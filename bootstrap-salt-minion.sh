@@ -75,12 +75,20 @@ if [ "$UNAME" = "Linux" ] ; then
             log "Debian version $VER not supported."
             exit 1
         fi
+    elif [ -f /etc/redhat-release ] ; then
+        OS=$(cat /etc/redhat-release)
+        CODENAME=$(cat /etc/redhat-release)
+        log "Installing for Redhat/CentOS"
+        do_with_root rpm -Uvh --force http://mirrors.kernel.org/fedora-epel/6/x86_64/epel-release-6-7.noarch.rpm
+        do_with_root yum update
+        do_with_root yum -y install salt-minion --enablerepo=epel-testing
+        do_with_root /sbin/chkconfig salt-minion on
+        do_with_root salt-minion start
     else
-        log "Unable to install. Bootstrapping only supported on Debian/Ubuntu."
+        log "Unable to install. Bootstrapping only supported on *Some OS.*"
         exit 1
     fi
 fi
 
 log "Salt has been installed!"
 trap - EXIT
-

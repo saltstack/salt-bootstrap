@@ -45,8 +45,12 @@ if [ "$UNAME" = "Linux" ] ; then
                 log "Installing for Ubuntu Lucid/Precise."
                 do_with_root apt-get update
                 do_with_root apt-get -y install python-software-properties
-                do_with_root add-apt-repository -y ppa:saltstack/salt
-		do_with_root apt-get update
+                if [ $CODENAME = 'lucid' ]; then
+                    do_with_root add-apt-repository ppa:saltstack/salt
+                else
+                    do_with_root add-apt-repository -y ppa:saltstack/salt
+                fi
+                do_with_root apt-get update
                 do_with_root apt-get -y install salt-minion
             else
                 log "Ubuntu $CODENAME is not supported."

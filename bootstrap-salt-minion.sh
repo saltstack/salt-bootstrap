@@ -23,6 +23,48 @@ set -o nounset                              # Treat unset variables as an error
 ScriptVersion="1.0"
 NOCOLORS=0
 
+#===  FUNCTION  ================================================================
+#         NAME:  usage
+#  DESCRIPTION:  Display usage information.
+#===============================================================================
+usage() {
+    cat << EOT
+
+  Usage :  ${0##/*/} [options] <install-type>
+
+  Installation types:
+    - stable (default)
+    - daily
+    - git
+
+  Options:
+  -h|help       Display this message
+  -v|version    Display script version
+  -N|nocolor    Do not use colors
+
+EOT
+}   # ----------  end of function usage  ----------
+
+#-----------------------------------------------------------------------
+#  Handle command line arguments
+#-----------------------------------------------------------------------
+
+while getopts ":hvN" opt
+do
+  case $opt in
+
+    h|help     )  usage; exit 0   ;;
+
+    v|version  )  echo "$0 -- Version $ScriptVersion"; exit 0   ;;
+
+    N|nocolor  )  NOCOLORS=1    ;;
+
+    \? )  echo -e "\n  Option does not exist : $OPTARG\n"
+          usage; exit 1   ;;
+
+  esac    # --- end of case ---
+done
+shift $(($OPTIND-1))
 
 # Define our colors
 if [ $NOCOLORS -eq 0 ]; then
@@ -67,49 +109,6 @@ else
     YELLOW=''
 fi
 
-#===  FUNCTION  ================================================================
-#         NAME:  usage
-#  DESCRIPTION:  Display usage information.
-#===============================================================================
-usage() {
-    cat << EOT
-
-  Usage :  ${0##/*/} [options] <install-type>
-
-  Installation types:
-    - stable (default)
-    - daily
-    - git
-
-  Options:
-  -h|help       Display this message
-  -v|version    Display script version
-  -N|nocolor    Do not use colors
-
-EOT
-}   # ----------  end of function usage  ----------
-
-#-----------------------------------------------------------------------
-#  Handle command line arguments
-#-----------------------------------------------------------------------
-
-while getopts ":hvN" opt
-do
-  case $opt in
-
-    h|help     )  usage; exit 0   ;;
-
-    v|version  )  echo "$0 -- Version $ScriptVersion"; exit 0   ;;
-
-    N|nocolor  )  NOCOLORS=1    ;;
-
-    \? )  echo -e "\n  Option does not exist : $OPTARG\n"
-          usage; exit 1   ;;
-
-  esac    # --- end of case ---
-done
-shift $(($OPTIND-1))
-
 # Define installation type
 if [ "$#" -eq 0 ];then
     ITYPE="stable"
@@ -118,20 +117,20 @@ else
 fi
 
 if [ "$ITYPE" != "stable" -a "$ITYPE" != "daily" -a "$ITYPE" != "git" ]; then
-    echo "${LIGHT_RED} ERROR: Installation type \"$ITYPE\" is not known...${ENDC}"
+    echo -e "${LIGHT_RED} ERROR: Installation type \"$ITYPE\" is not known...${ENDC}"
     exit 1
 fi
 
 # Root permissions are required to run this script
 if [ $(whoami) != "root" ] ; then
-    echo "${LIGHT_RED} * ERROR: Salt requires root privileges to install. Please re-run this script as root.${ENDC}"
+    echo -e "${LIGHT_RED} * ERROR: Salt requires root privileges to install. Please re-run this script as root.${ENDC}"
     exit 1
 fi
 
 # Create a temporary directory used for any temp files created
 TMPDIR="/tmp/salty-temp"
 if [ ! -d $TMPDIR ]; then
-    echo "${LIGHT_BLUE} * Creating temporary directory ${TMPDIR} ${ENDC}"
+    echo -e "${LIGHT_BLUE} * Creating temporary directory ${TMPDIR} ${ENDC}"
     mkdir $TMPDIR
 fi
 # Store current directory
@@ -188,31 +187,31 @@ shtool() {
 #===============================================================================
 download_shtool() {
     if [ ! -f $SHTOOL_COMMON ]; then
-        echo "Download SHTOOL sh.common from $SHTOOL_COMMON_LINK"
+        echo -e "Download SHTOOL sh.common from $SHTOOL_COMMON_LINK"
         wget $SHTOOL_COMMON_LINK -O $SHTOOL_COMMON
         MD5SUM=$(md5sum $SHTOOL_COMMON | awk '{ print $1 }')
         if [ "$MD5SUM" != "$SHTOOL_COMMON_MD5" ]; then
-            echo "MD5 signature of sh.common does not match!"
+            echo -e "MD5 signature of sh.common does not match!"
             exit 1
         fi
     fi
 
     if [ ! -f $SHTOOL_PLATFORM ]; then
-        echo "Download sh.platform from $SHTOOL_PLATFORM_LINK"
+        echo -e "Download sh.platform from $SHTOOL_PLATFORM_LINK"
         wget $SHTOOL_PLATFORM_LINK -O $SHTOOL_PLATFORM
         MD5SUM=$(md5sum $SHTOOL_PLATFORM | awk '{ print $1 }')
         if [ "$MD5SUM" != "$SHTOOL_PLATFORM_MD5" ]; then
-            echo "MD5 signature of shtool.platform does not match!"
+            echo -e "MD5 signature of shtool.platform does not match!"
             exit 1
         fi
     fi
 }
 
-echo "${LIGHT_BLUE} * Downloading shtool required scripts for system detection${ENDC}"
+echo -e "${LIGHT_BLUE} * Downloading shtool required scripts for system detection${ENDC}"
 download_shtool
-echo "${LIGHT_BLUE} * Downloaded required shtool scripts${ENDC}"
+echo -e "${LIGHT_BLUE} * Downloaded required shtool scripts${ENDC}"
 
-echo "${LIGHT_BLUE} * Detecting system:${ENDC}"
+echo -e "${LIGHT_BLUE} * Detecting system:${ENDC}"
 
 ARCH=$(shtool -F "%at")
 
@@ -224,13 +223,13 @@ FULL_DISTRO=$(shtool -F '%<sp>' -L -S '|' -C '+')
 DISTRO_NAME=$(echo $FULL_DISTRO | cut -d \| -f1 )
 DISTRO_VERSION=$(echo $FULL_DISTRO | cut -d \| -f2 )
 
-echo "${YELLOW}    System Information:${ENDC}"
-echo "${YELLOW}      System:\t\t${FULL_SYSTEM}${ENDC}"
-echo "${YELLOW}      Architecture:\t${ARCH}${ENDC}"
-echo "${YELLOW}      Distribution:\t${DISTRO_NAME} ${DISTRO_VERSION}${ENDC}"
+echo -e "${YELLOW}    System Information:${ENDC}"
+echo -e "${YELLOW}      System:\t\t${FULL_SYSTEM}${ENDC}"
+echo -e "${YELLOW}      Architecture:\t${ARCH}${ENDC}"
+echo -e "${YELLOW}      Distribution:\t${DISTRO_NAME} ${DISTRO_VERSION}${ENDC}"
 
 if [ $SYSTEM_NAME != "linux" ]; then
-    echo "${LIGHT_RED} * ERROR: Only Linux is currently supported${ENDC}"
+    echo -e "${LIGHT_RED} * ERROR: Only Linux is currently supported${ENDC}"
     exit 1
 fi
 
@@ -291,18 +290,9 @@ install_ubuntu_1110_post() {
     add-apt-repository -y --remove 'deb http://us.archive.ubuntu.com/ubuntu/ oneiric universe'
 }
 
-install_ubuntu_1004_stable() {
-    apt-get -y install salt-minion
-}
-
-install_ubuntu_1104_stable() {
-    apt-get -y install salt-minion
-}
-
 install_ubuntu_stable() {
     apt-get -y install salt-minion
 }
-###############################################################################################
 #
 #   End of Ubuntu Install Functions
 #
@@ -312,8 +302,6 @@ install_ubuntu_stable() {
 #
 #   Debian Install Functions
 #
-###############################################################################################
-
 install_debian_60_stable_deps() {
     echo "deb http://backports.debian.org/debian-backports squeeze-backports main" >> /etc/apt/sources.list.d/backports.list
     apt-get update
@@ -322,9 +310,30 @@ install_debian_60_stable_deps() {
 install_debian_60_stable() {
     apt-get -t squeeze-backports -y install salt-minion
 }
-###############################################################################################
 #
 #   Ended Debian Install Functions
+#
+###############################################################################################
+
+###############################################################################################
+#
+#   CentOS Install Functions
+#
+install_centos_63_stable_deps() {
+    rpm -Uvh --force http://mirrors.kernel.org/fedora-epel/6/x86_64/epel-release-6-7.noarch.rpm
+    yum -y update
+}
+
+install_centos_63_stable() {
+    yum -y install salt-minion --enablerepo=epel-testing
+}
+
+install_centos_63_stable_post() {
+    /sbin/chkconfig salt-minion on
+    salt-minion start &
+}
+#
+#   Ended CentOS Install Functions
 #
 ###############################################################################################
 
@@ -333,7 +342,7 @@ install_debian_60_stable() {
 ###############################################################################################
 ###############################################################################################
 ###
-###   DO NOT CHANGE ANYTHING BELLOW
+###   NO NEED TO CHANGE ANYTHING BELLOW
 ###
 ###############################################################################################
 ###############################################################################################
@@ -341,16 +350,16 @@ install_debian_60_stable() {
 
 # Let's get the dependencies install function
 DEPS_INSTALL_FUNC="install_${DISTRO_NAME}_$(echo $DISTRO_VERSION | tr -d '.')_${ITYPE}_deps"
-if $( ! type ${DEPS_INSTALL_FUNC} | grep -q 'shell function' ); then
-    echo "${BROWN} * INFO: ${DEPS_INSTALL_FUNC} not found..."
+if [ "$(! type ${DEPS_INSTALL_FUNC} | grep -q 'shell function')" != "" ]; then
+    echo -e "${BROWN} * INFO: ${DEPS_INSTALL_FUNC} not found..."
     # let's try and see if have a deps function which ignores the installation type
     DEPS_INSTALL_FUNC="install_${DISTRO_NAME}_$(echo $DISTRO_VERSION | tr -d '.')_deps"
-    if $( ! type ${DEPS_INSTALL_FUNC} | grep -q 'shell function' ); then
-        echo "${BROWN} * INFO: ${DEPS_INSTALL_FUNC} not found..."
+    if [ "$( ! type ${DEPS_INSTALL_FUNC} | grep -q 'shell function' )" != "" ]; then
+        echo -e "${BROWN} * INFO: ${DEPS_INSTALL_FUNC} not found..."
         # Let's try to see if we have a deps function which also ignores the distro version
         DEPS_INSTALL_FUNC="install_${DISTRO_NAME}_deps"
-        if $( ! type ${DEPS_INSTALL_FUNC} | grep -q 'shell function' ); then
-            echo "${LIGHT_RED} * ERROR: Installation not supported not supported. Can't find ${DEPS_INSTALL_FUNC}()${ENDC}"
+        if [ "$( ! type ${DEPS_INSTALL_FUNC} | grep -q 'shell function' )" != "" ]; then
+            echo -e "${LIGHT_RED} * ERROR: Installation not supported not supported. Can't find ${DEPS_INSTALL_FUNC}()${ENDC}"
             exit 1
         fi
     fi
@@ -358,46 +367,46 @@ fi
 
 # Let's get the install function
 INSTALL_FUNC="install_${DISTRO_NAME}_$(echo $DISTRO_VERSION | tr -d '.')_${ITYPE}"
-if $( ! type ${INSTALL_FUNC} | grep -q 'shell function' ); then
-    echo "${BROWN} * INFO: ${INSTALL_FUNC} not found..."
+if [ "$( ! type ${INSTALL_FUNC} | grep -q 'shell function' )" != "" ]; then
+    echo -e "${BROWN} * INFO: ${INSTALL_FUNC} not found..."
     # Let see if we have an install function which ignores the distribution version
     INSTALL_FUNC="install_${DISTRO_NAME}_${ITYPE}"
-    if $( ! type ${INSTALL_FUNC} | grep -q 'shell function' ); then
-        echo "${LIGHT_RED}ERROR: Installation not supported not supported. Can't find ${INSTALL_FUNC}()${ENDC}"
+    if [ "$( ! type ${INSTALL_FUNC} | grep -q 'shell function' )" != "" ]; then
+        echo -e "${LIGHT_RED}ERROR: Installation not supported not supported. Can't find ${INSTALL_FUNC}()${ENDC}"
         exit 1
     fi
 fi
 
 # Let's get the post function, if any, it's optional
 POST_INSTALL_FUNC="install_${DISTRO_NAME}_$(echo $DISTRO_VERSION | tr -d '.')_${ITYPE}_post"
-if $( ! type ${POST_INSTALL_FUNC} | grep -q 'shell function' ); then
-    echo "${BROWN} * INFO: ${POST_INSTALL_FUNC} not found..."
+if [ "$( ! type ${POST_INSTALL_FUNC} | grep -q 'shell function' )" != "" ]; then
+    echo -e "${BROWN} * INFO: ${POST_INSTALL_FUNC} not found..."
     # let's try and see if have a post function which ignores the installation type
     POST_INSTALL_FUNC="install_${DISTRO_NAME}_$(echo $DISTRO_VERSION | tr -d '.')_post"
-    if $( ! type ${POST_INSTALL_FUNC} | grep -q 'shell function' ); then
-        echo "${BROWN} * INFO: ${POST_INSTALL_FUNC} not found..."
+    if [ "$( ! type ${POST_INSTALL_FUNC} | grep -q 'shell function' )" != "" ]; then
+        echo -e "${BROWN} * INFO: ${POST_INSTALL_FUNC} not found..."
         # Let's try to see if we have a deps function which also ignores the distro version
         POST_INSTALL_FUNC="install_${DISTRO_NAME}_post"
-        if $( ! type ${POST_INSTALL_FUNC} | grep -q 'shell function' ); then
-            echo "${BROWN} * INFO: ${POST_INSTALL_FUNC} not found..."
+        if [ "$( ! type ${POST_INSTALL_FUNC} | grep -q 'shell function' )" != "" ]; then
+            echo -e "${BROWN} * INFO: ${POST_INSTALL_FUNC} not found..."
             POST_INSTALL_FUNC=""
         fi
     fi
 fi
 
 # Install dependencies
-echo "${LIGHT_BLUE} * Running ${DEPS_INSTALL_FUNC}()${ENDC}"
+echo -e "${LIGHT_BLUE} * Running ${DEPS_INSTALL_FUNC}()${ENDC}"
 $DEPS_INSTALL_FUNC
 
 # Install Salt
-echo "${LIGHT_BLUE} * Running ${INSTALL_FUNC}()${ENDC}"
+echo -e "${LIGHT_BLUE} * Running ${INSTALL_FUNC}()${ENDC}"
 $INSTALL_FUNC
 
 # Run any post install function
 if [ "$POST_INSTALL_FUNC" != "" ]; then
-    echo "${LIGHT_BLUE} * Running ${POST_INSTALL_FUNC}()${ENDC}"
+    echo -e "${LIGHT_BLUE} * Running ${POST_INSTALL_FUNC}()${ENDC}"
     $POST_INSTALL_FUNC
 fi
 
 # Done!
-echo "${LIGHT_BLUE} * Salt installed!${ENDC}"
+echo -e "${LIGHT_BLUE} * Salt installed!${ENDC}"

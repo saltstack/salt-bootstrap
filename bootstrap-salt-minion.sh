@@ -5,18 +5,13 @@
 #
 #          FILE: bootstrap-salt-minion.sh
 #
-#         USAGE: bootstrap-salt-minion.sh
+#   DESCRIPTION: Bootstrap salt installation for various systems/distributions
 #
-#   DESCRIPTION: Bootstrap salt installation for various systems/distros
-#
-#       OPTIONS: ---
-#  REQUIREMENTS: ---
-#          BUGS: ---
-#         NOTES: ---
+#          BUGS: https://github.com/saltstack/salty-vagrant/issues
 #        AUTHOR: Pedro Algarvio (s0undt3ch), pedro@algarvio.me
-#  ORGANIZATION: UfSoft.org
+#                Alec Koumjian (akoumjian)
+#  ORGANIZATION: Salt Stack (saltstack.org)
 #       CREATED: 10/15/2012 09:49:37 PM WEST
-#      REVISION:  ---
 #===============================================================================
 set -o nounset                              # Treat unset variables as an error
 

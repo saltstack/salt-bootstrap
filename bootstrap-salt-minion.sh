@@ -77,19 +77,6 @@ if [ $(whoami) != "root" ] ; then
     exit 1
 fi
 
-# Create a temporary directory used for any temp files created
-TMPDIR="/tmp/salty-temp"
-if [ ! -d $TMPDIR ]; then
-    echo " * Creating temporary directory ${TMPDIR} "
-    mkdir $TMPDIR
-fi
-
-# Store current directory
-STORED_PWD=$(pwd)
-# Change to temp directory
-cd $TMPDIR
-# When the script exits, change to the initial directory.
-trap "cd $STORED_PWD" EXIT
 
 # Define our logging file and pipe paths
 LOGFILE="/tmp/$(basename $0 | sed s/.sh/.log/g )"

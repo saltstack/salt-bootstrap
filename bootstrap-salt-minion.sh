@@ -122,9 +122,10 @@ __gather_linux_system_info() {
             cd /etc && /bin/ls *[_-]release *[_-]version 2>/dev/null | env -i sort | \
             sed -e '/^redhat-release$/d' -e '/^lsb-release$/d'; \
             echo redhat-release lsb-release
-            ) do
+            ); do
 
         [ ! -f "/etc/${rsource}" ] && continue
+
         n=$(echo ${rsource} | sed -e 's/[_-]release$//' -e 's/[_-]version$//')
         v=$(
             (grep VERSION /etc/${rsource}; cat /etc/${rsource}) | grep '[0-9]' | sed -e 'q' |\
@@ -254,6 +255,15 @@ echo "      Machine:      ${MACHINE}"
 echo "      Distribution: ${DISTRO_NAME} ${DISTRO_VERSION}"
 
 
+# Simplify version naming on functions
+if [ "x${DISTRO_VERSION}" = "x" ]; then
+    DISTRO_VERSION_NO_DOTS=""
+else
+    DISTRO_VERSION_NO_DOTS="_$(echo $DISTRO_VERSION | tr -d '.')"
+fi
+# Simplify distro name naming on functions
+DISTRO_NAME_L=$(echo $DISTRO_NAME | tr '[:upper:]' '[:lower:]')
+
 ##############################################################################
 #
 #   Distribution install functions
@@ -359,15 +369,14 @@ install_centos_63_stable_post() {
 #
 ##############################################################################
 
-
 #=============================================================================
 # LET'S PROCEED WITH OUR INSTALLATION
 #=============================================================================
 # Let's get the dependencies install function
-DEP_FUNC_NAMES="install_${DISTRO_NAME}${DISTRO_VERSION_NO_DOTS}_${ITYPE}_deps"
-DEP_FUNC_NAMES="$DEP_FUNC_NAMES install_${DISTRO_NAME}${DISTRO_VERSION_NO_DOTS}_deps"
-DEP_FUNC_NAMES="$DEP_FUNC_NAMES install_${DISTRO_NAME}_${ITYPE}_deps"
-DEP_FUNC_NAMES="$DEP_FUNC_NAMES install_${DISTRO_NAME}_deps"
+DEP_FUNC_NAMES="install_${DISTRO_NAME_L}${DISTRO_VERSION_NO_DOTS}_${ITYPE}_deps"
+DEP_FUNC_NAMES="$DEP_FUNC_NAMES install_${DISTRO_NAME_L}${DISTRO_VERSION_NO_DOTS}_deps"
+DEP_FUNC_NAMES="$DEP_FUNC_NAMES install_${DISTRO_NAME_L}_${ITYPE}_deps"
+DEP_FUNC_NAMES="$DEP_FUNC_NAMES install_${DISTRO_NAME_L}_deps"
 
 DEPS_INSTALL_FUNC="null"
 for DEP_FUNC_NAME in $DEP_FUNC_NAMES; do
@@ -379,8 +388,8 @@ done
 
 
 # Let's get the install function
-INSTALL_FUNC_NAMES="install_${DISTRO_NAME}${DISTRO_VERSION_NO_DOTS}_${ITYPE}"
-INSTALL_FUNC_NAMES="$INSTALL_FUNC_NAMES install_${DISTRO_NAME}_${ITYPE}"
+INSTALL_FUNC_NAMES="install_${DISTRO_NAME_L}${DISTRO_VERSION_NO_DOTS}_${ITYPE}"
+INSTALL_FUNC_NAMES="$INSTALL_FUNC_NAMES install_${DISTRO_NAME_L}_${ITYPE}"
 
 INSTALL_FUNC="null"
 for FUNC_NAME in $INSTALL_FUNC_NAMES; do
@@ -392,10 +401,10 @@ done
 
 
 # Let's get the dependencies install function
-POST_FUNC_NAMES="install_${DISTRO_NAME}${DISTRO_VERSION_NO_DOTS}_${ITYPE}_post"
-POST_FUNC_NAMES="$DEP_FUNC_NAMES install_${DISTRO_NAME}${DISTRO_VERSION_NO_DOTS}_post"
-POST_FUNC_NAMES="$DEP_FUNC_NAMES install_${DISTRO_NAME}_${ITYPE}_post"
-POST_FUNC_NAMES="$DEP_FUNC_NAMES install_${DISTRO_NAME}_post"
+POST_FUNC_NAMES="install_${DISTRO_NAME_L}${DISTRO_VERSION_NO_DOTS}_${ITYPE}_post"
+POST_FUNC_NAMES="$DEP_FUNC_NAMES install_${DISTRO_NAME_L}${DISTRO_VERSION_NO_DOTS}_post"
+POST_FUNC_NAMES="$DEP_FUNC_NAMES install_${DISTRO_NAME_L}_${ITYPE}_post"
+POST_FUNC_NAMES="$DEP_FUNC_NAMES install_${DISTRO_NAME_L}_post"
 
 POST_INSTALL_FUNC="null"
 for FUNC_NAME in $POST_FUNC_NAMES; do

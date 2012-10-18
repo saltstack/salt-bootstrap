@@ -101,7 +101,7 @@ exec 2>$LOGPIPE
 
 #---  FUNCTION  ----------------------------------------------------------------
 #          NAME:  __gather_os_info
-#   DESCRIPTION:  Discover operating system iformation
+#   DESCRIPTION:  Discover operating system information
 #-------------------------------------------------------------------------------
 __gather_os_info() {
     OS_NAME=$(uname -s 2>/dev/null)
@@ -115,7 +115,7 @@ __gather_os_info
 
 #---  FUNCTION  ----------------------------------------------------------------
 #          NAME:  __gather_linux_system_info
-#   DESCRIPTION:  Discover linux system information
+#   DESCRIPTION:  Discover Linux system information
 #-------------------------------------------------------------------------------
 __gather_linux_system_info() {
     for rsource in $(
@@ -179,7 +179,7 @@ __gather_sunos_system_info() {
 
 #---  FUNCTION  ----------------------------------------------------------------
 #          NAME:  __gather_bsd_system_info
-#   DESCRIPTION:  Discover OpenBSD, NetBSD and FreeBSD system information
+#   DESCRIPTION:  Discover OpenBSD, NetBSD and FreeBSD systems information
 #-------------------------------------------------------------------------------
 __gather_bsd_system_info() {
     DISTRO_NAME=${OS_NAME}
@@ -189,7 +189,7 @@ __gather_bsd_system_info() {
 
 #---  FUNCTION  ----------------------------------------------------------------
 #          NAME:  __gather_system_info
-#   DESCRIPTION:  Discover which system and distribution are we running.
+#   DESCRIPTION:  Discover which system and distribution we are running.
 #-------------------------------------------------------------------------------
 __gather_system_info() {
     case ${OS_NAME_L} in

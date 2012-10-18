@@ -119,45 +119,45 @@ __gather_os_info
 #-------------------------------------------------------------------------------
 __gather_linux_system_info() {
     for rsource in $(
-                cd /etc && /bin/ls *[_-]release *[_-]version 2>/dev/null | env -i sort | \
-                sed -e '/^redhat-release$/d' -e '/^lsb-release$/d'; \
-                echo redhat-release lsb-release
-                ) do
+            cd /etc && /bin/ls *[_-]release *[_-]version 2>/dev/null | env -i sort | \
+            sed -e '/^redhat-release$/d' -e '/^lsb-release$/d'; \
+            echo redhat-release lsb-release
+            ) do
 
-            [ ! -f "/etc/${rsource}" ] && continue
-            n=$(echo ${rsource} | sed -e 's/[_-]release$//' -e 's/[_-]version$//')
-            v=$(
-                (grep VERSION /etc/${rsource}; cat /etc/${rsource}) | grep '[0-9]' | sed -e 'q' |\
-                sed -e 's/^/#/' \
-                    -e 's/^#[^0-9]*\([0-9][0-9]*\.[0-9][0-9]*\)\(\.[0-9][0-9]*\).*$/\1[\2]/' \
-                    -e 's/^#[^0-9]*\([0-9][0-9]*\.[0-9][0-9]*\).*$/\1/' \
-                    -e 's/^#[^0-9]*\([0-9][0-9]*\).*$/\1/' \
-                    -e 's/^#.*$//'
-            )
-            case $(echo ${n} | tr '[:upper:]' '[:lower:]') in
-                redhat )
-                    if [ ".$(egrep '(Red Hat Enterprise Linux|CentOS)' /etc/${rsource})" != . ]; then
-                        n="<R>ed <H>at <E>nterprise <L>inux"
-                    else
-                        n="<R>ed <H>at <L>inux"
-                    fi
-                    ;;
-                arch               ) n="Arch"           ;;
-                centos             ) n="CentOS"         ;;
-                debian             ) n="Debian"         ;;
-                ubuntu             ) n="Ubuntu"         ;;
-                fedora             ) n="Fedora"         ;;
-                suse               ) n="SUSE"           ;;
-                mandrake*|mandriva ) n="Mandriva"       ;;
-                gentoo             ) n="Gentoo"         ;;
-                slackware          ) n="Slackware"      ;;
-                turbolinux         ) n="TurboLinux"     ;;
-                unitedlinux        ) n="UnitedLinux"    ;;
-                *                  ) n="${n}"           ;
-            esac
-            DISTRO_NAME=$n
-            DISTRO_VERSION=$v
-            break
+        [ ! -f "/etc/${rsource}" ] && continue
+        n=$(echo ${rsource} | sed -e 's/[_-]release$//' -e 's/[_-]version$//')
+        v=$(
+            (grep VERSION /etc/${rsource}; cat /etc/${rsource}) | grep '[0-9]' | sed -e 'q' |\
+            sed -e 's/^/#/' \
+                -e 's/^#[^0-9]*\([0-9][0-9]*\.[0-9][0-9]*\)\(\.[0-9][0-9]*\).*$/\1[\2]/' \
+                -e 's/^#[^0-9]*\([0-9][0-9]*\.[0-9][0-9]*\).*$/\1/' \
+                -e 's/^#[^0-9]*\([0-9][0-9]*\).*$/\1/' \
+                -e 's/^#.*$//'
+        )
+        case $(echo ${n} | tr '[:upper:]' '[:lower:]') in
+            redhat )
+                if [ ".$(egrep '(Red Hat Enterprise Linux|CentOS)' /etc/${rsource})" != . ]; then
+                    n="<R>ed <H>at <E>nterprise <L>inux"
+                else
+                    n="<R>ed <H>at <L>inux"
+                fi
+                ;;
+            arch               ) n="Arch"           ;;
+            centos             ) n="CentOS"         ;;
+            debian             ) n="Debian"         ;;
+            ubuntu             ) n="Ubuntu"         ;;
+            fedora             ) n="Fedora"         ;;
+            suse               ) n="SUSE"           ;;
+            mandrake*|mandriva ) n="Mandriva"       ;;
+            gentoo             ) n="Gentoo"         ;;
+            slackware          ) n="Slackware"      ;;
+            turbolinux         ) n="TurboLinux"     ;;
+            unitedlinux        ) n="UnitedLinux"    ;;
+            *                  ) n="${n}"           ;
+        esac
+        DISTRO_NAME=$n
+        DISTRO_VERSION=$v
+        break
     done
 }
 

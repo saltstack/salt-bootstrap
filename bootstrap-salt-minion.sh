@@ -15,6 +15,11 @@
 #===============================================================================
 set -o nounset                              # Treat unset variables as an error
 ScriptVersion="1.0"
+
+#===============================================================================
+#  LET THE BLACK MAGIC BEGIN!!!!
+#===============================================================================
+
 #===  FUNCTION  ================================================================
 #         NAME:  usage
 #  DESCRIPTION:  Display usage information.
@@ -78,6 +83,7 @@ if [ ! -d $TMPDIR ]; then
     echo " * Creating temporary directory ${TMPDIR} "
     mkdir $TMPDIR
 fi
+
 # Store current directory
 STORED_PWD=$(pwd)
 # Change to temp directory
@@ -86,8 +92,8 @@ cd $TMPDIR
 trap "cd $STORED_PWD" EXIT
 
 # Define our logging file and pipe paths
-LOGFILE="/tmp/$(basename ${0/.sh/.log})"
-LOGPIPE="/tmp/$(basename ${0/.sh/.logpipe})"
+LOGFILE="/tmp/$(basename $0 | sed s/.sh/.log/g )"
+LOGPIPE="/tmp/$(basename $0 | sed s/.sh/.logpipe/g )"
 
 # Remove the logging pipe when the script exits
 trap "rm -f $LOGPIPE" EXIT
@@ -105,202 +111,117 @@ exec 1>$LOGPIPE
 exec 2>&-
 exec 2>$LOGPIPE
 
-# Define some SHTOOL variables
-SHTOOL_COMMON="sh.common"
-SHTOOL_COMMON_MD5='2fdd8ccf7122df039cdf79a9f7a083e4'
-SHTOOL_COMMON_LINK='http://cvs.ossp.org/getfile?f=ossp-pkg/shtool/sh.common&v=1.24'
-SHTOOL_PLATFORM="shtool.platform"
-SHTOOL_PLATFORM_MD5='bf4c782746e1c92923fb66de513f9295'
-SHTOOL_PLATFORM_LINK='http://cvs.ossp.org/getfile?f=ossp-pkg/shtool/sh.platform&v=1.31'
+
+#---  FUNCTION  ----------------------------------------------------------------
+#          NAME:  __gather_os_info
+#   DESCRIPTION:  Discover operating system iformation
+#-------------------------------------------------------------------------------
+__gather_os_info() {
+    OS_NAME=$(uname -s 2>/dev/null)
+    OS_NAME_L=$( echo $OS_NAME | tr '[:upper:]' '[:lower:]' )
+    OS_VERSION=$(uname -r)
+    OS_VERSION_L=$( echo $OS_VERSION | tr '[:upper:]' '[:lower:]' )
+    MACHINE=$(uname -m 2>/dev/null || uname -p 2>/dev/null || echo "unknown")
+}
+__gather_os_info
 
 
-#===  FUNCTION  ================================================================
-#         NAME:  shtool
-#  DESCRIPTION:  Run shtool commands.
-#===============================================================================
-shtool() {
-    OPWD=$(pwd)
-    cd $TMPDIR
-    echo $(sh ./shtool.platform "$@")
-    cd $OPWD
+#---  FUNCTION  ----------------------------------------------------------------
+#          NAME:  __gather_linux_system_info
+#   DESCRIPTION:  Discover linux system information
+#-------------------------------------------------------------------------------
+__gather_linux_system_info() {
+    for rsource in $(
+                cd /etc && /bin/ls *[_-]release *[_-]version 2>/dev/null | env -i sort | \
+                sed -e '/^redhat-release$/d' -e '/^lsb-release$/d'; \
+                echo redhat-release lsb-release
+                ) do
+
+            [ ! -f "/etc/${rsource}" ] && continue
+            n=$(echo ${rsource} | sed -e 's/[_-]release$//' -e 's/[_-]version$//')
+            v=$(
+                (grep VERSION /etc/${rsource}; cat /etc/${rsource}) | grep '[0-9]' | sed -e 'q' |\
+                sed -e 's/^/#/' \
+                    -e 's/^#[^0-9]*\([0-9][0-9]*\.[0-9][0-9]*\)\(\.[0-9][0-9]*\).*$/\1[\2]/' \
+                    -e 's/^#[^0-9]*\([0-9][0-9]*\.[0-9][0-9]*\).*$/\1/' \
+                    -e 's/^#[^0-9]*\([0-9][0-9]*\).*$/\1/' \
+                    -e 's/^#.*$//'
+            )
+            case $(echo ${n} | tr '[:upper:]' '[:lower:]') in
+                redhat )
+                    if [ ".$(egrep '(Red Hat Enterprise Linux|CentOS)' /etc/${rsource})" != . ]; then
+                        n="<R>ed <H>at <E>nterprise <L>inux"
+                    else
+                        n="<R>ed <H>at <L>inux"
+                    fi
+                    ;;
+                arch               ) n="Arch"           ;;
+                centos             ) n="CentOS"         ;;
+                debian             ) n="Debian"         ;;
+                ubuntu             ) n="Ubuntu"         ;;
+                fedora             ) n="Fedora"         ;;
+                suse               ) n="SUSE"           ;;
+                mandrake*|mandriva ) n="Mandriva"       ;;
+                gentoo             ) n="Gentoo"         ;;
+                slackware          ) n="Slackware"      ;;
+                turbolinux         ) n="TurboLinux"     ;;
+                unitedlinux        ) n="UnitedLinux"    ;;
+                *                  ) n="${n}"           ;
+            esac
+            DISTRO_NAME=$n
+            DISTRO_VERSION=$v
+            break
+    done
 }
 
 
-#===  FUNCTION  ================================================================
-#         NAME:  download_shtool
-#  DESCRIPTION:  Download shtool required scripts
-#===============================================================================
-download_shtool() {
-    if [ ! -f $SHTOOL_COMMON ]; then
-        echo "Download SHTOOL sh.common from $SHTOOL_COMMON_LINK"
-        wget $SHTOOL_COMMON_LINK -O $SHTOOL_COMMON
-        MD5SUM=$(md5sum $SHTOOL_COMMON | awk '{ print $1 }')
-        if [ "$MD5SUM" != "$SHTOOL_COMMON_MD5" ]; then
-            echo "MD5 signature of sh.common does not match!"
+#---  FUNCTION  ----------------------------------------------------------------
+#          NAME:  __gather_sunos_system_info
+#   DESCRIPTION:  Discover SunOS system info
+#-------------------------------------------------------------------------------
+__gather_sunos_system_info() {
+    DISTRO_NAME="Solaris"
+    DISTRO_VERSION=$(
+        echo "${OS_VERSION}" |
+        sed -e 's;^4\.;1.;' \
+            -e 's;^5\.\([0-6]\)[^0-9]*$;2.\1;' \
+            -e 's;^5\.\([0-9][0-9]*\).*;\1;'
+    )
+}
+
+
+#---  FUNCTION  ----------------------------------------------------------------
+#          NAME:  __gather_bsd_system_info
+#   DESCRIPTION:  Discover OpenBSD, NetBSD and FreeBSD system information
+#-------------------------------------------------------------------------------
+__gather_bsd_system_info() {
+    DISTRO_NAME=${OS_NAME}
+    DISTRO_VERSION=$(echo "${OS_VERSION}" | sed -e 's;[()];;' -e 's/\(-.*\)$/[\1]/')
+}
+
+
+#---  FUNCTION  ----------------------------------------------------------------
+#          NAME:  __gather_system_info
+#   DESCRIPTION:  Discover which system and distribution are we running.
+#-------------------------------------------------------------------------------
+__gather_system_info() {
+    case ${OS_NAME_L} in
+        linux )
+            __gather_linux_system_info
+            ;;
+        sunos )
+            __gather_sunos_system_info
+            ;;
+        openbsd|freebsd|netbsd )
+            __gather_bsd_system_info
+            ;;
+        * )
+            echo " * ERROR: $OS_NAME not supported.";
             exit 1
-        fi
-    fi
+            ;;
+    esac
 
-    if [ ! -f $SHTOOL_PLATFORM ]; then
-        echo "Download sh.platform from $SHTOOL_PLATFORM_LINK"
-        wget $SHTOOL_PLATFORM_LINK -O $SHTOOL_PLATFORM
-        MD5SUM=$(md5sum $SHTOOL_PLATFORM | awk '{ print $1 }')
-        if [ "$MD5SUM" != "$SHTOOL_PLATFORM_MD5" ]; then
-            echo "MD5 signature of shtool.platform does not match!"
-            exit 1
-        fi
-    fi
 }
-
-echo " * Downloading shtool required scripts for system detection"
-download_shtool
-echo " * Downloaded required shtool scripts"
-
-echo " * Detecting system:"
-
-ARCH=$(shtool -F "%at")
-
-FULL_SYSTEM=$(shtool -F '%<st>' -L -S '|' -C '+')
-SYSTEM_NAME=$(echo $FULL_SYSTEM | cut -d \| -f1 )
-SYSTEM_VERSION=$(echo $FULL_SYSTEM | cut -d \| -f2 )
-
-FULL_DISTRO=$(shtool -F '%<sp>' -L -S '|' -C '+')
-DISTRO_NAME=$(echo $FULL_DISTRO | cut -d \| -f1 )
-DISTRO_VERSION=$(echo $FULL_DISTRO | cut -d \| -f2 )
-if [ "x${DISTRO_VERSION}" = "x" ]; then
-    DISTRO_VERSION_NO_DOTS=""
-else
-    DISTRO_VERSION_NO_DOTS="_$(echo $DISTRO_VERSION | tr -d '.')"
-fi
-
-/bin/echo -e "    System Information:"
-/bin/echo -e "      System:\t\t${FULL_SYSTEM}"
-/bin/echo -e "      Architecture:\t${ARCH}"
-/bin/echo -e "      Distribution:\t${DISTRO_NAME} ${DISTRO_VERSION}"
-
-if [ $SYSTEM_NAME != "linux" ]; then
-    echo " * ERROR: Only Linux is currently supported"
-    exit 1
-fi
-
-# Black Magic Below!!!
-INSTALL_FUNC=""
-
-###############################################################################################
-#
-#   Distribution install functions
-#
-#   In order to install salt for a distribution you need to define:
-#
-#   To Install Dependencies, which is required, one of:
-#       1. install_<distro>_<distro_version>_<install_type>_deps
-#       2. install_<distro>_<distro_version>_deps
-#       3. install_<distro>_<install_type>_deps
-#       4. install_<distro>_dep
-#
-#
-#   To install salt, which, of course, is required, one of:
-#       1. install_<distro>_<distro_version>_<install_type>
-#       1. install_<distro>_<install_type>
-#
-#
-#   And optionally, define a post install function, one of:
-#       1. install_<distro>_<distro_versions>_<install_type>_post
-#       2. install_<distro>_<distro_versions>_post
-#       3. install_<distro>_<install_type>_post
-#       4. install_<distro>_post
-#
-###############################################################################################
-
-###############################################################################################
-#
-#   Ubuntu Install Functions
-#
-###############################################################################################
-install_ubuntu_deps() {
-    apt-get update
-    apt-get -y install python-software-properties
-    add-apt-repository -y ppa:saltstack/salt
-    apt-get update
-}
-
-install_ubuntu_1004_deps() {
-    apt-get update
-    apt-get -y install python-software-properties
-    add-apt-repository ppa:saltstack/salt
-    apt-get update
-    apt-get -y install salt-minion
-}
-
-install_ubuntu_1110_deps() {
-    apt-get update
-    apt-get -y install python-software-properties
-    add-apt-repository -y 'deb http://us.archive.ubuntu.com/ubuntu/ oneiric universe'
-    add-apt-repository -y ppa:saltstack/salt
-}
-
-install_ubuntu_1110_post() {
-    add-apt-repository -y --remove 'deb http://us.archive.ubuntu.com/ubuntu/ oneiric universe'
-}
-
-install_ubuntu_stable() {
-    apt-get -y install salt-minion
-}
-#
-#   End of Ubuntu Install Functions
-#
-###############################################################################################
-
-###############################################################################################
-#
-#   Debian Install Functions
-#
-install_debian_60_stable_deps() {
-    echo "deb http://backports.debian.org/debian-backports squeeze-backports main" >> \
-        /etc/apt/sources.list.d/backports.list
-    apt-get update
-}
-
-install_debian_60_stable() {
-    apt-get -t squeeze-backports -y install salt-minion
-}
-#
-#   Ended Debian Install Functions
-#
-###############################################################################################
-
-###############################################################################################
-#
-#   CentOS Install Functions
-#
-install_centos_63_stable_deps() {
-    rpm -Uvh --force http://mirrors.kernel.org/fedora-epel/6/x86_64/epel-release-6-7.noarch.rpm
-    yum -y update
-}
-
-install_centos_63_stable() {
-    yum -y install salt-minion --enablerepo=epel-testing
-}
-
-install_centos_63_stable_post() {
-    /sbin/chkconfig salt-minion on
-    salt-minion start &
-}
-#
-#   Ended CentOS Install Functions
-#
-###############################################################################################
-
-
-###############################################################################################
-###############################################################################################
-###############################################################################################
-###                                                                                         ###
-###   NO NEED TO CHANGE ANYTHING BELLOW                                                     ###
-###                                                                                         ###
-###############################################################################################
-###############################################################################################
-###############################################################################################
 
 
 #---  FUNCTION  ----------------------------------------------------------------
@@ -337,6 +258,124 @@ __function_defined() {
     echo " * INFO: $FUNC_NAME not found...."
     return 1
 }
+__gather_system_info
+
+echo "    System Information:"
+echo "      OS Name:      ${OS_NAME}"
+echo "      OS Version:   ${OS_VERSION}"
+echo "      Machine:      ${MACHINE}"
+echo "      Distribution: ${DISTRO_NAME} ${DISTRO_VERSION}"
+
+
+##############################################################################
+#
+#   Distribution install functions
+#
+#   In order to install salt for a distribution you need to define:
+#
+#   To Install Dependencies, which is required, one of:
+#       1. install_<distro>_<distro_version>_<install_type>_deps
+#       2. install_<distro>_<distro_version>_deps
+#       3. install_<distro>_<install_type>_deps
+#       4. install_<distro>_dep
+#
+#
+#   To install salt, which, of course, is required, one of:
+#       1. install_<distro>_<distro_version>_<install_type>
+#       1. install_<distro>_<install_type>
+#
+#
+#   And optionally, define a post install function, one of:
+#       1. install_<distro>_<distro_versions>_<install_type>_post
+#       2. install_<distro>_<distro_versions>_post
+#       3. install_<distro>_<install_type>_post
+#       4. install_<distro>_post
+#
+##############################################################################
+
+##############################################################################
+#
+#   Ubuntu Install Functions
+#
+##############################################################################
+install_ubuntu_deps() {
+    apt-get update
+    apt-get -y install python-software-properties
+    add-apt-repository -y ppa:saltstack/salt
+    apt-get update
+}
+
+install_ubuntu_1004_deps() {
+    apt-get update
+    apt-get -y install python-software-properties
+    add-apt-repository ppa:saltstack/salt
+    apt-get update
+    apt-get -y install salt-minion
+}
+
+install_ubuntu_1110_deps() {
+    apt-get update
+    apt-get -y install python-software-properties
+    add-apt-repository -y 'deb http://us.archive.ubuntu.com/ubuntu/ oneiric universe'
+    add-apt-repository -y ppa:saltstack/salt
+}
+
+install_ubuntu_1110_post() {
+    add-apt-repository -y --remove 'deb http://us.archive.ubuntu.com/ubuntu/ oneiric universe'
+}
+
+install_ubuntu_stable() {
+    apt-get -y install salt-minion
+}
+#
+#   End of Ubuntu Install Functions
+#
+##############################################################################
+
+##############################################################################
+#
+#   Debian Install Functions
+#
+install_debian_60_stable_deps() {
+    echo "deb http://backports.debian.org/debian-backports squeeze-backports main" >> \
+        /etc/apt/sources.list.d/backports.list
+    apt-get update
+}
+
+install_debian_60_stable() {
+    apt-get -t squeeze-backports -y install salt-minion
+}
+#
+#   Ended Debian Install Functions
+#
+##############################################################################
+
+##############################################################################
+#
+#   CentOS Install Functions
+#
+install_centos_63_stable_deps() {
+    rpm -Uvh --force http://mirrors.kernel.org/fedora-epel/6/x86_64/epel-release-6-7.noarch.rpm
+    yum -y update
+}
+
+install_centos_63_stable() {
+    yum -y install salt-minion --enablerepo=epel-testing
+}
+
+install_centos_63_stable_post() {
+    /sbin/chkconfig salt-minion on
+    salt-minion start &
+}
+#
+#   Ended CentOS Install Functions
+#
+##############################################################################
+
+
+#=============================================================================
+# LET'S PROCEED WITH OUR INSTALLATION
+#=============================================================================
 # Let's get the dependencies install function
 DEP_FUNC_NAMES="install_${DISTRO_NAME}${DISTRO_VERSION_NO_DOTS}_${ITYPE}_deps"
 DEP_FUNC_NAMES="$DEP_FUNC_NAMES install_${DISTRO_NAME}${DISTRO_VERSION_NO_DOTS}_deps"

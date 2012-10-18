@@ -14,7 +14,6 @@
 #       CREATED: 10/15/2012 09:49:37 PM WEST
 #===============================================================================
 set -o nounset                              # Treat unset variables as an error
-
 ScriptVersion="1.0"
 #===  FUNCTION  ================================================================
 #         NAME:  usage
@@ -86,9 +85,9 @@ cd $TMPDIR
 # When the script exits, change to the initial directory.
 trap "cd $STORED_PWD" EXIT
 
-# Define our logging file and pipe
-LOGFILE="/tmp/$(basename $0).log"
-LOGPIPE="/tmp/$(basename $0).logpipe"
+# Define our logging file and pipe paths
+LOGFILE="/tmp/$(basename ${0/.sh/.log})"
+LOGPIPE="/tmp/$(basename ${0/.sh/.logpipe})"
 
 # Remove the logging pipe when the script exits
 trap "rm -f $LOGPIPE" EXIT
@@ -168,11 +167,16 @@ SYSTEM_VERSION=$(echo $FULL_SYSTEM | cut -d \| -f2 )
 FULL_DISTRO=$(shtool -F '%<sp>' -L -S '|' -C '+')
 DISTRO_NAME=$(echo $FULL_DISTRO | cut -d \| -f1 )
 DISTRO_VERSION=$(echo $FULL_DISTRO | cut -d \| -f2 )
+if [ "x${DISTRO_VERSION}" = "x" ]; then
+    DISTRO_VERSION_NO_DOTS=""
+else
+    DISTRO_VERSION_NO_DOTS="_$(echo $DISTRO_VERSION | tr -d '.')"
+fi
 
-echo "    System Information:"
-echo "      System:\t\t${FULL_SYSTEM}"
-echo "      Architecture:\t${ARCH}"
-echo "      Distribution:\t${DISTRO_NAME} ${DISTRO_VERSION}"
+/bin/echo -e "    System Information:"
+/bin/echo -e "      System:\t\t${FULL_SYSTEM}"
+/bin/echo -e "      Architecture:\t${ARCH}"
+/bin/echo -e "      Distribution:\t${DISTRO_NAME} ${DISTRO_VERSION}"
 
 if [ $SYSTEM_NAME != "linux" ]; then
     echo " * ERROR: Only Linux is currently supported"
@@ -191,17 +195,20 @@ INSTALL_FUNC=""
 #   To Install Dependencies, which is required, one of:
 #       1. install_<distro>_<distro_version>_<install_type>_deps
 #       2. install_<distro>_<distro_version>_deps
-#       3. install_<distro>_deps
+#       3. install_<distro>_<install_type>_deps
+#       4. install_<distro>_dep
 #
 #
 #   To install salt, which, of course, is required, one of:
 #       1. install_<distro>_<distro_version>_<install_type>
 #       1. install_<distro>_<install_type>
 #
+#
 #   And optionally, define a post install function, one of:
 #       1. install_<distro>_<distro_versions>_<install_type>_post
 #       2. install_<distro>_<distro_versions>_post
-#       3. install_<distro>_post
+#       3. install_<distro>_<install_type>_post
+#       4. install_<distro>_post
 #
 ###############################################################################################
 
@@ -249,7 +256,8 @@ install_ubuntu_stable() {
 #   Debian Install Functions
 #
 install_debian_60_stable_deps() {
-    echo "deb http://backports.debian.org/debian-backports squeeze-backports main" >> /etc/apt/sources.list.d/backports.list
+    echo "deb http://backports.debian.org/debian-backports squeeze-backports main" >> \
+        /etc/apt/sources.list.d/backports.list
     apt-get update
 }
 
@@ -287,58 +295,101 @@ install_centos_63_stable_post() {
 ###############################################################################################
 ###############################################################################################
 ###############################################################################################
-###
-###   NO NEED TO CHANGE ANYTHING BELLOW
-###
+###                                                                                         ###
+###   NO NEED TO CHANGE ANYTHING BELLOW                                                     ###
+###                                                                                         ###
 ###############################################################################################
 ###############################################################################################
 ###############################################################################################
 
-# Let's get the dependencies install function
-DEPS_INSTALL_FUNC="install_${DISTRO_NAME}_$(echo $DISTRO_VERSION | tr -d '.')_${ITYPE}_deps"
-if [ "$(! type ${DEPS_INSTALL_FUNC} | grep -q 'shell function')" != "" ]; then
-    echo " * INFO: ${DEPS_INSTALL_FUNC} not found..."
-    # let's try and see if have a deps function which ignores the installation type
-    DEPS_INSTALL_FUNC="install_${DISTRO_NAME}_$(echo $DISTRO_VERSION | tr -d '.')_deps"
-    if [ "$( ! type ${DEPS_INSTALL_FUNC} | grep -q 'shell function' )" != "" ]; then
-        echo " * INFO: ${DEPS_INSTALL_FUNC} not found..."
-        # Let's try to see if we have a deps function which also ignores the distro version
-        DEPS_INSTALL_FUNC="install_${DISTRO_NAME}_deps"
-        if [ "$( ! type ${DEPS_INSTALL_FUNC} | grep -q 'shell function' )" != "" ]; then
-            echo " * ERROR: Installation not supported not supported. Can't find ${DEPS_INSTALL_FUNC}()"
-            exit 1
+
+#---  FUNCTION  ----------------------------------------------------------------
+#          NAME:  __function_defined
+#   DESCRIPTION:  Checks if a function is defined within this scripts scope
+#    PARAMETERS:  function name
+#       RETURNS:  0 or 1 as in defined or not defined
+#-------------------------------------------------------------------------------
+__function_defined() {
+    FUNC_NAME=$1
+    if [ ${DISTRO_NAME} = "centos" ]; then
+        if typeset -f $FUNC_NAME &>/dev/null ; then
+            echo " * INFO: Found function $FUNC_NAME"
+            return 0
+        fi
+    elif [ ${DISTRO_NAME} = "ubuntu" ]; then
+        if $( type ${FUNC_NAME} | grep -q 'shell function' ); then
+            echo " * INFO: Found function $FUNC_NAME"
+            return 0
+        fi
+    # Last resorts try POSIXLY_CORRECT or not
+    elif test -n "${POSIXLY_CORRECT+yes}"; then
+        if typeset -f $FUNC_NAME &>/dev/null ; then
+            echo " * INFO: Found function $FUNC_NAME"
+            return 0
+        fi
+    else
+        # Arch linux seems to fall here
+        if $( type ${FUNC_NAME}  &>/dev/null ) ; then
+            echo " * INFO: Found function $FUNC_NAME"
+            return 0
         fi
     fi
-fi
+    echo " * INFO: $FUNC_NAME not found...."
+    return 1
+}
+# Let's get the dependencies install function
+DEP_FUNC_NAMES="install_${DISTRO_NAME}${DISTRO_VERSION_NO_DOTS}_${ITYPE}_deps"
+DEP_FUNC_NAMES="$DEP_FUNC_NAMES install_${DISTRO_NAME}${DISTRO_VERSION_NO_DOTS}_deps"
+DEP_FUNC_NAMES="$DEP_FUNC_NAMES install_${DISTRO_NAME}_${ITYPE}_deps"
+DEP_FUNC_NAMES="$DEP_FUNC_NAMES install_${DISTRO_NAME}_deps"
+
+DEPS_INSTALL_FUNC="null"
+for DEP_FUNC_NAME in $DEP_FUNC_NAMES; do
+    if __function_defined $DEP_FUNC_NAME; then
+        DEPS_INSTALL_FUNC=$DEP_FUNC_NAME
+        break
+    fi
+done
+
 
 # Let's get the install function
-INSTALL_FUNC="install_${DISTRO_NAME}_$(echo $DISTRO_VERSION | tr -d '.')_${ITYPE}"
-if [ "$( ! type ${INSTALL_FUNC} | grep -q 'shell function' )" != "" ]; then
-    echo " * INFO: ${INSTALL_FUNC} not found..."
-    # Let see if we have an install function which ignores the distribution version
-    INSTALL_FUNC="install_${DISTRO_NAME}_${ITYPE}"
-    if [ "$( ! type ${INSTALL_FUNC} | grep -q 'shell function' )" != "" ]; then
-        echo " * ERROR: Installation not supported not supported. Can't find ${INSTALL_FUNC}()"
-        exit 1
+INSTALL_FUNC_NAMES="install_${DISTRO_NAME}${DISTRO_VERSION_NO_DOTS}_${ITYPE}"
+INSTALL_FUNC_NAMES="$INSTALL_FUNC_NAMES install_${DISTRO_NAME}_${ITYPE}"
+
+INSTALL_FUNC="null"
+for FUNC_NAME in $INSTALL_FUNC_NAMES; do
+    if __function_defined $FUNC_NAME; then
+        INSTALL_FUNC=$FUNC_NAME
+        break
     fi
+done
+
+
+# Let's get the dependencies install function
+POST_FUNC_NAMES="install_${DISTRO_NAME}${DISTRO_VERSION_NO_DOTS}_${ITYPE}_post"
+POST_FUNC_NAMES="$DEP_FUNC_NAMES install_${DISTRO_NAME}${DISTRO_VERSION_NO_DOTS}_post"
+POST_FUNC_NAMES="$DEP_FUNC_NAMES install_${DISTRO_NAME}_${ITYPE}_post"
+POST_FUNC_NAMES="$DEP_FUNC_NAMES install_${DISTRO_NAME}_post"
+
+POST_INSTALL_FUNC="null"
+for FUNC_NAME in $POST_FUNC_NAMES; do
+    if __function_defined $FUNC_NAME; then
+        DEPS_INSTALL_FUNC=$FUNC_NAME
+        break
+    fi
+done
+
+
+if [ $DEPS_INSTALL_FUNC = "null" ]; then
+    echo " * ERROR: No dependencies installation function found. Exiting..."
+    exit 1
 fi
 
-# Let's get the post function, if any, it's optional
-POST_INSTALL_FUNC="install_${DISTRO_NAME}_$(echo $DISTRO_VERSION | tr -d '.')_${ITYPE}_post"
-if [ "$( ! type ${POST_INSTALL_FUNC} | grep -q 'shell function' )" != "" ]; then
-    echo " * INFO: ${POST_INSTALL_FUNC} not found..."
-    # let's try and see if have a post function which ignores the installation type
-    POST_INSTALL_FUNC="install_${DISTRO_NAME}_$(echo $DISTRO_VERSION | tr -d '.')_post"
-    if [ "$( ! type ${POST_INSTALL_FUNC} | grep -q 'shell function' )" != "" ]; then
-        echo " * INFO: ${POST_INSTALL_FUNC} not found..."
-        # Let's try to see if we have a deps function which also ignores the distro version
-        POST_INSTALL_FUNC="install_${DISTRO_NAME}_post"
-        if [ "$( ! type ${POST_INSTALL_FUNC} | grep -q 'shell function' )" != "" ]; then
-            echo " * INFO: ${POST_INSTALL_FUNC} not found..."
-            POST_INSTALL_FUNC=""
-        fi
-    fi
+if [ $DEPS_INSTALL_FUNC = "null" ]; then
+    echo " * ERROR: No installation function found. Exiting..."
+    exit 1
 fi
+
 
 # Install dependencies
 echo " * Running ${DEPS_INSTALL_FUNC}()"
@@ -349,7 +400,7 @@ echo " * Running ${INSTALL_FUNC}()"
 $INSTALL_FUNC
 
 # Run any post install function
-if [ "$POST_INSTALL_FUNC" != "" ]; then
+if [ "$POST_INSTALL_FUNC" != "null" ]; then
     echo " * Running ${POST_INSTALL_FUNC}()"
     $POST_INSTALL_FUNC
 fi

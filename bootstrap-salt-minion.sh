@@ -118,6 +118,19 @@ __gather_os_info
 #   DESCRIPTION:  Discover Linux system information
 #-------------------------------------------------------------------------------
 __gather_linux_system_info() {
+    DISTRO_NAME=""
+    DISTRO_VERSION=""
+
+    if [ -f /etc/lsb-release ]; then
+        DISTRO_NAME=$(grep DISTRIB_ID /etc/lsb-release | sed -e 's/.*=//')
+        DISTRO_VERSION=$(grep DISTRIB_RELEASE /etc/lsb-release | sed -e 's/.*=//')
+    fi
+
+    if [ "x$DISTRO_NAME" != "x" -a "x$DISTRO_VERSION" != "x" ]; then
+        # We already have the distribution name and version
+        return
+    fi
+
     for rsource in $(
             cd /etc && /bin/ls *[_-]release *[_-]version 2>/dev/null | env -i sort | \
             sed -e '/^redhat-release$/d' -e '/^lsb-release$/d'; \

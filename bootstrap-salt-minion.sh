@@ -44,7 +44,7 @@ EOT
 #  Handle command line arguments
 #-----------------------------------------------------------------------
 
-while getopts ":hvN" opt
+while getopts ":hv" opt
 do
   case $opt in
 

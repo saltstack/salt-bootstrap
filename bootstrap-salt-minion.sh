@@ -312,7 +312,7 @@ DISTRO_NAME_L=$(echo $DISTRO_NAME | tr '[:upper:]' '[:lower:]')
 #       1. install_<distro>_<distro_version>_<install_type>_deps
 #       2. install_<distro>_<distro_version>_deps
 #       3. install_<distro>_<install_type>_deps
-#       4. install_<distro>_dep
+#       4. install_<distro>_deps
 #
 #
 #   To install salt, which, of course, is required, one of:

@@ -355,11 +355,22 @@ install_ubuntu_1110_deps() {
     add-apt-repository -y ppa:saltstack/salt
 }
 
+install_ubuntu_daily_deps() {
+    apt-get update
+    apt-get -y install python-software-properties
+    add-apt-repository -y ppa:saltstack/salt-daily
+    apt-get update
+}
+
 install_ubuntu_1110_post() {
     add-apt-repository -y --remove 'deb http://us.archive.ubuntu.com/ubuntu/ oneiric universe'
 }
 
 install_ubuntu_stable() {
+    apt-get -y install salt-minion
+}
+
+install_ubuntu_daily() {
     apt-get -y install salt-minion
 }
 #

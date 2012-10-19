@@ -27,12 +27,20 @@ ScriptVersion="1.0"
 usage() {
     cat << EOT
 
-  Usage :  ${0##/*/} [options] <install-type>
+  Usage :  ${0##/*/} [options] <install-type> <install-type-args>
 
   Installation types:
     - stable (default)
-    - daily
+    - daily  (ubuntu specific)
     - git
+
+  Examples:
+    $ ${0##/*/}
+    $ ${0##/*/} stable
+    $ ${0##/*/} daily
+    $ ${0##/*/} git
+    $ ${0##/*/} git develop
+    $ ${0##/*/} git 8c3fadf15ec183e5ce8c63739850d543617e4357
 
   Options:
   -h|help       Display this message
@@ -64,10 +72,27 @@ if [ "$#" -eq 0 ];then
     ITYPE="stable"
 else
     ITYPE=$1
+    shift
 fi
 
 if [ "$ITYPE" != "stable" -a "$ITYPE" != "daily" -a "$ITYPE" != "git" ]; then
     echo " ERROR: Installation type \"$ITYPE\" is not known..."
+    exit 1
+fi
+
+if [ $ITYPE = "git" ]; then
+    if [ "$#" -eq 0 ];then
+        GIT_REV="master"
+    else
+        GIT_REV=$1
+        shift
+    fi
+fi
+
+if [ "$#" -gt 0 ]; then
+    usage
+    echo
+    echo " * ERROR: Too many arguments."
     exit 1
 fi
 
@@ -261,11 +286,11 @@ __function_defined() {
 }
 __gather_system_info
 
-echo "    System Information:"
-echo "      OS Name:      ${OS_NAME}"
-echo "      OS Version:   ${OS_VERSION}"
-echo "      Machine:      ${MACHINE}"
-echo "      Distribution: ${DISTRO_NAME} ${DISTRO_VERSION}"
+echo " * System Information:"
+echo "     OS Name:      ${OS_NAME}"
+echo "     OS Version:   ${OS_VERSION}"
+echo "     Machine:      ${MACHINE}"
+echo "     Distribution: ${DISTRO_NAME} ${DISTRO_VERSION}"
 
 
 # Simplify version naming on functions

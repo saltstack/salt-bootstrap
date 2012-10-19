@@ -427,6 +427,27 @@ install_debian_60_stable_deps() {
 install_debian_60_stable() {
     apt-get -t squeeze-backports -y install salt-minion
 }
+
+install_debian_60_git_deps() {
+    install_debian_60_stable_deps
+    install_debian_60_stable
+}
+
+install_debian_60_git() {
+    apt-get -y install git
+    apt-get -y purge salt-minion
+
+    rm -rf /tmp/git/salt
+    mkdir /tmp/git
+    cd /tmp/git
+    git clone git://github.com/saltstack/salt.git salt
+    cd salt
+    git checkout $GIT_REV
+    python setup.py install --install-layout=deb
+    mkdir -p /etc/salt
+    cp conf/minion.template /etc/salt/minion
+    rm -rf /tmp/git/salt
+}
 #
 #   Ended Debian Install Functions
 #

@@ -362,6 +362,14 @@ install_ubuntu_daily_deps() {
     apt-get update
 }
 
+install_ubuntu_git_deps() {
+    apt-get update
+    apt-get install -y python-software-properties
+    add-apt-repository  ppa:saltstack/salt
+    apt-get update
+    apt-get install -y salt-minion git-core
+}
+
 install_ubuntu_1110_post() {
     add-apt-repository -y --remove 'deb http://us.archive.ubuntu.com/ubuntu/ oneiric universe'
 }
@@ -372,6 +380,21 @@ install_ubuntu_stable() {
 
 install_ubuntu_daily() {
     apt-get -y install salt-minion
+}
+
+install_ubuntu_git() {
+    rm -rf /usr/share/pyshared/salt*
+    rm -rf /usr/bin/salt-*
+    mkdir -p /root/git
+    cd /root/git
+    git clone git://github.com/saltstack/salt.git
+    cd salt
+    git checkout $GIT_REV
+    python setup.py install --install-layout=deb
+}
+
+install_ubuntu_git_post() {
+    service salt-minion start
 }
 #
 #   End of Ubuntu Install Functions
@@ -398,8 +421,22 @@ install_debian_60_stable() {
 
 ##############################################################################
 #
+#   Fedora Install Functions
+#
+install_fedora_stable() {
+    yum install -y salt-minion
+}
+
+#
+#   Ended Fedora Install Functions
+#
+##############################################################################
+
+##############################################################################
+#
 #   CentOS Install Functions
 #
+
 install_centos_63_stable_deps() {
     rpm -Uvh --force http://mirrors.kernel.org/fedora-epel/6/x86_64/epel-release-6-7.noarch.rpm
     yum -y update
@@ -415,6 +452,98 @@ install_centos_63_stable_post() {
 }
 #
 #   Ended CentOS Install Functions
+#
+##############################################################################
+
+
+##############################################################################
+#
+#   Arch Install Functions
+#
+install_arch_stable_deps() {
+    echo '[salt]
+Server = http://red45.org/archlinux
+' >> /etc/pacman.conf
+}
+
+install_arch_git_deps() {
+    echo '[salt]
+    Server = http://red45.org/archlinux
+    ' >> /etc/pacman.conf
+}
+
+install_arch_stable() {
+    pacman -Sy --noconfirm pacman
+    pacman -Syu --noconfirm salt
+}
+
+install_arch_git() {
+    pacman -Sy --noconfirm pacman
+    pacman -Syu --noconfirm salt git
+    rm -rf /usr/lib/python2.7/site-packages/salt*
+    rm -rf /usr/bin/salt-*
+    mkdir -p /root/git
+    cd /root/git
+    git clone git://github.com/saltstack/salt.git
+    cd salt
+    git checkout $GIT_REV
+    python2 setup.py install
+}
+
+install_arch_post() {
+    /etc/rc.d/salt-minion start
+}
+#
+#   Ended Arch Install Functions
+#
+##############################################################################
+
+##############################################################################
+#
+#   FreeBSD Install Functions
+#
+install_freebsd_stable_deps() {
+    portsnap fetch extract update
+    cd /usr/ports/ports-mgmt/pkg
+    make install clean
+    cd
+    /usr/local/sbin/pkg2ng
+    echo 'PACKAGESITE: http://pkgbeta.freebsd.org/freebsd-9-amd64/latest' > /usr/local/etc/pkg.conf
+}
+
+install_freebsd_git_deps() {
+    portsnap fetch extract update
+    cd /usr/ports/ports-mgmt/pkg
+    make install clean
+    cd
+    /usr/local/sbin/pkg2ng
+    echo 'PACKAGESITE: http://pkgbeta.freebsd.org/freebsd-9-amd64/latest' > /usr/local/etc/pkg.conf
+}
+
+install_freebsd_stable() {
+    pkg install -y salt
+}
+
+install_freebsd_git() {
+    /usr/local/sbin/pkg install -y git salt
+    /usr/local/sbin/pkg delete -y salt
+    mkdir -p /root/git
+    cd /root/git
+    /usr/local/bin/git clone git://github.com/saltstack/salt.git
+    cd salt
+    git checkout $GIT_REV
+    /usr/local/bin/python setup.py install
+}
+
+install_freebsd_stable_post() {
+    salt-minion -d
+}
+
+install_freebsd_git_post() {
+    salt-minion -d
+}
+#
+#   Ended FreeBSD Install Functions
 #
 ##############################################################################
 

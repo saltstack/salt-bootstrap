@@ -125,6 +125,20 @@ exec 2>$LOGPIPE
 
 
 #---  FUNCTION  ----------------------------------------------------------------
+#          NAME:  __gather_hardware_info
+#   DESCRIPTION:  Discover hardware information
+#-------------------------------------------------------------------------------
+__gather_hardware_info() {
+    CPU_VENDOR_ID=$(cat /proc/cpuinfo | grep vendor_id | head -n 1 | awk '{print $3}')
+    CPU_VENDOR_ID_L=$( echo $CPU_VENDOR_ID | tr '[:upper:]' '[:lower:]' )
+    CPU_ARCH=$(uname -m 2>/dev/null || uname -p 2>/dev/null || echo "unknown")
+    CPU_ARCH_L=$( echo $CPU_ARCH | tr '[:upper:]' '[:lower:]' )
+
+}
+__gather_hardware_info
+
+
+#---  FUNCTION  ----------------------------------------------------------------
 #          NAME:  __gather_os_info
 #   DESCRIPTION:  Discover operating system information
 #-------------------------------------------------------------------------------
@@ -133,7 +147,6 @@ __gather_os_info() {
     OS_NAME_L=$( echo $OS_NAME | tr '[:upper:]' '[:lower:]' )
     OS_VERSION=$(uname -r)
     OS_VERSION_L=$( echo $OS_VERSION | tr '[:upper:]' '[:lower:]' )
-    MACHINE=$(uname -m 2>/dev/null || uname -p 2>/dev/null || echo "unknown")
 }
 __gather_os_info
 
@@ -287,9 +300,9 @@ __function_defined() {
 __gather_system_info
 
 echo " * System Information:"
+echo "     CPU:          ${CPU_VENDOR_ID} ${CPU_ARCH}"
 echo "     OS Name:      ${OS_NAME}"
 echo "     OS Version:   ${OS_VERSION}"
-echo "     Machine:      ${MACHINE}"
 echo "     Distribution: ${DISTRO_NAME} ${DISTRO_VERSION}"
 
 

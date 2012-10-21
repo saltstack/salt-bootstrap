@@ -451,7 +451,12 @@ install_fedora_stable() {
 #
 
 install_centos_63_stable_deps() {
-    rpm -Uvh --force http://mirrors.kernel.org/fedora-epel/6/x86_64/epel-release-6-7.noarch.rpm
+    if [ $CPU_ARCH_L = "i686" ]; then
+        local ARCH="i386"
+    else
+        local ARCH=$CPU_ARCH_L
+    fi
+    rpm -Uvh --force http://mirrors.kernel.org/fedora-epel/6/${ARCH}/epel-release-6-7.noarch.rpm
     yum -y update
 }
 

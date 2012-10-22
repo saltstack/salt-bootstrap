@@ -605,7 +605,7 @@ POST_FUNC_NAMES="$POST_FUNC_NAMES install_${DISTRO_NAME_L}_post"
 POST_INSTALL_FUNC="null"
 for FUNC_NAME in $POST_FUNC_NAMES; do
     if __function_defined $FUNC_NAME; then
-        DEPS_INSTALL_FUNC=$FUNC_NAME
+        POST_INSTALL_FUNC=$FUNC_NAME
         break
     fi
 done

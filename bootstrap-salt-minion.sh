@@ -449,7 +449,6 @@ install_fedora_stable() {
 #
 #   CentOS Install Functions
 #
-
 install_centos_63_stable_deps() {
     if [ $CPU_ARCH_L = "i686" ]; then
         local ARCH="i386"
@@ -466,7 +465,33 @@ install_centos_63_stable() {
 
 install_centos_63_stable_post() {
     /sbin/chkconfig salt-minion on
+    #/etc/init.d/salt-minion start &
     salt-minion start &
+}
+
+install_centos_63_git_deps() {
+    install_centos_63_stable_deps
+    yum -y install git PyYAML m2crypto python-crypto python-msgpack python-zmq python-jinja2 --enablerepo=epel-testing
+}
+
+install_centos_63_git() {
+    rm -rf /usr/lib/python*/site-packages/salt
+    rm -rf /usr/bin/salt*
+    cd /tmp
+    git clone git://github.com/saltstack/salt.git
+    cd salt
+    git checkout $GIT_REV
+    python2 setup.py install
+    mkdir -p /etc/salt/
+
+}
+
+install_centos_63_git_post() {
+    cp pkg/rpm/salt-{master,minion} /etc/init.d/
+    chmod +x /etc/init.d/salt-{master,minion}
+    /sbin/chkconfig salt-minion on
+    /etc/init.d/salt-minion start &
+    sleep 1
 }
 #
 #   Ended CentOS Install Functions
@@ -638,3 +663,4 @@ fi
 
 # Done!
 echo " * Salt installed!"
+exit 0

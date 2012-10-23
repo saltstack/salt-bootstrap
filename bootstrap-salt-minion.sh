@@ -102,13 +102,9 @@ if [ $(whoami) != "root" ] ; then
     exit 1
 fi
 
-
 # Define our logging file and pipe paths
 LOGFILE="/tmp/$(basename $0 | sed s/.sh/.log/g )"
 LOGPIPE="/tmp/$(basename $0 | sed s/.sh/.logpipe/g )"
-
-# Remove the logging pipe when the script exits
-trap "rm -f $LOGPIPE" EXIT
 
 # Create our logging pipe
 mknod $LOGPIPE p
@@ -122,6 +118,38 @@ exec 1>$LOGPIPE
 # Close STDERR, reopen it directing it to the logpipe
 exec 2>&-
 exec 2>$LOGPIPE
+
+#---  FUNCTION  ----------------------------------------------------------------
+#          NAME:  __exit_cleanup
+#   DESCRIPTION:  Cleanup any leftovers after script has ended
+#-------------------------------------------------------------------------------
+__exit_cleanup() {
+    EXIT_CODE=$?
+
+    # Remove the logging pipe when the script exits
+    echo " * Removing the logging pipe $LOGPIPE"
+    rm -f $LOGPIPE
+
+    # Kill tee when exiting, CentOS, at least requires this
+    TEE_PID=$(ps ax | grep tee | grep $LOGFILE | awk '{print $1}')
+    echo " * Killing logging pipe tee's with pid(s): $TEE_PID"
+
+    # We need to trap errors since killing tee will cause a 127 errno
+    # We also do this as late as possible so we don't "mis-catch" other errors
+    __trap_errors() {
+        echo "Errors Trapped: $EXIT_CODE"
+        # Exit with the "original" exit code, not the trapped code
+        exit $EXIT_CODE
+    }
+    trap "__trap_errors" ERR
+
+    # Now we're "good" to kill tee
+    kill -TERM $TEE_PID
+
+    # In case the 127 errno is not triggered, exit with the "original" exit code
+    exit $EXIT_CODE
+}
+trap "__exit_cleanup" EXIT
 
 
 #---  FUNCTION  ----------------------------------------------------------------
@@ -465,8 +493,7 @@ install_centos_63_stable() {
 
 install_centos_63_stable_post() {
     /sbin/chkconfig salt-minion on
-    #/etc/init.d/salt-minion start &
-    salt-minion start &
+    /etc/init.d/salt-minion start
 }
 
 install_centos_63_git_deps() {
@@ -490,8 +517,7 @@ install_centos_63_git_post() {
     cp pkg/rpm/salt-{master,minion} /etc/init.d/
     chmod +x /etc/init.d/salt-{master,minion}
     /sbin/chkconfig salt-minion on
-    /etc/init.d/salt-minion start &
-    sleep 1
+    /etc/init.d/salt-minion start
 }
 #
 #   Ended CentOS Install Functions

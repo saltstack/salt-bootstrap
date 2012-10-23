@@ -102,13 +102,9 @@ if [ $(whoami) != "root" ] ; then
     exit 1
 fi
 
-
 # Define our logging file and pipe paths
 LOGFILE="/tmp/$(basename $0 | sed s/.sh/.log/g )"
 LOGPIPE="/tmp/$(basename $0 | sed s/.sh/.logpipe/g )"
-
-# Remove the logging pipe when the script exits
-trap "rm -f $LOGPIPE" EXIT
 
 # Create our logging pipe
 mknod $LOGPIPE p
@@ -122,6 +118,38 @@ exec 1>$LOGPIPE
 # Close STDERR, reopen it directing it to the logpipe
 exec 2>&-
 exec 2>$LOGPIPE
+
+#---  FUNCTION  ----------------------------------------------------------------
+#          NAME:  __exit_cleanup
+#   DESCRIPTION:  Cleanup any leftovers after script has ended
+#-------------------------------------------------------------------------------
+__exit_cleanup() {
+    EXIT_CODE=$?
+
+    # Remove the logging pipe when the script exits
+    echo " * Removing the logging pipe $LOGPIPE"
+    rm -f $LOGPIPE
+
+    # Kill tee when exiting, CentOS, at least requires this
+    TEE_PID=$(ps ax | grep tee | grep $LOGFILE | awk '{print $1}')
+    echo " * Killing logging pipe tee's with pid(s): $TEE_PID"
+
+    # We need to trap errors since killing tee will cause a 127 errno
+    # We also do this as late as possible so we don't "mis-catch" other errors
+    __trap_errors() {
+        echo "Errors Trapped: $EXIT_CODE"
+        # Exit with the "original" exit code, not the trapped code
+        exit $EXIT_CODE
+    }
+    trap "__trap_errors" ERR
+
+    # Now we're "good" to kill tee
+    kill -TERM $TEE_PID
+
+    # In case the 127 errno is not triggered, exit with the "original" exit code
+    exit $EXIT_CODE
+}
+trap "__exit_cleanup" EXIT
 
 
 #---  FUNCTION  ----------------------------------------------------------------
@@ -470,7 +498,6 @@ install_fedora_stable() {
 #
 #   CentOS Install Functions
 #
-
 install_centos_63_stable_deps() {
     if [ $CPU_ARCH_L = "i686" ]; then
         local ARCH="i386"
@@ -487,7 +514,31 @@ install_centos_63_stable() {
 
 install_centos_63_stable_post() {
     /sbin/chkconfig salt-minion on
-    salt-minion start &
+    /etc/init.d/salt-minion start
+}
+
+install_centos_63_git_deps() {
+    install_centos_63_stable_deps
+    yum -y install git PyYAML m2crypto python-crypto python-msgpack python-zmq python-jinja2 --enablerepo=epel-testing
+}
+
+install_centos_63_git() {
+    rm -rf /usr/lib/python*/site-packages/salt
+    rm -rf /usr/bin/salt*
+    cd /tmp
+    git clone git://github.com/saltstack/salt.git
+    cd salt
+    git checkout $GIT_REV
+    python2 setup.py install
+    mkdir -p /etc/salt/
+
+}
+
+install_centos_63_git_post() {
+    cp pkg/rpm/salt-{master,minion} /etc/init.d/
+    chmod +x /etc/init.d/salt-{master,minion}
+    /sbin/chkconfig salt-minion on
+    /etc/init.d/salt-minion start
 }
 #
 #   Ended CentOS Install Functions
@@ -541,25 +592,45 @@ install_arch_post() {
 #
 #   FreeBSD Install Functions
 #
-install_freebsd_stable_deps() {
+install_freebsd_9_stable_deps() {
+    if [ $CPU_VENDOR_ID_L = "AuthenticAMD" -a $CPU_ARCH_L = "x86_64" ]; then
+        local ARCH="amd64"
+    elif [ $CPU_VENDOR_ID_L = "GenuineIntel" -a $CPU_ARCH_L = "x86_64" ]; then
+        local ARCH="x86:64"
+    elif [ $CPU_VENDOR_ID_L = "GenuineIntel" -a $CPU_ARCH_L = "i386" ]; then
+        local ARCH="i386"
+    elif [ $CPU_VENDOR_ID_L = "GenuineIntel" -a $CPU_ARCH_L = "i686" ]; then
+        local ARCH="x86:32"
+    fi
+
     portsnap fetch extract update
     cd /usr/ports/ports-mgmt/pkg
     make install clean
     cd
     /usr/local/sbin/pkg2ng
-    echo 'PACKAGESITE: http://pkgbeta.freebsd.org/freebsd-9-amd64/latest' > /usr/local/etc/pkg.conf
+    echo 'PACKAGESITE: http://pkgbeta.freebsd.org/freebsd-9-${ARCH}/latest' > /usr/local/etc/pkg.conf
 }
 
 install_freebsd_git_deps() {
+    if [ $CPU_VENDOR_ID_L = "AuthenticAMD" -a $CPU_ARCH_L = "x86_64" ]; then
+        local ARCH="amd64"
+    elif [ $CPU_VENDOR_ID_L = "GenuineIntel" -a $CPU_ARCH_L = "x86_64" ]; then
+        local ARCH="x86:64"
+    elif [ $CPU_VENDOR_ID_L = "GenuineIntel" -a $CPU_ARCH_L = "i386" ]; then
+        local ARCH="i386"
+    elif [ $CPU_VENDOR_ID_L = "GenuineIntel" -a $CPU_ARCH_L = "i686" ]; then
+        local ARCH="x86:32"
+    fi
+
     portsnap fetch extract update
     cd /usr/ports/ports-mgmt/pkg
     make install clean
     cd
     /usr/local/sbin/pkg2ng
-    echo 'PACKAGESITE: http://pkgbeta.freebsd.org/freebsd-9-amd64/latest' > /usr/local/etc/pkg.conf
+    echo 'PACKAGESITE: http://pkgbeta.freebsd.org/freebsd-9-${ARCH}/latest' > /usr/local/etc/pkg.conf
 }
 
-install_freebsd_stable() {
+install_freebsd_9_stable() {
     pkg install -y salt
 }
 
@@ -574,7 +645,7 @@ install_freebsd_git() {
     /usr/local/bin/python setup.py install
 }
 
-install_freebsd_stable_post() {
+install_freebsd_9_stable_post() {
     salt-minion -d
 }
 
@@ -585,6 +656,7 @@ install_freebsd_git_post() {
 #   Ended FreeBSD Install Functions
 #
 ##############################################################################
+
 
 #=============================================================================
 # LET'S PROCEED WITH OUR INSTALLATION
@@ -626,7 +698,7 @@ POST_FUNC_NAMES="$POST_FUNC_NAMES install_${DISTRO_NAME_L}_post"
 POST_INSTALL_FUNC="null"
 for FUNC_NAME in $POST_FUNC_NAMES; do
     if __function_defined $FUNC_NAME; then
-        DEPS_INSTALL_FUNC=$FUNC_NAME
+        POST_INSTALL_FUNC=$FUNC_NAME
         break
     fi
 done
@@ -659,3 +731,4 @@ fi
 
 # Done!
 echo " * Salt installed!"
+exit 0

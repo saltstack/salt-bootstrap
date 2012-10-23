@@ -571,25 +571,45 @@ install_arch_post() {
 #
 #   FreeBSD Install Functions
 #
-install_freebsd_stable_deps() {
+install_freebsd_9_stable_deps() {
+    if [ $CPU_VENDOR_ID_L = "AuthenticAMD" -a $CPU_ARCH_L = "x86_64" ]; then
+        local ARCH="amd64"
+    elif [ $CPU_VENDOR_ID_L = "GenuineIntel" -a $CPU_ARCH_L = "x86_64" ]; then
+        local ARCH="x86:64"
+    elif [ $CPU_VENDOR_ID_L = "GenuineIntel" -a $CPU_ARCH_L = "i386" ]; then
+        local ARCH="i386"
+    elif [ $CPU_VENDOR_ID_L = "GenuineIntel" -a $CPU_ARCH_L = "i686" ]; then
+        local ARCH="x86:32"
+    fi
+
     portsnap fetch extract update
     cd /usr/ports/ports-mgmt/pkg
     make install clean
     cd
     /usr/local/sbin/pkg2ng
-    echo 'PACKAGESITE: http://pkgbeta.freebsd.org/freebsd-9-amd64/latest' > /usr/local/etc/pkg.conf
+    echo 'PACKAGESITE: http://pkgbeta.freebsd.org/freebsd-9-${ARCH}/latest' > /usr/local/etc/pkg.conf
 }
 
 install_freebsd_git_deps() {
+    if [ $CPU_VENDOR_ID_L = "AuthenticAMD" -a $CPU_ARCH_L = "x86_64" ]; then
+        local ARCH="amd64"
+    elif [ $CPU_VENDOR_ID_L = "GenuineIntel" -a $CPU_ARCH_L = "x86_64" ]; then
+        local ARCH="x86:64"
+    elif [ $CPU_VENDOR_ID_L = "GenuineIntel" -a $CPU_ARCH_L = "i386" ]; then
+        local ARCH="i386"
+    elif [ $CPU_VENDOR_ID_L = "GenuineIntel" -a $CPU_ARCH_L = "i686" ]; then
+        local ARCH="x86:32"
+    fi
+
     portsnap fetch extract update
     cd /usr/ports/ports-mgmt/pkg
     make install clean
     cd
     /usr/local/sbin/pkg2ng
-    echo 'PACKAGESITE: http://pkgbeta.freebsd.org/freebsd-9-amd64/latest' > /usr/local/etc/pkg.conf
+    echo 'PACKAGESITE: http://pkgbeta.freebsd.org/freebsd-9-${ARCH}/latest' > /usr/local/etc/pkg.conf
 }
 
-install_freebsd_stable() {
+install_freebsd_9_stable() {
     pkg install -y salt
 }
 
@@ -604,7 +624,7 @@ install_freebsd_git() {
     /usr/local/bin/python setup.py install
 }
 
-install_freebsd_stable_post() {
+install_freebsd_9_stable_post() {
     salt-minion -d
 }
 
@@ -615,6 +635,7 @@ install_freebsd_git_post() {
 #   Ended FreeBSD Install Functions
 #
 ##############################################################################
+
 
 #=============================================================================
 # LET'S PROCEED WITH OUR INSTALLATION

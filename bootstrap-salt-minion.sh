@@ -435,7 +435,7 @@ install_ubuntu_git_deps() {
     apt-get install -y python-software-properties
     add-apt-repository  ppa:saltstack/salt
     apt-get update
-    apt-get install -y git python-yaml python-m2crypto python-crypto msgpack-python python-zmq python-jinja2
+    apt-get install -y git-core python-yaml python-m2crypto python-crypto msgpack-python python-zmq python-jinja2
 }
 
 install_ubuntu_1110_post() {
@@ -500,7 +500,6 @@ install_debian_60_git() {
     python setup.py install --install-layout=deb
     mkdir -p /etc/salt
     cp conf/minion.template /etc/salt/minion
-    rm -rf /tmp/git/salt
 }
 #
 #   Ended Debian Install Functions

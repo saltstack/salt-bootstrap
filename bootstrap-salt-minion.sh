@@ -339,6 +339,22 @@ __function_defined() {
 }
 __gather_system_info
 
+
+#---  FUNCTION  ----------------------------------------------------------------
+#          NAME:  __git_clone_and_checkout
+#   DESCRIPTION:  (DRY) Helper function to clone and checkout salt to a
+#                 specific revision.
+#-------------------------------------------------------------------------------
+__git_clone_and_checkout() {
+    SALT_GIT_CHECKOUT_DIR=/tmp/git/salt
+    [ -d /tmp/git ] || mkdir /tmp/git
+    cd /tmp/git
+    [ -d $SALT_GIT_CHECKOUT_DIR ] || git clone git://github.com/saltstack/salt.git salt
+    cd salt
+    git checkout $GIT_REV
+}
+
+
 echo " * System Information:"
 echo "     CPU:          ${CPU_VENDOR_ID} ${CPU_ARCH}"
 echo "     OS Name:      ${OS_NAME}"
@@ -385,7 +401,6 @@ DISTRO_NAME_L=$(echo $DISTRO_NAME | tr '[:upper:]' '[:lower:]')
 #
 #   Ubuntu Install Functions
 #
-##############################################################################
 install_ubuntu_deps() {
     apt-get update
     apt-get -y install python-software-properties
@@ -436,21 +451,21 @@ install_ubuntu_daily() {
 }
 
 install_ubuntu_git() {
-    mkdir -p /root/git
-    cd /root/git
-    git clone git://github.com/saltstack/salt.git
-    cd salt
-    git checkout $GIT_REV
+    __git_clone_and_checkout
     python setup.py install --install-layout=deb
 }
 
 install_ubuntu_git_post() {
     for fname in $(echo "minion master syndic"); do
-        cp /root/git/salt/debian/salt-$fname.init /etc/init.d/salt-$fname
-        cp /root/git/salt/debian/salt-$fname.upstart /etc/init/salt-$fname.conf
+        if [ $fname != "minion" ]; then
+            # Guess we should only enable and start the minion service. Right??
+            continue
+        fi
+        cp ${SALT_GIT_CHECKOUT_DIR}/debian/salt-$fname.init /etc/init.d/salt-$fname
+        cp ${SALT_GIT_CHECKOUT_DIR}/debian/salt-$fname.upstart /etc/init/salt-$fname.conf
         chmod +x /etc/init.d/salt-$fname
+        service salt-$fname start
     done
-    service salt-minion start
 }
 #
 #   End of Ubuntu Install Functions
@@ -480,12 +495,8 @@ install_debian_60_git() {
     apt-get -y install git
     apt-get -y purge salt-minion
 
-    rm -rf /tmp/git/salt
-    mkdir /tmp/git
-    cd /tmp/git
-    git clone git://github.com/saltstack/salt.git salt
-    cd salt
-    git checkout $GIT_REV
+    __git_clone_and_checkout
+
     python setup.py install --install-layout=deb
     mkdir -p /etc/salt
     cp conf/minion.template /etc/salt/minion
@@ -500,10 +511,47 @@ install_debian_60_git() {
 #
 #   Fedora Install Functions
 #
+install_fedora_deps() {
+    yum install -y PyYAML libyaml m2crypto python-crypto python-jinja2 python-msgpack python-zmq
+}
+
 install_fedora_stable() {
     yum install -y salt-minion
 }
 
+
+install_fedora_git_deps() {
+    install_fedora_deps
+    yum install -y git
+}
+
+install_fedora_git() {
+    __git_clone_and_checkout
+    python setup.py install
+}
+
+install_fedora_git_post() {
+    for fname in $(echo "minion master syndic"); do
+        if [ $fname != "minion" ]; then
+            # Guess we should only enable and start the minion service. Right??
+            continue
+        fi
+        #cp ${SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-$fname /etc/rc.d/init.d/salt-$fname
+        cp ${SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-$fname.service /lib/systemd/system/salt-$fname.service
+        #chmod +x /etc/rc.d/init.d/salt-$fname
+
+        # Switch from forking to simple, dunny why I can't make it work
+        sed -i 's/Type=forking/Type=simple/g' /lib/systemd/system/salt-$fname.service
+        # Remove the daemon flag because of the above
+        sed -ie 's;ExecStart=\(.*\) -d;ExecStart=\1;' /lib/systemd/system/salt-$fname.service
+        systemctl preset salt-$fname.service
+        systemctl enable salt-$fname.service
+        sleep 0.2
+        systemctl daemon-reload
+        sleep 0.2
+        systemctl start salt-$fname.service
+    done
+}
 #
 #   Ended Fedora Install Functions
 #
@@ -540,13 +588,10 @@ install_centos_63_git_deps() {
 install_centos_63_git() {
     rm -rf /usr/lib/python*/site-packages/salt
     rm -rf /usr/bin/salt*
-    cd /tmp
-    git clone git://github.com/saltstack/salt.git
-    cd salt
-    git checkout $GIT_REV
+
+    __git_clone_and_checkout
     python2 setup.py install
     mkdir -p /etc/salt/
-
 }
 
 install_centos_63_git_post() {
@@ -587,11 +632,9 @@ install_arch_git() {
     pacman -Syu --noconfirm salt git
     rm -rf /usr/lib/python2.7/site-packages/salt*
     rm -rf /usr/bin/salt-*
-    mkdir -p /root/git
-    cd /root/git
-    git clone git://github.com/saltstack/salt.git
-    cd salt
-    git checkout $GIT_REV
+
+    __git_clone_and_checkout
+
     python2 setup.py install
 }
 
@@ -652,11 +695,9 @@ install_freebsd_9_stable() {
 install_freebsd_git() {
     /usr/local/sbin/pkg install -y git salt
     /usr/local/sbin/pkg delete -y salt
-    mkdir -p /root/git
-    cd /root/git
-    /usr/local/bin/git clone git://github.com/saltstack/salt.git
-    cd salt
-    git checkout $GIT_REV
+
+    __git_clone_and_checkout
+
     /usr/local/bin/python setup.py install
 }
 
@@ -733,15 +774,27 @@ fi
 # Install dependencies
 echo " * Running ${DEPS_INSTALL_FUNC}()"
 $DEPS_INSTALL_FUNC
+if [ $? -ne 0 ]; then
+    echo " * Failed to run ${DEPS_INSTALL_FUNC}()!!!"
+    exit 1
+fi
 
 # Install Salt
 echo " * Running ${INSTALL_FUNC}()"
 $INSTALL_FUNC
+if [ $? -ne 0 ]; then
+    echo " * Failed to run ${INSTALL_FUNC}()!!!"
+    exit 1
+fi
 
 # Run any post install function
 if [ "$POST_INSTALL_FUNC" != "null" ]; then
     echo " * Running ${POST_INSTALL_FUNC}()"
     $POST_INSTALL_FUNC
+    if [ $? -ne 0 ]; then
+        echo " * Failed to run ${POST_INSTALL_FUNC}()!!!"
+        exit 1
+    fi
 fi
 
 # Done!

@@ -225,9 +225,7 @@ __gather_linux_system_info() {
         [ ! -f "/etc/${rsource}" ] && continue
 
         n=$(echo ${rsource} | sed -e 's/[_-]release$//' -e 's/[_-]version$//')
-        v=$(__parse_version_string $(
-            (grep VERSION /etc/${rsource}; cat /etc/${rsource}) | grep '[0-9]' | sed -e 'q'
-        ))
+        v=$(__parse_version_string "$((grep VERSION /etc/${rsource}; cat /etc/${rsource}) | grep '[0-9]' | sed -e 'q')")
         case $(echo ${n} | tr '[:upper:]' '[:lower:]') in
             redhat )
                 if [ ".$(egrep '(Red Hat Enterprise Linux|CentOS)' /etc/${rsource})" != . ]; then
@@ -422,7 +420,7 @@ install_ubuntu_git_deps() {
     apt-get install -y python-software-properties
     add-apt-repository  ppa:saltstack/salt
     apt-get update
-    apt-get install -y salt-minion git-core
+    apt-get install -y git python-yaml python-m2crypto python-crypto msgpack-python python-zmq python-jinja2
 }
 
 install_ubuntu_1110_post() {
@@ -438,8 +436,6 @@ install_ubuntu_daily() {
 }
 
 install_ubuntu_git() {
-    rm -rf /usr/share/pyshared/salt*
-    rm -rf /usr/bin/salt-*
     mkdir -p /root/git
     cd /root/git
     git clone git://github.com/saltstack/salt.git
@@ -449,6 +445,11 @@ install_ubuntu_git() {
 }
 
 install_ubuntu_git_post() {
+    for fname in $(echo "minion master syndic"); do
+        cp /root/git/salt/debian/salt-$fname.init /etc/init.d/salt-$fname
+        cp /root/git/salt/debian/salt-$fname.upstart /etc/init/salt-$fname.conf
+        chmod +x /etc/init.d/salt-$fname
+    done
     service salt-minion start
 }
 #

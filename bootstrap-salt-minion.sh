@@ -416,6 +416,11 @@ install_ubuntu_1004_deps() {
     apt-get -y install salt-minion
 }
 
+install_ubuntu_1004_git_deps() {
+    install_ubuntu_1004_deps
+    apt-get -y install git-core
+}
+
 install_ubuntu_1110_deps() {
     apt-get update
     apt-get -y install python-software-properties

@@ -490,6 +490,15 @@ install_ubuntu_git_post() {
 #
 #   Debian Install Functions
 #
+
+install_debian_deps() {
+    apt-get update
+}
+
+install_debian_stable() {
+    __apt_get_noinput salt-minion
+}
+
 install_debian_60_stable_deps() {
     echo "deb http://backports.debian.org/debian-backports squeeze-backports main" >> \
         /etc/apt/sources.list.d/backports.list

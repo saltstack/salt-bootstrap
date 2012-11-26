@@ -475,8 +475,14 @@ install_ubuntu_git_post() {
             # Guess we should only enable and start the minion service. Right??
             continue
         fi
-        cp ${SALT_GIT_CHECKOUT_DIR}/debian/salt-$fname.init /etc/init.d/salt-$fname
-        cp ${SALT_GIT_CHECKOUT_DIR}/pkg/salt-$fname.upstart /etc/init/salt-$fname.conf
+        if [ -f ${SALT_GIT_CHECKOUT_DIR}/debian/salt-$fname.init ]; then
+            cp ${SALT_GIT_CHECKOUT_DIR}/debian/salt-$fname.init /etc/init.d/salt-$fname
+        fi
+        if [ -f ${SALT_GIT_CHECKOUT_DIR}/debian/salt-$fname.upstart ]; then
+            cp ${SALT_GIT_CHECKOUT_DIR}/debian/salt-$fname.upstart /etc/init/salt-$fname.conf
+        elif [ -f ${SALT_GIT_CHECKOUT_DIR}/pkg/salt-$fname.upstart ]; then
+            cp ${SALT_GIT_CHECKOUT_DIR}/pkg/salt-$fname.upstart /etc/init/salt-$fname.conf
+        fi
         chmod +x /etc/init.d/salt-$fname
         service salt-$fname start
     done

@@ -467,7 +467,7 @@ install_ubuntu_git_post() {
             continue
         fi
         cp ${SALT_GIT_CHECKOUT_DIR}/debian/salt-$fname.init /etc/init.d/salt-$fname
-        cp ${SALT_GIT_CHECKOUT_DIR}/debian/salt-$fname.upstart /etc/init/salt-$fname.conf
+        cp ${SALT_GIT_CHECKOUT_DIR}/pkg/salt-$fname.upstart /etc/init/salt-$fname.conf
         chmod +x /etc/init.d/salt-$fname
         service salt-$fname start
     done

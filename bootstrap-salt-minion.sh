@@ -371,6 +371,15 @@ fi
 # Simplify distro name naming on functions
 DISTRO_NAME_L=$(echo $DISTRO_NAME | tr '[:upper:]' '[:lower:]')
 
+#---  FUNCTION  ----------------------------------------------------------------
+#          NAME:  __apt_get_noinput
+#   DESCRIPTION:  (DRY) apt-get install with noinput options
+#-------------------------------------------------------------------------------
+__apt_get_noinput() {
+    apt-get install -y -o DPkg::Options::=--force-confold $@
+}
+
+
 ##############################################################################
 #
 #   Distribution install functions
@@ -403,44 +412,44 @@ DISTRO_NAME_L=$(echo $DISTRO_NAME | tr '[:upper:]' '[:lower:]')
 #
 install_ubuntu_deps() {
     apt-get update
-    apt-get -y install python-software-properties
+    __apt_get_noinput python-software-properties
     add-apt-repository -y ppa:saltstack/salt
     apt-get update
 }
 
 install_ubuntu_1004_deps() {
     apt-get update
-    apt-get -y install python-software-properties
+    __apt_get_noinput python-software-properties
     add-apt-repository ppa:saltstack/salt
     apt-get update
-    apt-get -y install salt-minion
+    __apt_get_noinput salt-minion
 }
 
 install_ubuntu_1004_git_deps() {
     install_ubuntu_1004_deps
-    apt-get -y install git-core
+    __apt_get_noinput git-core
 }
 
 install_ubuntu_1110_deps() {
     apt-get update
-    apt-get -y install python-software-properties
+    __apt_get_noinput python-software-properties
     add-apt-repository -y 'deb http://us.archive.ubuntu.com/ubuntu/ oneiric universe'
     add-apt-repository -y ppa:saltstack/salt
 }
 
 install_ubuntu_daily_deps() {
     apt-get update
-    apt-get -y install python-software-properties
+    __apt_get_noinput python-software-properties
     add-apt-repository -y ppa:saltstack/salt-daily
     apt-get update
 }
 
 install_ubuntu_git_deps() {
     apt-get update
-    apt-get install -y python-software-properties
+    __apt_get_noinput python-software-properties
     add-apt-repository  ppa:saltstack/salt
     apt-get update
-    apt-get install -y git-core python-yaml python-m2crypto python-crypto msgpack-python python-zmq python-jinja2
+    __apt_get_noinput git-core python-yaml python-m2crypto python-crypto msgpack-python python-zmq python-jinja2
 }
 
 install_ubuntu_1110_post() {
@@ -448,11 +457,11 @@ install_ubuntu_1110_post() {
 }
 
 install_ubuntu_stable() {
-    apt-get -y install salt-minion
+    __apt_get_noinput salt-minion
 }
 
 install_ubuntu_daily() {
-    apt-get -y install salt-minion
+    __apt_get_noinput salt-minion
 }
 
 install_ubuntu_git() {
@@ -481,6 +490,15 @@ install_ubuntu_git_post() {
 #
 #   Debian Install Functions
 #
+
+install_debian_deps() {
+    apt-get update
+}
+
+install_debian_stable() {
+    __apt_get_noinput salt-minion
+}
+
 install_debian_60_stable_deps() {
     echo "deb http://backports.debian.org/debian-backports squeeze-backports main" >> \
         /etc/apt/sources.list.d/backports.list
@@ -488,7 +506,7 @@ install_debian_60_stable_deps() {
 }
 
 install_debian_60_stable() {
-    apt-get -t squeeze-backports -y install salt-minion
+    __apt_get_noinput -t squeeze-backports salt-minion
 }
 
 install_debian_60_git_deps() {
@@ -497,7 +515,7 @@ install_debian_60_git_deps() {
 }
 
 install_debian_60_git() {
-    apt-get -y install git
+    __apt_get_noinput git
     apt-get -y purge salt-minion
 
     __git_clone_and_checkout

@@ -222,7 +222,8 @@ __gather_linux_system_info() {
             echo redhat-release lsb-release
             ); do
 
-        [ ! -f "/etc/${rsource}" ] && continue
+        [ -L "/etc/${rsource}" ] && continue        # Don't follow symlinks
+        [ ! -f "/etc/${rsource}" ] && continue      # Does not exist
 
         n=$(echo ${rsource} | sed -e 's/[_-]release$//' -e 's/[_-]version$//')
         v=$(__parse_version_string "$((grep VERSION /etc/${rsource}; cat /etc/${rsource}) | grep '[0-9]' | sed -e 'q')")
@@ -311,12 +312,12 @@ __gather_system_info() {
 #-------------------------------------------------------------------------------
 __function_defined() {
     FUNC_NAME=$1
-    if [ ${DISTRO_NAME} = "centos" ]; then
+    if [ "${DISTRO_NAME}" = "centos" ]; then
         if typeset -f $FUNC_NAME &>/dev/null ; then
             echo " * INFO: Found function $FUNC_NAME"
             return 0
         fi
-    elif [ ${DISTRO_NAME} = "ubuntu" ]; then
+    elif [ "${DISTRO_NAME}" = "ubuntu" ]; then
         if $( type ${FUNC_NAME} | grep -q 'shell function' ); then
             echo " * INFO: Found function $FUNC_NAME"
             return 0
@@ -369,7 +370,7 @@ else
     DISTRO_VERSION_NO_DOTS="_$(echo $DISTRO_VERSION | tr -d '.')"
 fi
 # Simplify distro name naming on functions
-DISTRO_NAME_L=$(echo $DISTRO_NAME | tr '[:upper:]' '[:lower:]')
+DISTRO_NAME_L=$(echo $DISTRO_NAME | tr '[:upper:]' '[:lower:]' | sed 's/[^a-zA-Z0-9_ ]//g' | sed -e 's|\s|_|g')
 
 #---  FUNCTION  ----------------------------------------------------------------
 #          NAME:  __apt_get_noinput

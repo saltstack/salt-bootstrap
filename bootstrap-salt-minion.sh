@@ -398,10 +398,17 @@ __apt_get_noinput() {
 #
 #   To install salt, which, of course, is required, one of:
 #       1. install_<distro>_<distro_version>_<install_type>
-#       1. install_<distro>_<install_type>
+#       2. install_<distro>_<install_type>
 #
+#   Optionally, define a minion configuration function, which will be called if
+#   the -c|config-dir option is passed. One of:
+#       1. config_<distro>_<distro_version>_<install_type>_minion
+#       2. config_<distro>_<distro_version>_minion
+#       3. config_<distro>_<install_type>_minion
+#       4. config_<distro>_minion
+#       5. config_minion [THIS ONE IS ALREADY DEFINED AS THE DEFAULT]
 #
-#   And optionally, define a post install function, one of:
+#   Also optionally, define a post install function, one of:
 #       1. install_<distro>_<distro_versions>_<install_type>_post
 #       2. install_<distro>_<distro_versions>_post
 #       3. install_<distro>_<install_type>_post

@@ -45,6 +45,7 @@ usage() {
   Options:
   -h|help       Display this message
   -v|version    Display script version
+  -c|config-dir Temporary minion configuration directory
 EOT
 }   # ----------  end of function usage  ----------
 
@@ -52,13 +53,14 @@ EOT
 #  Handle command line arguments
 #-----------------------------------------------------------------------
 
-while getopts ":hv" opt
+while getopts ":hvc:" opt
 do
   case $opt in
 
-    h|help     )  usage; exit 0   ;;
+    h|help          )  usage; exit 0   ;;
 
-    v|version  )  echo "$0 -- Version $ScriptVersion"; exit 0   ;;
+    v|version       )  echo "$0 -- Version $ScriptVersion"; exit 0   ;;
+    c|config-dir    )  CONFIG_DIR=$OPTARG ;;
 
     \? )  echo "\n  Option does not exist : $OPTARG\n"
           usage; exit 1   ;;
@@ -743,6 +745,44 @@ install_freebsd_git_post() {
 ##############################################################################
 
 
+##############################################################################
+#
+#   Default minion configuration function. Matches ANY distribution as long as
+# the -c options is passed.
+#
+config_minion() {
+    # If the configuration directory is not passed, return
+    [ -z "$CONFIG_DIR" ] && return
+    # If the configuration directory does not exist, error out
+    if [ ! -d "$CONFIG_DIR" ]; then
+        echo " * The configuration directory ${CONFIG_DIR} does not exist."
+        exit 1
+    fi
+
+    # Let's create the necessary directories
+    [ -d /etc/salt ] || mkdir /etc/salt
+    [ -d /etc/salt/pki ] || mkdir /etc/salt/pki && chmod 700 /etc/salt/pki
+
+    # Copy the minions configuration if found
+    [ -f "$CONFIG_DIR/minion" ] && mv "$CONFIG_DIR/minion" /etc/salt
+
+    # Copy the minion's keys if found
+    if [ -f "$CONFIG_DIR/minion.pem" ]; then
+        mv "$CONFIG_DIR/minion.pem" /etc/salt/pki
+        chmod 400 /etc/salt/pki/minion.pem
+    fi
+    if [ -f "$CONFIG_DIR/minion.pub" ]; then
+        mv "$CONFIG_DIR/minion.pub" /etc/salt/pki
+        chmod 664 /etc/salt/pki/minion.pub
+    fi
+}
+#
+#  Ended Default Configuration function
+#
+##############################################################################
+
+
+
 #=============================================================================
 # LET'S PROCEED WITH OUR INSTALLATION
 #=============================================================================
@@ -774,7 +814,25 @@ for FUNC_NAME in $INSTALL_FUNC_NAMES; do
 done
 
 
-# Let's get the dependencies install function
+# Let's get the minion config function
+if [ "x$CONFIG_DIR"!= "x" ]; then
+    CONFIG_FUNC_NAMES="config_${DISTRO_NAME_L}${DISTRO_VERSION_NO_DOTS}_${ITYPE}_minion"
+    CONFIG_FUNC_NAMES="$CONFIG_FUNC_NAMES config_${DISTRO_NAME_L}${DISTRO_VERSION_NO_DOTS}_minon"
+    CONFIG_FUNC_NAMES="$CONFIG_FUNC_NAMES config_${DISTRO_NAME_L}_${ITYPE}_minion"
+    CONFIG_FUNC_NAMES="$CONFIG_FUNC_NAMES config_${DISTRO_NAME_L}_minion"
+    CONFIG_FUNC_NAMES="$CONFIG_FUNC_NAMES config_minion"
+
+    CONFIG_MINION_FUNC="null"
+    for FUNC_NAME in $CONFIG_FUNC_NAMES; do
+        if __function_defined $FUNC_NAME; then
+            CONFIG_MINION_FUNC=$FUNC_NAME
+            break
+        fi
+    done
+fi
+
+
+# Let's get the post install function
 POST_FUNC_NAMES="install_${DISTRO_NAME_L}${DISTRO_VERSION_NO_DOTS}_${ITYPE}_post"
 POST_FUNC_NAMES="$POST_FUNC_NAMES install_${DISTRO_NAME_L}${DISTRO_VERSION_NO_DOTS}_post"
 POST_FUNC_NAMES="$POST_FUNC_NAMES install_${DISTRO_NAME_L}_${ITYPE}_post"
@@ -814,6 +872,16 @@ $INSTALL_FUNC
 if [ $? -ne 0 ]; then
     echo " * Failed to run ${INSTALL_FUNC}()!!!"
     exit 1
+fi
+
+# Configure Salt
+if [ "x$CONFIG_DIR"!= "x" -a "$CONFIG_MINION_FUNC" != "null" ]; then
+    echo " * Running ${CONFIG_MINION_FUNC}()"
+    $CONFIG_MINION_FUNC
+    if [ $? -ne 0 ]; then
+        echo " * Failed to run ${CONFIG_MINION_FUNC}()!!!"
+        exit 1
+    fi
 fi
 
 # Run any post install function

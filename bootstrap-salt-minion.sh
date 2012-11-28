@@ -168,7 +168,11 @@ exec 2>$LOGPIPE
 #   DESCRIPTION:  Discover hardware information
 #-------------------------------------------------------------------------------
 __gather_hardware_info() {
-    CPU_VENDOR_ID=$(cat /proc/cpuinfo | grep vendor_id | head -n 1 | awk '{print $3}')
+    if [ -f /proc/cpuinfo ]; then
+        CPU_VENDOR_ID=$(cat /proc/cpuinfo | grep vendor_id | head -n 1 | awk '{print $3}')
+    else
+        CPU_VENDOR_ID=$(sysctl -a | grep hw.model | sed 's|hw.model: ||g')
+    fi
     CPU_VENDOR_ID_L=$( echo $CPU_VENDOR_ID | tr '[:upper:]' '[:lower:]' )
     CPU_ARCH=$(uname -m 2>/dev/null || uname -p 2>/dev/null || echo "unknown")
     CPU_ARCH_L=$( echo $CPU_ARCH | tr '[:upper:]' '[:lower:]' )

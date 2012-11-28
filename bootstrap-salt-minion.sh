@@ -105,22 +105,6 @@ if [ $(whoami) != "root" ] ; then
     exit 1
 fi
 
-# Define our logging file and pipe paths
-LOGFILE="/tmp/$(basename $0 | sed s/.sh/.log/g )"
-LOGPIPE="/tmp/$(basename $0 | sed s/.sh/.logpipe/g )"
-
-# Create our logging pipe
-mknod $LOGPIPE p
-
-# What ever is written to the logpipe gets written to the logfile
-tee < $LOGPIPE $LOGFILE &
-
-# Close STDOUT, reopen it directing it to the logpipe
-exec 1>&-
-exec 1>$LOGPIPE
-# Close STDERR, reopen it directing it to the logpipe
-exec 2>&-
-exec 2>$LOGPIPE
 
 #---  FUNCTION  ----------------------------------------------------------------
 #          NAME:  __exit_cleanup
@@ -135,6 +119,9 @@ __exit_cleanup() {
 
     # Kill tee when exiting, CentOS, at least requires this
     TEE_PID=$(ps ax | grep tee | grep $LOGFILE | awk '{print $1}')
+
+    [ "x$TEE_PID" = "x" ] && exit $EXIT_CODE
+
     echo " * Killing logging pipe tee's with pid(s): $TEE_PID"
 
     # We need to trap errors since killing tee will cause a 127 errno
@@ -144,7 +131,8 @@ __exit_cleanup() {
         # Exit with the "original" exit code, not the trapped code
         exit $EXIT_CODE
     }
-    trap "__trap_errors" ERR
+    # Bash understands ERR trap signal, FreeBSD does not
+    trap "__trap_errors" ERR >/dev/null 2>&1 || trap "__trap_errors" INT KILL QUIT
 
     # Now we're "good" to kill tee
     kill -TERM $TEE_PID
@@ -155,12 +143,39 @@ __exit_cleanup() {
 trap "__exit_cleanup" EXIT
 
 
+# Define our logging file and pipe paths
+LOGFILE="/tmp/$(basename $0 | sed s/.sh/.log/g )"
+LOGPIPE="/tmp/$(basename $0 | sed s/.sh/.logpipe/g )"
+
+# Create our logging pipe
+# On FreeBSD we have to use mkfifo instead of mknod
+mknod $LOGPIPE p >/dev/null 2>&1 || mkfifo $LOGPIPE >/dev/null 2>&1
+if [ $? -ne 0 ]; then
+    echo " * Failed to create the named pipe required to log"
+    exit 1
+fi
+
+# What ever is written to the logpipe gets written to the logfile
+tee < $LOGPIPE $LOGFILE &
+
+# Close STDOUT, reopen it directing it to the logpipe
+exec 1>&-
+exec 1>$LOGPIPE
+# Close STDERR, reopen it directing it to the logpipe
+exec 2>&-
+exec 2>$LOGPIPE
+
+
 #---  FUNCTION  ----------------------------------------------------------------
 #          NAME:  __gather_hardware_info
 #   DESCRIPTION:  Discover hardware information
 #-------------------------------------------------------------------------------
 __gather_hardware_info() {
-    CPU_VENDOR_ID=$(cat /proc/cpuinfo | grep vendor_id | head -n 1 | awk '{print $3}')
+    if [ -f /proc/cpuinfo ]; then
+        CPU_VENDOR_ID=$( cat /proc/cpuinfo | grep vendor_id | head -n 1 | awk '{print $3}' )
+    else
+        CPU_VENDOR_ID=$( sysctl -n hw.model )
+    fi
     CPU_VENDOR_ID_L=$( echo $CPU_VENDOR_ID | tr '[:upper:]' '[:lower:]' )
     CPU_ARCH=$(uname -m 2>/dev/null || uname -p 2>/dev/null || echo "unknown")
     CPU_ARCH_L=$( echo $CPU_ARCH | tr '[:upper:]' '[:lower:]' )
@@ -229,7 +244,7 @@ __gather_linux_system_info() {
         [ ! -f "/etc/${rsource}" ] && continue      # Does not exist
 
         n=$(echo ${rsource} | sed -e 's/[_-]release$//' -e 's/[_-]version$//')
-        v=$(__parse_version_string "$((grep VERSION /etc/${rsource}; cat /etc/${rsource}) | grep '[0-9]' | sed -e 'q')")
+        v=$( __parse_version_string "$( (grep VERSION /etc/${rsource}; cat /etc/${rsource}) | grep '[0-9]' | sed -e 'q' )" )
         case $(echo ${n} | tr '[:upper:]' '[:lower:]') in
             redhat )
                 if [ ".$(egrep '(Red Hat Enterprise Linux|CentOS)' /etc/${rsource})" != . ]; then
@@ -279,7 +294,7 @@ __gather_sunos_system_info() {
 #-------------------------------------------------------------------------------
 __gather_bsd_system_info() {
     DISTRO_NAME=${OS_NAME}
-    DISTRO_VERSION=$(echo "${OS_VERSION}" | sed -e 's;[()];;' -e 's/\(-.*\)$/[\1]/')
+    DISTRO_VERSION=$(echo "${OS_VERSION}" | sed -e 's;[()];;' -e 's/-.*$//')
 }
 
 
@@ -327,13 +342,13 @@ __function_defined() {
         fi
     # Last resorts try POSIXLY_CORRECT or not
     elif test -n "${POSIXLY_CORRECT+yes}"; then
-        if typeset -f $FUNC_NAME &>/dev/null ; then
+        if typeset -f $FUNC_NAME >/dev/null 2>&1 ; then
             echo " * INFO: Found function $FUNC_NAME"
             return 0
         fi
     else
         # Arch linux seems to fall here
-        if $( type ${FUNC_NAME}  &>/dev/null ) ; then
+        if $( type ${FUNC_NAME}  >/dev/null 2>&1 ) ; then
             echo " * INFO: Found function $FUNC_NAME"
             return 0
         fi
@@ -360,7 +375,8 @@ __git_clone_and_checkout() {
 
 
 echo " * System Information:"
-echo "     CPU:          ${CPU_VENDOR_ID} ${CPU_ARCH}"
+echo "     CPU:          ${CPU_VENDOR_ID}"
+echo "     CPU Arch:     ${CPU_ARCH}"
 echo "     OS Name:      ${OS_NAME}"
 echo "     OS Version:   ${OS_VERSION}"
 echo "     Distribution: ${DISTRO_NAME} ${DISTRO_VERSION}"
@@ -373,7 +389,7 @@ else
     DISTRO_VERSION_NO_DOTS="_$(echo $DISTRO_VERSION | tr -d '.')"
 fi
 # Simplify distro name naming on functions
-DISTRO_NAME_L=$(echo $DISTRO_NAME | tr '[:upper:]' '[:lower:]' | sed 's/[^a-zA-Z0-9_ ]//g' | sed -e 's|\s|_|g')
+DISTRO_NAME_L=$(echo $DISTRO_NAME | tr '[:upper:]' '[:lower:]' | sed 's/[^a-zA-Z0-9_ ]//g' | sed -e 's|[:space:]+|_|g')
 
 #---  FUNCTION  ----------------------------------------------------------------
 #          NAME:  __apt_get_noinput
@@ -689,15 +705,17 @@ install_arch_post() {
 #
 #   FreeBSD Install Functions
 #
-install_freebsd_9_stable_deps() {
-    if [ $CPU_VENDOR_ID_L = "AuthenticAMD" -a $CPU_ARCH_L = "x86_64" ]; then
+install_freebsd_90_stable_deps() {
+    if [ "$CPU_VENDOR_ID_L" = "AuthenticAMD" -a $CPU_ARCH_L = "x86_64" ]; then
         local ARCH="amd64"
-    elif [ $CPU_VENDOR_ID_L = "GenuineIntel" -a $CPU_ARCH_L = "x86_64" ]; then
+    elif [ "$CPU_VENDOR_ID_L" = "GenuineIntel" -a $CPU_ARCH_L = "x86_64" ]; then
         local ARCH="x86:64"
-    elif [ $CPU_VENDOR_ID_L = "GenuineIntel" -a $CPU_ARCH_L = "i386" ]; then
+    elif [ "$CPU_VENDOR_ID_L" = "GenuineIntel" -a $CPU_ARCH_L = "i386" ]; then
         local ARCH="i386"
-    elif [ $CPU_VENDOR_ID_L = "GenuineIntel" -a $CPU_ARCH_L = "i686" ]; then
+    elif [ "$CPU_VENDOR_ID_L" = "GenuineIntel" -a $CPU_ARCH_L = "i686" ]; then
         local ARCH="x86:32"
+    else
+        local ARCH=$CPU_ARCH
     fi
 
     portsnap fetch extract update
@@ -705,18 +723,20 @@ install_freebsd_9_stable_deps() {
     make install clean
     cd
     /usr/local/sbin/pkg2ng
-    echo 'PACKAGESITE: http://pkgbeta.freebsd.org/freebsd-9-${ARCH}/latest' > /usr/local/etc/pkg.conf
+    echo "PACKAGESITE: http://pkgbeta.freebsd.org/freebsd-9-${ARCH}/latest" > /usr/local/etc/pkg.conf
 }
 
 install_freebsd_git_deps() {
-    if [ $CPU_VENDOR_ID_L = "AuthenticAMD" -a $CPU_ARCH_L = "x86_64" ]; then
+    if [ "$CPU_VENDOR_ID_L" = "AuthenticAMD" -a $CPU_ARCH_L = "x86_64" ]; then
         local ARCH="amd64"
-    elif [ $CPU_VENDOR_ID_L = "GenuineIntel" -a $CPU_ARCH_L = "x86_64" ]; then
+    elif [ "$CPU_VENDOR_ID_L" = "GenuineIntel" -a $CPU_ARCH_L = "x86_64" ]; then
         local ARCH="x86:64"
-    elif [ $CPU_VENDOR_ID_L = "GenuineIntel" -a $CPU_ARCH_L = "i386" ]; then
+    elif [ "$CPU_VENDOR_ID_L" = "GenuineIntel" -a $CPU_ARCH_L = "i386" ]; then
         local ARCH="i386"
-    elif [ $CPU_VENDOR_ID_L = "GenuineIntel" -a $CPU_ARCH_L = "i686" ]; then
+    elif [ "$CPU_VENDOR_ID_L" = "GenuineIntel" -a $CPU_ARCH_L = "i686" ]; then
         local ARCH="x86:32"
+    else
+        local ARCH=$CPU_ARCH
     fi
 
     portsnap fetch extract update
@@ -724,11 +744,11 @@ install_freebsd_git_deps() {
     make install clean
     cd
     /usr/local/sbin/pkg2ng
-    echo 'PACKAGESITE: http://pkgbeta.freebsd.org/freebsd-9-${ARCH}/latest' > /usr/local/etc/pkg.conf
+    echo "PACKAGESITE: http://pkgbeta.freebsd.org/freebsd-9-${ARCH}/latest" > /usr/local/etc/pkg.conf
 }
 
-install_freebsd_9_stable() {
-    pkg install -y salt
+install_freebsd_90_stable() {
+    /usr/local/sbin/pkg install -y salt
 }
 
 install_freebsd_git() {
@@ -740,7 +760,7 @@ install_freebsd_git() {
     /usr/local/bin/python setup.py install
 }
 
-install_freebsd_9_stable_post() {
+install_freebsd_90_stable_post() {
     salt-minion -d
 }
 

@@ -61,7 +61,7 @@ do
     h|help          )  usage; exit 0   ;;
 
     v|version       )  echo "$0 -- Version $ScriptVersion"; exit 0   ;;
-    c|config-dir    )  TEMP_CONFIG_DIR=$OPTARG ;;
+    c|config-dir    )  TEMP_CONFIG_DIR="$OPTARG" ;;
 
     \? )  echo "\n  Option does not exist : $OPTARG\n"
           usage; exit 1   ;;
@@ -87,7 +87,7 @@ if [ $ITYPE = "git" ]; then
     if [ "$#" -eq 0 ];then
         GIT_REV="master"
     else
-        GIT_REV=$1
+        GIT_REV="$1"
         shift
     fi
 fi
@@ -843,6 +843,7 @@ done
 
 
 # Let's get the minion config function
+CONFIG_MINION_FUNC="null"
 if [ "$TEMP_CONFIG_DIR" != "null" ]; then
     CONFIG_FUNC_NAMES="config_${DISTRO_NAME_L}${DISTRO_VERSION_NO_DOTS}_${ITYPE}_minion"
     CONFIG_FUNC_NAMES="$CONFIG_FUNC_NAMES config_${DISTRO_NAME_L}${DISTRO_VERSION_NO_DOTS}_minon"
@@ -850,7 +851,6 @@ if [ "$TEMP_CONFIG_DIR" != "null" ]; then
     CONFIG_FUNC_NAMES="$CONFIG_FUNC_NAMES config_${DISTRO_NAME_L}_minion"
     CONFIG_FUNC_NAMES="$CONFIG_FUNC_NAMES config_minion"
 
-    CONFIG_MINION_FUNC="null"
     for FUNC_NAME in $CONFIG_FUNC_NAMES; do
         if __function_defined $FUNC_NAME; then
             CONFIG_MINION_FUNC=$FUNC_NAME

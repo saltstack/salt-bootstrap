@@ -794,7 +794,7 @@ if [ $DEPS_INSTALL_FUNC = "null" ]; then
     exit 1
 fi
 
-if [ $DEPS_INSTALL_FUNC = "null" ]; then
+if [ $INSTALL_FUNC = "null" ]; then
     echo " * ERROR: No installation function found. Exiting..."
     exit 1
 fi

@@ -291,7 +291,7 @@ __gather_sunos_system_info() {
 #-------------------------------------------------------------------------------
 __gather_bsd_system_info() {
     DISTRO_NAME=${OS_NAME}
-    DISTRO_VERSION=$(echo "${OS_VERSION}" | sed -e 's;[()];;' -e 's/\(-.*\)$/[\1]/')
+    DISTRO_VERSION=$(echo "${OS_VERSION}" | sed -e 's;[()];;' -e 's/-.*$//')
 }
 
 

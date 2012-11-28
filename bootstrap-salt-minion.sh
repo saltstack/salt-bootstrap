@@ -102,22 +102,6 @@ if [ $(whoami) != "root" ] ; then
     exit 1
 fi
 
-# Define our logging file and pipe paths
-LOGFILE="/tmp/$(basename $0 | sed s/.sh/.log/g )"
-LOGPIPE="/tmp/$(basename $0 | sed s/.sh/.logpipe/g )"
-
-# Create our logging pipe
-mknod $LOGPIPE p
-
-# What ever is written to the logpipe gets written to the logfile
-tee < $LOGPIPE $LOGFILE &
-
-# Close STDOUT, reopen it directing it to the logpipe
-exec 1>&-
-exec 1>$LOGPIPE
-# Close STDERR, reopen it directing it to the logpipe
-exec 2>&-
-exec 2>$LOGPIPE
 
 #---  FUNCTION  ----------------------------------------------------------------
 #          NAME:  __exit_cleanup
@@ -132,6 +116,9 @@ __exit_cleanup() {
 
     # Kill tee when exiting, CentOS, at least requires this
     TEE_PID=$(ps ax | grep tee | grep $LOGFILE | awk '{print $1}')
+
+    [ "x$TEE_PID" == "x" ] && exit $EXIT_CODE
+
     echo " * Killing logging pipe tee's with pid(s): $TEE_PID"
 
     # We need to trap errors since killing tee will cause a 127 errno
@@ -150,6 +137,28 @@ __exit_cleanup() {
     exit $EXIT_CODE
 }
 trap "__exit_cleanup" EXIT
+
+
+# Define our logging file and pipe paths
+LOGFILE="/tmp/$(basename $0 | sed s/.sh/.log/g )"
+LOGPIPE="/tmp/$(basename $0 | sed s/.sh/.logpipe/g )"
+
+# Create our logging pipe
+mknod $LOGPIPE p >/dev/null 2>&1 || mkfifo $LOGPIPE >/dev/null 2>&1
+if [ $? -ne 0 ]; then
+    echo " * Failed to create the named pipe required to log"
+    exit 1
+fi
+
+# What ever is written to the logpipe gets written to the logfile
+tee < $LOGPIPE $LOGFILE &
+
+# Close STDOUT, reopen it directing it to the logpipe
+exec 1>&-
+exec 1>$LOGPIPE
+# Close STDERR, reopen it directing it to the logpipe
+exec 2>&-
+exec 2>$LOGPIPE
 
 
 #---  FUNCTION  ----------------------------------------------------------------

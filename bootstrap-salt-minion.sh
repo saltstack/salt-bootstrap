@@ -169,9 +169,9 @@ exec 2>$LOGPIPE
 #-------------------------------------------------------------------------------
 __gather_hardware_info() {
     if [ -f /proc/cpuinfo ]; then
-        CPU_VENDOR_ID=$(cat /proc/cpuinfo | grep vendor_id | head -n 1 | awk '{print $3}')
+        CPU_VENDOR_ID=$( cat /proc/cpuinfo | grep vendor_id | head -n 1 | awk '{print $3}' )
     else
-        CPU_VENDOR_ID=$(sysctl -a | grep hw.model | sed 's|hw.model: ||g')
+        CPU_VENDOR_ID=$( sysctl -n hw.model )
     fi
     CPU_VENDOR_ID_L=$( echo $CPU_VENDOR_ID | tr '[:upper:]' '[:lower:]' )
     CPU_ARCH=$(uname -m 2>/dev/null || uname -p 2>/dev/null || echo "unknown")
@@ -372,7 +372,8 @@ __git_clone_and_checkout() {
 
 
 echo " * System Information:"
-echo "     CPU:          ${CPU_VENDOR_ID} ${CPU_ARCH}"
+echo "     CPU:          ${CPU_VENDOR_ID}"
+echo "     CPU Arch:     ${CPU_ARCH}"
 echo "     OS Name:      ${OS_NAME}"
 echo "     OS Version:   ${OS_VERSION}"
 echo "     Distribution: ${DISTRO_NAME} ${DISTRO_VERSION}"
@@ -411,7 +412,7 @@ __apt_get_noinput() {
 #
 #   To install salt, which, of course, is required, one of:
 #       1. install_<distro>_<distro_version>_<install_type>
-#       1. install_<distro>_<install_type>
+#       2. install_<distro>_<install_type>
 #
 #
 #   And optionally, define a post install function, one of:
@@ -694,15 +695,17 @@ install_arch_post() {
 #
 #   FreeBSD Install Functions
 #
-install_freebsd_9_stable_deps() {
-    if [ $CPU_VENDOR_ID_L = "AuthenticAMD" -a $CPU_ARCH_L = "x86_64" ]; then
+install_freebsd_90_stable_deps() {
+    if [ "$CPU_VENDOR_ID_L" = "AuthenticAMD" -a $CPU_ARCH_L = "x86_64" ]; then
         local ARCH="amd64"
-    elif [ $CPU_VENDOR_ID_L = "GenuineIntel" -a $CPU_ARCH_L = "x86_64" ]; then
+    elif [ "$CPU_VENDOR_ID_L" = "GenuineIntel" -a $CPU_ARCH_L = "x86_64" ]; then
         local ARCH="x86:64"
-    elif [ $CPU_VENDOR_ID_L = "GenuineIntel" -a $CPU_ARCH_L = "i386" ]; then
+    elif [ "$CPU_VENDOR_ID_L" = "GenuineIntel" -a $CPU_ARCH_L = "i386" ]; then
         local ARCH="i386"
-    elif [ $CPU_VENDOR_ID_L = "GenuineIntel" -a $CPU_ARCH_L = "i686" ]; then
+    elif [ "$CPU_VENDOR_ID_L" = "GenuineIntel" -a $CPU_ARCH_L = "i686" ]; then
         local ARCH="x86:32"
+    else
+        local ARCH=$CPU_ARCH
     fi
 
     portsnap fetch extract update
@@ -710,18 +713,20 @@ install_freebsd_9_stable_deps() {
     make install clean
     cd
     /usr/local/sbin/pkg2ng
-    echo 'PACKAGESITE: http://pkgbeta.freebsd.org/freebsd-9-${ARCH}/latest' > /usr/local/etc/pkg.conf
+    echo "PACKAGESITE: http://pkgbeta.freebsd.org/freebsd-9-${ARCH}/latest" > /usr/local/etc/pkg.conf
 }
 
 install_freebsd_git_deps() {
-    if [ $CPU_VENDOR_ID_L = "AuthenticAMD" -a $CPU_ARCH_L = "x86_64" ]; then
+    if [ "$CPU_VENDOR_ID_L" = "AuthenticAMD" -a $CPU_ARCH_L = "x86_64" ]; then
         local ARCH="amd64"
-    elif [ $CPU_VENDOR_ID_L = "GenuineIntel" -a $CPU_ARCH_L = "x86_64" ]; then
+    elif [ "$CPU_VENDOR_ID_L" = "GenuineIntel" -a $CPU_ARCH_L = "x86_64" ]; then
         local ARCH="x86:64"
-    elif [ $CPU_VENDOR_ID_L = "GenuineIntel" -a $CPU_ARCH_L = "i386" ]; then
+    elif [ "$CPU_VENDOR_ID_L" = "GenuineIntel" -a $CPU_ARCH_L = "i386" ]; then
         local ARCH="i386"
-    elif [ $CPU_VENDOR_ID_L = "GenuineIntel" -a $CPU_ARCH_L = "i686" ]; then
+    elif [ "$CPU_VENDOR_ID_L" = "GenuineIntel" -a $CPU_ARCH_L = "i686" ]; then
         local ARCH="x86:32"
+    else
+        local ARCH=$CPU_ARCH
     fi
 
     portsnap fetch extract update
@@ -729,11 +734,11 @@ install_freebsd_git_deps() {
     make install clean
     cd
     /usr/local/sbin/pkg2ng
-    echo 'PACKAGESITE: http://pkgbeta.freebsd.org/freebsd-9-${ARCH}/latest' > /usr/local/etc/pkg.conf
+    echo "PACKAGESITE: http://pkgbeta.freebsd.org/freebsd-9-${ARCH}/latest" > /usr/local/etc/pkg.conf
 }
 
-install_freebsd_9_stable() {
-    pkg install -y salt
+install_freebsd_90_stable() {
+    /usr/local/sbin/pkg install -y salt
 }
 
 install_freebsd_git() {
@@ -745,7 +750,7 @@ install_freebsd_git() {
     /usr/local/bin/python setup.py install
 }
 
-install_freebsd_9_stable_post() {
+install_freebsd_90_stable_post() {
     salt-minion -d
 }
 

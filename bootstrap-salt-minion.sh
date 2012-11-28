@@ -9,7 +9,7 @@
 #
 #          BUGS: https://github.com/saltstack/salty-vagrant/issues
 #        AUTHOR: Pedro Algarvio (s0undt3ch), pedro@algarvio.me
-#                Alec Koumjian (akoumjian)
+#                Alec Koumjian (akoumjian), akoumjian@gmail.com
 #  ORGANIZATION: Salt Stack (saltstack.org)
 #       CREATED: 10/15/2012 09:49:37 PM WEST
 #===============================================================================

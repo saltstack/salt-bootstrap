@@ -117,7 +117,7 @@ __exit_cleanup() {
     # Kill tee when exiting, CentOS, at least requires this
     TEE_PID=$(ps ax | grep tee | grep $LOGFILE | awk '{print $1}')
 
-    [ "x$TEE_PID" == "x" ] && exit $EXIT_CODE
+    [ "x$TEE_PID" = "x" ] && exit $EXIT_CODE
 
     echo " * Killing logging pipe tee's with pid(s): $TEE_PID"
 
@@ -128,7 +128,8 @@ __exit_cleanup() {
         # Exit with the "original" exit code, not the trapped code
         exit $EXIT_CODE
     }
-    trap "__trap_errors" ERR
+    # Bash understands ERR trap signal, FreeBSD does not
+    trap "__trap_errors" ERR >/dev/null 2>&1 || trap "__trap_errors" INT KILL QUIT
 
     # Now we're "good" to kill tee
     kill -TERM $TEE_PID
@@ -144,6 +145,7 @@ LOGFILE="/tmp/$(basename $0 | sed s/.sh/.log/g )"
 LOGPIPE="/tmp/$(basename $0 | sed s/.sh/.logpipe/g )"
 
 # Create our logging pipe
+# On FreeBSD we have to use mkfifo instead of mknod
 mknod $LOGPIPE p >/dev/null 2>&1 || mkfifo $LOGPIPE >/dev/null 2>&1
 if [ $? -ne 0 ]; then
     echo " * Failed to create the named pipe required to log"

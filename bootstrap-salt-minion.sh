@@ -339,13 +339,13 @@ __function_defined() {
         fi
     # Last resorts try POSIXLY_CORRECT or not
     elif test -n "${POSIXLY_CORRECT+yes}"; then
-        if typeset -f $FUNC_NAME &>/dev/null ; then
+        if typeset -f $FUNC_NAME >/dev/null 2>&1 ; then
             echo " * INFO: Found function $FUNC_NAME"
             return 0
         fi
     else
         # Arch linux seems to fall here
-        if $( type ${FUNC_NAME}  &>/dev/null ) ; then
+        if $( type ${FUNC_NAME}  >/dev/null 2>&1 ) ; then
             echo " * INFO: Found function $FUNC_NAME"
             return 0
         fi

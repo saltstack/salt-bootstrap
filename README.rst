@@ -86,14 +86,12 @@ Below is an example for Ubuntu Oneiric:
   install_ubuntu_1110_deps() {
       apt-get update
       apt-get -y install python-software-properties
-      add-apt-repository -y 'deb http://us.archive.ubuntu.com/ubuntu/ oneiric 
-      universe'
+      add-apt-repository -y 'deb http://us.archive.ubuntu.com/ubuntu/ oneiric universe'
       add-apt-repository -y ppa:saltstack/salt
   }
 
   install_ubuntu_1110_post() {
-      add-apt-repository -y --remove 'deb http://us.archive.ubuntu.com/ubuntu/ 
-      oneiric universe'
+      add-apt-repository -y --remove 'deb http://us.archive.ubuntu.com/ubuntu/ oneiric universe'
   }
 
   install_ubuntu_stable() {
@@ -122,4 +120,4 @@ Supported Operating Systems
 
 
 .. _`Salt`: http://saltstack.org/
-.. vim: fenc=utf-8 spell spl=en cc=80 tw=79 fo=want sts=2 sw=2 et
+.. vim: fenc=utf-8 spell spl=en cc=100 tw=99 fo=want sts=2 sw=2 et

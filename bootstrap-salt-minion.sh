@@ -15,6 +15,7 @@
 #===============================================================================
 set -o nounset                              # Treat unset variables as an error
 ScriptVersion="1.0"
+ScriptName="bootstrap-salt-minion.sh"
 
 #===============================================================================
 #  LET THE BLACK MAGIC BEGIN!!!!
@@ -27,7 +28,7 @@ ScriptVersion="1.0"
 usage() {
     cat << EOT
 
-  Usage :  ${0##/*/} [options] <install-type> <install-type-args>
+  Usage :  ${ScriptName} [options] <install-type> <install-type-args>
 
   Installation types:
     - stable (default)
@@ -35,12 +36,12 @@ usage() {
     - git
 
   Examples:
-    $ ${0##/*/}
-    $ ${0##/*/} stable
-    $ ${0##/*/} daily
-    $ ${0##/*/} git
-    $ ${0##/*/} git develop
-    $ ${0##/*/} git 8c3fadf15ec183e5ce8c63739850d543617e4357
+    $ ${ScriptName}
+    $ ${ScriptName} stable
+    $ ${ScriptName} daily
+    $ ${ScriptName} git
+    $ ${ScriptName} git develop
+    $ ${ScriptName} git 8c3fadf15ec183e5ce8c63739850d543617e4357
 
   Options:
   -h|help       Display this message
@@ -63,17 +64,29 @@ do
     v|version       )  echo "$0 -- Version $ScriptVersion"; exit 0   ;;
     c|config-dir    )  TEMP_CONFIG_DIR="$OPTARG" ;;
 
-    \? )  echo "\n  Option does not exist : $OPTARG\n"
-          usage; exit 1   ;;
+    \?              )  echo "\n  Option does not exist : $OPTARG\n"
+                       usage; exit 1   ;;
 
   esac    # --- end of case ---
 done
 shift $(($OPTIND-1))
 
+__check_unparsed_options() {
+    shellopts="$1"
+    unparsed_options=$( echo "$shellopts" | grep -e '[\-|\-\-][a-z]' )
+    if [ "x$unparsed_options" != "x" ]; then
+        usage
+        echo
+        echo " * ERROR: options come before install arguments"
+        echo
+        exit 1
+    fi
+}
 # Define installation type
 if [ "$#" -eq 0 ];then
     ITYPE="stable"
 else
+    __check_unparsed_options "$*"
     ITYPE=$1
     shift
 fi
@@ -87,12 +100,14 @@ if [ $ITYPE = "git" ]; then
     if [ "$#" -eq 0 ];then
         GIT_REV="master"
     else
+        __check_unparsed_options "$*"
         GIT_REV="$1"
         shift
     fi
 fi
 
 if [ "$#" -gt 0 ]; then
+    __check_unparsed_options "$*"
     usage
     echo
     echo " * ERROR: Too many arguments."
@@ -144,8 +159,8 @@ trap "__exit_cleanup" EXIT
 
 
 # Define our logging file and pipe paths
-LOGFILE="/tmp/$(basename $0 | sed s/.sh/.log/g )"
-LOGPIPE="/tmp/$(basename $0 | sed s/.sh/.logpipe/g )"
+LOGFILE="/tmp/$( echo $ScriptName | sed s/.sh/.log/g )"
+LOGPIPE="/tmp/$( echo $ScriptName | sed s/.sh/.logpipe/g )"
 
 # Create our logging pipe
 # On FreeBSD we have to use mkfifo instead of mknod

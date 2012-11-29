@@ -8,11 +8,38 @@ process is handled by this shell script ``bootstrap-salt-minion.sh``.  This
 script runs through a series of checks to determine operating system type and 
 version to then install the `Salt`_ binaries using the appropriate methods.
 
+
+One Line Bootstrap
+------------------
+
+If you're looking for the *one-liner* to install salt...
+
+For example, using ``curl`` to install latest git:
+
+.. code:: console
+
+  curl -L http://bootstrap.saltstack.org | sudo sh -s git develop
+
+
+Or, using ``wget`` to install your distribution's stable packages:
+
+.. code:: console
+
+  wget -O - http://bootstrap.saltstack.org | sudo sh
+
+If you have certificate issues using ``wget`` try the following:
+
+.. code:: console
+
+  wget --no-check-certificate -O - http://bootstrap.saltstack.org | sudo sh
+
+
+
 Adding support for other operating systems
 ------------------------------------------
 In order to install salt for a distribution you need to define:
 
-* To Install Dependencies, which is required, one of:
+1. To Install Dependencies, which is required, one of:
 
 .. code:: bash
 
@@ -22,7 +49,7 @@ In order to install salt for a distribution you need to define:
   install_<distro>_deps
 
 
-* To install salt, which, of course, is required, one of:
+2. To install salt, which, of course, is required, one of:
 
 .. code:: bash
 
@@ -30,8 +57,8 @@ In order to install salt for a distribution you need to define:
   install_<distro>_<install_type>
 
 
-* Optionally, define a minion configuration function, which will be called if 
-  the ``-c|config-dir`` option is passed. One of:
+3. Optionally, define a minion configuration function, which will be called if 
+   the ``-c|config-dir`` option is passed. One of:
 
 .. code:: bash
 
@@ -42,7 +69,7 @@ In order to install salt for a distribution you need to define:
   config_minion [THIS ONE IS ALREADY DEFINED AS THE DEFAULT]
 
 
-* Also optionally, define a post install function, one of:
+4. Also optionally, define a post install function, one of:
 
 .. code:: bash
 
@@ -59,13 +86,13 @@ Below is an example for Ubuntu Oneiric:
   install_ubuntu_1110_deps() {
       apt-get update
       apt-get -y install python-software-properties
-      add-apt-repository -y 'deb http://us.archive.ubuntu.com/ubuntu/ oneiric       
+      add-apt-repository -y 'deb http://us.archive.ubuntu.com/ubuntu/ oneiric 
       universe'
       add-apt-repository -y ppa:saltstack/salt
   }
 
   install_ubuntu_1110_post() {
-      add-apt-repository -y --remove 'deb http://us.archive.ubuntu.com/ubuntu/       
+      add-apt-repository -y --remove 'deb http://us.archive.ubuntu.com/ubuntu/ 
       oneiric universe'
   }
 
@@ -92,28 +119,6 @@ Supported Operating Systems
 - FreeBSD 9.0
 
 
-One Line Bootstrap
-------------------
-
-Salt can be installed using a single line command.
-For example, using ``curl`` to install latest git:
-
-.. code:: console
-
-  curl -L http://bootstrap.saltstack.org | sudo sh -s git develop
-
-
-Or, using ``wget`` to install current distro's stable version:
-
-.. code:: console
-
-  wget -O - http://bootstrap.saltstack.org | sudo sh
-
-If you have certificate issues using ``wget`` try the following:
-
-.. code:: console
-
-  wget --no-check-certificate -O - http://bootstrap.saltstack.org | sudo sh
 
 
 .. _`Salt`: http://saltstack.org/

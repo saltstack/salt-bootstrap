@@ -14,7 +14,7 @@
 #       CREATED: 10/15/2012 09:49:37 PM WEST
 #===============================================================================
 set -o nounset                              # Treat unset variables as an error
-ScriptVersion="1.0"
+ScriptVersion="1.1"
 ScriptName="bootstrap-salt-minion.sh"
 
 #===============================================================================

@@ -73,7 +73,7 @@ shift $(($OPTIND-1))
 
 __check_unparsed_options() {
     shellopts="$1"
-    unparsed_options=$( echo "$shellopts" | grep -e '[\-|\-\-][a-z]' )
+    unparsed_options=$( echo "$shellopts" | grep -E '[-]+[[:alnum:]]' )
     if [ "x$unparsed_options" != "x" ]; then
         usage
         echo

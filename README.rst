@@ -12,23 +12,28 @@ Adding support for other operating systems
 ------------------------------------------
 In order to install salt for a distribution you need to define:
 
-* To Install Dependencies, which is required, one of
+* To Install Dependencies, which is required, one of:
 
-.. code:: sh
+.. code:: bash
+
   install_<distro>_<distro_version>_<install_type>_deps
   install_<distro>_<distro_version>_deps
   install_<distro>_<install_type>_deps
   install_<distro>_deps
 
 
-* To install salt, which, of course, is required, one of::
+* To install salt, which, of course, is required, one of:
+
+.. code:: bash
 
   install_<distro>_<distro_version>_<install_type>
   install_<distro>_<install_type>
 
 
 * Optionally, define a minion configuration function, which will be called if 
-  the ``-c|config-dir`` option is passed. One of::
+  the ``-c|config-dir`` option is passed. One of:
+
+.. code:: bash
 
   config_<distro>_<distro_version>_<install_type>_minion
   config_<distro>_<distro_version>_minion
@@ -37,7 +42,9 @@ In order to install salt for a distribution you need to define:
   config_minion [THIS ONE IS ALREADY DEFINED AS THE DEFAULT]
 
 
-* Also optionally, define a post install function, one of::
+* Also optionally, define a post install function, one of:
+
+.. code:: bash
 
   install_<distro>_<distro_versions>_<install_type>_post
   install_<distro>_<distro_versions>_post
@@ -89,16 +96,22 @@ One Line Bootstrap
 ------------------
 
 Salt can be installed using a single line command.
-For example, using ``curl`` to install latest git::
+For example, using ``curl`` to install latest git:
+
+.. code:: console
 
   curl -L http://bootstrap.saltstack.org | sudo sh -s git develop
 
 
-Or, using ``wget`` to install current distro's stable version::
+Or, using ``wget`` to install current distro's stable version:
+
+.. code:: console
 
   wget -O - http://bootstrap.saltstack.org | sudo sh
 
-If you have certificate issues using ``wget`` try the following::
+If you have certificate issues using ``wget`` try the following:
+
+.. code:: console
 
   wget --no-check-certificate -O - http://bootstrap.saltstack.org | sudo sh
 

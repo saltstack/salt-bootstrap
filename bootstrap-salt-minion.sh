@@ -63,17 +63,29 @@ do
     v|version       )  echo "$0 -- Version $ScriptVersion"; exit 0   ;;
     c|config-dir    )  TEMP_CONFIG_DIR="$OPTARG" ;;
 
-    \? )  echo "\n  Option does not exist : $OPTARG\n"
-          usage; exit 1   ;;
+    \?              )  echo "\n  Option does not exist : $OPTARG\n"
+                       usage; exit 1   ;;
 
   esac    # --- end of case ---
 done
 shift $(($OPTIND-1))
 
+__check_unparsed_options() {
+    shellopts="$1"
+    unparsed_options=$( echo "$shellopts" | grep -e '[\-|\-\-][a-z]' )
+    if [ "x$unparsed_options" != "x" ]; then
+        usage
+        echo
+        echo " * ERROR: options come before install arguments"
+        echo
+        exit 1
+    fi
+}
 # Define installation type
 if [ "$#" -eq 0 ];then
     ITYPE="stable"
 else
+    __check_unparsed_options "$*"
     ITYPE=$1
     shift
 fi
@@ -87,12 +99,14 @@ if [ $ITYPE = "git" ]; then
     if [ "$#" -eq 0 ];then
         GIT_REV="master"
     else
+        __check_unparsed_options "$*"
         GIT_REV="$1"
         shift
     fi
 fi
 
 if [ "$#" -gt 0 ]; then
+    __check_unparsed_options "$*"
     usage
     echo
     echo " * ERROR: Too many arguments."

@@ -144,8 +144,8 @@ trap "__exit_cleanup" EXIT
 
 
 # Define our logging file and pipe paths
-LOGFILE="/tmp/$(basename $0 | sed s/.sh/.log/g )"
-LOGPIPE="/tmp/$(basename $0 | sed s/.sh/.logpipe/g )"
+LOGFILE="/tmp/salt-bootstrap.log"
+LOGPIPE="/tmp/salt-bootstrap.logpipe"
 
 # Create our logging pipe
 # On FreeBSD we have to use mkfifo instead of mknod

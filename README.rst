@@ -47,11 +47,12 @@ In order to install salt for a distribution you need to define:
 
 Below is an example for Ubuntu Oneiric:
 
-.. code:: sh
+.. code:: bash
+
   install_ubuntu_1110_deps() {
       apt-get update
       apt-get -y install python-software-properties
-      add-apt-repository -y 'deb http://us.archive.ubuntu.com/ubuntu/ oneiric 
+      add-apt-repository -y 'deb http://us.archive.ubuntu.com/ubuntu/ oneiric       
       universe'
       add-apt-repository -y ppa:saltstack/salt
   }

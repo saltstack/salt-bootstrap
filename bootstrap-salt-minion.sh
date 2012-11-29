@@ -15,6 +15,7 @@
 #===============================================================================
 set -o nounset                              # Treat unset variables as an error
 ScriptVersion="1.0"
+ScriptName="bootstrap-salt-minion.sh"
 
 #===============================================================================
 #  LET THE BLACK MAGIC BEGIN!!!!
@@ -27,7 +28,7 @@ ScriptVersion="1.0"
 usage() {
     cat << EOT
 
-  Usage :  ${0##/*/} [options] <install-type> <install-type-args>
+  Usage :  ${ScriptName} [options] <install-type> <install-type-args>
 
   Installation types:
     - stable (default)
@@ -35,12 +36,12 @@ usage() {
     - git
 
   Examples:
-    $ ${0##/*/}
-    $ ${0##/*/} stable
-    $ ${0##/*/} daily
-    $ ${0##/*/} git
-    $ ${0##/*/} git develop
-    $ ${0##/*/} git 8c3fadf15ec183e5ce8c63739850d543617e4357
+    $ ${ScriptName}
+    $ ${ScriptName} stable
+    $ ${ScriptName} daily
+    $ ${ScriptName} git
+    $ ${ScriptName} git develop
+    $ ${ScriptName} git 8c3fadf15ec183e5ce8c63739850d543617e4357
 
   Options:
   -h|help       Display this message
@@ -158,8 +159,8 @@ trap "__exit_cleanup" EXIT
 
 
 # Define our logging file and pipe paths
-LOGFILE="/tmp/salt-bootstrap.log"
-LOGPIPE="/tmp/salt-bootstrap.logpipe"
+LOGFILE="/tmp/$( echo $ScriptName | sed s/.sh/.log/g )"
+LOGPIPE="/tmp/$( echo $ScriptName | sed s/.sh/.logpipe/g )"
 
 # Create our logging pipe
 # On FreeBSD we have to use mkfifo instead of mknod

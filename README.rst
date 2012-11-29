@@ -13,15 +13,15 @@ Adding support for other operating systems
 In order to install salt for a distribution you need to define:
 
 * To Install Dependencies, which is required, one of:
-  1. ``install_<distro>_<distro_version>_<install_type>_deps``
-  2. ``install_<distro>_<distro_version>_deps``
-  3. ``install_<distro>_<install_type>_deps``
-  4. ``install_<distro>_deps``
+1. ``install_<distro>_<distro_version>_<install_type>_deps``
+2. ``install_<distro>_<distro_version>_deps``
+3. ``install_<distro>_<install_type>_deps``
+4. ``install_<distro>_deps``
 
 
 * To install salt, which, of course, is required, one of:
-  1. ``install_<distro>_<distro_version>_<install_type>``
-  2. ``install_<distro>_<install_type>``
+1. ``install_<distro>_<distro_version>_<install_type>``
+2. ``install_<distro>_<install_type>``
 
    Optionally, define a minion configuration function, which will be called if
    the -c|config-dir option is passed. One of:

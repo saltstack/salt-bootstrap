@@ -12,7 +12,9 @@ Adding support for other operating systems
 ------------------------------------------
 In order to install salt for a distribution you need to define:
 
-* To Install Dependencies, which is required, one of::
+* To Install Dependencies, which is required, one of
+
+.. code:: sh
   install_<distro>_<distro_version>_<install_type>_deps
   install_<distro>_<distro_version>_deps
   install_<distro>_<install_type>_deps
@@ -20,12 +22,14 @@ In order to install salt for a distribution you need to define:
 
 
 * To install salt, which, of course, is required, one of::
+
   install_<distro>_<distro_version>_<install_type>
   install_<distro>_<install_type>
 
 
 * Optionally, define a minion configuration function, which will be called if 
   the ``-c|config-dir`` option is passed. One of::
+
   config_<distro>_<distro_version>_<install_type>_minion
   config_<distro>_<distro_version>_minion
   config_<distro>_<install_type>_minion
@@ -34,6 +38,7 @@ In order to install salt for a distribution you need to define:
 
 
 * Also optionally, define a post install function, one of::
+
   install_<distro>_<distro_versions>_<install_type>_post
   install_<distro>_<distro_versions>_post
   install_<distro>_<install_type>_post
@@ -42,20 +47,24 @@ In order to install salt for a distribution you need to define:
 
 Below is an example for Ubuntu Oneiric:
 
-    install_ubuntu_1110_deps() {
-        apt-get update
-        apt-get -y install python-software-properties
-        add-apt-repository -y 'deb http://us.archive.ubuntu.com/ubuntu/ oneiric universe'
-        add-apt-repository -y ppa:saltstack/salt
-    }
+.. code:: sh
+  install_ubuntu_1110_deps() {
+      apt-get update
+      apt-get -y install python-software-properties
+      add-apt-repository -y 'deb http://us.archive.ubuntu.com/ubuntu/ oneiric 
+      universe'
+      add-apt-repository -y ppa:saltstack/salt
+  }
 
-    install_ubuntu_1110_post() {
-        add-apt-repository -y --remove 'deb http://us.archive.ubuntu.com/ubuntu/ oneiric universe'
-    }
+  install_ubuntu_1110_post() {
+      add-apt-repository -y --remove 'deb http://us.archive.ubuntu.com/ubuntu/       
+      oneiric universe'
+  }
 
-    install_ubuntu_stable() {
-        apt-get -y install salt-minion
-    }
+  install_ubuntu_stable() {
+      apt-get -y install salt-minion
+  }
+
 
 Since there is no ``install_ubuntu_1110_stable()`` it defaults to the 
 unspecified version script.

@@ -763,10 +763,12 @@ install_freebsd_git_deps() {
 }
 
 install_freebsd_90_stable() {
+    /usr/local/sbin/pkg install -y swig
     /usr/local/sbin/pkg install -y salt
 }
 
 install_freebsd_git() {
+    /usr/local/sbin/pkg install -y swig
     /usr/local/sbin/pkg install -y git salt
     /usr/local/sbin/pkg delete -y salt
 

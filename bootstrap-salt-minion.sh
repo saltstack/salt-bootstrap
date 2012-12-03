@@ -739,6 +739,8 @@ install_freebsd_90_stable_deps() {
     cd
     /usr/local/sbin/pkg2ng
     echo "PACKAGESITE: http://pkgbeta.freebsd.org/freebsd-9-${ARCH}/latest" > /usr/local/etc/pkg.conf
+
+    /usr/local/sbin/pkg install -y swig 
 }
 
 install_freebsd_git_deps() {
@@ -760,6 +762,8 @@ install_freebsd_git_deps() {
     cd
     /usr/local/sbin/pkg2ng
     echo "PACKAGESITE: http://pkgbeta.freebsd.org/freebsd-9-${ARCH}/latest" > /usr/local/etc/pkg.conf
+
+    /usr/local/sbin/pkg install -y swig 
 }
 
 install_freebsd_90_stable() {

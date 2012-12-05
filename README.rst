@@ -34,7 +34,7 @@ If you have certificate issues using ``wget`` try the following:
   wget --no-check-certificate -O - http://bootstrap.saltstack.org | sudo sh
 
 
-If you already have python installed, the it's as easy as:
+If you already have python installed, then it's as easy as:
 
 .. code:: console
 

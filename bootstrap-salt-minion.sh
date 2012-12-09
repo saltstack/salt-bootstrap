@@ -682,13 +682,13 @@ install_centos_63_git_post() {
 #
 install_arch_stable_deps() {
     echo '[salt]
-Server = http://red45.org/archlinux
+Server = http://intothesaltmine.org/archlinux
 ' >> /etc/pacman.conf
 }
 
 install_arch_git_deps() {
     echo '[salt]
-    Server = http://red45.org/archlinux
+    Server = http://intothesaltmine.org/archlinux
     ' >> /etc/pacman.conf
 }
 

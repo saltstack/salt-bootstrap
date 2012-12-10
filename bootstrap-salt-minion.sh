@@ -482,6 +482,7 @@ install_ubuntu_1110_deps() {
 install_ubuntu_daily_deps() {
     apt-get update
     __apt_get_noinput python-software-properties
+    add-apt-repository -y ppa:saltstack/salt-depends
     add-apt-repository -y ppa:saltstack/salt-daily
     apt-get update
 }

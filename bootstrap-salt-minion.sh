@@ -489,7 +489,7 @@ install_ubuntu_daily_deps() {
 install_ubuntu_git_deps() {
     apt-get update
     __apt_get_noinput python-software-properties
-    add-apt-repository  ppa:saltstack/salt
+    add-apt-repository ppa:saltstack/salt
     apt-get update
     __apt_get_noinput git-core python-yaml python-m2crypto python-crypto msgpack-python python-zmq python-jinja2
 }
@@ -509,14 +509,16 @@ install_ubuntu_daily() {
 install_ubuntu_git() {
     __git_clone_and_checkout
     python setup.py install --install-layout=deb
+
+    # Let's trigger config_minion()
+    if [ "$TEMP_CONFIG_DIR" = "null" ]; then
+        TEMP_CONFIG_DIR="${SALT_GIT_CHECKOUT_DIR}/conf/"
+        CONFIG_MINION_FUNC="config_minion"
+    fi
 }
 
 install_ubuntu_git_post() {
     for fname in $(echo "minion master syndic"); do
-        if [ $fname != "minion" ]; then
-            # Guess we should only enable and start the minion service. Right??
-            continue
-        fi
         if [ -f ${SALT_GIT_CHECKOUT_DIR}/debian/salt-$fname.init ]; then
             cp ${SALT_GIT_CHECKOUT_DIR}/debian/salt-$fname.init /etc/init.d/salt-$fname
         fi
@@ -526,6 +528,12 @@ install_ubuntu_git_post() {
             cp ${SALT_GIT_CHECKOUT_DIR}/pkg/salt-$fname.upstart /etc/init/salt-$fname.conf
         fi
         chmod +x /etc/init.d/salt-$fname
+
+        if [ $fname != "minion" ]; then
+            # Guess we should only enable and start the minion service. Right??
+            continue
+        fi
+
         service salt-$fname start
     done
 }

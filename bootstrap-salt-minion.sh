@@ -187,7 +187,7 @@ exec 2>$LOGPIPE
 #-------------------------------------------------------------------------------
 __gather_hardware_info() {
     if [ -f /proc/cpuinfo ]; then
-        CPU_VENDOR_ID=$( cat /proc/cpuinfo | grep vendor_id | head -n 1 | awk '{print $3}' )
+        CPU_VENDOR_ID=$(cat /proc/cpuinfo | grep -E 'vendor_id|Processor' | head -n 1 | awk '{print $3}' | cut -d '-' -f1 )
     else
         CPU_VENDOR_ID=$( sysctl -n hw.model )
     fi

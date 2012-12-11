@@ -557,6 +557,23 @@ install_debian_60_stable() {
     __apt_get_noinput -t squeeze-backports salt-minion
 }
 
+install_debian_git_deps() {
+    apt-get update
+    __apt_get_noinput lsb-release python python-pkg-resources python-crypto \
+        python-jinja2 python-m2crypto python-yaml msgpack-python git
+}
+
+install_debian_git() {
+    __git_clone_and_checkout
+    python setup.py install --install-layout=deb
+
+    # Let's trigger config_minion()
+    if [ "$TEMP_CONFIG_DIR" = "null" ]; then
+        TEMP_CONFIG_DIR="${SALT_GIT_CHECKOUT_DIR}/conf/"
+        CONFIG_MINION_FUNC="config_minion"
+    fi
+}
+
 install_debian_60_git_deps() {
     install_debian_60_stable_deps
     install_debian_60_stable
@@ -569,8 +586,12 @@ install_debian_60_git() {
     __git_clone_and_checkout
 
     python setup.py install --install-layout=deb
-    mkdir -p /etc/salt
-    cp conf/minion.template /etc/salt/minion
+
+    # Let's trigger config_minion()
+    if [ "$TEMP_CONFIG_DIR" = "null" ]; then
+        TEMP_CONFIG_DIR="${SALT_GIT_CHECKOUT_DIR}/conf/"
+        CONFIG_MINION_FUNC="config_minion"
+    fi
 }
 #
 #   Ended Debian Install Functions

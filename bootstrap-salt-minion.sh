@@ -548,20 +548,36 @@ install_debian_stable() {
     __apt_get_noinput salt-minion
 }
 
-install_debian_60_stable_deps() {
+install_debian_60_deps() {
     echo "deb http://backports.debian.org/debian-backports squeeze-backports main" >> \
         /etc/apt/sources.list.d/backports.list
+
+    # Add madduck's repo since squeeze packages have been deprecated
+    for i in {salt-common,salt-master,salt-minion,salt-syndic,salt-doc}; do
+        echo "Package: $i"
+        echo "Pin: release a=squeeze-backports"
+        echo "Pin-Priority: 600"
+        echo
+    done > /etc/apt/preferences.d/local-salt-backport.pref
+
+    cat <<_eof > /etc/apt/sources.list.d/local-madduck-backports.list
+deb http://debian.madduck.net/repo squeeze-backports main
+deb-src http://debian.madduck.net/repo squeeze-backports main
+_eof
+
+    wget -q http://debian.madduck.net/repo/gpg/archive.key
+    apt-key add archive.key
     apt-get update
 }
 
-install_debian_60_stable() {
-    __apt_get_noinput -t squeeze-backports salt-minion
+install_debian_60() {
+    __apt_get_noinput salt-minion
 }
 
 install_debian_git_deps() {
     apt-get update
     __apt_get_noinput lsb-release python python-pkg-resources python-crypto \
-        python-jinja2 python-m2crypto python-yaml msgpack-python git
+        python-jinja2 python-m2crypto python-yaml msgpack-python git python-zmq
 }
 
 install_debian_git() {
@@ -576,12 +592,11 @@ install_debian_git() {
 }
 
 install_debian_60_git_deps() {
-    install_debian_60_stable_deps
-    install_debian_60_stable
+    install_debian_60_deps # Add backports
+    install_debian_git_deps # Grab the actual deps
 }
 
 install_debian_60_git() {
-    __apt_get_noinput git
     apt-get -y purge salt-minion
 
     __git_clone_and_checkout
@@ -593,6 +608,20 @@ install_debian_60_git() {
         TEMP_CONFIG_DIR="${SALT_GIT_CHECKOUT_DIR}/conf/"
         CONFIG_MINION_FUNC="config_minion"
     fi
+}
+
+install_debian_git_post() {
+    for fname in $(echo "minion master syndic"); do
+        if [ $fname != "minion" ]; then
+            # Guess we should only enable and start the minion service. Right??
+            continue
+        fi
+        if [ -f ${SALT_GIT_CHECKOUT_DIR}/debian/salt-$fname.init ]; then
+            cp ${SALT_GIT_CHECKOUT_DIR}/debian/salt-$fname.init /etc/init.d/salt-$fname
+        fi
+        chmod +x /etc/init.d/salt-$fname
+        /etc/init.d/salt-$fname start
+    done
 }
 #
 #   Ended Debian Install Functions

@@ -548,14 +548,30 @@ install_debian_stable() {
     __apt_get_noinput salt-minion
 }
 
-install_debian_60_stable_deps() {
+install_debian_60_deps() {
     echo "deb http://backports.debian.org/debian-backports squeeze-backports main" >> \
         /etc/apt/sources.list.d/backports.list
+
+    # Add madduck's repo since squeeze packages have been deprecated
+    for i in {salt-common,salt-master,salt-minion,salt-syndic,salt-doc,msgpack-python,python-zmq}; do
+        echo "Package: $i"
+        echo "Pin: release a=squeeze-backports"
+        echo "Pin-Priority: 600"
+        echo
+    done > /etc/apt/preferences.d/local-salt-backport.pref
+
+    cat <<_eof > /etc/apt/sources.list.d/local-madduck-backports.list
+deb http://debian.madduck.net/repo squeeze-backports main
+deb-src http://debian.madduck.net/repo squeeze-backports main
+_eof
+
+    wget -q http://debian.madduck.net/repo/gpg/archive.key
+    apt-key add archive.key
     apt-get update
 }
 
-install_debian_60_stable() {
-    __apt_get_noinput -t squeeze-backports salt-minion
+install_debian_60() {
+    __apt_get_noinput salt-minion
 }
 
 install_debian_git_deps() {

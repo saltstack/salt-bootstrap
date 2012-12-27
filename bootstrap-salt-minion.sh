@@ -688,7 +688,7 @@ install_centos_63_stable_deps() {
     else
         local ARCH=$CPU_ARCH_L
     fi
-    rpm -Uvh --force http://mirrors.kernel.org/fedora-epel/6/${ARCH}/epel-release-6-7.noarch.rpm
+    rpm -Uvh --force http://mirrors.kernel.org/fedora-epel/6/${ARCH}/epel-release-6-8.noarch.rpm
     yum -y update
 }
 

@@ -855,7 +855,7 @@ config_minion() {
 
     # Let's create the necessary directories
     [ -d /etc/salt ] || mkdir /etc/salt
-    [ -d $PKI_DIR ] || mkdir $PKI_DIR && chmod 700 $PKI_DIR
+    [ -d $PKI_DIR ] || mkdir -p $PKI_DIR && chmod 700 $PKI_DIR
 
     # Copy the minions configuration if found
     [ -f "$TEMP_CONFIG_DIR/minion" ] && mv "$TEMP_CONFIG_DIR/minion" /etc/salt

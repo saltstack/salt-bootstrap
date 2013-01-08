@@ -851,19 +851,15 @@ config_minion() {
         exit 1
     fi
 
+    PKI_DIR=/etc/salt/pki/minion
+
     # Let's create the necessary directories
     [ -d /etc/salt ] || mkdir /etc/salt
-    [ -d /etc/salt/pki ] || mkdir /etc/salt/pki && chmod 700 /etc/salt/pki
+    [ -d $PKI_DIR ] || mkdir $PKI_DIR && chmod 700 $PKI_DIR
 
     # Copy the minions configuration if found
     [ -f "$TEMP_CONFIG_DIR/minion" ] && mv "$TEMP_CONFIG_DIR/minion" /etc/salt
 
-    PKI_DIR=/etc/salt/pki
-
-    # Minion keys moved to minion directory in Salt 0.11.0
-    if [[ -d $PKI_DIR/minion ]]; then
-        PKI_DIR=$PKI_DIR/minion
-    fi
 
     # Copy the minion's keys if found
     if [ -f "$TEMP_CONFIG_DIR/minion.pem" ]; then

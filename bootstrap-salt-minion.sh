@@ -961,14 +961,6 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-# Install Salt
-echo " * Running ${INSTALL_FUNC}()"
-$INSTALL_FUNC
-if [ $? -ne 0 ]; then
-    echo " * Failed to run ${INSTALL_FUNC}()!!!"
-    exit 1
-fi
-
 # Configure Salt
 if [ "$TEMP_CONFIG_DIR" != "null" -a "$CONFIG_MINION_FUNC" != "null" ]; then
     echo " * Running ${CONFIG_MINION_FUNC}()"
@@ -977,6 +969,14 @@ if [ "$TEMP_CONFIG_DIR" != "null" -a "$CONFIG_MINION_FUNC" != "null" ]; then
         echo " * Failed to run ${CONFIG_MINION_FUNC}()!!!"
         exit 1
     fi
+fi
+
+# Install Salt
+echo " * Running ${INSTALL_FUNC}()"
+$INSTALL_FUNC
+if [ $? -ne 0 ]; then
+    echo " * Failed to run ${INSTALL_FUNC}()!!!"
+    exit 1
 fi
 
 # Run any post install function

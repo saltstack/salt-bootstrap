@@ -701,6 +701,18 @@ install_centos_63_stable_post() {
     /etc/init.d/salt-minion start
 }
 
+install_centos_62_stable_deps() {
+    install_centos_63_stable_deps
+}
+
+install_centos_62_stable() {
+    install_centos_63_stable
+}
+
+install_centos_62_stable_post() {
+    install_centos_63_stable_post
+}
+
 install_centos_63_git_deps() {
     install_centos_63_stable_deps
     yum -y install git PyYAML m2crypto python-crypto python-msgpack python-zmq python-jinja2 --enablerepo=epel-testing

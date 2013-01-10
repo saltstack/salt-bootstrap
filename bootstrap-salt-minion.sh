@@ -579,20 +579,24 @@ install_debian_git_deps() {
         python-jinja2 python-m2crypto python-yaml msgpack-python git python-zmq
 }
 
+config_debian_git_minion() {
+    TEMP_CONFIG_DIR="${SALT_GIT_CHECKOUT_DIR}/conf/"
+    config_minion
+}
+
 install_debian_git() {
     __git_clone_and_checkout
     python setup.py install --install-layout=deb
-
-    # Let's trigger config_minion()
-    if [ "$TEMP_CONFIG_DIR" = "null" ]; then
-        TEMP_CONFIG_DIR="${SALT_GIT_CHECKOUT_DIR}/conf/"
-        CONFIG_MINION_FUNC="config_minion"
-    fi
 }
 
 install_debian_60_git_deps() {
     install_debian_60_deps # Add backports
     install_debian_git_deps # Grab the actual deps
+}
+
+config_debian_60_git_minion() {
+    TEMP_CONFIG_DIR="${SALT_GIT_CHECKOUT_DIR}/conf/"
+    config_minion
 }
 
 install_debian_60_git() {
@@ -601,12 +605,6 @@ install_debian_60_git() {
     __git_clone_and_checkout
 
     python setup.py install --install-layout=deb
-
-    # Let's trigger config_minion()
-    if [ "$TEMP_CONFIG_DIR" = "null" ]; then
-        TEMP_CONFIG_DIR="${SALT_GIT_CHECKOUT_DIR}/conf/"
-        CONFIG_MINION_FUNC="config_minion"
-    fi
 }
 
 install_debian_git_post() {

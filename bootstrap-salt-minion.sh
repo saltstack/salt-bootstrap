@@ -482,6 +482,7 @@ install_ubuntu_1110_deps() {
 install_ubuntu_daily_deps() {
     apt-get update
     __apt_get_noinput python-software-properties
+    add-apt-repository -y ppa:saltstack/salt-depends
     add-apt-repository -y ppa:saltstack/salt-daily
     apt-get update
 }
@@ -555,20 +556,36 @@ install_debian_stable() {
     __apt_get_noinput salt-minion
 }
 
-install_debian_60_stable_deps() {
+install_debian_60_deps() {
     echo "deb http://backports.debian.org/debian-backports squeeze-backports main" >> \
         /etc/apt/sources.list.d/backports.list
+
+    # Add madduck's repo since squeeze packages have been deprecated
+    for i in {salt-common,salt-master,salt-minion,salt-syndic,salt-doc}; do
+        echo "Package: $i"
+        echo "Pin: release a=squeeze-backports"
+        echo "Pin-Priority: 600"
+        echo
+    done > /etc/apt/preferences.d/local-salt-backport.pref
+
+    cat <<_eof > /etc/apt/sources.list.d/local-madduck-backports.list
+deb http://debian.madduck.net/repo squeeze-backports main
+deb-src http://debian.madduck.net/repo squeeze-backports main
+_eof
+
+    wget -q http://debian.madduck.net/repo/gpg/archive.key
+    apt-key add archive.key
     apt-get update
 }
 
-install_debian_60_stable() {
-    __apt_get_noinput -t squeeze-backports salt-minion
+install_debian_60() {
+    __apt_get_noinput salt-minion
 }
 
 install_debian_git_deps() {
     apt-get update
     __apt_get_noinput lsb-release python python-pkg-resources python-crypto \
-        python-jinja2 python-m2crypto python-yaml msgpack-python git
+        python-jinja2 python-m2crypto python-yaml msgpack-python git python-zmq
 }
 
 install_debian_git() {
@@ -583,12 +600,11 @@ install_debian_git() {
 }
 
 install_debian_60_git_deps() {
-    install_debian_60_stable_deps
-    install_debian_60_stable
+    install_debian_60_deps # Add backports
+    install_debian_git_deps # Grab the actual deps
 }
 
 install_debian_60_git() {
-    __apt_get_noinput git
     apt-get -y purge salt-minion
 
     __git_clone_and_checkout
@@ -600,6 +616,20 @@ install_debian_60_git() {
         TEMP_CONFIG_DIR="${SALT_GIT_CHECKOUT_DIR}/conf/"
         CONFIG_MINION_FUNC="config_minion"
     fi
+}
+
+install_debian_git_post() {
+    for fname in $(echo "minion master syndic"); do
+        if [ $fname != "minion" ]; then
+            # Guess we should only enable and start the minion service. Right??
+            continue
+        fi
+        if [ -f ${SALT_GIT_CHECKOUT_DIR}/debian/salt-$fname.init ]; then
+            cp ${SALT_GIT_CHECKOUT_DIR}/debian/salt-$fname.init /etc/init.d/salt-$fname
+        fi
+        chmod +x /etc/init.d/salt-$fname
+        /etc/init.d/salt-$fname start
+    done
 }
 #
 #   Ended Debian Install Functions
@@ -666,7 +696,7 @@ install_centos_63_stable_deps() {
     else
         local ARCH=$CPU_ARCH_L
     fi
-    rpm -Uvh --force http://mirrors.kernel.org/fedora-epel/6/${ARCH}/epel-release-6-7.noarch.rpm
+    rpm -Uvh --force http://mirrors.kernel.org/fedora-epel/6/${ARCH}/epel-release-6-8.noarch.rpm
     yum -y update
 }
 
@@ -677,6 +707,18 @@ install_centos_63_stable() {
 install_centos_63_stable_post() {
     /sbin/chkconfig salt-minion on
     /etc/init.d/salt-minion start
+}
+
+install_centos_62_stable_deps() {
+    install_centos_63_stable_deps
+}
+
+install_centos_62_stable() {
+    install_centos_63_stable
+}
+
+install_centos_62_stable_post() {
+    install_centos_63_stable_post
 }
 
 install_centos_63_git_deps() {
@@ -829,21 +871,24 @@ config_minion() {
         exit 1
     fi
 
+    PKI_DIR=/etc/salt/pki/minion
+
     # Let's create the necessary directories
     [ -d /etc/salt ] || mkdir /etc/salt
-    [ -d /etc/salt/pki ] || mkdir /etc/salt/pki && chmod 700 /etc/salt/pki
+    [ -d $PKI_DIR ] || mkdir -p $PKI_DIR && chmod 700 $PKI_DIR
 
     # Copy the minions configuration if found
     [ -f "$TEMP_CONFIG_DIR/minion" ] && mv "$TEMP_CONFIG_DIR/minion" /etc/salt
 
+
     # Copy the minion's keys if found
     if [ -f "$TEMP_CONFIG_DIR/minion.pem" ]; then
-        mv "$TEMP_CONFIG_DIR/minion.pem" /etc/salt/pki
-        chmod 400 /etc/salt/pki/minion.pem
+        mv "$TEMP_CONFIG_DIR/minion.pem" $PKI_DIR/
+        chmod 400 $PKI_DIR/minion.pem
     fi
     if [ -f "$TEMP_CONFIG_DIR/minion.pub" ]; then
-        mv "$TEMP_CONFIG_DIR/minion.pub" /etc/salt/pki
-        chmod 664 /etc/salt/pki/minion.pub
+        mv "$TEMP_CONFIG_DIR/minion.pub" $PKI_DIR/
+        chmod 664 $PKI_DIR/minion.pub
     fi
 }
 #

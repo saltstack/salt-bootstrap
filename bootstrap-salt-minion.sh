@@ -120,6 +120,8 @@ if [ $(whoami) != "root" ] ; then
     exit 1
 fi
 
+echo " * INFO: $0 -- Version ${ScriptVersion}"
+
 
 #---  FUNCTION  ----------------------------------------------------------------
 #          NAME:  __exit_cleanup

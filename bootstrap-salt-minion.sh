@@ -481,6 +481,14 @@ install_ubuntu_1004_deps() {
 install_ubuntu_1004_git_deps() {
     install_ubuntu_1004_deps
     __apt_get_noinput git-core
+
+    __git_clone_and_checkout
+
+    # Let's trigger config_minion()
+    if [ "$TEMP_CONFIG_DIR" = "null" ]; then
+        TEMP_CONFIG_DIR="${SALT_GIT_CHECKOUT_DIR}/conf/"
+        CONFIG_MINION_FUNC="config_minion"
+    fi
 }
 
 install_ubuntu_1110_deps() {
@@ -504,6 +512,14 @@ install_ubuntu_git_deps() {
     add-apt-repository ppa:saltstack/salt
     apt-get update
     __apt_get_noinput git-core python-yaml python-m2crypto python-crypto msgpack-python python-zmq python-jinja2
+
+    __git_clone_and_checkout
+
+    # Let's trigger config_minion()
+    if [ "$TEMP_CONFIG_DIR" = "null" ]; then
+        TEMP_CONFIG_DIR="${SALT_GIT_CHECKOUT_DIR}/conf/"
+        CONFIG_MINION_FUNC="config_minion"
+    fi
 }
 
 install_ubuntu_1110_post() {
@@ -519,14 +535,7 @@ install_ubuntu_daily() {
 }
 
 install_ubuntu_git() {
-    __git_clone_and_checkout
     python setup.py install --install-layout=deb
-
-    # Let's trigger config_minion()
-    if [ "$TEMP_CONFIG_DIR" = "null" ]; then
-        TEMP_CONFIG_DIR="${SALT_GIT_CHECKOUT_DIR}/conf/"
-        CONFIG_MINION_FUNC="config_minion"
-    fi
 }
 
 install_ubuntu_git_post() {
@@ -597,34 +606,27 @@ install_debian_git_deps() {
     apt-get update
     __apt_get_noinput lsb-release python python-pkg-resources python-crypto \
         python-jinja2 python-m2crypto python-yaml msgpack-python git python-zmq
-}
 
-config_debian_git_minion() {
+    __git_clone_and_checkout
+
+    # Let's trigger config_minion()
     if [ "$TEMP_CONFIG_DIR" = "null" ]; then
         TEMP_CONFIG_DIR="${SALT_GIT_CHECKOUT_DIR}/conf/"
-        config_minion
+        CONFIG_MINION_FUNC="config_minion"
     fi
 }
 
 install_debian_git() {
-    __git_clone_and_checkout
     python setup.py install --install-layout=deb
 }
 
 install_debian_60_git_deps() {
-    install_debian_60_deps # Add backports
+    install_debian_60_deps  # Add backports
     install_debian_git_deps # Grab the actual deps
-}
-
-config_debian_60_git_minion() {
-    config_debian_git_minion
 }
 
 install_debian_60_git() {
     apt-get -y purge salt-minion
-
-    __git_clone_and_checkout
-
     python setup.py install --install-layout=deb
 }
 
@@ -662,10 +664,17 @@ install_fedora_stable() {
 install_fedora_git_deps() {
     install_fedora_deps
     yum install -y git
+
+    __git_clone_and_checkout
+
+    # Let's trigger config_minion()
+    if [ "$TEMP_CONFIG_DIR" = "null" ]; then
+        TEMP_CONFIG_DIR="${SALT_GIT_CHECKOUT_DIR}/conf/"
+        CONFIG_MINION_FUNC="config_minion"
+    fi
 }
 
 install_fedora_git() {
-    __git_clone_and_checkout
     python setup.py install
 }
 
@@ -734,15 +743,22 @@ install_centos_62_stable_post() {
 install_centos_63_git_deps() {
     install_centos_63_stable_deps
     yum -y install git PyYAML m2crypto python-crypto python-msgpack python-zmq python-jinja2 --enablerepo=epel-testing
+
+    __git_clone_and_checkout
+
+    # Let's trigger config_minion()
+    if [ "$TEMP_CONFIG_DIR" = "null" ]; then
+        TEMP_CONFIG_DIR="${SALT_GIT_CHECKOUT_DIR}/conf/"
+        CONFIG_MINION_FUNC="config_minion"
+    fi
+
 }
 
 install_centos_63_git() {
     rm -rf /usr/lib/python*/site-packages/salt
     rm -rf /usr/bin/salt*
 
-    __git_clone_and_checkout
     python2 setup.py install
-    mkdir -p /etc/salt/
 }
 
 install_centos_63_git_post() {
@@ -771,6 +787,14 @@ install_arch_git_deps() {
     echo '[salt]
     Server = http://intothesaltmine.org/archlinux
     ' >> /etc/pacman.conf
+
+    __git_clone_and_checkout
+
+    # Let's trigger config_minion()
+    if [ "$TEMP_CONFIG_DIR" = "null" ]; then
+        TEMP_CONFIG_DIR="${SALT_GIT_CHECKOUT_DIR}/conf/"
+        CONFIG_MINION_FUNC="config_minion"
+    fi
 }
 
 install_arch_stable() {
@@ -783,8 +807,6 @@ install_arch_git() {
     pacman -Syu --noconfirm salt git
     rm -rf /usr/lib/python2.7/site-packages/salt*
     rm -rf /usr/bin/salt-*
-
-    __git_clone_and_checkout
 
     python2 setup.py install
 }
@@ -839,6 +861,13 @@ install_freebsd_git_deps() {
     echo "PACKAGESITE: http://pkgbeta.freebsd.org/freebsd:9:${ARCH}/latest" > /usr/local/etc/pkg.conf
 
     /usr/local/sbin/pkg install -y swig
+
+    __git_clone_and_checkout
+    # Let's trigger config_minion()
+    if [ "$TEMP_CONFIG_DIR" = "null" ]; then
+        TEMP_CONFIG_DIR="${SALT_GIT_CHECKOUT_DIR}/conf/"
+        CONFIG_MINION_FUNC="config_minion"
+    fi
 }
 
 install_freebsd_90_stable() {
@@ -848,8 +877,6 @@ install_freebsd_90_stable() {
 install_freebsd_git() {
     /usr/local/sbin/pkg install -y git salt
     /usr/local/sbin/pkg delete -y salt
-
-    __git_clone_and_checkout
 
     /usr/local/bin/python setup.py install
 }
@@ -870,7 +897,7 @@ install_freebsd_git_post() {
 ##############################################################################
 #
 #   Default minion configuration function. Matches ANY distribution as long as
-# the -c options is passed.
+#   the -c options is passed.
 #
 config_minion() {
     # If the configuration directory is not passed, return
@@ -926,19 +953,6 @@ for DEP_FUNC_NAME in $DEP_FUNC_NAMES; do
 done
 
 
-# Let's get the install function
-INSTALL_FUNC_NAMES="install_${DISTRO_NAME_L}${DISTRO_VERSION_NO_DOTS}_${ITYPE}"
-INSTALL_FUNC_NAMES="$INSTALL_FUNC_NAMES install_${DISTRO_NAME_L}_${ITYPE}"
-
-INSTALL_FUNC="null"
-for FUNC_NAME in $INSTALL_FUNC_NAMES; do
-    if __function_defined $FUNC_NAME; then
-        INSTALL_FUNC=$FUNC_NAME
-        break
-    fi
-done
-
-
 # Let's get the minion config function
 CONFIG_MINION_FUNC="null"
 if [ "$TEMP_CONFIG_DIR" != "null" ]; then
@@ -955,6 +969,19 @@ if [ "$TEMP_CONFIG_DIR" != "null" ]; then
         fi
     done
 fi
+
+
+# Let's get the install function
+INSTALL_FUNC_NAMES="install_${DISTRO_NAME_L}${DISTRO_VERSION_NO_DOTS}_${ITYPE}"
+INSTALL_FUNC_NAMES="$INSTALL_FUNC_NAMES install_${DISTRO_NAME_L}_${ITYPE}"
+
+INSTALL_FUNC="null"
+for FUNC_NAME in $INSTALL_FUNC_NAMES; do
+    if __function_defined $FUNC_NAME; then
+        INSTALL_FUNC=$FUNC_NAME
+        break
+    fi
+done
 
 
 # Let's get the post install function
@@ -991,6 +1018,7 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
+
 # Configure Salt
 if [ "$TEMP_CONFIG_DIR" != "null" -a "$CONFIG_MINION_FUNC" != "null" ]; then
     echo " * Running ${CONFIG_MINION_FUNC}()"
@@ -1001,6 +1029,7 @@ if [ "$TEMP_CONFIG_DIR" != "null" -a "$CONFIG_MINION_FUNC" != "null" ]; then
     fi
 fi
 
+
 # Install Salt
 echo " * Running ${INSTALL_FUNC}()"
 $INSTALL_FUNC
@@ -1008,6 +1037,7 @@ if [ $? -ne 0 ]; then
     echo " * Failed to run ${INSTALL_FUNC}()!!!"
     exit 1
 fi
+
 
 # Run any post install function
 if [ "$POST_INSTALL_FUNC" != "null" ]; then
@@ -1018,6 +1048,7 @@ if [ "$POST_INSTALL_FUNC" != "null" ]; then
         exit 1
     fi
 fi
+
 
 # Done!
 echo " * Salt installed!"

@@ -439,11 +439,6 @@ __apt_get_noinput() {
 #       3. install_<distro>_<install_type>_deps
 #       4. install_<distro>_deps
 #
-#
-#   To install salt, which, of course, is required, one of:
-#       1. install_<distro>_<distro_version>_<install_type>
-#       2. install_<distro>_<install_type>
-#
 #   Optionally, define a minion configuration function, which will be called if
 #   the -c|config-dir option is passed. One of:
 #       1. config_<distro>_<distro_version>_<install_type>_minion
@@ -451,6 +446,10 @@ __apt_get_noinput() {
 #       3. config_<distro>_<install_type>_minion
 #       4. config_<distro>_minion
 #       5. config_minion [THIS ONE IS ALREADY DEFINED AS THE DEFAULT]
+#
+#   To install salt, which, of course, is required, one of:
+#       1. install_<distro>_<distro_version>_<install_type>
+#       2. install_<distro>_<install_type>
 #
 #   Also optionally, define a post install function, one of:
 #       1. install_<distro>_<distro_versions>_<install_type>_post
@@ -600,20 +599,25 @@ install_debian_git_deps() {
         python-jinja2 python-m2crypto python-yaml msgpack-python git python-zmq
 }
 
+config_debian_git_minion() {
+    if [ "$TEMP_CONFIG_DIR" = "null" ]; then
+        TEMP_CONFIG_DIR="${SALT_GIT_CHECKOUT_DIR}/conf/"
+        config_minion
+    fi
+}
+
 install_debian_git() {
     __git_clone_and_checkout
     python setup.py install --install-layout=deb
-
-    # Let's trigger config_minion()
-    if [ "$TEMP_CONFIG_DIR" = "null" ]; then
-        TEMP_CONFIG_DIR="${SALT_GIT_CHECKOUT_DIR}/conf/"
-        CONFIG_MINION_FUNC="config_minion"
-    fi
 }
 
 install_debian_60_git_deps() {
     install_debian_60_deps # Add backports
     install_debian_git_deps # Grab the actual deps
+}
+
+config_debian_60_git_minion() {
+    config_debian_git_minion
 }
 
 install_debian_60_git() {
@@ -622,12 +626,6 @@ install_debian_60_git() {
     __git_clone_and_checkout
 
     python setup.py install --install-layout=deb
-
-    # Let's trigger config_minion()
-    if [ "$TEMP_CONFIG_DIR" = "null" ]; then
-        TEMP_CONFIG_DIR="${SALT_GIT_CHECKOUT_DIR}/conf/"
-        CONFIG_MINION_FUNC="config_minion"
-    fi
 }
 
 install_debian_git_post() {
@@ -993,14 +991,6 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-# Install Salt
-echo " * Running ${INSTALL_FUNC}()"
-$INSTALL_FUNC
-if [ $? -ne 0 ]; then
-    echo " * Failed to run ${INSTALL_FUNC}()!!!"
-    exit 1
-fi
-
 # Configure Salt
 if [ "$TEMP_CONFIG_DIR" != "null" -a "$CONFIG_MINION_FUNC" != "null" ]; then
     echo " * Running ${CONFIG_MINION_FUNC}()"
@@ -1009,6 +999,14 @@ if [ "$TEMP_CONFIG_DIR" != "null" -a "$CONFIG_MINION_FUNC" != "null" ]; then
         echo " * Failed to run ${CONFIG_MINION_FUNC}()!!!"
         exit 1
     fi
+fi
+
+# Install Salt
+echo " * Running ${INSTALL_FUNC}()"
+$INSTALL_FUNC
+if [ $? -ne 0 ]; then
+    echo " * Failed to run ${INSTALL_FUNC}()!!!"
+    exit 1
 fi
 
 # Run any post install function

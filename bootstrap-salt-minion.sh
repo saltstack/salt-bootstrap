@@ -14,7 +14,7 @@
 #       CREATED: 10/15/2012 09:49:37 PM WEST
 #===============================================================================
 set -o nounset                              # Treat unset variables as an error
-ScriptVersion="1.1"
+ScriptVersion="1.2"
 ScriptName="bootstrap-salt-minion.sh"
 
 #===============================================================================
@@ -335,6 +335,32 @@ __gather_system_info() {
     esac
 
 }
+__gather_system_info
+
+
+echo " * System Information:"
+echo "     CPU:          ${CPU_VENDOR_ID}"
+echo "     CPU Arch:     ${CPU_ARCH}"
+echo "     OS Name:      ${OS_NAME}"
+echo "     OS Version:   ${OS_VERSION}"
+echo "     Distribution: ${DISTRO_NAME} ${DISTRO_VERSION}"
+
+
+# Simplify version naming on functions
+if [ "x${DISTRO_VERSION}" = "x" ]; then
+    DISTRO_VERSION_NO_DOTS=""
+else
+    DISTRO_VERSION_NO_DOTS="_$(echo $DISTRO_VERSION | tr -d '.')"
+fi
+# Simplify distro name naming on functions
+DISTRO_NAME_L=$(echo $DISTRO_NAME | tr '[:upper:]' '[:lower:]' | sed 's/[^a-zA-Z0-9_ ]//g' | sed -e 's|[:space:]+|_|g')
+
+
+# Only Ubuntu has daily packages, let's let users know about that
+if [ "${DISTRO_NAME_L}" != "ubuntu" -a $ITYPE = "daily" ]; then
+    echo " * ERROR: Only Ubuntu has daily packages support"
+    exit 1
+fi
 
 
 #---  FUNCTION  ----------------------------------------------------------------
@@ -345,12 +371,12 @@ __gather_system_info() {
 #-------------------------------------------------------------------------------
 __function_defined() {
     FUNC_NAME=$1
-    if [ "${DISTRO_NAME}" = "centos" ]; then
+    if [ "${DISTRO_NAME_L}" = "centos" ]; then
         if typeset -f $FUNC_NAME &>/dev/null ; then
             echo " * INFO: Found function $FUNC_NAME"
             return 0
         fi
-    elif [ "${DISTRO_NAME}" = "ubuntu" ]; then
+    elif [ "${DISTRO_NAME_L}" = "ubuntu" ]; then
         if $( type ${FUNC_NAME} | grep -q 'shell function' ); then
             echo " * INFO: Found function $FUNC_NAME"
             return 0
@@ -371,7 +397,8 @@ __function_defined() {
     echo " * INFO: $FUNC_NAME not found...."
     return 1
 }
-__gather_system_info
+
+
 
 
 #---  FUNCTION  ----------------------------------------------------------------
@@ -388,23 +415,6 @@ __git_clone_and_checkout() {
     git checkout $GIT_REV
 }
 
-
-echo " * System Information:"
-echo "     CPU:          ${CPU_VENDOR_ID}"
-echo "     CPU Arch:     ${CPU_ARCH}"
-echo "     OS Name:      ${OS_NAME}"
-echo "     OS Version:   ${OS_VERSION}"
-echo "     Distribution: ${DISTRO_NAME} ${DISTRO_VERSION}"
-
-
-# Simplify version naming on functions
-if [ "x${DISTRO_VERSION}" = "x" ]; then
-    DISTRO_VERSION_NO_DOTS=""
-else
-    DISTRO_VERSION_NO_DOTS="_$(echo $DISTRO_VERSION | tr -d '.')"
-fi
-# Simplify distro name naming on functions
-DISTRO_NAME_L=$(echo $DISTRO_NAME | tr '[:upper:]' '[:lower:]' | sed 's/[^a-zA-Z0-9_ ]//g' | sed -e 's|[:space:]+|_|g')
 
 #---  FUNCTION  ----------------------------------------------------------------
 #          NAME:  __apt_get_noinput

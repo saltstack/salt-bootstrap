@@ -505,7 +505,7 @@ install_ubuntu_daily_deps() {
 install_ubuntu_git_deps() {
     apt-get update
     __apt_get_noinput python-software-properties
-    add-apt-repository ppa:saltstack/salt
+    add-apt-repository -y ppa:saltstack/salt
     apt-get update
     __apt_get_noinput git-core python-yaml python-m2crypto python-crypto msgpack-python python-zmq python-jinja2
 

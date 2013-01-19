@@ -5,7 +5,7 @@ before_install:
   - (sudo ./bootstrap-salt-minion.sh stable && salt-minion --versions-report && sudo apt-get remove salt-common salt-minion) || exit 1
   - (sudo ./bootstrap-salt-minion.sh daily && salt-minion --versions-report && sudo apt-get remove salt-common salt-minion) || exit 1
 
-script: (sudo ./bootstrap-salt-minion.sh git develop && salt --versions-report) || exit 1
+script: (/bin/echo -e '\nInstalling from GIT' && sudo ./bootstrap-salt-minion.sh git develop && salt --versions-report) || exit 1
 
 notifications:
   irc:

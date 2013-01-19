@@ -1,0 +1,19 @@
+before_install:
+  - sudo apt-get update && sudo apt-get install devscripts
+
+script:
+  - sudo /bin/bash bootstrap-salt-minion.sh
+  - sudo apt-get remove salt*
+  - sudo bootstrap-salt-minion.sh
+  - sudo apt-get remove salt*
+  - sudo bootstrap-salt-minion.sh stable
+  - sudo apt-get remove salt*
+  - sudo bootstrap-salt-minion.sh daily
+  - sudo apt-get remove salt*
+  - sudo bootstrap-salt-minion.sh git dev
+
+notifications:
+  irc:
+    channels: "irc.freenode.org#salt-devel"
+    on_success: change
+    on_failure: change

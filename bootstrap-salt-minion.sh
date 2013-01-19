@@ -378,12 +378,7 @@ __function_defined() {
             echo " * INFO: Found function $FUNC_NAME"
             return 0
         fi
-    elif [ "${DISTRO_NAME_L}" = "ubuntu" ]; then
-        if $( type ${FUNC_NAME} | grep -q 'shell function' ); then
-            echo " * INFO: Found function $FUNC_NAME"
-            return 0
-        fi
-    # Last resorts try POSIXLY_CORRECT or not
+    # Try POSIXLY_CORRECT or not
     elif test -n "${POSIXLY_CORRECT+yes}"; then
         if typeset -f $FUNC_NAME >/dev/null 2>&1 ; then
             echo " * INFO: Found function $FUNC_NAME"

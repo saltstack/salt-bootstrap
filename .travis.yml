@@ -1,16 +1,12 @@
 before_install:
-  - sudo apt-get update && sudo apt-get install devscripts
+  - sudo apt-get update && sudo apt-get upgrade && sudo apt-get install devscripts
 
 script:
-  - sudo /bin/bash bootstrap-salt-minion.sh
-  - sudo apt-get remove salt-common salt-minion
-  - sudo ./bootstrap-salt-minion.sh
-  - sudo apt-get remove salt-common salt-minion
-  - sudo ./bootstrap-salt-minion.sh stable
-  - sudo apt-get remove salt-common salt-minion
-  - sudo ./bootstrap-salt-minion.sh daily
-  - sudo apt-get remove salt-common salt-minion
-  - sudo ./bootstrap-salt-minion.sh git dev
+  - sudo /bin/bash bootstrap-salt-minion.sh && sudo apt-get remove salt-common salt-minion
+  - sudo ./bootstrap-salt-minion.sh && sudo apt-get remove salt-common salt-minion
+  - sudo ./bootstrap-salt-minion.sh stable && sudo apt-get remove salt-common salt-minion
+  - sudo ./bootstrap-salt-minion.sh daily && sudo apt-get remove salt-common salt-minion
+  - sudo ./bootstrap-salt-minion.sh git develop
 
 notifications:
   irc:

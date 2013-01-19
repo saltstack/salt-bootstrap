@@ -1,5 +1,5 @@
 before_install:
-  - sudo apt-get update && sudo apt-get upgrade && sudo apt-get install devscripts
+  - sudo apt-get update && sudo apt-get install devscripts
 
 script:
   - sudo /bin/bash bootstrap-salt-minion.sh && sudo apt-get remove salt-common salt-minion

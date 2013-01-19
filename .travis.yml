@@ -2,7 +2,7 @@ before_install:
   - sudo apt-get update && sudo apt-get install devscripts
 
 script:
-  - (sudo /bin/bash bootstrap-salt-minion.sh &&  && salt --versions-report && sudo apt-get remove salt-common salt-minion) || exit 1
+  - (sudo /bin/bash bootstrap-salt-minion.sh && salt --versions-report && sudo apt-get remove salt-common salt-minion) || exit 1
   - (sudo ./bootstrap-salt-minion.sh && salt --versions-report && sudo apt-get remove salt-common salt-minion) || exit 1
   - (sudo ./bootstrap-salt-minion.sh stable && salt --versions-report && sudo apt-get remove salt-common salt-minion) || exit 1
   - (sudo ./bootstrap-salt-minion.sh daily && salt --versions-report && sudo apt-get remove salt-common salt-minion) || exit 1

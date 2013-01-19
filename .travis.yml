@@ -3,14 +3,14 @@ before_install:
 
 script:
   - sudo /bin/bash bootstrap-salt-minion.sh
-  - sudo apt-get remove salt*
-  - sudo bootstrap-salt-minion.sh
-  - sudo apt-get remove salt*
-  - sudo bootstrap-salt-minion.sh stable
-  - sudo apt-get remove salt*
-  - sudo bootstrap-salt-minion.sh daily
-  - sudo apt-get remove salt*
-  - sudo bootstrap-salt-minion.sh git dev
+  - sudo apt-get remove salt-common salt-minion
+  - sudo ./bootstrap-salt-minion.sh
+  - sudo apt-get remove salt-common salt-minion
+  - sudo ./bootstrap-salt-minion.sh stable
+  - sudo apt-get remove salt-common salt-minion
+  - sudo ./bootstrap-salt-minion.sh daily
+  - sudo apt-get remove salt-common salt-minion
+  - sudo ./bootstrap-salt-minion.sh git dev
 
 notifications:
   irc:

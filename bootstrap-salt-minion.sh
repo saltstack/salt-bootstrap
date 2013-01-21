@@ -383,6 +383,7 @@ fi
 #-------------------------------------------------------------------------------
 __function_defined() {
     FUNC_NAME=$1
+    d=$(declare -f $FUNCNAME)
     if [ "${DISTRO_NAME_L}" = "centos" ]; then
         if typeset -f $FUNC_NAME &>/dev/null ; then
             echo " * INFO: Found function $FUNC_NAME"

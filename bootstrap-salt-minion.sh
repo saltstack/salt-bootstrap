@@ -159,7 +159,7 @@ __exit_cleanup() {
         # Exit with the "original" exit code, not the trapped code
         exit $EXIT_CODE
     }
-    trap "__trap_errors" INT KILL QUIT
+    trap "__trap_errors" INT QUIT ABRT KILL QUIT TERM
 
     # Now we're "good" to kill tee
     kill -s TERM $TEE_PID

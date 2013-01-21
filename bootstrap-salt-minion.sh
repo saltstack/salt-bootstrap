@@ -122,9 +122,6 @@ fi
 
 CALLER=$(echo `ps a -eo pid,cmd | grep $$ | grep -v grep | tr -s ' '` | cut -d ' ' -f 2)
 echo " * INFO: ${CALLER} $0 -- Version ${ScriptVersion}"
-exit 1
-
-
 #---  FUNCTION  ----------------------------------------------------------------
 #          NAME:  __exit_cleanup
 #   DESCRIPTION:  Cleanup any leftovers after script has ended

@@ -120,7 +120,7 @@ if [ $(whoami) != "root" ] ; then
     exit 1
 fi
 
-CALLER=$(ps a | grep $$ | grep -v grep | tr -s ' ' | cut -d ' ' -f 6)
+CALLER=$(ps a -eo pid,cmd | grep $$ | grep -v grep | tr -s ' ' | cut -d ' ' -f 2)
 echo " * INFO: ${CALLER} $0 -- Version ${ScriptVersion}"
 
 

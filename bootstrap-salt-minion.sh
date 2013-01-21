@@ -120,13 +120,26 @@ if [ $(whoami) != "root" ] ; then
     exit 1
 fi
 
-CALLER=$(ps a -eo pid,cmd | grep $$ | grep -v grep | tr -s ' ' | cut -d ' ' -f 2)
+CALLER=$(echo `ps a -eo pid,cmd | grep $$ | grep -v grep | tr -s ' '` | cut -d ' ' -f 2)
 echo " * INFO: ${CALLER} $0 -- Version ${ScriptVersion}"
+exit 1
 
 
 #---  FUNCTION  ----------------------------------------------------------------
 #          NAME:  __exit_cleanup
 #   DESCRIPTION:  Cleanup any leftovers after script has ended
+#
+#
+#   http://www.unix.com/man-page/POSIX/1posix/trap/
+#
+#               Signal Number   Signal Name
+#               1               SIGHUP
+#               2               SIGINT
+#               3               SIGQUIT
+#               6               SIGABRT
+#               9               SIGKILL
+#              14               SIGALRM
+#              15               SIGTERM
 #-------------------------------------------------------------------------------
 __exit_cleanup() {
     EXIT_CODE=$?
@@ -149,8 +162,7 @@ __exit_cleanup() {
         # Exit with the "original" exit code, not the trapped code
         exit $EXIT_CODE
     }
-    # Bash understands ERR trap signal, FreeBSD does not
-    trap "__trap_errors" ERR >/dev/null 2>&1 || trap "__trap_errors" INT KILL QUIT
+    trap "__trap_errors" INT KILL QUIT
 
     # Now we're "good" to kill tee
     kill -TERM $TEE_PID
@@ -158,7 +170,7 @@ __exit_cleanup() {
     # In case the 127 errno is not triggered, exit with the "original" exit code
     exit $EXIT_CODE
 }
-trap "__exit_cleanup" EXIT
+trap "__exit_cleanup" EXIT INT
 
 
 # Define our logging file and pipe paths

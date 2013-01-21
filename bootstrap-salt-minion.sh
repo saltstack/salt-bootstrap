@@ -91,7 +91,7 @@ else
     shift
 fi
 
-if [ "$ITYPE" != "stable" -a "$ITYPE" != "daily" -a "$ITYPE" != "git" ]; then
+if [ "$ITYPE" != "stable" ] && [ "$ITYPE" != "daily" ] && [ "$ITYPE" != "git" ]; then
     echo " ERROR: Installation type \"$ITYPE\" is not known..."
     exit 1
 fi
@@ -256,7 +256,7 @@ __gather_linux_system_info() {
         DISTRO_VERSION=$(__parse_version_string $(grep DISTRIB_RELEASE /etc/lsb-release | sed -e 's/.*=//'))
     fi
 
-    if [ "x$DISTRO_NAME" != "x" -a "x$DISTRO_VERSION" != "x" ]; then
+    if [ "x$DISTRO_NAME" != "x" ] && [ "x$DISTRO_VERSION" != "x" ]; then
         # We already have the distribution name and version
         return
     fi
@@ -369,7 +369,7 @@ DISTRO_NAME_L=$(echo $DISTRO_NAME | tr '[:upper:]' '[:lower:]' | sed 's/[^a-zA-Z
 
 
 # Only Ubuntu has daily packages, let's let users know about that
-if [ "${DISTRO_NAME_L}" != "ubuntu" -a $ITYPE = "daily" ]; then
+if [ "${DISTRO_NAME_L}" != "ubuntu" ] && [ $ITYPE = "daily" ]; then
     echo " * ERROR: Only Ubuntu has daily packages support"
     exit 1
 fi
@@ -1027,7 +1027,7 @@ fi
 
 
 # Configure Salt
-if [ "$TEMP_CONFIG_DIR" != "null" -a "$CONFIG_MINION_FUNC" != "null" ]; then
+if [ "$TEMP_CONFIG_DIR" != "null" ] && [ "$CONFIG_MINION_FUNC" != "null" ]; then
     echo " * Running ${CONFIG_MINION_FUNC}()"
     $CONFIG_MINION_FUNC
     if [ $? -ne 0 ]; then

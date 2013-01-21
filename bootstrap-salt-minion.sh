@@ -383,12 +383,30 @@ fi
 #-------------------------------------------------------------------------------
 __function_defined() {
     FUNC_NAME=$1
-    if [ "$(grep $FUNC_NAME $(dirname $0)/$(basename $0))x" != "x" ]; then
-        # This is really ugly and counter producing but it was, so far, the
-        # only way we could have a POSIX compliant method to find if a function
-        # is defined within this script.
-        echo " * INFO: Found function $FUNC_NAME"
-        return 0
+    if [ "${DISTRO_NAME_L}" = "centos" ]; then
+        if typeset -f $FUNC_NAME &>/dev/null ; then
+            echo " * INFO: Found function $FUNC_NAME"
+            return 0
+        fi
+
+    # Try POSIXLY_CORRECT or not
+    elif test -n "${POSIXLY_CORRECT+yes}"; then
+        if typeset -f ${FUNC_NAME} >/dev/null 2>&1 ; then
+            echo " * INFO: Found function $FUNC_NAME"
+            return 0
+        fi
+    else
+        # Arch linux seems to fall here
+        if $( type ${FUNC_NAME}  >/dev/null 2>&1 ) ; then
+            echo " * INFO: Found function $FUNC_NAME"
+            return 0
+        fi
+#    if [ "$(grep $FUNC_NAME $(dirname $0)/$(basename $0))x" != "x" ]; then
+#        # This is really ugly and counter producing but it was, so far, the
+#        # only way we could have a POSIX compliant method to find if a function
+#        # is defined within this script.
+#        echo " * INFO: Found function $FUNC_NAME"
+#        return 0
     fi
     echo " * INFO: $FUNC_NAME not found...."
     return 1

@@ -535,7 +535,7 @@ install_ubuntu_git() {
 }
 
 install_ubuntu_git_post() {
-    for fname in $(echo "minion master syndic"); do
+    for fname in minion master syndic; do
         if [ -f ${SALT_GIT_CHECKOUT_DIR}/debian/salt-$fname.init ]; then
             cp ${SALT_GIT_CHECKOUT_DIR}/debian/salt-$fname.init /etc/init.d/salt-$fname
         fi
@@ -577,8 +577,8 @@ install_debian_60_deps() {
         /etc/apt/sources.list.d/backports.list
 
     # Add madduck's repo since squeeze packages have been deprecated
-    for i in {salt-common,salt-master,salt-minion,salt-syndic,salt-doc}; do
-        echo "Package: $i"
+    for fname in salt-common salt-master salt-minion salt-syndic salt-doc; do
+        echo "Package: $fname"
         echo "Pin: release a=squeeze-backports"
         echo "Pin-Priority: 600"
         echo
@@ -627,7 +627,7 @@ install_debian_60_git() {
 }
 
 install_debian_git_post() {
-    for fname in $(echo "minion master syndic"); do
+    for fname in minion master syndic; do
         if [ $fname != "minion" ]; then
             # Guess we should only enable and start the minion service. Right??
             continue
@@ -675,7 +675,7 @@ install_fedora_git() {
 }
 
 install_fedora_git_post() {
-    for fname in $(echo "minion master syndic"); do
+    for fname in minion master syndic; do
         if [ $fname != "minion" ]; then
             # Guess we should only enable and start the minion service. Right??
             continue
@@ -758,8 +758,10 @@ install_centos_63_git() {
 }
 
 install_centos_63_git_post() {
-    cp pkg/rpm/salt-{master,minion} /etc/init.d/
-    chmod +x /etc/init.d/salt-{master,minion}
+    for fname in master minion; do
+        cp pkg/rpm/salt-${fname} /etc/init.d/
+        chmod +x /etc/init.d/salt-${fname}
+    done
     /sbin/chkconfig salt-minion on
     /etc/init.d/salt-minion start
 }

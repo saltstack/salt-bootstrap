@@ -381,7 +381,7 @@ __function_defined() {
         fi
     # Try POSIXLY_CORRECT or not
     elif test -n "${POSIXLY_CORRECT+yes}"; then
-        if typeset -f $FUNC_NAME >/dev/null 2>&1 ; then
+        if typeset -f ${FUNC_NAME} >/dev/null 2>&1 ; then
             echo " * INFO: Found function $FUNC_NAME"
             return 0
         fi
@@ -707,11 +707,11 @@ install_fedora_git_post() {
 #
 install_centos_63_stable_deps() {
     if [ $CPU_ARCH_L = "i686" ]; then
-        local ARCH="i386"
+        EPEL_ARCH="i386"
     else
-        local ARCH=$CPU_ARCH_L
+        EPEL_ARCH=$CPU_ARCH_L
     fi
-    rpm -Uvh --force http://mirrors.kernel.org/fedora-epel/6/${ARCH}/epel-release-6-8.noarch.rpm
+    rpm -Uvh --force http://mirrors.kernel.org/fedora-epel/6/${EPEL_ARCH}/epel-release-6-8.noarch.rpm
     yum -y update
 }
 
@@ -823,40 +823,40 @@ install_arch_post() {
 #
 install_freebsd_90_stable_deps() {
     if [ $CPU_ARCH_L = "amd64" ]; then
-        local ARCH="x86:64"
+        BSD_ARCH="x86:64"
     elif [ $CPU_ARCH_L = "x86_64" ]; then
-        local ARCH="x86:64"
+        BSD_ARCH="x86:64"
     elif [ $CPU_ARCH_L = "i386" ]; then
-        local ARCH="x86:32"
+        BSD_ARCH="x86:32"
     elif [ $CPU_ARCH_L = "i686" ]; then
-        local ARCH="x86:32"
+        BSD_ARCH="x86:32"
     fi
 
-    fetch http://pkgbeta.freebsd.org/freebsd:9:${ARCH}/latest/Latest/pkg.txz
+    fetch http://pkgbeta.freebsd.org/freebsd:9:${BSD_ARCH}/latest/Latest/pkg.txz
     tar xf ./pkg.txz -s ",/.*/,,g" "*/pkg-static"
     ./pkg-static add ./pkg.txz
     /usr/local/sbin/pkg2ng
-    echo "PACKAGESITE: http://pkgbeta.freebsd.org/freebsd:9:${ARCH}/latest" > /usr/local/etc/pkg.conf
+    echo "PACKAGESITE: http://pkgbeta.freebsd.org/freebsd:9:${BSD_ARCH}/latest" > /usr/local/etc/pkg.conf
 
     /usr/local/sbin/pkg install -y swig
 }
 
 install_freebsd_git_deps() {
     if [ $CPU_ARCH_L = "amd64" ]; then
-        local ARCH="x86:64"
+        BSD_ARCH="x86:64"
     elif [ $CPU_ARCH_L = "x86_64" ]; then
-        local ARCH="x86:64"
+        BSD_ARCH="x86:64"
     elif [ $CPU_ARCH_L = "i386" ]; then
-        local ARCH="x86:32"
+        BSD_ARCH="x86:32"
     elif [ $CPU_ARCH_L = "i686" ]; then
-        local ARCH="x86:32"
+        BSD_ARCH="x86:32"
     fi
 
-    fetch http://pkgbeta.freebsd.org/freebsd:9:${ARCH}/latest/Latest/pkg.txz
+    fetch http://pkgbeta.freebsd.org/freebsd:9:${BSD_ARCH}/latest/Latest/pkg.txz
     tar xf ./pkg.txz -s ",/.*/,,g" "*/pkg-static"
     ./pkg-static add ./pkg.txz
     /usr/local/sbin/pkg2ng
-    echo "PACKAGESITE: http://pkgbeta.freebsd.org/freebsd:9:${ARCH}/latest" > /usr/local/etc/pkg.conf
+    echo "PACKAGESITE: http://pkgbeta.freebsd.org/freebsd:9:${BSD_ARCH}/latest" > /usr/local/etc/pkg.conf
 
     /usr/local/sbin/pkg install -y swig
 

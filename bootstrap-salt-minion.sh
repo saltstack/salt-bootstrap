@@ -162,7 +162,7 @@ __exit_cleanup() {
     trap "__trap_errors" INT KILL QUIT
 
     # Now we're "good" to kill tee
-    kill -TERM $TEE_PID
+    kill -s TERM $TEE_PID
 
     # In case the 127 errno is not triggered, exit with the "original" exit code
     exit $EXIT_CODE

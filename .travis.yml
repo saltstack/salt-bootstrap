@@ -2,7 +2,7 @@ before_install:
   - sudo apt-get update && sudo apt-get install devscripts
 
 script:
-  #- /usr/bin/checkbashisms -pxf bootstrap-salt-minion.sh || exit 1
+  - /usr/bin/checkbashisms -pxfn bootstrap-salt-minion.sh || exit 1
   - (/bin/echo -e '\nInstalling stable with bash' && sudo /bin/bash bootstrap-salt-minion.sh && salt-minion --versions-report && sudo apt-get remove salt-common salt-minion) || exit 1
   - (/bin/echo -e '\nInstalling stable with sh' && sudo ./bootstrap-salt-minion.sh && salt-minion --versions-report && sudo apt-get remove salt-common salt-minion) || exit 1
   - (/bin/echo -e '\nInstalling explicit stable with sh' && sudo ./bootstrap-salt-minion.sh stable && salt-minion --versions-report && sudo apt-get remove salt-common salt-minion) || exit 1

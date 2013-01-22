@@ -777,6 +777,8 @@ Server = http://intothesaltmine.org/archlinux
 }
 
 install_arch_git_deps() {
+    pacman -Sy --noconfirm git
+
     grep '\[salt\]' /etc/pacman.conf >/dev/null 2>&1 || echo '[salt]
     Server = http://intothesaltmine.org/archlinux
     ' >> /etc/pacman.conf

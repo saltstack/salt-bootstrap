@@ -44,8 +44,8 @@ If you already have python installed, then it's as easy as:
   python -m urllib "http://bootstrap.saltstack.org" | sudo sh -s git develop
 
 
-On a FreeBSD base system you usually don't have either of the above binaries
-available. You **do** have ``fetch`` available though:
+On a FreeBSD base system you usually don't have either of the above binaries available. You **do** 
+have ``fetch`` available though:
 
 .. code:: console
 
@@ -67,16 +67,8 @@ In order to install salt for a distribution you need to define:
   install_<distro>_deps
 
 
-2. To install salt, which, of course, is required, one of:
-
-.. code:: bash
-
-  install_<distro>_<distro_version>_<install_type>
-  install_<distro>_<install_type>
-
-
-3. Optionally, define a minion configuration function, which will be called if 
-   the ``-c|config-dir`` option is passed. One of:
+2. Optionally, define a minion configuration function, which will be called if the 
+   ``-c|config-dir`` option is passed. One of:
 
 .. code:: bash
 
@@ -85,6 +77,14 @@ In order to install salt for a distribution you need to define:
   config_<distro>_<install_type>_minion
   config_<distro>_minion
   config_minion [THIS ONE IS ALREADY DEFINED AS THE DEFAULT]
+
+
+3. To install salt, which, of course, is required, one of:
+
+.. code:: bash
+
+  install_<distro>_<distro_version>_<install_type>
+  install_<distro>_<install_type>
 
 
 4. Also optionally, define a post install function, one of:
@@ -133,7 +133,6 @@ Supported Operating Systems
 - Fedora
 - Arch
 - FreeBSD 9.0
-
 
 
 

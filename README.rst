@@ -44,6 +44,14 @@ If you already have python installed, then it's as easy as:
   python -m urllib "http://bootstrap.saltstack.org" | sudo sh -s git develop
 
 
+On a FreeBSD base system you usually don't have either of the above binaries
+available. You **do** have ``fetch`` available though:
+
+.. code:: console
+
+  fetch -o - http://bootstrap.saltstack.org | sudo sh
+
+
 
 Adding support for other operating systems
 ------------------------------------------

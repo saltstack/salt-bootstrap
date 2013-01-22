@@ -392,8 +392,6 @@ __function_defined() {
 }
 
 
-
-
 #---  FUNCTION  ----------------------------------------------------------------
 #          NAME:  __git_clone_and_checkout
 #   DESCRIPTION:  (DRY) Helper function to clone and checkout salt to a
@@ -558,7 +556,6 @@ install_ubuntu_git_post() {
 #
 #   Debian Install Functions
 #
-
 install_debian_deps() {
     apt-get update
 }
@@ -650,7 +647,6 @@ install_fedora_deps() {
 install_fedora_stable() {
     yum install -y salt-minion
 }
-
 
 install_fedora_git_deps() {
     install_fedora_deps
@@ -758,7 +754,6 @@ install_centos_63_git_post() {
 #   Ended CentOS Install Functions
 #
 ##############################################################################
-
 
 ##############################################################################
 #
@@ -950,7 +945,6 @@ config_minion() {
 #  Ended Default Configuration function
 #
 ##############################################################################
-
 
 
 #=============================================================================

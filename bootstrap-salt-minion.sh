@@ -807,7 +807,14 @@ install_arch_git() {
 }
 
 install_arch_post() {
-    /etc/rc.d/salt-minion start
+    if [ -f /usr/bin/systemctl ]; then
+        # Using systemd
+        systemctl daemon-reload
+        sleep 0.2
+        systemctl restart salt-minion.service
+    else
+        /etc/rc.d/salt-minion start
+    fi
 }
 #
 #   Ended Arch Install Functions

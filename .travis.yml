@@ -7,6 +7,7 @@ script:
   - (/bin/echo -e '\nInstalling stable with sh' && sudo ./bootstrap-salt-minion.sh && salt-minion --versions-report && sudo apt-get remove salt-common salt-minion) || exit 1
   - (/bin/echo -e '\nInstalling explicit stable with sh' && sudo ./bootstrap-salt-minion.sh stable && salt-minion --versions-report && sudo apt-get remove salt-common salt-minion) || exit 1
   - (/bin/echo -e '\nInstalling ubuntu daily with sh' && sudo ./bootstrap-salt-minion.sh daily && salt-minion --versions-report && sudo apt-get remove salt-common salt-minion) || exit 1
+  - (/bin/echo -e '\nInstalling stable piped trough sh' && cat ./bootstrap-salt-minion.sh | sudo sh && salt-minion --versions-report && sudo apt-get remove salt-common salt-minion) || exit 1
   - (/bin/echo -e '\nInstalling from GIT' && sudo ./bootstrap-salt-minion.sh git develop && salt --versions-report) || exit 1
 
 notifications:

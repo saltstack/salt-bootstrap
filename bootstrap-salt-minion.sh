@@ -771,13 +771,13 @@ install_centos_63_git_post() {
 #   Arch Install Functions
 #
 install_arch_stable_deps() {
-    echo '[salt]
+    grep '\[salt\]' /etc/pacman.conf >/dev/null 2>&1 || echo '[salt]
 Server = http://intothesaltmine.org/archlinux
 ' >> /etc/pacman.conf
 }
 
 install_arch_git_deps() {
-    echo '[salt]
+    grep '\[salt\]' /etc/pacman.conf >/dev/null 2>&1 || echo '[salt]
     Server = http://intothesaltmine.org/archlinux
     ' >> /etc/pacman.conf
 

@@ -675,14 +675,8 @@ install_fedora_git_post() {
             # Guess we should only enable and start the minion service. Right??
             continue
         fi
-        #cp ${SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-$fname /etc/rc.d/init.d/salt-$fname
         cp ${SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-$fname.service /lib/systemd/system/salt-$fname.service
-        #chmod +x /etc/rc.d/init.d/salt-$fname
 
-        # Switch from forking to simple, dunny why I can't make it work
-        sed -i 's/Type=forking/Type=simple/g' /lib/systemd/system/salt-$fname.service
-        # Remove the daemon flag because of the above
-        sed -ie 's;ExecStart=\(.*\) -d;ExecStart=\1;' /lib/systemd/system/salt-$fname.service
         systemctl preset salt-$fname.service
         systemctl enable salt-$fname.service
         sleep 0.2
@@ -819,10 +813,6 @@ install_arch_git_post() {
             fi
             cp ${SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-$fname.service /lib/systemd/system/salt-$fname.service
 
-            # Switch from forking to simple, dunny why I can't make it work
-            sed -i 's/Type=forking/Type=simple/g' /lib/systemd/system/salt-$fname.service
-            # Remove the daemon flag because of the above
-            sed -ie 's;ExecStart=\(.*\) -d;ExecStart=\1;' /lib/systemd/system/salt-$fname.service
             systemctl preset salt-$fname.service
             systemctl enable salt-$fname.service
             sleep 0.2

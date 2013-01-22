@@ -777,11 +777,9 @@ Server = http://intothesaltmine.org/archlinux
 }
 
 install_arch_git_deps() {
-    pacman -Sy --noconfirm git
-
-    grep '\[salt\]' /etc/pacman.conf >/dev/null 2>&1 || echo '[salt]
-    Server = http://intothesaltmine.org/archlinux
-    ' >> /etc/pacman.conf
+    pacman -Sy --noconfirm pacman git python2-crypto python2-distribute \
+        python2-jinja  python2-m2crypto python2-markupsafe python2-msgpack \
+        python2-psutil python2-pyzmq zeromq
 
     __git_clone_and_checkout
 
@@ -798,11 +796,6 @@ install_arch_stable() {
 }
 
 install_arch_git() {
-    pacman -Sy --noconfirm pacman
-    pacman -Syu --noconfirm salt git
-    rm -rf /usr/lib/python2.7/site-packages/salt*
-    rm -rf /usr/bin/salt-*
-
     python2 setup.py install
 }
 
@@ -814,6 +807,39 @@ install_arch_post() {
         systemctl restart salt-minion.service
     else
         /etc/rc.d/salt-minion start
+    fi
+}
+
+install_arch_git_post() {
+    if [ -f /usr/bin/systemctl ]; then
+        for fname in minion master syndic; do
+            if [ $fname != "minion" ]; then
+                # Guess we should only enable and start the minion service. Right??
+                continue
+            fi
+            cp ${SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-$fname.service /lib/systemd/system/salt-$fname.service
+
+            # Switch from forking to simple, dunny why I can't make it work
+            sed -i 's/Type=forking/Type=simple/g' /lib/systemd/system/salt-$fname.service
+            # Remove the daemon flag because of the above
+            sed -ie 's;ExecStart=\(.*\) -d;ExecStart=\1;' /lib/systemd/system/salt-$fname.service
+            systemctl preset salt-$fname.service
+            systemctl enable salt-$fname.service
+            sleep 0.2
+            systemctl daemon-reload
+            sleep 0.2
+            systemctl start salt-$fname.service
+        done
+    else
+        for fname in minion master syndic; do
+            if [ $fname != "minion" ]; then
+                # Guess we should only enable and start the minion service. Right??
+                continue
+            fi
+            cp ${SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-$fname /etc/rc.d/init.d/salt-$fname
+            chmod +x /etc/rc.d/init.d/salt-$fname
+            /etc/init.d/salt-$fname start
+        done
     fi
 }
 #

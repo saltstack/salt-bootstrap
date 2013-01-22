@@ -120,7 +120,7 @@ if [ $(whoami) != "root" ] ; then
     exit 1
 fi
 
-CALLER=$(echo `ps a -eo pid,cmd | grep $$ | grep -v grep | tr -s ' '` | cut -d ' ' -f 2)
+CALLER=$(echo `ps a -eo pid,command | grep $$ | grep -v grep | tr -s ' '` | cut -d ' ' -f 2)
 echo " * INFO: ${CALLER} $0 -- Version ${ScriptVersion}"
 #---  FUNCTION  ----------------------------------------------------------------
 #          NAME:  __exit_cleanup

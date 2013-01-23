@@ -766,6 +766,10 @@ Server = http://intothesaltmine.org/archlinux
 }
 
 install_arch_git_deps() {
+    grep '\[salt\]' /etc/pacman.conf >/dev/null 2>&1 || echo '[salt]
+Server = http://intothesaltmine.org/archlinux
+' >> /etc/pacman.conf
+
     pacman -Sy --noconfirm pacman git python2-crypto python2-distribute \
         python2-jinja  python2-m2crypto python2-markupsafe python2-msgpack \
         python2-psutil python2-pyzmq zeromq

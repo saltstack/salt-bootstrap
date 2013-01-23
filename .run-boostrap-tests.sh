@@ -24,8 +24,8 @@ COLUMNS=$(tput cols) || 80
 title_echo() {
 	title="$1"
 	line="$(printf "%${COLUMNS}s" "")"
-	printf "\033[1;34m%s\033[0m\n" "${line// /*}"
-	printf "\033[1;34m%*s\033[0m\n" $(((${#title}+$COLUMNS)/2)) "$title"
+	printf "\033[0;33m%s\033[0m\n" "${line// /*}"
+	printf "\033[0;33m%*s\033[0m\n" $(((${#title}+$COLUMNS)/2)) "$title"
 #	printf "\033[1;34m%s\033[0m\n" "${line// /*}"
 }
 

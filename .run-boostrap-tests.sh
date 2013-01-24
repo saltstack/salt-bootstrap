@@ -11,7 +11,7 @@
 #  REQUIREMENTS: ---
 #          BUGS: https://github.com/saltstack/salt-bootstrap
 #        AUTHOR: Pedro Algarvio (s0undt3ch), pedro@algarvio.me
-#  ORGANIZATION: UfSoft.org
+#  ORGANIZATION: Salt Stack (saltstack.org)
 #       CREATED: 32/01/2013 06:01:27 PM WET
 #===============================================================================
 

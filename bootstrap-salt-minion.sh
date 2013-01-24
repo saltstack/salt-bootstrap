@@ -455,7 +455,12 @@ __apt_get_noinput() {
 #
 install_ubuntu_deps() {
     apt-get update
-    __apt_get_noinput python-software-properties
+    if [ $DISTRO_VERSION -gt 1204 ]; then
+        # Above Ubuntu 12.04 add-apt-repository is in a different package
+        __apt_get_noinput software-properties-common
+    else
+        __apt_get_noinput python-software-properties
+    fi
     add-apt-repository -y ppa:saltstack/salt
     apt-get update
 }
@@ -490,7 +495,11 @@ install_ubuntu_1110_deps() {
 
 install_ubuntu_daily_deps() {
     apt-get update
-    __apt_get_noinput python-software-properties
+    if [ $DISTRO_VERSION -gt 1204 ]; then
+        __apt_get_noinput software-properties-common
+    else
+        __apt_get_noinput python-software-properties
+    fi
     add-apt-repository -y ppa:saltstack/salt-depends
     add-apt-repository -y ppa:saltstack/salt-daily
     apt-get update
@@ -498,7 +507,11 @@ install_ubuntu_daily_deps() {
 
 install_ubuntu_git_deps() {
     apt-get update
-    __apt_get_noinput python-software-properties
+    if [ $DISTRO_VERSION -gt 1204 ]; then
+        __apt_get_noinput software-properties-common
+    else
+        __apt_get_noinput python-software-properties
+    fi
     add-apt-repository -y ppa:saltstack/salt
     apt-get update
     __apt_get_noinput git-core python-yaml python-m2crypto python-crypto msgpack-python python-zmq python-jinja2

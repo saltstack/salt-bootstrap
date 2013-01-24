@@ -461,29 +461,12 @@ install_ubuntu_deps() {
     else
         __apt_get_noinput python-software-properties
     fi
-    add-apt-repository -y ppa:saltstack/salt
-    apt-get update
-}
-
-install_ubuntu_1004_deps() {
-    apt-get update
-    __apt_get_noinput python-software-properties
-    add-apt-repository ppa:saltstack/salt
-    apt-get update
-    __apt_get_noinput salt-minion
-}
-
-install_ubuntu_1004_git_deps() {
-    install_ubuntu_1004_deps
-    __apt_get_noinput git-core
-
-    __git_clone_and_checkout
-
-    # Let's trigger config_minion()
-    if [ "$TEMP_CONFIG_DIR" = "null" ]; then
-        TEMP_CONFIG_DIR="${SALT_GIT_CHECKOUT_DIR}/conf/"
-        CONFIG_MINION_FUNC="config_minion"
+    if [ $DISTRO_VERSION -lt 1110 ]; then
+        add-apt-repository ppa:saltstack/salt
+    else
+        add-apt-repository -y ppa:saltstack/salt
     fi
+    apt-get update
 }
 
 install_ubuntu_1110_deps() {
@@ -491,29 +474,11 @@ install_ubuntu_1110_deps() {
     __apt_get_noinput python-software-properties
     add-apt-repository -y 'deb http://us.archive.ubuntu.com/ubuntu/ oneiric universe'
     add-apt-repository -y ppa:saltstack/salt
-}
-
-install_ubuntu_daily_deps() {
-    apt-get update
-    if [ $DISTRO_VERSION -gt 1204 ]; then
-        __apt_get_noinput software-properties-common
-    else
-        __apt_get_noinput python-software-properties
-    fi
-    add-apt-repository -y ppa:saltstack/salt-depends
-    add-apt-repository -y ppa:saltstack/salt-daily
     apt-get update
 }
 
 install_ubuntu_git_deps() {
-    apt-get update
-    if [ $DISTRO_VERSION -gt 1204 ]; then
-        __apt_get_noinput software-properties-common
-    else
-        __apt_get_noinput python-software-properties
-    fi
-    add-apt-repository -y ppa:saltstack/salt
-    apt-get update
+    install_ubuntu_deps
     __apt_get_noinput git-core python-yaml python-m2crypto python-crypto msgpack-python python-zmq python-jinja2
 
     __git_clone_and_checkout

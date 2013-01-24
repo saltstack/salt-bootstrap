@@ -907,14 +907,18 @@ config_minion() {
     fi
 
     PKI_DIR=/etc/salt/pki/minion
+    MASTER_PKI_DIR=/etc/salt/pki/master
 
     # Let's create the necessary directories
     [ -d /etc/salt ] || mkdir /etc/salt
     [ -d $PKI_DIR ] || mkdir -p $PKI_DIR && chmod 700 $PKI_DIR
+    [ -d $MASTER_PKI_DIR ] || mkdir -p $MASTER_PKI_DIR && chmod 700 $MASTER_PKI_DIR
 
     # Copy the minions configuration if found
     [ -f "$TEMP_CONFIG_DIR/minion" ] && mv "$TEMP_CONFIG_DIR/minion" /etc/salt
 
+    # Copy the masters configuration if found
+    [ -f "$TEMP_CONFIG_DIR/master" ] && mv "$TEMP_CONFIG_DIR/master" /etc/salt
 
     # Copy the minion's keys if found
     if [ -f "$TEMP_CONFIG_DIR/minion.pem" ]; then
@@ -924,6 +928,16 @@ config_minion() {
     if [ -f "$TEMP_CONFIG_DIR/minion.pub" ]; then
         mv "$TEMP_CONFIG_DIR/minion.pub" $PKI_DIR/
         chmod 664 $PKI_DIR/minion.pub
+    fi
+
+    # Copy the master's keys if found
+    if [ -f "$TEMP_CONFIG_DIR/master.pem" ]; then
+        mv "$TEMP_CONFIG_DIR/master.pem" $MASTER_PKI_DIR/
+        chmod 400 $MASTER_PKI_DIR/master.pem
+    fi
+    if [ -f "$TEMP_CONFIG_DIR/master.pub" ]; then
+        mv "$TEMP_CONFIG_DIR/master.pub" $MASTER_PKI_DIR/
+        chmod 664 $MASTER_PKI_DIR/master.pub
     fi
 }
 #

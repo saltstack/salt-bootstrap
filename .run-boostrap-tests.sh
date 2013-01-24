@@ -5,21 +5,19 @@
 #
 #         USAGE: ./.travis-ci-test.sh
 #
-#   DESCRIPTION: 
+#   DESCRIPTION: Run several tests against the bootstrap script
 #
 #       OPTIONS: ---
 #  REQUIREMENTS: ---
-#          BUGS: ---
-#         NOTES: ---
+#          BUGS: https://github.com/saltstack/salt-bootstrap
 #        AUTHOR: Pedro Algarvio (s0undt3ch), pedro@algarvio.me
 #  ORGANIZATION: UfSoft.org
-#       CREATED: 01/23/2013 06:01:27 PM WET
-#      REVISION:  ---
+#       CREATED: 32/01/2013 06:01:27 PM WET
 #===============================================================================
 
 set -o nounset                              # Treat unset variables as an error
 
-COLUMNS=$(tput cols) || 80
+COLUMNS=$(tput cols || 80)
 
 title_echo() {
 	title="$1"
@@ -32,16 +30,14 @@ title_echo() {
 failed_echo() {
 	title="FAILED"
 	line="$(printf "%${COLUMNS}s" "")"
-#	printf "\031[1;34m%s\033[0m\n" "${line// /*}"
-	printf "\031[1;34m%*s\033[0m\n" $(((${#title}+$COLUMNS)/2)) "$title"
-	printf "\031[1;34m%s\033[0m\n" "${line// /*}"
+	printf "\033[1;31m%*s\033[0m\n" $(((${#title}+$COLUMNS)/2)) "$title"
+	printf "\033[1;31m%s\033[0m\n" "${line// /*}"
 	exit 1
 }
 
 passed_echo() {
 	title="OK"
 	line="$(printf "%${COLUMNS}s" "")"
-#	printf "\033[1;32m%s\033[0m\n" "${line// /*}"
 	printf "\033[1;32m%*s\033[0m\n" $(((${#title}+$COLUMNS)/2)) "$title"
 	printf "\033[1;32m%s\033[0m\n" "${line// /*}"
 }

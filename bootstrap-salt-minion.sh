@@ -362,8 +362,10 @@ echo "     Distribution: ${DISTRO_NAME} ${DISTRO_VERSION}"
 # Simplify version naming on functions
 if [ "x${DISTRO_VERSION}" = "x" ]; then
     DISTRO_VERSION_NO_DOTS=""
+    PREFIXED_DISTRO_VERSION_NO_DOTS=""
 else
-    DISTRO_VERSION_NO_DOTS="_$(echo $DISTRO_VERSION | tr -d '.')"
+    DISTRO_VERSION_NO_DOTS="$(echo $DISTRO_VERSION | tr -d '.')"
+    PREFIXED_DISTRO_VERSION_NO_DOTS="_${DISTRO_VERSION_NO_DOTS}"
 fi
 # Simplify distro name naming on functions
 DISTRO_NAME_L=$(echo $DISTRO_NAME | tr '[:upper:]' '[:lower:]' | sed 's/[^a-zA-Z0-9_ ]//g' | sed -e 's|[:space:]+|_|g')
@@ -455,13 +457,13 @@ __apt_get_noinput() {
 #
 install_ubuntu_deps() {
     apt-get update
-    if [ $DISTRO_VERSION -gt 1204 ]; then
+    if [ $DISTRO_VERSION_NO_DOTS -gt 1204 ]; then
         # Above Ubuntu 12.04 add-apt-repository is in a different package
         __apt_get_noinput software-properties-common
     else
         __apt_get_noinput python-software-properties
     fi
-    if [ $DISTRO_VERSION -lt 1110 ]; then
+    if [ $DISTRO_VERSION_NO_DOTS -lt 1110 ]; then
         add-apt-repository ppa:saltstack/salt
     else
         add-apt-repository -y ppa:saltstack/salt
@@ -934,8 +936,8 @@ config_minion() {
 # LET'S PROCEED WITH OUR INSTALLATION
 #=============================================================================
 # Let's get the dependencies install function
-DEP_FUNC_NAMES="install_${DISTRO_NAME_L}${DISTRO_VERSION_NO_DOTS}_${ITYPE}_deps"
-DEP_FUNC_NAMES="$DEP_FUNC_NAMES install_${DISTRO_NAME_L}${DISTRO_VERSION_NO_DOTS}_deps"
+DEP_FUNC_NAMES="install_${DISTRO_NAME_L}${PREFIXED_DISTRO_VERSION_NO_DOTS}_${ITYPE}_deps"
+DEP_FUNC_NAMES="$DEP_FUNC_NAMES install_${DISTRO_NAME_L}${PREFIXED_DISTRO_VERSION_NO_DOTS}_deps"
 DEP_FUNC_NAMES="$DEP_FUNC_NAMES install_${DISTRO_NAME_L}_${ITYPE}_deps"
 DEP_FUNC_NAMES="$DEP_FUNC_NAMES install_${DISTRO_NAME_L}_deps"
 
@@ -951,8 +953,8 @@ done
 # Let's get the minion config function
 CONFIG_MINION_FUNC="null"
 if [ "$TEMP_CONFIG_DIR" != "null" ]; then
-    CONFIG_FUNC_NAMES="config_${DISTRO_NAME_L}${DISTRO_VERSION_NO_DOTS}_${ITYPE}_minion"
-    CONFIG_FUNC_NAMES="$CONFIG_FUNC_NAMES config_${DISTRO_NAME_L}${DISTRO_VERSION_NO_DOTS}_minon"
+    CONFIG_FUNC_NAMES="config_${DISTRO_NAME_L}${PREFIXED_DISTRO_VERSION_NO_DOTS}_${ITYPE}_minion"
+    CONFIG_FUNC_NAMES="$CONFIG_FUNC_NAMES config_${DISTRO_NAME_L}${PREFIXED_DISTRO_VERSION_NO_DOTS}_minon"
     CONFIG_FUNC_NAMES="$CONFIG_FUNC_NAMES config_${DISTRO_NAME_L}_${ITYPE}_minion"
     CONFIG_FUNC_NAMES="$CONFIG_FUNC_NAMES config_${DISTRO_NAME_L}_minion"
     CONFIG_FUNC_NAMES="$CONFIG_FUNC_NAMES config_minion"
@@ -967,7 +969,7 @@ fi
 
 
 # Let's get the install function
-INSTALL_FUNC_NAMES="install_${DISTRO_NAME_L}${DISTRO_VERSION_NO_DOTS}_${ITYPE}"
+INSTALL_FUNC_NAMES="install_${DISTRO_NAME_L}${PREFIXED_DISTRO_VERSION_NO_DOTS}_${ITYPE}"
 INSTALL_FUNC_NAMES="$INSTALL_FUNC_NAMES install_${DISTRO_NAME_L}_${ITYPE}"
 
 INSTALL_FUNC="null"
@@ -980,8 +982,8 @@ done
 
 
 # Let's get the post install function
-POST_FUNC_NAMES="install_${DISTRO_NAME_L}${DISTRO_VERSION_NO_DOTS}_${ITYPE}_post"
-POST_FUNC_NAMES="$POST_FUNC_NAMES install_${DISTRO_NAME_L}${DISTRO_VERSION_NO_DOTS}_post"
+POST_FUNC_NAMES="install_${DISTRO_NAME_L}${PREFIXED_DISTRO_VERSION_NO_DOTS}_${ITYPE}_post"
+POST_FUNC_NAMES="$POST_FUNC_NAMES install_${DISTRO_NAME_L}${PREFIXED_DISTRO_VERSION_NO_DOTS}_post"
 POST_FUNC_NAMES="$POST_FUNC_NAMES install_${DISTRO_NAME_L}_${ITYPE}_post"
 POST_FUNC_NAMES="$POST_FUNC_NAMES install_${DISTRO_NAME_L}_post"
 

@@ -491,10 +491,10 @@ install_ubuntu_git_deps() {
 
     __git_clone_and_checkout
 
-    # Let's trigger config_minion()
+    # Let's trigger config_salt()
     if [ "$TEMP_CONFIG_DIR" = "null" ]; then
         TEMP_CONFIG_DIR="${SALT_GIT_CHECKOUT_DIR}/conf/"
-        CONFIG_MINION_FUNC="config_minion"
+        CONFIG_SALT_FUNC="config_salt"
     fi
 }
 
@@ -584,10 +584,10 @@ install_debian_git_deps() {
 
     __git_clone_and_checkout
 
-    # Let's trigger config_minion()
+    # Let's trigger config_salt()
     if [ "$TEMP_CONFIG_DIR" = "null" ]; then
         TEMP_CONFIG_DIR="${SALT_GIT_CHECKOUT_DIR}/conf/"
-        CONFIG_MINION_FUNC="config_minion"
+        CONFIG_SALT_FUNC="config_salt"
     fi
 }
 
@@ -641,10 +641,10 @@ install_fedora_git_deps() {
 
     __git_clone_and_checkout
 
-    # Let's trigger config_minion()
+    # Let's trigger config_salt()
     if [ "$TEMP_CONFIG_DIR" = "null" ]; then
         TEMP_CONFIG_DIR="${SALT_GIT_CHECKOUT_DIR}/conf/"
-        CONFIG_MINION_FUNC="config_minion"
+        CONFIG_SALT_FUNC="config_salt"
     fi
 }
 
@@ -714,10 +714,10 @@ install_centos_63_git_deps() {
 
     __git_clone_and_checkout
 
-    # Let's trigger config_minion()
+    # Let's trigger config_salt()
     if [ "$TEMP_CONFIG_DIR" = "null" ]; then
         TEMP_CONFIG_DIR="${SALT_GIT_CHECKOUT_DIR}/conf/"
-        CONFIG_MINION_FUNC="config_minion"
+        CONFIG_SALT_FUNC="config_salt"
     fi
 
 }
@@ -763,10 +763,10 @@ Server = http://intothesaltmine.org/archlinux
 
     __git_clone_and_checkout
 
-    # Let's trigger config_minion()
+    # Let's trigger config_salt()
     if [ "$TEMP_CONFIG_DIR" = "null" ]; then
         TEMP_CONFIG_DIR="${SALT_GIT_CHECKOUT_DIR}/conf/"
-        CONFIG_MINION_FUNC="config_minion"
+        CONFIG_SALT_FUNC="config_salt"
     fi
 }
 
@@ -867,10 +867,10 @@ install_freebsd_git_deps() {
     /usr/local/sbin/pkg install -y swig
 
     __git_clone_and_checkout
-    # Let's trigger config_minion()
+    # Let's trigger config_salt()
     if [ "$TEMP_CONFIG_DIR" = "null" ]; then
         TEMP_CONFIG_DIR="${SALT_GIT_CHECKOUT_DIR}/conf/"
-        CONFIG_MINION_FUNC="config_minion"
+        CONFIG_SALT_FUNC="config_salt"
     fi
 }
 
@@ -976,7 +976,7 @@ done
 
 
 # Let's get the minion config function
-CONFIG_MINION_FUNC="null"
+CONFIG_SALT_FUNC="null"
 if [ "$TEMP_CONFIG_DIR" != "null" ]; then
     CONFIG_FUNC_NAMES="config_${DISTRO_NAME_L}${PREFIXED_DISTRO_VERSION_NO_DOTS}_${ITYPE}_salt"
     CONFIG_FUNC_NAMES="$CONFIG_FUNC_NAMES config_${DISTRO_NAME_L}${PREFIXED_DISTRO_VERSION_NO_DOTS}_salt"
@@ -986,7 +986,7 @@ if [ "$TEMP_CONFIG_DIR" != "null" ]; then
 
     for FUNC_NAME in $CONFIG_FUNC_NAMES; do
         if __function_defined $FUNC_NAME; then
-            CONFIG_MINION_FUNC=$FUNC_NAME
+            CONFIG_SALT_FUNC=$FUNC_NAME
             break
         fi
     done
@@ -1042,11 +1042,11 @@ fi
 
 
 # Configure Salt
-if [ "$TEMP_CONFIG_DIR" != "null" ] && [ "$CONFIG_MINION_FUNC" != "null" ]; then
-    echo " * Running ${CONFIG_MINION_FUNC}()"
-    $CONFIG_MINION_FUNC
+if [ "$TEMP_CONFIG_DIR" != "null" ] && [ "$CONFIG_SALT_FUNC" != "null" ]; then
+    echo " * Running ${CONFIG_SALT_FUNC}()"
+    $CONFIG_SALT_FUNC
     if [ $? -ne 0 ]; then
-        echo " * Failed to run ${CONFIG_MINION_FUNC}()!!!"
+        echo " * Failed to run ${CONFIG_SALT_FUNC}()!!!"
         exit 1
     fi
 fi

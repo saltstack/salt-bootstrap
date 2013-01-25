@@ -25,17 +25,20 @@ For example, using ``curl`` to install latest git:
   curl -L http://bootstrap.saltstack.org | sudo sh -s git develop
 
 
+
 Or, using ``wget`` to install your distribution's stable packages:
 
 .. code:: console
 
   wget -O - http://bootstrap.saltstack.org | sudo sh
 
+
 If you have certificate issues using ``wget`` try the following:
 
 .. code:: console
 
   wget --no-check-certificate -O - http://bootstrap.saltstack.org | sudo sh
+
 
 
 If you already have python installed, then it's as easy as:
@@ -51,6 +54,14 @@ have ``fetch`` available though:
 .. code:: console
 
   fetch -o - http://bootstrap.saltstack.org | sudo sh
+
+
+
+If all you want is to install a ``salt-master`` using latest git:
+
+.. code:: console
+
+  curl -L http://bootstrap.saltstack.org | sudo sh -s -- -M -N git develop
 
 
 

@@ -17,6 +17,8 @@
 
 set -o nounset                              # Treat unset variables as an error
 
+# Find out the available columns on our tty
+COLUMNS=$(tput cols || 80)
 
 if [ $(whoami) != "root" ] ; then
     title="You need to run this script as root."
@@ -30,8 +32,6 @@ fi
 # Change to the scripts parent directory
 cd $(dirname $0)
 
-# Find out the available columns on our tty
-COLUMNS=$(tput cols || 80)
 
 
 title_echo() {

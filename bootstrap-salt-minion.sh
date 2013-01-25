@@ -145,7 +145,7 @@ fi
 
 CALLER=$(echo `ps a -o pid,command | grep $$ | grep -v grep | tr -s ' '` | cut -d ' ' -f 2)
 if [ "${CALLER}x" = "${0}x" ]; then
-    CALLER="PIPED TROUGH"
+    CALLER="PIPED THROUGH"
 fi
 echo " * INFO: ${CALLER} $0 -- Version ${ScriptVersion}"
 #---  FUNCTION  ----------------------------------------------------------------

@@ -144,6 +144,9 @@ if [ $(whoami) != "root" ] ; then
 fi
 
 CALLER=$(echo `ps a -o pid,command | grep $$ | grep -v grep | tr -s ' '` | cut -d ' ' -f 2)
+if [ "${CALLER}x" = "${0}x" ]; then
+    CALLER="PIPED TROUGH"
+fi
 echo " * INFO: ${CALLER} $0 -- Version ${ScriptVersion}"
 #---  FUNCTION  ----------------------------------------------------------------
 #          NAME:  __exit_cleanup
@@ -437,7 +440,7 @@ __git_clone_and_checkout() {
 #   DESCRIPTION:  (DRY) apt-get install with noinput options
 #-------------------------------------------------------------------------------
 __apt_get_noinput() {
-    apt-get install -y -o DPkg::Options::=--force-confold $@
+    apt-get install -y -o DPkg::Options::=--force-confold $@; return $?
 }
 
 
@@ -519,9 +522,17 @@ install_ubuntu_1110_post() {
 }
 
 install_ubuntu_stable() {
-    [ $INSTALL_MINION -eq 1 ] && __apt_get_noinput salt-minion
-    [ $INSTALL_MASTER -eq 1 ] && __apt_get_noinput salt-master
-    [ $INSTALL_SYNDIC -eq 1 ] && __apt_get_noinput salt-syndic
+    packages=""
+    if [ $INSTALL_MINION -eq 1 ]; then
+        packages="${packages} salt-minion"
+    fi
+    if [ $INSTALL_MASTER -eq 1 ]; then
+        packages="${packages} salt-master"
+    fi
+    if [ $INSTALL_SYNDIC -eq 1 ]; then
+        packages="${packages} salt-syndic"
+    fi
+    __apt_get_noinput "${packages}"
 }
 
 install_ubuntu_daily() {
@@ -534,17 +545,20 @@ install_ubuntu_git() {
 
 install_ubuntu_git_post() {
     for fname in minion master syndic; do
-        if [ -f ${SALT_GIT_CHECKOUT_DIR}/debian/salt-$fname.init ]; then
-            cp ${SALT_GIT_CHECKOUT_DIR}/debian/salt-$fname.init /etc/init.d/salt-$fname
+        if [ -f /usr/sbin/service ]; then
+            # We have upstart support
+            if [ -f ${SALT_GIT_CHECKOUT_DIR}/debian/salt-$fname.upstart ]; then
+                cp ${SALT_GIT_CHECKOUT_DIR}/debian/salt-$fname.upstart /etc/init/salt-$fname.conf
+            elif [ -f ${SALT_GIT_CHECKOUT_DIR}/pkg/salt-$fname.upstart ]; then
+                cp ${SALT_GIT_CHECKOUT_DIR}/pkg/salt-$fname.upstart /etc/init/salt-$fname.conf
+            fi
+            service salt-$fname status && service salt-$fname restart || service salt-$fname start
+        else
+            if [ -f ${SALT_GIT_CHECKOUT_DIR}/debian/salt-$fname.init ]; then
+                cp ${SALT_GIT_CHECKOUT_DIR}/debian/salt-$fname.init /etc/init.d/salt-$fname
+                chmod +x /etc/init.d/salt-$fname
+            fi
         fi
-        if [ -f ${SALT_GIT_CHECKOUT_DIR}/debian/salt-$fname.upstart ]; then
-            cp ${SALT_GIT_CHECKOUT_DIR}/debian/salt-$fname.upstart /etc/init/salt-$fname.conf
-        elif [ -f ${SALT_GIT_CHECKOUT_DIR}/pkg/salt-$fname.upstart ]; then
-            cp ${SALT_GIT_CHECKOUT_DIR}/pkg/salt-$fname.upstart /etc/init/salt-$fname.conf
-        fi
-        chmod +x /etc/init.d/salt-$fname
-
-        service salt-$fname start
     done
 }
 #
@@ -602,9 +616,17 @@ install_debian_60_git_deps() {
 }
 
 install_debian_stable() {
-    [ $INSTALL_MINION -eq 1 ] && __apt_get_noinput salt-minion
-    [ $INSTALL_MASTER -eq 1 ] && __apt_get_noinput salt-master
-    [ $INSTALL_SYNDIC -eq 1 ] && __apt_get_noinput salt-syndic
+    packages=""
+    if [ $INSTALL_MINION -eq 1 ]; then
+        packages="${packages} salt-minion"
+    fi
+    if [ $INSTALL_MASTER -eq 1 ]; then
+        packages="${packages} salt-master"
+    fi
+    if [ $INSTALL_SYNDIC -eq 1 ]; then
+        packages="${packages} salt-syndic"
+    fi
+    __apt_get_noinput "${packages}"
 }
 
 

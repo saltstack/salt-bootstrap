@@ -23,6 +23,7 @@ COLUMNS=$(tput cols || 80)
 if [ $(whoami) != "root" ] ; then
     title="You need to run this script as root."
     line="$(printf "%${COLUMNS}s" "")"
+    printf "\033[1;31m%s\033[0m\n" "${line// /*}"
     printf "\033[1;31m%*s\033[0m\n" $(((${#title}+$COLUMNS)/2)) "$title"
     printf "\033[1;31m%s\033[0m\n" "${line// /*}"
     exit 1

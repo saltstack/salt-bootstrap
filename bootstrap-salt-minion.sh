@@ -672,7 +672,7 @@ install_fedora_stable() {
     if [ $INSTALL_MASTER -eq 1 ] || [ $INSTALL_SYNDIC -eq 1 ]; then
         packages="${packages} salt-master"
     fi
-    yum install -y "${packages}"
+    yum install -y ${packages}
 }
 
 install_fedora_git_deps() {

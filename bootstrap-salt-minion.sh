@@ -665,7 +665,14 @@ install_fedora_deps() {
 }
 
 install_fedora_stable() {
-    yum install -y salt-minion
+    packages=""
+    if [ $INSTALL_MINION -eq 1 ]; then
+        packages="${packages} salt-minion"
+    fi
+    if [ $INSTALL_MASTER -eq 1 ] || [ $INSTALL_SYNDIC -eq 1 ]; then
+        packages="${packages} salt-master"
+    fi
+    yum install -y "${packages}"
 }
 
 install_fedora_git_deps() {
@@ -687,18 +694,13 @@ install_fedora_git() {
 
 install_fedora_git_post() {
     for fname in minion master syndic; do
-        if [ $fname != "minion" ]; then
-            # Guess we should only enable and start the minion service. Right??
-            continue
-        fi
         cp ${SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-$fname.service /lib/systemd/system/salt-$fname.service
 
-        systemctl preset salt-$fname.service
-        systemctl enable salt-$fname.service
-        sleep 0.2
+        systemctl is-enabled salt-$fname.service || (systemctl preset salt-$fname.service && systemctl enable salt-$fname.service)
+        sleep 0.1
         systemctl daemon-reload
-        sleep 0.2
-        systemctl start salt-$fname.service
+        sleep 0.1
+        systemctl try-restart salt-$fname.service
     done
 }
 #

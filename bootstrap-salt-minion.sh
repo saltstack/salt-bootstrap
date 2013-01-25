@@ -48,7 +48,9 @@ usage() {
   -h|help       Display this message
   -v|version    Display script version
   -c|config-dir Temporary minion configuration directory
-  -m|master     Also install salt-master
+  -M|master     Also install salt-master
+  -S|syndic     Also install salt-syndic
+  -N|no-minion  Do not install salt-minion
 EOT
 }   # ----------  end of function usage  ----------
 
@@ -57,6 +59,8 @@ EOT
 #-----------------------------------------------------------------------
 TEMP_CONFIG_DIR="null"
 INSTALL_MASTER=0
+INSTALL_SYNDIC=0
+INSTALL_MINION=1
 
 while getopts ":hvc:" opt
 do
@@ -66,7 +70,9 @@ do
 
     v|version       )  echo "$0 -- Version $ScriptVersion"; exit 0   ;;
     c|config-dir    )  TEMP_CONFIG_DIR="$OPTARG" ;;
-    m|master        )  INSTALL_MASTER=1 ;;
+    M|master        )  INSTALL_MASTER=1 ;;
+    S|syndic        )  INSTALL_SYNDIC=1 ;;
+    N|no-minion     )  INSTALL_MINION=0 ;;
 
     \?              )  echo "\n  Option does not exist : $OPTARG\n"
                        usage; exit 1   ;;
@@ -86,6 +92,12 @@ __check_unparsed_options() {
         exit 1
     fi
 }
+
+# Check that we're actually installing one of minion/master/syndic
+if [ $INSTALL_MINION -eq 0 ] && [ $INSTALL_MASTER -eq 0 ] && [ $INSTALL_SYNDIC -eq 0 ]; then
+    echo " * ERROR: Nothing to install"
+fi
+
 # Define installation type
 if [ "$#" -eq 0 ];then
     ITYPE="stable"
@@ -912,43 +924,47 @@ config_salt() {
         exit 1
     fi
 
-    PKI_DIR=/etc/salt/pki/minion
-    [ $INSTALL_MASTER -eq 1 ] && MASTER_PKI_DIR=/etc/salt/pki/master
-
+    SALT_DIR=/etc/salt
+    PKI_DIR=$SALT_DIR/pki
     # Let's create the necessary directories
-    [ -d /etc/salt ] || mkdir /etc/salt
+    [ -d $SALT_DIR ] || mkdir $SALT_DIR
     [ -d $PKI_DIR ] || mkdir -p $PKI_DIR && chmod 700 $PKI_DIR
-    if [ $INSTALL_MASTER -eq 1 ] && [ ! -d $MASTER_PKI_DIR ]; then
-        mkdir -p $MASTER_PKI_DIR
-        chmod 700 $MASTER_PKI_DIR
+
+    if [ $INSTALL_MINION -eq 1 ]; then
+        # Create the PKI directory
+        [ -d $PKI_DIR/minion ] || mkdir -p $PKI_DIR/minion && chmod 700 $PKI_DIR/minion
+
+        # Copy the minions configuration if found
+        [ -f "$TEMP_CONFIG_DIR/minion" ] && mv "$TEMP_CONFIG_DIR/minion" /etc/salt
+
+        # Copy the minion's keys if found
+        if [ -f "$TEMP_CONFIG_DIR/minion.pem" ]; then
+            mv "$TEMP_CONFIG_DIR/minion.pem" $PKI_DIR/minion/
+            chmod 400 $PKI_DIR/minion/minion.pem
+        fi
+        if [ -f "$TEMP_CONFIG_DIR/minion.pub" ]; then
+            mv "$TEMP_CONFIG_DIR/minion.pub" $PKI_DIR/minion/
+            chmod 664 $PKI_DIR/minion/minion.pub
+        fi
     fi
 
-    # Copy the minions configuration if found
-    [ -f "$TEMP_CONFIG_DIR/minion" ] && mv "$TEMP_CONFIG_DIR/minion" /etc/salt
 
-    # Copy the masters configuration if found
-    if [ $INSTALL_MASTER -eq 1 ] && [ -f "$TEMP_CONFIG_DIR/master" ]; then
-        mv "$TEMP_CONFIG_DIR/master" /etc/salt
-    fi
+    if [ $INSTALL_MASTER -eq 1 ] || [ $INSTALL_SYNDIC -eq 1 ]; then
+        # Create the PKI directory
+        [ -d $PKI_DIR/master ] || mkdir -p $PKI_DIR/master && chmod 700 $PKI_DIR/master
 
-    # Copy the minion's keys if found
-    if [ -f "$TEMP_CONFIG_DIR/minion.pem" ]; then
-        mv "$TEMP_CONFIG_DIR/minion.pem" $PKI_DIR/
-        chmod 400 $PKI_DIR/minion.pem
-    fi
-    if [ -f "$TEMP_CONFIG_DIR/minion.pub" ]; then
-        mv "$TEMP_CONFIG_DIR/minion.pub" $PKI_DIR/
-        chmod 664 $PKI_DIR/minion.pub
-    fi
+        # Copy the masters configuration if found
+        [ -f "$TEMP_CONFIG_DIR/master" ] && mv "$TEMP_CONFIG_DIR/master" /etc/salt
 
-    # Copy the master's keys if found
-    if [ $INSTALL_MASTER -eq 1 ] && [ -f "$TEMP_CONFIG_DIR/master.pem" ]; then
-        mv "$TEMP_CONFIG_DIR/master.pem" $MASTER_PKI_DIR/
-        chmod 400 $MASTER_PKI_DIR/master.pem
-    fi
-    if [ $INSTALL_MASTER -eq 1 ] && [ -f "$TEMP_CONFIG_DIR/master.pub" ]; then
-        mv "$TEMP_CONFIG_DIR/master.pub" $MASTER_PKI_DIR/
-        chmod 664 $MASTER_PKI_DIR/master.pub
+        # Copy the master's keys if found
+        if [ -f "$TEMP_CONFIG_DIR/master.pem" ]; then
+            mv "$TEMP_CONFIG_DIR/master.pem" $PKI_DIR/master/
+            chmod 400 $PKI_DIR/master/master.pem
+        fi
+        if [ -f "$TEMP_CONFIG_DIR/master.pub" ]; then
+            mv "$TEMP_CONFIG_DIR/master.pub" $PKI_DIR/master/
+            chmod 664 $PKI_DIR/master/master.pub
+        fi
     fi
 }
 #

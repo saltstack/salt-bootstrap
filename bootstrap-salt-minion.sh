@@ -532,7 +532,7 @@ install_ubuntu_stable() {
     if [ $INSTALL_SYNDIC -eq 1 ]; then
         packages="${packages} salt-syndic"
     fi
-    __apt_get_noinput "${packages}"
+    __apt_get_noinput ${packages}
 }
 
 install_ubuntu_daily() {
@@ -545,6 +545,12 @@ install_ubuntu_git() {
 
 install_ubuntu_git_post() {
     for fname in minion master syndic; do
+
+        # Skip if not meant to be installed
+        [ $fname = "minion" ] && [ $INSTALL_MINION -eq 0 ] && continue
+        [ $fname = "master" ] && [ $INSTALL_MASTER -eq 0 ] && continue
+        [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq 0 ] && continue
+
         if [ -f /usr/sbin/service ]; then
             # We have upstart support
             if [ -f ${SALT_GIT_CHECKOUT_DIR}/debian/salt-$fname.upstart ]; then
@@ -626,7 +632,7 @@ install_debian_stable() {
     if [ $INSTALL_SYNDIC -eq 1 ]; then
         packages="${packages} salt-syndic"
     fi
-    __apt_get_noinput "${packages}"
+    __apt_get_noinput ${packages}
 }
 
 
@@ -644,6 +650,12 @@ install_debian_60_git() {
 
 install_debian_git_post() {
     for fname in minion master syndic; do
+
+        # Skip if not meant to be installed
+        [ $fname = "minion" ] && [ $INSTALL_MINION -eq 0 ] && continue
+        [ $fname = "master" ] && [ $INSTALL_MASTER -eq 0 ] && continue
+        [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq 0 ] && continue
+
         if [ -f ${SALT_GIT_CHECKOUT_DIR}/debian/salt-$fname.init ]; then
             cp ${SALT_GIT_CHECKOUT_DIR}/debian/salt-$fname.init /etc/init.d/salt-$fname
         fi
@@ -694,6 +706,12 @@ install_fedora_git() {
 
 install_fedora_git_post() {
     for fname in minion master syndic; do
+
+        # Skip if not meant to be installed
+        [ $fname = "minion" ] && [ $INSTALL_MINION -eq 0 ] && continue
+        [ $fname = "master" ] && [ $INSTALL_MASTER -eq 0 ] && continue
+        [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq 0 ] && continue
+
         cp ${SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-$fname.service /lib/systemd/system/salt-$fname.service
 
         systemctl is-enabled salt-$fname.service || (systemctl preset salt-$fname.service && systemctl enable salt-$fname.service)
@@ -765,12 +783,19 @@ install_centos_63_git() {
 }
 
 install_centos_63_git_post() {
-    for fname in master minion; do
+    for fname in master minion syndic; do
+
+        # Skip if not meant to be installed
+        [ $fname = "minion" ] && [ $INSTALL_MINION -eq 0 ] && continue
+        [ $fname = "master" ] && [ $INSTALL_MASTER -eq 0 ] && continue
+        [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq 0 ] && continue
+
         cp pkg/rpm/salt-${fname} /etc/init.d/
         chmod +x /etc/init.d/salt-${fname}
+
+        /sbin/chkconfig salt-${fname} on
+        /etc/init.d/salt-${fname} start
     done
-    /sbin/chkconfig salt-minion on
-    /etc/init.d/salt-minion start
 }
 #
 #   Ended CentOS Install Functions
@@ -826,12 +851,14 @@ install_arch_post() {
 }
 
 install_arch_git_post() {
-    if [ -f /usr/bin/systemctl ]; then
-        for fname in minion master syndic; do
-            if [ $fname != "minion" ]; then
-                # Guess we should only enable and start the minion service. Right??
-                continue
-            fi
+    for fname in minion master syndic; do
+
+        # Skip if not meant to be installed
+        [ $fname = "minion" ] && [ $INSTALL_MINION -eq 0 ] && continue
+        [ $fname = "master" ] && [ $INSTALL_MASTER -eq 0 ] && continue
+        [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq 0 ] && continue
+
+        if [ -f /usr/bin/systemctl ]; then
             cp ${SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-$fname.service /lib/systemd/system/salt-$fname.service
 
             systemctl preset salt-$fname.service
@@ -840,18 +867,12 @@ install_arch_git_post() {
             systemctl daemon-reload
             sleep 0.2
             systemctl start salt-$fname.service
-        done
-    else
-        for fname in minion master syndic; do
-            if [ $fname != "minion" ]; then
-                # Guess we should only enable and start the minion service. Right??
-                continue
-            fi
+        else
             cp ${SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-$fname /etc/rc.d/init.d/salt-$fname
             chmod +x /etc/rc.d/init.d/salt-$fname
             /etc/init.d/salt-$fname start
-        done
-    fi
+        fi
+    done
 }
 #
 #   Ended Arch Install Functions

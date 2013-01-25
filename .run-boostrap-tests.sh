@@ -75,3 +75,4 @@ title_echo "Installing from a specific git tag"
 title_echo "Installing from a specific git sha commit"
 (sudo ./bootstrap-salt-minion.sh git bf1d7dfb733a6133d6a750e0ab63a27e72cf7e81 && salt --versions-report && sudo rm -rf /tmp/git ) && passed_echo || failed_echo
 
+exit 0

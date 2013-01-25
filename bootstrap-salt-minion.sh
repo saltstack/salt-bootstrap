@@ -96,6 +96,7 @@ __check_unparsed_options() {
 # Check that we're actually installing one of minion/master/syndic
 if [ $INSTALL_MINION -eq 0 ] && [ $INSTALL_MASTER -eq 0 ] && [ $INSTALL_SYNDIC -eq 0 ]; then
     echo " * ERROR: Nothing to install"
+    exit 1
 fi
 
 # Define installation type
@@ -515,11 +516,13 @@ install_ubuntu_1110_post() {
 }
 
 install_ubuntu_stable() {
-    __apt_get_noinput salt-minion
+    [ $INSTALL_MINION -eq 1 ] && __apt_get_noinput salt-minion
+    [ $INSTALL_MASTER -eq 1 ] && __apt_get_noinput salt-master
+    [ $INSTALL_SYNDIC -eq 1 ] && __apt_get_noinput salt-syndic
 }
 
 install_ubuntu_daily() {
-    __apt_get_noinput salt-minion
+    install_ubuntu_stable
 }
 
 install_ubuntu_git() {
@@ -538,11 +541,6 @@ install_ubuntu_git_post() {
         fi
         chmod +x /etc/init.d/salt-$fname
 
-        if [ $fname != "minion" ]; then
-            # Guess we should only enable and start the minion service. Right??
-            continue
-        fi
-
         service salt-$fname start
     done
 }
@@ -557,10 +555,6 @@ install_ubuntu_git_post() {
 #
 install_debian_deps() {
     apt-get update
-}
-
-install_debian_stable() {
-    __apt_get_noinput salt-minion
 }
 
 install_debian_60_deps() {
@@ -585,10 +579,6 @@ _eof
     apt-get update
 }
 
-install_debian_60() {
-    __apt_get_noinput salt-minion
-}
-
 install_debian_git_deps() {
     apt-get update
     __apt_get_noinput lsb-release python python-pkg-resources python-crypto \
@@ -603,26 +593,32 @@ install_debian_git_deps() {
     fi
 }
 
-install_debian_git() {
-    python setup.py install --install-layout=deb
-}
-
 install_debian_60_git_deps() {
     install_debian_60_deps  # Add backports
     install_debian_git_deps # Grab the actual deps
 }
 
-install_debian_60_git() {
-    apt-get -y purge salt-minion
+install_debian_stable() {
+    [ $INSTALL_MINION -eq 1 ] && __apt_get_noinput salt-minion
+    [ $INSTALL_MASTER -eq 1 ] && __apt_get_noinput salt-master
+    [ $INSTALL_SYNDIC -eq 1 ] && __apt_get_noinput salt-syndic
+}
+
+
+install_debian_60() {
+    install_debian_stable
+}
+
+install_debian_git() {
     python setup.py install --install-layout=deb
+}
+
+install_debian_60_git() {
+    install_debian_git
 }
 
 install_debian_git_post() {
     for fname in minion master syndic; do
-        if [ $fname != "minion" ]; then
-            # Guess we should only enable and start the minion service. Right??
-            continue
-        fi
         if [ -f ${SALT_GIT_CHECKOUT_DIR}/debian/salt-$fname.init ]; then
             cp ${SALT_GIT_CHECKOUT_DIR}/debian/salt-$fname.init /etc/init.d/salt-$fname
         fi

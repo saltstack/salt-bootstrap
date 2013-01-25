@@ -45,12 +45,12 @@ usage() {
     $ ${ScriptName} git 8c3fadf15ec183e5ce8c63739850d543617e4357
 
   Options:
-  -h|help       Display this message
-  -v|version    Display script version
-  -c|config-dir Temporary minion configuration directory
-  -M|master     Also install salt-master
-  -S|syndic     Also install salt-syndic
-  -N|no-minion  Do not install salt-minion
+  -h|-help       Display this message
+  -v|-version    Display script version
+  -c|-config-dir Temporary minion configuration directory
+  -M|-master     Also install salt-master
+  -S|-syndic     Also install salt-syndic
+  -N|-no-minion  Do not install salt-minion
 EOT
 }   # ----------  end of function usage  ----------
 
@@ -74,8 +74,15 @@ do
     S|syndic        )  INSTALL_SYNDIC=1 ;;
     N|no-minion     )  INSTALL_MINION=0 ;;
 
-    \?              )  echo "\n  Option does not exist : $OPTARG\n"
-                       usage; exit 1   ;;
+    \?              )  echo
+                       if [ "$OPTARG" = "-" ]; then
+                           echo "  Long options are NOT double-dash prefixed"
+                       else
+                           echo "  Option does not exist : $OPTARG"
+                       fi
+                       usage
+                       exit 1
+                       ;;
 
   esac    # --- end of case ---
 done

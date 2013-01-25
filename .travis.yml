@@ -2,7 +2,7 @@ before_install:
   - sudo apt-get update && sudo apt-get install devscripts
 
 script:
-  - ./.run-boostrap-tests.sh
+  - sudo ./.run-boostrap-tests.sh
 
 notifications:
   irc:

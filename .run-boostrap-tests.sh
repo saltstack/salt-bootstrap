@@ -45,8 +45,8 @@ passed_echo() {
 title_echo "Running checkbashisms"
 /usr/bin/checkbashisms -pxfn bootstrap-salt-minion.sh && passed_echo || failed_echo
 
-title_echo "Double dashed long options are errors and explained to the user"
-/bin/bash bootstrap-salt-minion.sh --help | grep "Long options are NOT double-dash prefixed" && passed_echo || failed_echo
+title_echo "Passing '-N'(no minion) without passing '-M'(install master) or '-S'(install syndic) fails"
+./bootstrap-salt-minion.sh -N && failed_echo || passed_echo
 
 title_echo "Installing using bash"
 (sudo /bin/bash bootstrap-salt-minion.sh && salt-minion --versions-report && sudo apt-get remove salt-common salt-minion) && passed_echo || failed_echo

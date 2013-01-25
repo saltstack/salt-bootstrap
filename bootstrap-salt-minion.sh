@@ -45,12 +45,12 @@ usage() {
     $ ${ScriptName} git 8c3fadf15ec183e5ce8c63739850d543617e4357
 
   Options:
-  -h|-help       Display this message
-  -v|-version    Display script version
-  -c|-config-dir Temporary minion configuration directory
-  -M|-master     Also install salt-master
-  -S|-syndic     Also install salt-syndic
-  -N|-no-minion  Do not install salt-minion
+  -h  Display this message
+  -v  Display script version
+  -c  Temporary minion configuration directory
+  -M  Also install salt-master
+  -S  Also install salt-syndic
+  -N  Do not install salt-minion
 EOT
 }   # ----------  end of function usage  ----------
 
@@ -62,27 +62,23 @@ INSTALL_MASTER=0
 INSTALL_SYNDIC=0
 INSTALL_MINION=1
 
-while getopts ":hvc:" opt
+while getopts ":hvc:MSN" opt
 do
-  case $opt in
+  case "${opt}" in
 
-    h|help          )  usage; exit 0   ;;
+    h )  usage; exit 0   ;;
 
-    v|version       )  echo "$0 -- Version $ScriptVersion"; exit 0   ;;
-    c|config-dir    )  TEMP_CONFIG_DIR="$OPTARG" ;;
-    M|master        )  INSTALL_MASTER=1 ;;
-    S|syndic        )  INSTALL_SYNDIC=1 ;;
-    N|no-minion     )  INSTALL_MINION=0 ;;
+    v )  echo "$0 -- Version $ScriptVersion"; exit 0   ;;
+    c )  TEMP_CONFIG_DIR="$OPTARG" ;;
+    M )  INSTALL_MASTER=1 ;;
+    S )  INSTALL_SYNDIC=1 ;;
+    N )  INSTALL_MINION=0 ;;
 
-    \?              )  echo
-                       if [ "$OPTARG" = "-" ]; then
-                           echo "  Long options are NOT double-dash prefixed"
-                       else
-                           echo "  Option does not exist : $OPTARG"
-                       fi
-                       usage
-                       exit 1
-                       ;;
+    \?)  echo
+         echo "  Option does not exist : $OPTARG"
+         usage
+         exit 1
+         ;;
 
   esac    # --- end of case ---
 done

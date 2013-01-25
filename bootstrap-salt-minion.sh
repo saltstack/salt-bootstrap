@@ -48,6 +48,7 @@ usage() {
   -h|help       Display this message
   -v|version    Display script version
   -c|config-dir Temporary minion configuration directory
+  -m|master     Also install salt-master
 EOT
 }   # ----------  end of function usage  ----------
 
@@ -55,6 +56,7 @@ EOT
 #  Handle command line arguments
 #-----------------------------------------------------------------------
 TEMP_CONFIG_DIR="null"
+INSTALL_MASTER=0
 
 while getopts ":hvc:" opt
 do
@@ -64,6 +66,7 @@ do
 
     v|version       )  echo "$0 -- Version $ScriptVersion"; exit 0   ;;
     c|config-dir    )  TEMP_CONFIG_DIR="$OPTARG" ;;
+    m|master        )  INSTALL_MASTER=1 ;;
 
     \?              )  echo "\n  Option does not exist : $OPTARG\n"
                        usage; exit 1   ;;
@@ -92,11 +95,13 @@ else
     shift
 fi
 
+# Check installation type
 if [ "$ITYPE" != "stable" ] && [ "$ITYPE" != "daily" ] && [ "$ITYPE" != "git" ]; then
     echo " ERROR: Installation type \"$ITYPE\" is not known..."
     exit 1
 fi
 
+# If doing a git install, check what branch/tag/sha will be checked out
 if [ $ITYPE = "git" ]; then
     if [ "$#" -eq 0 ];then
         GIT_REV="master"
@@ -107,6 +112,7 @@ if [ $ITYPE = "git" ]; then
     fi
 fi
 
+# Check for any unparsed arguments. Should be an error.
 if [ "$#" -gt 0 ]; then
     __check_unparsed_options "$*"
     usage
@@ -431,13 +437,13 @@ __apt_get_noinput() {
 #       3. install_<distro>_<install_type>_deps
 #       4. install_<distro>_deps
 #
-#   Optionally, define a minion configuration function, which will be called if
+#   Optionally, define a salt configuration function, which will be called if
 #   the -c|config-dir option is passed. One of:
-#       1. config_<distro>_<distro_version>_<install_type>_minion
-#       2. config_<distro>_<distro_version>_minion
-#       3. config_<distro>_<install_type>_minion
-#       4. config_<distro>_minion
-#       5. config_minion [THIS ONE IS ALREADY DEFINED AS THE DEFAULT]
+#       1. config_<distro>_<distro_version>_<install_type>_salt
+#       2. config_<distro>_<distro_version>_salt
+#       3. config_<distro>_<install_type>_salt
+#       4. config_<distro>_salt
+#       5. config_salt [THIS ONE IS ALREADY DEFINED AS THE DEFAULT]
 #
 #   To install salt, which, of course, is required, one of:
 #       1. install_<distro>_<distro_version>_<install_type>
@@ -897,7 +903,7 @@ install_freebsd_git_post() {
 #   Default minion configuration function. Matches ANY distribution as long as
 #   the -c options is passed.
 #
-config_minion() {
+config_salt() {
     # If the configuration directory is not passed, return
     [ "$TEMP_CONFIG_DIR" = "null" ] && return
     # If the configuration directory does not exist, error out
@@ -907,18 +913,23 @@ config_minion() {
     fi
 
     PKI_DIR=/etc/salt/pki/minion
-    MASTER_PKI_DIR=/etc/salt/pki/master
+    [ $INSTALL_MASTER -eq 1 ] && MASTER_PKI_DIR=/etc/salt/pki/master
 
     # Let's create the necessary directories
     [ -d /etc/salt ] || mkdir /etc/salt
     [ -d $PKI_DIR ] || mkdir -p $PKI_DIR && chmod 700 $PKI_DIR
-    [ -d $MASTER_PKI_DIR ] || mkdir -p $MASTER_PKI_DIR && chmod 700 $MASTER_PKI_DIR
+    if [ $INSTALL_MASTER -eq 1 ] && [ ! -d $MASTER_PKI_DIR ]; then
+        mkdir -p $MASTER_PKI_DIR
+        chmod 700 $MASTER_PKI_DIR
+    fi
 
     # Copy the minions configuration if found
     [ -f "$TEMP_CONFIG_DIR/minion" ] && mv "$TEMP_CONFIG_DIR/minion" /etc/salt
 
     # Copy the masters configuration if found
-    [ -f "$TEMP_CONFIG_DIR/master" ] && mv "$TEMP_CONFIG_DIR/master" /etc/salt
+    if [ $INSTALL_MASTER -eq 1 ] && [ -f "$TEMP_CONFIG_DIR/master" ]; then
+        mv "$TEMP_CONFIG_DIR/master" /etc/salt
+    fi
 
     # Copy the minion's keys if found
     if [ -f "$TEMP_CONFIG_DIR/minion.pem" ]; then
@@ -931,11 +942,11 @@ config_minion() {
     fi
 
     # Copy the master's keys if found
-    if [ -f "$TEMP_CONFIG_DIR/master.pem" ]; then
+    if [ $INSTALL_MASTER -eq 1 ] && [ -f "$TEMP_CONFIG_DIR/master.pem" ]; then
         mv "$TEMP_CONFIG_DIR/master.pem" $MASTER_PKI_DIR/
         chmod 400 $MASTER_PKI_DIR/master.pem
     fi
-    if [ -f "$TEMP_CONFIG_DIR/master.pub" ]; then
+    if [ $INSTALL_MASTER -eq 1 ] && [ -f "$TEMP_CONFIG_DIR/master.pub" ]; then
         mv "$TEMP_CONFIG_DIR/master.pub" $MASTER_PKI_DIR/
         chmod 664 $MASTER_PKI_DIR/master.pub
     fi
@@ -967,11 +978,11 @@ done
 # Let's get the minion config function
 CONFIG_MINION_FUNC="null"
 if [ "$TEMP_CONFIG_DIR" != "null" ]; then
-    CONFIG_FUNC_NAMES="config_${DISTRO_NAME_L}${PREFIXED_DISTRO_VERSION_NO_DOTS}_${ITYPE}_minion"
-    CONFIG_FUNC_NAMES="$CONFIG_FUNC_NAMES config_${DISTRO_NAME_L}${PREFIXED_DISTRO_VERSION_NO_DOTS}_minon"
-    CONFIG_FUNC_NAMES="$CONFIG_FUNC_NAMES config_${DISTRO_NAME_L}_${ITYPE}_minion"
-    CONFIG_FUNC_NAMES="$CONFIG_FUNC_NAMES config_${DISTRO_NAME_L}_minion"
-    CONFIG_FUNC_NAMES="$CONFIG_FUNC_NAMES config_minion"
+    CONFIG_FUNC_NAMES="config_${DISTRO_NAME_L}${PREFIXED_DISTRO_VERSION_NO_DOTS}_${ITYPE}_salt"
+    CONFIG_FUNC_NAMES="$CONFIG_FUNC_NAMES config_${DISTRO_NAME_L}${PREFIXED_DISTRO_VERSION_NO_DOTS}_salt"
+    CONFIG_FUNC_NAMES="$CONFIG_FUNC_NAMES config_${DISTRO_NAME_L}_${ITYPE}_salt"
+    CONFIG_FUNC_NAMES="$CONFIG_FUNC_NAMES config_${DISTRO_NAME_L}_salt"
+    CONFIG_FUNC_NAMES="$CONFIG_FUNC_NAMES config_salt"
 
     for FUNC_NAME in $CONFIG_FUNC_NAMES; do
         if __function_defined $FUNC_NAME; then

@@ -556,20 +556,33 @@ install_ubuntu_git_post() {
         [ $fname = "master" ] && [ $INSTALL_MASTER -eq 0 ] && continue
         [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq 0 ] && continue
 
-        if [ -f /usr/sbin/service ]; then
+        if [ -f /sbin/initctl ]; then
             # We have upstart support
-            if [ -f ${SALT_GIT_CHECKOUT_DIR}/debian/salt-$fname.upstart ]; then
-                cp ${SALT_GIT_CHECKOUT_DIR}/debian/salt-$fname.upstart /etc/init/salt-$fname.conf
-            elif [ -f ${SALT_GIT_CHECKOUT_DIR}/pkg/salt-$fname.upstart ]; then
+            /sbin/initctl status salt-$fname > /dev/null 2>&1
+            if [ $? -eq 1 ]; then
+                # upstart does not know about our service, let's copy the proper file
                 cp ${SALT_GIT_CHECKOUT_DIR}/pkg/salt-$fname.upstart /etc/init/salt-$fname.conf
             fi
-            service salt-$fname status && service salt-$fname restart || service salt-$fname start
-        else
-            if [ -f ${SALT_GIT_CHECKOUT_DIR}/debian/salt-$fname.init ]; then
-                cp ${SALT_GIT_CHECKOUT_DIR}/debian/salt-$fname.init /etc/init.d/salt-$fname
-                chmod +x /etc/init.d/salt-$fname
+
+            /sbin/initctl status salt-$fname > /dev/null 2>&1
+            if [ $? -eq 0 ]; then
+                # upstart knows about this service
+                /sbin/initctl restart salt-$fname > /dev/null 2>&1
+                # Restart service
+                [ $? -eq 0 ] && continue
+                # Service was not running, let's try starting it
+                /sbin/initctl start salt-$fname > /dev/null 2>&1
+                [ $? -eq 0 ] && continue
+                # We failed to start the service, let's test the SysV code bellow
             fi
         fi
+
+        # No upstart support in Ubuntu!?
+        if [ -f ${SALT_GIT_CHECKOUT_DIR}/debian/salt-$fname.init ]; then
+            cp ${SALT_GIT_CHECKOUT_DIR}/debian/salt-$fname.init /etc/init.d/salt-$fname
+            chmod +x /etc/init.d/salt-$fname
+        fi
+        /etc/init.d/salt-$fname restart
     done
 }
 #
@@ -831,7 +844,7 @@ install_centos_63_git_post() {
             # We have upstart support
             /sbin/initctl status salt-$fname > /dev/null 2>&1
             if [ $? -eq 1 ]; then
-                # upstart does not know about our service, let's 
+                # upstart does not know about our service, let's copy the proper file
                 cp ${SALT_GIT_CHECKOUT_DIR}/pkg/salt-$fname.upstart /etc/init/salt-$fname.conf
             fi
 

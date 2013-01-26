@@ -758,6 +758,21 @@ install_centos_63_stable_post() {
         [ $fname = "master" ] && [ $INSTALL_MASTER -eq 0 ] && continue
         [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq 0 ] && continue
 
+        if [ -f /sbin/service ]; then
+            # We have upstart support
+            sudo service salt-$fname status | grep salt-$fname
+            UPSTART_SERVICE_EXISTS=$?
+            # Let's (re)start the service
+            if [ $UPSTART_SERVICE_EXITS -eq 0 ]; then
+                service salt-$fname restart
+                # Continue to next iteration or else the SysV init code bellow
+                # would also run, and is supposed to run if there's no upstart
+                # script for salt-$fname
+                continue
+            fi
+        fi
+
+        # Still in SysV init!?
         /sbin/chkconfig salt-$fname on
         /etc/init.d/salt-$fname start
     done
@@ -804,11 +819,29 @@ install_centos_63_git_post() {
         [ $fname = "master" ] && [ $INSTALL_MASTER -eq 0 ] && continue
         [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq 0 ] && continue
 
-        cp pkg/rpm/salt-${fname} /etc/init.d/
-        chmod +x /etc/init.d/salt-${fname}
+        if [ -f /sbin/service ]; then
+            # We have upstart support
+            sudo service salt-$fname status | grep salt-$fname
+            UPSTART_SERVICE_EXISTS=$?
+            if [ $UPSTART_SERVICE_EXISTS -eq 1 ]; then
+                # upstart does not know yet about salt-$fname
+                # Let's copy the proper file
+                cp ${SALT_GIT_CHECKOUT_DIR}/pkg/salt-$fname.upstart /etc/init/salt-$fname.conf
+            fi
+            # Let's (re)start the service
+            if [ $UPSTART_SERVICE_EXITS -eq 0 ]; then
+                service salt-$fname restart
+            else
+                service salt-$fname start
+            fi
+        else
+            # Still in SysV init?!
+            cp ${SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-${fname} /etc/init.d/
+            chmod +x /etc/init.d/salt-${fname}
 
-        /sbin/chkconfig salt-${fname} on
-        /etc/init.d/salt-${fname} start
+            /sbin/chkconfig salt-${fname} on
+            /etc/init.d/salt-${fname} start
+        fi
     done
 }
 #

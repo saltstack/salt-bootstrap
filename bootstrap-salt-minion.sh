@@ -914,14 +914,26 @@ install_arch_git() {
 }
 
 install_arch_post() {
-    if [ -f /usr/bin/systemctl ]; then
-        # Using systemd
-        systemctl daemon-reload
-        sleep 0.2
-        systemctl restart salt-minion.service
-    else
-        /etc/rc.d/salt-minion start
-    fi
+    for fname in minion master syndic; do
+
+        # Skip if not meant to be installed
+        [ $fname = "minion" ] && [ $INSTALL_MINION -eq 0 ] && continue
+        [ $fname = "master" ] && [ $INSTALL_MASTER -eq 0 ] && continue
+        [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq 0 ] && continue
+
+        if [ -f /usr/bin/systemctl ]; then
+            # Using systemd
+            /usr/bin/systemctl is-enabled salt-$fname.service || (
+                /usr/bin/systemctl preset salt-$fname.service && /usr/bin/systemctl enable salt-$fname.service
+            )
+            sleep 0.1
+            systemctl daemon-reload
+            sleep 0.1
+            systemctl try-restart salt-$fname.service
+            continue
+        fi
+        /etc/rc.d/salt-$fname start
+    done
 }
 
 install_arch_git_post() {
@@ -935,17 +947,20 @@ install_arch_git_post() {
         if [ -f /usr/bin/systemctl ]; then
             cp ${SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-$fname.service /lib/systemd/system/salt-$fname.service
 
-            systemctl preset salt-$fname.service
-            systemctl enable salt-$fname.service
-            sleep 0.2
+            /usr/bin/systemctl is-enabled salt-$fname.service || (
+                /usr/bin/systemctl preset salt-$fname.service && /usr/bin/systemctl enable salt-$fname.service
+            )
+            sleep 0.1
             systemctl daemon-reload
-            sleep 0.2
-            systemctl start salt-$fname.service
-        else
-            cp ${SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-$fname /etc/rc.d/init.d/salt-$fname
-            chmod +x /etc/rc.d/init.d/salt-$fname
-            /etc/init.d/salt-$fname start
+            sleep 0.1
+            systemctl try-restart salt-$fname.service
+            continue
         fi
+
+        # SysV init!?
+        cp ${SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-$fname /etc/rc.d/init.d/salt-$fname
+        chmod +x /etc/rc.d/init.d/salt-$fname
+        /etc/init.d/salt-$fname start
     done
 }
 #

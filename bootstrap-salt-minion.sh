@@ -741,12 +741,26 @@ install_centos_63_stable_deps() {
 }
 
 install_centos_63_stable() {
-    yum -y install salt-minion --enablerepo=epel-testing
+    packages=""
+    if [ $INSTALL_MINION -eq 1 ]; then
+        packages="${packages} salt-minion"
+    fi
+    if [ $INSTALL_MASTER -eq 1 ] || [ $INSTALL_SYNDIC -eq 1 ]; then
+        packages="${packages} salt-master"
+    fi
+    yum -y install ${packages} --enablerepo=epel-testing
 }
 
 install_centos_63_stable_post() {
-    /sbin/chkconfig salt-minion on
-    /etc/init.d/salt-minion start
+    for fname in minion master syndic; do
+        # Skip if not meant to be installed
+        [ $fname = "minion" ] && [ $INSTALL_MINION -eq 0 ] && continue
+        [ $fname = "master" ] && [ $INSTALL_MASTER -eq 0 ] && continue
+        [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq 0 ] && continue
+
+        /sbin/chkconfig salt-$fname on
+        /etc/init.d/salt-$fname start
+    done
 }
 
 install_centos_62_stable_deps() {

@@ -382,6 +382,11 @@ echo "     CPU Arch:     ${CPU_ARCH}"
 echo "     OS Name:      ${OS_NAME}"
 echo "     OS Version:   ${OS_VERSION}"
 echo "     Distribution: ${DISTRO_NAME} ${DISTRO_VERSION}"
+echo
+
+[ $INSTALL_MINION -eq 1 ] && echo " * INFO: Installing minion"
+[ $INSTALL_MASTER -eq 1 ] && echo " * INFO: Installing master"
+[ $INSTALL_SYNDIC -eq 1 ] && echo " * INFO: Installing syndic"
 
 
 # Simplify version naming on functions
@@ -741,12 +746,44 @@ install_centos_63_stable_deps() {
 }
 
 install_centos_63_stable() {
-    yum -y install salt-minion --enablerepo=epel-testing
+    packages=""
+    if [ $INSTALL_MINION -eq 1 ]; then
+        packages="${packages} salt-minion"
+    fi
+    if [ $INSTALL_MASTER -eq 1 ] || [ $INSTALL_SYNDIC -eq 1 ]; then
+        packages="${packages} salt-master"
+    fi
+    yum -y install ${packages} --enablerepo=epel-testing
 }
 
 install_centos_63_stable_post() {
-    /sbin/chkconfig salt-minion on
-    /etc/init.d/salt-minion start
+    for fname in minion master syndic; do
+        # Skip if not meant to be installed
+        [ $fname = "minion" ] && [ $INSTALL_MINION -eq 0 ] && continue
+        [ $fname = "master" ] && [ $INSTALL_MASTER -eq 0 ] && continue
+        [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq 0 ] && continue
+
+        if [ -f /sbin/initctl ]; then
+            # We have upstart support
+            /sbin/initctl status salt-$fname > /dev/null 2>&1
+            if [ $? -eq 0 ]; then
+                # upstart knows about this service
+                /sbin/initctl restart salt-$fname > /dev/null 2>&1
+                # Restart service
+                [ $? -eq 0 ] && continue
+                # Service was not running, let's try starting it
+                /sbin/initctl start salt-$fname > /dev/null 2>&1
+                [ $? -eq 0 ] && continue
+                # We failed to start the service, let's test the SysV code bellow
+            fi
+        fi
+
+        if [ -f /etc/init.d/salt-$fname ]; then
+            # Still in SysV init!?
+            /sbin/chkconfig salt-$fname on
+            /etc/init.d/salt-$fname start
+        fi
+    done
 }
 
 install_centos_62_stable_deps() {
@@ -790,9 +827,33 @@ install_centos_63_git_post() {
         [ $fname = "master" ] && [ $INSTALL_MASTER -eq 0 ] && continue
         [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq 0 ] && continue
 
-        cp pkg/rpm/salt-${fname} /etc/init.d/
-        chmod +x /etc/init.d/salt-${fname}
+        if [ -f /sbin/initctl ]; then
+            # We have upstart support
+            /sbin/initctl status salt-$fname > /dev/null 2>&1
+            if [ $? -eq 1 ]; then
+                # upstart does not know about our service, let's 
+                cp ${SALT_GIT_CHECKOUT_DIR}/pkg/salt-$fname.upstart /etc/init/salt-$fname.conf
+            fi
 
+            /sbin/initctl status salt-$fname > /dev/null 2>&1
+            if [ $? -eq 0 ]; then
+                # upstart knows about this service
+                /sbin/initctl restart salt-$fname > /dev/null 2>&1
+                # Restart service
+                [ $? -eq 0 ] && continue
+                # Service was not running, let's try starting it
+                /sbin/initctl start salt-$fname > /dev/null 2>&1
+                [ $? -eq 0 ] && continue
+                # We failed to start the service, let's test the SysV code bellow
+            fi
+        fi
+
+
+        # Still in SysV init?!
+        if [ ! -f /etc/init.d/salt-$fname ]; then
+            cp ${SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-${fname} /etc/init.d/
+            chmod +x /etc/init.d/salt-${fname}
+        fi
         /sbin/chkconfig salt-${fname} on
         /etc/init.d/salt-${fname} start
     done

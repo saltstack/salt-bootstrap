@@ -142,6 +142,7 @@ Supported Operating Systems
 - Ubuntu 10.x/11.x/12.x
 - Debian 6.x
 - CentOS 6.3
+- RedHat 6.3
 - Fedora
 - Arch
 - FreeBSD 9.0

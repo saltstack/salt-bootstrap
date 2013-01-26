@@ -300,9 +300,7 @@ __gather_linux_system_info() {
         v=$( __parse_version_string "$( (grep VERSION /etc/${rsource}; cat /etc/${rsource}) | grep '[0-9]' | sed -e 'q' )" )
         case $(echo ${n} | tr '[:upper:]' '[:lower:]') in
             redhat )
-                if [ ".$(egrep '(Red Hat Enterprise Linux|CentOS)' /etc/${rsource})" != . ]; then
-                    n="<R>ed <H>at <E>nterprise <L>inux"
-                else
+                if [ ".$(egrep '(Red Hat Enterprise Linux|CentOS)' /etc/${rsource})" == . ]; then
                     n="<R>ed <H>at <L>inux"
                 fi
                 ;;
@@ -744,6 +742,39 @@ install_fedora_git_post() {
 #
 ##############################################################################
 
+##############################################################################
+#
+#   Red Hat Enterprise Linux Install Functions
+#
+install_redhat_stable_deps() {
+    install_centos_63_stable_deps
+}
+
+install_redhat_stable() {
+    install_centos_63_stable
+}
+
+install_redhat_stable_post() {
+    install_centos_63_stable_post
+}
+
+install_redhat_git_deps() {
+    install_centos_63_git_deps
+}
+
+install_redhat_git() {
+    install_centos_63_git
+}
+
+install_redhat_git_post() {
+    install_centos_63_git_post
+}
+
+
+#
+#   Ended Red Hat Enterprise Linux Install Functions
+#
+##############################################################################
 ##############################################################################
 #
 #   CentOS Install Functions

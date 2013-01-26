@@ -382,6 +382,11 @@ echo "     CPU Arch:     ${CPU_ARCH}"
 echo "     OS Name:      ${OS_NAME}"
 echo "     OS Version:   ${OS_VERSION}"
 echo "     Distribution: ${DISTRO_NAME} ${DISTRO_VERSION}"
+echo
+
+[ $INSTALL_MINION -eq 1 ] && echo " * INFO: Installing minion"
+[ $INSTALL_MASTER -eq 1 ] && echo " * INFO: Installing master"
+[ $INSTALL_SYNDIC -eq 1 ] && echo " * INFO: Installing syndic"
 
 
 # Simplify version naming on functions

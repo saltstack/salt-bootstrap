@@ -923,13 +923,14 @@ install_arch_post() {
 
         if [ -f /usr/bin/systemctl ]; then
             # Using systemd
-            /usr/bin/systemctl is-enabled salt-$fname.service || (
-                /usr/bin/systemctl preset salt-$fname.service && /usr/bin/systemctl enable salt-$fname.service
+            /usr/bin/systemctl is-enabled salt-$fname.service /dev/null 2>&1 || (
+                /usr/bin/systemctl preset salt-$fname.service /dev/null 2>&1 &&
+                /usr/bin/systemctl enable salt-$fname.service /dev/null 2>&1
             )
             sleep 0.1
-            systemctl daemon-reload
+            /usr/bin/systemctl daemon-reload
             sleep 0.1
-            systemctl try-restart salt-$fname.service
+            /usr/bin/systemctl try-restart salt-$fname.service
             continue
         fi
         /etc/rc.d/salt-$fname start
@@ -947,13 +948,14 @@ install_arch_git_post() {
         if [ -f /usr/bin/systemctl ]; then
             cp ${SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-$fname.service /lib/systemd/system/salt-$fname.service
 
-            /usr/bin/systemctl is-enabled salt-$fname.service || (
-                /usr/bin/systemctl preset salt-$fname.service && /usr/bin/systemctl enable salt-$fname.service
+            /usr/bin/systemctl is-enabled salt-$fname.service /dev/null 2>&1 || (
+                /usr/bin/systemctl preset salt-$fname.service /dev/null 2>&1 &&
+                /usr/bin/systemctl enable salt-$fname.service /dev/null 2>&1
             )
             sleep 0.1
-            systemctl daemon-reload
+            /usr/bin/systemctl daemon-reload
             sleep 0.1
-            systemctl try-restart salt-$fname.service
+            /usr/bin/systemctl try-restart salt-$fname.service
             continue
         fi
 

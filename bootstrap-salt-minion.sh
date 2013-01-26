@@ -763,7 +763,7 @@ install_centos_63_stable_post() {
             sudo service salt-$fname status | grep salt-$fname
             UPSTART_SERVICE_EXISTS=$?
             # Let's (re)start the service
-            if [ $UPSTART_SERVICE_EXITS -eq 0 ]; then
+            if [ $UPSTART_SERVICE_EXISTS -eq 0 ]; then
                 service salt-$fname restart
                 # Continue to next iteration or else the SysV init code bellow
                 # would also run, and is supposed to run if there's no upstart
@@ -829,9 +829,10 @@ install_centos_63_git_post() {
                 cp ${SALT_GIT_CHECKOUT_DIR}/pkg/salt-$fname.upstart /etc/init/salt-$fname.conf
             fi
             # Let's (re)start the service
-            if [ $UPSTART_SERVICE_EXITS -eq 0 ]; then
+            if [ $UPSTART_SERVICE_EXISTS -eq 0 ]; then
                 service salt-$fname restart
             else
+                # We just copied the proper upstart file above
                 service salt-$fname start
             fi
         else

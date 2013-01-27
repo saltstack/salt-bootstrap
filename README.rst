@@ -22,7 +22,7 @@ For example, using ``curl`` to install latest git:
 
 .. code:: console
 
-  curl -L http://bootstrap.saltstack.org | sudo sh -s git develop
+  curl -L http://bootstrap.saltstack.org | sudo sh -s -- git develop
 
 
 
@@ -45,7 +45,7 @@ If you already have python installed, then it's as easy as:
 
 .. code:: console
 
-  python -m urllib "http://bootstrap.saltstack.org" | sudo sh -s git develop
+  python -m urllib "http://bootstrap.saltstack.org" | sudo sh -s -- git develop
 
 
 On a FreeBSD base system you usually don't have either of the above binaries available. You **do** 
@@ -141,7 +141,9 @@ Supported Operating Systems
 ---------------------------
 - Ubuntu 10.x/11.x/12.x
 - Debian 6.x
-- CentOS 6.3
+- CentOS 5/6
+- Red Hat 5/6
+- Red Hat Enterprise 5/6
 - Fedora
 - Arch
 - FreeBSD 9.0

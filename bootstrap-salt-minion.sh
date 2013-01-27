@@ -336,13 +336,48 @@ __gather_linux_system_info() {
 #   DESCRIPTION:  Discover SunOS system info
 #-------------------------------------------------------------------------------
 __gather_sunos_system_info() {
-    DISTRO_NAME="Solaris"
-    DISTRO_VERSION=$(
-        echo "${OS_VERSION}" |
-        sed -e 's;^4\.;1.;' \
-            -e 's;^5\.\([0-6]\)[^0-9]*$;2.\1;' \
-            -e 's;^5\.\([0-9][0-9]*\).*;\1;'
-    )
+    if [ -f /sbin/uname ]; then
+        DISTRO_VERSION=$(/sbin/uname -X | grep -i kernelid | awk '{ print $3}')
+    fi
+
+    DISTRO_NAME=""
+    if [ -f /etc/release ]; then
+        while read -r line; do
+            [ "${DISTRO_NAME}x" != "x" ] && break
+            case "$line" in
+                *OpenIndiana*oi_[0-9]*)
+                    DISTRO_NAME="OpenIndiana"
+                    DISTRO_VERSION=$(echo "$line" | sed -nr "s/OpenIndiana(.*)oi_([[:digit:]]+)(.*)/\2/p")
+                    ;;
+                *OpenSolaris*snv_[0-9]*)
+                    DISTRO_NAME="OpenSolaris"
+                    DISTRO_VERSION=$(echo "$line" | sed -nr "s/OpenSolaris(.*)snv_([[:digit:]]+)(.*)/\2/p")
+                    ;;
+                *Oracle*Solaris*[0-9]*)
+                    DISTRO_NAME="Oracle Solaris"
+                    DISTRO_VERSION=$(echo "$line" | sed -nr "s/(Oracle Solaris) ([[:digit:]]+)(.*)/\2/p")
+                    ;;
+                *Solaris*)
+                    DISTRO_NAME="Solaris"
+                    ;;
+                *NexentaCore*)
+                    DISTRO_NAME="Solaris"
+                    ;;
+                *SmartOS*)
+                    DISTRO_NAME="Solaris"
+                    ;;
+            esac
+        done < /etc/release
+
+    if [ "${DISTRO_NAME}x" = "x" ]; then
+        DISTRO_NAME="Solaris"
+        DISTRO_VERSION=$(
+            echo "${OS_VERSION}" |
+            sed -e 's;^4\.;1.;' \
+                -e 's;^5\.\([0-6]\)[^0-9]*$;2.\1;' \
+                -e 's;^5\.\([0-9][0-9]*\).*;\1;'
+        )
+    fi
 }
 
 

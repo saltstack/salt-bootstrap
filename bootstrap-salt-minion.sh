@@ -878,6 +878,38 @@ install_centos_63_git_post() {
 
 ##############################################################################
 #
+#   RedHat Install Functions
+#
+install_red_hat_linux_63_stable_deps() {
+    install_centos_63_stable_deps
+}
+
+install_red_hat_enterprise_linux_63_stable_deps() {
+    install_red_hat_linux_63_stable_deps
+}
+
+install_red_hat_linux_63_stable() {
+    install_centos_63_stable
+}
+
+install_red_hat_enterprise_linux_63_stable() {
+    install_red_hat_linux_63_stable
+}
+
+install_red_hat_linux_63_stable_post() {
+    install_centos_63_stable_post
+}
+
+install_red_hat_enterprise_linux_63_stable_post() {
+    install_red_hat_linux_63_stable_post
+}
+#
+#   Ended RedHat Install Functions
+#
+##############################################################################
+
+##############################################################################
+#
 #   Arch Install Functions
 #
 install_arch_stable_deps() {

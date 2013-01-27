@@ -748,17 +748,21 @@ install_fedora_git_post() {
 #
 #   CentOS Install Functions
 #
-install_centos_63_stable_deps() {
+install_centos_stable_deps() {
     if [ $CPU_ARCH_L = "i686" ]; then
         EPEL_ARCH="i386"
     else
         EPEL_ARCH=$CPU_ARCH_L
     fi
-    rpm -Uvh --force http://mirrors.kernel.org/fedora-epel/6/${EPEL_ARCH}/epel-release-6-8.noarch.rpm
+    if [ $DISTRO_VERSION_NO_DOTS -gt 4 ] && [ $DISTRO_VERSION_NO_DOTS -lt 6 ]; then
+        rpm -Uvh --force http://mirrors.kernel.org/fedora-epel/5/${EPEL_ARCH}/epel-release-5-4.noarch.rpm
+    elif [ $DISTRO_VERSION_NO_DOTS -gt 5 ] && [ $DISTRO_VERSION_NO_DOTS -lt 7 ]; then
+        rpm -Uvh --force http://mirrors.kernel.org/fedora-epel/6/${EPEL_ARCH}/epel-release-6-8.noarch.rpm
+    fi
     yum -y update
 }
 
-install_centos_63_stable() {
+install_centos_stable() {
     packages=""
     if [ $INSTALL_MINION -eq 1 ]; then
         packages="${packages} salt-minion"
@@ -769,7 +773,7 @@ install_centos_63_stable() {
     yum -y install ${packages} --enablerepo=epel-testing
 }
 
-install_centos_63_stable_post() {
+install_centos_stable_post() {
     for fname in minion master syndic; do
         # Skip if not meant to be installed
         [ $fname = "minion" ] && [ $INSTALL_MINION -eq 0 ] && continue
@@ -799,20 +803,8 @@ install_centos_63_stable_post() {
     done
 }
 
-install_centos_62_stable_deps() {
-    install_centos_63_stable_deps
-}
-
-install_centos_62_stable() {
-    install_centos_63_stable
-}
-
-install_centos_62_stable_post() {
-    install_centos_63_stable_post
-}
-
-install_centos_63_git_deps() {
-    install_centos_63_stable_deps
+install_centos_git_deps() {
+    install_centos_stable_deps
     yum -y install git PyYAML m2crypto python-crypto python-msgpack python-zmq python-jinja2 --enablerepo=epel-testing
 
     __git_clone_and_checkout
@@ -825,14 +817,14 @@ install_centos_63_git_deps() {
 
 }
 
-install_centos_63_git() {
+install_centos_git() {
     rm -rf /usr/lib/python*/site-packages/salt
     rm -rf /usr/bin/salt*
 
     python2 setup.py install
 }
 
-install_centos_63_git_post() {
+install_centos_git_post() {
     for fname in master minion syndic; do
 
         # Skip if not meant to be installed
@@ -880,28 +872,52 @@ install_centos_63_git_post() {
 #
 #   RedHat Install Functions
 #
-install_red_hat_linux_63_stable_deps() {
-    install_centos_63_stable_deps
+install_red_hat_linux_stable_deps() {
+    install_centos_stable_deps
 }
 
-install_red_hat_enterprise_linux_63_stable_deps() {
-    install_red_hat_linux_63_stable_deps
+install_red_hat_linux_git_deps() {
+    install_centos_git_deps
 }
 
-install_red_hat_linux_63_stable() {
-    install_centos_63_stable
+install_red_hat_enterprise_linux_stable_deps() {
+    install_red_hat_linux_stable_deps
 }
 
-install_red_hat_enterprise_linux_63_stable() {
-    install_red_hat_linux_63_stable
+install_red_hat_enterprise_linux_git_deps() {
+    install_red_hat_linux_git_deps
 }
 
-install_red_hat_linux_63_stable_post() {
-    install_centos_63_stable_post
+install_red_hat_linux_stable() {
+    install_centos_stable
 }
 
-install_red_hat_enterprise_linux_63_stable_post() {
-    install_red_hat_linux_63_stable_post
+install_red_hat_linux_git() {
+    install_centos_git
+}
+
+install_red_hat_enterprise_linux_stable() {
+    install_red_hat_linux_stable
+}
+
+install_red_hat_enterprise_linux_git() {
+    install_red_hat_linux_git
+}
+
+install_red_hat_linux_stable_post() {
+    install_centos_stable_post
+}
+
+install_red_hat_linux_git_post() {
+    install_centos_git_post
+}
+
+install_red_hat_enterprise_linux_stable_post() {
+    install_red_hat_linux_stable_post
+}
+
+install_red_hat_enterprise_linux_git_post() {
+    install_red_hat_linux_git_post
 }
 #
 #   Ended RedHat Install Functions

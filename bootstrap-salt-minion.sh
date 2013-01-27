@@ -431,6 +431,7 @@ echo "     OS Version:   ${OS_VERSION}"
 echo "     Distribution: ${DISTRO_NAME} ${DISTRO_VERSION}"
 echo
 
+# Let users know what's going to be installed
 [ $INSTALL_MINION -eq 1 ] && echo " * INFO: Installing minion"
 [ $INSTALL_MASTER -eq 1 ] && echo " * INFO: Installing master"
 [ $INSTALL_SYNDIC -eq 1 ] && echo " * INFO: Installing syndic"
@@ -1139,6 +1140,48 @@ install_freebsd_git_post() {
 #
 ##############################################################################
 
+##############################################################################
+#
+#   SmartOS Install Functions
+#
+install_smartos_deps() {
+    pkgin -y in libtool-base autoconf automake libuuid gcc-compiler gmake \
+        python27 py27-setuptools py27-yaml py27-crypto swig
+    [ -d zeromq-3.2.1 ] || (
+        wget http://download.zeromq.org/zeromq-3.2.1-rc2.tar.gz &&
+        tar -xvf zeromq-3.2.1-rc2.tar.gz
+    )
+    cd zeromq-3.2.1
+    ./configure
+    make
+    make install
+
+    easy_install-2.7 pyzmq
+
+    # Let's trigger config_salt()
+    if [ "$TEMP_CONFIG_DIR" = "null" ]; then
+        TEMP_CONFIG_DIR="${SALT_GIT_CHECKOUT_DIR}/conf/"
+        CONFIG_SALT_FUNC="config_salt"
+    fi
+
+}
+
+install_smartos_stable() {
+    easy_install-2.7 salt
+}
+
+install_smartos_post() {
+    ###
+    # TODO: * create /opt/local/share/smf/salt-minion/manifest.xml in salt.git
+    # * svcadm enable salt-minion
+    # * remove line below
+    ###
+    /opt/local/bin/salt-minion -d
+}
+#
+#   Ended SmartOS Install Functions
+#
+##############################################################################
 
 ##############################################################################
 #

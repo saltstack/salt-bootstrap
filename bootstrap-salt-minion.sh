@@ -1169,8 +1169,25 @@ install_smartos_deps() {
 
 }
 
+install_smartos_git_deps() {
+    install_smartos_deps
+    pkgin -y in scmgit
+
+    __git_clone_and_checkout
+    # Let's trigger config_salt()
+    if [ "$TEMP_CONFIG_DIR" = "null" ]; then
+        TEMP_CONFIG_DIR="${SALT_GIT_CHECKOUT_DIR}/conf/"
+        CONFIG_SALT_FUNC="config_salt"
+    fi
+
+}
+
 install_smartos_stable() {
     easy_install-2.7 salt
+}
+
+install_smartos_git() {
+    /opt/local/bin/python setup.py install
 }
 
 install_smartos_post() {

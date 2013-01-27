@@ -368,6 +368,7 @@ __gather_sunos_system_info() {
                     ;;
             esac
         done < /etc/release
+    fi
 
     if [ "${DISTRO_NAME}x" = "x" ]; then
         DISTRO_NAME="Solaris"

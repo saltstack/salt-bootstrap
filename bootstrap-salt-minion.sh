@@ -143,7 +143,7 @@ if [ $(whoami) != "root" ] ; then
     exit 1
 fi
 
-CALLER=$(echo `ps a -o pid,command | grep $$ | grep -v grep | tr -s ' '` | cut -d ' ' -f 2)
+CALLER=$(echo `ps -a -o pid,args | grep $$ | grep -v grep | tr -s ' '` | cut -d ' ' -f 2)
 if [ "${CALLER}x" = "${0}x" ]; then
     CALLER="PIPED THROUGH"
 fi

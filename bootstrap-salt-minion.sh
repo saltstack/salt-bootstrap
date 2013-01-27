@@ -226,6 +226,11 @@ exec 2>$LOGPIPE
 __gather_hardware_info() {
     if [ -f /proc/cpuinfo ]; then
         CPU_VENDOR_ID=$(cat /proc/cpuinfo | grep -E 'vendor_id|Processor' | head -n 1 | awk '{print $3}' | cut -d '-' -f1 )
+    elif [ -f /usr/sbin/psrinfo ]; then
+        # SmartOS.
+        # Solaris!?
+        # This has only been tested for a GenuineIntel CPU
+        CPU_VENDOR_ID=$( /usr/sbin/psrinfo -pv 0 | tail -n 2 | head -n 1 | cut -d ' ' -f6 | sed 's/[^A-Za-z0-9]//g' )
     else
         CPU_VENDOR_ID=$( sysctl -n hw.model )
     fi

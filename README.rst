@@ -147,6 +147,7 @@ Supported Operating Systems
 - Fedora
 - Arch
 - FreeBSD 9.0
+- SmartOS
 
 
 

@@ -348,23 +348,29 @@ __gather_sunos_system_info() {
                 *OpenIndiana*oi_[0-9]*)
                     DISTRO_NAME="OpenIndiana"
                     DISTRO_VERSION=$(echo "$line" | sed -nr "s/OpenIndiana(.*)oi_([[:digit:]]+)(.*)/\2/p")
+                    break
                     ;;
                 *OpenSolaris*snv_[0-9]*)
                     DISTRO_NAME="OpenSolaris"
                     DISTRO_VERSION=$(echo "$line" | sed -nr "s/OpenSolaris(.*)snv_([[:digit:]]+)(.*)/\2/p")
+                    break
                     ;;
                 *Oracle*Solaris*[0-9]*)
                     DISTRO_NAME="Oracle Solaris"
                     DISTRO_VERSION=$(echo "$line" | sed -nr "s/(Oracle Solaris) ([[:digit:]]+)(.*)/\2/p")
+                    break
                     ;;
                 *Solaris*)
                     DISTRO_NAME="Solaris"
+                    break
                     ;;
                 *NexentaCore*)
-                    DISTRO_NAME="Solaris"
+                    DISTRO_NAME="Nexenta Core"
+                    break
                     ;;
                 *SmartOS*)
-                    DISTRO_NAME="Solaris"
+                    DISTRO_NAME="SmartOS"
+                    break
                     ;;
             esac
         done < /etc/release

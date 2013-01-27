@@ -1160,7 +1160,10 @@ install_smartos_deps() {
 
     # Let's trigger config_salt()
     if [ "$TEMP_CONFIG_DIR" = "null" ]; then
-        TEMP_CONFIG_DIR="${SALT_GIT_CHECKOUT_DIR}/conf/"
+        # Since we don't have a source to copy the default configuration or
+        # even any pre-seeded keys, TEMP_CONFIG_DIR will be a bogus, yet,
+        # exiting directory so the configuration function works it's best
+        TEMP_CONFIG_DIR="/"
         CONFIG_SALT_FUNC="config_salt"
     fi
 

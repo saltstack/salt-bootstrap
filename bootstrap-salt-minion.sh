@@ -1196,7 +1196,15 @@ install_smartos_post() {
     # * svcadm enable salt-minion
     # * remove line below
     ###
-    /opt/local/bin/salt-minion -d
+    for fname in minion master syndic; do
+
+        # Skip if not meant to be installed
+        [ $fname = "minion" ] && [ $INSTALL_MINION -eq 0 ] && continue
+        [ $fname = "master" ] && [ $INSTALL_MASTER -eq 0 ] && continue
+        [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq 0 ] && continue
+
+        /opt/local/bin/salt-$fname -d &
+    done
 }
 #
 #   Ended SmartOS Install Functions

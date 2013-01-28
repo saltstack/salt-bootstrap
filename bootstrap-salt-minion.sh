@@ -630,7 +630,7 @@ install_ubuntu_git_post() {
             cp ${SALT_GIT_CHECKOUT_DIR}/debian/salt-$fname.init /etc/init.d/salt-$fname
             chmod +x /etc/init.d/salt-$fname
         fi
-        /etc/init.d/salt-$fname restart
+        /etc/init.d/salt-$fname restart &
     done
 }
 #
@@ -726,7 +726,7 @@ install_debian_git_post() {
             cp ${SALT_GIT_CHECKOUT_DIR}/debian/salt-$fname.init /etc/init.d/salt-$fname
         fi
         chmod +x /etc/init.d/salt-$fname
-        /etc/init.d/salt-$fname start
+        /etc/init.d/salt-$fname start &
     done
 }
 #
@@ -846,7 +846,7 @@ install_centos_stable_post() {
         if [ -f /etc/init.d/salt-$fname ]; then
             # Still in SysV init!?
             /sbin/chkconfig salt-$fname on
-            /etc/init.d/salt-$fname start
+            /etc/init.d/salt-$fname start &
         fi
     done
 }
@@ -908,7 +908,7 @@ install_centos_git_post() {
             chmod +x /etc/init.d/salt-${fname}
         fi
         /sbin/chkconfig salt-${fname} on
-        /etc/init.d/salt-${fname} start
+        /etc/init.d/salt-${fname} start &
     done
 }
 #
@@ -1029,7 +1029,7 @@ install_arch_post() {
             /usr/bin/systemctl try-restart salt-$fname.service
             continue
         fi
-        /etc/rc.d/salt-$fname start
+        /etc/rc.d/salt-$fname start &
     done
 }
 
@@ -1058,7 +1058,7 @@ install_arch_git_post() {
         # SysV init!?
         cp ${SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-$fname /etc/rc.d/init.d/salt-$fname
         chmod +x /etc/rc.d/init.d/salt-$fname
-        /etc/init.d/salt-$fname start
+        /etc/init.d/salt-$fname start &
     done
 }
 #
@@ -1129,11 +1129,11 @@ install_freebsd_git() {
 }
 
 install_freebsd_90_stable_post() {
-    salt-minion -d
+    salt-minion -d &
 }
 
 install_freebsd_git_post() {
-    salt-minion -d
+    salt-minion -d &
 }
 #
 #   Ended FreeBSD Install Functions

@@ -1187,7 +1187,17 @@ install_smartos_stable() {
 }
 
 install_smartos_git() {
-    /opt/local/bin/python setup.py install
+
+    USE_SETUPTOOLS=1 /opt/local/bin/python setup.py install
+
+    # Install manifest files if needed.
+    for fname in minion master syndic; do
+        svcs network/salt-$fname > /dev/null 2>&1
+        if [ $? -eq 1 ]; then
+            svccfg import ${SALT_GIT_CHECKOUT_DIR}/solaris/salt-$fname.xml
+            svcadm enable salt-$fname
+        fi
+    done
 }
 
 install_smartos_post() {

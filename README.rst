@@ -25,10 +25,7 @@ For example, using ``curl`` to install latest git:
   curl -L http://bootstrap.saltstack.org | sudo sh -s -- git develop
 
 
-In case `curl` tells you something like:
-
-
-.. code: text
+In case `curl` tells you something like::
 
   curl: (60) SSL certificate problem, verify that the CA cert is OK. Details:
   error:14090086:SSL routines:SSL3_GET_SERVER_CERTIFICATE:certificate verify failed

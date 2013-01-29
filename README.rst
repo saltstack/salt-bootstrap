@@ -48,11 +48,19 @@ If you have certificate issues using ``wget`` try the following:
 
 
 
-If you already have python installed, then it's as easy as:
+If you already have python installed, ``python 2.6``, then it's as easy as:
 
 .. code:: console
 
   python -m urllib "http://bootstrap.saltstack.org" | sudo sh -s -- git develop
+
+
+All python versions should support the following one liner:
+
+.. code:: console
+
+  python -c 'import urllib; print urllib.urlopen("http://bootstrap.saltstack.org").read()' | \
+  sudo  sh -s -- git develop
 
 
 On a FreeBSD base system you usually don't have either of the above binaries available. You **do** 

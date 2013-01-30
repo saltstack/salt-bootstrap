@@ -322,6 +322,16 @@ __gather_linux_system_info() {
             slackware          ) n="Slackware"      ;;
             turbolinux         ) n="TurboLinux"     ;;
             unitedlinux        ) n="UnitedLinux"    ;;
+            system             )
+                while read -r line; do
+                    [ "${n}x" != "systemx" ] && break
+                    case "$line" in
+                        *Amazon*Linux*AMI*)
+                            n="Amazon Linux AMI"
+                            break
+                    esac
+                done < /etc/${rsource}
+                ;;
             *                  ) n="${n}"           ;
         esac
         DISTRO_NAME=$n

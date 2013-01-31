@@ -449,9 +449,11 @@ echo
 
 # Simplify version naming on functions
 if [ "x${DISTRO_VERSION}" = "x" ]; then
+    DISTRO_MAJOR_VERSION=""
     DISTRO_VERSION_NO_DOTS=""
     PREFIXED_DISTRO_VERSION_NO_DOTS=""
 else
+    DISTRO_MAJOR_VERSION="$(echo $DISTRO_VERSION | sed 's/^\([0-9]*\).*/\1/g')"
     DISTRO_VERSION_NO_DOTS="$(echo $DISTRO_VERSION | tr -d '.')"
     PREFIXED_DISTRO_VERSION_NO_DOTS="_${DISTRO_VERSION_NO_DOTS}"
 fi
@@ -812,9 +814,9 @@ install_centos_stable_deps() {
     else
         EPEL_ARCH=$CPU_ARCH_L
     fi
-    if [ $DISTRO_VERSION_NO_DOTS -gt 4 ] && [ $DISTRO_VERSION_NO_DOTS -lt 6 ]; then
+    if [ $DISTRO_MAJOR_VERSION -eq 5 ]; then
         rpm -Uvh --force http://mirrors.kernel.org/fedora-epel/5/${EPEL_ARCH}/epel-release-5-4.noarch.rpm
-    elif [ $DISTRO_VERSION_NO_DOTS -gt 5 ] && [ $DISTRO_VERSION_NO_DOTS -lt 7 ]; then
+    elif [ $DISTRO_MAJOR_VERSION -eq 6 ]; then
         rpm -Uvh --force http://mirrors.kernel.org/fedora-epel/6/${EPEL_ARCH}/epel-release-6-8.noarch.rpm
     fi
     yum -y update

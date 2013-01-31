@@ -812,9 +812,9 @@ install_centos_stable_deps() {
     else
         EPEL_ARCH=$CPU_ARCH_L
     fi
-    if [ $DISTRO_VERSION_NO_DOTS -gt 4 ] && [ $DISTRO_VERSION_NO_DOTS -lt 6 ]; then
+    if [ ${DISTRO_VERSION_NO_DOTS:0:1} -gt 4 ] && [ ${DISTRO_VERSION_NO_DOTS:0:1} -lt 6 ]; then
         rpm -Uvh --force http://mirrors.kernel.org/fedora-epel/5/${EPEL_ARCH}/epel-release-5-4.noarch.rpm
-    elif [ $DISTRO_VERSION_NO_DOTS -gt 5 ] && [ $DISTRO_VERSION_NO_DOTS -lt 7 ]; then
+    elif [ ${DISTRO_VERSION_NO_DOTS:0:1} -gt 5 ] && [ ${DISTRO_VERSION_NO_DOTS:0:1} -lt 7 ]; then
         rpm -Uvh --force http://mirrors.kernel.org/fedora-epel/6/${EPEL_ARCH}/epel-release-6-8.noarch.rpm
     fi
     yum -y update

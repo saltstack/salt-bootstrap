@@ -984,6 +984,52 @@ install_red_hat_enterprise_linux_git_post() {
 
 ##############################################################################
 #
+#   Amazon Linux AMI Install Functions
+#
+install_amazon_linux_ami_deps() {
+    # Acording to http://aws.amazon.com/amazon-linux-ami/faqs/#epel we should
+    # enable the EPEL 6 repo
+    if [ $CPU_ARCH_L = "i686" ]; then
+        EPEL_ARCH="i386"
+    else
+        EPEL_ARCH=$CPU_ARCH_L
+    fi
+    rpm -Uvh --force http://mirrors.kernel.org/fedora-epel/6/${EPEL_ARCH}/epel-release-6-8.noarch.rpm
+    yum -y update
+}
+
+install_amazon_linux_ami_git_deps() {
+    install_amazon_linux_ami_deps
+    yum -y install git PyYAML m2crypto python-crypto python-msgpack python-zmq \
+        python-ordereddict python-jinja2 --enablerepo=epel-testing
+
+    __git_clone_and_checkout
+
+    # Let's trigger config_salt()
+    if [ "$TEMP_CONFIG_DIR" = "null" ]; then
+        TEMP_CONFIG_DIR="${SALT_GIT_CHECKOUT_DIR}/conf/"
+        CONFIG_SALT_FUNC="config_salt"
+    fi
+}
+
+install_amazon_linux_ami_stable() {
+    install_centos_stable
+}
+
+install_amazon_linux_ami_git() {
+    install_centos_git
+}
+
+install_amazon_linux_ami_git_post() {
+    install_centos_git_post
+}
+#
+#   Ended Amazon Linux AMI Install Functions
+#
+##############################################################################
+
+##############################################################################
+#
 #   Arch Install Functions
 #
 install_arch_stable_deps() {

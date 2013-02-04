@@ -1,8 +1,10 @@
 before_install:
-  - sudo apt-get update && sudo apt-get install devscripts
+  - sudo apt-get update && sudo apt-get install
+  - "if [[ $TRAVIS_PYTHON_VERSION == '2.6' ]]; then pip install unittest2; fi"
+  - pip install unittest-xml-reporting
 
 script:
-  - sudo ./.run-boostrap-tests.sh
+  - sudo python tests/runtests.py -vv
 
 notifications:
   irc:

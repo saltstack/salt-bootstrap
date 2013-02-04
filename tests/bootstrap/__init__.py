@@ -49,25 +49,31 @@ BOOTSTRAP_SCRIPT_PATH = os.path.join(PARENT_DIR, 'bootstrap-salt-minion.sh')
 
 
 class Tee(object):
-    def __init__(self, realstd):
-        self.realstd = realstd
-        #realstd = self
+    def __init__(self, realstd=None):
         fd_, self.filename = tempfile.mkstemp()
         os.close(fd_)
         self.logfile = open(self.filename, 'w')
+        if realstd is not None:
+            realstd.write('\n')
+            realstd.flush()
+            # Duplicate what's written to the filename to the realstd
+            os.dup2(realstd.fileno(), self.fileno())
 
     def __del__(self):
-        self.logfile.close()
+        if not self.logfile.closed:
+            self.logfile.close()
+        os.unlink(self.filename)
 
     def close(self):
-        self.logfile.close()
+        if not self.logfile.closed:
+            self.logfile.close()
 
     def fileno(self):
         return self.logfile.fileno()
 
     def write(self, data):
-        self.logfile.write(data)
-        self.realstd.write(data)
+        if not self.logfile.closed:
+            self.logfile.write(data)
 
     def read(self):
         return open(self.filename, 'r').read()
@@ -81,14 +87,18 @@ class BootstrapTestCase(TestCase):
                    script=BOOTSTRAP_SCRIPT_PATH,
                    args=(),
                    cwd=PARENT_DIR,
-                   catch_stderr=False,
                    timeout=None,
-                   executable='/bin/sh'):
+                   executable='/bin/sh',
+                   stream_stds=False):
 
         cmd = [script] + list(args)
 
-        stderr = Tee(sys.stderr)
-        stdout = Tee(sys.stdout)
+        if stream_stds:
+            stderr = Tee(sys.stderr)
+            stdout = Tee(sys.stdout)
+        else:
+            stderr = Tee()
+            stdout = Tee()
 
         popen_kwargs = {
             'cwd': cwd,
@@ -119,8 +129,8 @@ class BootstrapTestCase(TestCase):
 
                 now = datetime.now()
                 if now > ping_at:
-                    sys.stderr.write('.')
-                    sys.stderr.flush()
+                    #sys.stderr.write('.')
+                    #sys.stderr.flush()
                     ping_at = datetime.now() + timedelta(seconds=5)
 
                 if now > stop_at:

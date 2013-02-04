@@ -26,5 +26,9 @@ class InstallationTestCase(BootstrapTestCase):
         self.assert_script_result(
             'Failed to install using bash',
             0,
-            self.run_script(executable='/bin/bash', timeout=15*60)
+            self.run_script(
+                executable='/bin/bash',
+                timeout=15*60,
+                stream_stds=True
+            )
         )

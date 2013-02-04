@@ -14,6 +14,11 @@ from bootstrap import *
 
 
 class InstallationTestCase(BootstrapTestCase):
+
+    def setUp(self):
+        if os.geteuid() is not 0:
+            self.skipTest('you must be root to run this test')
+
     def test_install_using_bash(self):
         if not os.path.exists('/bin/bash'):
             self.skipTest('\'/bin/bash\' was not found on this system')

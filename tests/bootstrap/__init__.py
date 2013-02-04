@@ -53,7 +53,7 @@ class BootstrapTestCase(TestCase):
                    args=(),
                    cwd=PARENT_DIR,
                    catch_stderr=False,
-                   timeout=None,
+                   timeout=9*60,
                    executable='/bin/sh'):
 
         cmd = [script] + list(args)
@@ -75,6 +75,7 @@ class BootstrapTestCase(TestCase):
         process = subprocess.Popen(cmd, **popen_kwargs)
 
         if timeout is not None:
+            ping_at = datetime.now() + timedelta(seconds=5)
             stop_at = datetime.now() + timedelta(seconds=timeout)
             term_sent = False
             while True:
@@ -82,7 +83,13 @@ class BootstrapTestCase(TestCase):
                 if process.returncode is not None:
                     break
 
-                if datetime.now() > stop_at:
+                now = datetime.now()
+                if now > ping_at:
+                    sys.stderr.write('.')
+                    sys.stderr.flush()
+                    ping_at = datetime.now() + timedelta(seconds=5)
+
+                if now > stop_at:
                     if term_sent is False:
                         # Kill the process group since sending the term signal
                         # would only terminate the shell, not the command

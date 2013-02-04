@@ -75,11 +75,18 @@ class Tee(object):
         if not self.logfile.closed:
             self.logfile.write(data)
 
+    def flush(self):
+        self.logfile.flush()
+
     def read(self):
         return open(self.filename, 'r').read()
 
     def splitlines(self):
         return self.read().splitlines()
+
+    # StringIO methods
+    def getvalue(self):
+        return self.read()
 
 
 class BootstrapTestCase(TestCase):

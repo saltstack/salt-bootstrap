@@ -53,7 +53,7 @@ class BootstrapTestCase(TestCase):
                    args=(),
                    cwd=PARENT_DIR,
                    catch_stderr=False,
-                   timeout=9*60,
+                   timeout=None,
                    executable='/bin/sh'):
 
         cmd = [script] + list(args)
@@ -101,12 +101,12 @@ class BootstrapTestCase(TestCase):
                     # As a last resort, kill the process group
                     os.killpg(os.getpgid(process.pid), signal.SIGKILL)
 
-                    return [
+                    return 1, [
                         'Process took more than {0} seconds to complete. '
                         'Process Killed!'.format(timeout)
                     ], ['Process killed, unable to catch stderr output']
 
-        if sys.version_info < (2, 7):
+        #if sys.version_info < (2, 7):
             # On python 2.6, the subprocess'es communicate() method uses
             # select which, is limited by the OS to 1024 file descriptors
             # We need more available descriptors to run the tests which
@@ -119,11 +119,11 @@ class BootstrapTestCase(TestCase):
             # Use communicate() to avoid that." <- a catch, catch situation
             #
             # Use this work around were it's needed only, python 2.6
-            process.wait()
-            out = process.stdout.read()
-            err = process.stderr.read()
-        else:
-            out, err = process.communicate()
+        #    process.wait()
+        #    out = process.stdout.read()
+        #    err = process.stderr.read()
+        #else:
+        out, err = process.communicate()
         # Force closing stderr/stdout to release file descriptors
         process.stdout.close()
         process.stderr.close()

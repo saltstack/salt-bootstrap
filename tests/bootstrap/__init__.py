@@ -14,6 +14,7 @@
 import os
 import sys
 import signal
+import tempfile
 import subprocess
 from datetime import datetime, timedelta
 
@@ -47,6 +48,34 @@ PARENT_DIR = os.path.dirname(TEST_DIR)
 BOOTSTRAP_SCRIPT_PATH = os.path.join(PARENT_DIR, 'bootstrap-salt-minion.sh')
 
 
+class Tee(object):
+    def __init__(self, realstd):
+        self.realstd = realstd
+        #realstd = self
+        fd_, self.filename = tempfile.mkstemp()
+        os.close(fd_)
+        self.logfile = open(self.filename, 'w')
+
+    def __del__(self):
+        self.logfile.close()
+
+    def close(self):
+        self.logfile.close()
+
+    def fileno(self):
+        return self.logfile.fileno()
+
+    def write(self, data):
+        self.logfile.write(data)
+        self.realstd.write(data)
+
+    def read(self):
+        return open(self.filename, 'r').read()
+
+    def splitlines(self):
+        return self.read().splitlines()
+
+
 class BootstrapTestCase(TestCase):
     def run_script(self,
                    script=BOOTSTRAP_SCRIPT_PATH,
@@ -58,11 +87,16 @@ class BootstrapTestCase(TestCase):
 
         cmd = [script] + list(args)
 
+        stderr = Tee(sys.stderr)
+        stdout = Tee(sys.stdout)
+
         popen_kwargs = {
             'cwd': cwd,
             'shell': True,
-            'stderr': subprocess.PIPE,
-            'stdout': subprocess.PIPE,
+            #'stderr': subprocess.PIPE,
+            #'stdout': subprocess.PIPE,
+            'stderr': stderr,
+            'stdout': stdout,
             'close_fds': True,
             'executable': executable,
 
@@ -125,10 +159,10 @@ class BootstrapTestCase(TestCase):
         #else:
         out, err = process.communicate()
         # Force closing stderr/stdout to release file descriptors
-        process.stdout.close()
-        process.stderr.close()
+        stdout.close()
+        stderr.close()
         try:
-            return process.returncode, out.splitlines(), err.splitlines()
+            return process.returncode, stdout.splitlines(), stderr.splitlines()
         finally:
             try:
                 process.terminate()

@@ -149,6 +149,12 @@ def main():
             '\'--xml\' is not available. The xmlrunner library is not '
             'installed.'
         )
+    elif options.xmlout:
+        print(
+            'Generated XML reports will be stored on {0!r}'.format(
+                XML_OUTPUT_DIR
+            )
+        )
 
     if not any((options.lint, options.usage, options.install)):
         options.lint = True

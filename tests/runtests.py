@@ -69,10 +69,13 @@ def run_suite(opts, path, display_name, suffix='[!_]*.py'):
     print_header('Starting {0}'.format(header))
 
     if opts.xmlout:
-        runner = xmlrunner.XMLTestRunner(output=XML_OUTPUT_DIR).run(tests)
-    else:
         if not os.path.isdir(XML_OUTPUT_DIR):
             os.makedirs(XML_OUTPUT_DIR)
+        runner = xmlrunner.XMLTestRunner(
+            output=XML_OUTPUT_DIR,
+            verbosity=opts.verbosity
+        ).run(tests)
+    else:
         runner = TextTestRunner(
             verbosity=opts.verbosity
         ).run(tests)

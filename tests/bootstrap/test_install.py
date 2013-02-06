@@ -114,3 +114,14 @@ class InstallationTestCase(BootstrapTestCase):
                 stream_stds=True
             )
         )
+
+    def test_install_latest_from_git_develop(self):
+        self.assert_script_result(
+            'Failed to install using latest git develop',
+            0,
+            self.run_script(
+                args=('git', 'develop'),
+                timeout=15 * 60,
+                stream_stds=True
+            )
+        )

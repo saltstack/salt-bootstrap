@@ -1,5 +1,6 @@
+language: python
+
 before_install:
-  - sudo apt-get update && sudo apt-get install
   - "if [[ $TRAVIS_PYTHON_VERSION == '2.6' ]]; then sudo pip install unittest2; fi"
   - sudo pip install unittest-xml-reporting
 

@@ -10,6 +10,7 @@
     :license: Apache 2.0, see LICENSE for more details.
 '''
 
+import shutil
 from bootstrap import *
 
 
@@ -18,6 +19,38 @@ class InstallationTestCase(BootstrapTestCase):
     def setUp(self):
         if os.geteuid() is not 0:
             self.skipTest('you must be root to run this test')
+
+    def tearDown(self):
+        cleanup_commands = []
+        if GRAINS['os_family'] == 'Debian':
+            cleanup_commands.append(
+                'apt-get remove -y -o DPkg::Options::=--force-confold '
+                '--purge salt-master salt-minion salt-syndic'
+            )
+            cleanup_commands.append(
+                'apt-get autoremove -y -o DPkg::Options::=--force-confold '
+                '--purge'
+            )
+        elif GRAINS['os_family'] == 'RedHat':
+            cleanup_commands.append(
+                'yum -y remove salt-minion salt-master'
+            )
+
+        for cleanup in cleanup_commands:
+            print 'Running cleanup command {0!r}'.format(cleanup)
+            self.assert_script_result(
+                'Failed to execute cleanup command {0!r}'.format(cleanup),
+                0,
+                self.run_script(
+                    args=cleanup.split(),
+                    timeout=15 * 60,
+                    stream_stds=True
+                )
+            )
+
+        if os.path.isdir('/tmp/git'):
+            print 'Cleaning salt git checkout'
+            shutil.rmtree('/tmp/git')
 
     def test_install_using_bash(self):
         if not os.path.exists('/bin/bash'):

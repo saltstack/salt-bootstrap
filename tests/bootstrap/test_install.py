@@ -50,10 +50,10 @@ class InstallationTestCase(BootstrapTestCase):
         if GRAINS['os'] == 'Ubuntu':
             self.assert_script_result(
                 'Failed to install daily',
-                0, rc, out, err
+                0, (rc, out, err)
             )
         else:
             self.assert_script_result(
                 'Although system is not Ubuntu, we managed to install',
-                1, rc, out, err
+                1, (rc, out, err)
             )

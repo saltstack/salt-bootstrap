@@ -128,7 +128,18 @@ class InstallationTestCase(BootstrapTestCase):
 
     def test_install_specific_git_tag(self):
         self.assert_script_result(
-            'Failed to install using latest git develop',
+            'Failed to install using specific git tag',
+            0,
+            self.run_script(
+                args=('git', 'v0.12.1'),
+                timeout=15 * 60,
+                stream_stds=True
+            )
+        )
+
+    def test_install_specific_git_sha(self):
+        self.assert_script_result(
+            'Failed to install using specific git sha',
             0,
             self.run_script(
                 args=('git', 'v0.12.1'),

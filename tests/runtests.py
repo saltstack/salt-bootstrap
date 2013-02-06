@@ -12,10 +12,11 @@
 '''
 
 import os
+import pprint
 import shutil
 import optparse
 
-from bootstrap import TestLoader, TextTestRunner
+from bootstrap import GRAINS, TestLoader, TextTestRunner
 try:
     from bootstrap.ext import console
     width, height = console.getTerminalSize()
@@ -166,6 +167,9 @@ def main():
 
     if not options.no_clean and os.path.isdir(XML_OUTPUT_DIR):
         shutil.rmtree(XML_OUTPUT_DIR)
+
+    print 'Detected system grains:'
+    pprint.pprint(GRAINS)
 
     overall_status = []
 

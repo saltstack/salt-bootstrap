@@ -32,3 +32,28 @@ class InstallationTestCase(BootstrapTestCase):
                 stream_stds=True
             )
         )
+
+    def test_install_using_sh(self):
+        self.assert_script_result(
+            'Failed to install using sh',
+            0,
+            self.run_script(
+                timeout=15*60,
+                stream_stds=True
+            )
+        )
+
+    def test_install_daily(self):
+        rc, out, err = self.run_script(
+            args=('daily',), timeout=15*60, stream_stds=True
+        )
+        if GRAINS['os'] == 'Ubuntu':
+            self.assert_script_result(
+                'Failed to install daily',
+                0, rc, out, err
+            )
+        else:
+            self.assert_script_result(
+                'Although system is not Ubuntu, we managed to install',
+                1, rc, out, err
+            )

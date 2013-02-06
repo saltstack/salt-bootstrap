@@ -42,6 +42,7 @@ else:
         skipIf,
     )
 
+from bootstrap.ext.os_data import GRAINS
 
 TEST_DIR = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
 EXT_DIR = os.path.join(TEST_DIR, 'ext')

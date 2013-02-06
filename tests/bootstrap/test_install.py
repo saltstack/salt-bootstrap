@@ -61,7 +61,7 @@ class InstallationTestCase(BootstrapTestCase):
             0,
             self.run_script(
                 executable='/bin/bash',
-                timeout=15*60,
+                timeout=15 * 60,
                 stream_stds=True
             )
         )
@@ -71,14 +71,25 @@ class InstallationTestCase(BootstrapTestCase):
             'Failed to install using sh',
             0,
             self.run_script(
-                timeout=15*60,
+                timeout=15 * 60,
+                stream_stds=True
+            )
+        )
+
+    def test_install_explicit_stable(self):
+        self.assert_script_result(
+            'Failed to install explicit stable using sh',
+            0,
+            self.run_script(
+                args=('stable'),
+                timeout=15 * 60,
                 stream_stds=True
             )
         )
 
     def test_install_daily(self):
         rc, out, err = self.run_script(
-            args=('daily',), timeout=15*60, stream_stds=True
+            args=('daily',), timeout=15 * 60, stream_stds=True
         )
         if GRAINS['os'] == 'Ubuntu':
             self.assert_script_result(
@@ -90,3 +101,15 @@ class InstallationTestCase(BootstrapTestCase):
                 'Although system is not Ubuntu, we managed to install',
                 1, (rc, out, err)
             )
+
+    def test_install_stable_piped_through_sh(self):
+        self.assert_script_result(
+            'Failed to install stable piped through sh',
+            0,
+            self.run_script(
+                args='cat {0} | sh '.format(BOOTSTRAP_SCRIPT_PATH).split(),
+                timeout=15 * 60,
+                stream_stds=True
+            )
+        )
+

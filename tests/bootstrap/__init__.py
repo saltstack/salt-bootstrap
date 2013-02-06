@@ -85,7 +85,7 @@ class BootstrapTestCase(TestCase):
             'preexec_fn': os.setpgrp
         }
 
-        cmd = ' '.join([script] + list(args))
+        cmd = ' '.join(filter(None, [script] + list(args)))
 
         process = subprocess.Popen(cmd, **popen_kwargs)
 

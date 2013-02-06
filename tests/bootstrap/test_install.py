@@ -42,6 +42,7 @@ class InstallationTestCase(BootstrapTestCase):
                 'Failed to execute cleanup command {0!r}'.format(cleanup),
                 0,
                 self.run_script(
+                    script=None,
                     args=cleanup.split(),
                     timeout=15 * 60,
                     stream_stds=True
@@ -107,9 +108,9 @@ class InstallationTestCase(BootstrapTestCase):
             'Failed to install stable piped through sh',
             0,
             self.run_script(
+                script=None,
                 args='cat {0} | sh '.format(BOOTSTRAP_SCRIPT_PATH).split(),
                 timeout=15 * 60,
                 stream_stds=True
             )
         )
-

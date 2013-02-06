@@ -13,6 +13,7 @@
 
 import os
 import sys
+import fcntl
 import signal
 import tempfile
 import subprocess
@@ -48,45 +49,14 @@ PARENT_DIR = os.path.dirname(TEST_DIR)
 BOOTSTRAP_SCRIPT_PATH = os.path.join(PARENT_DIR, 'bootstrap-salt-minion.sh')
 
 
-class Tee(object):
-    def __init__(self, realstd=None):
-        fd_, self.filename = tempfile.mkstemp()
-        os.close(fd_)
-        self.logfile = open(self.filename, 'w')
-        if realstd is not None:
-            realstd.write('\n')
-            realstd.flush()
-            # Duplicate what's written to the filename to the realstd
-            os.dup2(realstd.fileno(), self.fileno())
-
-    def __del__(self):
-        if not self.logfile.closed:
-            self.logfile.close()
-        os.unlink(self.filename)
-
-    def close(self):
-        if not self.logfile.closed:
-            self.logfile.close()
-
-    def fileno(self):
-        return self.logfile.fileno()
-
-    def write(self, data):
-        if not self.logfile.closed:
-            self.logfile.write(data)
-
-    def flush(self):
-        self.logfile.flush()
-
-    def read(self):
-        return open(self.filename, 'r').read()
-
-    def splitlines(self):
-        return self.read().splitlines()
-
-    # StringIO methods
-    def getvalue(self):
-        return self.read()
+def non_block_read(output):
+    fd = output.fileno()
+    fl = fcntl.fcntl(fd, fcntl.F_GETFL)
+    fcntl.fcntl(fd, fcntl.F_SETFL, fl | os.O_NONBLOCK)
+    try:
+        return output.read()
+    except:
+        return ''
 
 
 class BootstrapTestCase(TestCase):
@@ -100,20 +70,13 @@ class BootstrapTestCase(TestCase):
 
         cmd = [script] + list(args)
 
-        if stream_stds:
-            stderr = Tee(sys.stderr)
-            stdout = Tee(sys.stdout)
-        else:
-            stderr = Tee()
-            stdout = Tee()
+        out = err = ''
 
         popen_kwargs = {
             'cwd': cwd,
             'shell': True,
-            #'stderr': subprocess.PIPE,
-            #'stdout': subprocess.PIPE,
-            'stderr': stderr,
-            'stdout': stdout,
+            'stderr': subprocess.PIPE,
+            'stdout': subprocess.PIPE,
             'close_fds': True,
             'executable': executable,
 
@@ -126,19 +89,28 @@ class BootstrapTestCase(TestCase):
         process = subprocess.Popen(cmd, **popen_kwargs)
 
         if timeout is not None:
-            ping_at = datetime.now() + timedelta(seconds=5)
             stop_at = datetime.now() + timedelta(seconds=timeout)
             term_sent = False
-            while True:
-                process.poll()
-                if process.returncode is not None:
-                    break
 
+        while True:
+            process.poll()
+            if process.returncode is not None:
+                break
+
+            rout = non_block_read(process.stdout)
+            if rout:
+                out += rout
+                if stream_stds:
+                    sys.stdout.write(rout)
+
+            rerr = non_block_read(process.stderr)
+            if rerr:
+                err += rerr
+                if stream_stds:
+                    sys.stderr.write(rerr)
+
+            if timeout is not None:
                 now = datetime.now()
-                if now > ping_at:
-                    #sys.stderr.write('.')
-                    #sys.stderr.flush()
-                    ping_at = datetime.now() + timedelta(seconds=5)
 
                 if now > stop_at:
                     if term_sent is False:
@@ -154,32 +126,20 @@ class BootstrapTestCase(TestCase):
 
                     return 1, [
                         'Process took more than {0} seconds to complete. '
-                        'Process Killed!'.format(timeout)
-                    ], ['Process killed, unable to catch stderr output']
+                        'Process Killed! Current STDOUT: \n{1}'.format(
+                            timeout, out
+                        )
+                    ], [
+                        'Process took more than {0} seconds to complete. '
+                        'Process Killed! Current STDERR: \n{1}'.format(
+                            timeout, err
+                        )
+                    ]
 
-        #if sys.version_info < (2, 7):
-            # On python 2.6, the subprocess'es communicate() method uses
-            # select which, is limited by the OS to 1024 file descriptors
-            # We need more available descriptors to run the tests which
-            # need the stderr output.
-            # So instead of .communicate() we wait for the process to
-            # finish, but, as the python docs state "This will deadlock
-            # when using stdout=PIPE and/or stderr=PIPE and the child
-            # process generates enough output to a pipe such that it
-            # blocks waiting for the OS pipe buffer to accept more data.
-            # Use communicate() to avoid that." <- a catch, catch situation
-            #
-            # Use this work around were it's needed only, python 2.6
-        #    process.wait()
-        #    out = process.stdout.read()
-        #    err = process.stderr.read()
-        #else:
-        out, err = process.communicate()
-        # Force closing stderr/stdout to release file descriptors
-        stdout.close()
-        stderr.close()
+        process.communicate()
+
         try:
-            return process.returncode, stdout.splitlines(), stderr.splitlines()
+            return process.returncode, out.splitlines(), err.splitlines()
         finally:
             try:
                 process.terminate()

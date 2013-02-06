@@ -82,7 +82,7 @@ class InstallationTestCase(BootstrapTestCase):
             'Failed to install explicit stable using sh',
             0,
             self.run_script(
-                args=('stable'),
+                args=('stable',),
                 timeout=15 * 60,
                 stream_stds=True
             )

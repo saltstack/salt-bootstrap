@@ -1355,7 +1355,7 @@ install_freebsd_git_deps() {
 }
 
 install_freebsd_9x_stable() {
-    /usr/local/sbin/pkg install -y salt
+    /usr/local/sbin/pkg install -y sysutils/py-salt
 }
 
 install_freebsd_90_stable() {
@@ -1367,8 +1367,8 @@ install_freebsd_91_stable() {
 }
 
 install_freebsd_git() {
-    /usr/local/sbin/pkg install -y git salt
-    /usr/local/sbin/pkg delete -y salt
+    /usr/local/sbin/pkg install -y git sysutils/py-salt
+    /usr/local/sbin/pkg delete -y sysutils/py-salt
 
     /usr/local/bin/python setup.py install
 }

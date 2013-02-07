@@ -67,6 +67,19 @@ class InstallationTestCase(BootstrapTestCase):
             )
         )
 
+        # Try to get the versions report
+        self.assert_script_result(
+            'Failed to the versions report',
+            0,
+            self.run_script(
+                script=None,
+                args=('salt-minion', '--versions-report'),
+                timeout=15 * 60,
+                stream_stds=True
+            )
+        )
+
+
     def test_install_using_sh(self):
         self.assert_script_result(
             'Failed to install using sh',
@@ -76,6 +89,19 @@ class InstallationTestCase(BootstrapTestCase):
                 stream_stds=True
             )
         )
+
+        # Try to get the versions report
+        self.assert_script_result(
+            'Failed to the versions report',
+            0,
+            self.run_script(
+                script=None,
+                args=('salt-minion', '--versions-report'),
+                timeout=15 * 60,
+                stream_stds=True
+            )
+        )
+
 
     def test_install_explicit_stable(self):
         self.assert_script_result(
@@ -88,6 +114,19 @@ class InstallationTestCase(BootstrapTestCase):
             )
         )
 
+        # Try to get the versions report
+        self.assert_script_result(
+            'Failed to the versions report',
+            0,
+            self.run_script(
+                script=None,
+                args=('salt-minion', '--versions-report'),
+                timeout=15 * 60,
+                stream_stds=True
+            )
+        )
+
+
     def test_install_daily(self):
         rc, out, err = self.run_script(
             args=('daily',), timeout=15 * 60, stream_stds=True
@@ -96,6 +135,18 @@ class InstallationTestCase(BootstrapTestCase):
             self.assert_script_result(
                 'Failed to install daily',
                 0, (rc, out, err)
+            )
+
+            # Try to get the versions report
+            self.assert_script_result(
+                'Failed to the versions report',
+                0,
+                self.run_script(
+                    script=None,
+                    args=('salt-minion', '--versions-report'),
+                    timeout=15 * 60,
+                    stream_stds=True
+                )
             )
         else:
             self.assert_script_result(
@@ -115,12 +166,36 @@ class InstallationTestCase(BootstrapTestCase):
             )
         )
 
+        # Try to get the versions report
+        self.assert_script_result(
+            'Failed to the versions report',
+            0,
+            self.run_script(
+                script=None,
+                args=('salt-minion', '--versions-report'),
+                timeout=15 * 60,
+                stream_stds=True
+            )
+        )
+
     def test_install_latest_from_git_develop(self):
         self.assert_script_result(
             'Failed to install using latest git develop',
             0,
             self.run_script(
                 args=('git', 'develop'),
+                timeout=15 * 60,
+                stream_stds=True
+            )
+        )
+
+        # Try to get the versions report
+        self.assert_script_result(
+            'Failed to the versions report',
+            0,
+            self.run_script(
+                script=None,
+                args=('salt', '--versions-report'),
                 timeout=15 * 60,
                 stream_stds=True
             )
@@ -137,12 +212,36 @@ class InstallationTestCase(BootstrapTestCase):
             )
         )
 
+        # Try to get the versions report
+        self.assert_script_result(
+            'Failed to the versions report',
+            0,
+            self.run_script(
+                script=None,
+                args=('salt', '--versions-report'),
+                timeout=15 * 60,
+                stream_stds=True
+            )
+        )
+
     def test_install_specific_git_sha(self):
         self.assert_script_result(
             'Failed to install using specific git sha',
             0,
             self.run_script(
                 args=('git', 'v0.12.1'),
+                timeout=15 * 60,
+                stream_stds=True
+            )
+        )
+
+        # Try to get the versions report
+        self.assert_script_result(
+            'Failed to the versions report',
+            0,
+            self.run_script(
+                script=None,
+                args=('salt', '--versions-report'),
                 timeout=15 * 60,
                 stream_stds=True
             )

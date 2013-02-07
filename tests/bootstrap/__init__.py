@@ -47,7 +47,7 @@ from bootstrap.ext.os_data import GRAINS
 TEST_DIR = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
 EXT_DIR = os.path.join(TEST_DIR, 'ext')
 PARENT_DIR = os.path.dirname(TEST_DIR)
-BOOTSTRAP_SCRIPT_PATH = os.path.join(PARENT_DIR, 'bootstrap-salt-minion.sh')
+BOOTSTRAP_SCRIPT_PATH = os.path.join(PARENT_DIR, 'bootstrap-salt.sh')
 
 
 def non_block_read(output):

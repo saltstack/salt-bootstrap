@@ -8,7 +8,7 @@ Bootstrapping Salt
 Before `Salt`_ can be used for provisioning on the desired machine, the 
 binaries need to be installed. Since `Salt`_ supports many different 
 distributions and versions of operating systems, the `Salt`_ installation 
-process is handled by this shell script ``bootstrap-salt-minion.sh``.  This 
+process is handled by this shell script ``bootstrap-salt.sh``.  This 
 script runs through a series of checks to determine operating system type and 
 version to then install the `Salt`_ binaries using the appropriate methods.
 

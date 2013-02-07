@@ -3,7 +3,7 @@
 # vim: softtabstop=4 shiftwidth=4 expandtab fenc=utf-8 spell spelllang=en
 #===============================================================================
 #
-#          FILE: bootstrap-salt-minion.sh
+#          FILE: bootstrap-salt.sh
 #
 #   DESCRIPTION: Bootstrap salt installation for various systems/distributions
 #
@@ -15,8 +15,8 @@
 #       CREATED: 10/15/2012 09:49:37 PM WEST
 #===============================================================================
 set -o nounset                              # Treat unset variables as an error
-ScriptVersion="1.3"
-ScriptName="bootstrap-salt-minion.sh"
+ScriptVersion="1.4"
+ScriptName="bootstrap-salt.sh"
 
 #===============================================================================
 #  LET THE BLACK MAGIC BEGIN!!!!

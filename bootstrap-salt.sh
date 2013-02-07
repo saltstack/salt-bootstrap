@@ -1299,7 +1299,7 @@ install_arch_start_daemons() {
 #
 #   FreeBSD Install Functions
 #
-install_freebsd_90_stable_deps() {
+install_freebsd_9x_stable_deps() {
     if [ $CPU_ARCH_L = "amd64" ]; then
         BSD_ARCH="x86:64"
     elif [ $CPU_ARCH_L = "x86_64" ]; then
@@ -1317,6 +1317,14 @@ install_freebsd_90_stable_deps() {
     echo "PACKAGESITE: http://pkgbeta.freebsd.org/freebsd:9:${BSD_ARCH}/latest" > /usr/local/etc/pkg.conf
 
     /usr/local/sbin/pkg install -y swig
+}
+
+install_freebsd_90_stable_deps() {
+    install_freebsd_9x_stable_deps
+}
+
+install_freebsd_91_stable_deps() {
+    install_freebsd_9x_stable_deps
 }
 
 install_freebsd_git_deps() {
@@ -1346,8 +1354,16 @@ install_freebsd_git_deps() {
     fi
 }
 
-install_freebsd_90_stable() {
+install_freebsd_9x_stable() {
     /usr/local/sbin/pkg install -y salt
+}
+
+install_freebsd_90_stable() {
+    install_freebsd_9x_stable
+}
+
+install_freebsd_91_stable() {
+    install_freebsd_9x_stable
 }
 
 install_freebsd_git() {
@@ -1378,6 +1394,23 @@ install_freebsd_start_daemons() {
         salt-$fname -d &
     done
 }
+
+install_freebsd_9x_stable_post() {
+    salt-minion -d &
+}
+
+install_freebsd_90_stable_post() {
+    install_freebsd_9x_stable_post
+}
+
+install_freebsd_91_stable_post() {
+    install_freebsd_9x_stable_post
+}
+
+install_freebsd_git_post() {
+    salt-minion -d &
+}
+
 #
 #   Ended FreeBSD Install Functions
 #

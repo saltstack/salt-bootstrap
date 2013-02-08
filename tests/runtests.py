@@ -177,10 +177,10 @@ def main():
         status = run_integration_suite(options, 'Lint', "*lint.py")
         overall_status.append(status)
     if options.usage:
-        run_integration_suite(options, 'Usage', "*usage.py")
+        status = run_integration_suite(options, 'Usage', "*usage.py")
         overall_status.append(status)
     if options.install:
-        run_integration_suite(options, 'Installation', "*install.py")
+        status = run_integration_suite(options, 'Installation', "*install.py")
         overall_status.append(status)
 
     if overall_status.count(False) > 0:

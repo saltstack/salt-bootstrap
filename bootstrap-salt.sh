@@ -764,6 +764,18 @@ install_debian_git_post() {
             cp ${SALT_GIT_CHECKOUT_DIR}/debian/salt-$fname.init /etc/init.d/salt-$fname
         fi
         chmod +x /etc/init.d/salt-$fname
+        update-rc.d salt-$fname defaults
+    done
+}
+
+install_debian_git_start_daemons() {
+    for fname in minion master syndic; do
+
+        # Skip if not meant to be installed
+        [ $fname = "minion" ] && [ $INSTALL_MINION -eq 0 ] && continue
+        [ $fname = "master" ] && [ $INSTALL_MASTER -eq 0 ] && continue
+        [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq 0 ] && continue
+
         /etc/init.d/salt-$fname start &
     done
 }

@@ -1185,11 +1185,10 @@ install_arch_post() {
             )
             sleep 0.1
             /usr/bin/systemctl daemon-reload
-            sleep 0.1
-            /usr/bin/systemctl try-restart salt-$fname.service
             continue
         fi
-        /etc/rc.d/salt-$fname start &
+
+        # XXX: How do we enable old Arch init.d scripts?
     done
 }
 
@@ -1219,6 +1218,22 @@ install_arch_git_post() {
         cp ${SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-$fname /etc/rc.d/init.d/salt-$fname
         chmod +x /etc/rc.d/init.d/salt-$fname
         /etc/init.d/salt-$fname start &
+    done
+}
+
+install_arch_start_daemons() {
+    for fname in minion master syndic; do
+
+        # Skip if not meant to be installed
+        [ $fname = "minion" ] && [ $INSTALL_MINION -eq 0 ] && continue
+        [ $fname = "master" ] && [ $INSTALL_MASTER -eq 0 ] && continue
+        [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq 0 ] && continue
+
+        if [ -f /usr/bin/systemctl ]; then
+            /usr/bin/systemctl try-restart salt-$fname.service
+            continue
+        fi
+        /etc/rc.d/salt-$fname start &
     done
 }
 #

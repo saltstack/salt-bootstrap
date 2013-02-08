@@ -1041,16 +1041,33 @@ install_red_hat_linux_stable_post() {
     install_centos_stable_post
 }
 
+install_red_hat_linux_stable_start_daemons() {
+    install_centos_stable_start_daemons
+}
+
 install_red_hat_linux_git_post() {
     install_centos_git_post
 }
+
+install_red_hat_linux_git_start_daemons() {
+    install_centos_git_start_daemons
+}
+
 
 install_red_hat_enterprise_linux_stable_post() {
     install_red_hat_linux_stable_post
 }
 
+install_red_hat_enterprise_linux_stable_start_daemons() {
+    install_red_hat_linux_stable_start_daemons
+}
+
 install_red_hat_enterprise_linux_git_post() {
     install_red_hat_linux_git_post
+}
+
+install_red_hat_enterprise_linux_git_start_daemons() {
+    install_red_hat_linux_git_start_daemons
 }
 #
 #   Ended RedHat Install Functions

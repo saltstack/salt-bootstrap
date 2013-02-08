@@ -637,7 +637,25 @@ install_ubuntu_git_post() {
                 # upstart does not know about our service, let's copy the proper file
                 cp ${SALT_GIT_CHECKOUT_DIR}/pkg/salt-$fname.upstart /etc/init/salt-$fname.conf
             fi
+        # No upstart support in Ubuntu!?
+        elif [ -f ${SALT_GIT_CHECKOUT_DIR}/debian/salt-$fname.init ]; then
+            cp ${SALT_GIT_CHECKOUT_DIR}/debian/salt-$fname.init /etc/init.d/salt-$fname
+            chmod +x /etc/init.d/salt-$fname
+            update-rc.d salt-$fname defaults
+        fi
+    done
+}
 
+install_ubuntu_git_start_daemons() {
+    for fname in minion master syndic; do
+
+        # Skip if not meant to be installed
+        [ $fname = "minion" ] && [ $INSTALL_MINION -eq 0 ] && continue
+        [ $fname = "master" ] && [ $INSTALL_MASTER -eq 0 ] && continue
+        [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq 0 ] && continue
+
+        if [ -f /sbin/initctl ]; then
+            # We have upstart support
             /sbin/initctl status salt-$fname > /dev/null 2>&1
             if [ $? -eq 0 ]; then
                 # upstart knows about this service
@@ -649,12 +667,6 @@ install_ubuntu_git_post() {
                 [ $? -eq 0 ] && continue
                 # We failed to start the service, let's test the SysV code bellow
             fi
-        fi
-
-        # No upstart support in Ubuntu!?
-        if [ -f ${SALT_GIT_CHECKOUT_DIR}/debian/salt-$fname.init ]; then
-            cp ${SALT_GIT_CHECKOUT_DIR}/debian/salt-$fname.init /etc/init.d/salt-$fname
-            chmod +x /etc/init.d/salt-$fname
         fi
         /etc/init.d/salt-$fname restart &
     done

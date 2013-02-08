@@ -888,6 +888,20 @@ install_centos_stable_post() {
         [ $fname = "master" ] && [ $INSTALL_MASTER -eq 0 ] && continue
         [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq 0 ] && continue
 
+        if [ ! -f /sbin/initctl ] && [ -f /etc/init.d/salt-$fname ]; then
+            # Still in SysV init!?
+            /sbin/chkconfig salt-$fname on
+        fi
+    done
+}
+
+install_centos_stable_start_daemons() {
+    for fname in minion master syndic; do
+        # Skip if not meant to be installed
+        [ $fname = "minion" ] && [ $INSTALL_MINION -eq 0 ] && continue
+        [ $fname = "master" ] && [ $INSTALL_MASTER -eq 0 ] && continue
+        [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq 0 ] && continue
+
         if [ -f /sbin/initctl ]; then
             # We have upstart support
             /sbin/initctl status salt-$fname > /dev/null 2>&1
@@ -905,7 +919,6 @@ install_centos_stable_post() {
 
         if [ -f /etc/init.d/salt-$fname ]; then
             # Still in SysV init!?
-            /sbin/chkconfig salt-$fname on
             /etc/init.d/salt-$fname start &
         fi
     done

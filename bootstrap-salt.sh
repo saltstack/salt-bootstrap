@@ -1305,10 +1305,12 @@ install_freebsd_git() {
 
 install_freebsd_90_stable_post__() {
     # XXX: What needs to be done for init.d support on FreeBSD
+    echo
 }
 
 install_freebsd_git_post__() {
     # XXX: What needs to be done for init.d support on FreeBSD
+    echo
 }
 
 install_freebsd_start_daemons() {

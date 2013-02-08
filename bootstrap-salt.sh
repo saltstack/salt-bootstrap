@@ -1303,12 +1303,24 @@ install_freebsd_git() {
     /usr/local/bin/python setup.py install
 }
 
-install_freebsd_90_stable_post() {
-    salt-minion -d &
+install_freebsd_90_stable_post__() {
+    # XXX: What needs to be done for init.d support on FreeBSD
 }
 
-install_freebsd_git_post() {
-    salt-minion -d &
+install_freebsd_git_post__() {
+    # XXX: What needs to be done for init.d support on FreeBSD
+}
+
+install_freebsd_start_daemons() {
+    for fname in minion master syndic; do
+
+        # Skip if not meant to be installed
+        [ $fname = "minion" ] && [ $INSTALL_MINION -eq 0 ] && continue
+        [ $fname = "master" ] && [ $INSTALL_MASTER -eq 0 ] && continue
+        [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq 0 ] && continue
+
+        salt-$fname -d &
+    done
 }
 #
 #   Ended FreeBSD Install Functions

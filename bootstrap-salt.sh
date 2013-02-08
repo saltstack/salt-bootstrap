@@ -1108,12 +1108,24 @@ install_amazon_linux_ami_stable() {
     install_centos_stable
 }
 
+install_amazon_linux_ami_stable_post() {
+    install_centos_stable_post
+}
+
+install_amazon_linux_ami_stable_start_daemons() {
+    install_centos_stable_start_daemons
+}
+
 install_amazon_linux_ami_git() {
     install_centos_git
 }
 
 install_amazon_linux_ami_git_post() {
     install_centos_git_post
+}
+
+install_amazon_linux_ami_git_start_daemons() {
+    install_centos_git_start_daemons
 }
 #
 #   Ended Amazon Linux AMI Install Functions

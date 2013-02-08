@@ -541,11 +541,17 @@ __apt_get_noinput() {
 #       1. install_<distro>_<distro_version>_<install_type>
 #       2. install_<distro>_<install_type>
 #
-#   Also optionally, define a post install function, one of:
+#   Optionally, define a post install function, one of:
 #       1. install_<distro>_<distro_versions>_<install_type>_post
 #       2. install_<distro>_<distro_versions>_post
 #       3. install_<distro>_<install_type>_post
 #       4. install_<distro>_post
+#
+#   Optionally, define a start daemons function, one of:
+#       1. install_<distro>_<distro_versions>_<install_type>_start_daemons
+#       2. install_<distro>_<distro_versions>_start_daemons
+#       3. install_<distro>_<install_type>_start_daemons
+#       4. install_<distro>_start_daemons
 #
 ##############################################################################
 
@@ -1414,6 +1420,21 @@ for FUNC_NAME in $POST_FUNC_NAMES; do
 done
 
 
+# Let's get the start daemons install function
+STARTDAEMONS_FUNC_NAMES="install_${DISTRO_NAME_L}${PREFIXED_DISTRO_VERSION_NO_DOTS}_${ITYPE}_start_daemons"
+STARTDAEMONS_FUNC_NAMES="$POST_FUNC_NAMES install_${DISTRO_NAME_L}${PREFIXED_DISTRO_VERSION_NO_DOTS}_start_daemons"
+STARTDAEMONS_FUNC_NAMES="$POST_FUNC_NAMES install_${DISTRO_NAME_L}_${ITYPE}_start_daemons"
+STARTDAEMONS_FUNC_NAMES="$POST_FUNC_NAMES install_${DISTRO_NAME_L}_start_daemons"
+
+STARTDAEMONS_INSTALL_FUNC="null"
+for FUNC_NAME in $STARTDAEMONS_FUNC_NAMES; do
+    if __function_defined $FUNC_NAME; then
+        STARTDAEMONS_INSTALL_FUNC=$FUNC_NAME
+        break
+    fi
+done
+
+
 if [ $DEPS_INSTALL_FUNC = "null" ]; then
     echoerr " * ERROR: No dependencies installation function found. Exiting..."
     exit 1
@@ -1463,6 +1484,18 @@ if [ "$POST_INSTALL_FUNC" != "null" ]; then
         exit 1
     fi
 fi
+
+
+# Run any start daemons function
+if [ "$STARTDAEMONS_INSTALL_FUNC" != "null" ]; then
+    echo " * Running ${STARTDAEMONS_INSTALL_FUNC}()"
+    $STARTDAEMONS_INSTALL_FUNC
+    if [ $? -ne 0 ]; then
+        echoerr " * ERROR: Failed to run ${STARTDAEMONS_INSTALL_FUNC}()!!!"
+        exit 1
+    fi
+fi
+
 
 
 # Done!

@@ -84,21 +84,31 @@ do
 done
 shift $(($OPTIND-1))
 
+
+#---  FUNCTION  ----------------------------------------------------------------
+#          NAME:  echoerr
+#   DESCRIPTION:  Echo errors to stderr.
+#-------------------------------------------------------------------------------
+echoerr() {
+    echo "$@" 1>&2;
+}
+
+
 __check_unparsed_options() {
     shellopts="$1"
     unparsed_options=$( echo "$shellopts" | grep -E '[-]+[[:alnum:]]' )
     if [ "x$unparsed_options" != "x" ]; then
         usage
-        echo
-        echo " * ERROR: options come before install arguments"
-        echo
+        echoerr
+        echoerr " * ERROR: options come before install arguments"
+        echoerr
         exit 1
     fi
 }
 
 # Check that we're actually installing one of minion/master/syndic
 if [ $INSTALL_MINION -eq 0 ] && [ $INSTALL_MASTER -eq 0 ] && [ $INSTALL_SYNDIC -eq 0 ]; then
-    echo " * ERROR: Nothing to install"
+    echoerr " * ERROR: Nothing to install"
     exit 1
 fi
 
@@ -113,7 +123,7 @@ fi
 
 # Check installation type
 if [ "$ITYPE" != "stable" ] && [ "$ITYPE" != "daily" ] && [ "$ITYPE" != "git" ]; then
-    echo " ERROR: Installation type \"$ITYPE\" is not known..."
+    echoerr " ERROR: Installation type \"$ITYPE\" is not known..."
     exit 1
 fi
 
@@ -132,14 +142,14 @@ fi
 if [ "$#" -gt 0 ]; then
     __check_unparsed_options "$*"
     usage
-    echo
-    echo " * ERROR: Too many arguments."
-    exit 1
+    echoerr
+    echoerr " * ERROR: Too many arguments."
+    exiterr 1
 fi
 
 # Root permissions are required to run this script
 if [ $(whoami) != "root" ] ; then
-    echo " * ERROR: Salt requires root privileges to install. Please re-run this script as root."
+    echoerr " * ERROR: Salt requires root privileges to install. Please re-run this script as root."
     exit 1
 fi
 
@@ -204,7 +214,7 @@ LOGPIPE="/tmp/$( echo $ScriptName | sed s/.sh/.logpipe/g )"
 # On FreeBSD we have to use mkfifo instead of mknod
 mknod $LOGPIPE p >/dev/null 2>&1 || mkfifo $LOGPIPE >/dev/null 2>&1
 if [ $? -ne 0 ]; then
-    echo " * Failed to create the named pipe required to log"
+    echoerr " * ERROR: Failed to create the named pipe required to log"
     exit 1
 fi
 
@@ -424,7 +434,7 @@ __gather_system_info() {
             __gather_bsd_system_info
             ;;
         * )
-            echo " * ERROR: $OS_NAME not supported.";
+            echoerr " * ERROR: $OS_NAME not supported.";
             exit 1
             ;;
     esac
@@ -461,7 +471,7 @@ DISTRO_NAME_L=$(echo $DISTRO_NAME | tr '[:upper:]' '[:lower:]' | sed 's/[^a-zA-Z
 
 # Only Ubuntu has daily packages, let's let users know about that
 if [ "${DISTRO_NAME_L}" != "ubuntu" ] && [ $ITYPE = "daily" ]; then
-    echo " * ERROR: Only Ubuntu has daily packages support"
+    echoerr " * ERROR: Only Ubuntu has daily packages support"
     exit 1
 fi
 
@@ -1405,12 +1415,12 @@ done
 
 
 if [ $DEPS_INSTALL_FUNC = "null" ]; then
-    echo " * ERROR: No dependencies installation function found. Exiting..."
+    echoerr " * ERROR: No dependencies installation function found. Exiting..."
     exit 1
 fi
 
 if [ $INSTALL_FUNC = "null" ]; then
-    echo " * ERROR: No installation function found. Exiting..."
+    echoerr " * ERROR: No installation function found. Exiting..."
     exit 1
 fi
 
@@ -1419,7 +1429,7 @@ fi
 echo " * Running ${DEPS_INSTALL_FUNC}()"
 $DEPS_INSTALL_FUNC
 if [ $? -ne 0 ]; then
-    echo " * Failed to run ${DEPS_INSTALL_FUNC}()!!!"
+    echoerr " * ERROR: Failed to run ${DEPS_INSTALL_FUNC}()!!!"
     exit 1
 fi
 
@@ -1429,7 +1439,7 @@ if [ "$TEMP_CONFIG_DIR" != "null" ] && [ "$CONFIG_SALT_FUNC" != "null" ]; then
     echo " * Running ${CONFIG_SALT_FUNC}()"
     $CONFIG_SALT_FUNC
     if [ $? -ne 0 ]; then
-        echo " * Failed to run ${CONFIG_SALT_FUNC}()!!!"
+        echoerr " * ERROR: Failed to run ${CONFIG_SALT_FUNC}()!!!"
         exit 1
     fi
 fi
@@ -1439,7 +1449,7 @@ fi
 echo " * Running ${INSTALL_FUNC}()"
 $INSTALL_FUNC
 if [ $? -ne 0 ]; then
-    echo " * Failed to run ${INSTALL_FUNC}()!!!"
+    echoerr " * ERROR: Failed to run ${INSTALL_FUNC}()!!!"
     exit 1
 fi
 
@@ -1449,7 +1459,7 @@ if [ "$POST_INSTALL_FUNC" != "null" ]; then
     echo " * Running ${POST_INSTALL_FUNC}()"
     $POST_INSTALL_FUNC
     if [ $? -ne 0 ]; then
-        echo " * Failed to run ${POST_INSTALL_FUNC}()!!!"
+        echoerr " * ERROR: Failed to run ${POST_INSTALL_FUNC}()!!!"
         exit 1
     fi
 fi

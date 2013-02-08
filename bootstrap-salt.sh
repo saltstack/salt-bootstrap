@@ -960,7 +960,25 @@ install_centos_git_post() {
                 # upstart does not know about our service, let's copy the proper file
                 cp ${SALT_GIT_CHECKOUT_DIR}/pkg/salt-$fname.upstart /etc/init/salt-$fname.conf
             fi
+        # Still in SysV init?!
+        elif [ ! -f /etc/init.d/salt-$fname ]; then
+            cp ${SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-${fname} /etc/init.d/
+            chmod +x /etc/init.d/salt-${fname}
+        fi
+        /sbin/chkconfig salt-${fname} on
+    done
+}
 
+install_centos_git_start_daemons() {
+    for fname in master minion syndic; do
+
+        # Skip if not meant to be installed
+        [ $fname = "minion" ] && [ $INSTALL_MINION -eq 0 ] && continue
+        [ $fname = "master" ] && [ $INSTALL_MASTER -eq 0 ] && continue
+        [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq 0 ] && continue
+
+        if [ -f /sbin/initctl ]; then
+            # We have upstart support
             /sbin/initctl status salt-$fname > /dev/null 2>&1
             if [ $? -eq 0 ]; then
                 # upstart knows about this service
@@ -974,13 +992,7 @@ install_centos_git_post() {
             fi
         fi
 
-
         # Still in SysV init?!
-        if [ ! -f /etc/init.d/salt-$fname ]; then
-            cp ${SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-${fname} /etc/init.d/
-            chmod +x /etc/init.d/salt-${fname}
-        fi
-        /sbin/chkconfig salt-${fname} on
         /etc/init.d/salt-${fname} start &
     done
 }

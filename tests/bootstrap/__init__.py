@@ -50,14 +50,18 @@ PARENT_DIR = os.path.dirname(TEST_DIR)
 BOOTSTRAP_SCRIPT_PATH = os.path.join(PARENT_DIR, 'bootstrap-salt.sh')
 
 
-def non_block_read(output):
-    fd = output.fileno()
-    fl = fcntl.fcntl(fd, fcntl.F_GETFL)
-    fcntl.fcntl(fd, fcntl.F_SETFL, fl | os.O_NONBLOCK)
-    try:
-        return output.read()
-    except:
-        return ''
+class NonBlockingPopen(subprocess.Popen):
+    def __init__(self, *args, **kwargs):
+        super(NonBlockingPopen, self).__init__(*args, **kwargs)
+        if self.stdout is not None:
+            fod = self.stdout.fileno()
+            fol = fcntl.fcntl(fod, fcntl.F_GETFL)
+            fcntl.fcntl(fod, fcntl.F_SETFL, fol | os.O_NONBLOCK)
+
+        if self.stderr is not None:
+            fed = self.stderr.fileno()
+            fel = fcntl.fcntl(fed, fcntl.F_GETFL)
+            fcntl.fcntl(fed, fcntl.F_SETFL, fel | os.O_NONBLOCK)
 
 
 class BootstrapTestCase(TestCase):
@@ -87,28 +91,43 @@ class BootstrapTestCase(TestCase):
 
         cmd = ' '.join(filter(None, [script] + list(args)))
 
-        process = subprocess.Popen(cmd, **popen_kwargs)
+        if stream_stds:
+            process = NonBlockingPopen(cmd, **popen_kwargs)
+        else:
+            process = subprocess.Popen(cmd, **popen_kwargs)
 
         if timeout is not None:
             stop_at = datetime.now() + timedelta(seconds=timeout)
             term_sent = False
 
         while True:
-            process.poll()
+            if process.poll() is not None:
+                break
+
             if process.returncode is not None:
                 break
 
-            rout = non_block_read(process.stdout)
-            if rout:
-                out += rout
-                if stream_stds:
-                    sys.stdout.write(rout)
+            try:
+                #rout = non_block_read(process.stdout)
+                rout = process.stdout.read()
+                if rout:
+                    out += rout
+                    if stream_stds:
+                        sys.stdout.write(rout)
+            except IOError, err:
+                if err.errno != 11:
+                    raise
 
-            rerr = non_block_read(process.stderr)
-            if rerr:
-                err += rerr
-                if stream_stds:
-                    sys.stderr.write(rerr)
+            #rerr = non_block_read(process.stderr)
+            try:
+                rerr = process.stderr.read()
+                if rerr:
+                    err += rerr
+                    if stream_stds:
+                        sys.stderr.write(rerr)
+            except IOError, err:
+                if err.errno != 11:
+                    raise
 
             if timeout is not None:
                 now = datetime.now()

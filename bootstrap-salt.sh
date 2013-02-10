@@ -113,6 +113,9 @@ usage() {
   -M  Also install salt-master
   -S  Also install salt-syndic
   -N  Do not install salt-minion
+  -C  Only run the configuration function. This option automaticaly
+      bypasses any installation.
+
 EOT
 }   # ----------  end of function usage  ----------
 
@@ -124,8 +127,9 @@ INSTALL_MASTER=$BS_FALSE
 INSTALL_SYNDIC=$BS_FALSE
 INSTALL_MINION=$BS_TRUE
 ECHO_DEBUG=$BS_FALSE
+CONFIG_ONLY=$BS_FALSE
 
-while getopts ":hvnDc:MSN" opt
+while getopts ":hvnDc:MSNC" opt
 do
   case "${opt}" in
 
@@ -138,6 +142,7 @@ do
     M )  INSTALL_MASTER=$BS_TRUE ;;
     S )  INSTALL_SYNDIC=$BS_TRUE ;;
     N )  INSTALL_MINION=$BS_FALSE ;;
+    C )  CONFIG_ONLY=$BS_TRUE ;;
 
     \?)  echo
          echoerror "Option does not exist : $OPTARG"
@@ -169,6 +174,10 @@ __check_unparsed_options() {
 if [ $INSTALL_MINION -eq $BS_FALSE ] && [ $INSTALL_MASTER -eq $BS_FALSE ] && [ $INSTALL_SYNDIC -eq $BS_FALSE ]; then
     echoerror "Nothing to install"
     exit 1
+fi
+
+if [ $CONFIG_ONLY -eq 1 ] && [ TEMP_CONFIG_DIR = "null" ]; then
+    echo " * Error: Running the script in configuration only mode and no configuration directory was passed."
 fi
 
 # Define installation type
@@ -1654,11 +1663,14 @@ fi
 
 
 # Install dependencies
-echoinfo "Running ${DEPS_INSTALL_FUNC}()"
-$DEPS_INSTALL_FUNC
-if [ $? -ne 0 ]; then
-    echoerror "Failed to run ${DEPS_INSTALL_FUNC}()!!!"
-    exit 1
+if [ $CONFIG_ONLY -eq 0 ]; then
+    # Only execute function is not in config mode only
+    echoinfo "Running ${DEPS_INSTALL_FUNC}()"
+    $DEPS_INSTALL_FUNC
+    if [ $? -ne 0 ]; then
+        echoerror "Failed to run ${DEPS_INSTALL_FUNC}()!!!"
+        exit 1
+    fi
 fi
 
 
@@ -1674,16 +1686,19 @@ fi
 
 
 # Install Salt
-echoinfo "Running ${INSTALL_FUNC}()"
-$INSTALL_FUNC
-if [ $? -ne 0 ]; then
-    echoerror "Failed to run ${INSTALL_FUNC}()!!!"
-    exit 1
+if [ $CONFIG_ONLY -eq 0 ]; then
+    # Only execute function is not in config mode only
+    echoinfo "Running ${INSTALL_FUNC}()"
+    $INSTALL_FUNC
+    if [ $? -ne 0 ]; then
+        echoerror "Failed to run ${INSTALL_FUNC}()!!!"
+        exit 1
+    fi
 fi
 
 
-# Run any post install function
-if [ "$POST_INSTALL_FUNC" != "null" ]; then
+# Run any post install function, Only execute function is not in config mode only
+if [ $CONFIG_ONLY -eq 0 ] && [ "$POST_INSTALL_FUNC" != "null" ]; then
     echoinfo "Running ${POST_INSTALL_FUNC}()"
     $POST_INSTALL_FUNC
     if [ $? -ne 0 ]; then
@@ -1704,5 +1719,9 @@ if [ "$STARTDAEMONS_INSTALL_FUNC" != "null" ]; then
 fi
 
 # Done!
-echoinfo "Salt installed!"
+if [ $CONFIG_ONLY -eq 0 ]; then
+    echoinfo "Salt installed!"
+else
+    echoinfo "Salt configured"
+fi
 exit 0

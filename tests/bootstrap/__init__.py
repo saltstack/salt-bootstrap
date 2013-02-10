@@ -75,7 +75,7 @@ class BootstrapTestCase(TestCase):
 
         cmd = [script] + list(args)
 
-        out = err = ''
+        outbuff = errbuff = ''
 
         popen_kwargs = {
             'cwd': cwd,
@@ -111,7 +111,7 @@ class BootstrapTestCase(TestCase):
                 #rout = non_block_read(process.stdout)
                 rout = process.stdout.read()
                 if rout:
-                    out += rout
+                    outbuff += rout
                     if stream_stds:
                         sys.stdout.write(rout)
             except IOError, err:
@@ -122,7 +122,7 @@ class BootstrapTestCase(TestCase):
             try:
                 rerr = process.stderr.read()
                 if rerr:
-                    err += rerr
+                    errbuff += rerr
                     if stream_stds:
                         sys.stderr.write(rerr)
             except IOError, err:

@@ -52,16 +52,52 @@ BOOTSTRAP_SCRIPT_PATH = os.path.join(PARENT_DIR, 'bootstrap-salt.sh')
 
 class NonBlockingPopen(subprocess.Popen):
     def __init__(self, *args, **kwargs):
+        self.stream_stds = kwargs.pop('stream_stds', False)
         super(NonBlockingPopen, self).__init__(*args, **kwargs)
-        if self.stdout is not None:
+        if self.stdout is not None and self.stream_stds:
             fod = self.stdout.fileno()
             fol = fcntl.fcntl(fod, fcntl.F_GETFL)
             fcntl.fcntl(fod, fcntl.F_SETFL, fol | os.O_NONBLOCK)
+            self.obuff = ''
 
-        if self.stderr is not None:
+        if self.stderr is not None and self.stream_stds:
             fed = self.stderr.fileno()
             fel = fcntl.fcntl(fed, fcntl.F_GETFL)
             fcntl.fcntl(fed, fcntl.F_SETFL, fel | os.O_NONBLOCK)
+            self.ebuff = ''
+
+    def poll(self):
+        poll = super(NonBlockingPopen, self).poll()
+
+        if self.stdout is not None and self.stream_stds:
+            try:
+                obuff = self.stdout.read()
+                self.obuff += obuff
+                sys.stdout.write(obuff)
+            except IOError, err:
+                if err.errno != 11:
+                    # We only handle Resource not ready properly, any other
+                    # raise the exception
+                    raise
+        if self.stderr is not None and self.stream_stds:
+            try:
+                ebuff = self.stderr.read()
+                self.ebuff += ebuff
+                sys.stderr.write(ebuff)
+            except IOError, err:
+                if err.errno != 11:
+                    # We only handle Resource not ready properly, any other
+                    # raise the exception
+                    raise
+
+        if poll is None:
+            # Not done yet
+            return poll
+
+        # Allow the same attribute access even though not streaming to stds
+        self.obuff = self.stdout.read()
+        self.ebuff = self.stderr.read()
+        return poll
 
 
 class BootstrapTestCase(TestCase):
@@ -85,44 +121,21 @@ class BootstrapTestCase(TestCase):
             'close_fds': True,
             'executable': executable,
 
+            'stream_stds': stream_stds,
+
             # detach from parent group (no more inherited signals!)
             #'preexec_fn': os.setpgrp
         }
 
         cmd = ' '.join(filter(None, [script] + list(args)))
 
-        if stream_stds:
-            process = NonBlockingPopen(cmd, **popen_kwargs)
-        else:
-            process = subprocess.Popen(cmd, **popen_kwargs)
+        process = NonBlockingPopen(cmd, **popen_kwargs)
 
         if timeout is not None:
             stop_at = datetime.now() + timedelta(seconds=timeout)
             term_sent = False
 
-        #import time
         while process.poll() is None:
-            #time.sleep(0.1)
-
-            try:
-                rout = process.stdout.read()
-                if rout:
-                    outbuff += rout
-                    if stream_stds:
-                        sys.stdout.write(rout)
-            except IOError, err:
-                if err.errno != 11:
-                    raise
-
-            try:
-                rerr = process.stderr.read()
-                if rerr:
-                    errbuff += rerr
-                    if stream_stds:
-                        sys.stderr.write(rerr)
-            except IOError, err:
-                if err.errno != 11:
-                    raise
 
             if timeout is not None:
                 now = datetime.now()
@@ -142,12 +155,12 @@ class BootstrapTestCase(TestCase):
                     return 1, [
                         'Process took more than {0} seconds to complete. '
                         'Process Killed! Current STDOUT: \n{1}'.format(
-                            timeout, outbuff
+                            timeout, process.obuff
                         )
                     ], [
                         'Process took more than {0} seconds to complete. '
                         'Process Killed! Current STDERR: \n{1}'.format(
-                            timeout, errbuff
+                            timeout, process.ebuff
                         )
                     ]
 
@@ -155,7 +168,9 @@ class BootstrapTestCase(TestCase):
 
         try:
             return (
-                process.returncode, outbuff.splitlines(), errbuff.splitlines()
+                process.returncode,
+                process.obuff.splitlines(),
+                process.ebuff.splitlines()
             )
         finally:
             try:

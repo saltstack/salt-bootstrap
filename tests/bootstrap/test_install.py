@@ -14,6 +14,17 @@ import shutil
 from bootstrap import *
 
 
+CLEANUP_COMMANDS_BY_OS_FAMILY = {
+    'Debian': [
+        'apt-get remove -y -o DPkg::Options::=--force-confold '
+        '--purge salt-master salt-minion salt-syndic',
+        'apt-get autoremove -y -o DPkg::Options::=--force-confold --purge'
+    ],
+    'RedHat': [
+        'yum -y remove salt-minion salt-master'
+    ]
+}
+
 class InstallationTestCase(BootstrapTestCase):
 
     def setUp(self):
@@ -21,22 +32,14 @@ class InstallationTestCase(BootstrapTestCase):
             self.skipTest('you must be root to run this test')
 
     def tearDown(self):
-        cleanup_commands = []
-        if GRAINS['os_family'] == 'Debian':
-            cleanup_commands.append(
-                'apt-get remove -y -o DPkg::Options::=--force-confold '
-                '--purge salt-master salt-minion salt-syndic'
+        if GRAINS['os_family'] not in CLEANUP_COMMANDS_BY_OS_FAMILY:
+            raise RuntimeError(
+                'There is not `tearDown()` clean up support for {0} OS '
+                'family.'.format(
+                    GRAINS['os_family']
+                )
             )
-            cleanup_commands.append(
-                'apt-get autoremove -y -o DPkg::Options::=--force-confold '
-                '--purge'
-            )
-        elif GRAINS['os_family'] == 'RedHat':
-            cleanup_commands.append(
-                'yum -y remove salt-minion salt-master'
-            )
-
-        for cleanup in cleanup_commands:
+        for cleanup in CLEANUP_COMMANDS_BY_OS_FAMILY[GRAINS['os_family']]:
             print 'Running cleanup command {0!r}'.format(cleanup)
             self.assert_script_result(
                 'Failed to execute cleanup command {0!r}'.format(cleanup),

@@ -541,11 +541,17 @@ __apt_get_noinput() {
 #       1. install_<distro>_<distro_version>_<install_type>
 #       2. install_<distro>_<install_type>
 #
-#   Also optionally, define a post install function, one of:
+#   Optionally, define a post install function, one of:
 #       1. install_<distro>_<distro_versions>_<install_type>_post
 #       2. install_<distro>_<distro_versions>_post
 #       3. install_<distro>_<install_type>_post
 #       4. install_<distro>_post
+#
+#   Optionally, define a start daemons function, one of:
+#       1. install_<distro>_<distro_versions>_<install_type>_start_daemons
+#       2. install_<distro>_<distro_versions>_start_daemons
+#       3. install_<distro>_<install_type>_start_daemons
+#       4. install_<distro>_start_daemons
 #
 ##############################################################################
 
@@ -631,7 +637,25 @@ install_ubuntu_git_post() {
                 # upstart does not know about our service, let's copy the proper file
                 cp ${SALT_GIT_CHECKOUT_DIR}/pkg/salt-$fname.upstart /etc/init/salt-$fname.conf
             fi
+        # No upstart support in Ubuntu!?
+        elif [ -f ${SALT_GIT_CHECKOUT_DIR}/debian/salt-$fname.init ]; then
+            cp ${SALT_GIT_CHECKOUT_DIR}/debian/salt-$fname.init /etc/init.d/salt-$fname
+            chmod +x /etc/init.d/salt-$fname
+            update-rc.d salt-$fname defaults
+        fi
+    done
+}
 
+install_ubuntu_git_start_daemons() {
+    for fname in minion master syndic; do
+
+        # Skip if not meant to be installed
+        [ $fname = "minion" ] && [ $INSTALL_MINION -eq 0 ] && continue
+        [ $fname = "master" ] && [ $INSTALL_MASTER -eq 0 ] && continue
+        [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq 0 ] && continue
+
+        if [ -f /sbin/initctl ]; then
+            # We have upstart support
             /sbin/initctl status salt-$fname > /dev/null 2>&1
             if [ $? -eq 0 ]; then
                 # upstart knows about this service
@@ -643,12 +667,6 @@ install_ubuntu_git_post() {
                 [ $? -eq 0 ] && continue
                 # We failed to start the service, let's test the SysV code bellow
             fi
-        fi
-
-        # No upstart support in Ubuntu!?
-        if [ -f ${SALT_GIT_CHECKOUT_DIR}/debian/salt-$fname.init ]; then
-            cp ${SALT_GIT_CHECKOUT_DIR}/debian/salt-$fname.init /etc/init.d/salt-$fname
-            chmod +x /etc/init.d/salt-$fname
         fi
         /etc/init.d/salt-$fname restart &
     done
@@ -746,6 +764,18 @@ install_debian_git_post() {
             cp ${SALT_GIT_CHECKOUT_DIR}/debian/salt-$fname.init /etc/init.d/salt-$fname
         fi
         chmod +x /etc/init.d/salt-$fname
+        update-rc.d salt-$fname defaults
+    done
+}
+
+install_debian_git_start_daemons() {
+    for fname in minion master syndic; do
+
+        # Skip if not meant to be installed
+        [ $fname = "minion" ] && [ $INSTALL_MINION -eq 0 ] && continue
+        [ $fname = "master" ] && [ $INSTALL_MASTER -eq 0 ] && continue
+        [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq 0 ] && continue
+
         /etc/init.d/salt-$fname start &
     done
 }
@@ -803,7 +833,17 @@ install_fedora_git_post() {
         systemctl is-enabled salt-$fname.service || (systemctl preset salt-$fname.service && systemctl enable salt-$fname.service)
         sleep 0.1
         systemctl daemon-reload
-        sleep 0.1
+    done
+}
+
+install_fedora_git_start_daemons() {
+    for fname in minion master syndic; do
+
+        # Skip if not meant to be installed
+        [ $fname = "minion" ] && [ $INSTALL_MINION -eq 0 ] && continue
+        [ $fname = "master" ] && [ $INSTALL_MASTER -eq 0 ] && continue
+        [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq 0 ] && continue
+
         systemctl try-restart salt-$fname.service
     done
 }
@@ -848,6 +888,20 @@ install_centos_stable_post() {
         [ $fname = "master" ] && [ $INSTALL_MASTER -eq 0 ] && continue
         [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq 0 ] && continue
 
+        if [ ! -f /sbin/initctl ] && [ -f /etc/init.d/salt-$fname ]; then
+            # Still in SysV init!?
+            /sbin/chkconfig salt-$fname on
+        fi
+    done
+}
+
+install_centos_stable_start_daemons() {
+    for fname in minion master syndic; do
+        # Skip if not meant to be installed
+        [ $fname = "minion" ] && [ $INSTALL_MINION -eq 0 ] && continue
+        [ $fname = "master" ] && [ $INSTALL_MASTER -eq 0 ] && continue
+        [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq 0 ] && continue
+
         if [ -f /sbin/initctl ]; then
             # We have upstart support
             /sbin/initctl status salt-$fname > /dev/null 2>&1
@@ -865,7 +919,6 @@ install_centos_stable_post() {
 
         if [ -f /etc/init.d/salt-$fname ]; then
             # Still in SysV init!?
-            /sbin/chkconfig salt-$fname on
             /etc/init.d/salt-$fname start &
         fi
     done
@@ -907,7 +960,25 @@ install_centos_git_post() {
                 # upstart does not know about our service, let's copy the proper file
                 cp ${SALT_GIT_CHECKOUT_DIR}/pkg/salt-$fname.upstart /etc/init/salt-$fname.conf
             fi
+        # Still in SysV init?!
+        elif [ ! -f /etc/init.d/salt-$fname ]; then
+            cp ${SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-${fname} /etc/init.d/
+            chmod +x /etc/init.d/salt-${fname}
+        fi
+        /sbin/chkconfig salt-${fname} on
+    done
+}
 
+install_centos_git_start_daemons() {
+    for fname in master minion syndic; do
+
+        # Skip if not meant to be installed
+        [ $fname = "minion" ] && [ $INSTALL_MINION -eq 0 ] && continue
+        [ $fname = "master" ] && [ $INSTALL_MASTER -eq 0 ] && continue
+        [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq 0 ] && continue
+
+        if [ -f /sbin/initctl ]; then
+            # We have upstart support
             /sbin/initctl status salt-$fname > /dev/null 2>&1
             if [ $? -eq 0 ]; then
                 # upstart knows about this service
@@ -921,13 +992,7 @@ install_centos_git_post() {
             fi
         fi
 
-
         # Still in SysV init?!
-        if [ ! -f /etc/init.d/salt-$fname ]; then
-            cp ${SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-${fname} /etc/init.d/
-            chmod +x /etc/init.d/salt-${fname}
-        fi
-        /sbin/chkconfig salt-${fname} on
         /etc/init.d/salt-${fname} start &
     done
 }
@@ -976,16 +1041,33 @@ install_red_hat_linux_stable_post() {
     install_centos_stable_post
 }
 
+install_red_hat_linux_stable_start_daemons() {
+    install_centos_stable_start_daemons
+}
+
 install_red_hat_linux_git_post() {
     install_centos_git_post
 }
+
+install_red_hat_linux_git_start_daemons() {
+    install_centos_git_start_daemons
+}
+
 
 install_red_hat_enterprise_linux_stable_post() {
     install_red_hat_linux_stable_post
 }
 
+install_red_hat_enterprise_linux_stable_start_daemons() {
+    install_red_hat_linux_stable_start_daemons
+}
+
 install_red_hat_enterprise_linux_git_post() {
     install_red_hat_linux_git_post
+}
+
+install_red_hat_enterprise_linux_git_start_daemons() {
+    install_red_hat_linux_git_start_daemons
 }
 #
 #   Ended RedHat Install Functions
@@ -1026,12 +1108,24 @@ install_amazon_linux_ami_stable() {
     install_centos_stable
 }
 
+install_amazon_linux_ami_stable_post() {
+    install_centos_stable_post
+}
+
+install_amazon_linux_ami_stable_start_daemons() {
+    install_centos_stable_start_daemons
+}
+
 install_amazon_linux_ami_git() {
     install_centos_git
 }
 
 install_amazon_linux_ami_git_post() {
     install_centos_git_post
+}
+
+install_amazon_linux_ami_git_start_daemons() {
+    install_centos_git_start_daemons
 }
 #
 #   Ended Amazon Linux AMI Install Functions
@@ -1091,11 +1185,10 @@ install_arch_post() {
             )
             sleep 0.1
             /usr/bin/systemctl daemon-reload
-            sleep 0.1
-            /usr/bin/systemctl try-restart salt-$fname.service
             continue
         fi
-        /etc/rc.d/salt-$fname start &
+
+        # XXX: How do we enable old Arch init.d scripts?
     done
 }
 
@@ -1125,6 +1218,22 @@ install_arch_git_post() {
         cp ${SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-$fname /etc/rc.d/init.d/salt-$fname
         chmod +x /etc/rc.d/init.d/salt-$fname
         /etc/init.d/salt-$fname start &
+    done
+}
+
+install_arch_start_daemons() {
+    for fname in minion master syndic; do
+
+        # Skip if not meant to be installed
+        [ $fname = "minion" ] && [ $INSTALL_MINION -eq 0 ] && continue
+        [ $fname = "master" ] && [ $INSTALL_MASTER -eq 0 ] && continue
+        [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq 0 ] && continue
+
+        if [ -f /usr/bin/systemctl ]; then
+            /usr/bin/systemctl try-restart salt-$fname.service
+            continue
+        fi
+        /etc/rc.d/salt-$fname start &
     done
 }
 #
@@ -1194,12 +1303,26 @@ install_freebsd_git() {
     /usr/local/bin/python setup.py install
 }
 
-install_freebsd_90_stable_post() {
-    salt-minion -d &
+install_freebsd_90_stable_post__() {
+    # XXX: What needs to be done for init.d support on FreeBSD
+    echo
 }
 
-install_freebsd_git_post() {
-    salt-minion -d &
+install_freebsd_git_post__() {
+    # XXX: What needs to be done for init.d support on FreeBSD
+    echo
+}
+
+install_freebsd_start_daemons() {
+    for fname in minion master syndic; do
+
+        # Skip if not meant to be installed
+        [ $fname = "minion" ] && [ $INSTALL_MINION -eq 0 ] && continue
+        [ $fname = "master" ] && [ $INSTALL_MASTER -eq 0 ] && continue
+        [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq 0 ] && continue
+
+        salt-$fname -d &
+    done
 }
 #
 #   Ended FreeBSD Install Functions
@@ -1245,7 +1368,6 @@ install_smartos_git_deps() {
         TEMP_CONFIG_DIR="${SALT_GIT_CHECKOUT_DIR}/conf/"
         CONFIG_SALT_FUNC="config_salt"
     fi
-
 }
 
 install_smartos_stable() {
@@ -1253,25 +1375,21 @@ install_smartos_stable() {
 }
 
 install_smartos_git() {
-
+    # Use setuptools in order to also install dependencies
     USE_SETUPTOOLS=1 /opt/local/bin/python setup.py install
+}
 
+install_smartos_post() {
     # Install manifest files if needed.
     for fname in minion master syndic; do
         svcs network/salt-$fname > /dev/null 2>&1
         if [ $? -eq 1 ]; then
             svccfg import ${SALT_GIT_CHECKOUT_DIR}/solaris/salt-$fname.xml
-            svcadm enable salt-$fname
         fi
     done
 }
 
-install_smartos_post() {
-    ###
-    # TODO: * create /opt/local/share/smf/salt-minion/manifest.xml in salt.git
-    # * svcadm enable salt-minion
-    # * remove line below
-    ###
+install_smartos_start_daemons() {
     for fname in minion master syndic; do
 
         # Skip if not meant to be installed
@@ -1279,7 +1397,8 @@ install_smartos_post() {
         [ $fname = "master" ] && [ $INSTALL_MASTER -eq 0 ] && continue
         [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq 0 ] && continue
 
-        /opt/local/bin/salt-$fname -d &
+        # Start services
+        svcadm enable salt-$fname
     done
 }
 #
@@ -1414,6 +1533,21 @@ for FUNC_NAME in $POST_FUNC_NAMES; do
 done
 
 
+# Let's get the start daemons install function
+STARTDAEMONS_FUNC_NAMES="install_${DISTRO_NAME_L}${PREFIXED_DISTRO_VERSION_NO_DOTS}_${ITYPE}_start_daemons"
+STARTDAEMONS_FUNC_NAMES="$POST_FUNC_NAMES install_${DISTRO_NAME_L}${PREFIXED_DISTRO_VERSION_NO_DOTS}_start_daemons"
+STARTDAEMONS_FUNC_NAMES="$POST_FUNC_NAMES install_${DISTRO_NAME_L}_${ITYPE}_start_daemons"
+STARTDAEMONS_FUNC_NAMES="$POST_FUNC_NAMES install_${DISTRO_NAME_L}_start_daemons"
+
+STARTDAEMONS_INSTALL_FUNC="null"
+for FUNC_NAME in $STARTDAEMONS_FUNC_NAMES; do
+    if __function_defined $FUNC_NAME; then
+        STARTDAEMONS_INSTALL_FUNC=$FUNC_NAME
+        break
+    fi
+done
+
+
 if [ $DEPS_INSTALL_FUNC = "null" ]; then
     echoerr " * ERROR: No dependencies installation function found. Exiting..."
     exit 1
@@ -1463,6 +1597,18 @@ if [ "$POST_INSTALL_FUNC" != "null" ]; then
         exit 1
     fi
 fi
+
+
+# Run any start daemons function
+if [ "$STARTDAEMONS_INSTALL_FUNC" != "null" ]; then
+    echo " * Running ${STARTDAEMONS_INSTALL_FUNC}()"
+    $STARTDAEMONS_INSTALL_FUNC
+    if [ $? -ne 0 ]; then
+        echoerr " * ERROR: Failed to run ${STARTDAEMONS_INSTALL_FUNC}()!!!"
+        exit 1
+    fi
+fi
+
 
 
 # Done!

@@ -50,14 +50,54 @@ PARENT_DIR = os.path.dirname(TEST_DIR)
 BOOTSTRAP_SCRIPT_PATH = os.path.join(PARENT_DIR, 'bootstrap-salt.sh')
 
 
-def non_block_read(output):
-    fd = output.fileno()
-    fl = fcntl.fcntl(fd, fcntl.F_GETFL)
-    fcntl.fcntl(fd, fcntl.F_SETFL, fl | os.O_NONBLOCK)
-    try:
-        return output.read()
-    except:
-        return ''
+class NonBlockingPopen(subprocess.Popen):
+    def __init__(self, *args, **kwargs):
+        self.stream_stds = kwargs.pop('stream_stds', False)
+        super(NonBlockingPopen, self).__init__(*args, **kwargs)
+        if self.stdout is not None and self.stream_stds:
+            fod = self.stdout.fileno()
+            fol = fcntl.fcntl(fod, fcntl.F_GETFL)
+            fcntl.fcntl(fod, fcntl.F_SETFL, fol | os.O_NONBLOCK)
+            self.obuff = ''
+
+        if self.stderr is not None and self.stream_stds:
+            fed = self.stderr.fileno()
+            fel = fcntl.fcntl(fed, fcntl.F_GETFL)
+            fcntl.fcntl(fed, fcntl.F_SETFL, fel | os.O_NONBLOCK)
+            self.ebuff = ''
+
+    def poll(self):
+        poll = super(NonBlockingPopen, self).poll()
+
+        if self.stdout is not None and self.stream_stds:
+            try:
+                obuff = self.stdout.read()
+                self.obuff += obuff
+                sys.stdout.write(obuff)
+            except IOError, err:
+                if err.errno != 11:
+                    # We only handle Resource not ready properly, any other
+                    # raise the exception
+                    raise
+        if self.stderr is not None and self.stream_stds:
+            try:
+                ebuff = self.stderr.read()
+                self.ebuff += ebuff
+                sys.stderr.write(ebuff)
+            except IOError, err:
+                if err.errno != 11:
+                    # We only handle Resource not ready properly, any other
+                    # raise the exception
+                    raise
+
+        if poll is None:
+            # Not done yet
+            return poll
+
+        # Allow the same attribute access even though not streaming to stds
+        self.obuff = self.stdout.read()
+        self.ebuff = self.stderr.read()
+        return poll
 
 
 class BootstrapTestCase(TestCase):
@@ -71,7 +111,7 @@ class BootstrapTestCase(TestCase):
 
         cmd = [script] + list(args)
 
-        out = err = ''
+        outbuff = errbuff = ''
 
         popen_kwargs = {
             'cwd': cwd,
@@ -81,34 +121,21 @@ class BootstrapTestCase(TestCase):
             'close_fds': True,
             'executable': executable,
 
+            'stream_stds': stream_stds,
+
             # detach from parent group (no more inherited signals!)
-            'preexec_fn': os.setpgrp
+            #'preexec_fn': os.setpgrp
         }
 
         cmd = ' '.join(filter(None, [script] + list(args)))
 
-        process = subprocess.Popen(cmd, **popen_kwargs)
+        process = NonBlockingPopen(cmd, **popen_kwargs)
 
         if timeout is not None:
             stop_at = datetime.now() + timedelta(seconds=timeout)
             term_sent = False
 
-        while True:
-            process.poll()
-            if process.returncode is not None:
-                break
-
-            rout = non_block_read(process.stdout)
-            if rout:
-                out += rout
-                if stream_stds:
-                    sys.stdout.write(rout)
-
-            rerr = non_block_read(process.stderr)
-            if rerr:
-                err += rerr
-                if stream_stds:
-                    sys.stderr.write(rerr)
+        while process.poll() is None:
 
             if timeout is not None:
                 now = datetime.now()
@@ -128,19 +155,23 @@ class BootstrapTestCase(TestCase):
                     return 1, [
                         'Process took more than {0} seconds to complete. '
                         'Process Killed! Current STDOUT: \n{1}'.format(
-                            timeout, out
+                            timeout, process.obuff
                         )
                     ], [
                         'Process took more than {0} seconds to complete. '
                         'Process Killed! Current STDERR: \n{1}'.format(
-                            timeout, err
+                            timeout, process.ebuff
                         )
                     ]
 
         process.communicate()
 
         try:
-            return process.returncode, out.splitlines(), err.splitlines()
+            return (
+                process.returncode,
+                process.obuff.splitlines(),
+                process.ebuff.splitlines()
+            )
         finally:
             try:
                 process.terminate()

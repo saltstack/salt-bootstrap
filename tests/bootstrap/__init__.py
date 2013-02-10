@@ -86,7 +86,7 @@ class BootstrapTestCase(TestCase):
             'executable': executable,
 
             # detach from parent group (no more inherited signals!)
-            'preexec_fn': os.setpgrp
+            #'preexec_fn': os.setpgrp
         }
 
         cmd = ' '.join(filter(None, [script] + list(args)))
@@ -100,15 +100,11 @@ class BootstrapTestCase(TestCase):
             stop_at = datetime.now() + timedelta(seconds=timeout)
             term_sent = False
 
-        while True:
-            if process.poll() is not None:
-                break
-
-            if process.returncode is not None:
-                break
+        #import time
+        while process.poll() is None:
+            #time.sleep(0.1)
 
             try:
-                #rout = non_block_read(process.stdout)
                 rout = process.stdout.read()
                 if rout:
                     outbuff += rout
@@ -118,7 +114,6 @@ class BootstrapTestCase(TestCase):
                 if err.errno != 11:
                     raise
 
-            #rerr = non_block_read(process.stderr)
             try:
                 rerr = process.stderr.read()
                 if rerr:
@@ -147,12 +142,12 @@ class BootstrapTestCase(TestCase):
                     return 1, [
                         'Process took more than {0} seconds to complete. '
                         'Process Killed! Current STDOUT: \n{1}'.format(
-                            timeout, out
+                            timeout, outbuff
                         )
                     ], [
                         'Process took more than {0} seconds to complete. '
                         'Process Killed! Current STDERR: \n{1}'.format(
-                            timeout, err
+                            timeout, errbuff
                         )
                     ]
 

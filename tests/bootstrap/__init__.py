@@ -159,7 +159,9 @@ class BootstrapTestCase(TestCase):
         process.communicate()
 
         try:
-            return process.returncode, out.splitlines(), err.splitlines()
+            return (
+                process.returncode, outbuff.splitlines(), errbuff.splitlines()
+            )
         finally:
             try:
                 process.terminate()

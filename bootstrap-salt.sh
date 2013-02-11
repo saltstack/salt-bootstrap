@@ -22,6 +22,30 @@ ScriptName="bootstrap-salt.sh"
 #  LET THE BLACK MAGIC BEGIN!!!!
 #===============================================================================
 
+#---  FUNCTION  ----------------------------------------------------------------
+#          NAME:  echoerr
+#   DESCRIPTION:  Echo errors to stderr.
+#-------------------------------------------------------------------------------
+echoerror() {
+    echo " * ERROR: $@" 1>&2;
+}
+
+#---  FUNCTION  ----------------------------------------------------------------
+#          NAME:  echoinfo
+#   DESCRIPTION:  Echo information to stdout.
+#-------------------------------------------------------------------------------
+echoinfo() {
+    echo " *  INFO: $@";
+}
+
+#---  FUNCTION  ----------------------------------------------------------------
+#          NAME:  echodebug
+#   DESCRIPTION:  Echo debug information to stdout.
+#-------------------------------------------------------------------------------
+echodebug() {
+    echo " * DEBUG: $@";
+}
+
 #===  FUNCTION  ================================================================
 #         NAME:  usage
 #  DESCRIPTION:  Display usage information.
@@ -75,7 +99,7 @@ do
     N )  INSTALL_MINION=0 ;;
 
     \?)  echo
-         echo "  Option does not exist : $OPTARG"
+         echoerror "Option does not exist : $OPTARG"
          usage
          exit 1
          ;;
@@ -85,13 +109,7 @@ done
 shift $(($OPTIND-1))
 
 
-#---  FUNCTION  ----------------------------------------------------------------
-#          NAME:  echoerr
-#   DESCRIPTION:  Echo errors to stderr.
-#-------------------------------------------------------------------------------
-echoerr() {
-    echo "$@" 1>&2;
-}
+
 
 
 __check_unparsed_options() {
@@ -99,16 +117,16 @@ __check_unparsed_options() {
     unparsed_options=$( echo "$shellopts" | grep -E '[-]+[[:alnum:]]' )
     if [ "x$unparsed_options" != "x" ]; then
         usage
-        echoerr
-        echoerr " * ERROR: options come before install arguments"
-        echoerr
+        echo
+        echoerror "options are only allowed before install arguments"
+        echo
         exit 1
     fi
 }
 
 # Check that we're actually installing one of minion/master/syndic
 if [ $INSTALL_MINION -eq 0 ] && [ $INSTALL_MASTER -eq 0 ] && [ $INSTALL_SYNDIC -eq 0 ]; then
-    echoerr " * ERROR: Nothing to install"
+    echoerror "Nothing to install"
     exit 1
 fi
 
@@ -123,7 +141,7 @@ fi
 
 # Check installation type
 if [ "$ITYPE" != "stable" ] && [ "$ITYPE" != "daily" ] && [ "$ITYPE" != "git" ]; then
-    echoerr " ERROR: Installation type \"$ITYPE\" is not known..."
+    echoerror "Installation type \"$ITYPE\" is not known..."
     exit 1
 fi
 
@@ -143,13 +161,13 @@ if [ "$#" -gt 0 ]; then
     __check_unparsed_options "$*"
     usage
     echoerr
-    echoerr " * ERROR: Too many arguments."
+    echoerror "Too many arguments."
     exiterr 1
 fi
 
 # Root permissions are required to run this script
 if [ $(whoami) != "root" ] ; then
-    echoerr " * ERROR: Salt requires root privileges to install. Please re-run this script as root."
+    echoerror "Salt requires root privileges to install. Please re-run this script as root."
     exit 1
 fi
 
@@ -157,7 +175,7 @@ CALLER=$(echo `ps -a -o pid,args | grep $$ | grep -v grep | tr -s ' '` | cut -d 
 if [ "${CALLER}x" = "${0}x" ]; then
     CALLER="PIPED THROUGH"
 fi
-echo " * INFO: ${CALLER} $0 -- Version ${ScriptVersion}"
+echoinfo "${CALLER} ${0} -- Version ${ScriptVersion}"
 #---  FUNCTION  ----------------------------------------------------------------
 #          NAME:  __exit_cleanup
 #   DESCRIPTION:  Cleanup any leftovers after script has ended
@@ -178,7 +196,7 @@ __exit_cleanup() {
     EXIT_CODE=$?
 
     # Remove the logging pipe when the script exits
-    echo " * Removing the logging pipe $LOGPIPE"
+    echodebug "Removing the logging pipe $LOGPIPE"
     rm -f $LOGPIPE
 
     # Kill tee when exiting, CentOS, at least requires this
@@ -186,12 +204,12 @@ __exit_cleanup() {
 
     [ "x$TEE_PID" = "x" ] && exit $EXIT_CODE
 
-    echo " * Killing logging pipe tee's with pid(s): $TEE_PID"
+    echodebug "Killing logging pipe tee's with pid(s): $TEE_PID"
 
     # We need to trap errors since killing tee will cause a 127 errno
     # We also do this as late as possible so we don't "mis-catch" other errors
     __trap_errors() {
-        echo "Errors Trapped: $EXIT_CODE"
+        echoinfo "Errors Trapped: $EXIT_CODE"
         # Exit with the "original" exit code, not the trapped code
         exit $EXIT_CODE
     }
@@ -214,7 +232,7 @@ LOGPIPE="/tmp/$( echo $ScriptName | sed s/.sh/.logpipe/g )"
 # On FreeBSD we have to use mkfifo instead of mknod
 mknod $LOGPIPE p >/dev/null 2>&1 || mkfifo $LOGPIPE >/dev/null 2>&1
 if [ $? -ne 0 ]; then
-    echoerr " * ERROR: Failed to create the named pipe required to log"
+    echoerror "Failed to create the named pipe required to log"
     exit 1
 fi
 
@@ -434,7 +452,7 @@ __gather_system_info() {
             __gather_bsd_system_info
             ;;
         * )
-            echoerr " * ERROR: $OS_NAME not supported.";
+            echoerror "${OS_NAME} not supported.";
             exit 1
             ;;
     esac
@@ -443,18 +461,18 @@ __gather_system_info() {
 __gather_system_info
 
 
-echo " * System Information:"
-echo "     CPU:          ${CPU_VENDOR_ID}"
-echo "     CPU Arch:     ${CPU_ARCH}"
-echo "     OS Name:      ${OS_NAME}"
-echo "     OS Version:   ${OS_VERSION}"
-echo "     Distribution: ${DISTRO_NAME} ${DISTRO_VERSION}"
+echoinfo "System Information:"
+echoinfo "  CPU:          ${CPU_VENDOR_ID}"
+echoinfo "  CPU Arch:     ${CPU_ARCH}"
+echoinfo "  OS Name:      ${OS_NAME}"
+echoinfo "  OS Version:   ${OS_VERSION}"
+echoinfo "  Distribution: ${DISTRO_NAME} ${DISTRO_VERSION}"
 echo
 
 # Let users know what's going to be installed
-[ $INSTALL_MINION -eq 1 ] && echo " * INFO: Installing minion"
-[ $INSTALL_MASTER -eq 1 ] && echo " * INFO: Installing master"
-[ $INSTALL_SYNDIC -eq 1 ] && echo " * INFO: Installing syndic"
+[ $INSTALL_MINION -eq 1 ] && echoinfo "Installing minion"
+[ $INSTALL_MASTER -eq 1 ] && echoinfo "Installing master"
+[ $INSTALL_SYNDIC -eq 1 ] && echoinfo "Installing syndic"
 
 
 # Simplify version naming on functions
@@ -471,7 +489,7 @@ DISTRO_NAME_L=$(echo $DISTRO_NAME | tr '[:upper:]' '[:lower:]' | sed 's/[^a-zA-Z
 
 # Only Ubuntu has daily packages, let's let users know about that
 if [ "${DISTRO_NAME_L}" != "ubuntu" ] && [ $ITYPE = "daily" ]; then
-    echoerr " * ERROR: Only Ubuntu has daily packages support"
+    echoerror "Only Ubuntu has daily packages support"
     exit 1
 fi
 
@@ -485,10 +503,10 @@ fi
 __function_defined() {
     FUNC_NAME=$1
     if [ "$(command -v $FUNC_NAME)x" != "x" ]; then
-        echo " * INFO: Found function $FUNC_NAME"
+        echoinfo "Found function $FUNC_NAME"
         return 0
     fi
-    echo " * INFO: $FUNC_NAME not found...."
+    echodebug "$FUNC_NAME not found...."
     return 1
 }
 
@@ -1416,7 +1434,7 @@ config_salt() {
     [ "$TEMP_CONFIG_DIR" = "null" ] && return
     # If the configuration directory does not exist, error out
     if [ ! -d "$TEMP_CONFIG_DIR" ]; then
-        echo " * The configuration directory ${TEMP_CONFIG_DIR} does not exist."
+        echoerror "The configuration directory ${TEMP_CONFIG_DIR} does not exist."
         exit 1
     fi
 
@@ -1549,51 +1567,51 @@ done
 
 
 if [ $DEPS_INSTALL_FUNC = "null" ]; then
-    echoerr " * ERROR: No dependencies installation function found. Exiting..."
+    echoerror "No dependencies installation function found. Exiting..."
     exit 1
 fi
 
 if [ $INSTALL_FUNC = "null" ]; then
-    echoerr " * ERROR: No installation function found. Exiting..."
+    echoerror "No installation function found. Exiting..."
     exit 1
 fi
 
 
 # Install dependencies
-echo " * Running ${DEPS_INSTALL_FUNC}()"
+echoinfo "Running ${DEPS_INSTALL_FUNC}()"
 $DEPS_INSTALL_FUNC
 if [ $? -ne 0 ]; then
-    echoerr " * ERROR: Failed to run ${DEPS_INSTALL_FUNC}()!!!"
+    echoerror "Failed to run ${DEPS_INSTALL_FUNC}()!!!"
     exit 1
 fi
 
 
 # Configure Salt
 if [ "$TEMP_CONFIG_DIR" != "null" ] && [ "$CONFIG_SALT_FUNC" != "null" ]; then
-    echo " * Running ${CONFIG_SALT_FUNC}()"
+    echoinfo "Running ${CONFIG_SALT_FUNC}()"
     $CONFIG_SALT_FUNC
     if [ $? -ne 0 ]; then
-        echoerr " * ERROR: Failed to run ${CONFIG_SALT_FUNC}()!!!"
+        echoerror "Failed to run ${CONFIG_SALT_FUNC}()!!!"
         exit 1
     fi
 fi
 
 
 # Install Salt
-echo " * Running ${INSTALL_FUNC}()"
+echoinfo "Running ${INSTALL_FUNC}()"
 $INSTALL_FUNC
 if [ $? -ne 0 ]; then
-    echoerr " * ERROR: Failed to run ${INSTALL_FUNC}()!!!"
+    echoerror "Failed to run ${INSTALL_FUNC}()!!!"
     exit 1
 fi
 
 
 # Run any post install function
 if [ "$POST_INSTALL_FUNC" != "null" ]; then
-    echo " * Running ${POST_INSTALL_FUNC}()"
+    echoinfo "Running ${POST_INSTALL_FUNC}()"
     $POST_INSTALL_FUNC
     if [ $? -ne 0 ]; then
-        echoerr " * ERROR: Failed to run ${POST_INSTALL_FUNC}()!!!"
+        echoerror "Failed to run ${POST_INSTALL_FUNC}()!!!"
         exit 1
     fi
 fi
@@ -1601,16 +1619,14 @@ fi
 
 # Run any start daemons function
 if [ "$STARTDAEMONS_INSTALL_FUNC" != "null" ]; then
-    echo " * Running ${STARTDAEMONS_INSTALL_FUNC}()"
+    echoinfo "Running ${STARTDAEMONS_INSTALL_FUNC}()"
     $STARTDAEMONS_INSTALL_FUNC
     if [ $? -ne 0 ]; then
-        echoerr " * ERROR: Failed to run ${STARTDAEMONS_INSTALL_FUNC}()!!!"
+        echoerror "Failed to run ${STARTDAEMONS_INSTALL_FUNC}()!!!"
         exit 1
     fi
 fi
 
-
-
 # Done!
-echo " * Salt installed!"
+echoinfo "Salt installed!"
 exit 0

@@ -261,3 +261,15 @@ class InstallationTestCase(BootstrapTestCase):
                 stream_stds=True
             )
         )
+
+    def test_config_only_without_config_dir_fails(self):
+        '''
+        Test running in configuration mode only without providing the necessary
+        configuration directory fails.
+        '''
+        self.assert_script_result(
+            'The script successfully executed even though no configuration '
+            'directory was provided.',
+            1,
+            self.run_script(args=('-C',))
+        )

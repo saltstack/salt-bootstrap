@@ -135,14 +135,14 @@ do
 
     h )  usage; exit 0                                  ;;
 
-    v )  echo "$0 -- Version $ScriptVersion"; exit 0   ;;
-    n )  COLORS=0; __detect_color_support   ;;
-    D )  ECHO_DEBUG=$BS_TRUE   ;;
-    c )  TEMP_CONFIG_DIR="$OPTARG" ;;
-    M )  INSTALL_MASTER=$BS_TRUE ;;
-    S )  INSTALL_SYNDIC=$BS_TRUE ;;
-    N )  INSTALL_MINION=$BS_FALSE ;;
-    C )  CONFIG_ONLY=$BS_TRUE ;;
+    v )  echo "$0 -- Version $ScriptVersion"; exit 0    ;;
+    n )  COLORS=0; __detect_color_support               ;;
+    D )  ECHO_DEBUG=$BS_TRUE                            ;;
+    c )  TEMP_CONFIG_DIR="$OPTARG"                      ;;
+    M )  INSTALL_MASTER=$BS_TRUE                        ;;
+    S )  INSTALL_SYNDIC=$BS_TRUE                        ;;
+    N )  INSTALL_MINION=$BS_FALSE                       ;;
+    C )  CONFIG_ONLY=$BS_TRUE                           ;;
 
     \?)  echo
          echoerror "Option does not exist : $OPTARG"
@@ -153,9 +153,6 @@ do
   esac    # --- end of case ---
 done
 shift $(($OPTIND-1))
-
-
-
 
 
 __check_unparsed_options() {
@@ -171,13 +168,14 @@ __check_unparsed_options() {
 }
 
 # Check that we're actually installing one of minion/master/syndic
-if [ $INSTALL_MINION -eq $BS_FALSE ] && [ $INSTALL_MASTER -eq $BS_FALSE ] && [ $INSTALL_SYNDIC -eq $BS_FALSE ]; then
-    echoerror "Nothing to install"
+if [ $INSTALL_MINION -eq $BS_FALSE ] && [ $INSTALL_MASTER -eq $BS_FALSE ] && [ $INSTALL_SYNDIC -eq $BS_FALSE ] && [ $CONFIG_ONLY -eq $BS_FALSE ]; then
+    echoerror "Nothing to install or configure"
     exit 1
 fi
 
-if [ $CONFIG_ONLY -eq 1 ] && [ TEMP_CONFIG_DIR = "null" ]; then
-    echo " * Error: Running the script in configuration only mode and no configuration directory was passed."
+if [ $CONFIG_ONLY -eq $BS_TRUE ] && [ "$TEMP_CONFIG_DIR" = "null" ]; then
+    echoerror "In order to run the script in configuration only mode you also need to provide the configuration directory."
+    exit 1
 fi
 
 # Define installation type
@@ -1663,7 +1661,7 @@ fi
 
 
 # Install dependencies
-if [ $CONFIG_ONLY -eq 0 ]; then
+if [ $CONFIG_ONLY -eq $BS_FALSE ]; then
     # Only execute function is not in config mode only
     echoinfo "Running ${DEPS_INSTALL_FUNC}()"
     $DEPS_INSTALL_FUNC
@@ -1686,7 +1684,7 @@ fi
 
 
 # Install Salt
-if [ $CONFIG_ONLY -eq 0 ]; then
+if [ $CONFIG_ONLY -eq $BS_FALSE ]; then
     # Only execute function is not in config mode only
     echoinfo "Running ${INSTALL_FUNC}()"
     $INSTALL_FUNC
@@ -1698,7 +1696,7 @@ fi
 
 
 # Run any post install function, Only execute function is not in config mode only
-if [ $CONFIG_ONLY -eq 0 ] && [ "$POST_INSTALL_FUNC" != "null" ]; then
+if [ $CONFIG_ONLY -eq $BS_FALSE ] && [ "$POST_INSTALL_FUNC" != "null" ]; then
     echoinfo "Running ${POST_INSTALL_FUNC}()"
     $POST_INSTALL_FUNC
     if [ $? -ne 0 ]; then
@@ -1719,7 +1717,7 @@ if [ "$STARTDAEMONS_INSTALL_FUNC" != "null" ]; then
 fi
 
 # Done!
-if [ $CONFIG_ONLY -eq 0 ]; then
+if [ $CONFIG_ONLY -eq $BS_FALSE ]; then
     echoinfo "Salt installed!"
 else
     echoinfo "Salt configured"

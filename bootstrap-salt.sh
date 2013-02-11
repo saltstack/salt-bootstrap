@@ -138,7 +138,13 @@ do
     v )  echo "$0 -- Version $ScriptVersion"; exit 0    ;;
     n )  COLORS=0; __detect_color_support               ;;
     D )  ECHO_DEBUG=$BS_TRUE                            ;;
-    c )  TEMP_CONFIG_DIR="$OPTARG"                      ;;
+    c )  TEMP_CONFIG_DIR="$OPTARG"
+         # If the configuration directory does not exist, error out
+         if [ ! -d "$TEMP_CONFIG_DIR" ]; then
+             echoerror "The configuration directory ${TEMP_CONFIG_DIR} does not exist."
+             exit 1
+         fi
+         ;;
     M )  INSTALL_MASTER=$BS_TRUE                        ;;
     S )  INSTALL_SYNDIC=$BS_TRUE                        ;;
     N )  INSTALL_MINION=$BS_FALSE                       ;;
@@ -1522,17 +1528,14 @@ install_smartos_start_daemons() {
 #   the -c options is passed.
 #
 config_salt() {
-    CONFIGURED_ANYTHING=$BS_FALSE
     # If the configuration directory is not passed, return
     [ "$TEMP_CONFIG_DIR" = "null" ] && return
-    # If the configuration directory does not exist, error out
-    if [ ! -d "$TEMP_CONFIG_DIR" ]; then
-        echoerror "The configuration directory ${TEMP_CONFIG_DIR} does not exist."
-        exit 1
-    fi
+
+    CONFIGURED_ANYTHING=$BS_FALSE
 
     SALT_DIR=/etc/salt
     PKI_DIR=$SALT_DIR/pki
+
     # Let's create the necessary directories
     [ -d $SALT_DIR ] || mkdir $SALT_DIR
     [ -d $PKI_DIR ] || mkdir -p $PKI_DIR && chmod 700 $PKI_DIR

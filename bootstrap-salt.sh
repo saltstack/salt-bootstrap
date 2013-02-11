@@ -604,6 +604,9 @@ __apt_get_noinput() {
 #       3. install_<distro>_<install_type>_start_daemons
 #       4. install_<distro>_start_daemons
 #
+#       NOTE: The start daemons function should be able to restart any daemons
+#             which are running, or start if they're not running.
+#
 ##############################################################################
 
 ##############################################################################

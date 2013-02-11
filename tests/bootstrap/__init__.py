@@ -187,4 +187,6 @@ class BootstrapTestCase(TestCase):
                 err_msg = '{0}STDOUT:\n{1}\n'.format(err_msg, '\n'.join(out))
             if err:
                 err_msg = '{0}STDERR:\n{1}\n'.format(err_msg, '\n'.join(err))
+            if not err and not out:
+                err_msg = '{0} No std{out,err} captured.'.format(err_msg)
             raise AssertionError(err_msg.rstrip())

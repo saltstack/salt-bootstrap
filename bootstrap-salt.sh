@@ -22,6 +22,9 @@ ScriptName="bootstrap-salt.sh"
 #  LET THE BLACK MAGIC BEGIN!!!!
 #===============================================================================
 
+# Bootstrap script truth values
+BS_TRUE=1
+BS_FALSE=0
 
 #---  FUNCTION  ----------------------------------------------------------------
 #          NAME:  __detect_color_support
@@ -65,7 +68,9 @@ echoinfo() {
 #   DESCRIPTION:  Echo debug information to stdout.
 #-------------------------------------------------------------------------------
 echodebug() {
-    echo "${BC} * DEBUG${EC}: $@";
+    if [ $ECHO_DEBUG -eq $BS_TRUE ]; then
+        echo "${BC} * DEBUG${EC}: $@";
+    fi
 }
 
 #===  FUNCTION  ================================================================
@@ -94,6 +99,7 @@ usage() {
   -h  Display this message
   -v  Display script version
   -n  No colours.
+  -D  Show debug output.
   -c  Temporary minion configuration directory
   -M  Also install salt-master
   -S  Also install salt-syndic
@@ -105,11 +111,12 @@ EOT
 #  Handle command line arguments
 #-----------------------------------------------------------------------
 TEMP_CONFIG_DIR="null"
-INSTALL_MASTER=0
-INSTALL_SYNDIC=0
-INSTALL_MINION=1
+INSTALL_MASTER=$BS_FALSE
+INSTALL_SYNDIC=$BS_FALSE
+INSTALL_MINION=$BS_TRUE
+ECHO_DEBUG=$BS_FALSE
 
-while getopts ":hvnc:MSN" opt
+while getopts ":hvnDc:MSN" opt
 do
   case "${opt}" in
 
@@ -117,10 +124,11 @@ do
 
     v )  echo "$0 -- Version $ScriptVersion"; exit 0   ;;
     n )  COLORS=0; __detect_color_support   ;;
+    D )  ECHO_DEBUG=$BS_TRUE   ;;
     c )  TEMP_CONFIG_DIR="$OPTARG" ;;
-    M )  INSTALL_MASTER=1 ;;
-    S )  INSTALL_SYNDIC=1 ;;
-    N )  INSTALL_MINION=0 ;;
+    M )  INSTALL_MASTER=$BS_TRUE ;;
+    S )  INSTALL_SYNDIC=$BS_TRUE ;;
+    N )  INSTALL_MINION=$BS_FALSE ;;
 
     \?)  echo
          echoerror "Option does not exist : $OPTARG"
@@ -149,7 +157,7 @@ __check_unparsed_options() {
 }
 
 # Check that we're actually installing one of minion/master/syndic
-if [ $INSTALL_MINION -eq 0 ] && [ $INSTALL_MASTER -eq 0 ] && [ $INSTALL_SYNDIC -eq 0 ]; then
+if [ $INSTALL_MINION -eq $BS_FALSE ] && [ $INSTALL_MASTER -eq $BS_FALSE ] && [ $INSTALL_SYNDIC -eq $BS_FALSE ]; then
     echoerror "Nothing to install"
     exit 1
 fi
@@ -495,9 +503,9 @@ echoinfo "  Distribution: ${DISTRO_NAME} ${DISTRO_VERSION}"
 echo
 
 # Let users know what's going to be installed
-[ $INSTALL_MINION -eq 1 ] && echoinfo "Installing minion"
-[ $INSTALL_MASTER -eq 1 ] && echoinfo "Installing master"
-[ $INSTALL_SYNDIC -eq 1 ] && echoinfo "Installing syndic"
+[ $INSTALL_MINION -eq $BS_TRUE ] && echoinfo "Installing minion"
+[ $INSTALL_MASTER -eq $BS_TRUE ] && echoinfo "Installing master"
+[ $INSTALL_SYNDIC -eq $BS_TRUE ] && echoinfo "Installing syndic"
 
 
 # Simplify version naming on functions
@@ -645,13 +653,13 @@ install_ubuntu_1110_post() {
 
 install_ubuntu_stable() {
     packages=""
-    if [ $INSTALL_MINION -eq 1 ]; then
+    if [ $INSTALL_MINION -eq $BS_TRUE ]; then
         packages="${packages} salt-minion"
     fi
-    if [ $INSTALL_MASTER -eq 1 ]; then
+    if [ $INSTALL_MASTER -eq $BS_TRUE ]; then
         packages="${packages} salt-master"
     fi
-    if [ $INSTALL_SYNDIC -eq 1 ]; then
+    if [ $INSTALL_SYNDIC -eq $BS_TRUE ]; then
         packages="${packages} salt-syndic"
     fi
     __apt_get_noinput ${packages}
@@ -669,9 +677,9 @@ install_ubuntu_git_post() {
     for fname in minion master syndic; do
 
         # Skip if not meant to be installed
-        [ $fname = "minion" ] && [ $INSTALL_MINION -eq 0 ] && continue
-        [ $fname = "master" ] && [ $INSTALL_MASTER -eq 0 ] && continue
-        [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq 0 ] && continue
+        [ $fname = "minion" ] && [ $INSTALL_MINION -eq $BS_FALSE ] && continue
+        [ $fname = "master" ] && [ $INSTALL_MASTER -eq $BS_FALSE ] && continue
+        [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq $BS_FALSE ] && continue
 
         if [ -f /sbin/initctl ]; then
             # We have upstart support
@@ -693,9 +701,9 @@ install_ubuntu_git_start_daemons() {
     for fname in minion master syndic; do
 
         # Skip if not meant to be installed
-        [ $fname = "minion" ] && [ $INSTALL_MINION -eq 0 ] && continue
-        [ $fname = "master" ] && [ $INSTALL_MASTER -eq 0 ] && continue
-        [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq 0 ] && continue
+        [ $fname = "minion" ] && [ $INSTALL_MINION -eq $BS_FALSE ] && continue
+        [ $fname = "master" ] && [ $INSTALL_MASTER -eq $BS_FALSE ] && continue
+        [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq $BS_FALSE ] && continue
 
         if [ -f /sbin/initctl ]; then
             # We have upstart support
@@ -770,13 +778,13 @@ install_debian_60_git_deps() {
 
 install_debian_stable() {
     packages=""
-    if [ $INSTALL_MINION -eq 1 ]; then
+    if [ $INSTALL_MINION -eq $BS_TRUE ]; then
         packages="${packages} salt-minion"
     fi
-    if [ $INSTALL_MASTER -eq 1 ]; then
+    if [ $INSTALL_MASTER -eq $BS_TRUE ]; then
         packages="${packages} salt-master"
     fi
-    if [ $INSTALL_SYNDIC -eq 1 ]; then
+    if [ $INSTALL_SYNDIC -eq $BS_TRUE ]; then
         packages="${packages} salt-syndic"
     fi
     __apt_get_noinput ${packages}
@@ -799,9 +807,9 @@ install_debian_git_post() {
     for fname in minion master syndic; do
 
         # Skip if not meant to be installed
-        [ $fname = "minion" ] && [ $INSTALL_MINION -eq 0 ] && continue
-        [ $fname = "master" ] && [ $INSTALL_MASTER -eq 0 ] && continue
-        [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq 0 ] && continue
+        [ $fname = "minion" ] && [ $INSTALL_MINION -eq $BS_FALSE ] && continue
+        [ $fname = "master" ] && [ $INSTALL_MASTER -eq $BS_FALSE ] && continue
+        [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq $BS_FALSE ] && continue
 
         if [ -f ${SALT_GIT_CHECKOUT_DIR}/debian/salt-$fname.init ]; then
             cp ${SALT_GIT_CHECKOUT_DIR}/debian/salt-$fname.init /etc/init.d/salt-$fname
@@ -815,9 +823,9 @@ install_debian_git_start_daemons() {
     for fname in minion master syndic; do
 
         # Skip if not meant to be installed
-        [ $fname = "minion" ] && [ $INSTALL_MINION -eq 0 ] && continue
-        [ $fname = "master" ] && [ $INSTALL_MASTER -eq 0 ] && continue
-        [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq 0 ] && continue
+        [ $fname = "minion" ] && [ $INSTALL_MINION -eq $BS_FALSE ] && continue
+        [ $fname = "master" ] && [ $INSTALL_MASTER -eq $BS_FALSE ] && continue
+        [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq $BS_FALSE ] && continue
 
         /etc/init.d/salt-$fname start &
     done
@@ -837,10 +845,10 @@ install_fedora_deps() {
 
 install_fedora_stable() {
     packages=""
-    if [ $INSTALL_MINION -eq 1 ]; then
+    if [ $INSTALL_MINION -eq $BS_TRUE ]; then
         packages="${packages} salt-minion"
     fi
-    if [ $INSTALL_MASTER -eq 1 ] || [ $INSTALL_SYNDIC -eq 1 ]; then
+    if [ $INSTALL_MASTER -eq $BS_TRUE ] || [ $INSTALL_SYNDIC -eq $BS_TRUE ]; then
         packages="${packages} salt-master"
     fi
     yum install -y ${packages}
@@ -867,9 +875,9 @@ install_fedora_git_post() {
     for fname in minion master syndic; do
 
         # Skip if not meant to be installed
-        [ $fname = "minion" ] && [ $INSTALL_MINION -eq 0 ] && continue
-        [ $fname = "master" ] && [ $INSTALL_MASTER -eq 0 ] && continue
-        [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq 0 ] && continue
+        [ $fname = "minion" ] && [ $INSTALL_MINION -eq $BS_FALSE ] && continue
+        [ $fname = "master" ] && [ $INSTALL_MASTER -eq $BS_FALSE ] && continue
+        [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq $BS_FALSE ] && continue
 
         cp ${SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-$fname.service /lib/systemd/system/salt-$fname.service
 
@@ -883,9 +891,9 @@ install_fedora_git_start_daemons() {
     for fname in minion master syndic; do
 
         # Skip if not meant to be installed
-        [ $fname = "minion" ] && [ $INSTALL_MINION -eq 0 ] && continue
-        [ $fname = "master" ] && [ $INSTALL_MASTER -eq 0 ] && continue
-        [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq 0 ] && continue
+        [ $fname = "minion" ] && [ $INSTALL_MINION -eq $BS_FALSE ] && continue
+        [ $fname = "master" ] && [ $INSTALL_MASTER -eq $BS_FALSE ] && continue
+        [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq $BS_FALSE ] && continue
 
         systemctl try-restart salt-$fname.service
     done
@@ -915,10 +923,10 @@ install_centos_stable_deps() {
 
 install_centos_stable() {
     packages=""
-    if [ $INSTALL_MINION -eq 1 ]; then
+    if [ $INSTALL_MINION -eq $BS_TRUE ]; then
         packages="${packages} salt-minion"
     fi
-    if [ $INSTALL_MASTER -eq 1 ] || [ $INSTALL_SYNDIC -eq 1 ]; then
+    if [ $INSTALL_MASTER -eq $BS_TRUE ] || [ $INSTALL_SYNDIC -eq $BS_TRUE ]; then
         packages="${packages} salt-master"
     fi
     yum -y install ${packages} --enablerepo=epel-testing
@@ -927,9 +935,9 @@ install_centos_stable() {
 install_centos_stable_post() {
     for fname in minion master syndic; do
         # Skip if not meant to be installed
-        [ $fname = "minion" ] && [ $INSTALL_MINION -eq 0 ] && continue
-        [ $fname = "master" ] && [ $INSTALL_MASTER -eq 0 ] && continue
-        [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq 0 ] && continue
+        [ $fname = "minion" ] && [ $INSTALL_MINION -eq $BS_FALSE ] && continue
+        [ $fname = "master" ] && [ $INSTALL_MASTER -eq $BS_FALSE ] && continue
+        [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq $BS_FALSE ] && continue
 
         if [ ! -f /sbin/initctl ] && [ -f /etc/init.d/salt-$fname ]; then
             # Still in SysV init!?
@@ -941,9 +949,9 @@ install_centos_stable_post() {
 install_centos_stable_start_daemons() {
     for fname in minion master syndic; do
         # Skip if not meant to be installed
-        [ $fname = "minion" ] && [ $INSTALL_MINION -eq 0 ] && continue
-        [ $fname = "master" ] && [ $INSTALL_MASTER -eq 0 ] && continue
-        [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq 0 ] && continue
+        [ $fname = "minion" ] && [ $INSTALL_MINION -eq $BS_FALSE ] && continue
+        [ $fname = "master" ] && [ $INSTALL_MASTER -eq $BS_FALSE ] && continue
+        [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq $BS_FALSE ] && continue
 
         if [ -f /sbin/initctl ]; then
             # We have upstart support
@@ -992,9 +1000,9 @@ install_centos_git_post() {
     for fname in master minion syndic; do
 
         # Skip if not meant to be installed
-        [ $fname = "minion" ] && [ $INSTALL_MINION -eq 0 ] && continue
-        [ $fname = "master" ] && [ $INSTALL_MASTER -eq 0 ] && continue
-        [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq 0 ] && continue
+        [ $fname = "minion" ] && [ $INSTALL_MINION -eq $BS_FALSE ] && continue
+        [ $fname = "master" ] && [ $INSTALL_MASTER -eq $BS_FALSE ] && continue
+        [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq $BS_FALSE ] && continue
 
         if [ -f /sbin/initctl ]; then
             # We have upstart support
@@ -1016,9 +1024,9 @@ install_centos_git_start_daemons() {
     for fname in master minion syndic; do
 
         # Skip if not meant to be installed
-        [ $fname = "minion" ] && [ $INSTALL_MINION -eq 0 ] && continue
-        [ $fname = "master" ] && [ $INSTALL_MASTER -eq 0 ] && continue
-        [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq 0 ] && continue
+        [ $fname = "minion" ] && [ $INSTALL_MINION -eq $BS_FALSE ] && continue
+        [ $fname = "master" ] && [ $INSTALL_MASTER -eq $BS_FALSE ] && continue
+        [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq $BS_FALSE ] && continue
 
         if [ -f /sbin/initctl ]; then
             # We have upstart support
@@ -1216,9 +1224,9 @@ install_arch_post() {
     for fname in minion master syndic; do
 
         # Skip if not meant to be installed
-        [ $fname = "minion" ] && [ $INSTALL_MINION -eq 0 ] && continue
-        [ $fname = "master" ] && [ $INSTALL_MASTER -eq 0 ] && continue
-        [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq 0 ] && continue
+        [ $fname = "minion" ] && [ $INSTALL_MINION -eq $BS_FALSE ] && continue
+        [ $fname = "master" ] && [ $INSTALL_MASTER -eq $BS_FALSE ] && continue
+        [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq $BS_FALSE ] && continue
 
         if [ -f /usr/bin/systemctl ]; then
             # Using systemd
@@ -1239,9 +1247,9 @@ install_arch_git_post() {
     for fname in minion master syndic; do
 
         # Skip if not meant to be installed
-        [ $fname = "minion" ] && [ $INSTALL_MINION -eq 0 ] && continue
-        [ $fname = "master" ] && [ $INSTALL_MASTER -eq 0 ] && continue
-        [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq 0 ] && continue
+        [ $fname = "minion" ] && [ $INSTALL_MINION -eq $BS_FALSE ] && continue
+        [ $fname = "master" ] && [ $INSTALL_MASTER -eq $BS_FALSE ] && continue
+        [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq $BS_FALSE ] && continue
 
         if [ -f /usr/bin/systemctl ]; then
             cp ${SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-$fname.service /lib/systemd/system/salt-$fname.service
@@ -1268,9 +1276,9 @@ install_arch_start_daemons() {
     for fname in minion master syndic; do
 
         # Skip if not meant to be installed
-        [ $fname = "minion" ] && [ $INSTALL_MINION -eq 0 ] && continue
-        [ $fname = "master" ] && [ $INSTALL_MASTER -eq 0 ] && continue
-        [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq 0 ] && continue
+        [ $fname = "minion" ] && [ $INSTALL_MINION -eq $BS_FALSE ] && continue
+        [ $fname = "master" ] && [ $INSTALL_MASTER -eq $BS_FALSE ] && continue
+        [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq $BS_FALSE ] && continue
 
         if [ -f /usr/bin/systemctl ]; then
             /usr/bin/systemctl try-restart salt-$fname.service
@@ -1360,9 +1368,9 @@ install_freebsd_start_daemons() {
     for fname in minion master syndic; do
 
         # Skip if not meant to be installed
-        [ $fname = "minion" ] && [ $INSTALL_MINION -eq 0 ] && continue
-        [ $fname = "master" ] && [ $INSTALL_MASTER -eq 0 ] && continue
-        [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq 0 ] && continue
+        [ $fname = "minion" ] && [ $INSTALL_MINION -eq $BS_FALSE ] && continue
+        [ $fname = "master" ] && [ $INSTALL_MASTER -eq $BS_FALSE ] && continue
+        [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq $BS_FALSE ] && continue
 
         salt-$fname -d &
     done
@@ -1436,9 +1444,9 @@ install_smartos_start_daemons() {
     for fname in minion master syndic; do
 
         # Skip if not meant to be installed
-        [ $fname = "minion" ] && [ $INSTALL_MINION -eq 0 ] && continue
-        [ $fname = "master" ] && [ $INSTALL_MASTER -eq 0 ] && continue
-        [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq 0 ] && continue
+        [ $fname = "minion" ] && [ $INSTALL_MINION -eq $BS_FALSE ] && continue
+        [ $fname = "master" ] && [ $INSTALL_MASTER -eq $BS_FALSE ] && continue
+        [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq $BS_FALSE ] && continue
 
         # Start services
         svcadm enable salt-$fname
@@ -1469,7 +1477,7 @@ config_salt() {
     [ -d $SALT_DIR ] || mkdir $SALT_DIR
     [ -d $PKI_DIR ] || mkdir -p $PKI_DIR && chmod 700 $PKI_DIR
 
-    if [ $INSTALL_MINION -eq 1 ]; then
+    if [ $INSTALL_MINION -eq $BS_TRUE ]; then
         # Create the PKI directory
         [ -d $PKI_DIR/minion ] || mkdir -p $PKI_DIR/minion && chmod 700 $PKI_DIR/minion
 
@@ -1488,7 +1496,7 @@ config_salt() {
     fi
 
 
-    if [ $INSTALL_MASTER -eq 1 ] || [ $INSTALL_SYNDIC -eq 1 ]; then
+    if [ $INSTALL_MASTER -eq $BS_TRUE ] || [ $INSTALL_SYNDIC -eq $BS_TRUE ]; then
         # Create the PKI directory
         [ -d $PKI_DIR/master ] || mkdir -p $PKI_DIR/master && chmod 700 $PKI_DIR/master
 

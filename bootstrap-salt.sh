@@ -133,7 +133,7 @@ while getopts ":hvnDc:MSNC" opt
 do
   case "${opt}" in
 
-    h )  usage; exit 0   ;;
+    h )  usage; exit 0                                  ;;
 
     v )  echo "$0 -- Version $ScriptVersion"; exit 0   ;;
     n )  COLORS=0; __detect_color_support   ;;

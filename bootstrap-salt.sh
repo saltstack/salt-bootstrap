@@ -1382,10 +1382,13 @@ install_freebsd_9x_stable_post() {
         [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq $BS_FALSE ] && continue
 
         # XXX: Should we cp /usr/local/etc/salt/master.sample /usr/local/etc/salt/master and same for minion?
-        echo "salt_${fname}_enable=\"YES\"" >> /etc/rc.conf
+        enable_string="salt_${fname}_enable=\"YES\""
+        grep "$enable_string" /etc/rc.conf >/dev/null 2>&1
+        [ $? -eq 1 ] && echo "$enable_string" >> /etc/rc.conf
 
         if [ $fname = "minion" ] ; then
-            echo "salt_minion_paths=\"/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin\"" >> /etc/rc.conf
+            grep "salt_minion_paths" /etc/rc.conf >/dev/null 2>&1
+            [ $? -eq 1 ] && echo "salt_minion_paths=\"/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin\"" >> /etc/rc.conf
         fi
 
     done
@@ -1408,10 +1411,13 @@ install_freebsd_git_post() {
         [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq $BS_FALSE ] && continue
 
         # XXX: Should we cp /usr/local/etc/salt/master.sample /usr/local/etc/salt/master and same for minion?
-        echo "salt_${fname}_enable=\"YES\"" >> /etc/rc.conf
+        enable_string="salt_${fname}_enable=\"YES\""
+        grep "$enable_string" /etc/rc.conf >/dev/null 2>&1
+        [ $? -eq 1 ] && echo "$enable_string" >> /etc/rc.conf
 
         if [ $fname = "minion" ] ; then
-            echo "salt_minion_paths=\"/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin\"" >> /etc/rc.conf
+            grep "salt_minion_paths" /etc/rc.conf >/dev/null 2>&1
+            [ $? -eq 1 ] && echo "salt_minion_paths=\"/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin\"" >> /etc/rc.conf
         fi
 
     done

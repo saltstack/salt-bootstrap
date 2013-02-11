@@ -136,6 +136,7 @@ In order to install salt for a distribution you need to define:
   they're not running.
 
 
+----
 
 Below is an example for Ubuntu Oneiric:
 

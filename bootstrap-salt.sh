@@ -167,6 +167,7 @@ __check_unparsed_options() {
     fi
 }
 
+
 # Check that we're actually installing one of minion/master/syndic
 if [ $INSTALL_MINION -eq $BS_FALSE ] && [ $INSTALL_MASTER -eq $BS_FALSE ] && [ $INSTALL_SYNDIC -eq $BS_FALSE ] && [ $CONFIG_ONLY -eq $BS_FALSE ]; then
     echoerror "Nothing to install or configure"
@@ -208,7 +209,7 @@ fi
 if [ "$#" -gt 0 ]; then
     __check_unparsed_options "$*"
     usage
-    echoerr
+    echo
     echoerror "Too many arguments."
     exiterr 1
 fi
@@ -520,11 +521,30 @@ echoinfo "  OS Version:   ${OS_VERSION}"
 echoinfo "  Distribution: ${DISTRO_NAME} ${DISTRO_VERSION}"
 echo
 
-# Let users know what's going to be installed
-[ $INSTALL_MINION -eq $BS_TRUE ] && echoinfo "Installing minion"
-[ $INSTALL_MASTER -eq $BS_TRUE ] && echoinfo "Installing master"
-[ $INSTALL_SYNDIC -eq $BS_TRUE ] && echoinfo "Installing syndic"
+# Let users know what's going to be installed/configured
+if [ $INSTALL_MINION -eq $BS_TRUE ]; then
+    if [ $CONFIG_ONLY -eq $BS_FALSE ]; then
+        echoinfo "Installing minion"
+    else
+        echoinfo "Configuring minion"
+    fi
+fi
 
+if [ $INSTALL_MASTER -eq $BS_TRUE ]; then
+    if [ $CONFIG_ONLY -eq $BS_FALSE ]; then
+        echoinfo "Installing master"
+    else
+        echoinfo "Configuring master"
+    fi
+fi
+
+if [ $INSTALL_SYNDIC -eq $BS_TRUE ]; then
+    if [ $CONFIG_ONLY -eq $BS_FALSE ]; then
+        echoinfo "Installing syndic"
+    else
+        echoinfo "Configuring syndic"
+    fi
+fi
 
 # Simplify version naming on functions
 if [ "x${DISTRO_VERSION}" = "x" ]; then
@@ -1502,6 +1522,7 @@ install_smartos_start_daemons() {
 #   the -c options is passed.
 #
 config_salt() {
+    CONFIGURED_ANYTHING=$BS_FALSE
     # If the configuration directory is not passed, return
     [ "$TEMP_CONFIG_DIR" = "null" ] && return
     # If the configuration directory does not exist, error out
@@ -1521,16 +1542,18 @@ config_salt() {
         [ -d $PKI_DIR/minion ] || mkdir -p $PKI_DIR/minion && chmod 700 $PKI_DIR/minion
 
         # Copy the minions configuration if found
-        [ -f "$TEMP_CONFIG_DIR/minion" ] && mv "$TEMP_CONFIG_DIR/minion" /etc/salt
+        [ -f "$TEMP_CONFIG_DIR/minion" ] && mv "$TEMP_CONFIG_DIR/minion" /etc/salt && CONFIGURED_ANYTHING=$BS_TRUE
 
         # Copy the minion's keys if found
         if [ -f "$TEMP_CONFIG_DIR/minion.pem" ]; then
             mv "$TEMP_CONFIG_DIR/minion.pem" $PKI_DIR/minion/
             chmod 400 $PKI_DIR/minion/minion.pem
+            CONFIGURED_ANYTHING=$BS_TRUE
         fi
         if [ -f "$TEMP_CONFIG_DIR/minion.pub" ]; then
             mv "$TEMP_CONFIG_DIR/minion.pub" $PKI_DIR/minion/
             chmod 664 $PKI_DIR/minion/minion.pub
+            CONFIGURED_ANYTHING=$BS_TRUE
         fi
     fi
 
@@ -1540,17 +1563,24 @@ config_salt() {
         [ -d $PKI_DIR/master ] || mkdir -p $PKI_DIR/master && chmod 700 $PKI_DIR/master
 
         # Copy the masters configuration if found
-        [ -f "$TEMP_CONFIG_DIR/master" ] && mv "$TEMP_CONFIG_DIR/master" /etc/salt
+        [ -f "$TEMP_CONFIG_DIR/master" ] && mv "$TEMP_CONFIG_DIR/master" /etc/salt && CONFIGURED_ANYTHING=$BS_TRUE
 
         # Copy the master's keys if found
         if [ -f "$TEMP_CONFIG_DIR/master.pem" ]; then
             mv "$TEMP_CONFIG_DIR/master.pem" $PKI_DIR/master/
             chmod 400 $PKI_DIR/master/master.pem
+            CONFIGURED_ANYTHING=$BS_TRUE
         fi
         if [ -f "$TEMP_CONFIG_DIR/master.pub" ]; then
             mv "$TEMP_CONFIG_DIR/master.pub" $PKI_DIR/master/
             chmod 664 $PKI_DIR/master/master.pub
+            CONFIGURED_ANYTHING=$BS_TRUE
         fi
+    fi
+
+    if [ $CONFIG_ONLY -eq $BS_TRUE ] && [ $CONFIGURED_ANYTHING -eq $BS_FALSE ]; then
+        echoerror "No configuration or keys were copied over. No configuration was done!"
+        exit 1
     fi
 }
 #

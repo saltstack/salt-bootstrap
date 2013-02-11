@@ -1373,17 +1373,7 @@ install_freebsd_git() {
     /usr/local/bin/python setup.py install
 }
 
-install_freebsd_90_stable_post__() {
-    # XXX: What needs to be done for init.d support on FreeBSD
-    echo
-}
-
-install_freebsd_git_post__() {
-    # XXX: What needs to be done for init.d support on FreeBSD
-    echo
-}
-
-install_freebsd_start_daemons() {
+install_freebsd_9x_stable_post() {
     for fname in minion master syndic; do
 
         # Skip if not meant to be installed
@@ -1391,12 +1381,14 @@ install_freebsd_start_daemons() {
         [ $fname = "master" ] && [ $INSTALL_MASTER -eq $BS_FALSE ] && continue
         [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq $BS_FALSE ] && continue
 
-        salt-$fname -d &
-    done
-}
+        # XXX: Should we cp /usr/local/etc/salt/master.sample /usr/local/etc/salt/master and same for minion?
+        echo "salt_${fname}_enable=\"YES\"" >> /etc/rc.conf
 
-install_freebsd_9x_stable_post() {
-    salt-minion -d &
+        if [ $fname = "minion" ] ; then
+            echo "salt_minion_paths=\"/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin\"" >> /etc/rc.conf
+        fi
+
+    done
 }
 
 install_freebsd_90_stable_post() {
@@ -1408,9 +1400,35 @@ install_freebsd_91_stable_post() {
 }
 
 install_freebsd_git_post() {
-    salt-minion -d &
+    for fname in minion master syndic; do
+
+        # Skip if not meant to be installed
+        [ $fname = "minion" ] && [ $INSTALL_MINION -eq $BS_FALSE ] && continue
+        [ $fname = "master" ] && [ $INSTALL_MASTER -eq $BS_FALSE ] && continue
+        [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq $BS_FALSE ] && continue
+
+        # XXX: Should we cp /usr/local/etc/salt/master.sample /usr/local/etc/salt/master and same for minion?
+        echo "salt_${fname}_enable=\"YES\"" >> /etc/rc.conf
+
+        if [ $fname = "minion" ] ; then
+            echo "salt_minion_paths=\"/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin\"" >> /etc/rc.conf
+        fi
+
+    done
 }
 
+install_freebsd_start_daemons() {
+    for fname in minion master syndic; do
+
+        # Skip if not meant to be installed
+        [ $fname = "minion" ] && [ $INSTALL_MINION -eq $BS_FALSE ] && continue
+        [ $fname = "master" ] && [ $INSTALL_MASTER -eq $BS_FALSE ] && continue
+        [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq $BS_FALSE ] && continue
+
+        service salt_$fname start &
+
+    done
+}
 #
 #   Ended FreeBSD Install Functions
 #

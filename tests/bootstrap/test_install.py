@@ -273,3 +273,28 @@ class InstallationTestCase(BootstrapTestCase):
             1,
             self.run_script(args=('-C',))
         )
+
+    def test_config_with_a_non_existing_configuration_dir_fails(self):
+        '''
+        Do we fail if the passed configuration directory passed does not exits?
+        '''
+        self.assert_script_result(
+            'The script successfully executed even though the configuration '
+            'directory provided does not exist.',
+            1,
+            self.run_script(
+                args=('-C', '-c', '/tmp/this-directory-must-not-exist')
+            )
+        )
+
+    def test_config_only_without_actually_configuring_anything_fails(self):
+        '''
+        Test running in configuration mode only without actually configuring
+        anything fails.
+        '''
+        self.assert_script_result(
+            'The script successfully executed even though no configuration '
+            'was done.',
+            1,
+            self.run_script(args=('-C', '-c', '/tmp'))
+        )

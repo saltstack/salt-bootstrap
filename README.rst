@@ -110,7 +110,7 @@ In order to install salt for a distribution you need to define:
   install_<distro>_<install_type>
 
 
-4. Also optionally, define a post install function, one of:
+4. Optionally, define a post install function, one of:
 
 .. code:: bash
 
@@ -118,6 +118,23 @@ In order to install salt for a distribution you need to define:
   install_<distro>_<distro_versions>_post
   install_<distro>_<install_type>_post
   install_<distro>_post
+
+
+5. Optionally, define a start daemons function, one of:
+
+.. code:: bash
+
+  install_<distro>_<distro_versions>_<install_type>_start_daemons
+  install_<distro>_<distro_versions>_start_daemons
+  install_<distro>_<install_type>_start_daemons
+  install_<distro>_start_daemons
+
+
+.. admonition:: Attention!
+
+  The start daemons function should be able to restart any daemons which are running, or start if 
+  they're not running.
+
 
 
 Below is an example for Ubuntu Oneiric:

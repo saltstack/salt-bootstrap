@@ -22,12 +22,34 @@ ScriptName="bootstrap-salt.sh"
 #  LET THE BLACK MAGIC BEGIN!!!!
 #===============================================================================
 
+
+#---  FUNCTION  ----------------------------------------------------------------
+#          NAME:  __detect_color_support
+#   DESCRIPTION:  Try to detect color support.
+#-------------------------------------------------------------------------------
+COLORS=$(tput colors 2>/dev/null || echo 0)
+__detect_color_support() {
+    if [ $? -eq 0 ] && [ "$COLORS" -gt 2 ]; then
+        RC="\033[1;31m"
+        GC="\033[1;32m"
+        BC="\033[1;34m"
+        EC="\033[0m"
+    else
+        RC=""
+        GC=""
+        BC=""
+        EC=""
+    fi
+}
+__detect_color_support
+
+
 #---  FUNCTION  ----------------------------------------------------------------
 #          NAME:  echoerr
 #   DESCRIPTION:  Echo errors to stderr.
 #-------------------------------------------------------------------------------
 echoerror() {
-    echo " * ERROR: $@" 1>&2;
+    echo "${RC} * ERROR${EC}: $@" 1>&2;
 }
 
 #---  FUNCTION  ----------------------------------------------------------------
@@ -35,7 +57,7 @@ echoerror() {
 #   DESCRIPTION:  Echo information to stdout.
 #-------------------------------------------------------------------------------
 echoinfo() {
-    echo " *  INFO: $@";
+    echo "${GC} *  INFO${EC}: $@";
 }
 
 #---  FUNCTION  ----------------------------------------------------------------
@@ -43,7 +65,7 @@ echoinfo() {
 #   DESCRIPTION:  Echo debug information to stdout.
 #-------------------------------------------------------------------------------
 echodebug() {
-    echo " * DEBUG: $@";
+    echo "${BC} * DEBUG${EC}: $@";
 }
 
 #===  FUNCTION  ================================================================
@@ -71,6 +93,7 @@ usage() {
   Options:
   -h  Display this message
   -v  Display script version
+  -n  No colours.
   -c  Temporary minion configuration directory
   -M  Also install salt-master
   -S  Also install salt-syndic
@@ -86,13 +109,14 @@ INSTALL_MASTER=0
 INSTALL_SYNDIC=0
 INSTALL_MINION=1
 
-while getopts ":hvc:MSN" opt
+while getopts ":hvnc:MSN" opt
 do
   case "${opt}" in
 
     h )  usage; exit 0   ;;
 
     v )  echo "$0 -- Version $ScriptVersion"; exit 0   ;;
+    n )  COLORS=0; __detect_color_support   ;;
     c )  TEMP_CONFIG_DIR="$OPTARG" ;;
     M )  INSTALL_MASTER=1 ;;
     S )  INSTALL_SYNDIC=1 ;;
@@ -461,6 +485,7 @@ __gather_system_info() {
 __gather_system_info
 
 
+echo
 echoinfo "System Information:"
 echoinfo "  CPU:          ${CPU_VENDOR_ID}"
 echoinfo "  CPU Arch:     ${CPU_ARCH}"

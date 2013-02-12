@@ -24,7 +24,7 @@ CLEANUP_COMMANDS_BY_OS_FAMILY = {
         'yum -y remove salt-minion salt-master'
     ],
     'FreeBSD': [
-        'pkg delete -y sysutils/py-salt',
+        'pkg delete -y swig sysutils/py-salt',
         'pkg autoremove -y'
     ]
 }

@@ -930,6 +930,9 @@ install_centos_stable_deps() {
         rpm -Uvh --force http://mirrors.kernel.org/fedora-epel/5/${EPEL_ARCH}/epel-release-5-4.noarch.rpm
     elif [ $DISTRO_MAJOR_VERSION -eq 6 ]; then
         rpm -Uvh --force http://mirrors.kernel.org/fedora-epel/6/${EPEL_ARCH}/epel-release-6-8.noarch.rpm
+    else
+        echoerror "Failed add EPEL repository support."
+        exit 1
     fi
     yum -y update
 }

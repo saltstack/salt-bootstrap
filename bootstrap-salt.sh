@@ -519,12 +519,14 @@ echo
 # Simplify version naming on functions
 if [ "x${DISTRO_VERSION}" = "x" ]; then
     DISTRO_MAJOR_VERSION=""
-    DISTRO_VERSION_NO_DOTS=""
-    PREFIXED_DISTRO_VERSION_NO_DOTS=""
+    DISTRO_MINOR_VERSION=""
+    PREFIXED_DISTRO_MAJOR_VERSION=""
+    PREFIXED_DISTRO_MINOR_VERSION=""
 else
     DISTRO_MAJOR_VERSION="$(echo $DISTRO_VERSION | sed 's/^\([0-9]*\).*/\1/g')"
-    DISTRO_VERSION_NO_DOTS="$(echo $DISTRO_VERSION | tr -d '.')"
-    PREFIXED_DISTRO_VERSION_NO_DOTS="_${DISTRO_VERSION_NO_DOTS}"
+    DISTRO_MINOR_VERSION="$(echo $DISTRO_VERSION | sed 's/^\([0-9]*\).*/\2/g')"
+    PREFIXED_DISTRO_MAJOR_VERSION="_${DISTRO_MAJOR_VERSION}"
+    PREFIXED_DISTRO_MINOR_VERSION="_${DISTRO_MINOR_VERSION}"
 fi
 # Simplify distro name naming on functions
 DISTRO_NAME_L=$(echo $DISTRO_NAME | tr '[:upper:]' '[:lower:]' | sed 's/[^a-zA-Z0-9_ ]//g' | sed -re 's/(\s)+/_/g')
@@ -585,34 +587,43 @@ __apt_get_noinput() {
 #   In order to install salt for a distribution you need to define:
 #
 #   To Install Dependencies, which is required, one of:
-#       1. install_<distro>_<distro_version>_<install_type>_deps
-#       2. install_<distro>_<distro_version>_deps
-#       3. install_<distro>_<install_type>_deps
-#       4. install_<distro>_deps
+#       1. install_<distro>_<major_version>_<install_type>_deps
+#       2. install_<distro>_<major_version>_<minor_version>_<install_type>_deps
+#       3. install_<distro>_<major_version>_deps
+#       4  install_<distro>_<major_version>_<minor_version>_deps
+#       5. install_<distro>_<install_type>_deps
+#       6. install_<distro>_deps
 #
 #   Optionally, define a salt configuration function, which will be called if
 #   the -c|config-dir option is passed. One of:
-#       1. config_<distro>_<distro_version>_<install_type>_salt
-#       2. config_<distro>_<distro_version>_salt
-#       3. config_<distro>_<install_type>_salt
-#       4. config_<distro>_salt
-#       5. config_salt [THIS ONE IS ALREADY DEFINED AS THE DEFAULT]
+#       1. config_<distro>_<major_version>_<install_type>_salt
+#       2. config_<distro>_<major_version>_<minor_version>_<install_type>_salt
+#       3. config_<distro>_<major_version>_salt
+#       4  config_<distro>_<major_version>_<minor_version>_salt
+#       5. config_<distro>_<install_type>_salt
+#       6. config_<distro>_salt
+#       7. config_salt [THIS ONE IS ALREADY DEFINED AS THE DEFAULT]
 #
 #   To install salt, which, of course, is required, one of:
-#       1. install_<distro>_<distro_version>_<install_type>
-#       2. install_<distro>_<install_type>
+#       1. install_<distro>_<major_version>_<install_type>
+#       2. install_<distro>_<major_version>_<minor_version>_<install_type>
+#       3. install_<distro>_<install_type>
 #
 #   Optionally, define a post install function, one of:
-#       1. install_<distro>_<distro_versions>_<install_type>_post
-#       2. install_<distro>_<distro_versions>_post
-#       3. install_<distro>_<install_type>_post
-#       4. install_<distro>_post
+#       1. install_<distro>_<major_version>_<install_type>_post
+#       2. install_<distro>_<major_version>_<minor_version>_<install_type>_post
+#       3. install_<distro>_<major_version>_post
+#       4  install_<distro>_<major_version>_<minor_version>_post
+#       5. install_<distro>_<install_type>_post
+#       6. install_<distro>_post
 #
 #   Optionally, define a start daemons function, one of:
-#       1. install_<distro>_<distro_versions>_<install_type>_start_daemons
-#       2. install_<distro>_<distro_versions>_start_daemons
-#       3. install_<distro>_<install_type>_start_daemons
-#       4. install_<distro>_start_daemons
+#       1. install_<distro>_<major_version>_<install_type>_start_daemons
+#       2. install_<distro>_<major_version>_<minor_version>_<install_type>_start_daemons
+#       3. install_<distro>_<major_version>_start_daemons
+#       4  install_<distro>_<major_version>_<minor_version>_start_daemons
+#       5. install_<distro>_<install_type>_start_daemons
+#       6. install_<distro>_start_daemons
 #
 #       NOTE: The start daemons function should be able to restart any daemons
 #             which are running, or start if they're not running.
@@ -625,13 +636,13 @@ __apt_get_noinput() {
 #
 install_ubuntu_deps() {
     apt-get update
-    if [ $DISTRO_VERSION_NO_DOTS -gt 1204 ]; then
+    if [ $DISTRO_MAJOR_VERSION -gt 12 ] && [ $DISTRO_MINOR_VERSION -gt 04 ]; then
         # Above Ubuntu 12.04 add-apt-repository is in a different package
         __apt_get_noinput software-properties-common
     else
         __apt_get_noinput python-software-properties
     fi
-    if [ $DISTRO_VERSION_NO_DOTS -lt 1110 ]; then
+    if [ $DISTRO_MAJOR_VERSION -lt 11 ] && [ $DISTRO_MINOR_VERSION -lt 10 ]; then
         add-apt-repository ppa:saltstack/salt
     else
         add-apt-repository -y ppa:saltstack/salt
@@ -639,7 +650,7 @@ install_ubuntu_deps() {
     apt-get update
 }
 
-install_ubuntu_1110_deps() {
+install_ubuntu_11_10_deps() {
     apt-get update
     __apt_get_noinput python-software-properties
     add-apt-repository -y 'deb http://us.archive.ubuntu.com/ubuntu/ oneiric universe'
@@ -660,7 +671,7 @@ install_ubuntu_git_deps() {
     fi
 }
 
-install_ubuntu_1110_post() {
+install_ubuntu_11_10_post() {
     add-apt-repository -y --remove 'deb http://us.archive.ubuntu.com/ubuntu/ oneiric universe'
 }
 
@@ -748,7 +759,7 @@ install_debian_deps() {
     apt-get update
 }
 
-install_debian_60_deps() {
+install_debian_6_0_deps() {
     echo "deb http://backports.debian.org/debian-backports squeeze-backports main" >> \
         /etc/apt/sources.list.d/backports.list
 
@@ -784,8 +795,8 @@ install_debian_git_deps() {
     fi
 }
 
-install_debian_60_git_deps() {
-    install_debian_60_deps  # Add backports
+install_debian_6_0_git_deps() {
+    install_debian_6_0_deps  # Add backports
     install_debian_git_deps # Grab the actual deps
 }
 
@@ -804,7 +815,7 @@ install_debian_stable() {
 }
 
 
-install_debian_60() {
+install_debian_6_0() {
     install_debian_stable
 }
 
@@ -812,7 +823,7 @@ install_debian_git() {
     python setup.py install --install-layout=deb
 }
 
-install_debian_60_git() {
+install_debian_6_0_git() {
     install_debian_git
 }
 
@@ -1540,8 +1551,10 @@ config_salt() {
 # LET'S PROCEED WITH OUR INSTALLATION
 #=============================================================================
 # Let's get the dependencies install function
-DEP_FUNC_NAMES="install_${DISTRO_NAME_L}${PREFIXED_DISTRO_VERSION_NO_DOTS}_${ITYPE}_deps"
-DEP_FUNC_NAMES="$DEP_FUNC_NAMES install_${DISTRO_NAME_L}${PREFIXED_DISTRO_VERSION_NO_DOTS}_deps"
+DEP_FUNC_NAMES="install_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}_${ITYPE}_deps"
+DEP_FUNC_NAMES="$DEP_FUNC_NAMES install_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}${PREFIXED_DISTRO_MINOR_VERSION}_${ITYPE}_deps"
+DEP_FUNC_NAMES="$DEP_FUNC_NAMES install_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}_deps"
+DEP_FUNC_NAMES="$DEP_FUNC_NAMES install_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}${PREFIXED_DISTRO_MINOR_VERSION}_deps"
 DEP_FUNC_NAMES="$DEP_FUNC_NAMES install_${DISTRO_NAME_L}_${ITYPE}_deps"
 DEP_FUNC_NAMES="$DEP_FUNC_NAMES install_${DISTRO_NAME_L}_deps"
 
@@ -1557,8 +1570,11 @@ done
 # Let's get the minion config function
 CONFIG_SALT_FUNC="null"
 if [ "$TEMP_CONFIG_DIR" != "null" ]; then
-    CONFIG_FUNC_NAMES="config_${DISTRO_NAME_L}${PREFIXED_DISTRO_VERSION_NO_DOTS}_${ITYPE}_salt"
-    CONFIG_FUNC_NAMES="$CONFIG_FUNC_NAMES config_${DISTRO_NAME_L}${PREFIXED_DISTRO_VERSION_NO_DOTS}_salt"
+
+    CONFIG_FUNC_NAMES="config_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}_${ITYPE}_salt"
+    CONFIG_FUNC_NAMES="$CONFIG_FUNC_NAMES config_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}${PREFIXED_DISTRO_MINOR_VERSION}_${ITYPE}_salt"
+    CONFIG_FUNC_NAMES="$CONFIG_FUNC_NAMES config_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}_salt"
+    CONFIG_FUNC_NAMES="$CONFIG_FUNC_NAMES config_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}${PREFIXED_DISTRO_MINOR_VERSION}_salt"
     CONFIG_FUNC_NAMES="$CONFIG_FUNC_NAMES config_${DISTRO_NAME_L}_${ITYPE}_salt"
     CONFIG_FUNC_NAMES="$CONFIG_FUNC_NAMES config_${DISTRO_NAME_L}_salt"
     CONFIG_FUNC_NAMES="$CONFIG_FUNC_NAMES config_salt"
@@ -1573,7 +1589,8 @@ fi
 
 
 # Let's get the install function
-INSTALL_FUNC_NAMES="install_${DISTRO_NAME_L}${PREFIXED_DISTRO_VERSION_NO_DOTS}_${ITYPE}"
+INSTALL_FUNC_NAMES="install_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}_${ITYPE}"
+INSTALL_FUNC_NAMES="$INSTALL_FUNC_NAMES install_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}${PREFIXED_DISTRO_MINOR_VERSION}_${ITYPE}"
 INSTALL_FUNC_NAMES="$INSTALL_FUNC_NAMES install_${DISTRO_NAME_L}_${ITYPE}"
 
 INSTALL_FUNC="null"
@@ -1586,10 +1603,13 @@ done
 
 
 # Let's get the post install function
-POST_FUNC_NAMES="install_${DISTRO_NAME_L}${PREFIXED_DISTRO_VERSION_NO_DOTS}_${ITYPE}_post"
-POST_FUNC_NAMES="$POST_FUNC_NAMES install_${DISTRO_NAME_L}${PREFIXED_DISTRO_VERSION_NO_DOTS}_post"
+POST_FUNC_NAMES="install_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}_${ITYPE}_post"
+POST_FUNC_NAMES="$POST_FUNC_NAMES install_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}${PREFIXED_DISTRO_MINOR_VERSION}_${ITYPE}_post"
+POST_FUNC_NAMES="$POST_FUNC_NAMES install_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}_post"
+POST_FUNC_NAMES="$POST_FUNC_NAMES install_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}${PREFIXED_DISTRO_MINOR_VERSION}_post"
 POST_FUNC_NAMES="$POST_FUNC_NAMES install_${DISTRO_NAME_L}_${ITYPE}_post"
 POST_FUNC_NAMES="$POST_FUNC_NAMES install_${DISTRO_NAME_L}_post"
+
 
 POST_INSTALL_FUNC="null"
 for FUNC_NAME in $POST_FUNC_NAMES; do
@@ -1601,10 +1621,12 @@ done
 
 
 # Let's get the start daemons install function
-STARTDAEMONS_FUNC_NAMES="install_${DISTRO_NAME_L}${PREFIXED_DISTRO_VERSION_NO_DOTS}_${ITYPE}_start_daemons"
-STARTDAEMONS_FUNC_NAMES="$POST_FUNC_NAMES install_${DISTRO_NAME_L}${PREFIXED_DISTRO_VERSION_NO_DOTS}_start_daemons"
-STARTDAEMONS_FUNC_NAMES="$POST_FUNC_NAMES install_${DISTRO_NAME_L}_${ITYPE}_start_daemons"
-STARTDAEMONS_FUNC_NAMES="$POST_FUNC_NAMES install_${DISTRO_NAME_L}_start_daemons"
+STARTDAEMONS_FUNC_NAMES="install_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}_${ITYPE}_start_daemons"
+STARTDAEMONS_FUNC_NAMES="$STARTDAEMONS_FUNC_NAMES install_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}${PREFIXED_DISTRO_MINOR_VERSION}_${ITYPE}_start_daemons"
+STARTDAEMONS_FUNC_NAMES="$STARTDAEMONS_FUNC_NAMES install_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}_start_daemons"
+STARTDAEMONS_FUNC_NAMES="$STARTDAEMONS_FUNC_NAMES install_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}${PREFIXED_DISTRO_MINOR_VERSION}_start_daemons"
+STARTDAEMONS_FUNC_NAMES="$STARTDAEMONS_FUNC_NAMES install_${DISTRO_NAME_L}_${ITYPE}_start_daemons"
+STARTDAEMONS_FUNC_NAMES="$STARTDAEMONS_FUNC_NAMES install_${DISTRO_NAME_L}_start_daemons"
 
 STARTDAEMONS_INSTALL_FUNC="null"
 for FUNC_NAME in $STARTDAEMONS_FUNC_NAMES; do

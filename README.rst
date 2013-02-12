@@ -84,8 +84,10 @@ In order to install salt for a distribution you need to define:
 
 .. code:: bash
 
-  install_<distro>_<distro_version>_<install_type>_deps
-  install_<distro>_<distro_version>_deps
+  install_<distro>_<major_version>_<install_type>_deps
+  install_<distro>_<major_version>_<minor_version>_<install_type>_deps
+  install_<distro>_<major_version>_deps
+  install_<distro>_<major_version>_<minor_version>_deps
   install_<distro>_<install_type>_deps
   install_<distro>_deps
 
@@ -95,18 +97,21 @@ In order to install salt for a distribution you need to define:
 
 .. code:: bash
 
-  config_<distro>_<distro_version>_<install_type>_minion
-  config_<distro>_<distro_version>_minion
-  config_<distro>_<install_type>_minion
-  config_<distro>_minion
-  config_minion [THIS ONE IS ALREADY DEFINED AS THE DEFAULT]
+  config_<distro>_<major_version>_<install_type>_salt
+  config_<distro>_<major_version>_<minor_version>_<install_type>_salt
+  config_<distro>_<major_version>_salt
+  config_<distro>_<major_version>_<minor_version>_salt
+  config_<distro>_<install_type>_salt
+  config_<distro>_salt
+  config_salt [THIS ONE IS ALREADY DEFINED AS THE DEFAULT]
 
 
 3. To install salt, which, of course, is required, one of:
 
 .. code:: bash
 
-  install_<distro>_<distro_version>_<install_type>
+  install_<distro>_<major_version>_<install_type>
+  install_<distro>_<major_version>_<minor_version>_<install_type>
   install_<distro>_<install_type>
 
 
@@ -114,8 +119,10 @@ In order to install salt for a distribution you need to define:
 
 .. code:: bash
 
-  install_<distro>_<distro_versions>_<install_type>_post
-  install_<distro>_<distro_versions>_post
+  install_<distro>_<major_version>_<install_type>_post
+  install_<distro>_<major_version>_<minor_version>_<install_type>_post
+  install_<distro>_<major_version>_post
+  install_<distro>_<major_version>_<minor_version>_post
   install_<distro>_<install_type>_post
   install_<distro>_post
 
@@ -124,8 +131,10 @@ In order to install salt for a distribution you need to define:
 
 .. code:: bash
 
-  install_<distro>_<distro_versions>_<install_type>_start_daemons
-  install_<distro>_<distro_versions>_start_daemons
+  install_<distro>_<major_version>_<install_type>_start_daemons
+  install_<distro>_<major_version>_<minor_version>_<install_type>_start_daemons
+  install_<distro>_<major_version>_start_daemons
+  install_<distro>_<major_version>_<minor_version>_start_daemons
   install_<distro>_<install_type>_start_daemons
   install_<distro>_start_daemons
 
@@ -142,14 +151,14 @@ Below is an example for Ubuntu Oneiric:
 
 .. code:: bash
 
-  install_ubuntu_1110_deps() {
+  install_ubuntu_11_10_deps() {
       apt-get update
       apt-get -y install python-software-properties
       add-apt-repository -y 'deb http://us.archive.ubuntu.com/ubuntu/ oneiric universe'
       add-apt-repository -y ppa:saltstack/salt
   }
 
-  install_ubuntu_1110_post() {
+  install_ubuntu_11_10_post() {
       add-apt-repository -y --remove 'deb http://us.archive.ubuntu.com/ubuntu/ oneiric universe'
   }
 
@@ -158,13 +167,11 @@ Below is an example for Ubuntu Oneiric:
   }
 
 
-Since there is no ``install_ubuntu_1110_stable()`` it defaults to the 
-unspecified version script.
+Since there is no ``install_ubuntu_11_10_stable()`` it defaults to the unspecified version script.
 
-The bootstrapping script must be plain POSIX sh only, **not** bash or another 
-shell script. By design the targeting for each operating system and version is 
-very specific. Assumptions of supported versions or variants should not be 
-made, to avoid failed or broken installations.
+The bootstrapping script must be plain POSIX sh only, **not** bash or another shell script. By 
+design the targeting for each operating system and version is very specific. Assumptions of 
+supported versions or variants should not be made, to avoid failed or broken installations.
 
 Supported Operating Systems
 ---------------------------

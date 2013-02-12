@@ -1384,7 +1384,6 @@ install_freebsd_9x_stable_post() {
         [ $? -eq 1 ] && echo "$enable_string" >> /etc/rc.conf
 
         [ -f /usr/local/etc/salt/${fname}.sample ] && cp /usr/local/etc/salt/${fname}.sample /usr/local/etc/salt/${fname}
-        [ -f /usr/local/etc/salt/${fname}.sample ] && cp /usr/local/etc/salt/${fname}.sample /usr/local/etc/salt/${fname}
 
         if [ $fname = "minion" ] ; then
             grep "salt_minion_paths" /etc/rc.conf >/dev/null 2>&1
@@ -1414,7 +1413,6 @@ install_freebsd_git_post() {
         grep "$enable_string" /etc/rc.conf >/dev/null 2>&1
         [ $? -eq 1 ] && echo "$enable_string" >> /etc/rc.conf
 
-        [ -f /usr/local/etc/salt/${fname}.sample ] && cp /usr/local/etc/salt/${fname}.sample /usr/local/etc/salt/${fname}
         [ -f /usr/local/etc/salt/${fname}.sample ] && cp /usr/local/etc/salt/${fname}.sample /usr/local/etc/salt/${fname}
 
         if [ $fname = "minion" ] ; then

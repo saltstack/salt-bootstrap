@@ -61,7 +61,7 @@ __detect_color_support
 #   DESCRIPTION:  Echo errors to stderr.
 #-------------------------------------------------------------------------------
 echoerror() {
-    echo "${RC} * ERROR${EC}: $@" 1>&2;
+    printf "${RC} * ERROR${EC}: $@\n" 1>&2;
 }
 
 #---  FUNCTION  ----------------------------------------------------------------
@@ -69,7 +69,7 @@ echoerror() {
 #   DESCRIPTION:  Echo information to stdout.
 #-------------------------------------------------------------------------------
 echoinfo() {
-    echo "${GC} *  INFO${EC}: $@";
+    printf "${GC} *  INFO${EC}: $@\n";
 }
 
 #---  FUNCTION  ----------------------------------------------------------------
@@ -78,7 +78,7 @@ echoinfo() {
 #-------------------------------------------------------------------------------
 echodebug() {
     if [ $ECHO_DEBUG -eq $BS_TRUE ]; then
-        echo "${BC} * DEBUG${EC}: $@";
+        printf "${BC} * DEBUG${EC}: $@\n";
     fi
 }
 

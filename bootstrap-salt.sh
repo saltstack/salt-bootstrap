@@ -1299,7 +1299,7 @@ install_arch_start_daemons() {
 #
 #   FreeBSD Install Functions
 #
-install_freebsd_9x_stable_deps() {
+__freebsd_get_packagesite() {
     if [ $CPU_ARCH_L = "amd64" ]; then
         BSD_ARCH="x86:64"
     elif [ $CPU_ARCH_L = "x86_64" ]; then
@@ -1310,11 +1310,17 @@ install_freebsd_9x_stable_deps() {
         BSD_ARCH="x86:32"
     fi
 
-    fetch http://pkgbeta.freebsd.org/freebsd:9:${BSD_ARCH}/latest/Latest/pkg.txz
+    PACKAGESITE=${PACKAGESITE:="http://pkgbeta.freebsd.org/freebsd:9:${BSD_ARCH}/latest"}
+}
+
+install_freebsd_9x_stable_deps() {
+    __freebsd_get_packagesite
+
+    fetch "${PACKAGESITE}/Latest/pkg.txz"
     tar xf ./pkg.txz -s ",/.*/,,g" "*/pkg-static"
     ./pkg-static add ./pkg.txz
     /usr/local/sbin/pkg2ng
-    echo "PACKAGESITE: http://pkgbeta.freebsd.org/freebsd:9:${BSD_ARCH}/latest" > /usr/local/etc/pkg.conf
+    echo "PACKAGESITE: ${PACKAGESITE}" > /usr/local/etc/pkg.conf
 
     /usr/local/sbin/pkg install -y swig
 }
@@ -1328,21 +1334,13 @@ install_freebsd_91_stable_deps() {
 }
 
 install_freebsd_git_deps() {
-    if [ $CPU_ARCH_L = "amd64" ]; then
-        BSD_ARCH="x86:64"
-    elif [ $CPU_ARCH_L = "x86_64" ]; then
-        BSD_ARCH="x86:64"
-    elif [ $CPU_ARCH_L = "i386" ]; then
-        BSD_ARCH="x86:32"
-    elif [ $CPU_ARCH_L = "i686" ]; then
-        BSD_ARCH="x86:32"
-    fi
+    __freebsd_get_packagesite
 
-    fetch http://pkgbeta.freebsd.org/freebsd:9:${BSD_ARCH}/latest/Latest/pkg.txz
+    fetch "${PACKAGESITE}/Latest/pkg.txz"
     tar xf ./pkg.txz -s ",/.*/,,g" "*/pkg-static"
     ./pkg-static add ./pkg.txz
     /usr/local/sbin/pkg2ng
-    echo "PACKAGESITE: http://pkgbeta.freebsd.org/freebsd:9:${BSD_ARCH}/latest" > /usr/local/etc/pkg.conf
+    echo "PACKAGESITE: ${PACKAGESITE}" > /usr/local/etc/pkg.conf
 
     /usr/local/sbin/pkg install -y swig
 

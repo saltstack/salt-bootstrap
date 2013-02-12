@@ -1007,7 +1007,13 @@ install_centos_stable_start_daemons() {
 
 install_centos_git_deps() {
     install_centos_stable_deps
-    yum -y install git PyYAML m2crypto python-crypto python-msgpack python-zmq python-jinja2 --enablerepo=epel-testing
+    if [ $DISTRO_MAJOR_VERSION -eq 5 ]; then
+        yum -y install git PyYAML python26-m2crypto m2crypto python26 python26-crypto \
+            python26-msgpack python26-zmq python26-jinja2 --enablerepo=epel-testing
+    else
+        yum -y install git PyYAML m2crypto python-crypto python-msgpack python-zmq \
+            python-jinja2 --enablerepo=epel-testing
+    fi
 
     __git_clone_and_checkout
 
@@ -1020,10 +1026,11 @@ install_centos_git_deps() {
 }
 
 install_centos_git() {
-    rm -rf /usr/lib/python*/site-packages/salt
-    rm -rf /usr/bin/salt*
-
-    python2 setup.py install
+    if [ $DISTRO_MAJOR_VERSION -eq 5 ]; then
+        python2.6 setup.py install
+    else
+        python2 setup.py install
+    fi
 }
 
 install_centos_git_post() {

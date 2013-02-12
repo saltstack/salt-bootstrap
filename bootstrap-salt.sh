@@ -374,7 +374,9 @@ __gather_linux_system_info() {
         v=$( __parse_version_string "$( (grep VERSION /etc/${rsource}; cat /etc/${rsource}) | grep '[0-9]' | sed -e 'q' )" )
         case $(echo ${n} | tr '[:upper:]' '[:lower:]') in
             redhat )
-                if [ ".$(egrep '(Red Hat Enterprise Linux|CentOS)' /etc/${rsource})" != . ]; then
+                if [ ".$(egrep 'CentOS' /etc/${rsource})" != . ]; then
+                    n="CentOS"
+                elif [ ".$(egrep 'Red Hat Enterprise Linux' /etc/${rsource})" != . ]; then
                     n="<R>ed <H>at <E>nterprise <L>inux"
                 else
                     n="<R>ed <H>at <L>inux"

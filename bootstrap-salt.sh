@@ -10,6 +10,7 @@
 #          BUGS: https://github.com/saltstack/salty-vagrant/issues
 #        AUTHOR: Pedro Algarvio (s0undt3ch), pedro@algarvio.me
 #                Alec Koumjian (akoumjian), akoumjian@gmail.com
+#                Geoff Garside (geoffgarside), geoff@geoffgarside.co.uk
 #       LICENSE: Apache 2.0
 #  ORGANIZATION: Salt Stack (saltstack.org)
 #       CREATED: 10/15/2012 09:49:37 PM WEST
@@ -527,7 +528,7 @@ else
     PREFIXED_DISTRO_VERSION_NO_DOTS="_${DISTRO_VERSION_NO_DOTS}"
 fi
 # Simplify distro name naming on functions
-DISTRO_NAME_L=$(echo $DISTRO_NAME | tr '[:upper:]' '[:lower:]' | sed 's/[^a-zA-Z0-9_ ]//g' | sed -re 's/(\s)+/_/g')
+DISTRO_NAME_L=$(echo $DISTRO_NAME | tr '[:upper:]' '[:lower:]' | sed 's/[^a-zA-Z0-9_ ]//g' | sed -re 's/([[:space:]])+/_/g')
 
 
 # Only Ubuntu has daily packages, let's let users know about that
@@ -1312,7 +1313,7 @@ install_arch_start_daemons() {
 #
 #   FreeBSD Install Functions
 #
-install_freebsd_90_stable_deps() {
+__freebsd_get_packagesite() {
     if [ $CPU_ARCH_L = "amd64" ]; then
         BSD_ARCH="x86:64"
     elif [ $CPU_ARCH_L = "x86_64" ]; then
@@ -1323,31 +1324,37 @@ install_freebsd_90_stable_deps() {
         BSD_ARCH="x86:32"
     fi
 
-    fetch http://pkgbeta.freebsd.org/freebsd:9:${BSD_ARCH}/latest/Latest/pkg.txz
+    BS_PACKAGESITE=${PACKAGESITE:-"http://pkgbeta.freebsd.org/freebsd:9:${BSD_ARCH}/latest"}
+}
+
+install_freebsd_9x_stable_deps() {
+    __freebsd_get_packagesite
+
+    fetch "${BS_PACKAGESITE}/Latest/pkg.txz"
     tar xf ./pkg.txz -s ",/.*/,,g" "*/pkg-static"
     ./pkg-static add ./pkg.txz
     /usr/local/sbin/pkg2ng
-    echo "PACKAGESITE: http://pkgbeta.freebsd.org/freebsd:9:${BSD_ARCH}/latest" > /usr/local/etc/pkg.conf
+    echo "PACKAGESITE: ${BS_PACKAGESITE}" > /usr/local/etc/pkg.conf
 
     /usr/local/sbin/pkg install -y swig
 }
 
-install_freebsd_git_deps() {
-    if [ $CPU_ARCH_L = "amd64" ]; then
-        BSD_ARCH="x86:64"
-    elif [ $CPU_ARCH_L = "x86_64" ]; then
-        BSD_ARCH="x86:64"
-    elif [ $CPU_ARCH_L = "i386" ]; then
-        BSD_ARCH="x86:32"
-    elif [ $CPU_ARCH_L = "i686" ]; then
-        BSD_ARCH="x86:32"
-    fi
+install_freebsd_90_stable_deps() {
+    install_freebsd_9x_stable_deps
+}
 
-    fetch http://pkgbeta.freebsd.org/freebsd:9:${BSD_ARCH}/latest/Latest/pkg.txz
+install_freebsd_91_stable_deps() {
+    install_freebsd_9x_stable_deps
+}
+
+install_freebsd_git_deps() {
+    __freebsd_get_packagesite
+
+    fetch "${BS_PACKAGESITE}/Latest/pkg.txz"
     tar xf ./pkg.txz -s ",/.*/,,g" "*/pkg-static"
     ./pkg-static add ./pkg.txz
     /usr/local/sbin/pkg2ng
-    echo "PACKAGESITE: http://pkgbeta.freebsd.org/freebsd:9:${BSD_ARCH}/latest" > /usr/local/etc/pkg.conf
+    echo "PACKAGESITE: ${BS_PACKAGESITE}" > /usr/local/etc/pkg.conf
 
     /usr/local/sbin/pkg install -y swig
 
@@ -1359,25 +1366,75 @@ install_freebsd_git_deps() {
     fi
 }
 
+install_freebsd_9x_stable() {
+    /usr/local/sbin/pkg install -y sysutils/py-salt
+}
+
 install_freebsd_90_stable() {
-    /usr/local/sbin/pkg install -y salt
+    install_freebsd_9x_stable
+}
+
+install_freebsd_91_stable() {
+    install_freebsd_9x_stable
 }
 
 install_freebsd_git() {
-    /usr/local/sbin/pkg install -y git salt
-    /usr/local/sbin/pkg delete -y salt
+    /usr/local/sbin/pkg install -y git sysutils/py-salt
+    /usr/local/sbin/pkg delete -y sysutils/py-salt
 
     /usr/local/bin/python setup.py install
 }
 
-install_freebsd_90_stable_post__() {
-    # XXX: What needs to be done for init.d support on FreeBSD
-    echo
+install_freebsd_9x_stable_post() {
+    for fname in minion master syndic; do
+
+        # Skip if not meant to be installed
+        [ $fname = "minion" ] && [ $INSTALL_MINION -eq $BS_FALSE ] && continue
+        [ $fname = "master" ] && [ $INSTALL_MASTER -eq $BS_FALSE ] && continue
+        [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq $BS_FALSE ] && continue
+
+        enable_string="salt_${fname}_enable=\"YES\""
+        grep "$enable_string" /etc/rc.conf >/dev/null 2>&1
+        [ $? -eq 1 ] && echo "$enable_string" >> /etc/rc.conf
+
+        [ -f /usr/local/etc/salt/${fname}.sample ] && cp /usr/local/etc/salt/${fname}.sample /usr/local/etc/salt/${fname}
+
+        if [ $fname = "minion" ] ; then
+            grep "salt_minion_paths" /etc/rc.conf >/dev/null 2>&1
+            [ $? -eq 1 ] && echo "salt_minion_paths=\"/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin\"" >> /etc/rc.conf
+        fi
+
+    done
 }
 
-install_freebsd_git_post__() {
-    # XXX: What needs to be done for init.d support on FreeBSD
-    echo
+install_freebsd_90_stable_post() {
+    install_freebsd_9x_stable_post
+}
+
+install_freebsd_91_stable_post() {
+    install_freebsd_9x_stable_post
+}
+
+install_freebsd_git_post() {
+    for fname in minion master syndic; do
+
+        # Skip if not meant to be installed
+        [ $fname = "minion" ] && [ $INSTALL_MINION -eq $BS_FALSE ] && continue
+        [ $fname = "master" ] && [ $INSTALL_MASTER -eq $BS_FALSE ] && continue
+        [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq $BS_FALSE ] && continue
+
+        enable_string="salt_${fname}_enable=\"YES\""
+        grep "$enable_string" /etc/rc.conf >/dev/null 2>&1
+        [ $? -eq 1 ] && echo "$enable_string" >> /etc/rc.conf
+
+        [ -f /usr/local/etc/salt/${fname}.sample ] && cp /usr/local/etc/salt/${fname}.sample /usr/local/etc/salt/${fname}
+
+        if [ $fname = "minion" ] ; then
+            grep "salt_minion_paths" /etc/rc.conf >/dev/null 2>&1
+            [ $? -eq 1 ] && echo "salt_minion_paths=\"/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin\"" >> /etc/rc.conf
+        fi
+
+    done
 }
 
 install_freebsd_start_daemons() {
@@ -1388,7 +1445,8 @@ install_freebsd_start_daemons() {
         [ $fname = "master" ] && [ $INSTALL_MASTER -eq $BS_FALSE ] && continue
         [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq $BS_FALSE ] && continue
 
-        salt-$fname -d &
+        service salt_$fname start &
+
     done
 }
 #

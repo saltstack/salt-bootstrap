@@ -75,7 +75,7 @@ class NonBlockingPopen(subprocess.Popen):
                 self.obuff += obuff
                 sys.stdout.write(obuff)
             except IOError, err:
-                if err.errno != 11:
+                if err.errno not in (11, 35):
                     # We only handle Resource not ready properly, any other
                     # raise the exception
                     raise
@@ -85,7 +85,7 @@ class NonBlockingPopen(subprocess.Popen):
                 self.ebuff += ebuff
                 sys.stderr.write(ebuff)
             except IOError, err:
-                if err.errno != 11:
+                if err.errno not in (11, 35):
                     # We only handle Resource not ready properly, any other
                     # raise the exception
                     raise
@@ -179,14 +179,17 @@ class BootstrapTestCase(TestCase):
                 # process already terminated
                 pass
 
-    def assert_script_result(self, fail_msg, expected_rc, process_details):
+    def assert_script_result(self, fail_msg, expected_rcs, process_details):
+        if not isinstance(expected_rcs, (tuple, list)):
+            expected_rcs = (expected_rcs,)
+
         rc, out, err = process_details
-        if rc != expected_rc:
+        if rc not in expected_rcs:
             err_msg = '{0}:\n'.format(fail_msg)
             if out:
                 err_msg = '{0}STDOUT:\n{1}\n'.format(err_msg, '\n'.join(out))
             if err:
                 err_msg = '{0}STDERR:\n{1}\n'.format(err_msg, '\n'.join(err))
             if not err and not out:
-                err_msg = '{0} No std{out,err} captured.'.format(err_msg)
+                err_msg = '{0} No stdout nor stderr captured.'.format(err_msg)
             raise AssertionError(err_msg.rstrip())

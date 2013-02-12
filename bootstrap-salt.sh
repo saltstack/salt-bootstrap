@@ -1335,10 +1335,10 @@ __freebsd_get_packagesite() {
         BSD_ARCH="x86:32"
     fi
 
-    BS_PACKAGESITE=${PACKAGESITE:-"http://pkgbeta.freebsd.org/freebsd:9:${BSD_ARCH}/latest"}
+    BS_PACKAGESITE=${PACKAGESITE:-"http://pkgbeta.freebsd.org/freebsd:${DISTRO_MAJOR_VERSION}:${BSD_ARCH}/latest"}
 }
 
-install_freebsd_9x_stable_deps() {
+install_freebsd_9_stable_deps() {
     __freebsd_get_packagesite
 
     fetch "${BS_PACKAGESITE}/Latest/pkg.txz"
@@ -1348,14 +1348,6 @@ install_freebsd_9x_stable_deps() {
     echo "PACKAGESITE: ${BS_PACKAGESITE}" > /usr/local/etc/pkg.conf
 
     /usr/local/sbin/pkg install -y swig
-}
-
-install_freebsd_90_stable_deps() {
-    install_freebsd_9x_stable_deps
-}
-
-install_freebsd_91_stable_deps() {
-    install_freebsd_9x_stable_deps
 }
 
 install_freebsd_git_deps() {
@@ -1377,16 +1369,8 @@ install_freebsd_git_deps() {
     fi
 }
 
-install_freebsd_9x_stable() {
+install_freebsd_9_stable() {
     /usr/local/sbin/pkg install -y sysutils/py-salt
-}
-
-install_freebsd_90_stable() {
-    install_freebsd_9x_stable
-}
-
-install_freebsd_91_stable() {
-    install_freebsd_9x_stable
 }
 
 install_freebsd_git() {
@@ -1396,7 +1380,7 @@ install_freebsd_git() {
     /usr/local/bin/python setup.py install
 }
 
-install_freebsd_9x_stable_post() {
+install_freebsd_9_stable_post() {
     for fname in minion master syndic; do
 
         # Skip if not meant to be installed
@@ -1416,14 +1400,6 @@ install_freebsd_9x_stable_post() {
         fi
 
     done
-}
-
-install_freebsd_90_stable_post() {
-    install_freebsd_9x_stable_post
-}
-
-install_freebsd_91_stable_post() {
-    install_freebsd_9x_stable_post
 }
 
 install_freebsd_git_post() {

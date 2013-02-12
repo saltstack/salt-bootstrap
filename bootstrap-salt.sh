@@ -517,7 +517,7 @@ else
     PREFIXED_DISTRO_VERSION_NO_DOTS="_${DISTRO_VERSION_NO_DOTS}"
 fi
 # Simplify distro name naming on functions
-DISTRO_NAME_L=$(echo $DISTRO_NAME | tr '[:upper:]' '[:lower:]' | sed 's/[^a-zA-Z0-9_ ]//g' | sed -re 's/[[:space:]]+/_/g')
+DISTRO_NAME_L=$(echo $DISTRO_NAME | tr '[:upper:]' '[:lower:]' | sed 's/[^a-zA-Z0-9_ ]//g' | sed -re 's/([[:space:]])+/_/g')
 
 
 # Only Ubuntu has daily packages, let's let users know about that

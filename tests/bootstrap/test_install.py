@@ -22,6 +22,10 @@ CLEANUP_COMMANDS_BY_OS_FAMILY = {
     ],
     'RedHat': [
         'yum -y remove salt-minion salt-master'
+    ],
+    'FreeBSD': [
+        'pkg delete -y swig sysutils/py-salt',
+        'pkg autoremove -y'
     ]
 }
 
@@ -43,7 +47,11 @@ class InstallationTestCase(BootstrapTestCase):
             print 'Running cleanup command {0!r}'.format(cleanup)
             self.assert_script_result(
                 'Failed to execute cleanup command {0!r}'.format(cleanup),
-                0,
+                (
+                    0,
+                    65  # FreeBSD throws this error code when the packages being
+                        # un-installed were not installed in the first place
+                ),
                 self.run_script(
                     script=None,
                     args=cleanup.split(),

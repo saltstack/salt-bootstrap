@@ -175,7 +175,11 @@ def os_data():
     #    grains.update(_bsd_cpudata(grains))
     else:
         grains['os'] = grains['kernel']
-    #if grains['kernel'] in ('FreeBSD', 'OpenBSD'):
+    if grains['kernel'] in ('FreeBSD', 'OpenBSD'):
+        grains['os'] = grains['kernel']
+        grains['os_family'] = grains['os']
+        grains['osfullname'] = "{0} {1}".format(grains['kernel'], grains['kernelrelease'])
+        grains['osrelease'] = grains['kernelrelease']
     #    grains.update(_bsd_cpudata(grains))
     if not grains['os']:
         grains['os'] = 'Unknown {0}'.format(grains['kernel'])

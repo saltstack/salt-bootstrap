@@ -19,8 +19,16 @@ ScriptVersion="1.4"
 ScriptName="bootstrap-salt.sh"
 
 #===============================================================================
+#  Environment variables taken into account.
+#-------------------------------------------------------------------------------
+#   * BS_COLORS: If 0 disables colour support
+#===============================================================================
+
+
+#===============================================================================
 #  LET THE BLACK MAGIC BEGIN!!!!
 #===============================================================================
+
 
 # Bootstrap script truth values
 BS_TRUE=1
@@ -30,7 +38,7 @@ BS_FALSE=0
 #          NAME:  __detect_color_support
 #   DESCRIPTION:  Try to detect color support.
 #-------------------------------------------------------------------------------
-COLORS=$(tput colors 2>/dev/null || echo 0)
+COLORS=${BS_COLORS:-$(tput colors 2>/dev/null || echo 0)}
 __detect_color_support() {
     if [ $? -eq 0 ] && [ "$COLORS" -gt 2 ]; then
         RC="\033[1;31m"

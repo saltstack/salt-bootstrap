@@ -1310,17 +1310,17 @@ __freebsd_get_packagesite() {
         BSD_ARCH="x86:32"
     fi
 
-    PACKAGESITE=${PACKAGESITE:="http://pkgbeta.freebsd.org/freebsd:9:${BSD_ARCH}/latest"}
+    BS_PACKAGESITE=${PACKAGESITE:-"http://pkgbeta.freebsd.org/freebsd:9:${BSD_ARCH}/latest"}
 }
 
 install_freebsd_9x_stable_deps() {
     __freebsd_get_packagesite
 
-    fetch "${PACKAGESITE}/Latest/pkg.txz"
+    fetch "${BS_PACKAGESITE}/Latest/pkg.txz"
     tar xf ./pkg.txz -s ",/.*/,,g" "*/pkg-static"
     ./pkg-static add ./pkg.txz
     /usr/local/sbin/pkg2ng
-    echo "PACKAGESITE: ${PACKAGESITE}" > /usr/local/etc/pkg.conf
+    echo "PACKAGESITE: ${BS_PACKAGESITE}" > /usr/local/etc/pkg.conf
 
     /usr/local/sbin/pkg install -y swig
 }
@@ -1336,11 +1336,11 @@ install_freebsd_91_stable_deps() {
 install_freebsd_git_deps() {
     __freebsd_get_packagesite
 
-    fetch "${PACKAGESITE}/Latest/pkg.txz"
+    fetch "${BS_PACKAGESITE}/Latest/pkg.txz"
     tar xf ./pkg.txz -s ",/.*/,,g" "*/pkg-static"
     ./pkg-static add ./pkg.txz
     /usr/local/sbin/pkg2ng
-    echo "PACKAGESITE: ${PACKAGESITE}" > /usr/local/etc/pkg.conf
+    echo "PACKAGESITE: ${BS_PACKAGESITE}" > /usr/local/etc/pkg.conf
 
     /usr/local/sbin/pkg install -y swig
 

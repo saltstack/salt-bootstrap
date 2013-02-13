@@ -800,7 +800,7 @@ install_debian_git_deps() {
 
 install_debian_6_0_git_deps() {
     install_debian_6_0_deps  # Add backports
-    install_debian_git_deps # Grab the actual deps
+    install_debian_git_deps  # Grab the actual deps
 }
 
 install_debian_stable() {
@@ -846,7 +846,7 @@ install_debian_git_post() {
     done
 }
 
-install_debian_git_start_daemons() {
+install_debian_start_daemons() {
     for fname in minion master syndic; do
 
         # Skip if not meant to be installed
@@ -854,6 +854,7 @@ install_debian_git_start_daemons() {
         [ $fname = "master" ] && [ $INSTALL_MASTER -eq $BS_FALSE ] && continue
         [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq $BS_FALSE ] && continue
 
+        /etc/init.d/salt-$fname stop > /dev/null 2>&1
         /etc/init.d/salt-$fname start &
     done
 }

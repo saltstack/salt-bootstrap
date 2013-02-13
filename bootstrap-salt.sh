@@ -724,7 +724,7 @@ install_ubuntu_git_post() {
     done
 }
 
-install_ubuntu_git_start_daemons() {
+install_ubuntu_start_daemons() {
     for fname in minion master syndic; do
 
         # Skip if not meant to be installed

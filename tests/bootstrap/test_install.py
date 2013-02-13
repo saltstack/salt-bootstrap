@@ -298,3 +298,55 @@ class InstallationTestCase(BootstrapTestCase):
             1,
             self.run_script(args=('-C', '-c', '/tmp'))
         )
+
+    def test_install_salt_master(self):
+        '''
+        Test if installing a salt-master works
+        '''
+        self.assert_script_result(
+            'Failed to install salt-master',
+            0,
+            self.run_script(
+                args=('-N', '-M'),
+                timeout=15 * 60,
+                stream_stds=True
+            )
+        )
+
+        # Try to get the versions report
+        self.assert_script_result(
+            'Failed to get the versions report from salt-master',
+            0,
+            self.run_script(
+                script=None,
+                args=('salt-master', '--versions-report'),
+                timeout=15 * 60,
+                stream_stds=True
+            )
+        )
+
+    def test_install_salt_syndic(self):
+        '''
+        Test if installing a salt-syndic works
+        '''
+        self.assert_script_result(
+            'Failed to install salt-syndic',
+            0,
+            self.run_script(
+                args=('-N', '-S'),
+                timeout=15 * 60,
+                stream_stds=True
+            )
+        )
+
+        # Try to get the versions report
+        self.assert_script_result(
+            'Failed to get the versions report from salt-syndic',
+            0,
+            self.run_script(
+                script=None,
+                args=('salt-syndic', '--versions-report'),
+                timeout=15 * 60,
+                stream_stds=True
+            )
+        )

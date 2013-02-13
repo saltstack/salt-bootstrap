@@ -1373,25 +1373,7 @@ install_freebsd_9_stable_post() {
 }
 
 install_freebsd_git_post() {
-    for fname in minion master syndic; do
-
-        # Skip if not meant to be installed
-        [ $fname = "minion" ] && [ $INSTALL_MINION -eq $BS_FALSE ] && continue
-        [ $fname = "master" ] && [ $INSTALL_MASTER -eq $BS_FALSE ] && continue
-        [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq $BS_FALSE ] && continue
-
-        enable_string="salt_${fname}_enable=\"YES\""
-        grep "$enable_string" /etc/rc.conf >/dev/null 2>&1
-        [ $? -eq 1 ] && echo "$enable_string" >> /etc/rc.conf
-
-        [ -f /usr/local/etc/salt/${fname}.sample ] && cp /usr/local/etc/salt/${fname}.sample /usr/local/etc/salt/${fname}
-
-        if [ $fname = "minion" ] ; then
-            grep "salt_minion_paths" /etc/rc.conf >/dev/null 2>&1
-            [ $? -eq 1 ] && echo "salt_minion_paths=\"/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin\"" >> /etc/rc.conf
-        fi
-
-    done
+    install_freebsd_9_stable_post
 }
 
 install_freebsd_start_daemons() {

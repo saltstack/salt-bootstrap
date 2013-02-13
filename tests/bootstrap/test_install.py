@@ -48,9 +48,13 @@ class InstallationTestCase(BootstrapTestCase):
             self.assert_script_result(
                 'Failed to execute cleanup command {0!r}'.format(cleanup),
                 (
-                    0,
-                    65  # FreeBSD throws this error code when the packages being
-                        # un-installed were not installed in the first place
+                    0,   # Proper exit code without errors.
+
+                    65,  # FreeBSD throws this error code when the packages
+                         # being un-installed were not installed in the first
+                         # place.
+
+                    100  # Same as above but on Ubuntu with a another errno
                 ),
                 self.run_script(
                     script=None,

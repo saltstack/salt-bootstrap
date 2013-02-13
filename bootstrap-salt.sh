@@ -736,17 +736,17 @@ install_ubuntu_git_start_daemons() {
             # We have upstart support
             /sbin/initctl status salt-$fname > /dev/null 2>&1
             if [ $? -eq 0 ]; then
-                # upstart knows about this service
-                /sbin/initctl restart salt-$fname > /dev/null 2>&1
-                # Restart service
-                [ $? -eq 0 ] && continue
-                # Service was not running, let's try starting it
+                # upstart knows about this service, let's stop and start it.
+                # We could restart but earlier versions of the upstart script
+                # did not support restart, so, it's safer this way
+                /sbin/initctl stop salt-$fname > /dev/null 2>&1
                 /sbin/initctl start salt-$fname > /dev/null 2>&1
                 [ $? -eq 0 ] && continue
                 # We failed to start the service, let's test the SysV code bellow
             fi
         fi
-        /etc/init.d/salt-$fname restart &
+        /etc/init.d/salt-$fname stop > /dev/null 2>&1
+        /etc/init.d/salt-$fname start &
     done
 }
 #

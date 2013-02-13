@@ -915,7 +915,7 @@ install_fedora_git_post() {
     done
 }
 
-install_fedora_git_start_daemons() {
+install_fedora_start_daemons() {
     for fname in minion master syndic; do
 
         # Skip if not meant to be installed
@@ -923,7 +923,8 @@ install_fedora_git_start_daemons() {
         [ $fname = "master" ] && [ $INSTALL_MASTER -eq $BS_FALSE ] && continue
         [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq $BS_FALSE ] && continue
 
-        systemctl try-restart salt-$fname.service
+        systemctl stop salt-$fname > /dev/null 2>&1
+        systemctl start salt-$fname.service
     done
 }
 #

@@ -95,8 +95,20 @@ class NonBlockingPopen(subprocess.Popen):
             return poll
 
         # Allow the same attribute access even though not streaming to stds
-        self.obuff = self.stdout.read()
-        self.ebuff = self.stderr.read()
+        try:
+            self.obuff = self.stdout.read()
+        except IOError, err:
+            if err.errno not in (11, 35):
+                # We only handle Resource not ready properly, any other
+                # raise the exception
+                raise
+        try:
+            self.ebuff = self.stderr.read()
+        except IOError, err:
+            if err.errno not in (11, 35):
+                # We only handle Resource not ready properly, any other
+                # raise the exception
+                raise
         return poll
 
 

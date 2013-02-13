@@ -664,9 +664,6 @@ __apt_get_noinput() {
 #       NOTE: The start daemons function should be able to restart any daemons
 #             which are running, or start if they're not running.
 #
-#       NOTE: The start daemons function should be able to restart any daemons
-#             which are running, or start if they're not running.
-#
 ##############################################################################
 
 ##############################################################################

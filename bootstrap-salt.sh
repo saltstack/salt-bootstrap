@@ -1479,7 +1479,8 @@ install_smartos_start_daemons() {
         [ $fname = "master" ] && [ $INSTALL_MASTER -eq $BS_FALSE ] && continue
         [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq $BS_FALSE ] && continue
 
-        # Start services
+        # Stop if running && Start service
+        svcadm disable salt-$fname > /dev/null 2>&1
         svcadm enable salt-$fname
     done
 }

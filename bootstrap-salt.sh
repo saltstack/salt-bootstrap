@@ -1402,8 +1402,8 @@ install_freebsd_start_daemons() {
         [ $fname = "master" ] && [ $INSTALL_MASTER -eq $BS_FALSE ] && continue
         [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq $BS_FALSE ] && continue
 
+        service salt_$fname stop > /dev/null 2>&1
         service salt_$fname start &
-
     done
 }
 #

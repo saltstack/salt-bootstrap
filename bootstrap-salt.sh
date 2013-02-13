@@ -978,35 +978,6 @@ install_centos_stable_post() {
     done
 }
 
-install_centos_stable_start_daemons() {
-    for fname in minion master syndic; do
-        # Skip if not meant to be installed
-        [ $fname = "minion" ] && [ $INSTALL_MINION -eq $BS_FALSE ] && continue
-        [ $fname = "master" ] && [ $INSTALL_MASTER -eq $BS_FALSE ] && continue
-        [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq $BS_FALSE ] && continue
-
-        if [ -f /sbin/initctl ]; then
-            # We have upstart support
-            /sbin/initctl status salt-$fname > /dev/null 2>&1
-            if [ $? -eq 0 ]; then
-                # upstart knows about this service
-                /sbin/initctl restart salt-$fname > /dev/null 2>&1
-                # Restart service
-                [ $? -eq 0 ] && continue
-                # Service was not running, let's try starting it
-                /sbin/initctl start salt-$fname > /dev/null 2>&1
-                [ $? -eq 0 ] && continue
-                # We failed to start the service, let's test the SysV code bellow
-            fi
-        fi
-
-        if [ -f /etc/init.d/salt-$fname ]; then
-            # Still in SysV init!?
-            /etc/init.d/salt-$fname start &
-        fi
-    done
-}
-
 install_centos_git_deps() {
     install_centos_stable_deps
     if [ $DISTRO_MAJOR_VERSION -eq 5 ]; then
@@ -1059,9 +1030,8 @@ install_centos_git_post() {
     done
 }
 
-install_centos_git_start_daemons() {
-    for fname in master minion syndic; do
-
+install_centos_start_daemons() {
+    for fname in minion master syndic; do
         # Skip if not meant to be installed
         [ $fname = "minion" ] && [ $INSTALL_MINION -eq $BS_FALSE ] && continue
         [ $fname = "master" ] && [ $INSTALL_MASTER -eq $BS_FALSE ] && continue
@@ -1071,19 +1041,21 @@ install_centos_git_start_daemons() {
             # We have upstart support
             /sbin/initctl status salt-$fname > /dev/null 2>&1
             if [ $? -eq 0 ]; then
-                # upstart knows about this service
-                /sbin/initctl restart salt-$fname > /dev/null 2>&1
-                # Restart service
-                [ $? -eq 0 ] && continue
-                # Service was not running, let's try starting it
+                # upstart knows about this service.
+                # Let's try to stop it, and then start it
+                /sbin/initctl stop salt-$fname > /dev/null 2>&1
                 /sbin/initctl start salt-$fname > /dev/null 2>&1
+                # Restart service
                 [ $? -eq 0 ] && continue
                 # We failed to start the service, let's test the SysV code bellow
             fi
         fi
 
-        # Still in SysV init?!
-        /etc/init.d/salt-${fname} start &
+        if [ -f /etc/init.d/salt-$fname ]; then
+            # Still in SysV init!?
+            /etc/init.d/salt-$fname stop > /dev/null 2>&1
+            /etc/init.d/salt-$fname start &
+        fi
     done
 }
 #
@@ -1131,16 +1103,12 @@ install_red_hat_linux_stable_post() {
     install_centos_stable_post
 }
 
-install_red_hat_linux_stable_start_daemons() {
-    install_centos_stable_start_daemons
+install_red_hat_linux_start_daemons() {
+    install_centos_start_daemons
 }
 
 install_red_hat_linux_git_post() {
     install_centos_git_post
-}
-
-install_red_hat_linux_git_start_daemons() {
-    install_centos_git_start_daemons
 }
 
 
@@ -1148,16 +1116,12 @@ install_red_hat_enterprise_linux_stable_post() {
     install_red_hat_linux_stable_post
 }
 
-install_red_hat_enterprise_linux_stable_start_daemons() {
-    install_red_hat_linux_stable_start_daemons
+install_red_hat_enterprise_linux_start_daemons() {
+    install_red_hat_linux_start_daemons
 }
 
 install_red_hat_enterprise_linux_git_post() {
     install_red_hat_linux_git_post
-}
-
-install_red_hat_enterprise_linux_git_start_daemons() {
-    install_red_hat_linux_git_start_daemons
 }
 #
 #   Ended RedHat Install Functions
@@ -1202,8 +1166,8 @@ install_amazon_linux_ami_stable_post() {
     install_centos_stable_post
 }
 
-install_amazon_linux_ami_stable_start_daemons() {
-    install_centos_stable_start_daemons
+install_amazon_linux_ami_start_daemons() {
+    install_centos_start_daemons
 }
 
 install_amazon_linux_ami_git() {
@@ -1212,10 +1176,6 @@ install_amazon_linux_ami_git() {
 
 install_amazon_linux_ami_git_post() {
     install_centos_git_post
-}
-
-install_amazon_linux_ami_git_start_daemons() {
-    install_centos_git_start_daemons
 }
 #
 #   Ended Amazon Linux AMI Install Functions

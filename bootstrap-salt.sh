@@ -366,17 +366,13 @@ __gather_linux_system_info() {
     DISTRO_VERSION=""
 
     if [ -f /etc/lsb-release ]; then
-    #if [ $(lsb_release -a | grep Descr | awk '{ print $2 }') = "SUSE" ]; then
-     #   DISTRO_NAME="suse"
-     #   DISTRO_VERSION=$(lsb_release -a | grep Rel | awk '{ print $2}')
-#	else 
         DISTRO_NAME=$(grep DISTRIB_ID /etc/lsb-release | sed -e 's/.*=//')
         DISTRO_VERSION=$(__parse_version_string $(grep DISTRIB_RELEASE /etc/lsb-release | sed -e 's/.*=//'))
         fi
- #   fi
     if [ -f /etc/SuSE-release ]; then
           DISTRO_NAME="suse"
 	  DISRTRO_VERSION=$(grep VERSION /etc/SuSE-release | awk '{ print $3}'
+    fi
    if [ "x$DISTRO_NAME" != "x" ] && [ "x$DISTRO_VERSION" != "x" ]; then
         # We already have the distribution name and version
         return

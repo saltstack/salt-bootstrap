@@ -366,15 +366,18 @@ __gather_linux_system_info() {
     DISTRO_VERSION=""
 
     if [ -f /etc/lsb-release ]; then
-    if [ $(lsb_release -a | grep Descr | awk '{ print $2 }') = "SUSE" ]; then
-        DISTRO_NAME="suse"
-        DISTRO_VERSION="$(lsb_release -a | grep Rel | awk '{ print $2}')"
-	else 
+    #if [ $(lsb_release -a | grep Descr | awk '{ print $2 }') = "SUSE" ]; then
+     #   DISTRO_NAME="suse"
+     #   DISTRO_VERSION=$(lsb_release -a | grep Rel | awk '{ print $2}')
+#	else 
         DISTRO_NAME=$(grep DISTRIB_ID /etc/lsb-release | sed -e 's/.*=//')
         DISTRO_VERSION=$(__parse_version_string $(grep DISTRIB_RELEASE /etc/lsb-release | sed -e 's/.*=//'))
         fi
-    fi
-    if [ "x$DISTRO_NAME" != "x" ] && [ "x$DISTRO_VERSION" != "x" ]; then
+ #   fi
+    if [ -f /etc/SuSE-release ]; then
+          DISTRO_NAME="suse"
+	  DISRTRO_VERSION=$(grep VERSION /etc/SuSE-release | awk '{ print $3}'
+   if [ "x$DISTRO_NAME" != "x" ] && [ "x$DISTRO_VERSION" != "x" ]; then
         # We already have the distribution name and version
         return
     fi
@@ -1512,9 +1515,7 @@ install_smartos_start_daemons() {
 #
 #
 install_suse_11_stable(){
-if [ -f /usr/local/bin/salt ]; then
-echo -e " "
-else
+if [ ! -f /usr/local/bin/salt ]; then
 pip install -U salt
 fi
 }
@@ -1523,13 +1524,9 @@ install_suse_11_deps() {
 if [ $(zypper if gcc-c++ python-devel libopenssl-devel zlib-devel swig git | grep Installed | grep Yes | wc -l) -lt 6 ]; then
 
 zypper in gcc-c++ python-devel libopenssl-devel zlib-devel swig git
-else
-echo -e " "
 fi
 
-if [ $(zypper search zeromq | grep zeromq | awk '{ print $1 }') = "i" ]; then
-echo -e " "
-else
+if [ $(zypper search zeromq | grep zeromq | awk '{ print $1 }') != "i" ]; then
 zypper -p http://download.opensuse.org/repositories/home:/fengshuo:/zeromq/SLE_11_SP1/ -v in zeromq
 fi
 }
@@ -1553,18 +1550,14 @@ pip install PyYAML M2Crypto pycrypto msgpack-python pyzmq jinja2
 fi
 }
 install_suse_11_git(){
-if [ -f /usr/local/bin/salt ]; then
-echo -e " "
-else
+if [ ! -f /usr/local/bin/salt ]; then
 install_suse_11_git_deps
 __git_clone_and_checkout
 python setup.py install
 fi
 }
 install_suse_11_post(){
-if [ -f /etc/init.d/salt-master ]; then
-echo -e " "
-else
+if [ ! -f /etc/init.d/salt-master ]; then
 if [ $INSTALL_MASTER = 1 ]; then
 curl https://raw.github.com/ixela/salt/develop/pkg/rpm/salt-master > /etc/init.d/salt-master
 chmod +x /etc/init.d/salt-master
@@ -1572,9 +1565,7 @@ chmod +x /etc/init.d/salt-master
 /sbin/chkconfig salt-master on
 fi
 fi
-if [ -f /etc/init.d/salt-minion ]; then
-echo " "
-else
+if [ ! -f /etc/init.d/salt-minion ]; then
 if [ $INSTALL_MINION = 1 ]; then
 curl https://raw.github.com/ixela/salt/develop/pkg/rpm/salt-minion > /etc/init.d/salt-minion
 chmod +x /etc/init.d/salt-minion

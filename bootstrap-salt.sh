@@ -368,9 +368,12 @@ __gather_linux_system_info() {
     if [ -f /etc/lsb-release ]; then
         DISTRO_NAME=$(grep DISTRIB_ID /etc/lsb-release | sed -e 's/.*=//')
         DISTRO_VERSION=$(__parse_version_string $(grep DISTRIB_RELEASE /etc/lsb-release | sed -e 's/.*=//'))
+        fi
+    if [ -f /etc/SuSE-release ]; then
+          DISTRO_NAME="suse"
+	  DISRTRO_VERSION=$(grep VERSION /etc/SuSE-release | awk '{ print $3}'
     fi
-
-    if [ "x$DISTRO_NAME" != "x" ] && [ "x$DISTRO_VERSION" != "x" ]; then
+   if [ "x$DISTRO_NAME" != "x" ] && [ "x$DISTRO_VERSION" != "x" ]; then
         # We already have the distribution name and version
         return
     fi
@@ -1503,7 +1506,81 @@ install_smartos_start_daemons() {
 #   Ended SmartOS Install Functions
 #
 ##############################################################################
+##############################################################################
+# Install salt for Suse Linux Enterprise Server 11. Installs from pip, not git.
+#
+#
+install_suse_11_stable(){
+if [ ! -f /usr/local/bin/salt ]; then
+pip install -U salt
+fi
+}
+install_suse_11_deps() {
 
+if [ $(zypper if gcc-c++ python-devel libopenssl-devel zlib-devel swig git | grep Installed | grep Yes | wc -l) -lt 6 ]; then
+
+zypper in gcc-c++ python-devel libopenssl-devel zlib-devel swig git
+fi
+
+if [ $(zypper search zeromq | grep zeromq | awk '{ print $1 }') != "i" ]; then
+zypper -p http://download.opensuse.org/repositories/home:/fengshuo:/zeromq/SLE_11_SP1/ -v in zeromq
+fi
+}
+install_suse_11_stable_deps(){
+install_suse_11_deps
+if [ -f /usr/local/bin/pip ]; then
+	echo  " "
+else
+curl http://python-distribute.org/distribute_setup.py | python
+curl https://raw.github.com/pypa/pip/master/contrib/get-pip.py | python
+rm distribute-*.*.*.tar.gz
+fi
+
+}
+install_suse_11_git_deps(){
+install_suse_11_stable_deps
+if [ $(pip search PyYAML M2Crypto pycrypto msgpack-python pyzmq jinja2 | grep INSTALLED | wc -l) -eq 6 ]; then
+echo " "
+else
+pip install PyYAML M2Crypto pycrypto msgpack-python pyzmq jinja2
+fi
+}
+install_suse_11_git(){
+if [ ! -f /usr/local/bin/salt ]; then
+install_suse_11_git_deps
+__git_clone_and_checkout
+python setup.py install
+fi
+}
+install_suse_11_post(){
+if [ ! -f /etc/init.d/salt-master ]; then
+if [ $INSTALL_MASTER = 1 ]; then
+curl https://raw.github.com/ixela/salt/develop/pkg/rpm/salt-master > /etc/init.d/salt-master
+chmod +x /etc/init.d/salt-master
+/sbin/chkconfig --add salt-master
+/sbin/chkconfig salt-master on
+fi
+fi
+if [ ! -f /etc/init.d/salt-minion ]; then
+if [ $INSTALL_MINION = 1 ]; then
+curl https://raw.github.com/ixela/salt/develop/pkg/rpm/salt-minion > /etc/init.d/salt-minion
+chmod +x /etc/init.d/salt-minion
+/sbin/chkconfig --add salt-minion
+/sbin/chkconfig salt-minion on
+fi
+fi
+}
+
+install_suse_11_git_post(){
+install_suse_11_post
+}
+install_suse_11_stable_post(){
+install_suse_11_post
+}
+#
+#
+#
+##############################################################################
 ##############################################################################
 #
 #   Default minion configuration function. Matches ANY distribution as long as

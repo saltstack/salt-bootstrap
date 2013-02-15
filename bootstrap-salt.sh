@@ -109,7 +109,7 @@ usage() {
   -v  Display script version
   -n  No colours.
   -D  Show debug output.
-  -c  Temporary minion configuration directory
+  -c  Temporary configuration directory
   -M  Also install salt-master
   -S  Also install salt-syndic
   -N  Do not install salt-minion

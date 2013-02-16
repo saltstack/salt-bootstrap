@@ -560,9 +560,15 @@ if [ "x${DISTRO_VERSION}" = "x" ]; then
     PREFIXED_DISTRO_MINOR_VERSION=""
 else
     DISTRO_MAJOR_VERSION="$(echo $DISTRO_VERSION | sed 's/^\([0-9]*\).*/\1/g')"
-    DISTRO_MINOR_VERSION="$(echo $DISTRO_VERSION | sed 's/^\([0-9]*\)\.\([0-9]*\).*/\2/g')"
+    DISTRO_MINOR_VERSION="$(echo $DISTRO_VERSION | sed 's/^\([0-9]*\).\([0-9]*\).*/\2/g')"
     PREFIXED_DISTRO_MAJOR_VERSION="_${DISTRO_MAJOR_VERSION}"
+    if [ "${PREFIXED_DISTRO_MAJOR_VERSION}" = "_" ]; then
+        PREFIXED_DISTRO_MAJOR_VERSION=""
+    fi
     PREFIXED_DISTRO_MINOR_VERSION="_${DISTRO_MINOR_VERSION}"
+    if [ "${PREFIXED_DISTRO_MINOR_VERSION}" = "_" ]; then
+        PREFIXED_DISTRO_MINOR_VERSION=""
+    fi
 fi
 # Simplify distro name naming on functions
 DISTRO_NAME_L=$(echo $DISTRO_NAME | tr '[:upper:]' '[:lower:]' | sed 's/[^a-zA-Z0-9_ ]//g' | sed -re 's/([[:space:]])+/_/g')

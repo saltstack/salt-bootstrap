@@ -131,12 +131,12 @@ In order to install salt for a distribution you need to define:
 
 .. code:: bash
 
-  install_<distro>_<major_version>_<install_type>_start_daemons
-  install_<distro>_<major_version>_<minor_version>_<install_type>_start_daemons
-  install_<distro>_<major_version>_start_daemons
-  install_<distro>_<major_version>_<minor_version>_start_daemons
-  install_<distro>_<install_type>_start_daemons
-  install_<distro>_start_daemons
+  install_<distro>_<major_version>_<install_type>_restart_daemons
+  install_<distro>_<major_version>_<minor_version>_<install_type>_restart_daemons
+  install_<distro>_<major_version>_restart_daemons
+  install_<distro>_<major_version>_<minor_version>_restart_daemons
+  install_<distro>_<install_type>_restart_daemons
+  install_<distro>_restart_daemons
 
 
 .. admonition:: Attention!
@@ -164,6 +164,32 @@ Below is an example for Ubuntu Oneiric:
 
   install_ubuntu_stable() {
       apt-get -y install salt-minion
+  }
+
+  install_ubuntu_restart_daemons() {
+      for fname in minion master syndic; do
+
+          # Skip if not meant to be installed
+          [ $fname = "minion" ] && [ $INSTALL_MINION -eq $BS_FALSE ] && continue
+          [ $fname = "master" ] && [ $INSTALL_MASTER -eq $BS_FALSE ] && continue
+          [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq $BS_FALSE ] && continue
+
+          if [ -f /sbin/initctl ]; then
+              # We have upstart support
+              /sbin/initctl status salt-$fname > /dev/null 2>&1
+              if [ $? -eq 0 ]; then
+                  # upstart knows about this service, let's stop and start it.
+                  # We could restart but earlier versions of the upstart script
+                  # did not support restart, so, it's safer this way
+                  /sbin/initctl stop salt-$fname > /dev/null 2>&1
+                  /sbin/initctl start salt-$fname > /dev/null 2>&1
+                  [ $? -eq 0 ] && continue
+                  # We failed to start the service, let's test the SysV code bellow
+              fi
+          fi
+          /etc/init.d/salt-$fname stop > /dev/null 2>&1
+          /etc/init.d/salt-$fname start &
+      done
   }
 
 

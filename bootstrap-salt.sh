@@ -660,12 +660,12 @@ __apt_get_noinput() {
 #       6. install_<distro>_post
 #
 #   Optionally, define a start daemons function, one of:
-#       1. install_<distro>_<major_version>_<install_type>_start_daemons
-#       2. install_<distro>_<major_version>_<minor_version>_<install_type>_start_daemons
-#       3. install_<distro>_<major_version>_start_daemons
-#       4  install_<distro>_<major_version>_<minor_version>_start_daemons
-#       5. install_<distro>_<install_type>_start_daemons
-#       6. install_<distro>_start_daemons
+#       1. install_<distro>_<major_version>_<install_type>_restart_daemons
+#       2. install_<distro>_<major_version>_<minor_version>_<install_type>_restart_daemons
+#       3. install_<distro>_<major_version>_restart_daemons
+#       4  install_<distro>_<major_version>_<minor_version>_restart_daemons
+#       5. install_<distro>_<install_type>_restart_daemons
+#       6. install_<distro>_restart_daemons
 #
 #       NOTE: The start daemons function should be able to restart any daemons
 #             which are running, or start if they're not running.
@@ -763,7 +763,7 @@ install_ubuntu_git_post() {
     done
 }
 
-install_ubuntu_start_daemons() {
+install_ubuntu_restart_daemons() {
     for fname in minion master syndic; do
 
         # Skip if not meant to be installed
@@ -885,7 +885,7 @@ install_debian_git_post() {
     done
 }
 
-install_debian_start_daemons() {
+install_debian_restart_daemons() {
     for fname in minion master syndic; do
 
         # Skip if not meant to be installed
@@ -954,7 +954,7 @@ install_fedora_git_post() {
     done
 }
 
-install_fedora_start_daemons() {
+install_fedora_restart_daemons() {
     for fname in minion master syndic; do
 
         # Skip if not meant to be installed
@@ -1069,7 +1069,7 @@ install_centos_git_post() {
     done
 }
 
-install_centos_start_daemons() {
+install_centos_restart_daemons() {
     for fname in minion master syndic; do
         # Skip if not meant to be installed
         [ $fname = "minion" ] && [ $INSTALL_MINION -eq $BS_FALSE ] && continue
@@ -1142,8 +1142,8 @@ install_red_hat_linux_stable_post() {
     install_centos_stable_post
 }
 
-install_red_hat_linux_start_daemons() {
-    install_centos_start_daemons
+install_red_hat_linux_restart_daemons() {
+    install_centos_restart_daemons
 }
 
 install_red_hat_linux_git_post() {
@@ -1155,8 +1155,8 @@ install_red_hat_enterprise_linux_stable_post() {
     install_red_hat_linux_stable_post
 }
 
-install_red_hat_enterprise_linux_start_daemons() {
-    install_red_hat_linux_start_daemons
+install_red_hat_enterprise_linux_restart_daemons() {
+    install_red_hat_linux_restart_daemons
 }
 
 install_red_hat_enterprise_linux_git_post() {
@@ -1205,8 +1205,8 @@ install_amazon_linux_ami_stable_post() {
     install_centos_stable_post
 }
 
-install_amazon_linux_ami_start_daemons() {
-    install_centos_start_daemons
+install_amazon_linux_ami_restart_daemons() {
+    install_centos_restart_daemons
 }
 
 install_amazon_linux_ami_git() {
@@ -1307,7 +1307,7 @@ install_arch_git_post() {
     done
 }
 
-install_arch_start_daemons() {
+install_arch_restart_daemons() {
     for fname in minion master syndic; do
 
         # Skip if not meant to be installed
@@ -1415,7 +1415,7 @@ install_freebsd_git_post() {
     install_freebsd_9_stable_post
 }
 
-install_freebsd_start_daemons() {
+install_freebsd_restart_daemons() {
     for fname in minion master syndic; do
 
         # Skip if not meant to be installed
@@ -1492,7 +1492,7 @@ install_smartos_post() {
     done
 }
 
-install_smartos_start_daemons() {
+install_smartos_restart_daemons() {
     for fname in minion master syndic; do
 
         # Skip if not meant to be installed
@@ -1654,12 +1654,12 @@ done
 
 
 # Let's get the start daemons install function
-STARTDAEMONS_FUNC_NAMES="install_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}_${ITYPE}_start_daemons"
-STARTDAEMONS_FUNC_NAMES="$STARTDAEMONS_FUNC_NAMES install_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}${PREFIXED_DISTRO_MINOR_VERSION}_${ITYPE}_start_daemons"
-STARTDAEMONS_FUNC_NAMES="$STARTDAEMONS_FUNC_NAMES install_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}_start_daemons"
-STARTDAEMONS_FUNC_NAMES="$STARTDAEMONS_FUNC_NAMES install_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}${PREFIXED_DISTRO_MINOR_VERSION}_start_daemons"
-STARTDAEMONS_FUNC_NAMES="$STARTDAEMONS_FUNC_NAMES install_${DISTRO_NAME_L}_${ITYPE}_start_daemons"
-STARTDAEMONS_FUNC_NAMES="$STARTDAEMONS_FUNC_NAMES install_${DISTRO_NAME_L}_start_daemons"
+STARTDAEMONS_FUNC_NAMES="install_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}_${ITYPE}_restart_daemons"
+STARTDAEMONS_FUNC_NAMES="$STARTDAEMONS_FUNC_NAMES install_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}${PREFIXED_DISTRO_MINOR_VERSION}_${ITYPE}_restart_daemons"
+STARTDAEMONS_FUNC_NAMES="$STARTDAEMONS_FUNC_NAMES install_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}_restart_daemons"
+STARTDAEMONS_FUNC_NAMES="$STARTDAEMONS_FUNC_NAMES install_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}${PREFIXED_DISTRO_MINOR_VERSION}_restart_daemons"
+STARTDAEMONS_FUNC_NAMES="$STARTDAEMONS_FUNC_NAMES install_${DISTRO_NAME_L}_${ITYPE}_restart_daemons"
+STARTDAEMONS_FUNC_NAMES="$STARTDAEMONS_FUNC_NAMES install_${DISTRO_NAME_L}_restart_daemons"
 
 STARTDAEMONS_INSTALL_FUNC="null"
 for FUNC_NAME in $STARTDAEMONS_FUNC_NAMES; do

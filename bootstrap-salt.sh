@@ -367,7 +367,8 @@ __gather_linux_system_info() {
 
     if [ -f /etc/lsb-release ]; then
         DISTRO_NAME=$(grep DISTRIB_ID /etc/lsb-release | sed -e 's/.*=//')
-        DISTRO_VERSION=$(__parse_version_string $(grep DISTRIB_RELEASE /etc/lsb-release | sed -e 's/.*=//'))
+        rv=$(grep DISTRIB_RELEASE /etc/lsb-release | sed -e 's/.*=//')
+        [ "${rv}x" != "x" ] && DISTRO_VERSION=$(__parse_version_string "$rv")
     fi
 
     if [ "x$DISTRO_NAME" != "x" ] && [ "x$DISTRO_VERSION" != "x" ]; then
@@ -385,7 +386,9 @@ __gather_linux_system_info() {
         [ ! -f "/etc/${rsource}" ] && continue      # Does not exist
 
         n=$(echo ${rsource} | sed -e 's/[_-]release$//' -e 's/[_-]version$//')
-        v=$( __parse_version_string "$( (grep VERSION /etc/${rsource}; cat /etc/${rsource}) | grep '[0-9]' | sed -e 'q' )" )
+        rv=$( (grep VERSION /etc/${rsource}; cat /etc/${rsource}) | grep '[0-9]' | sed -e 'q' )
+        [ "${rv}x" = "x" ] && continue  # There's no version information. Continue to next rsource
+        v=$(__parse_version_string "$rv")
         case $(echo ${n} | tr '[:upper:]' '[:lower:]') in
             redhat )
                 if [ ".$(egrep 'CentOS' /etc/${rsource})" != . ]; then

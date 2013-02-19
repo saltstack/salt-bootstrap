@@ -210,6 +210,7 @@ Supported Operating Systems
 - Arch
 - FreeBSD 9.0
 - SmartOS
+- SuSE 11
 
 
 

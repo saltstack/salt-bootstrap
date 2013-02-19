@@ -420,6 +420,9 @@ __gather_linux_system_info() {
                     esac
                 done < /etc/${rsource}
                 ;;
+            os                 )
+                n=$(grep '^NAME=' /etc/os-release | sed -e 's/^NAME=\(.*\)$/\1/g')
+                ;;
             *                  ) n="${n}"           ;
         esac
         DISTRO_NAME=$n

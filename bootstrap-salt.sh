@@ -1804,3 +1804,4 @@ if [ $CONFIG_ONLY -eq $BS_FALSE ]; then
 else
     echoinfo "Salt configured"
 fi
+exit 0

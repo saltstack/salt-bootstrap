@@ -677,7 +677,65 @@ __apt_get_noinput() {
 #             which are running, or start if they're not running.
 #
 ##############################################################################
-
+##############################################################################
+# Install salt for Suse Linux Enterprise Server 11. Installs from pip, not git.
+#
+#
+install_suse_11_stable(){
+pip install -U salt
+}
+install_suse_11_deps() {
+zypper in gcc-c++ python-devel libopenssl-devel zlib-devel swig git
+zypper -p http://download.opensuse.org/repositories/home:/fengshuo:/zeromq/SLE_11_SP1/ -v in zeromq
+}
+install_suse_11_stable_deps(){
+install_suse_11_deps
+if [ ! -f /usr/local/bin/pip ]; then
+curl http://python-distribute.org/distribute_setup.py | python
+curl https://raw.github.com/pypa/pip/master/contrib/get-pip.py | python
+rm distribute-*.*.*.tar.gz
+fi
+pip install PyYAML M2Crypto pycrypto msgpack-python pyzmq jinja2fi
+}
+install_suse_11_git_deps(){
+install_suse_11_stable_deps
+pip install PyYAML M2Crypto pycrypto msgpack-python pyzmq jinja2
+}
+install_suse_11_git(){
+install_suse_11_git_deps
+__git_clone_and_checkout
+python setup.py install
+}
+install_suse_11_post(){
+if [ $INSTALL_MASTER = 1 ]; then
+$tempfile=$(mktemp)
+curl https://raw.github.com/saltstack/salt/develop/pkg/rpm/salt-master > $tempfile
+sed 's/SALTMASTER=\/usr\/bin\/salt-master/SALTMASTER=\/usr\/local\/bin\/salt-master/g' $tempfile > /etc/init.d/salt-master
+rm $tempfile
+chmod +x /etc/init.d/salt-master
+/sbin/chkconfig --add salt-master
+/sbin/chkconfig salt-master on
+fi
+if [ $INSTALL_MINION = 1 ]; then
+$tempfile=$(mktemp)
+curl https://raw.github.com/saltstack/salt/develop/pkg/rpm/salt-minion > $tempfile
+sed 's/SALTMINION=\/usr\/bin\/salt-minion/SALTMINION=\/usr\/local\/bin\/salt-minion/g' $tempfile > /etc/init.d/salt-minion
+rm $tempfile
+chmod +x /etc/init.d/salt-minion
+/sbin/chkconfig --add salt-minion
+/sbin/chkconfig salt-minion on
+fi
+}
+install_suse_11_git_post(){
+install_suse_11_post
+}
+install_suse_11_stable_post(){
+install_suse_11_post
+}
+#
+#
+#
+##############################################################################
 ##############################################################################
 #
 #   Ubuntu Install Functions

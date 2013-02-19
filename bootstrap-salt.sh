@@ -386,7 +386,7 @@ __gather_linux_system_info() {
         [ ! -f "/etc/${rsource}" ] && continue      # Does not exist
 
         n=$(echo ${rsource} | sed -e 's/[_-]release$//' -e 's/[_-]version$//')
-        rv=$( (grep VERSION /etc/${rsource}; cat /etc/${rsource}) | grep '[0-9]' | sed -e 'q' )
+        rv=$( (grep VERSION /etc/${rsource} && cat /etc/${rsource}) | grep '[0-9]' | sed -e 'q' )
         [ "${rv}x" = "x" ] && continue  # There's no version information. Continue to next rsource
         v=$(__parse_version_string "$rv")
         case $(echo ${n} | tr '[:upper:]' '[:lower:]') in

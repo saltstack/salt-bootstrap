@@ -1,4 +1,3 @@
-
 #!/bin/sh -
 #===============================================================================
 # vim: softtabstop=4 shiftwidth=4 expandtab fenc=utf-8 spell spelllang=en
@@ -110,7 +109,7 @@ usage() {
   -v  Display script version
   -n  No colours.
   -D  Show debug output.
-  -c  Temporary minion configuration directory
+  -c  Temporary configuration directory
   -M  Also install salt-master
   -S  Also install salt-syndic
   -N  Do not install salt-minion
@@ -367,14 +366,11 @@ __gather_linux_system_info() {
     DISTRO_VERSION=""
 
     if [ -f /etc/lsb-release ]; then
-        if [ $(lsb_release -a | grep Descr | awk '{ print $2 }') = "SUSE" ]; then
-        DISTRO_NAME="suse"
-        DISTRO_VERSION="$(lsb_release -a | grep Rel | awk '{ print $2}')"
-        else
         DISTRO_NAME=$(grep DISTRIB_ID /etc/lsb-release | sed -e 's/.*=//')
-        DISTRO_VERSION=$(__parse_version_string $(grep DISTRIB_RELEASE /etc/lsb-release | sed -e 's/.*=//'))
-        fi
+        rv=$(grep DISTRIB_RELEASE /etc/lsb-release | sed -e 's/.*=//')
+        [ "${rv}x" != "x" ] && DISTRO_VERSION=$(__parse_version_string "$rv")
     fi
+
     if [ "x$DISTRO_NAME" != "x" ] && [ "x$DISTRO_VERSION" != "x" ]; then
         # We already have the distribution name and version
         return
@@ -390,7 +386,9 @@ __gather_linux_system_info() {
         [ ! -f "/etc/${rsource}" ] && continue      # Does not exist
 
         n=$(echo ${rsource} | sed -e 's/[_-]release$//' -e 's/[_-]version$//')
-        v=$( __parse_version_string "$( (grep VERSION /etc/${rsource}; cat /etc/${rsource}) | grep '[0-9]' | sed -e 'q' )" )
+        rv=$( (grep VERSION /etc/${rsource} && cat /etc/${rsource}) | grep '[0-9]' | sed -e 'q' )
+        [ "${rv}x" = "x" ] && continue  # There's no version information. Continue to next rsource
+        v=$(__parse_version_string "$rv")
         case $(echo ${n} | tr '[:upper:]' '[:lower:]') in
             redhat )
                 if [ ".$(egrep 'CentOS' /etc/${rsource})" != . ]; then
@@ -565,9 +563,15 @@ if [ "x${DISTRO_VERSION}" = "x" ]; then
     PREFIXED_DISTRO_MINOR_VERSION=""
 else
     DISTRO_MAJOR_VERSION="$(echo $DISTRO_VERSION | sed 's/^\([0-9]*\).*/\1/g')"
-    DISTRO_MINOR_VERSION="$(echo $DISTRO_VERSION | sed 's/^\([0-9]*\)\.\([0-9]*\).*/\2/g')"
+    DISTRO_MINOR_VERSION="$(echo $DISTRO_VERSION | sed 's/^\([0-9]*\).\([0-9]*\).*/\2/g')"
     PREFIXED_DISTRO_MAJOR_VERSION="_${DISTRO_MAJOR_VERSION}"
+    if [ "${PREFIXED_DISTRO_MAJOR_VERSION}" = "_" ]; then
+        PREFIXED_DISTRO_MAJOR_VERSION=""
+    fi
     PREFIXED_DISTRO_MINOR_VERSION="_${DISTRO_MINOR_VERSION}"
+    if [ "${PREFIXED_DISTRO_MINOR_VERSION}" = "_" ]; then
+        PREFIXED_DISTRO_MINOR_VERSION=""
+    fi
 fi
 # Simplify distro name naming on functions
 DISTRO_NAME_L=$(echo $DISTRO_NAME | tr '[:upper:]' '[:lower:]' | sed 's/[^a-zA-Z0-9_ ]//g' | sed -re 's/([[:space:]])+/_/g')
@@ -659,18 +663,76 @@ __apt_get_noinput() {
 #       6. install_<distro>_post
 #
 #   Optionally, define a start daemons function, one of:
-#       1. install_<distro>_<major_version>_<install_type>_start_daemons
-#       2. install_<distro>_<major_version>_<minor_version>_<install_type>_start_daemons
-#       3. install_<distro>_<major_version>_start_daemons
-#       4  install_<distro>_<major_version>_<minor_version>_start_daemons
-#       5. install_<distro>_<install_type>_start_daemons
-#       6. install_<distro>_start_daemons
+#       1. install_<distro>_<major_version>_<install_type>_restart_daemons
+#       2. install_<distro>_<major_version>_<minor_version>_<install_type>_restart_daemons
+#       3. install_<distro>_<major_version>_restart_daemons
+#       4  install_<distro>_<major_version>_<minor_version>_restart_daemons
+#       5. install_<distro>_<install_type>_restart_daemons
+#       6. install_<distro>_restart_daemons
 #
 #       NOTE: The start daemons function should be able to restart any daemons
 #             which are running, or start if they're not running.
 #
 ##############################################################################
-
+##############################################################################
+# Install salt for Suse Linux Enterprise Server 11. Installs from pip, not git.
+#
+#
+install_suse_11_stable(){
+pip install -U salt
+}
+install_suse_11_deps() {
+zypper in gcc-c++ python-devel libopenssl-devel zlib-devel swig git
+zypper -p http://download.opensuse.org/repositories/home:/fengshuo:/zeromq/SLE_11_SP1/ -v in zeromq
+}
+install_suse_11_stable_deps(){
+install_suse_11_deps
+if [ ! -f /usr/local/bin/pip ]; then
+curl http://python-distribute.org/distribute_setup.py | python
+curl https://raw.github.com/pypa/pip/master/contrib/get-pip.py | python
+rm distribute-*.*.*.tar.gz
+fi
+pip install PyYAML M2Crypto pycrypto msgpack-python pyzmq jinja2fi
+}
+install_suse_11_git_deps(){
+install_suse_11_stable_deps
+pip install PyYAML M2Crypto pycrypto msgpack-python pyzmq jinja2
+}
+install_suse_11_git(){
+install_suse_11_git_deps
+__git_clone_and_checkout
+python setup.py install
+}
+install_suse_11_post(){
+if [ $INSTALL_MASTER = 1 ]; then
+$tempfile=$(mktemp)
+curl https://raw.github.com/saltstack/salt/develop/pkg/rpm/salt-master > $tempfile
+sed 's/SALTMASTER=\/usr\/bin\/salt-master/SALTMASTER=\/usr\/local\/bin\/salt-master/g' $tempfile > /etc/init.d/salt-master
+rm $tempfile
+chmod +x /etc/init.d/salt-master
+/sbin/chkconfig --add salt-master
+/sbin/chkconfig salt-master on
+fi
+if [ $INSTALL_MINION = 1 ]; then
+$tempfile=$(mktemp)
+curl https://raw.github.com/saltstack/salt/develop/pkg/rpm/salt-minion > $tempfile
+sed 's/SALTMINION=\/usr\/bin\/salt-minion/SALTMINION=\/usr\/local\/bin\/salt-minion/g' $tempfile > /etc/init.d/salt-minion
+rm $tempfile
+chmod +x /etc/init.d/salt-minion
+/sbin/chkconfig --add salt-minion
+/sbin/chkconfig salt-minion on
+fi
+}
+install_suse_11_git_post(){
+install_suse_11_post
+}
+install_suse_11_stable_post(){
+install_suse_11_post
+}
+#
+#
+#
+##############################################################################
 ##############################################################################
 #
 #   Ubuntu Install Functions
@@ -762,7 +824,7 @@ install_ubuntu_git_post() {
     done
 }
 
-install_ubuntu_start_daemons() {
+install_ubuntu_restart_daemons() {
     for fname in minion master syndic; do
 
         # Skip if not meant to be installed
@@ -884,7 +946,7 @@ install_debian_git_post() {
     done
 }
 
-install_debian_start_daemons() {
+install_debian_restart_daemons() {
     for fname in minion master syndic; do
 
         # Skip if not meant to be installed
@@ -953,7 +1015,7 @@ install_fedora_git_post() {
     done
 }
 
-install_fedora_start_daemons() {
+install_fedora_restart_daemons() {
     for fname in minion master syndic; do
 
         # Skip if not meant to be installed
@@ -1068,7 +1130,7 @@ install_centos_git_post() {
     done
 }
 
-install_centos_start_daemons() {
+install_centos_restart_daemons() {
     for fname in minion master syndic; do
         # Skip if not meant to be installed
         [ $fname = "minion" ] && [ $INSTALL_MINION -eq $BS_FALSE ] && continue
@@ -1141,8 +1203,8 @@ install_red_hat_linux_stable_post() {
     install_centos_stable_post
 }
 
-install_red_hat_linux_start_daemons() {
-    install_centos_start_daemons
+install_red_hat_linux_restart_daemons() {
+    install_centos_restart_daemons
 }
 
 install_red_hat_linux_git_post() {
@@ -1154,8 +1216,8 @@ install_red_hat_enterprise_linux_stable_post() {
     install_red_hat_linux_stable_post
 }
 
-install_red_hat_enterprise_linux_start_daemons() {
-    install_red_hat_linux_start_daemons
+install_red_hat_enterprise_linux_restart_daemons() {
+    install_red_hat_linux_restart_daemons
 }
 
 install_red_hat_enterprise_linux_git_post() {
@@ -1204,8 +1266,8 @@ install_amazon_linux_ami_stable_post() {
     install_centos_stable_post
 }
 
-install_amazon_linux_ami_start_daemons() {
-    install_centos_start_daemons
+install_amazon_linux_ami_restart_daemons() {
+    install_centos_restart_daemons
 }
 
 install_amazon_linux_ami_git() {
@@ -1306,7 +1368,7 @@ install_arch_git_post() {
     done
 }
 
-install_arch_start_daemons() {
+install_arch_restart_daemons() {
     for fname in minion master syndic; do
 
         # Skip if not meant to be installed
@@ -1414,7 +1476,7 @@ install_freebsd_git_post() {
     install_freebsd_9_stable_post
 }
 
-install_freebsd_start_daemons() {
+install_freebsd_restart_daemons() {
     for fname in minion master syndic; do
 
         # Skip if not meant to be installed
@@ -1491,7 +1553,7 @@ install_smartos_post() {
     done
 }
 
-install_smartos_start_daemons() {
+install_smartos_restart_daemons() {
     for fname in minion master syndic; do
 
         # Skip if not meant to be installed
@@ -1508,99 +1570,7 @@ install_smartos_start_daemons() {
 #   Ended SmartOS Install Functions
 #
 ##############################################################################
-##############################################################################
-# Install salt for Suse Linux Enterprise Server 11. Installs from pip, not git.
-#
-#
-install_suse_11_stable(){
-if [ -f /usr/local/bin/salt ]; then
-echo -e " "
-else
-pip install -U salt
-fi
-}
-install_suse_11_deps() {
 
-if [ $(zypper if gcc-c++ python-devel libopenssl-devel zlib-devel swig git | grep Installed | grep Yes | wc -l) -lt 6 ]; then
-
-zypper in gcc-c++ python-devel libopenssl-devel zlib-devel swig git
-else
-echo -e " "
-fi
-
-if [ $(zypper search zeromq | grep zeromq | awk '{ print $1 }') = "i" ]; then
-echo -e " "
-else
-zypper -p http://download.opensuse.org/repositories/home:/fengshuo:/zeromq/SLE_11_SP1/ -v in zeromq
-fi
-}
-install_suse_11_stable_deps(){
-install_suse_11_deps
-if [ -f /usr/local/bin/pip ]; then
-        echo  " "
-else
-curl http://python-distribute.org/distribute_setup.py | python
-curl https://raw.github.com/pypa/pip/master/contrib/get-pip.py | python
-rm distribute-*.*.*.tar.gz
-fi
-
-}
-install_suse_11_git_deps(){
-install_suse_11_stable_deps
-if [ $(pip search PyYAML M2Crypto pycrypto msgpack-python pyzmq jinja2 | grep INSTALLED | wc -l) -eq 6 ]; then
-echo " "
-else
-pip install PyYAML M2Crypto pycrypto msgpack-python pyzmq jinja2
-fi
-}
-install_suse_11_git(){
-if [ -f /usr/local/bin/salt ]; then
-echo -e " "
-else
-install_suse_11_git_deps
-__git_clone_and_checkout
-python setup.py install
-fi
-}
-install_suse_11_post(){
-if [ -f /etc/init.d/salt-master ]; then
-echo -e " "
-else
-if [ $INSTALL_MASTER = 1 ]; then
-$tempfile=$(mktemp)
-curl https://raw.github.com/saltstack/salt/develop/pkg/rpm/salt-master > $tempfile
-sed 's/SALTMASTER=\/usr\/bin\/salt-master/SALTMASTER=\/usr\/local\/bin\/salt-master/g' $tempfile > /etc/init.d/salt-master
-rm $tempfile
-chmod +x /etc/init.d/salt-master
-/sbin/chkconfig --add salt-master
-/sbin/chkconfig salt-master on
-fi
-fi
-if [ -f /etc/init.d/salt-minion ]; then
-echo " "
-else
-if [ $INSTALL_MINION = 1 ]; then
-$tempfile=$(mktemp)
-curl https://raw.github.com/saltstack/salt/develop/pkg/rpm/salt-minion > $tempfile
-sed 's/SALTMINION=\/usr\/bin\/salt-minion/SALTMINION=\/usr\/local\/bin\/salt-minion/g' $tempfile > /etc/init.d/salt-minion
-rm $tempfile
-chmod +x /etc/init.d/salt-minion
-/sbin/chkconfig --add salt-minion
-/sbin/chkconfig salt-minion on
-fi
-fi
-}
-
-install_suse_11_git_post(){
-install_suse_11_post
-}
-install_suse_11_stable_post(){
-install_suse_11_post
-}
-#
-#
-#
-##############################################################################
 ##############################################################################
 #
 #   Default minion configuration function. Matches ANY distribution as long as
@@ -1745,12 +1715,12 @@ done
 
 
 # Let's get the start daemons install function
-STARTDAEMONS_FUNC_NAMES="install_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}_${ITYPE}_start_daemons"
-STARTDAEMONS_FUNC_NAMES="$STARTDAEMONS_FUNC_NAMES install_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}${PREFIXED_DISTRO_MINOR_VERSION}_${ITYPE}_start_daemons"
-STARTDAEMONS_FUNC_NAMES="$STARTDAEMONS_FUNC_NAMES install_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}_start_daemons"
-STARTDAEMONS_FUNC_NAMES="$STARTDAEMONS_FUNC_NAMES install_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}${PREFIXED_DISTRO_MINOR_VERSION}_start_daemons"
-STARTDAEMONS_FUNC_NAMES="$STARTDAEMONS_FUNC_NAMES install_${DISTRO_NAME_L}_${ITYPE}_start_daemons"
-STARTDAEMONS_FUNC_NAMES="$STARTDAEMONS_FUNC_NAMES install_${DISTRO_NAME_L}_start_daemons"
+STARTDAEMONS_FUNC_NAMES="install_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}_${ITYPE}_restart_daemons"
+STARTDAEMONS_FUNC_NAMES="$STARTDAEMONS_FUNC_NAMES install_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}${PREFIXED_DISTRO_MINOR_VERSION}_${ITYPE}_restart_daemons"
+STARTDAEMONS_FUNC_NAMES="$STARTDAEMONS_FUNC_NAMES install_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}_restart_daemons"
+STARTDAEMONS_FUNC_NAMES="$STARTDAEMONS_FUNC_NAMES install_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}${PREFIXED_DISTRO_MINOR_VERSION}_restart_daemons"
+STARTDAEMONS_FUNC_NAMES="$STARTDAEMONS_FUNC_NAMES install_${DISTRO_NAME_L}_${ITYPE}_restart_daemons"
+STARTDAEMONS_FUNC_NAMES="$STARTDAEMONS_FUNC_NAMES install_${DISTRO_NAME_L}_restart_daemons"
 
 STARTDAEMONS_INSTALL_FUNC="null"
 for FUNC_NAME in $STARTDAEMONS_FUNC_NAMES; do
@@ -1834,4 +1804,3 @@ if [ $CONFIG_ONLY -eq $BS_FALSE ]; then
 else
     echoinfo "Salt configured"
 fi
-exit 0

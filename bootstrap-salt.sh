@@ -376,8 +376,8 @@ __gather_linux_system_info() {
     DISTRO_VERSION=""
 
     # Let's test if the lsb_release binary is available
-    rv=$(lsb_release 2>&1)
-    if [ "x${rv}" != "x" ]; then
+    rv=$(lsb_release >/dev/null 2>&1)
+    if [ $? -eq 0 ]; then
         DISTRO_NAME=$(lsb_release -si)
         rv=$(lsb_release -sr)
         [ "${rv}x" != "x" ] && DISTRO_VERSION=$(__parse_version_string "$rv")

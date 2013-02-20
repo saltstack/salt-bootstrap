@@ -1522,12 +1522,12 @@ install_smartos_restart_daemons() {
 #    SuSE Install Functions.
 #
 install_suse_11_stable(){
-    pip install -U salt
+    USE_SETUPTOOLS=1 pip install -U salt
 }
 
 install_suse_11_deps() {
-    zypper in gcc-c++ python-devel libopenssl-devel zlib-devel swig git
-    zypper -p http://download.opensuse.org/repositories/home:/fengshuo:/zeromq/SLE_11_SP1/ -v in zeromq
+    zypper --non-interactive install -l gcc-c++ python-devel libopenssl-devel zlib-devel swig
+    zypper --non-interactive --no-gpg-checks -p http://download.opensuse.org/repositories/home:/fengshuo:/zeromq/SLE_11_SP1/ -v install zeromq
 }
 
 install_suse_11_stable_deps(){
@@ -1537,11 +1537,12 @@ install_suse_11_stable_deps(){
         curl https://raw.github.com/pypa/pip/master/contrib/get-pip.py | python
         rm distribute-*.*.*.tar.gz
     fi
-    pip install PyYAML M2Crypto pycrypto msgpack-python pyzmq jinja2fi
+    pip install PyYAML M2Crypto pycrypto msgpack-python pyzmq jinja2
 }
 
 install_suse_11_git_deps(){
     install_suse_11_stable_deps
+    zypper --non-interactive install -l git
     pip install PyYAML M2Crypto pycrypto msgpack-python pyzmq jinja2
 }
 
@@ -1553,7 +1554,7 @@ install_suse_11_git(){
 
 install_suse_11_post(){
     if [ $INSTALL_MASTER = 1 ]; then
-        $tempfile=$(mktemp)
+        tempfile=$(mktemp)
         curl https://raw.github.com/saltstack/salt/develop/pkg/rpm/salt-master > $tempfile
         sed 's/SALTMASTER=\/usr\/bin\/salt-master/SALTMASTER=\/usr\/local\/bin\/salt-master/g' $tempfile > /etc/init.d/salt-master
         rm $tempfile
@@ -1563,7 +1564,7 @@ install_suse_11_post(){
     fi
 
     if [ $INSTALL_MINION = 1 ]; then
-        $tempfile=$(mktemp)
+        tempfile=$(mktemp)
         curl https://raw.github.com/saltstack/salt/develop/pkg/rpm/salt-minion > $tempfile
         sed 's/SALTMINION=\/usr\/bin\/salt-minion/SALTMINION=\/usr\/local\/bin\/salt-minion/g' $tempfile > /etc/init.d/salt-minion
         rm $tempfile

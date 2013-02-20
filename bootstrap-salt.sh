@@ -375,7 +375,13 @@ __gather_linux_system_info() {
     DISTRO_NAME=""
     DISTRO_VERSION=""
 
-    if [ -f /etc/lsb-release ]; then
+    # Let's test if the lsb_release binary is available
+    rv=$(lsb_release 2>&1)
+    if [ "x${rv}" != "x" ]; then
+        DISTRO_NAME=$(lsb_release -si)
+        rv=$(lsb_release -sr)
+        [ "${rv}x" != "x" ] && DISTRO_VERSION=$(__parse_version_string "$rv")
+    elif [ -f /etc/lsb-release ]; then
         DISTRO_NAME=$(grep DISTRIB_ID /etc/lsb-release | sed -e 's/.*=//')
         rv=$(grep DISTRIB_RELEASE /etc/lsb-release | sed -e 's/.*=//')
         [ "${rv}x" != "x" ] && DISTRO_VERSION=$(__parse_version_string "$rv")

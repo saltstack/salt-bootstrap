@@ -1536,6 +1536,7 @@ install_suse_11_stable(){
 }
 
 install_suse_11_deps() {
+    echowarn "SuSE installations should be considered unstable. See #56"
     zypper --non-interactive install -l gcc-c++ python-devel libopenssl-devel zlib-devel swig
     zypper --non-interactive --no-gpg-checks -p http://download.opensuse.org/repositories/home:/fengshuo:/zeromq/SLE_11_SP1/ -v install zeromq
 }

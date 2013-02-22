@@ -241,7 +241,7 @@ if [ "${CALLER}x" = "${0}x" ]; then
     CALLER="PIPED THROUGH"
 fi
 echoinfo "${CALLER} ${0} -- Version ${ScriptVersion}"
-echowarn "The script is currently in an unstable stage. Should be fixed in the next hours"
+#echowarn "The script is currently in an unstable stage. Should be fixed in the next hours"
 #---  FUNCTION  ----------------------------------------------------------------
 #          NAME:  __exit_cleanup
 #   DESCRIPTION:  Cleanup any leftovers after script has ended

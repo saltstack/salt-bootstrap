@@ -939,14 +939,15 @@ _eof
     apt-get update
     apt-get install -t experimental libzmq3 libzmq3-dev
     apt-get install build-essential python-dev
-    # Building pyzmq from source to build it against libzmq3
-    pip install pyzmq
 }
 
 install_debian_git_deps() {
     apt-get update
     __apt_get_noinput lsb-release python python-pkg-resources python-crypto \
         python-jinja2 python-m2crypto python-yaml msgpack-python git
+
+    # Building pyzmq from source to build it against libzmq3
+    pip install pyzmq
 
     __git_clone_and_checkout
 
@@ -974,6 +975,10 @@ install_debian_stable() {
         packages="${packages} salt-syndic"
     fi
     __apt_get_noinput ${packages}
+
+    # Building pyzmq from source to build it against libzmq3.
+    # Should override current installation
+    pip install -U pyzmq
 }
 
 

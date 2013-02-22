@@ -937,8 +937,8 @@ Pin-Priority: 800
 _eof
 
     apt-get update
-    apt-get install -t experimental libzmq3 libzmq3-dev
-    apt-get install build-essential python-dev
+    __apt_get_noinput -t experimental libzmq3 libzmq3-dev
+    __apt_get_noinput build-essential python-dev
 }
 
 install_debian_git_deps() {

@@ -369,6 +369,47 @@ __parse_version_string() {
 
 
 #---  FUNCTION  ----------------------------------------------------------------
+#          NAME:  __sort_release_files
+#   DESCRIPTION:  Custom sort function. Alphabetical or numerical sort is not
+#                 enough.
+#-------------------------------------------------------------------------------
+__sort_release_files() {
+    KNOWN_RELEASE_FILES="(arch|centos|debian|ubuntu|fedora|redhat|suse|\
+        mandrake|mandriva|gentoo|slackware|turbolinux|unitedlinux|lsb)\
+        (-|_)(release|version)"
+    primary_release_files=""
+    secondary_release_files=""
+    # Sort know VS un-known files first
+    for release_file in $(echo $@ | sed -r 's:[[:space:]]:\n:g' | sort --unique --ignore-case); do
+        match=$(echo $release_file | egrep -i ${KNOWN_RELEASE_FILES})
+        if [ "x${match}" != "x" ]; then
+            primary_release_files="${primary_release_files} ${release_file}"
+        else
+            secondary_release_files="${secondary_release_files} ${release_file}"
+        fi
+    done
+
+    # Now let's sort by know files importance, max important goes last in the max_prio list
+    max_prio="redhat-release centos-release"
+    for entry in $max_prio; do
+        if [ "x$(echo ${primary_release_files} | grep $entry)" != "x" ]; then
+            primary_release_files=$(echo ${primary_release_files} | sed -e "s:\(.*\)\($entry\)\(.*\):\2 \1 \3:g")
+        fi
+    done
+    # Now, least important goes last in the min_prio list
+    min_prio="lsb-release"
+    for entry in $max_prio; do
+        if [ "x$(echo ${primary_release_files} | grep $entry)" != "x" ]; then
+            primary_release_files=$(echo ${primary_release_files} | sed -e "s:\(.*\)\($entry\)\(.*\):\1 \3 \2:g")
+        fi
+    done
+
+    # Echo the results collapsing multiple white-space into a single white-space
+    echo "${primary_release_files} ${secondary_release_files}" | sed -r 's:[[:space:]]:\n:g'
+}
+
+
+#---  FUNCTION  ----------------------------------------------------------------
 #          NAME:  __gather_linux_system_info
 #   DESCRIPTION:  Discover Linux system information
 #-------------------------------------------------------------------------------
@@ -383,6 +424,7 @@ __gather_linux_system_info() {
         rv=$(lsb_release -sr)
         [ "${rv}x" != "x" ] && DISTRO_VERSION=$(__parse_version_string "$rv")
     elif [ -f /etc/lsb-release ]; then
+        # We don't have the lsb_release binary, though, we do have the file it parses
         DISTRO_NAME=$(grep DISTRIB_ID /etc/lsb-release | sed -e 's/.*=//')
         rv=$(grep DISTRIB_RELEASE /etc/lsb-release | sed -e 's/.*=//')
         [ "${rv}x" != "x" ] && DISTRO_VERSION=$(__parse_version_string "$rv")
@@ -393,11 +435,11 @@ __gather_linux_system_info() {
         return
     fi
 
-    for rsource in $(
+    for rsource in $(__sort_release_files $(
             cd /etc && /bin/ls *[_-]release *[_-]version 2>/dev/null | env -i sort | \
             sed -e '/^redhat-release$/d' -e '/^lsb-release$/d'; \
             echo redhat-release lsb-release
-            ); do
+            )); do
 
         [ -L "/etc/${rsource}" ] && continue        # Don't follow symlinks
         [ ! -f "/etc/${rsource}" ] && continue      # Does not exist

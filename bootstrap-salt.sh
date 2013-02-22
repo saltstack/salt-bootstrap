@@ -921,13 +921,32 @@ _eof
         wget -q http://debian.madduck.net/repo/gpg/archive.key -O - | apt-key add -
     fi
 
+    cat <<_eof > /etc/apt/sources.list.d/debian-experimental.list
+deb http://ftp.debian.org/debian experimental main
+deb-src http://ftp.debian.org/debian experimental main
+_eof
+
+    cat <<_eof > /etc/apt/preferences.d/libzmq3-debian-experimental.pref
+Package: libzmq3
+Pin: release a=experimental
+Pin-Priority: 800
+
+Package: libzmq3-dev
+Pin: release a=experimental
+Pin-Priority: 800
+_eof
+
     apt-get update
+    apt-get install -t experimental libzmq3 libzmq3-dev
+    apt-get install build-essential python-dev
+    # Building pyzmq from source to build it against libzmq3
+    pip install pyzmq
 }
 
 install_debian_git_deps() {
     apt-get update
     __apt_get_noinput lsb-release python python-pkg-resources python-crypto \
-        python-jinja2 python-m2crypto python-yaml msgpack-python git python-zmq
+        python-jinja2 python-m2crypto python-yaml msgpack-python git
 
     __git_clone_and_checkout
 

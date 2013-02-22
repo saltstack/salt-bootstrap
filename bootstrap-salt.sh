@@ -868,7 +868,7 @@ install_debian_deps() {
 }
 
 install_debian_6_0_deps() {
-    if [ "x$(grep -R 'debian-backports squeeze-backports main' /etc/apt)" = "x" ]; then
+    if [ "x$(grep -R 'backports.debian.org' /etc/apt)" = "x" ]; then
         echo "deb http://backports.debian.org/debian-backports squeeze-backports main" >> \
             /etc/apt/sources.list.d/backports.list
     fi

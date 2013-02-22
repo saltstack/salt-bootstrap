@@ -1130,8 +1130,8 @@ install_centos_git_post() {
         elif [ ! -f /etc/init.d/salt-$fname ]; then
             cp ${SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-${fname} /etc/init.d/
             chmod +x /etc/init.d/salt-${fname}
+            /sbin/chkconfig salt-${fname} on
         fi
-        /sbin/chkconfig salt-${fname} on
     done
 }
 

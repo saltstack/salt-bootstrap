@@ -374,9 +374,9 @@ __parse_version_string() {
 #                 enough.
 #-------------------------------------------------------------------------------
 __sort_release_files() {
-    KNOWN_RELEASE_FILES="(arch|centos|debian|ubuntu|fedora|redhat|suse|\
+    KNOWN_RELEASE_FILES=$(echo "(arch|centos|debian|ubuntu|fedora|redhat|suse|\
         mandrake|mandriva|gentoo|slackware|turbolinux|unitedlinux|lsb)\
-        (-|_)(release|version)"
+        (-|_)(release|version)" | sed -r 's:[[:space:]]::g')
     primary_release_files=""
     secondary_release_files=""
     # Sort know VS un-known files first

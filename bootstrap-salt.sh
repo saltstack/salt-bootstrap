@@ -868,24 +868,28 @@ install_debian_deps() {
 }
 
 install_debian_6_0_deps() {
-    echo "deb http://backports.debian.org/debian-backports squeeze-backports main" >> \
-        /etc/apt/sources.list.d/backports.list
+    if [ "x$(grep 'debian-backports squeeze-backports main' /etc/apt)" = "x" ]; then
+        echo "deb http://backports.debian.org/debian-backports squeeze-backports main" >> \
+            /etc/apt/sources.list.d/backports.list
+    fi
 
-    # Add madduck's repo since squeeze packages have been deprecated
-    for fname in salt-common salt-master salt-minion salt-syndic salt-doc; do
-        echo "Package: $fname"
-        echo "Pin: release a=squeeze-backports"
-        echo "Pin-Priority: 600"
-        echo
-    done > /etc/apt/preferences.d/local-salt-backport.pref
+    if [ ! -f /etc/apt/preferences.d/local-salt-backport.pref ]; then
+        # Add madduck's repo since squeeze packages have been deprecated
+        for fname in salt-common salt-master salt-minion salt-syndic salt-doc; do
+            echo "Package: $fname"
+            echo "Pin: release a=squeeze-backports"
+            echo "Pin-Priority: 600"
+            echo
+        done > /etc/apt/preferences.d/local-salt-backport.pref
 
-    cat <<_eof > /etc/apt/sources.list.d/local-madduck-backports.list
+        cat <<_eof > /etc/apt/sources.list.d/local-madduck-backports.list
 deb http://debian.madduck.net/repo squeeze-backports main
 deb-src http://debian.madduck.net/repo squeeze-backports main
 _eof
 
-    wget -q http://debian.madduck.net/repo/gpg/archive.key
-    apt-key add archive.key
+        wget -q http://debian.madduck.net/repo/gpg/archive.key -O - | sudo apt-key add -
+    fi
+
     apt-get update
 }
 

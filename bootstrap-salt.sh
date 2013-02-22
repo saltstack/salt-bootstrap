@@ -887,7 +887,7 @@ deb http://debian.madduck.net/repo squeeze-backports main
 deb-src http://debian.madduck.net/repo squeeze-backports main
 _eof
 
-        wget -q http://debian.madduck.net/repo/gpg/archive.key -O - | sudo apt-key add -
+        wget -q http://debian.madduck.net/repo/gpg/archive.key -O - | apt-key add -
     fi
 
     apt-get update

@@ -10,11 +10,23 @@
     :license: Apache 2.0, see LICENSE for more details.
 '''
 
+import glob
 import shutil
 from bootstrap import *
 
 
 CLEANUP_COMMANDS_BY_OS_FAMILY = {
+    'Arch': [
+        'pacman -Qs python2-crypto && pacman -Rsc --noconfirm python2-crypto && exit $? || exit 0',
+        'pacman -Qs python2-distribute && pacman -Rsc --noconfirm python2-distribute && exit $? || exit 0',
+        'pacman -Qs python2-jinja && pacman -Rsc --noconfirm python2-jinja && exit $? || exit 0',
+        'pacman -Qs python2-m2crypto && pacman -Rsc --noconfirm python2-m2crypto && exit $? || exit 0',
+        'pacman -Qs python2-markupsafe && pacman -Rsc --noconfirm python2-markupsafe && exit $? || exit 0',
+        'pacman -Qs python2-msgpack && pacman -Rsc --noconfirm python2-msgpack && exit $? || exit 0',
+        'pacman -Qs python2-psutil && pacman -Rsc --noconfirm python2-psutil && exit $? || exit 0',
+        'pacman -Qs python2-pyzmq && pacman -Rsc --noconfirm python2-pyzmq && exit $? || exit 0',
+        'pacman -Qs zeromq && pacman -Rsc --noconfirm zeromq && exit $? || exit 0',
+    ],
     'Debian': [
         'apt-get remove -y -o DPkg::Options::=--force-confold '
         '--purge salt-master salt-minion salt-syndic',
@@ -29,6 +41,7 @@ CLEANUP_COMMANDS_BY_OS_FAMILY = {
     ]
 }
 
+
 class InstallationTestCase(BootstrapTestCase):
 
     def setUp(self):
@@ -38,7 +51,7 @@ class InstallationTestCase(BootstrapTestCase):
     def tearDown(self):
         if GRAINS['os_family'] not in CLEANUP_COMMANDS_BY_OS_FAMILY:
             raise RuntimeError(
-                'There is not `tearDown()` clean up support for {0} OS '
+                'There is not `tearDown()` clean up support for {0!r} OS '
                 'family.'.format(
                     GRAINS['os_family']
                 )
@@ -67,6 +80,13 @@ class InstallationTestCase(BootstrapTestCase):
         if os.path.isdir('/tmp/git'):
             print 'Cleaning salt git checkout'
             shutil.rmtree('/tmp/git')
+        if os.path.isdir('/usr/lib/python2.7/site-packages/salt'):
+            print 'Cleaning up /usr/lib/python2.7/site-packages/salt'
+            shutil.rmtree('/usr/lib/python2.7/site-packages/salt')
+        for entry in glob.glob('/usr/bin/salt*'):
+            os.unlink(entry)
+        for entry in glob.glob('/usr/lib/systemd/system/salt*'):
+            os.unlink(entry)
 
     def test_install_using_bash(self):
         if not os.path.exists('/bin/bash'):

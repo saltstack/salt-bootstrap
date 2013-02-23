@@ -203,5 +203,9 @@ class BootstrapTestCase(TestCase):
             if err:
                 err_msg = '{0}STDERR:\n{1}\n'.format(err_msg, '\n'.join(err))
             if not err and not out:
-                err_msg = '{0} No stdout nor stderr captured.'.format(err_msg)
+                err_msg = (
+                    '{0} No stdout nor stderr captured. Exit code: {1}'.format(
+                        err_msg, rc
+                    )
+                )
             raise AssertionError(err_msg.rstrip())

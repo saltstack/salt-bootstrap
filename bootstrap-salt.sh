@@ -489,6 +489,7 @@ __gather_linux_system_info() {
                 ;;
             os                 )
                 n=$(__unquote_string $(grep '^NAME=' /etc/os-release | sed -e 's/^NAME=\(.*\)$/\1/g'))
+                [ "${n}" = "Arch Linux" ] && v=""   # Arch Linux does not provide a version.
                 ;;
             *                  ) n="${n}"           ;
         esac

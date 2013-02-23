@@ -1295,13 +1295,13 @@ install_amazon_linux_ami_git_post() {
 #
 #   Arch Install Functions
 #
-install_arch_stable_deps() {
+install_arch_linux_stable_deps() {
     grep '\[salt\]' /etc/pacman.conf >/dev/null 2>&1 || echo '[salt]
 Server = http://intothesaltmine.org/archlinux
 ' >> /etc/pacman.conf
 }
 
-install_arch_git_deps() {
+install_arch_linux_git_deps() {
     grep '\[salt\]' /etc/pacman.conf >/dev/null 2>&1 || echo '[salt]
 Server = http://intothesaltmine.org/archlinux
 ' >> /etc/pacman.conf
@@ -1319,16 +1319,16 @@ Server = http://intothesaltmine.org/archlinux
     fi
 }
 
-install_arch_stable() {
+install_arch_linux_stable() {
     pacman -Sy --noconfirm pacman
     pacman -Syu --noconfirm salt
 }
 
-install_arch_git() {
+install_arch_linux_git() {
     python2 setup.py install
 }
 
-install_arch_post() {
+install_arch_linux_post() {
     for fname in minion master syndic; do
 
         # Skip if not meant to be installed
@@ -1351,7 +1351,7 @@ install_arch_post() {
     done
 }
 
-install_arch_git_post() {
+install_arch_linux_git_post() {
     for fname in minion master syndic; do
 
         # Skip if not meant to be installed
@@ -1377,7 +1377,7 @@ install_arch_git_post() {
     done
 }
 
-install_arch_restart_daemons() {
+install_arch_linux_restart_daemons() {
     for fname in minion master syndic; do
 
         # Skip if not meant to be installed

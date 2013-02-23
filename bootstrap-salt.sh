@@ -369,14 +369,22 @@ __parse_version_string() {
 
 
 #---  FUNCTION  ----------------------------------------------------------------
+#          NAME:  __unquote_string
+#   DESCRIPTION:  Strip single or double quotes from the provided string.
+#-------------------------------------------------------------------------------
+__unquote_string() {
+    echo $@ | sed "s/^\([\"']\)\(.*\)\1\$/\2/g"
+}
+
+#---  FUNCTION  ----------------------------------------------------------------
 #          NAME:  __sort_release_files
 #   DESCRIPTION:  Custom sort function. Alphabetical or numerical sort is not
 #                 enough.
 #-------------------------------------------------------------------------------
 __sort_release_files() {
     KNOWN_RELEASE_FILES=$(echo "(arch|centos|debian|ubuntu|fedora|redhat|suse|\
-        mandrake|mandriva|gentoo|slackware|turbolinux|unitedlinux|lsb)\
-        (-|_)(release|version)" | sed -r 's:[[:space:]]::g')
+        mandrake|mandriva|gentoo|slackware|turbolinux|unitedlinux|lsb|system|\
+        os)(-|_)(release|version)" | sed -r 's:[[:space:]]::g')
     primary_release_files=""
     secondary_release_files=""
     # Sort know VS un-known files first
@@ -449,7 +457,7 @@ __gather_linux_system_info() {
         [ "${rv}x" = "x" ] && continue  # There's no version information. Continue to next rsource
         v=$(__parse_version_string "$rv")
         case $(echo ${n} | tr '[:upper:]' '[:lower:]') in
-            redhat )
+            redhat             )
                 if [ ".$(egrep 'CentOS' /etc/${rsource})" != . ]; then
                     n="CentOS"
                 elif [ ".$(egrep 'Red Hat Enterprise Linux' /etc/${rsource})" != . ]; then
@@ -458,7 +466,7 @@ __gather_linux_system_info() {
                     n="<R>ed <H>at <L>inux"
                 fi
                 ;;
-            arch               ) n="Arch"           ;;
+            arch               ) n="Arch Linux"     ;;
             centos             ) n="CentOS"         ;;
             debian             ) n="Debian"         ;;
             ubuntu             ) n="Ubuntu"         ;;
@@ -480,7 +488,7 @@ __gather_linux_system_info() {
                 done < /etc/${rsource}
                 ;;
             os                 )
-                n=$(grep '^NAME=' /etc/os-release | sed -e 's/^NAME=\(.*\)$/\1/g')
+                n=$(__unquote_string $(grep '^NAME=' /etc/os-release | sed -e 's/^NAME=\(.*\)$/\1/g'))
                 ;;
             *                  ) n="${n}"           ;
         esac

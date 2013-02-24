@@ -11,6 +11,7 @@
     :license: Apache 2.0, see LICENSE for more details.
 '''
 
+import sys
 import subprocess
 from bootstrap import GRAINS
 
@@ -20,6 +21,15 @@ if GRAINS['os'] == 'SmartOS':
         'pkgin -y in scmgit-base py27-pip',
         'pip install unittest2'
     ])
+else:
+    print(
+        'Failed gather the proper commands to allow the tests suite to be '
+        'executed in this system.\nSystem Grains:\n{0}'.format(
+            GRAINS
+        )
+    )
+    sys.exit(1)
+
 
 for command in COMMANDS:
     subprocess.Popen(command, shell=True)

@@ -248,7 +248,7 @@ class InstallationTestCase(BootstrapTestCase):
             'Failed to install using specific git tag',
             0,
             self.run_script(
-                args=('git', 'v0.12.1'),
+                args=('git', 'v0.13.1'),
                 timeout=15 * 60,
                 stream_stds=True
             )
@@ -271,7 +271,7 @@ class InstallationTestCase(BootstrapTestCase):
             'Failed to install using specific git sha',
             0,
             self.run_script(
-                args=('git', 'v0.12.1'),
+                args=('git', '2b6264de62bf2ea221bb2c0b8af36dfcfaafe7cf'),
                 timeout=15 * 60,
                 stream_stds=True
             )

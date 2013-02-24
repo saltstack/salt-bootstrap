@@ -1607,7 +1607,7 @@ install_smartos_post() {
         svcs network/salt-$fname > /dev/null 2>&1
         if [ $? -eq 1 ]; then
             if [ ! -f salt-$fname.xml ]; then
-                curl -kL https://github.com/saltstack/salt/raw/develop/pkg/solaris/salt-$fname.xml > salt-$fname.xml
+                curl -sk -o salt-$fname.xml -L https://raw.github.com/saltstack/salt/develop/pkg/solaris/salt-$fname.xml
             fi
             svccfg import salt-$fname.xml
         fi

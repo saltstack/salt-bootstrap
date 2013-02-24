@@ -41,7 +41,10 @@ CLEANUP_COMMANDS_BY_OS_FAMILY = {
     ],
     'Solaris': [
         'pkgin -y rm libtool-base autoconf automake libuuid gcc-compiler '
-        'gmake python27 py27-setuptools py27-yaml py27-crypto swig'
+        'gmake python27 py27-setuptools py27-yaml py27-crypto swig',
+        'svccfg delete network/salt-minion',
+        'svccfg delete network/salt-master',
+        'svccfg delete network/salt-syndic'
     ]
 }
 

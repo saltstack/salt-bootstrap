@@ -1567,7 +1567,7 @@ install_smartos_deps() {
     make
     make install
 
-    pip-2.7 pyzmq
+    pip-2.7 install pyzmq
 
     # Let's trigger config_salt()
     if [ "$TEMP_CONFIG_DIR" = "null" ]; then
@@ -1593,7 +1593,7 @@ install_smartos_git_deps() {
 }
 
 install_smartos_stable() {
-    pip-2.7 salt
+    pip-2.7 install salt
 }
 
 install_smartos_git() {

@@ -385,6 +385,14 @@ __camelcase_split() {
 }
 
 #---  FUNCTION  ----------------------------------------------------------------
+#          NAME:  __strip_duplicates
+#   DESCRIPTION:  Strip duplicate strings
+#-------------------------------------------------------------------------------
+__strip_duplicates() {
+    echo $@ | sed -r 's/[[:space:]]/\n/g' | awk '!x[$0]++'
+}
+
+#---  FUNCTION  ----------------------------------------------------------------
 #          NAME:  __sort_release_files
 #   DESCRIPTION:  Custom sort function. Alphabetical or numerical sort is not
 #                 enough.
@@ -1800,7 +1808,7 @@ DEP_FUNC_NAMES="$DEP_FUNC_NAMES install_${DISTRO_NAME_L}_${ITYPE}_deps"
 DEP_FUNC_NAMES="$DEP_FUNC_NAMES install_${DISTRO_NAME_L}_deps"
 
 DEPS_INSTALL_FUNC="null"
-for DEP_FUNC_NAME in $DEP_FUNC_NAMES; do
+for DEP_FUNC_NAME in $(__strip_duplicates $DEP_FUNC_NAMES); do
     if __function_defined $DEP_FUNC_NAME; then
         DEPS_INSTALL_FUNC=$DEP_FUNC_NAME
         break
@@ -1820,7 +1828,7 @@ if [ "$TEMP_CONFIG_DIR" != "null" ]; then
     CONFIG_FUNC_NAMES="$CONFIG_FUNC_NAMES config_${DISTRO_NAME_L}_salt"
     CONFIG_FUNC_NAMES="$CONFIG_FUNC_NAMES config_salt"
 
-    for FUNC_NAME in $CONFIG_FUNC_NAMES; do
+    for FUNC_NAME in $(__strip_duplicates $CONFIG_FUNC_NAMES); do
         if __function_defined $FUNC_NAME; then
             CONFIG_SALT_FUNC=$FUNC_NAME
             break
@@ -1835,7 +1843,7 @@ INSTALL_FUNC_NAMES="$INSTALL_FUNC_NAMES install_${DISTRO_NAME_L}${PREFIXED_DISTR
 INSTALL_FUNC_NAMES="$INSTALL_FUNC_NAMES install_${DISTRO_NAME_L}_${ITYPE}"
 
 INSTALL_FUNC="null"
-for FUNC_NAME in $INSTALL_FUNC_NAMES; do
+for FUNC_NAME in $(__strip_duplicates $INSTALL_FUNC_NAMES); do
     if __function_defined $FUNC_NAME; then
         INSTALL_FUNC=$FUNC_NAME
         break
@@ -1853,7 +1861,7 @@ POST_FUNC_NAMES="$POST_FUNC_NAMES install_${DISTRO_NAME_L}_post"
 
 
 POST_INSTALL_FUNC="null"
-for FUNC_NAME in $POST_FUNC_NAMES; do
+for FUNC_NAME in $(__strip_duplicates $POST_FUNC_NAMES); do
     if __function_defined $FUNC_NAME; then
         POST_INSTALL_FUNC=$FUNC_NAME
         break
@@ -1870,7 +1878,7 @@ STARTDAEMONS_FUNC_NAMES="$STARTDAEMONS_FUNC_NAMES install_${DISTRO_NAME_L}_${ITY
 STARTDAEMONS_FUNC_NAMES="$STARTDAEMONS_FUNC_NAMES install_${DISTRO_NAME_L}_restart_daemons"
 
 STARTDAEMONS_INSTALL_FUNC="null"
-for FUNC_NAME in $STARTDAEMONS_FUNC_NAMES; do
+for FUNC_NAME in $(__strip_duplicates $STARTDAEMONS_FUNC_NAMES); do
     if __function_defined $FUNC_NAME; then
         STARTDAEMONS_INSTALL_FUNC=$FUNC_NAME
         break

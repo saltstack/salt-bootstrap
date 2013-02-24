@@ -32,4 +32,8 @@ else:
 
 
 for command in COMMANDS:
+    print 'Executing {0!r}'.format(command)
     subprocess.Popen(command, shell=True)
+
+print('\nDONE\n')
+exit(0)

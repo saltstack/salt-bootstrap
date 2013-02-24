@@ -18,6 +18,7 @@ from bootstrap import GRAINS
 COMMANDS = []
 if GRAINS['os'] == 'SmartOS':
     COMMANDS.extend([
+        'pkgin up',
         'pkgin -y in scmgit-base py27-pip',
         'pip install unittest2'
     ])

@@ -38,6 +38,10 @@ CLEANUP_COMMANDS_BY_OS_FAMILY = {
     'FreeBSD': [
         'pkg delete -y swig sysutils/py-salt',
         'pkg autoremove -y'
+    ],
+    'SmartOS': [
+        'pkgin rm libtool-base autoconf automake libuuid gcc-compiler gmake '
+        'python27 py27-setuptools py27-yaml py27-crypto swig'
     ]
 }
 

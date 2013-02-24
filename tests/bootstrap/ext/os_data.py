@@ -85,7 +85,7 @@ def os_data():
         grains['os'] = 'Windows'
         grains['os_family'] = 'Windows'
         return grains
-    elif not sys.platform.startswith('win'):
+    elif sys.platform.startswith('linux'):
         # Add lsb grains on any distro with lsb-release
         try:
             import lsb_release

@@ -1571,11 +1571,17 @@ install_smartos_deps() {
 
     # Let's trigger config_salt()
     if [ "$TEMP_CONFIG_DIR" = "null" ]; then
-        # Since we don't have a source to copy the default configuration or
-        # even any pre-seeded keys, TEMP_CONFIG_DIR will be a bogus, yet,
-        # exiting directory so the configuration function works it's best
-        TEMP_CONFIG_DIR="/"
+        # Let's set the configuration directory to /tmp
+        TEMP_CONFIG_DIR="/tmp"
         CONFIG_SALT_FUNC="config_salt"
+
+        # Let's download, since they were not provided, the default configuration files
+        if [ ! -f /etc/salt/minion ] && [ ! -f $TEMP_CONFIG_DIR/minion ]; then
+            curl -sk -o $TEMP_CONFIG_DIR/minion -L https://raw.github.com/saltstack/salt/blob/develop/conf/minion
+        fi
+        if [ ! -f /etc/salt/master ] && [ ! -f $TEMP_CONFIG_DIR/master ]; then
+            curl -sk -o $TEMP_CONFIG_DIR/master -L https://raw.github.com/saltstack/salt/blob/develop/conf/master
+        fi
     fi
 
 }
@@ -1606,10 +1612,10 @@ install_smartos_post() {
     for fname in minion master syndic; do
         svcs network/salt-$fname > /dev/null 2>&1
         if [ $? -eq 1 ]; then
-            if [ ! -f salt-$fname.xml ]; then
-                curl -sk -o salt-$fname.xml -L https://raw.github.com/saltstack/salt/develop/pkg/solaris/salt-$fname.xml
+            if [ ! -f $TEMP_CONFIG_DIR/salt-$fname.xml ]; then
+                curl -sk -o $TEMP_CONFIG_DIR/salt-$fname.xml -L https://raw.github.com/saltstack/salt/develop/pkg/solaris/salt-$fname.xml
             fi
-            svccfg import salt-$fname.xml
+            svccfg import $TEMP_CONFIG_DIR/salt-$fname.xml
         fi
     done
 }

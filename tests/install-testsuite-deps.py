@@ -33,7 +33,8 @@ else:
 
 for command in COMMANDS:
     print 'Executing {0!r}'.format(command)
-    subprocess.Popen(command, shell=True)
+    process = subprocess.Popen(command, shell=True)
+    process.communicate()
 
 print('\nDONE\n')
 exit(0)

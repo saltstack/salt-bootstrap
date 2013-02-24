@@ -1599,7 +1599,7 @@ install_smartos_git_deps() {
 }
 
 install_smartos_stable() {
-    pip-2.7 install salt
+    USE_SETUPTOOLS=1 pip-2.7 install salt
 }
 
 install_smartos_git() {

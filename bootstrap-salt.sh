@@ -1555,18 +1555,19 @@ install_freebsd_restart_daemons() {
 #   SmartOS Install Functions
 #
 install_smartos_deps() {
+    ZEROMQ_VERSION='3.2.2'
     pkgin -y in libtool-base autoconf automake libuuid gcc-compiler gmake \
         python27 py27-setuptools py27-yaml py27-crypto swig
-    [ -d zeromq-3.2.1 ] || (
-        wget http://download.zeromq.org/zeromq-3.2.1-rc2.tar.gz &&
-        tar -xvf zeromq-3.2.1-rc2.tar.gz
+    [ -d zeromq-${ZEROMQ_VERSION} ] || (
+        wget http://download.zeromq.org/zeromq-${ZEROMQ_VERSION}.tar.gz &&
+        tar -xvf zeromq-${ZEROMQ_VERSION}.tar.gz
     )
-    cd zeromq-3.2.1
+    cd zeromq-${ZEROMQ_VERSION}
     ./configure
     make
     make install
 
-    easy_install-2.7 pyzmq
+    pip-2.7 pyzmq
 
     # Let's trigger config_salt()
     if [ "$TEMP_CONFIG_DIR" = "null" ]; then
@@ -1592,7 +1593,7 @@ install_smartos_git_deps() {
 }
 
 install_smartos_stable() {
-    easy_install-2.7 salt
+    pip-2.7 salt
 }
 
 install_smartos_git() {

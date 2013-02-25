@@ -63,14 +63,15 @@ class InstallationTestCase(BootstrapTestCase):
         if os.geteuid() is not 0:
             self.skipTest('you must be root to run this test')
 
-    def tearDown(self):
         if GRAINS['os_family'] not in CLEANUP_COMMANDS_BY_OS_FAMILY:
-            raise RuntimeError(
+            self.skipTest(
                 'There is not `tearDown()` clean up support for {0!r} OS '
                 'family.'.format(
                     GRAINS['os_family']
                 )
             )
+
+    def tearDown(self):
         for cleanup in CLEANUP_COMMANDS_BY_OS_FAMILY[GRAINS['os_family']]:
             print 'Running cleanup command {0!r}'.format(cleanup)
             self.assert_script_result(

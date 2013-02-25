@@ -50,9 +50,17 @@ CLEANUP_COMMANDS_BY_OS_FAMILY = {
         'svcs network/salt-syndic >/dev/null 2>&1 && svccfg delete network/salt-syndic >/dev/null 2>&1 || exit 0'
     ],
     'Suse': [
+        '(zypper se -i salt || exit 0 && zypper --non-interactive remove salt && exit 0) || '
+        '(rpm -q salt && rpm -e --noscripts salt || exit 0)',
+        '(zypper se -i salt-master || exit 0 && zypper --non-interactive remove salt-master && exit 0) || '
+        '(rpm -q salt-master && rpm -e --noscripts salt-master || exit 0)',
+        '(zypper se -i salt-minion || exit 0 && zypper --non-interactive remove salt-minion && exit 0) || '
+        '(rpm -q salt-minion && rpm -e --noscripts salt-minion || exit 0)',
+        '(zypper se -i salt-syndic || exit 0 && zypper --non-interactive remove salt-syndic && exit 0) || '
+        '(rpm -q salt-syndic && rpm -e --noscripts salt-syndic || exit 0)',
         'zypper --non-interactive remove libzmq3 python-Jinja2 '
         'python-M2Crypto python-PyYAML python-msgpack-python '
-        'python-pycrypto python-pyzmq salt salt-minion salt-master salt-syndic'
+        'python-pycrypto python-pyzmq',
     ]
 }
 
@@ -72,16 +80,6 @@ class InstallationTestCase(BootstrapTestCase):
             )
 
     def tearDown(self):
-        if GRAINS['os_family'] == 'Suse':
-            from salt import version
-            if version.__version_info__ <= (0, 13):
-                # packages need some tweaks to properly uninstall
-                CLEANUP_COMMANDS_BY_OS_FAMILY[GRAINS['os_family']].insert(
-                    0, 'touch /etc/init.d/master'
-                )
-                CLEANUP_COMMANDS_BY_OS_FAMILY[GRAINS['os_family']].insert(
-                    0, 'touch /etc/init.d/minion'
-                )
         for cleanup in CLEANUP_COMMANDS_BY_OS_FAMILY[GRAINS['os_family']]:
             print 'Running cleanup command {0!r}'.format(cleanup)
             self.assert_script_result(

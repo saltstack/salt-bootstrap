@@ -52,7 +52,7 @@ CLEANUP_COMMANDS_BY_OS_FAMILY = {
     'Suse': [
         'zypper --non-interactive remove libzmq3 python-Jinja2 '
         'python-M2Crypto python-PyYAML python-msgpack-python '
-        'python-pycrypto python-pyzmq salt salt-minion salt-master'
+        'python-pycrypto python-pyzmq salt salt-minion salt-master salt-syndic'
     ]
 }
 

@@ -22,7 +22,7 @@ if GRAINS['os'] == 'SmartOS':
         'pkgin -y in scmgit-base py27-pip',
         'pip install unittest2'
     ])
-elif GRAINS['os'] == 'openSuse':
+elif GRAINS['os'] == 'openSUSE':
     COMMANDS.extend([
         'zypper addrepo --refresh http://download.opensuse.org/repositories'
         '/devel:/languages:/python/{0}/devel:languages:python.repo'.format(

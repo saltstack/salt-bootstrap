@@ -1694,8 +1694,11 @@ install_opensuse_stable() {
     if [ $INSTALL_MINION -eq $BS_TRUE ]; then
         packages="${packages} salt-minion"
     fi
-    if [ $INSTALL_MASTER -eq $BS_TRUE ] || [ $INSTALL_SYNDIC -eq $BS_TRUE ]; then
+    if [ $INSTALL_MASTER -eq $BS_TRUE ]; then
         packages="${packages} salt-master"
+    fi
+    if [ $INSTALL_SYNDIC -eq $BS_TRUE ]; then
+        packages="${packages} salt-syndic"
     fi
     zypper --non-interactive install --auto-agree-with-licenses $packages
 }

@@ -22,6 +22,16 @@ if GRAINS['os'] == 'SmartOS':
         'pkgin -y in scmgit-base py27-pip',
         'pip install unittest2'
     ])
+elif GRAINS['os'] == 'openSuse':
+    COMMANDS.extend([
+        'zypper addrepo --refresh http://download.opensuse.org/repositories'
+        '/devel:/languages:/python/{0}/devel:languages:python.repo'.format(
+            GRAINS['osrelease']
+        ),
+        'zypper --gpg-auto-import-keys --non-interactive refresh',
+        'zypper --non-interactive install --auto-agree-with-licenses git python-pip',
+        'pip install unittest2'
+    ])
 else:
     print(
         'Failed gather the proper commands to allow the tests suite to be '

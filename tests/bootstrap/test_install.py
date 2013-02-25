@@ -48,6 +48,11 @@ CLEANUP_COMMANDS_BY_OS_FAMILY = {
         'svcs network/salt-master >/dev/null 2>&1 && svccfg delete network/salt-master >/dev/null 2>&1 || exit 0',
         'svcs network/salt-syndic >/dev/null 2>&1 && svcadm disable network/salt-syndic >/dev/null 2>&1 || exit 0',
         'svcs network/salt-syndic >/dev/null 2>&1 && svccfg delete network/salt-syndic >/dev/null 2>&1 || exit 0'
+    ],
+    'Suse': [
+        'zypper --non-interactive remove libzmq3 python-Jinja2 '
+        'python-M2Crypto python-PyYAML python-msgpack-python '
+        'python-pycrypto python-pyzmq salt salt-minion salt-master'
     ]
 }
 

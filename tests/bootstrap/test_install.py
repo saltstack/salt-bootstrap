@@ -72,6 +72,16 @@ class InstallationTestCase(BootstrapTestCase):
             )
 
     def tearDown(self):
+        if GRAINS['os_family'] == 'Suse':
+            from salt import version
+            if version.__version_info__ <= (0, 13):
+                # packages need some tweaks to properly uninstall
+                CLEANUP_COMMANDS_BY_OS_FAMILY[GRAINS['os_family']].insert(
+                    0, 'touch /etc/init.d/master'
+                )
+                CLEANUP_COMMANDS_BY_OS_FAMILY[GRAINS['os_family']].insert(
+                    0, 'touch /etc/init.d/minion'
+                )
         for cleanup in CLEANUP_COMMANDS_BY_OS_FAMILY[GRAINS['os_family']]:
             print 'Running cleanup command {0!r}'.format(cleanup)
             self.assert_script_result(

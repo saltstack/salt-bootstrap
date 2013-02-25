@@ -78,6 +78,8 @@ class InstallationTestCase(BootstrapTestCase):
                 (
                     0,   # Proper exit code without errors.
 
+                    4,   # ZYPPER_EXIT_ERR_ZYPP: A problem reported by ZYPP library.
+
                     65,  # FreeBSD throws this error code when the packages
                          # being un-installed were not installed in the first
                          # place.

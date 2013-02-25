@@ -1664,6 +1664,91 @@ install_smartos_restart_daemons() {
 
 ##############################################################################
 #
+#    openSUSE Install Functions.
+#
+install_opensuse_stable_deps() {
+    DISTRO_REPO="openSUSE_${DISTRO_MAJOR_VERSION}.${DISTRO_MINOR_VERSION}"
+    zypper addrepo --refresh http://download.opensuse.org/repositories/devel:/languages:/python/${DISTRO_REPO}/devel:languages:python.repo
+    zypper --gpg-auto-import-keys --non-interactive refresh
+    zypper --non-interactive install --auto-agree-with-licenses libzmq3 python \
+        python-Jinja2 python-M2Crypto python-PyYAML python-msgpack-python \
+        python-pycrypto python-pyzmq
+}
+
+install_opensuse_git_deps() {
+    install_opensuse_stable_deps
+    zypper --non-interactive install --auto-agree-with-licenses git
+
+    __git_clone_and_checkout
+
+    # Let's trigger config_salt()
+    if [ "$TEMP_CONFIG_DIR" = "null" ]; then
+        TEMP_CONFIG_DIR="${SALT_GIT_CHECKOUT_DIR}/conf/"
+        CONFIG_SALT_FUNC="config_salt"
+    fi
+}
+
+install_opensuse_stable() {
+    packages=""
+    if [ $INSTALL_MINION -eq $BS_TRUE ]; then
+        packages="${packages} salt-minion"
+    fi
+    if [ $INSTALL_MASTER -eq $BS_TRUE ] || [ $INSTALL_SYNDIC -eq $BS_TRUE ]; then
+        packages="${packages} salt-master"
+    fi
+    zypper --non-interactive install --auto-agree-with-licenses $packages
+}
+
+install_opensuse_git() {
+    python setup.py install
+}
+
+install_opensuse_stable_post() {
+    for fname in minion master syndic; do
+
+        # Skip if not meant to be installed
+        [ $fname = "minion" ] && [ $INSTALL_MINION -eq $BS_FALSE ] && continue
+        [ $fname = "master" ] && [ $INSTALL_MASTER -eq $BS_FALSE ] && continue
+        [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq $BS_FALSE ] && continue
+
+        systemctl is-enabled salt-$fname.service || (systemctl preset salt-$fname.service && systemctl enable salt-$fname.service)
+        sleep 0.1
+        systemctl daemon-reload
+    done
+}
+
+install_opensuse_git_post() {
+    for fname in minion master syndic; do
+
+        # Skip if not meant to be installed
+        [ $fname = "minion" ] && [ $INSTALL_MINION -eq $BS_FALSE ] && continue
+        [ $fname = "master" ] && [ $INSTALL_MASTER -eq $BS_FALSE ] && continue
+        [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq $BS_FALSE ] && continue
+
+        cp ${SALT_GIT_CHECKOUT_DIR}/pkg/salt-$fname.service /lib/systemd/system/salt-$fname.service
+    done
+    install_opensuse_stable_post
+}
+
+install_opensuse_restart_daemons() {
+    for fname in minion master syndic; do
+
+        # Skip if not meant to be installed
+        [ $fname = "minion" ] && [ $INSTALL_MINION -eq $BS_FALSE ] && continue
+        [ $fname = "master" ] && [ $INSTALL_MASTER -eq $BS_FALSE ] && continue
+        [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq $BS_FALSE ] && continue
+
+        systemctl stop salt-$fname > /dev/null 2>&1
+        systemctl start salt-$fname.service
+    done
+}
+#
+#   End of openSUSE Install Functions.
+#
+##############################################################################
+
+##############################################################################
+#
 #    SuSE Install Functions.
 #
 install_suse_11_stable(){

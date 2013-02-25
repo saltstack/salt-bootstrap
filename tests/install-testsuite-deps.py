@@ -24,7 +24,7 @@ if GRAINS['os'] == 'SmartOS':
     ])
 elif GRAINS['os'] == 'openSUSE':
     COMMANDS.extend([
-        'zypper addrepo --refresh http://download.opensuse.org/repositories'
+        'zypper --non-interactive addrepo --refresh http://download.opensuse.org/repositories'
         '/devel:/languages:/python/{0}/devel:languages:python.repo'.format(
             GRAINS['osrelease']
         ),

@@ -50,14 +50,14 @@ CLEANUP_COMMANDS_BY_OS_FAMILY = {
         'svcs network/salt-syndic >/dev/null 2>&1 && svccfg delete network/salt-syndic >/dev/null 2>&1 || exit 0'
     ],
     'Suse': [
-        '(zypper se -i salt || exit 0 && zypper --non-interactive remove salt && exit 0) || '
-        '(rpm -q salt && rpm -e --noscripts salt || exit 0)',
         '(zypper se -i salt-master || exit 0 && zypper --non-interactive remove salt-master && exit 0) || '
         '(rpm -q salt-master && rpm -e --noscripts salt-master || exit 0)',
         '(zypper se -i salt-minion || exit 0 && zypper --non-interactive remove salt-minion && exit 0) || '
         '(rpm -q salt-minion && rpm -e --noscripts salt-minion || exit 0)',
         '(zypper se -i salt-syndic || exit 0 && zypper --non-interactive remove salt-syndic && exit 0) || '
         '(rpm -q salt-syndic && rpm -e --noscripts salt-syndic || exit 0)',
+        '(zypper se -i salt || exit 0 && zypper --non-interactive remove salt && exit 0) || '
+        '(rpm -q salt && rpm -e --noscripts salt || exit 0)',
         'zypper --non-interactive remove libzmq3 python-Jinja2 '
         'python-M2Crypto python-PyYAML python-msgpack-python '
         'python-pycrypto python-pyzmq',

@@ -88,15 +88,21 @@ class InstallationTestCase(BootstrapTestCase):
             self.assert_script_result(
                 'Failed to execute cleanup command {0!r}'.format(cleanup),
                 (
-                    0,   # Proper exit code without errors.
+                    0,    # Proper exit code without errors.
 
-                    4,   # ZYPPER_EXIT_ERR_ZYPP: A problem reported by ZYPP library.
+                    4,    # ZYPPER_EXIT_ERR_ZYPP: A problem reported by ZYPP
+                          # library.
 
-                    65,  # FreeBSD throws this error code when the packages
-                         # being un-installed were not installed in the first
-                         # place.
+                    65,   # FreeBSD throws this error code when the packages
+                          # being un-installed were not installed in the first
+                          # place.
 
-                    100  # Same as above but on Ubuntu with a another errno
+                    100,  # Same as above but on Ubuntu with a another errno
+
+                    104,  # ZYPPER_EXIT_INF_CAP_NOT_FOUND: Returned by the
+                          # install and the remove command in case any of
+                          # the arguments does not match any of the available
+                          # (or installed) package names or other capabilities.
                 ),
                 self.run_script(
                     script=None,

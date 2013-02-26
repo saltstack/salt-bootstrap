@@ -1828,7 +1828,6 @@ install_suse_11_stable_post() {
             [ $fname = "master" ] && [ $INSTALL_MASTER -eq $BS_FALSE ] && continue
             [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq $BS_FALSE ] && continue
 
-            https://github.com/saltstack/salt/raw/develop/pkg/rpm/salt-master
             if [ -f /bin/systemctl ]; then
                 curl -k -L https://github.com/saltstack/salt/raw/develop/pkg/salt-$fname.service \
                     -o /lib/systemd/system/salt-$fname.service

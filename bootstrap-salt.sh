@@ -1778,16 +1778,16 @@ install_opensuse_restart_daemons() {
 #    SuSE Install Functions.
 #
 install_suse_11_stable_deps() {
-    PATCHLEVEL=$(grep PATCHLEVEL /etc/SuSE-release | awk '{print $3}')
-    if [ "x${PATCHLEVEL}" != "x" ]; then
-        DISTRO_PATCHLEVEL="_SP${PATCHLEVEL}"
+    SUSE_PATCHLEVEL=$(grep PATCHLEVEL /etc/SuSE-release | awk '{print $3}')
+    if [ "x${SUSE_PATCHLEVEL}" != "x" ]; then
+        DISTRO_PATCHLEVEL="_SP${SUSE_PATCHLEVEL}"
     fi
     DISTRO_REPO="SLE_${DISTRO_MAJOR_VERSION}${DISTRO_PATCHLEVEL}"
 
     zypper --non-interactive addrepo --refresh \
         http://download.opensuse.org/repositories/devel:/languages:/python/${DISTRO_REPO}/devel:languages:python.repo
     zypper --gpg-auto-import-keys --non-interactive refresh
-    if [ $PATCHLEVEL -eq 1 ]; then
+    if [ $SUSE_PATCHLEVEL -eq 1 ]; then
         zypper --non-interactive install --auto-agree-with-licenses libzmq3 python \
         python-Jinja2 'python-M2Crypto>=0.21' python-msgpack-python \
         python-pycrypto python-pyzmq python-pip
@@ -1806,7 +1806,11 @@ install_suse_11_git_deps() {
 }
 
 install_suse_11_stable() {
-    install_opensuse_stable
+    if [ $SUSE_PATCHLEVEL -lt 2 ]; then
+        install_opensuse_stable
+    else
+        pip install salt
+    fi
 }
 
 install_suse_11_git() {
@@ -1814,7 +1818,29 @@ install_suse_11_git() {
 }
 
 install_suse_11_stable_post() {
-    install_opensuse_stable_post
+    if [ $SUSE_PATCHLEVEL -lt 2 ]; then
+        install_opensuse_stable_post
+    else
+        for fname in minion master syndic; do
+
+            # Skip if not meant to be installed
+            [ $fname = "minion" ] && [ $INSTALL_MINION -eq $BS_FALSE ] && continue
+            [ $fname = "master" ] && [ $INSTALL_MASTER -eq $BS_FALSE ] && continue
+            [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq $BS_FALSE ] && continue
+
+            https://github.com/saltstack/salt/raw/develop/pkg/rpm/salt-master
+            if [ -f /bin/systemctl ]; then
+                curl -k -L https://github.com/saltstack/salt/raw/develop/pkg/salt-$fname.service \
+                    -o /lib/systemd/system/salt-$fname.service
+                continue
+            fi
+
+            curl -k -L https://github.com/saltstack/salt/raw/develop/pkg/rpm/salt-$fname \
+                -o /etc/init.d/salt-$fname
+            chmod +x /etc/init.d/salt-$fname
+
+        done
+    fi
 }
 
 install_suse_11_git_post() {

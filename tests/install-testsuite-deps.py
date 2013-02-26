@@ -12,8 +12,10 @@
 '''
 
 import sys
+import pprint
 import subprocess
-from bootstrap import GRAINS
+from bootstrap.ext.os_data import GRAINS
+
 
 COMMANDS = []
 if GRAINS['os'] == 'SmartOS':
@@ -36,7 +38,7 @@ else:
     print(
         'Failed gather the proper commands to allow the tests suite to be '
         'executed in this system.\nSystem Grains:\n{0}'.format(
-            GRAINS
+            pprint.pformat(GRAINS)
         )
     )
     sys.exit(1)

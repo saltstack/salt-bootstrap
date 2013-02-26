@@ -12,7 +12,7 @@
 
 import glob
 import shutil
-from bootstrap import *
+from bootstrap.unittesting import *
 
 
 CLEANUP_COMMANDS_BY_OS_FAMILY = {
@@ -140,7 +140,6 @@ class InstallationTestCase(BootstrapTestCase):
             )
         )
 
-
     def test_install_using_sh(self):
         self.assert_script_result(
             'Failed to install using sh',
@@ -162,7 +161,6 @@ class InstallationTestCase(BootstrapTestCase):
                 stream_stds=True
             )
         )
-
 
     def test_install_explicit_stable(self):
         self.assert_script_result(
@@ -186,7 +184,6 @@ class InstallationTestCase(BootstrapTestCase):
                 stream_stds=True
             )
         )
-
 
     def test_install_daily(self):
         rc, out, err = self.run_script(

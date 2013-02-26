@@ -58,6 +58,8 @@ CLEANUP_COMMANDS_BY_OS_FAMILY = {
         '(rpm -q salt-syndic && rpm -e --noscripts salt-syndic || exit 0)',
         '(zypper --non-interactive se -i salt || exit 0 && zypper --non-interactive remove salt && exit 0) || '
         '(rpm -q salt && rpm -e --noscripts salt || exit 0)',
+        'pip uninstall -y salt >/dev/null 2>&1 || exit 0',
+        'pip uninstall -y PyYaml >/dev/null 2>&1 || exit 0',
         'zypper --non-interactive remove libzmq3 python-Jinja2 '
         'python-M2Crypto python-PyYAML python-msgpack-python '
         'python-pycrypto python-pyzmq',
@@ -115,12 +117,18 @@ class InstallationTestCase(BootstrapTestCase):
         if os.path.isdir('/tmp/git'):
             print 'Cleaning salt git checkout'
             shutil.rmtree('/tmp/git')
-        if os.path.isdir('/usr/lib/python2.7/site-packages/salt'):
-            print 'Cleaning up /usr/lib/python2.7/site-packages/salt'
-            shutil.rmtree('/usr/lib/python2.7/site-packages/salt')
+        for entry in glob.glob('/usr/lib*/python*/site-packages/salt*'):
+            if os.path.isfile(entry):
+                print 'Removing file {0!r}'.format(entry)
+                os.remove(entry)
+            elif os.path.isdir(entry):
+                print 'Removing directory {0!r}'.format(entry)
+                shutil.rmtree(entry)
         for entry in glob.glob('/usr/bin/salt*'):
+            print 'Removing file {0!r}'.format(entry)
             os.unlink(entry)
         for entry in glob.glob('/usr/lib/systemd/system/salt*'):
+            print 'Removing file {0!r}'.format(entry)
             os.unlink(entry)
 
     def test_install_using_bash(self):

@@ -899,6 +899,9 @@ install_debian_deps() {
 }
 
 install_debian_6_0_deps() {
+    echowarn "PyZMQ will be installed from PyPi in order to compile it against ZMQ3"
+    echowarn "This is required for long term stable minion connections to the master."
+
     if [ "x$(grep -R 'backports.debian.org' /etc/apt)" = "x" ]; then
         echo "deb http://backports.debian.org/debian-backports squeeze-backports main" >> \
             /etc/apt/sources.list.d/backports.list
@@ -942,6 +945,9 @@ _eof
 }
 
 install_debian_git_deps() {
+    echowarn "PyZMQ will be installed from PyPi in order to compile it against ZMQ3"
+    echowarn "This is required for long term stable minion connections to the master."
+
     apt-get update
     __apt_get_noinput lsb-release python python-pkg-resources python-crypto \
         python-jinja2 python-m2crypto python-yaml msgpack-python git

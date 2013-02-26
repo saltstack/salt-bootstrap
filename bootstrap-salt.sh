@@ -1766,7 +1766,7 @@ install_suse_11_stable_deps() {
         http://download.opensuse.org/repositories/devel:/languages:/python/${DISTRO_REPO}/devel:languages:python.repo
     zypper --gpg-auto-import-keys --non-interactive refresh
     zypper --non-interactive install --auto-agree-with-licenses libzmq3 python \
-        python-Jinja2 python-M2Crypto python-PyYAML python-msgpack-python \
+        python-Jinja2 'python-M2Crypto>=0.21' python-PyYAML python-msgpack-python \
         python-pycrypto python-pyzmq
 }
 

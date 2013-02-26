@@ -1755,67 +1755,109 @@ install_opensuse_restart_daemons() {
 #
 #    SuSE Install Functions.
 #
-install_suse_11_stable(){
-    USE_SETUPTOOLS=1 pip install -U salt
-}
-
-install_suse_11_deps() {
-    echowarn "SuSE installations should be considered unstable. See #56"
-    zypper --non-interactive install -l gcc-c++ python-devel libopenssl-devel zlib-devel swig
-    zypper --non-interactive --no-gpg-checks -p http://download.opensuse.org/repositories/home:/fengshuo:/zeromq/SLE_11_SP1/ -v install zeromq
-}
-
-install_suse_11_stable_deps(){
-    install_suse_11_deps
-    if [ ! -f /usr/local/bin/pip ]; then
-        curl http://python-distribute.org/distribute_setup.py | python
-        curl https://raw.github.com/pypa/pip/master/contrib/get-pip.py | python
-        rm distribute-*.*.*.tar.gz
+install_suse_11_stable_deps() {
+    DISTRO_PATCHLEVEL=$(grep PATCHLEVEL /etc/SuSE-release | awk '{print $3}')
+    if [ "x${DISTRO_PATCHLEVEL}" != "x" ]; then
+        DISTRO_PATCHLEVEL="_SP${DISTRO_PATCHLEVEL}"
     fi
-    pip install PyYAML M2Crypto pycrypto msgpack-python pyzmq jinja2
+    DISTRO_REPO="SLE_${DISTRO_MAJOR_VERSION}${DISTRO_PATCHLEVEL}"
+
+    zypper --non-interactive addrepo --refresh \
+        http://download.opensuse.org/repositories/devel:/languages:/python/${DISTRO_REPO}/devel:languages:python.repo
+    zypper --gpg-auto-import-keys --non-interactive refresh
+    zypper --non-interactive install --auto-agree-with-licenses libzmq3 python \
+        python-Jinja2 python-M2Crypto python-PyYAML python-msgpack-python \
+        python-pycrypto python-pyzmq
 }
 
-install_suse_11_git_deps(){
+install_suse_11_git_deps() {
     install_suse_11_stable_deps
-    zypper --non-interactive install -l git
-    pip install PyYAML M2Crypto pycrypto msgpack-python pyzmq jinja2
+    install_opensuse_git_deps
 }
 
-install_suse_11_git(){
-    install_suse_11_git_deps
-    __git_clone_and_checkout
-    python setup.py install
+install_suse_11_stable() {
+    install_opensuse_stable
 }
 
-install_suse_11_post(){
-    if [ $INSTALL_MASTER = 1 ]; then
-        tempfile=$(mktemp)
-        curl https://raw.github.com/saltstack/salt/develop/pkg/rpm/salt-master > $tempfile
-        sed 's/SALTMASTER=\/usr\/bin\/salt-master/SALTMASTER=\/usr\/local\/bin\/salt-master/g' $tempfile > /etc/init.d/salt-master
-        rm $tempfile
-        chmod +x /etc/init.d/salt-master
-        /sbin/chkconfig --add salt-master
-        /sbin/chkconfig salt-master on
-    fi
-
-    if [ $INSTALL_MINION = 1 ]; then
-        tempfile=$(mktemp)
-        curl https://raw.github.com/saltstack/salt/develop/pkg/rpm/salt-minion > $tempfile
-        sed 's/SALTMINION=\/usr\/bin\/salt-minion/SALTMINION=\/usr\/local\/bin\/salt-minion/g' $tempfile > /etc/init.d/salt-minion
-        rm $tempfile
-        chmod +x /etc/init.d/salt-minion
-        /sbin/chkconfig --add salt-minion
-        /sbin/chkconfig salt-minion on
-    fi
+install_suse_11_git() {
+    install_opensuse_git
 }
 
-install_suse_11_git_post(){
-    install_suse_11_post
+install_suse_11_stable_post() {
+    install_opensuse_stable_post
 }
 
-install_suse_11_stable_post(){
-    install_suse_11_post
+install_suse_11_git_post() {
+    install_opensuse_git_post
 }
+
+install_suse_11_restart_daemons() {
+    install_opensuse_restart_daemons
+}
+
+
+#install_suse_11_stable(){
+#    USE_SETUPTOOLS=1 pip install -U salt
+#}
+#
+#install_suse_11_deps() {
+#    echowarn "SuSE installations should be considered unstable. See #56"
+#    zypper --non-interactive install -l gcc-c++ python-devel libopenssl-devel zlib-devel swig
+#    zypper --non-interactive --no-gpg-checks -p http://download.opensuse.org/repositories/home:/fengshuo:/zeromq/SLE_11_SP1/ -v install zeromq
+#}
+#
+#install_suse_11_stable_deps(){
+#    install_suse_11_deps
+#    if [ ! -f /usr/local/bin/pip ]; then
+#        curl http://python-distribute.org/distribute_setup.py | python
+#        curl https://raw.github.com/pypa/pip/master/contrib/get-pip.py | python
+#        rm distribute-*.*.*.tar.gz
+#    fi
+#    pip install PyYAML M2Crypto pycrypto msgpack-python pyzmq jinja2
+#}
+#
+#install_suse_11_git_deps(){
+#    install_suse_11_stable_deps
+#    zypper --non-interactive install -l git
+#    pip install PyYAML M2Crypto pycrypto msgpack-python pyzmq jinja2
+#}
+#
+#install_suse_11_git(){
+#    install_suse_11_git_deps
+#    __git_clone_and_checkout
+#    python setup.py install
+#}
+#
+#install_suse_11_post(){
+#    if [ $INSTALL_MASTER = 1 ]; then
+#        tempfile=$(mktemp)
+#        curl https://raw.github.com/saltstack/salt/develop/pkg/rpm/salt-master > $tempfile
+#        sed 's/SALTMASTER=\/usr\/bin\/salt-master/SALTMASTER=\/usr\/local\/bin\/salt-master/g' $tempfile > /etc/init.d/salt-master
+#        rm $tempfile
+#        chmod +x /etc/init.d/salt-master
+#        /sbin/chkconfig --add salt-master
+#        /sbin/chkconfig salt-master on
+#    fi
+#
+#    if [ $INSTALL_MINION = 1 ]; then
+#        tempfile=$(mktemp)
+#        curl https://raw.github.com/saltstack/salt/develop/pkg/rpm/salt-minion > $tempfile
+#        sed 's/SALTMINION=\/usr\/bin\/salt-minion/SALTMINION=\/usr\/local\/bin\/salt-minion/g' $tempfile > /etc/init.d/salt-minion
+#        rm $tempfile
+#        chmod +x /etc/init.d/salt-minion
+#        /sbin/chkconfig --add salt-minion
+#        /sbin/chkconfig salt-minion on
+#    fi
+#}
+#
+#install_suse_11_git_post(){
+#    install_suse_11_post
+#}
+#
+#install_suse_11_stable_post(){
+#    install_suse_11_post
+#}
+
 #
 #   End of SuSE Install Functions.
 #

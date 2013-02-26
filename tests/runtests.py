@@ -16,7 +16,8 @@ import pprint
 import shutil
 import optparse
 
-from bootstrap import GRAINS, TestLoader, TextTestRunner
+from bootstrap.unittesting import TestLoader, TextTestRunner
+from bootstrap.ext.os_data import GRAINS
 try:
     from bootstrap.ext import console
     width, height = console.getTerminalSize()

@@ -1704,7 +1704,7 @@ install_opensuse_stable() {
 }
 
 install_opensuse_git() {
-    python setup.py install
+    python setup.py install --prefix=/usr
 }
 
 install_opensuse_stable_post() {

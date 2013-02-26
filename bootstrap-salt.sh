@@ -1802,7 +1802,15 @@ install_suse_11_stable_deps() {
 
 install_suse_11_git_deps() {
     install_suse_11_stable_deps
-    install_opensuse_git_deps
+    zypper --non-interactive install --auto-agree-with-licenses git
+
+    __git_clone_and_checkout
+
+    # Let's trigger config_salt()
+    if [ "$TEMP_CONFIG_DIR" = "null" ]; then
+        TEMP_CONFIG_DIR="${SALT_GIT_CHECKOUT_DIR}/conf/"
+        CONFIG_SALT_FUNC="config_salt"
+    fi
 }
 
 install_suse_11_stable() {

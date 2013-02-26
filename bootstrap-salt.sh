@@ -1809,7 +1809,9 @@ install_suse_11_stable() {
     if [ $SUSE_PATCHLEVEL -gt 1 ]; then
         install_opensuse_stable
     else
-        pip install salt
+        # USE_SETUPTOOLS=1 To work around
+        # error: option --single-version-externally-managed not recognized
+        USE_SETUPTOOLS=1 pip install salt
     fi
 }
 

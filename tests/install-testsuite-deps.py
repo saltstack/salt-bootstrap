@@ -11,9 +11,13 @@
     :license: Apache 2.0, see LICENSE for more details.
 '''
 
+# Import python libs
+import re
 import sys
 import pprint
 import subprocess
+
+# Import bootstrap libs
 from bootstrap.ext.os_data import GRAINS
 
 
@@ -29,6 +33,25 @@ elif GRAINS['os'] == 'openSUSE':
         'zypper --non-interactive addrepo --refresh http://download.opensuse.org/repositories'
         '/devel:/languages:/python/{0}/devel:languages:python.repo'.format(
             GRAINS['osrelease']
+        ),
+        'zypper --gpg-auto-import-keys --non-interactive refresh',
+        'zypper --non-interactive install --auto-agree-with-licenses git python-pip',
+        'pip install unittest2'
+    ])
+elif GRAINS['osfullname'].startswith('SUSE Linux Enterprise Server'):
+    match = re.search(
+        r'PATCHLEVEL(?:[\s]+)=(?:[\s]+)([0-9]+)',
+        open('/etc/SuSE-release').read()
+    )
+    #if not match:
+    #    print 'Failed to get the current patch level for:\n{0}'.format(
+    #        pprint.pformat(GRAINS)
+    #    )
+    COMMANDS.extend([
+        'zypper --non-interactive addrepo --refresh http://download.opensuse.org/repositories'
+        '/devel:/languages:/python/SLE_{0}{1}/devel:languages:python.repo'.format(
+            GRAINS['osrelease'],
+            match and '_SP{0}'.format(match.group(1)) or ''
         ),
         'zypper --gpg-auto-import-keys --non-interactive refresh',
         'zypper --non-interactive install --auto-agree-with-licenses git python-pip',

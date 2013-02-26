@@ -1806,7 +1806,7 @@ install_suse_11_git_deps() {
 }
 
 install_suse_11_stable() {
-    if [ $SUSE_PATCHLEVEL -lt 2 ]; then
+    if [ $SUSE_PATCHLEVEL -gt 1 ]; then
         install_opensuse_stable
     else
         pip install salt
@@ -1818,7 +1818,7 @@ install_suse_11_git() {
 }
 
 install_suse_11_stable_post() {
-    if [ $SUSE_PATCHLEVEL -lt 2 ]; then
+    if [ $SUSE_PATCHLEVEL -gt 1 ]; then
         install_opensuse_stable_post
     else
         for fname in minion master syndic; do

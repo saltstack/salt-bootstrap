@@ -50,19 +50,24 @@ CLEANUP_COMMANDS_BY_OS_FAMILY = {
         'svcs network/salt-syndic >/dev/null 2>&1 && svccfg delete network/salt-syndic >/dev/null 2>&1 || exit 0'
     ],
     'Suse': [
-        '(zypper se -i salt || exit 0 && zypper --non-interactive remove salt && exit 0) || '
-        '(rpm -q salt && rpm -e --noscripts salt || exit 0)',
-        '(zypper se -i salt-master || exit 0 && zypper --non-interactive remove salt-master && exit 0) || '
+        '(zypper --non-interactive se -i salt-master || exit 0 && zypper --non-interactive remove salt-master && exit 0) || '
         '(rpm -q salt-master && rpm -e --noscripts salt-master || exit 0)',
-        '(zypper se -i salt-minion || exit 0 && zypper --non-interactive remove salt-minion && exit 0) || '
+        '(zypper --non-interactive se -i salt-minion || exit 0 && zypper --non-interactive remove salt-minion && exit 0) || '
         '(rpm -q salt-minion && rpm -e --noscripts salt-minion || exit 0)',
-        '(zypper se -i salt-syndic || exit 0 && zypper --non-interactive remove salt-syndic && exit 0) || '
+        '(zypper --non-interactive se -i salt-syndic || exit 0 && zypper --non-interactive remove salt-syndic && exit 0) || '
         '(rpm -q salt-syndic && rpm -e --noscripts salt-syndic || exit 0)',
+        '(zypper --non-interactive se -i salt || exit 0 && zypper --non-interactive remove salt && exit 0) || '
+        '(rpm -q salt && rpm -e --noscripts salt || exit 0)',
+        'pip uninstall -y salt >/dev/null 2>&1 || exit 0',
+        'pip uninstall -y PyYaml >/dev/null 2>&1 || exit 0',
         'zypper --non-interactive remove libzmq3 python-Jinja2 '
         'python-M2Crypto python-PyYAML python-msgpack-python '
         'python-pycrypto python-pyzmq',
     ]
 }
+
+# SLES grains differ from openSUSE, let do a 1:1 direct mapping
+CLEANUP_COMMANDS_BY_OS_FAMILY['SUSE  Enterprise Server'] = CLEANUP_COMMANDS_BY_OS_FAMILY['Suse']
 
 
 class InstallationTestCase(BootstrapTestCase):
@@ -85,15 +90,21 @@ class InstallationTestCase(BootstrapTestCase):
             self.assert_script_result(
                 'Failed to execute cleanup command {0!r}'.format(cleanup),
                 (
-                    0,   # Proper exit code without errors.
+                    0,    # Proper exit code without errors.
 
-                    4,   # ZYPPER_EXIT_ERR_ZYPP: A problem reported by ZYPP library.
+                    4,    # ZYPPER_EXIT_ERR_ZYPP: A problem reported by ZYPP
+                          # library.
 
-                    65,  # FreeBSD throws this error code when the packages
-                         # being un-installed were not installed in the first
-                         # place.
+                    65,   # FreeBSD throws this error code when the packages
+                          # being un-installed were not installed in the first
+                          # place.
 
-                    100  # Same as above but on Ubuntu with a another errno
+                    100,  # Same as above but on Ubuntu with a another errno
+
+                    104,  # ZYPPER_EXIT_INF_CAP_NOT_FOUND: Returned by the
+                          # install and the remove command in case any of
+                          # the arguments does not match any of the available
+                          # (or installed) package names or other capabilities.
                 ),
                 self.run_script(
                     script=None,
@@ -106,12 +117,18 @@ class InstallationTestCase(BootstrapTestCase):
         if os.path.isdir('/tmp/git'):
             print 'Cleaning salt git checkout'
             shutil.rmtree('/tmp/git')
-        if os.path.isdir('/usr/lib/python2.7/site-packages/salt'):
-            print 'Cleaning up /usr/lib/python2.7/site-packages/salt'
-            shutil.rmtree('/usr/lib/python2.7/site-packages/salt')
+        for entry in glob.glob('/usr/lib*/python*/site-packages/salt*'):
+            if os.path.isfile(entry):
+                print 'Removing file {0!r}'.format(entry)
+                os.remove(entry)
+            elif os.path.isdir(entry):
+                print 'Removing directory {0!r}'.format(entry)
+                shutil.rmtree(entry)
         for entry in glob.glob('/usr/bin/salt*'):
+            print 'Removing file {0!r}'.format(entry)
             os.unlink(entry)
         for entry in glob.glob('/usr/lib/systemd/system/salt*'):
+            print 'Removing file {0!r}'.format(entry)
             os.unlink(entry)
 
     def test_install_using_bash(self):

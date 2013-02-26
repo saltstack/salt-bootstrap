@@ -391,7 +391,7 @@ __camelcase_split() {
 #   DESCRIPTION:  Strip duplicate strings
 #-------------------------------------------------------------------------------
 __strip_duplicates() {
-    echo $@ | sed -r 's/[[:space:]]/\n/g' | awk '!x[$0]++'
+    echo $@ | tr -s '[:space:]' '\n' | awk '!x[$0]++'
 }
 
 #---  FUNCTION  ----------------------------------------------------------------

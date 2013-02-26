@@ -1715,9 +1715,16 @@ install_opensuse_stable_post() {
         [ $fname = "master" ] && [ $INSTALL_MASTER -eq $BS_FALSE ] && continue
         [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq $BS_FALSE ] && continue
 
-        systemctl is-enabled salt-$fname.service || (systemctl preset salt-$fname.service && systemctl enable salt-$fname.service)
-        sleep 0.1
-        systemctl daemon-reload
+        if [ -f /bin/systemctl ]; then
+            systemctl is-enabled salt-$fname.service || (systemctl preset salt-$fname.service && systemctl enable salt-$fname.service)
+            sleep 0.1
+            systemctl daemon-reload
+            continue
+        fi
+
+        /sbin/chkconfig --add salt-$fname
+        /sbin/chkconfig salt-$fname on
+
     done
 }
 
@@ -1729,8 +1736,16 @@ install_opensuse_git_post() {
         [ $fname = "master" ] && [ $INSTALL_MASTER -eq $BS_FALSE ] && continue
         [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq $BS_FALSE ] && continue
 
-        cp ${SALT_GIT_CHECKOUT_DIR}/pkg/salt-$fname.service /lib/systemd/system/salt-$fname.service
+        if [ -f /bin/systemctl ]; then
+            cp ${SALT_GIT_CHECKOUT_DIR}/pkg/salt-$fname.service /lib/systemd/system/salt-$fname.service
+            continue
+        fi
+
+        cp ${SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-$fname /etc/init.d/salt-$fname
+        chmod +x /etc/init.d/salt-$fname
+
     done
+
     install_opensuse_stable_post
 }
 
@@ -1742,8 +1757,15 @@ install_opensuse_restart_daemons() {
         [ $fname = "master" ] && [ $INSTALL_MASTER -eq $BS_FALSE ] && continue
         [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq $BS_FALSE ] && continue
 
-        systemctl stop salt-$fname > /dev/null 2>&1
-        systemctl start salt-$fname.service
+        if [ -f /bin/systemctl ]; then
+            systemctl stop salt-$fname > /dev/null 2>&1
+            systemctl start salt-$fname.service
+            continue
+        fi
+
+        service salt-$fname stop > /dev/null 2>&1
+        service salt-$fname start &
+
     done
 }
 #

@@ -1778,18 +1778,26 @@ install_opensuse_restart_daemons() {
 #    SuSE Install Functions.
 #
 install_suse_11_stable_deps() {
-    DISTRO_PATCHLEVEL=$(grep PATCHLEVEL /etc/SuSE-release | awk '{print $3}')
-    if [ "x${DISTRO_PATCHLEVEL}" != "x" ]; then
-        DISTRO_PATCHLEVEL="_SP${DISTRO_PATCHLEVEL}"
+    PATCHLEVEL=$(grep PATCHLEVEL /etc/SuSE-release | awk '{print $3}')
+    if [ "x${PATCHLEVEL}" != "x" ]; then
+        DISTRO_PATCHLEVEL="_SP${PATCHLEVEL}"
     fi
     DISTRO_REPO="SLE_${DISTRO_MAJOR_VERSION}${DISTRO_PATCHLEVEL}"
 
     zypper --non-interactive addrepo --refresh \
         http://download.opensuse.org/repositories/devel:/languages:/python/${DISTRO_REPO}/devel:languages:python.repo
     zypper --gpg-auto-import-keys --non-interactive refresh
-    zypper --non-interactive install --auto-agree-with-licenses libzmq3 python \
+    if [ $PATCHLEVEL -eq 1 ]; then
+        zypper --non-interactive install --auto-agree-with-licenses libzmq3 python \
+        python-Jinja2 'python-M2Crypto>=0.21' python-msgpack-python \
+        python-pycrypto python-pyzmq python-pip
+        # There's no python-PyYaml in SP1, let's install it using pip
+        pip install PyYaml
+    else
+        zypper --non-interactive install --auto-agree-with-licenses libzmq3 python \
         python-Jinja2 'python-M2Crypto>=0.21' python-PyYAML python-msgpack-python \
         python-pycrypto python-pyzmq
+    fi
 }
 
 install_suse_11_git_deps() {

@@ -61,7 +61,7 @@ elif GRAINS['os_family'] == 'Debian':
     COMMANDS.extend([
         'apt-get install -y -o Dpkg::Options::="--force-confdef" '
         '-o Dpkg::Options::="--force-confold" git python-pip',
-        'sudo pip install unittest2'
+        'pip install unittest2'
     ])
 else:
     print(

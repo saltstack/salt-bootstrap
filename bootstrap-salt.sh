@@ -22,7 +22,8 @@ ScriptName="bootstrap-salt.sh"
 #===============================================================================
 #  Environment variables taken into account.
 #-------------------------------------------------------------------------------
-#   * BS_COLORS: If 0 disables colour support
+#   * BS_COLORS:        If 0 disables colour support
+#   * BS_PIP_ALLOWED:   If 1 enable pip based installations(if needed)
 #===============================================================================
 
 
@@ -92,6 +93,17 @@ echodebug() {
     fi
 }
 
+#---  FUNCTION  ----------------------------------------------------------------
+#          NAME:  pip_not_allowed
+#   DESCRIPTION:  Simple function to let the users know that -P needs to be
+#                 used.
+#-------------------------------------------------------------------------------
+pip_not_allowed() {
+    echoerror "pip based installations were not allowed. Retry using '-P'"
+    usage
+    exit 1
+}
+
 #===  FUNCTION  ================================================================
 #         NAME:  usage
 #  DESCRIPTION:  Display usage information.
@@ -125,6 +137,11 @@ usage() {
   -N  Do not install salt-minion
   -C  Only run the configuration function. This option automaticaly
       bypasses any installation.
+  -P  Allow pip based installations. On some distributions the required salt
+      packages or it's dependencies are not available as a package for that
+      distribution. Using this flag allows the script to use pip as a last
+      resort method. NOTE: This works for functions which actually implement
+      pip based installations.
 
 EOT
 }   # ----------  end of function usage  ----------
@@ -138,8 +155,9 @@ INSTALL_SYNDIC=$BS_FALSE
 INSTALL_MINION=$BS_TRUE
 ECHO_DEBUG=$BS_FALSE
 CONFIG_ONLY=$BS_FALSE
+PIP_ALLOWED=${BS_PIP_ALLOWED:-$BS_FALSE}
 
-while getopts ":hvnDc:MSNC" opt
+while getopts ":hvnDc:MSNCP" opt
 do
   case "${opt}" in
 
@@ -159,6 +177,7 @@ do
     S )  INSTALL_SYNDIC=$BS_TRUE                        ;;
     N )  INSTALL_MINION=$BS_FALSE                       ;;
     C )  CONFIG_ONLY=$BS_TRUE                           ;;
+    P )  PIP_ALLOWED=$BS_TRUE                           ;;
 
     \?)  echo
          echoerror "Option does not exist : $OPTARG"

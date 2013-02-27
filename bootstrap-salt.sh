@@ -22,7 +22,8 @@ ScriptName="bootstrap-salt.sh"
 #===============================================================================
 #  Environment variables taken into account.
 #-------------------------------------------------------------------------------
-#   * BS_COLORS: If 0 disables colour support
+#   * BS_COLORS:        If 0 disables colour support
+#   * BS_PIP_ALLOWED:   If 1 enable pip based installations(if needed)
 #===============================================================================
 
 
@@ -92,6 +93,17 @@ echodebug() {
     fi
 }
 
+#---  FUNCTION  ----------------------------------------------------------------
+#          NAME:  pip_not_allowed
+#   DESCRIPTION:  Simple function to let the users know that -P needs to be
+#                 used.
+#-------------------------------------------------------------------------------
+pip_not_allowed() {
+    echoerror "pip based installations were not allowed. Retry using '-P'"
+    usage
+    exit 1
+}
+
 #===  FUNCTION  ================================================================
 #         NAME:  usage
 #  DESCRIPTION:  Display usage information.
@@ -125,6 +137,11 @@ usage() {
   -N  Do not install salt-minion
   -C  Only run the configuration function. This option automaticaly
       bypasses any installation.
+  -P  Allow pip based installations. On some distributions the required salt
+      packages or it's dependencies are not available as a package for that
+      distribution. Using this flag allows the script to use pip as a last
+      resort method. NOTE: This works for functions which actually implement
+      pip based installations.
 
 EOT
 }   # ----------  end of function usage  ----------
@@ -138,8 +155,9 @@ INSTALL_SYNDIC=$BS_FALSE
 INSTALL_MINION=$BS_TRUE
 ECHO_DEBUG=$BS_FALSE
 CONFIG_ONLY=$BS_FALSE
+PIP_ALLOWED=${BS_PIP_ALLOWED:-$BS_FALSE}
 
-while getopts ":hvnDc:MSNC" opt
+while getopts ":hvnDc:MSNCP" opt
 do
   case "${opt}" in
 
@@ -159,6 +177,7 @@ do
     S )  INSTALL_SYNDIC=$BS_TRUE                        ;;
     N )  INSTALL_MINION=$BS_FALSE                       ;;
     C )  CONFIG_ONLY=$BS_TRUE                           ;;
+    P )  PIP_ALLOWED=$BS_TRUE                           ;;
 
     \?)  echo
          echoerror "Option does not exist : $OPTARG"
@@ -1603,6 +1622,9 @@ install_freebsd_restart_daemons() {
 #   SmartOS Install Functions
 #
 install_smartos_deps() {
+    [ $PIP_ALLOWED -eq $BS_FALSE ] && pip_not_allowed
+    echowarn "PyZMQ will be installed using pip"
+
     ZEROMQ_VERSION='3.2.2'
     pkgin -y in libtool-base autoconf automake libuuid gcc-compiler gmake \
         python27 py27-pip py27-setuptools py27-yaml py27-crypto swig
@@ -1822,6 +1844,8 @@ install_suse_11_stable_deps() {
         http://download.opensuse.org/repositories/devel:/languages:/python/${DISTRO_REPO}/devel:languages:python.repo
     zypper --gpg-auto-import-keys --non-interactive refresh
     if [ $SUSE_PATCHLEVEL -eq 1 ]; then
+        [ $PIP_ALLOWED -eq $BS_FALSE ] && pip_not_allowed
+        echowarn "PyYaml will be installed using pip"
         zypper --non-interactive install --auto-agree-with-licenses libzmq3 python \
         python-Jinja2 'python-M2Crypto>=0.21' python-msgpack-python \
         python-pycrypto python-pyzmq python-pip

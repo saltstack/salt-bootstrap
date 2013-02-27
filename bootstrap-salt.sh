@@ -1588,6 +1588,9 @@ install_freebsd_restart_daemons() {
 #   SmartOS Install Functions
 #
 install_smartos_deps() {
+    [ $PIP_ALLOWED -eq $BS_FALSE ] && pip_not_allowed
+    echowarn "PyZMQ will be installed using pip"
+
     ZEROMQ_VERSION='3.2.2'
     pkgin -y in libtool-base autoconf automake libuuid gcc-compiler gmake \
         python27 py27-pip py27-setuptools py27-yaml py27-crypto swig
@@ -1807,6 +1810,8 @@ install_suse_11_stable_deps() {
         http://download.opensuse.org/repositories/devel:/languages:/python/${DISTRO_REPO}/devel:languages:python.repo
     zypper --gpg-auto-import-keys --non-interactive refresh
     if [ $SUSE_PATCHLEVEL -eq 1 ]; then
+        [ $PIP_ALLOWED -eq $BS_FALSE ] && pip_not_allowed
+        echowarn "PyYaml will be installed using pip"
         zypper --non-interactive install --auto-agree-with-licenses libzmq3 python \
         python-Jinja2 'python-M2Crypto>=0.21' python-msgpack-python \
         python-pycrypto python-pyzmq python-pip

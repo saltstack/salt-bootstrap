@@ -899,6 +899,7 @@ install_debian_deps() {
 }
 
 install_debian_6_0_deps() {
+    [ $PIP_ALLOWED -eq $BS_FALSE ] && pip_not_allowed
     echowarn "PyZMQ will be installed from PyPi in order to compile it against ZMQ3"
     echowarn "This is required for long term stable minion connections to the master."
 
@@ -947,6 +948,7 @@ _eof
 }
 
 install_debian_git_deps() {
+    [ $PIP_ALLOWED -eq $BS_FALSE ] && pip_not_allowed
     echowarn "PyZMQ will be installed from PyPi in order to compile it against ZMQ3"
     echowarn "This is required for long term stable minion connections to the master."
 

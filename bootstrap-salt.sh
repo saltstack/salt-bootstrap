@@ -924,12 +924,13 @@ _eof
         wget -q http://debian.madduck.net/repo/gpg/archive.key -O - | apt-key add -
     fi
 
-    cat <<_eof > /etc/apt/sources.list.d/debian-experimental.list
+    if [ ! -f /etc/apt/sources.list.d/debian-experimental.list ]; then
+        cat <<_eof > /etc/apt/sources.list.d/debian-experimental.list
 deb http://ftp.debian.org/debian experimental main
 deb-src http://ftp.debian.org/debian experimental main
 _eof
 
-    cat <<_eof > /etc/apt/preferences.d/libzmq3-debian-experimental.pref
+        cat <<_eof > /etc/apt/preferences.d/libzmq3-debian-experimental.pref
 Package: libzmq3
 Pin: release a=experimental
 Pin-Priority: 800
@@ -938,6 +939,7 @@ Package: libzmq3-dev
 Pin: release a=experimental
 Pin-Priority: 800
 _eof
+    fi
 
     apt-get update
     __apt_get_noinput -t experimental libzmq3 libzmq3-dev

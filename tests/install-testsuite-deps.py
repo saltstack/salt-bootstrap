@@ -57,6 +57,12 @@ elif GRAINS['osfullname'].startswith('SUSE Linux Enterprise Server'):
         'zypper --non-interactive install --auto-agree-with-licenses git python-pip',
         'pip install unittest2'
     ])
+elif GRAINS['os_family'] == 'Debian':
+    COMMANDS.extend([
+        'sudo apt-get install -y -o Dpkg::Options::="--force-confdef" '
+        '-o Dpkg::Options::="--force-confold" git python-pip',
+        'sudo pip install unittest2'
+    ])
 else:
     print(
         'Failed gather the proper commands to allow the tests suite to be '

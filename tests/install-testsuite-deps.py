@@ -65,7 +65,7 @@ elif GRAINS['os'] == 'Amazon':
         ),
         'yum -y update',
         'yum -y install python-pip --enablerepo=epel-testing',
-        'pip install unittest2'
+        'pip-python install unittest2'
     ])
 elif GRAINS['os_family'] == 'Debian':
     COMMANDS.extend([

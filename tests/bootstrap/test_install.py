@@ -448,6 +448,12 @@ class InstallationTestCase(BootstrapTestCase):
         '''
         Test if installing a salt-syndic works
         '''
+        if GRAINS['os'] == 'Debian':
+            self.skipTest(
+                'Currently the debian stable package will have the syndic '
+                'waiting for a connection to a master.'
+            )
+
         args = []
         if GRAINS['os'] in OS_REQUIRES_PIP_ALLOWED:
             args.append('-P')

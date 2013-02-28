@@ -57,6 +57,16 @@ elif GRAINS['osfullname'].startswith('SUSE Linux Enterprise Server'):
         'zypper --non-interactive install --auto-agree-with-licenses git python-pip',
         'pip install unittest2'
     ])
+elif GRAINS['os'] == 'Amazon':
+    COMMANDS.extend([
+        'rpm -Uvh --force http://mirrors.kernel.org/fedora-epel/6/'
+        '{0}/epel-release-6-8.noarch.rpm'.format(
+            GRAINS['cpuarch'] == 'i686' and 'i386' or GRAINS['cpuarch']
+        ),
+        'yum -y update',
+        'yum -y install python-pip --enablerepo=epel-testing',
+        'pip install unittest2'
+    ])
 else:
     print(
         'Failed gather the proper commands to allow the tests suite to be '

@@ -114,22 +114,19 @@ class InstallationTestCase(BootstrapTestCase):
                 )
             )
 
-        if os.path.isdir('/tmp/git'):
-            print 'Cleaning salt git checkout'
-            shutil.rmtree('/tmp/git')
-        for entry in glob.glob('/usr/lib*/python*/site-packages/salt*'):
-            if os.path.isfile(entry):
-                print 'Removing file {0!r}'.format(entry)
-                os.remove(entry)
-            elif os.path.isdir(entry):
-                print 'Removing directory {0!r}'.format(entry)
-                shutil.rmtree(entry)
-        for entry in glob.glob('/usr/bin/salt*'):
-            print 'Removing file {0!r}'.format(entry)
-            os.unlink(entry)
-        for entry in glob.glob('/usr/lib/systemd/system/salt*'):
-            print 'Removing file {0!r}'.format(entry)
-            os.unlink(entry)
+        # As a last resort, by hand house cleaning...
+        for glob_rule in ('/tmp/git', '/usr/lib*/python*/site-packages/salt*',
+                          '/usr/bin/salt*', '/usr/lib/systemd/system/salt*',
+                          '/etc/init*/salt*', '/usr/share/doc/salt*',
+                          '/usr/share/man/man*/salt*', '/var/*/salt*',
+                          '/etc/salt'):
+            for entry in glob.glob(glob_rule):
+                if os.path.isfile(entry):
+                    print 'Removing file {0!r}'.format(entry)
+                    os.remove(entry)
+                elif os.path.isdir(entry):
+                    print 'Removing directory {0!r}'.format(entry)
+                    shutil.rmtree(entry)
 
     def test_install_using_bash(self):
         if not os.path.exists('/bin/bash'):

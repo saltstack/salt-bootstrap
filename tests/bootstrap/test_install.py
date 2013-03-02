@@ -33,7 +33,11 @@ CLEANUP_COMMANDS_BY_OS_FAMILY = {
         'apt-get autoremove -y -o DPkg::Options::=--force-confold --purge'
     ],
     'RedHat': [
-        'yum -y remove salt-minion salt-master'
+        'yum -y remove salt-minion salt-master',
+        'yum -y remove git python{0}-m2crypto m2crypto python{0}-crypto '
+        'python{0}-msgpack python{0}-zmq python{0}-jinja2'.format(
+            GRAINS['osrelease'].split('.')[0] == '5' and '26' or ''
+        ),
     ],
     'FreeBSD': [
         'pkg delete -y swig sysutils/py-salt',
@@ -123,22 +127,19 @@ class InstallationTestCase(BootstrapTestCase):
                 )
             )
 
-        if os.path.isdir('/tmp/git'):
-            print 'Cleaning salt git checkout'
-            shutil.rmtree('/tmp/git')
-        for entry in glob.glob('/usr/lib*/python*/site-packages/salt*'):
-            if os.path.isfile(entry):
-                print 'Removing file {0!r}'.format(entry)
-                os.remove(entry)
-            elif os.path.isdir(entry):
-                print 'Removing directory {0!r}'.format(entry)
-                shutil.rmtree(entry)
-        for entry in glob.glob('/usr/bin/salt*'):
-            print 'Removing file {0!r}'.format(entry)
-            os.unlink(entry)
-        for entry in glob.glob('/usr/lib/systemd/system/salt*'):
-            print 'Removing file {0!r}'.format(entry)
-            os.unlink(entry)
+        # As a last resort, by hand house cleaning...
+        for glob_rule in ('/tmp/git', '/usr/lib*/python*/site-packages/salt*',
+                          '/usr/bin/salt*', '/usr/lib/systemd/system/salt*',
+                          '/etc/init*/salt*', '/usr/share/doc/salt*',
+                          '/usr/share/man/man*/salt*', '/var/*/salt*',
+                          '/etc/salt'):
+            for entry in glob.glob(glob_rule):
+                if os.path.isfile(entry):
+                    print 'Removing file {0!r}'.format(entry)
+                    os.remove(entry)
+                elif os.path.isdir(entry):
+                    print 'Removing directory {0!r}'.format(entry)
+                    shutil.rmtree(entry)
 
     def test_install_using_bash(self):
         if not os.path.exists('/bin/bash'):

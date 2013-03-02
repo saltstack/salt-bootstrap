@@ -33,7 +33,11 @@ CLEANUP_COMMANDS_BY_OS_FAMILY = {
         'apt-get autoremove -y -o DPkg::Options::=--force-confold --purge'
     ],
     'RedHat': [
-        'yum -y remove salt-minion salt-master'
+        'yum -y remove salt-minion salt-master',
+        'yum -y remove git python{0}-m2crypto m2crypto python{0}-crypto '
+        'python{0}-msgpack python{0}-zmq python{0}-jinja2'.format(
+            GRAINS['osrelease'].split('.')[0] == '5' and '26' or ''
+        ),
     ],
     'FreeBSD': [
         'pkg delete -y swig sysutils/py-salt',

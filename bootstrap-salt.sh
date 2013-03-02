@@ -1109,7 +1109,16 @@ install_centos_stable_deps() {
         echoerror "Failed add EPEL repository support."
         exit 1
     fi
+
     yum -y update
+
+    if [ $DISTRO_MAJOR_VERSION -eq 5 ]; then
+        yum -y install PyYAML python26-m2crypto m2crypto python26 python26-crypto \
+            python26-msgpack python26-zmq python26-jinja2 --enablerepo=epel-testing
+    else
+        yum -y install PyYAML m2crypto python-crypto python-msgpack python-zmq \
+            python-jinja2 --enablerepo=epel-testing
+    fi
 }
 
 install_centos_stable() {
@@ -1139,13 +1148,7 @@ install_centos_stable_post() {
 
 install_centos_git_deps() {
     install_centos_stable_deps
-    if [ $DISTRO_MAJOR_VERSION -eq 5 ]; then
-        yum -y install git PyYAML python26-m2crypto m2crypto python26 python26-crypto \
-            python26-msgpack python26-zmq python26-jinja2 --enablerepo=epel-testing
-    else
-        yum -y install git PyYAML m2crypto python-crypto python-msgpack python-zmq \
-            python-jinja2 --enablerepo=epel-testing
-    fi
+    yum -y install git --enablerepo=epel-testing
 
     __git_clone_and_checkout
 
@@ -1328,12 +1331,13 @@ install_amazon_linux_ami_deps() {
     fi
     rpm -Uvh --force http://mirrors.kernel.org/fedora-epel/6/${EPEL_ARCH}/epel-release-6-8.noarch.rpm
     yum -y update
+    yum -y install PyYAML m2crypto python-crypto python-msgpack python-zmq \
+        python-ordereddict python-jinja2 --enablerepo=epel-testing
 }
 
 install_amazon_linux_ami_git_deps() {
     install_amazon_linux_ami_deps
-    yum -y install git PyYAML m2crypto python-crypto python-msgpack python-zmq \
-        python-ordereddict python-jinja2 --enablerepo=epel-testing
+    yum -y install git --enablerepo=epel-testing
 
     __git_clone_and_checkout
 

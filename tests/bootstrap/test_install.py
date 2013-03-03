@@ -254,28 +254,28 @@ class InstallationTestCase(BootstrapTestCase):
             )
         )
 
-    def test_install_latest_from_git_develop(self):
-        self.assert_script_result(
-            'Failed to install using latest git develop',
-            0,
-            self.run_script(
-                args=('git', 'develop'),
-                timeout=15 * 60,
-                stream_stds=True
-            )
-        )
-
-        # Try to get the versions report
-        self.assert_script_result(
-            'Failed to the versions report',
-            0,
-            self.run_script(
-                script=None,
-                args=('salt', '--versions-report'),
-                timeout=15 * 60,
-                stream_stds=True
-            )
-        )
+    #def test_install_latest_from_git_develop(self):
+    #    self.assert_script_result(
+    #        'Failed to install using latest git develop',
+    #        0,
+    #        self.run_script(
+    #            args=('git', 'develop'),
+    #            timeout=15 * 60,
+    #            stream_stds=True
+    #        )
+    #    )
+    #
+    #    # Try to get the versions report
+    #    self.assert_script_result(
+    #        'Failed to the versions report',
+    #        0,
+    #        self.run_script(
+    #            script=None,
+    #            args=('salt', '--versions-report'),
+    #            timeout=15 * 60,
+    #            stream_stds=True
+    #        )
+    #    )
 
     def test_install_specific_git_tag(self):
         self.assert_script_result(

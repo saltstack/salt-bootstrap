@@ -70,7 +70,7 @@ elif GRAINS['os'] == 'Amazon':
 elif GRAINS['os'] == 'Fedora':
     COMMANDS.extend([
         'yum -y update',
-        'yum -y install python-pip --enablerepo=epel-testing',
+        'yum -y install python-pip',
         'pip-python install unittest2'
     ])
 else:

@@ -722,9 +722,15 @@ __git_clone_and_checkout() {
     SALT_GIT_CHECKOUT_DIR=/tmp/git/salt
     [ -d /tmp/git ] || mkdir /tmp/git
     cd /tmp/git
-    [ -d $SALT_GIT_CHECKOUT_DIR ] || git clone https://github.com/saltstack/salt.git salt
-    cd salt
-    git checkout $GIT_REV
+    if [ -d $SALT_GIT_CHECKOUT_DIR ]; then
+        cd $SALT_GIT_CHECKOUT_DIR
+        git fetch
+        git reset --hard origin/$GIT_REV
+    else
+        git clone https://github.com/saltstack/salt.git salt salt
+        cd $SALT_GIT_CHECKOUT_DIR
+        git checkout $GIT_REV
+    fi
 }
 
 

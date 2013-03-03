@@ -67,6 +67,12 @@ elif GRAINS['os'] == 'Amazon':
         'yum -y install python-pip --enablerepo=epel-testing',
         'pip-python install unittest2'
     ])
+elif GRAINS['os'] == 'Fedora':
+    COMMANDS.extend([
+        'yum -y update',
+        'yum -y install python-pip --enablerepo=epel-testing',
+        'pip-python install unittest2'
+    ])
 else:
     print(
         'Failed gather the proper commands to allow the tests suite to be '

@@ -67,10 +67,17 @@ elif GRAINS['os'] == 'Amazon':
         'yum -y install python-pip --enablerepo=epel-testing',
         'pip-python install unittest2'
     ])
+elif GRAINS['os'] == 'Fedora':
+    COMMANDS.extend([
+        'yum -y update',
+        'yum -y install python-pip',
+        'pip-python install unittest2'
+    ])
 elif GRAINS['os_family'] == 'Debian':
     COMMANDS.extend([
-        'apt-get install -y -o Dpkg::Options::="--force-confdef" '
-        '-o Dpkg::Options::="--force-confold" git python-pip',
+        'apt-get update',
+        'apt-get install -y -o DPkg::Options::=--force-confold '
+        '-o Dpkg::Options::="--force-confdef" python-pip',
         'pip install unittest2'
     ])
 else:

@@ -29,12 +29,13 @@ CLEANUP_COMMANDS_BY_OS_FAMILY = {
     ],
     'Debian': [
         'apt-get remove -y -o DPkg::Options::=--force-confold '
-        '--purge salt-master salt-minion salt-syndic',
+        '--purge salt-master salt-minion salt-syndic python-crypto '
+        'python-jinja2 python-m2crypto python-yaml msgpack-python python-zmq',
         'apt-get autoremove -y -o DPkg::Options::=--force-confold --purge'
     ],
     'RedHat': [
         'yum -y remove salt-minion salt-master',
-        'yum -y remove git python{0}-m2crypto m2crypto python{0}-crypto '
+        'yum -y remove python{0}-m2crypto m2crypto python{0}-crypto '
         'python{0}-msgpack python{0}-zmq python{0}-jinja2'.format(
             GRAINS['osrelease'].split('.')[0] == '5' and '26' or ''
         ),
@@ -289,34 +290,34 @@ class InstallationTestCase(BootstrapTestCase):
             )
         )
 
-    def test_install_latest_from_git_develop(self):
-        args = []
-        if GRAINS['os'] in OS_REQUIRES_PIP_ALLOWED:
-            args.append('-P')
-
-        args.extend(['git', 'develop'])
-
-        self.assert_script_result(
-            'Failed to install using latest git develop',
-            0,
-            self.run_script(
-                args=args,
-                timeout=15 * 60,
-                stream_stds=True
-            )
-        )
-
-        # Try to get the versions report
-        self.assert_script_result(
-            'Failed to get the versions report (\'--versions-report\')',
-            0,
-            self.run_script(
-                script=None,
-                args=('salt', '--versions-report'),
-                timeout=15 * 60,
-                stream_stds=True
-            )
-        )
+    #def test_install_latest_from_git_develop(self):
+    #    args = []
+    #    if GRAINS['os'] in OS_REQUIRES_PIP_ALLOWED:
+    #        args.append('-P')
+    #
+    #    args.extend(['git', 'develop'])
+    #
+    #    self.assert_script_result(
+    #        'Failed to install using latest git develop',
+    #        0,
+    #        self.run_script(
+    #            args=args,
+    #            timeout=15 * 60,
+    #            stream_stds=True
+    #        )
+    #    )
+    #
+    #    # Try to get the versions report
+    #    self.assert_script_result(
+    #        'Failed to get the versions report (\'--versions-report\')',
+    #        0,
+    #        self.run_script(
+    #            script=None,
+    #            args=('salt', '--versions-report'),
+    #            timeout=15 * 60,
+    #            stream_stds=True
+    #        )
+    #    )
 
     def test_install_specific_git_tag(self):
         args = []

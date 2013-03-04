@@ -73,6 +73,12 @@ elif GRAINS['os'] == 'Fedora':
         'yum -y install python-pip',
         'pip-python install unittest2'
     ])
+elif GRAINS['os_family'] == 'Debian':
+    COMMANDS.extend([
+        'apt-get update',
+        'apt-get install python-pip',
+        'pip install unittest2'
+    ])
 else:
     print(
         'Failed gather the proper commands to allow the tests suite to be '

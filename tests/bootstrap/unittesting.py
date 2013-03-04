@@ -54,6 +54,7 @@ BOOTSTRAP_SCRIPT_PATH = os.path.join(PARENT_DIR, 'bootstrap-salt.sh')
 
 
 class NonBlockingPopen(subprocess.Popen):
+
     def __init__(self, *args, **kwargs):
         self.stream_stds = kwargs.pop('stream_stds', False)
         super(NonBlockingPopen, self).__init__(*args, **kwargs)

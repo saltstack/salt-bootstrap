@@ -71,6 +71,15 @@ CLEANUP_COMMANDS_BY_OS_FAMILY = {
     ]
 }
 
+OS_REQUIRES_PIP_ALLOWED = (
+    # Some distributions can only install salt or some of its dependencies
+    # passing -P to the bootstrap script.
+    # The GRAINS['os'] which are in this list, requires that extra argument.
+    'Debian',
+    'SmartOS',
+    'Suse'  # Need to revisit openSUSE and SLES for the proper OS grain.
+)
+
 # SLES grains differ from openSUSE, let do a 1:1 direct mapping
 CLEANUP_COMMANDS_BY_OS_FAMILY['SUSE  Enterprise Server'] = CLEANUP_COMMANDS_BY_OS_FAMILY['Suse']
 
@@ -137,10 +146,15 @@ class InstallationTestCase(BootstrapTestCase):
         if not os.path.exists('/bin/bash'):
             self.skipTest('\'/bin/bash\' was not found on this system')
 
+        args = []
+        if GRAINS['os'] in OS_REQUIRES_PIP_ALLOWED:
+            args.append('-P')
+
         self.assert_script_result(
             'Failed to install using bash',
             0,
             self.run_script(
+                args=args,
                 executable='/bin/bash',
                 timeout=15 * 60,
                 stream_stds=True
@@ -149,7 +163,7 @@ class InstallationTestCase(BootstrapTestCase):
 
         # Try to get the versions report
         self.assert_script_result(
-            'Failed to the versions report',
+            'Failed to get the versions report (\'--versions-report\')',
             0,
             self.run_script(
                 script=None,
@@ -160,10 +174,15 @@ class InstallationTestCase(BootstrapTestCase):
         )
 
     def test_install_using_sh(self):
+        args = []
+        if GRAINS['os'] in OS_REQUIRES_PIP_ALLOWED:
+            args.append('-P')
+
         self.assert_script_result(
             'Failed to install using sh',
             0,
             self.run_script(
+                args=args,
                 timeout=15 * 60,
                 stream_stds=True
             )
@@ -171,7 +190,7 @@ class InstallationTestCase(BootstrapTestCase):
 
         # Try to get the versions report
         self.assert_script_result(
-            'Failed to the versions report',
+            'Failed to get the versions report (\'--versions-report\')',
             0,
             self.run_script(
                 script=None,
@@ -182,11 +201,17 @@ class InstallationTestCase(BootstrapTestCase):
         )
 
     def test_install_explicit_stable(self):
+        args = []
+        if GRAINS['os'] in OS_REQUIRES_PIP_ALLOWED:
+            args.append('-P')
+
+        args.append('stable')
+
         self.assert_script_result(
             'Failed to install explicit stable using sh',
             0,
             self.run_script(
-                args=('stable',),
+                args=args,
                 timeout=15 * 60,
                 stream_stds=True
             )
@@ -194,7 +219,7 @@ class InstallationTestCase(BootstrapTestCase):
 
         # Try to get the versions report
         self.assert_script_result(
-            'Failed to the versions report',
+            'Failed to get the versions report (\'--versions-report\')',
             0,
             self.run_script(
                 script=None,
@@ -205,8 +230,14 @@ class InstallationTestCase(BootstrapTestCase):
         )
 
     def test_install_daily(self):
+        args = []
+        if GRAINS['os'] in OS_REQUIRES_PIP_ALLOWED:
+            args.append('-P')
+
+        args.append('daily')
+
         rc, out, err = self.run_script(
-            args=('daily',), timeout=15 * 60, stream_stds=True
+            args=args, timeout=15 * 60, stream_stds=True
         )
         if GRAINS['os'] == 'Ubuntu':
             self.assert_script_result(
@@ -216,7 +247,7 @@ class InstallationTestCase(BootstrapTestCase):
 
             # Try to get the versions report
             self.assert_script_result(
-                'Failed to the versions report',
+                'Failed to get the versions report (\'--versions-report\')',
                 0,
                 self.run_script(
                     script=None,
@@ -232,12 +263,16 @@ class InstallationTestCase(BootstrapTestCase):
             )
 
     def test_install_stable_piped_through_sh(self):
+        args = 'cat {0} | sh '.format(BOOTSTRAP_SCRIPT_PATH).split()
+        if GRAINS['os'] in OS_REQUIRES_PIP_ALLOWED:
+            args.extend('-s -- -P'.split())
+
         self.assert_script_result(
             'Failed to install stable piped through sh',
             0,
             self.run_script(
                 script=None,
-                args='cat {0} | sh '.format(BOOTSTRAP_SCRIPT_PATH).split(),
+                args=args,
                 timeout=15 * 60,
                 stream_stds=True
             )
@@ -245,7 +280,7 @@ class InstallationTestCase(BootstrapTestCase):
 
         # Try to get the versions report
         self.assert_script_result(
-            'Failed to the versions report',
+            'Failed to get the versions report (\'--versions-report\')',
             0,
             self.run_script(
                 script=None,
@@ -256,11 +291,17 @@ class InstallationTestCase(BootstrapTestCase):
         )
 
     #def test_install_latest_from_git_develop(self):
+    #    args = []
+    #    if GRAINS['os'] in OS_REQUIRES_PIP_ALLOWED:
+    #        args.append('-P')
+    #
+    #    args.extend(['git', 'develop'])
+    #
     #    self.assert_script_result(
     #        'Failed to install using latest git develop',
     #        0,
     #        self.run_script(
-    #            args=('git', 'develop'),
+    #            args=args,
     #            timeout=15 * 60,
     #            stream_stds=True
     #        )
@@ -268,7 +309,7 @@ class InstallationTestCase(BootstrapTestCase):
     #
     #    # Try to get the versions report
     #    self.assert_script_result(
-    #        'Failed to the versions report',
+    #        'Failed to get the versions report (\'--versions-report\')',
     #        0,
     #        self.run_script(
     #            script=None,
@@ -279,11 +320,17 @@ class InstallationTestCase(BootstrapTestCase):
     #    )
 
     def test_install_specific_git_tag(self):
+        args = []
+        if GRAINS['os'] in OS_REQUIRES_PIP_ALLOWED:
+            args.append('-P')
+
+        args.extend(['git', 'v0.13.1'])
+
         self.assert_script_result(
             'Failed to install using specific git tag',
             0,
             self.run_script(
-                args=('git', 'v0.13.1'),
+                args=args,
                 timeout=15 * 60,
                 stream_stds=True
             )
@@ -291,7 +338,7 @@ class InstallationTestCase(BootstrapTestCase):
 
         # Try to get the versions report
         self.assert_script_result(
-            'Failed to the versions report',
+            'Failed to get the versions report (\'--versions-report\')',
             0,
             self.run_script(
                 script=None,
@@ -302,11 +349,17 @@ class InstallationTestCase(BootstrapTestCase):
         )
 
     def test_install_specific_git_sha(self):
+        args = []
+        if GRAINS['os'] in OS_REQUIRES_PIP_ALLOWED:
+            args.append('-P')
+
+        args.extend(['git', '2b6264de62bf2ea221bb2c0b8af36dfcfaafe7cf'])
+
         self.assert_script_result(
             'Failed to install using specific git sha',
             0,
             self.run_script(
-                args=('git', '2b6264de62bf2ea221bb2c0b8af36dfcfaafe7cf'),
+                args=args,
                 timeout=15 * 60,
                 stream_stds=True
             )
@@ -314,7 +367,7 @@ class InstallationTestCase(BootstrapTestCase):
 
         # Try to get the versions report
         self.assert_script_result(
-            'Failed to the versions report',
+            'Failed to get the versions report (\'--versions-report\')',
             0,
             self.run_script(
                 script=None,
@@ -365,11 +418,17 @@ class InstallationTestCase(BootstrapTestCase):
         '''
         Test if installing a salt-master works
         '''
+        args = []
+        if GRAINS['os'] in OS_REQUIRES_PIP_ALLOWED:
+            args.append('-P')
+
+        args.extend(['-N', '-M'])
+
         self.assert_script_result(
             'Failed to install salt-master',
             0,
             self.run_script(
-                args=('-N', '-M'),
+                args=args,
                 timeout=15 * 60,
                 stream_stds=True
             )
@@ -391,11 +450,23 @@ class InstallationTestCase(BootstrapTestCase):
         '''
         Test if installing a salt-syndic works
         '''
+        if GRAINS['os'] == 'Debian':
+            self.skipTest(
+                'Currently the debian stable package will have the syndic '
+                'waiting for a connection to a master.'
+            )
+
+        args = []
+        if GRAINS['os'] in OS_REQUIRES_PIP_ALLOWED:
+            args.append('-P')
+
+        args.extend(['-N', '-S'])
+
         self.assert_script_result(
             'Failed to install salt-syndic',
             0,
             self.run_script(
-                args=('-N', '-S'),
+                args=args,
                 timeout=15 * 60,
                 stream_stds=True
             )
@@ -408,6 +479,29 @@ class InstallationTestCase(BootstrapTestCase):
             self.run_script(
                 script=None,
                 args=('salt-syndic', '--versions-report'),
+                timeout=15 * 60,
+                stream_stds=True
+            )
+        )
+
+    def test_install_pip_not_allowed(self):
+        '''
+        Check if distributions which require `-P` to allow pip to install
+        packages, fail if that flag is not passed.
+        '''
+        if GRAINS['os'] not in OS_REQUIRES_PIP_ALLOWED:
+            self.skipTest(
+                'Distribution {0} does not require the extra `-P` flag'.format(
+                    GRAINS['os']
+                )
+            )
+
+        self.assert_script_result(
+            'Even though {0} is flagged as requiring the extra `-P` flag to '
+            'allow packages to be installed by pip, it did not fail when we '
+            'did not pass it'.format(GRAINS['os']),
+            1,
+            self.run_script(
                 timeout=15 * 60,
                 stream_stds=True
             )

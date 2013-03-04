@@ -76,7 +76,8 @@ elif GRAINS['os'] == 'Fedora':
 elif GRAINS['os_family'] == 'Debian':
     COMMANDS.extend([
         'apt-get update',
-        'apt-get install -y -o DPkg::Options::=--force-confold python-pip',
+        'apt-get install -y -o DPkg::Options::=--force-confold '
+        '-o Dpkg::Options::="--force-confdef" python-pip',
         'pip install unittest2'
     ])
 else:

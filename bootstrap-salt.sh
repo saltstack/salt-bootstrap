@@ -725,7 +725,7 @@ __git_clone_and_checkout() {
     if [ -d $SALT_GIT_CHECKOUT_DIR ]; then
         cd $SALT_GIT_CHECKOUT_DIR
         git fetch
-        git reset --hard origin/$GIT_REV
+        git reset --hard $GIT_REV
     else
         git clone https://github.com/saltstack/salt.git salt
         cd $SALT_GIT_CHECKOUT_DIR

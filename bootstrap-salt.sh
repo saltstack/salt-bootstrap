@@ -2016,6 +2016,32 @@ config_salt() {
 ##############################################################################
 
 
+##############################################################################
+#
+#   This function checks if all of the installed daemons are running or not.
+#
+daemons_running() {
+    FAILED_DAEMONS=0
+    for fname in minion master syndic; do
+
+        # Skip if not meant to be installed
+        [ $fname = "minion" ] && [ $INSTALL_MINION -eq $BS_FALSE ] && continue
+        [ $fname = "master" ] && [ $INSTALL_MASTER -eq $BS_FALSE ] && continue
+        [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq $BS_FALSE ] && continue
+
+        if [ "x$(ps aux | grep -v grep | grep salt-$fname)" = "x" ]; then
+            echoerror "salt-$fname was not found running"
+            FAILED_DAEMONS=$(expr $FAILED_DAEMONS + 1)
+        fi
+    done
+    return $FAILED_DAEMONS
+}
+#
+#  Ended daemons running check function
+#
+##############################################################################
+
+
 #=============================================================================
 # LET'S PROCEED WITH OUR INSTALLATION
 #=============================================================================
@@ -2106,6 +2132,25 @@ for FUNC_NAME in $(__strip_duplicates $STARTDAEMONS_FUNC_NAMES); do
 done
 
 
+# Let's get the daemons running check function.
+DAEMONS_RUNNING_FUNC="null"
+DAEMONS_RUNNING_FUNC_NAMES="daemons_running_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}_${ITYPE}"
+DAEMONS_RUNNING_FUNC_NAMES="$DAEMONS_RUNNING_FUNC_NAMES daemons_running_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}${PREFIXED_DISTRO_MINOR_VERSION}_${ITYPE}"
+DAEMONS_RUNNING_FUNC_NAMES="$DAEMONS_RUNNING_FUNC_NAMES daemons_running_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}"
+DAEMONS_RUNNING_FUNC_NAMES="$DAEMONS_RUNNING_FUNC_NAMES daemons_running_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}${PREFIXED_DISTRO_MINOR_VERSION}"
+DAEMONS_RUNNING_FUNC_NAMES="$DAEMONS_RUNNING_FUNC_NAMES daemons_running_${DISTRO_NAME_L}_${ITYPE}"
+DAEMONS_RUNNING_FUNC_NAMES="$DAEMONS_RUNNING_FUNC_NAMES daemons_running_${DISTRO_NAME_L}"
+DAEMONS_RUNNING_FUNC_NAMES="$DAEMONS_RUNNING_FUNC_NAMES daemons_running"
+
+for FUNC_NAME in $(__strip_duplicates $DAEMONS_RUNNING_FUNC_NAMES); do
+    if __function_defined $FUNC_NAME; then
+        DAEMONS_RUNNING_FUNC=$FUNC_NAME
+        break
+    fi
+done
+
+
+
 if [ $DEPS_INSTALL_FUNC = "null" ]; then
     echoerror "No dependencies installation function found. Exiting..."
     exit 1
@@ -2172,6 +2217,18 @@ if [ "$STARTDAEMONS_INSTALL_FUNC" != "null" ]; then
         exit 1
     fi
 fi
+
+# Check if the installed daemons are running or not
+if [ "$DAEMONS_RUNNING_FUNC" != "null" ]; then
+    sleep 3  # Sleep a little bit to let daemons start
+    echoinfo "Running ${DAEMONS_RUNNING_FUNC}()"
+    $DAEMONS_RUNNING_FUNC
+    if [ $? -ne 0 ]; then
+        echoerror "Failed to run ${DAEMONS_RUNNING_FUNC}()!!!"
+        exit 1
+    fi
+fi
+
 
 # Done!
 if [ $CONFIG_ONLY -eq $BS_FALSE ]; then

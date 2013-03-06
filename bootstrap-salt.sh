@@ -972,7 +972,7 @@ _eof
 
     apt-get update
     __apt_get_noinput -t experimental libzmq3 libzmq3-dev
-    __apt_get_noinput build-essential python-dev
+    __apt_get_noinput build-essential python-dev python-pip
 }
 
 install_debian_git_deps() {
@@ -985,7 +985,7 @@ install_debian_git_deps() {
 
     apt-get update
     __apt_get_noinput lsb-release python python-pkg-resources python-crypto \
-        python-jinja2 python-m2crypto python-yaml msgpack-python git
+        python-jinja2 python-m2crypto python-yaml msgpack-python python-pip git
 
     __git_clone_and_checkout
 

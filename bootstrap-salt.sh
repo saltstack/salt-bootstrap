@@ -731,6 +731,8 @@ __git_clone_and_checkout() {
         cd $SALT_GIT_CHECKOUT_DIR
         git checkout $GIT_REV
     fi
+    # Tags are needed because of salt's versioning, also fetch that
+    git fetch --tags
 }
 
 

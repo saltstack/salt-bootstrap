@@ -205,8 +205,8 @@ __check_unparsed_options() {
 
 # Check that we're actually installing one of minion/master/syndic
 if [ $INSTALL_MINION -eq $BS_FALSE ] && [ $INSTALL_MASTER -eq $BS_FALSE ] && [ $INSTALL_SYNDIC -eq $BS_FALSE ] && [ $CONFIG_ONLY -eq $BS_FALSE ]; then
-    echoerror "Nothing to install or configure"
-    exit 1
+    echowarn "Nothing to install or configure"
+    exit 0
 fi
 
 if [ $CONFIG_ONLY -eq $BS_TRUE ] && [ "$TEMP_CONFIG_DIR" = "null" ]; then
@@ -2021,8 +2021,8 @@ config_salt() {
     fi
 
     if [ $CONFIG_ONLY -eq $BS_TRUE ] && [ $CONFIGURED_ANYTHING -eq $BS_FALSE ]; then
-        echoerror "No configuration or keys were copied over. No configuration was done!"
-        exit 1
+        echowarn "No configuration or keys were copied over. No configuration was done!"
+        exit 0
     fi
 }
 #

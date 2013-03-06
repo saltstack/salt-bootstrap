@@ -924,6 +924,13 @@ install_debian_deps() {
 }
 
 install_debian_6_0_deps() {
+    [ $PIP_ALLOWED -eq $BS_FALSE ] && pip_not_allowed
+    echowarn "PyZMQ will be installed from PyPi in order to compile it against ZMQ3"
+    echowarn "This is required for long term stable minion connections to the master."
+
+    # No user interaction, libc6 restart services for example
+    export DEBIAN_FRONTEND=noninteractive
+
     if [ "x$(grep -R 'backports.debian.org' /etc/apt)" = "x" ]; then
         echo "deb http://backports.debian.org/debian-backports squeeze-backports main" >> \
             /etc/apt/sources.list.d/backports.list
@@ -946,13 +953,39 @@ _eof
         wget -q http://debian.madduck.net/repo/gpg/archive.key -O - | apt-key add -
     fi
 
+    if [ ! -f /etc/apt/sources.list.d/debian-experimental.list ]; then
+        cat <<_eof > /etc/apt/sources.list.d/debian-experimental.list
+deb http://ftp.debian.org/debian experimental main
+deb-src http://ftp.debian.org/debian experimental main
+_eof
+
+        cat <<_eof > /etc/apt/preferences.d/libzmq3-debian-experimental.pref
+Package: libzmq3
+Pin: release a=experimental
+Pin-Priority: 800
+
+Package: libzmq3-dev
+Pin: release a=experimental
+Pin-Priority: 800
+_eof
+    fi
+
     apt-get update
+    __apt_get_noinput -t experimental libzmq3 libzmq3-dev
+    __apt_get_noinput build-essential python-dev
 }
 
 install_debian_git_deps() {
+    [ $PIP_ALLOWED -eq $BS_FALSE ] && pip_not_allowed
+    echowarn "PyZMQ will be installed from PyPi in order to compile it against ZMQ3"
+    echowarn "This is required for long term stable minion connections to the master."
+
+    # No user interaction, libc6 restart services for example
+    export DEBIAN_FRONTEND=noninteractive
+
     apt-get update
     __apt_get_noinput lsb-release python python-pkg-resources python-crypto \
-        python-jinja2 python-m2crypto python-yaml msgpack-python git python-zmq
+        python-jinja2 python-m2crypto python-yaml msgpack-python git
 
     __git_clone_and_checkout
 
@@ -980,6 +1013,10 @@ install_debian_stable() {
         packages="${packages} salt-syndic"
     fi
     __apt_get_noinput ${packages}
+
+    # Building pyzmq from source to build it against libzmq3.
+    # Should override current installation
+    pip install -U pyzmq
 }
 
 
@@ -989,6 +1026,10 @@ install_debian_6_0() {
 
 install_debian_git() {
     python setup.py install --install-layout=deb
+
+    # Building pyzmq from source to build it against libzmq3.
+    # Should override current installation
+    pip install -U pyzmq
 }
 
 install_debian_6_0_git() {

@@ -246,7 +246,7 @@ if [ "$#" -gt 0 ]; then
     usage
     echo
     echoerror "Too many arguments."
-    exiterr 1
+    exit 1
 fi
 
 # Root permissions are required to run this script

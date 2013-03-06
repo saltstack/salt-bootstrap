@@ -334,6 +334,11 @@ exec 2>&-
 exec 2>$LOGPIPE
 
 
+# Any subsequent commands which fail and are not handled(catch), will cause the
+# shell script to exit immediately.
+set -e
+
+
 #---  FUNCTION  ----------------------------------------------------------------
 #          NAME:  __gather_hardware_info
 #   DESCRIPTION:  Discover hardware information

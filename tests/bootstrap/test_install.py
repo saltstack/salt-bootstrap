@@ -534,7 +534,7 @@ class InstallationTestCase(BootstrapTestCase):
             self.run_script(
                 script=None,
                 args=('git', 'checkout', 'v0.12.1'),
-                cwd='/tmp/git',
+                cwd='/tmp/git/salt',
                 timeout=15 * 60,
                 stream_stds=True
             )

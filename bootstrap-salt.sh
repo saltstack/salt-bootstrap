@@ -1194,7 +1194,7 @@ install_centos_restart_daemons() {
         if [ -f /etc/init.d/salt-$fname ]; then
             # Still in SysV init!?
             /etc/init.d/salt-$fname stop > /dev/null 2>&1
-            /etc/init.d/salt-$fname start &
+            /etc/init.d/salt-$fname start
         fi
     done
 }

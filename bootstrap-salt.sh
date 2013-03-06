@@ -914,7 +914,7 @@ install_ubuntu_restart_daemons() {
             fi
         fi
         /etc/init.d/salt-$fname stop > /dev/null 2>&1
-        /etc/init.d/salt-$fname start &
+        /etc/init.d/salt-$fname start
     done
 }
 #
@@ -1068,7 +1068,7 @@ install_debian_restart_daemons() {
         [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq $BS_FALSE ] && continue
 
         /etc/init.d/salt-$fname stop > /dev/null 2>&1
-        /etc/init.d/salt-$fname start &
+        /etc/init.d/salt-$fname start
     done
 }
 #
@@ -1526,7 +1526,7 @@ install_arch_linux_restart_daemons() {
             continue
         fi
         /etc/rc.d/salt-$fname stop > /dev/null 2>&1
-        /etc/rc.d/salt-$fname start &
+        /etc/rc.d/salt-$fname start
     done
 }
 #
@@ -1633,7 +1633,7 @@ install_freebsd_restart_daemons() {
         [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq $BS_FALSE ] && continue
 
         service salt_$fname stop > /dev/null 2>&1
-        service salt_$fname start &
+        service salt_$fname start
     done
 }
 #
@@ -1844,7 +1844,7 @@ install_opensuse_restart_daemons() {
         fi
 
         service salt-$fname stop > /dev/null 2>&1
-        service salt-$fname start &
+        service salt-$fname start
 
     done
 }

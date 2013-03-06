@@ -334,11 +334,6 @@ exec 2>&-
 exec 2>$LOGPIPE
 
 
-# Any subsequent commands which fail and are not handled(catch), will cause the
-# shell script to exit immediately.
-set -e
-
-
 #---  FUNCTION  ----------------------------------------------------------------
 #          NAME:  __gather_hardware_info
 #   DESCRIPTION:  Discover hardware information
@@ -729,15 +724,16 @@ __git_clone_and_checkout() {
     cd /tmp/git
     if [ -d $SALT_GIT_CHECKOUT_DIR ]; then
         cd $SALT_GIT_CHECKOUT_DIR
-        git fetch
-        git reset --hard $GIT_REV
+        git fetch || return 1
+        git reset --hard $GIT_REV || return 1
     else
-        git clone https://github.com/saltstack/salt.git salt
+        git clone https://github.com/saltstack/salt.git salt || return 1
         cd $SALT_GIT_CHECKOUT_DIR
-        git checkout $GIT_REV
+        git checkout $GIT_REV || return 1
     fi
     # Tags are needed because of salt's versioning, also fetch that
-    git fetch --tags
+    git fetch --tags || return 1
+    return 0
 }
 
 
@@ -833,13 +829,15 @@ install_ubuntu_git_deps() {
     install_ubuntu_deps
     __apt_get_noinput git-core python-yaml python-m2crypto python-crypto msgpack-python python-zmq python-jinja2
 
-    __git_clone_and_checkout
+    __git_clone_and_checkout || return 1
 
     # Let's trigger config_salt()
     if [ "$TEMP_CONFIG_DIR" = "null" ]; then
         TEMP_CONFIG_DIR="${SALT_GIT_CHECKOUT_DIR}/conf/"
         CONFIG_SALT_FUNC="config_salt"
     fi
+
+    return 0
 }
 
 install_ubuntu_11_10_post() {
@@ -994,13 +992,15 @@ install_debian_git_deps() {
     __apt_get_noinput lsb-release python python-pkg-resources python-crypto \
         python-jinja2 python-m2crypto python-yaml msgpack-python python-pip git
 
-    __git_clone_and_checkout
+    __git_clone_and_checkout || return 1
 
     # Let's trigger config_salt()
     if [ "$TEMP_CONFIG_DIR" = "null" ]; then
         TEMP_CONFIG_DIR="${SALT_GIT_CHECKOUT_DIR}/conf/"
         CONFIG_SALT_FUNC="config_salt"
     fi
+
+    return 0
 }
 
 install_debian_6_0_git_deps() {
@@ -1099,13 +1099,15 @@ install_fedora_git_deps() {
     install_fedora_deps
     yum install -y git
 
-    __git_clone_and_checkout
+    __git_clone_and_checkout || return 1
 
     # Let's trigger config_salt()
     if [ "$TEMP_CONFIG_DIR" = "null" ]; then
         TEMP_CONFIG_DIR="${SALT_GIT_CHECKOUT_DIR}/conf/"
         CONFIG_SALT_FUNC="config_salt"
     fi
+
+    return 0
 }
 
 install_fedora_git() {
@@ -1204,7 +1206,7 @@ install_centos_git_deps() {
     install_centos_stable_deps
     yum -y install git --enablerepo=epel-testing
 
-    __git_clone_and_checkout
+    __git_clone_and_checkout || return 1
 
     # Let's trigger config_salt()
     if [ "$TEMP_CONFIG_DIR" = "null" ]; then
@@ -1212,6 +1214,7 @@ install_centos_git_deps() {
         CONFIG_SALT_FUNC="config_salt"
     fi
 
+    return 0
 }
 
 install_centos_git() {
@@ -1393,13 +1396,15 @@ install_amazon_linux_ami_git_deps() {
     install_amazon_linux_ami_deps
     yum -y install git --enablerepo=epel-testing
 
-    __git_clone_and_checkout
+    __git_clone_and_checkout || return 1
 
     # Let's trigger config_salt()
     if [ "$TEMP_CONFIG_DIR" = "null" ]; then
         TEMP_CONFIG_DIR="${SALT_GIT_CHECKOUT_DIR}/conf/"
         CONFIG_SALT_FUNC="config_salt"
     fi
+
+    return 0
 }
 
 install_amazon_linux_ami_stable() {
@@ -1445,13 +1450,15 @@ Server = http://intothesaltmine.org/archlinux
         python2-jinja  python2-m2crypto python2-markupsafe python2-msgpack \
         python2-psutil python2-pyzmq zeromq
 
-    __git_clone_and_checkout
+    __git_clone_and_checkout || return 1
 
     # Let's trigger config_salt()
     if [ "$TEMP_CONFIG_DIR" = "null" ]; then
         TEMP_CONFIG_DIR="${SALT_GIT_CHECKOUT_DIR}/conf/"
         CONFIG_SALT_FUNC="config_salt"
     fi
+
+    return 0
 }
 
 install_arch_linux_stable() {
@@ -1579,12 +1586,14 @@ install_freebsd_git_deps() {
 
     /usr/local/sbin/pkg install -y swig
 
-    __git_clone_and_checkout
+    __git_clone_and_checkout || return 1
     # Let's trigger config_salt()
     if [ "$TEMP_CONFIG_DIR" = "null" ]; then
         TEMP_CONFIG_DIR="${SALT_GIT_CHECKOUT_DIR}/conf/"
         CONFIG_SALT_FUNC="config_salt"
     fi
+
+    return 0
 }
 
 install_freebsd_9_stable() {
@@ -1684,12 +1693,14 @@ install_smartos_git_deps() {
     install_smartos_deps
     pkgin -y in scmgit
 
-    __git_clone_and_checkout
+    __git_clone_and_checkout || return 1
     # Let's trigger config_salt()
     if [ "$TEMP_CONFIG_DIR" = "null" ]; then
         TEMP_CONFIG_DIR="${SALT_GIT_CHECKOUT_DIR}/conf/"
         CONFIG_SALT_FUNC="config_salt"
     fi
+
+    return 0
 }
 
 install_smartos_stable() {
@@ -1760,13 +1771,15 @@ install_opensuse_git_deps() {
     install_opensuse_stable_deps
     zypper --non-interactive install --auto-agree-with-licenses git
 
-    __git_clone_and_checkout
+    __git_clone_and_checkout || return 1
 
     # Let's trigger config_salt()
     if [ "$TEMP_CONFIG_DIR" = "null" ]; then
         TEMP_CONFIG_DIR="${SALT_GIT_CHECKOUT_DIR}/conf/"
         CONFIG_SALT_FUNC="config_salt"
     fi
+
+    return 0
 }
 
 install_opensuse_stable() {
@@ -1886,13 +1899,15 @@ install_suse_11_git_deps() {
     install_suse_11_stable_deps
     zypper --non-interactive install --auto-agree-with-licenses git
 
-    __git_clone_and_checkout
+    __git_clone_and_checkout || return 1
 
     # Let's trigger config_salt()
     if [ "$TEMP_CONFIG_DIR" = "null" ]; then
         TEMP_CONFIG_DIR="${SALT_GIT_CHECKOUT_DIR}/conf/"
         CONFIG_SALT_FUNC="config_salt"
     fi
+
+    return 0
 }
 
 install_suse_11_stable() {

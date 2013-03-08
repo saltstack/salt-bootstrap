@@ -737,8 +737,11 @@ __git_clone_and_checkout() {
         # HEAD; instead it will simply reset to itself.  Check the ref to see
         # if it is a branch name, check out the branch, and pull in the
         # changes.
+        set +e
         git branch -a | grep -q ${GIT_REV}
-        if [ $? -eq 0 ]; then
+        status=$?
+        set -e
+        if [ $status -eq 0 ]; then
             git pull --rebase
         fi;
     else

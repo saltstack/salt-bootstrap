@@ -738,7 +738,7 @@ __git_clone_and_checkout() {
         # if it is a branch name, check out the branch, and pull in the
         # changes.
         git branch -a | grep -q ${GIT_REV}
-        if [ "$?" == "0" ]; then
+        if [ $? -eq 0 ]; then
             git pull --rebase
         fi;
     else

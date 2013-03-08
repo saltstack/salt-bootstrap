@@ -731,7 +731,7 @@ __git_clone_and_checkout() {
         cd $SALT_GIT_CHECKOUT_DIR
         git fetch
         git fetch --tags
-        git checkout $GIT_REV
+        git reset --hard $GIT_REV
 
         # Just calling `git reset --hard $GIT_REV` on a branch name that has
         # already been checked out will not update that branch to the upstream

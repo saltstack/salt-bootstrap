@@ -1442,8 +1442,8 @@ Server = http://intothesaltmine.org/archlinux
 ' >> /etc/pacman.conf
 
     pacman -Sy --noconfirm pacman git python2-crypto python2-distribute \
-        python2-jinja  python2-m2crypto python2-markupsafe python2-msgpack \
-        python2-psutil python2-pyzmq zeromq
+        python2-jinja python2-m2crypto python2-markupsafe python2-msgpack \
+        python2-psutil python2-yaml python2-pyzmq zeromq
 
     __git_clone_and_checkout
 

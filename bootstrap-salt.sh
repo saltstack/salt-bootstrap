@@ -730,6 +730,7 @@ __git_clone_and_checkout() {
     if [ -d $SALT_GIT_CHECKOUT_DIR ]; then
         cd $SALT_GIT_CHECKOUT_DIR
         git fetch
+        git fetch --tags
         git checkout $GIT_REV
 
         # Just calling `git reset --hard $GIT_REV` on a branch name that has
@@ -749,8 +750,6 @@ __git_clone_and_checkout() {
         cd $SALT_GIT_CHECKOUT_DIR
         git checkout $GIT_REV
     fi
-    # Tags are needed because of salt's versioning, also fetch that
-    git fetch --tags
 }
 
 

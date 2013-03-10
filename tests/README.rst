@@ -24,8 +24,7 @@ Running the tests suite is as simple as:
 
 .. code:: console
 
-  python tests/runtests.py
-
+  sudo python tests/runtests.py
 
 For additional information on the available options:
 

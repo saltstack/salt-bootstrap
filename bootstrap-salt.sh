@@ -890,8 +890,11 @@ install_ubuntu_git_post() {
 
         if [ -f /sbin/initctl ]; then
             # We have upstart support
+            set +e
             /sbin/initctl status salt-$fname > /dev/null 2>&1
-            if [ $? -eq 1 ]; then
+            status=$?
+            set -e
+            if [ $status -eq 1 ]; then
                 # upstart does not know about our service, let's copy the proper file
                 cp ${SALT_GIT_CHECKOUT_DIR}/pkg/salt-$fname.upstart /etc/init/salt-$fname.conf
             fi

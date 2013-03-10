@@ -912,6 +912,8 @@ install_ubuntu_restart_daemons() {
         [ $fname = "master" ] && [ $INSTALL_MASTER -eq $BS_FALSE ] && continue
         [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq $BS_FALSE ] && continue
 
+        # disable auto-exit, trying to stop a stopped service will fail
+        set +e
         if [ -f /sbin/initctl ]; then
             # We have upstart support
             /sbin/initctl status salt-$fname > /dev/null 2>&1
@@ -927,6 +929,7 @@ install_ubuntu_restart_daemons() {
         fi
         /etc/init.d/salt-$fname stop > /dev/null 2>&1
         /etc/init.d/salt-$fname start
+        set -e
     done
 }
 #

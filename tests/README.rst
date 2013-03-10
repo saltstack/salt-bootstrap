@@ -17,6 +17,9 @@ scripting would be too cumbersome and too complicated.
 Running the tests suite
 -----------------------
 
+.. warning:: The test suite is **destructive**. It will install/un-install packages on your system.
+ You must run the suite using ``sudo`` or most / all of the tests will be skipped.
+
 Running the tests suite is as simple as:
 
 .. code:: console
@@ -30,8 +33,6 @@ For additional information on the available options:
 
   python tests/runtests.py --help
 
-
-.. warning:: The test suite is **destructive**. It will install/un-install packages on your system.
 
 
 .. _`checkbashisms`: http://sourceforge.net/projects/checkbaskisms/

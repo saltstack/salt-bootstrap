@@ -407,11 +407,19 @@ class InstallationTestCase(BootstrapTestCase):
         Test running in configuration mode only without actually configuring
         anything fails.
         '''
+        rc, out, err = self.run_script(
+            args=('-C', '-n', '-c', '/tmp'),
+        )
+
         self.assert_script_result(
-            'The script successfully executed even though no configuration '
+            'The script did not show a warning even though no configuration '
             'was done.',
-            1,
-            self.run_script(args=('-C', '-c', '/tmp'))
+            0, (rc, out, err)
+        )
+        self.assertIn(
+            'WARN: No configuration or keys were copied over. No '
+            'configuration was done!',
+            '\n'.join(out)
         )
 
     def test_install_salt_master(self):

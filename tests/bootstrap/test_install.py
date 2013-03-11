@@ -407,11 +407,19 @@ class InstallationTestCase(BootstrapTestCase):
         Test running in configuration mode only without actually configuring
         anything fails.
         '''
+        rc, out, err = self.run_script(
+            args=('-C', '-n', '-c', '/tmp'),
+        )
+
         self.assert_script_result(
-            'The script successfully executed even though no configuration '
+            'The script did not show a warning even though no configuration '
             'was done.',
-            1,
-            self.run_script(args=('-C', '-c', '/tmp'))
+            0, (rc, out, err)
+        )
+        self.assertIn(
+            'WARN: No configuration or keys were copied over. No '
+            'configuration was done!',
+            '\n'.join(out)
         )
 
     def test_install_salt_master(self):
@@ -506,3 +514,72 @@ class InstallationTestCase(BootstrapTestCase):
                 stream_stds=True
             )
         )
+
+    def test_install_from_git_on_checked_out_repository(self):
+        '''
+        Check if the script properly updates an already checked out repository.
+        '''
+        if not os.path.isdir('/tmp/git'):
+            os.makedirs('/tmp/git')
+
+        # Clone salt from git
+        self.assert_script_result(
+            'Failed to clone salt\'s git repository',
+            0,
+            self.run_script(
+                script=None,
+                args=('git', 'clone', 'https://github.com/saltstack/salt.git'),
+                cwd='/tmp/git',
+                timeout=15 * 60,
+                stream_stds=True
+            )
+        )
+
+        # Check-out a specific revision
+        self.assert_script_result(
+            'Failed to checkout v0.12.1 from salt\'s cloned git repository',
+            0,
+            self.run_script(
+                script=None,
+                args=('git', 'checkout', 'v0.12.1'),
+                cwd='/tmp/git/salt',
+                timeout=15 * 60,
+                stream_stds=True
+            )
+        )
+
+        # Now run the bootstrap script over an existing git checkout and see
+        # if it properly updates.
+        args = []
+        if GRAINS['os'] in OS_REQUIRES_PIP_ALLOWED:
+            args.append('-P')
+
+        args.extend(['git', 'v0.13.1'])
+
+        self.assert_script_result(
+            'Failed to install using specific git tag',
+            0,
+            self.run_script(
+                args=args,
+                timeout=15 * 60,
+                stream_stds=True
+            )
+        )
+
+        # Get the version from the salt binary just installed
+        # Do it as a two step so we can check the returning output.
+        rc, out, err = self.run_script(
+            script=None,
+            args=('salt', '--version'),
+            timeout=15 * 60,
+            stream_stds=True
+        )
+
+        self.assert_script_result(
+            'Failed to get the salt version',
+            0, (rc, out, err)
+        )
+
+        # Make sure the installation updated the git repository to the proper
+        # git tag before installing.
+        self.assertIn('0.13.1', '\n'.join(out))

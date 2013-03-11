@@ -65,7 +65,10 @@ def run_suite(opts, path, display_name, suffix='[!_]*.py'):
     Execute a unit test suite
     '''
     loader = TestLoader()
-    tests = loader.discover(path, suffix, TEST_DIR)
+    if opts.name:
+        tests = tests = loader.loadTestsFromName(display_name)
+    else:
+        tests = loader.discover(path, suffix, TEST_DIR)
 
     header = '{0} Tests'.format(display_name)
     print_header('Starting {0}'.format(header))
@@ -118,6 +121,12 @@ def main():
         action='store_true',
         help='Run Installation tests'
     )
+    test_selection_group.add_option(
+        '-n', '--name',
+        action='append',
+        default=[],
+        help='Specific test to run'
+    )
     parser.add_option_group(test_selection_group)
 
     output_options_group = optparse.OptionGroup(parser, "Output Options")
@@ -161,7 +170,7 @@ def main():
             )
         )
 
-    if not any((options.lint, options.usage, options.install)):
+    if not any((options.lint, options.usage, options.install, options.name)):
         options.lint = True
         options.usage = True
         options.install = True
@@ -174,6 +183,10 @@ def main():
 
     overall_status = []
 
+    if options.name:
+        for name in options.name:
+            results = run_suite(options, '', name)
+            overall_status.append(results)
     if options.lint:
         status = run_integration_suite(options, 'Lint', "*lint.py")
         overall_status.append(status)

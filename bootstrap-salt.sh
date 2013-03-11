@@ -205,8 +205,8 @@ __check_unparsed_options() {
 
 # Check that we're actually installing one of minion/master/syndic
 if [ $INSTALL_MINION -eq $BS_FALSE ] && [ $INSTALL_MASTER -eq $BS_FALSE ] && [ $INSTALL_SYNDIC -eq $BS_FALSE ] && [ $CONFIG_ONLY -eq $BS_FALSE ]; then
-    echoerror "Nothing to install or configure"
-    exit 1
+    echowarn "Nothing to install or configure"
+    exit 0
 fi
 
 if [ $CONFIG_ONLY -eq $BS_TRUE ] && [ "$TEMP_CONFIG_DIR" = "null" ]; then
@@ -332,11 +332,6 @@ exec 1>$LOGPIPE
 # Close STDERR, reopen it directing it to the logpipe
 exec 2>&-
 exec 2>$LOGPIPE
-
-
-# Any subsequent commands which fail and are not handled(catch), will cause the
-# shell script to exit immediately.
-set -e
 
 
 #---  FUNCTION  ----------------------------------------------------------------
@@ -729,27 +724,26 @@ __git_clone_and_checkout() {
     cd /tmp/git
     if [ -d $SALT_GIT_CHECKOUT_DIR ]; then
         cd $SALT_GIT_CHECKOUT_DIR
-        git fetch
-        git fetch --tags
-        git reset --hard $GIT_REV
+        git fetch || return 1
+        # Tags are needed because of salt's versioning, also fetch that
+        git fetch --tags || return 1
+        git reset --hard $GIT_REV || return 1
 
         # Just calling `git reset --hard $GIT_REV` on a branch name that has
         # already been checked out will not update that branch to the upstream
         # HEAD; instead it will simply reset to itself.  Check the ref to see
         # if it is a branch name, check out the branch, and pull in the
         # changes.
-        set +e
         git branch -a | grep -q ${GIT_REV}
-        status=$?
-        set -e
-        if [ $status -eq 0 ]; then
-            git pull --rebase
-        fi;
+        if [ $? -eq 0 ]; then
+            git pull --rebase || return 1
+        fi
     else
-        git clone https://github.com/saltstack/salt.git salt
+        git clone https://github.com/saltstack/salt.git salt || return 1
         cd $SALT_GIT_CHECKOUT_DIR
-        git checkout $GIT_REV
+        git checkout $GIT_REV || return 1
     fi
+    return 0
 }
 
 
@@ -845,13 +839,15 @@ install_ubuntu_git_deps() {
     install_ubuntu_deps
     __apt_get_noinput git-core python-yaml python-m2crypto python-crypto msgpack-python python-zmq python-jinja2
 
-    __git_clone_and_checkout
+    __git_clone_and_checkout || return 1
 
     # Let's trigger config_salt()
     if [ "$TEMP_CONFIG_DIR" = "null" ]; then
         TEMP_CONFIG_DIR="${SALT_GIT_CHECKOUT_DIR}/conf/"
         CONFIG_SALT_FUNC="config_salt"
     fi
+
+    return 0
 }
 
 install_ubuntu_11_10_post() {
@@ -1006,13 +1002,15 @@ install_debian_git_deps() {
     __apt_get_noinput lsb-release python python-pkg-resources python-crypto \
         python-jinja2 python-m2crypto python-yaml msgpack-python python-pip git
 
-    __git_clone_and_checkout
+    __git_clone_and_checkout || return 1
 
     # Let's trigger config_salt()
     if [ "$TEMP_CONFIG_DIR" = "null" ]; then
         TEMP_CONFIG_DIR="${SALT_GIT_CHECKOUT_DIR}/conf/"
         CONFIG_SALT_FUNC="config_salt"
     fi
+
+    return 0
 }
 
 install_debian_6_0_git_deps() {
@@ -1111,13 +1109,15 @@ install_fedora_git_deps() {
     install_fedora_deps
     yum install -y git
 
-    __git_clone_and_checkout
+    __git_clone_and_checkout || return 1
 
     # Let's trigger config_salt()
     if [ "$TEMP_CONFIG_DIR" = "null" ]; then
         TEMP_CONFIG_DIR="${SALT_GIT_CHECKOUT_DIR}/conf/"
         CONFIG_SALT_FUNC="config_salt"
     fi
+
+    return 0
 }
 
 install_fedora_git() {
@@ -1216,7 +1216,7 @@ install_centos_git_deps() {
     install_centos_stable_deps
     yum -y install git --enablerepo=epel-testing
 
-    __git_clone_and_checkout
+    __git_clone_and_checkout || return 1
 
     # Let's trigger config_salt()
     if [ "$TEMP_CONFIG_DIR" = "null" ]; then
@@ -1224,6 +1224,7 @@ install_centos_git_deps() {
         CONFIG_SALT_FUNC="config_salt"
     fi
 
+    return 0
 }
 
 install_centos_git() {
@@ -1405,13 +1406,15 @@ install_amazon_linux_ami_git_deps() {
     install_amazon_linux_ami_deps
     yum -y install git --enablerepo=epel-testing
 
-    __git_clone_and_checkout
+    __git_clone_and_checkout || return 1
 
     # Let's trigger config_salt()
     if [ "$TEMP_CONFIG_DIR" = "null" ]; then
         TEMP_CONFIG_DIR="${SALT_GIT_CHECKOUT_DIR}/conf/"
         CONFIG_SALT_FUNC="config_salt"
     fi
+
+    return 0
 }
 
 install_amazon_linux_ami_stable() {
@@ -1457,13 +1460,15 @@ Server = http://intothesaltmine.org/archlinux
         python2-jinja python2-m2crypto python2-markupsafe python2-msgpack \
         python2-psutil python2-yaml python2-pyzmq zeromq
 
-    __git_clone_and_checkout
+    __git_clone_and_checkout || return 1
 
     # Let's trigger config_salt()
     if [ "$TEMP_CONFIG_DIR" = "null" ]; then
         TEMP_CONFIG_DIR="${SALT_GIT_CHECKOUT_DIR}/conf/"
         CONFIG_SALT_FUNC="config_salt"
     fi
+
+    return 0
 }
 
 install_arch_linux_stable() {
@@ -1591,12 +1596,14 @@ install_freebsd_git_deps() {
 
     /usr/local/sbin/pkg install -y swig
 
-    __git_clone_and_checkout
+    __git_clone_and_checkout || return 1
     # Let's trigger config_salt()
     if [ "$TEMP_CONFIG_DIR" = "null" ]; then
         TEMP_CONFIG_DIR="${SALT_GIT_CHECKOUT_DIR}/conf/"
         CONFIG_SALT_FUNC="config_salt"
     fi
+
+    return 0
 }
 
 install_freebsd_9_stable() {
@@ -1696,12 +1703,14 @@ install_smartos_git_deps() {
     install_smartos_deps
     pkgin -y in scmgit
 
-    __git_clone_and_checkout
+    __git_clone_and_checkout || return 1
     # Let's trigger config_salt()
     if [ "$TEMP_CONFIG_DIR" = "null" ]; then
         TEMP_CONFIG_DIR="${SALT_GIT_CHECKOUT_DIR}/conf/"
         CONFIG_SALT_FUNC="config_salt"
     fi
+
+    return 0
 }
 
 install_smartos_stable() {
@@ -1772,13 +1781,15 @@ install_opensuse_git_deps() {
     install_opensuse_stable_deps
     zypper --non-interactive install --auto-agree-with-licenses git
 
-    __git_clone_and_checkout
+    __git_clone_and_checkout || return 1
 
     # Let's trigger config_salt()
     if [ "$TEMP_CONFIG_DIR" = "null" ]; then
         TEMP_CONFIG_DIR="${SALT_GIT_CHECKOUT_DIR}/conf/"
         CONFIG_SALT_FUNC="config_salt"
     fi
+
+    return 0
 }
 
 install_opensuse_stable() {
@@ -1898,13 +1909,15 @@ install_suse_11_git_deps() {
     install_suse_11_stable_deps
     zypper --non-interactive install --auto-agree-with-licenses git
 
-    __git_clone_and_checkout
+    __git_clone_and_checkout || return 1
 
     # Let's trigger config_salt()
     if [ "$TEMP_CONFIG_DIR" = "null" ]; then
         TEMP_CONFIG_DIR="${SALT_GIT_CHECKOUT_DIR}/conf/"
         CONFIG_SALT_FUNC="config_salt"
     fi
+
+    return 0
 }
 
 install_suse_11_stable() {
@@ -2018,12 +2031,38 @@ config_salt() {
     fi
 
     if [ $CONFIG_ONLY -eq $BS_TRUE ] && [ $CONFIGURED_ANYTHING -eq $BS_FALSE ]; then
-        echoerror "No configuration or keys were copied over. No configuration was done!"
-        exit 1
+        echowarn "No configuration or keys were copied over. No configuration was done!"
+        exit 0
     fi
 }
 #
 #  Ended Default Configuration function
+#
+##############################################################################
+
+
+##############################################################################
+#
+#   This function checks if all of the installed daemons are running or not.
+#
+daemons_running() {
+    FAILED_DAEMONS=0
+    for fname in minion master syndic; do
+
+        # Skip if not meant to be installed
+        [ $fname = "minion" ] && [ $INSTALL_MINION -eq $BS_FALSE ] && continue
+        [ $fname = "master" ] && [ $INSTALL_MASTER -eq $BS_FALSE ] && continue
+        [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq $BS_FALSE ] && continue
+
+        if [ "x$(ps aux | grep -v grep | grep salt-$fname)" = "x" ]; then
+            echoerror "salt-$fname was not found running"
+            FAILED_DAEMONS=$(expr $FAILED_DAEMONS + 1)
+        fi
+    done
+    return $FAILED_DAEMONS
+}
+#
+#  Ended daemons running check function
 #
 ##############################################################################
 
@@ -2118,6 +2157,25 @@ for FUNC_NAME in $(__strip_duplicates $STARTDAEMONS_FUNC_NAMES); do
 done
 
 
+# Let's get the daemons running check function.
+DAEMONS_RUNNING_FUNC="null"
+DAEMONS_RUNNING_FUNC_NAMES="daemons_running_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}_${ITYPE}"
+DAEMONS_RUNNING_FUNC_NAMES="$DAEMONS_RUNNING_FUNC_NAMES daemons_running_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}${PREFIXED_DISTRO_MINOR_VERSION}_${ITYPE}"
+DAEMONS_RUNNING_FUNC_NAMES="$DAEMONS_RUNNING_FUNC_NAMES daemons_running_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}"
+DAEMONS_RUNNING_FUNC_NAMES="$DAEMONS_RUNNING_FUNC_NAMES daemons_running_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}${PREFIXED_DISTRO_MINOR_VERSION}"
+DAEMONS_RUNNING_FUNC_NAMES="$DAEMONS_RUNNING_FUNC_NAMES daemons_running_${DISTRO_NAME_L}_${ITYPE}"
+DAEMONS_RUNNING_FUNC_NAMES="$DAEMONS_RUNNING_FUNC_NAMES daemons_running_${DISTRO_NAME_L}"
+DAEMONS_RUNNING_FUNC_NAMES="$DAEMONS_RUNNING_FUNC_NAMES daemons_running"
+
+for FUNC_NAME in $(__strip_duplicates $DAEMONS_RUNNING_FUNC_NAMES); do
+    if __function_defined $FUNC_NAME; then
+        DAEMONS_RUNNING_FUNC=$FUNC_NAME
+        break
+    fi
+done
+
+
+
 if [ $DEPS_INSTALL_FUNC = "null" ]; then
     echoerror "No dependencies installation function found. Exiting..."
     exit 1
@@ -2184,6 +2242,18 @@ if [ "$STARTDAEMONS_INSTALL_FUNC" != "null" ]; then
         exit 1
     fi
 fi
+
+# Check if the installed daemons are running or not
+if [ "$DAEMONS_RUNNING_FUNC" != "null" ]; then
+    sleep 3  # Sleep a little bit to let daemons start
+    echoinfo "Running ${DAEMONS_RUNNING_FUNC}()"
+    $DAEMONS_RUNNING_FUNC
+    if [ $? -ne 0 ]; then
+        echoerror "Failed to run ${DAEMONS_RUNNING_FUNC}()!!!"
+        exit 1
+    fi
+fi
+
 
 # Done!
 if [ $CONFIG_ONLY -eq $BS_FALSE ]; then

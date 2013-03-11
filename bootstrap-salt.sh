@@ -803,7 +803,7 @@ __apt_get_noinput() {
 #
 install_ubuntu_deps() {
     apt-get update
-    if [ $DISTRO_MAJOR_VERSION -gt 12 ] && [ $DISTRO_MINOR_VERSION -gt 04 ]; then
+    if [ $DISTRO_MAJOR_VERSION -eq 12 ] && [ $DISTRO_MINOR_VERSION -gt 04 ] || [ $DISTRO_MAJOR_VERSION -gt 12 ]; then
         # Above Ubuntu 12.04 add-apt-repository is in a different package
         __apt_get_noinput software-properties-common
     else

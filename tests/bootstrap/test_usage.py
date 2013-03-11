@@ -11,13 +11,18 @@ from bootstrap.unittesting import *
 
 
 class UsageTestCase(BootstrapTestCase):
-    def test_no_daemon_install_fails(self):
+    def test_no_daemon_install_shows_warning(self):
         '''
         Passing '-N'(no minion) without passing '-M'(install master) or
-        '-S'(install syndic) fails.
+        '-S'(install syndic) shows a warning.
         '''
-        self.assert_script_result(
-            'Not installing any daemons did not throw any error',
-            1,
-            self.run_script(args=('-N',))
+        rc, out, err = self.run_script(
+            args=('-N', '-n'),
         )
+
+        self.assert_script_result(
+            'Not installing any daemons nor configuring did not throw any '
+            'warning',
+            0, (rc, out, err)
+        )
+        self.assertIn(' *  WARN: Nothing to install or configure', out)

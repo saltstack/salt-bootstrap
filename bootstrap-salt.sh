@@ -730,14 +730,26 @@ __git_clone_and_checkout() {
     if [ -d $SALT_GIT_CHECKOUT_DIR ]; then
         cd $SALT_GIT_CHECKOUT_DIR
         git fetch
+        git fetch --tags
         git reset --hard $GIT_REV
+
+        # Just calling `git reset --hard $GIT_REV` on a branch name that has
+        # already been checked out will not update that branch to the upstream
+        # HEAD; instead it will simply reset to itself.  Check the ref to see
+        # if it is a branch name, check out the branch, and pull in the
+        # changes.
+        set +e
+        git branch -a | grep -q ${GIT_REV}
+        status=$?
+        set -e
+        if [ $status -eq 0 ]; then
+            git pull --rebase
+        fi;
     else
         git clone https://github.com/saltstack/salt.git salt
         cd $SALT_GIT_CHECKOUT_DIR
         git checkout $GIT_REV
     fi
-    # Tags are needed because of salt's versioning, also fetch that
-    git fetch --tags
 }
 
 

@@ -886,8 +886,11 @@ install_ubuntu_git_post() {
 
         if [ -f /sbin/initctl ]; then
             # We have upstart support
+            set +e
             /sbin/initctl status salt-$fname > /dev/null 2>&1
-            if [ $? -eq 1 ]; then
+            status=$?
+            set -e
+            if [ $status -eq 1 ]; then
                 # upstart does not know about our service, let's copy the proper file
                 cp ${SALT_GIT_CHECKOUT_DIR}/pkg/salt-$fname.upstart /etc/init/salt-$fname.conf
             fi
@@ -908,6 +911,8 @@ install_ubuntu_restart_daemons() {
         [ $fname = "master" ] && [ $INSTALL_MASTER -eq $BS_FALSE ] && continue
         [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq $BS_FALSE ] && continue
 
+        # disable auto-exit, trying to stop a stopped service will fail
+        set +e
         if [ -f /sbin/initctl ]; then
             # We have upstart support
             /sbin/initctl status salt-$fname > /dev/null 2>&1
@@ -923,6 +928,7 @@ install_ubuntu_restart_daemons() {
         fi
         /etc/init.d/salt-$fname stop > /dev/null 2>&1
         /etc/init.d/salt-$fname start
+        set -e
     done
 }
 #

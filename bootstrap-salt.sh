@@ -1456,7 +1456,8 @@ install_arch_linux_git_deps() {
 Server = http://intothesaltmine.org/archlinux
 ' >> /etc/pacman.conf
 
-    pacman -Sy --noconfirm pacman git python2-crypto python2-distribute \
+    pacman -Sy --noconfirm pacman
+    pacman -Sy --noconfirm git python2-crypto python2-distribute \
         python2-jinja python2-m2crypto python2-markupsafe python2-msgpack \
         python2-psutil python2-yaml python2-pyzmq zeromq
 

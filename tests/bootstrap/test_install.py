@@ -574,4 +574,4 @@ class InstallationTestCase(BootstrapTestCase):
 
         # Make sure the installation updated the git repository to the proper
         # git tag before installing.
-        self.assertIn('v0.13.1', out)
+        self.assertIn('0.13.1', '\n'.join(out))

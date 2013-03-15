@@ -192,3 +192,7 @@ def os_data():
     return grains
 
 GRAINS = os_data()
+
+if __name__ == '__main__':
+    import pprint
+    pprint.pprint(GRAINS)

@@ -260,7 +260,7 @@ if [ "${CALLER}x" = "${0}x" ]; then
     CALLER="PIPED THROUGH"
 fi
 echoinfo "${CALLER} ${0} -- Version ${ScriptVersion}"
-echowarn "Running the unstable version of ${ScriptName}"
+#echowarn "Running the unstable version of ${ScriptName}"
 
 
 #---  FUNCTION  ----------------------------------------------------------------

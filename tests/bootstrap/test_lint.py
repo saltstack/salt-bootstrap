@@ -7,7 +7,7 @@
     :copyright: © 2013 by the UfSoft.org Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
 '''
-from bootstrap import *
+from bootstrap.unittesting import *
 
 
 class LintTestCase(BootstrapTestCase):

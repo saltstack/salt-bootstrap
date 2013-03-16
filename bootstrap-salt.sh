@@ -2269,7 +2269,9 @@ if [ "$DAEMONS_RUNNING_FUNC" != "null" ]; then
     if [ $? -ne 0 ]; then
         echoerror "Failed to run ${DAEMONS_RUNNING_FUNC}()!!!"
         echodebug "Running Processes:"
-        echodebug "$(ps auxwww)"
+        for line in "$(ps auxwww)"; do
+            echodebug "$line"
+        done
         exit 1
     fi
 fi

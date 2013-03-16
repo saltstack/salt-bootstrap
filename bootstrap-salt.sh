@@ -24,6 +24,7 @@ ScriptName="bootstrap-salt.sh"
 #-------------------------------------------------------------------------------
 #   * BS_COLORS:        If 0 disables colour support
 #   * BS_PIP_ALLOWED:   If 1 enable pip based installations(if needed)
+#   * BS_ECHO_DEBUG:    If 1 enable debug echo which can also be set by -D
 #===============================================================================
 
 
@@ -153,7 +154,7 @@ TEMP_CONFIG_DIR="null"
 INSTALL_MASTER=$BS_FALSE
 INSTALL_SYNDIC=$BS_FALSE
 INSTALL_MINION=$BS_TRUE
-ECHO_DEBUG=$BS_FALSE
+ECHO_DEBUG=${BS_ECHO_DEBUG:-$BS_FALSE}
 CONFIG_ONLY=$BS_FALSE
 PIP_ALLOWED=${BS_PIP_ALLOWED:-$BS_FALSE}
 

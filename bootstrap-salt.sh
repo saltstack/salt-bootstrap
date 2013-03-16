@@ -2279,9 +2279,9 @@ if [ "$DAEMONS_RUNNING_FUNC" != "null" ]; then
             [ $fname = "master" ] && [ $INSTALL_MASTER -eq $BS_FALSE ] && continue
             [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq $BS_FALSE ] && continue
 
-            [ ! -f /var/log/$fname ] && continue
+            [ ! -f /var/log/salt/$fname ] && continue
 
-            echodebug "DEAMON LOGS for $fname: $(cat /var/log/$fname)"
+            echodebug "DEAMON LOGS for $fname: $(cat /var/log/salt/$fname)"
 
         done
         exit 1

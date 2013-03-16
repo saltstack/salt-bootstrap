@@ -16,13 +16,14 @@
 #       CREATED: 10/15/2012 09:49:37 PM WEST
 #===============================================================================
 set -o nounset                              # Treat unset variables as an error
-ScriptVersion="1.5"
+ScriptVersion="1.5.1"
 ScriptName="bootstrap-salt.sh"
 
 #===============================================================================
 #  Environment variables taken into account.
 #-------------------------------------------------------------------------------
-#   * BS_COLORS: If 0 disables colour support
+#   * BS_COLORS:        If 0 disables colour support
+#   * BS_PIP_ALLOWED:   If 1 enable pip based installations(if needed)
 #===============================================================================
 
 
@@ -92,6 +93,17 @@ echodebug() {
     fi
 }
 
+#---  FUNCTION  ----------------------------------------------------------------
+#          NAME:  pip_not_allowed
+#   DESCRIPTION:  Simple function to let the users know that -P needs to be
+#                 used.
+#-------------------------------------------------------------------------------
+pip_not_allowed() {
+    echoerror "pip based installations were not allowed. Retry using '-P'"
+    usage
+    exit 1
+}
+
 #===  FUNCTION  ================================================================
 #         NAME:  usage
 #  DESCRIPTION:  Display usage information.
@@ -125,6 +137,11 @@ usage() {
   -N  Do not install salt-minion
   -C  Only run the configuration function. This option automaticaly
       bypasses any installation.
+  -P  Allow pip based installations. On some distributions the required salt
+      packages or it's dependencies are not available as a package for that
+      distribution. Using this flag allows the script to use pip as a last
+      resort method. NOTE: This works for functions which actually implement
+      pip based installations.
 
 EOT
 }   # ----------  end of function usage  ----------
@@ -138,8 +155,9 @@ INSTALL_SYNDIC=$BS_FALSE
 INSTALL_MINION=$BS_TRUE
 ECHO_DEBUG=$BS_FALSE
 CONFIG_ONLY=$BS_FALSE
+PIP_ALLOWED=${BS_PIP_ALLOWED:-$BS_FALSE}
 
-while getopts ":hvnDc:MSNC" opt
+while getopts ":hvnDc:MSNCP" opt
 do
   case "${opt}" in
 
@@ -159,6 +177,7 @@ do
     S )  INSTALL_SYNDIC=$BS_TRUE                        ;;
     N )  INSTALL_MINION=$BS_FALSE                       ;;
     C )  CONFIG_ONLY=$BS_TRUE                           ;;
+    P )  PIP_ALLOWED=$BS_TRUE                           ;;
 
     \?)  echo
          echoerror "Option does not exist : $OPTARG"
@@ -186,8 +205,8 @@ __check_unparsed_options() {
 
 # Check that we're actually installing one of minion/master/syndic
 if [ $INSTALL_MINION -eq $BS_FALSE ] && [ $INSTALL_MASTER -eq $BS_FALSE ] && [ $INSTALL_SYNDIC -eq $BS_FALSE ] && [ $CONFIG_ONLY -eq $BS_FALSE ]; then
-    echoerror "Nothing to install or configure"
-    exit 1
+    echowarn "Nothing to install or configure"
+    exit 0
 fi
 
 if [ $CONFIG_ONLY -eq $BS_TRUE ] && [ "$TEMP_CONFIG_DIR" = "null" ]; then
@@ -227,7 +246,7 @@ if [ "$#" -gt 0 ]; then
     usage
     echo
     echoerror "Too many arguments."
-    exiterr 1
+    exit 1
 fi
 
 # Root permissions are required to run this script
@@ -391,7 +410,7 @@ __camelcase_split() {
 #   DESCRIPTION:  Strip duplicate strings
 #-------------------------------------------------------------------------------
 __strip_duplicates() {
-    echo $@ | sed -r 's/[[:space:]]/\n/g' | awk '!x[$0]++'
+    echo $@ | tr -s '[:space:]' '\n' | awk '!x[$0]++'
 }
 
 #---  FUNCTION  ----------------------------------------------------------------
@@ -703,9 +722,28 @@ __git_clone_and_checkout() {
     SALT_GIT_CHECKOUT_DIR=/tmp/git/salt
     [ -d /tmp/git ] || mkdir /tmp/git
     cd /tmp/git
-    [ -d $SALT_GIT_CHECKOUT_DIR ] || git clone git://github.com/saltstack/salt.git salt
-    cd salt
-    git checkout $GIT_REV
+    if [ -d $SALT_GIT_CHECKOUT_DIR ]; then
+        cd $SALT_GIT_CHECKOUT_DIR
+        git fetch || return 1
+        # Tags are needed because of salt's versioning, also fetch that
+        git fetch --tags || return 1
+        git reset --hard $GIT_REV || return 1
+
+        # Just calling `git reset --hard $GIT_REV` on a branch name that has
+        # already been checked out will not update that branch to the upstream
+        # HEAD; instead it will simply reset to itself.  Check the ref to see
+        # if it is a branch name, check out the branch, and pull in the
+        # changes.
+        git branch -a | grep -q ${GIT_REV}
+        if [ $? -eq 0 ]; then
+            git pull --rebase || return 1
+        fi
+    else
+        git clone https://github.com/saltstack/salt.git salt || return 1
+        cd $SALT_GIT_CHECKOUT_DIR
+        git checkout $GIT_REV || return 1
+    fi
+    return 0
 }
 
 
@@ -775,7 +813,7 @@ __apt_get_noinput() {
 #
 install_ubuntu_deps() {
     apt-get update
-    if [ $DISTRO_MAJOR_VERSION -gt 12 ] && [ $DISTRO_MINOR_VERSION -gt 04 ]; then
+    if [ $DISTRO_MAJOR_VERSION -eq 12 ] && [ $DISTRO_MINOR_VERSION -gt 04 ] || [ $DISTRO_MAJOR_VERSION -gt 12 ]; then
         # Above Ubuntu 12.04 add-apt-repository is in a different package
         __apt_get_noinput software-properties-common
     else
@@ -801,13 +839,15 @@ install_ubuntu_git_deps() {
     install_ubuntu_deps
     __apt_get_noinput git-core python-yaml python-m2crypto python-crypto msgpack-python python-zmq python-jinja2
 
-    __git_clone_and_checkout
+    __git_clone_and_checkout || return 1
 
     # Let's trigger config_salt()
     if [ "$TEMP_CONFIG_DIR" = "null" ]; then
         TEMP_CONFIG_DIR="${SALT_GIT_CHECKOUT_DIR}/conf/"
         CONFIG_SALT_FUNC="config_salt"
     fi
+
+    return 0
 }
 
 install_ubuntu_11_10_post() {
@@ -899,6 +939,13 @@ install_debian_deps() {
 }
 
 install_debian_6_0_deps() {
+    [ $PIP_ALLOWED -eq $BS_FALSE ] && pip_not_allowed
+    echowarn "PyZMQ will be installed from PyPi in order to compile it against ZMQ3"
+    echowarn "This is required for long term stable minion connections to the master."
+
+    # No user interaction, libc6 restart services for example
+    export DEBIAN_FRONTEND=noninteractive
+
     if [ "x$(grep -R 'backports.debian.org' /etc/apt)" = "x" ]; then
         echo "deb http://backports.debian.org/debian-backports squeeze-backports main" >> \
             /etc/apt/sources.list.d/backports.list
@@ -921,21 +968,49 @@ _eof
         wget -q http://debian.madduck.net/repo/gpg/archive.key -O - | apt-key add -
     fi
 
+    if [ ! -f /etc/apt/sources.list.d/debian-experimental.list ]; then
+        cat <<_eof > /etc/apt/sources.list.d/debian-experimental.list
+deb http://ftp.debian.org/debian experimental main
+deb-src http://ftp.debian.org/debian experimental main
+_eof
+
+        cat <<_eof > /etc/apt/preferences.d/libzmq3-debian-experimental.pref
+Package: libzmq3
+Pin: release a=experimental
+Pin-Priority: 800
+
+Package: libzmq3-dev
+Pin: release a=experimental
+Pin-Priority: 800
+_eof
+    fi
+
     apt-get update
+    __apt_get_noinput -t experimental libzmq3 libzmq3-dev
+    __apt_get_noinput build-essential python-dev python-pip
 }
 
 install_debian_git_deps() {
+    [ $PIP_ALLOWED -eq $BS_FALSE ] && pip_not_allowed
+    echowarn "PyZMQ will be installed from PyPi in order to compile it against ZMQ3"
+    echowarn "This is required for long term stable minion connections to the master."
+
+    # No user interaction, libc6 restart services for example
+    export DEBIAN_FRONTEND=noninteractive
+
     apt-get update
     __apt_get_noinput lsb-release python python-pkg-resources python-crypto \
-        python-jinja2 python-m2crypto python-yaml msgpack-python git python-zmq
+        python-jinja2 python-m2crypto python-yaml msgpack-python python-pip git
 
-    __git_clone_and_checkout
+    __git_clone_and_checkout || return 1
 
     # Let's trigger config_salt()
     if [ "$TEMP_CONFIG_DIR" = "null" ]; then
         TEMP_CONFIG_DIR="${SALT_GIT_CHECKOUT_DIR}/conf/"
         CONFIG_SALT_FUNC="config_salt"
     fi
+
+    return 0
 }
 
 install_debian_6_0_git_deps() {
@@ -955,6 +1030,10 @@ install_debian_stable() {
         packages="${packages} salt-syndic"
     fi
     __apt_get_noinput ${packages}
+
+    # Building pyzmq from source to build it against libzmq3.
+    # Should override current installation
+    pip install -U pyzmq
 }
 
 
@@ -964,6 +1043,10 @@ install_debian_6_0() {
 
 install_debian_git() {
     python setup.py install --install-layout=deb
+
+    # Building pyzmq from source to build it against libzmq3.
+    # Should override current installation
+    pip install -U pyzmq
 }
 
 install_debian_6_0_git() {
@@ -1026,13 +1109,15 @@ install_fedora_git_deps() {
     install_fedora_deps
     yum install -y git
 
-    __git_clone_and_checkout
+    __git_clone_and_checkout || return 1
 
     # Let's trigger config_salt()
     if [ "$TEMP_CONFIG_DIR" = "null" ]; then
         TEMP_CONFIG_DIR="${SALT_GIT_CHECKOUT_DIR}/conf/"
         CONFIG_SALT_FUNC="config_salt"
     fi
+
+    return 0
 }
 
 install_fedora_git() {
@@ -1090,7 +1175,16 @@ install_centos_stable_deps() {
         echoerror "Failed add EPEL repository support."
         exit 1
     fi
+
     yum -y update
+
+    if [ $DISTRO_MAJOR_VERSION -eq 5 ]; then
+        yum -y install PyYAML python26-m2crypto m2crypto python26 python26-crypto \
+            python26-msgpack python26-zmq python26-jinja2 --enablerepo=epel-testing
+    else
+        yum -y install PyYAML m2crypto python-crypto python-msgpack python-zmq \
+            python-jinja2 --enablerepo=epel-testing
+    fi
 }
 
 install_centos_stable() {
@@ -1120,15 +1214,9 @@ install_centos_stable_post() {
 
 install_centos_git_deps() {
     install_centos_stable_deps
-    if [ $DISTRO_MAJOR_VERSION -eq 5 ]; then
-        yum -y install git PyYAML python26-m2crypto m2crypto python26 python26-crypto \
-            python26-msgpack python26-zmq python26-jinja2 --enablerepo=epel-testing
-    else
-        yum -y install git PyYAML m2crypto python-crypto python-msgpack python-zmq \
-            python-jinja2 --enablerepo=epel-testing
-    fi
+    yum -y install git --enablerepo=epel-testing
 
-    __git_clone_and_checkout
+    __git_clone_and_checkout || return 1
 
     # Let's trigger config_salt()
     if [ "$TEMP_CONFIG_DIR" = "null" ]; then
@@ -1136,6 +1224,7 @@ install_centos_git_deps() {
         CONFIG_SALT_FUNC="config_salt"
     fi
 
+    return 0
 }
 
 install_centos_git() {
@@ -1309,20 +1398,23 @@ install_amazon_linux_ami_deps() {
     fi
     rpm -Uvh --force http://mirrors.kernel.org/fedora-epel/6/${EPEL_ARCH}/epel-release-6-8.noarch.rpm
     yum -y update
+    yum -y install PyYAML m2crypto python-crypto python-msgpack python-zmq \
+        python-ordereddict python-jinja2 --enablerepo=epel-testing
 }
 
 install_amazon_linux_ami_git_deps() {
     install_amazon_linux_ami_deps
-    yum -y install git PyYAML m2crypto python-crypto python-msgpack python-zmq \
-        python-ordereddict python-jinja2 --enablerepo=epel-testing
+    yum -y install git --enablerepo=epel-testing
 
-    __git_clone_and_checkout
+    __git_clone_and_checkout || return 1
 
     # Let's trigger config_salt()
     if [ "$TEMP_CONFIG_DIR" = "null" ]; then
         TEMP_CONFIG_DIR="${SALT_GIT_CHECKOUT_DIR}/conf/"
         CONFIG_SALT_FUNC="config_salt"
     fi
+
+    return 0
 }
 
 install_amazon_linux_ami_stable() {
@@ -1364,17 +1456,20 @@ install_arch_linux_git_deps() {
 Server = http://intothesaltmine.org/archlinux
 ' >> /etc/pacman.conf
 
-    pacman -Sy --noconfirm pacman git python2-crypto python2-distribute \
+    pacman -Sy --noconfirm pacman
+    pacman -Sy --noconfirm git python2-crypto python2-distribute \
         python2-jinja python2-m2crypto python2-markupsafe python2-msgpack \
         python2-psutil python2-yaml python2-pyzmq zeromq
 
-    __git_clone_and_checkout
+    __git_clone_and_checkout || return 1
 
     # Let's trigger config_salt()
     if [ "$TEMP_CONFIG_DIR" = "null" ]; then
         TEMP_CONFIG_DIR="${SALT_GIT_CHECKOUT_DIR}/conf/"
         CONFIG_SALT_FUNC="config_salt"
     fi
+
+    return 0
 }
 
 install_arch_linux_stable() {
@@ -1502,12 +1597,14 @@ install_freebsd_git_deps() {
 
     /usr/local/sbin/pkg install -y swig
 
-    __git_clone_and_checkout
+    __git_clone_and_checkout || return 1
     # Let's trigger config_salt()
     if [ "$TEMP_CONFIG_DIR" = "null" ]; then
         TEMP_CONFIG_DIR="${SALT_GIT_CHECKOUT_DIR}/conf/"
         CONFIG_SALT_FUNC="config_salt"
     fi
+
+    return 0
 }
 
 install_freebsd_9_stable() {
@@ -1569,6 +1666,9 @@ install_freebsd_restart_daemons() {
 #   SmartOS Install Functions
 #
 install_smartos_deps() {
+    [ $PIP_ALLOWED -eq $BS_FALSE ] && pip_not_allowed
+    echowarn "PyZMQ will be installed using pip"
+
     ZEROMQ_VERSION='3.2.2'
     pkgin -y in libtool-base autoconf automake libuuid gcc-compiler gmake \
         python27 py27-pip py27-setuptools py27-yaml py27-crypto swig
@@ -1604,12 +1704,14 @@ install_smartos_git_deps() {
     install_smartos_deps
     pkgin -y in scmgit
 
-    __git_clone_and_checkout
+    __git_clone_and_checkout || return 1
     # Let's trigger config_salt()
     if [ "$TEMP_CONFIG_DIR" = "null" ]; then
         TEMP_CONFIG_DIR="${SALT_GIT_CHECKOUT_DIR}/conf/"
         CONFIG_SALT_FUNC="config_salt"
     fi
+
+    return 0
 }
 
 install_smartos_stable() {
@@ -1664,69 +1766,207 @@ install_smartos_restart_daemons() {
 
 ##############################################################################
 #
+#    openSUSE Install Functions.
+#
+install_opensuse_stable_deps() {
+    DISTRO_REPO="openSUSE_${DISTRO_MAJOR_VERSION}.${DISTRO_MINOR_VERSION}"
+    zypper --non-interactive addrepo --refresh \
+        http://download.opensuse.org/repositories/devel:/languages:/python/${DISTRO_REPO}/devel:languages:python.repo
+    zypper --gpg-auto-import-keys --non-interactive refresh
+    zypper --non-interactive install --auto-agree-with-licenses libzmq3 python \
+        python-Jinja2 python-M2Crypto python-PyYAML python-msgpack-python \
+        python-pycrypto python-pyzmq
+}
+
+install_opensuse_git_deps() {
+    install_opensuse_stable_deps
+    zypper --non-interactive install --auto-agree-with-licenses git
+
+    __git_clone_and_checkout || return 1
+
+    # Let's trigger config_salt()
+    if [ "$TEMP_CONFIG_DIR" = "null" ]; then
+        TEMP_CONFIG_DIR="${SALT_GIT_CHECKOUT_DIR}/conf/"
+        CONFIG_SALT_FUNC="config_salt"
+    fi
+
+    return 0
+}
+
+install_opensuse_stable() {
+    packages=""
+    if [ $INSTALL_MINION -eq $BS_TRUE ]; then
+        packages="${packages} salt-minion"
+    fi
+    if [ $INSTALL_MASTER -eq $BS_TRUE ]; then
+        packages="${packages} salt-master"
+    fi
+    if [ $INSTALL_SYNDIC -eq $BS_TRUE ]; then
+        packages="${packages} salt-syndic"
+    fi
+    zypper --non-interactive install --auto-agree-with-licenses $packages
+}
+
+install_opensuse_git() {
+    python setup.py install --prefix=/usr
+}
+
+install_opensuse_stable_post() {
+    for fname in minion master syndic; do
+
+        # Skip if not meant to be installed
+        [ $fname = "minion" ] && [ $INSTALL_MINION -eq $BS_FALSE ] && continue
+        [ $fname = "master" ] && [ $INSTALL_MASTER -eq $BS_FALSE ] && continue
+        [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq $BS_FALSE ] && continue
+
+        if [ -f /bin/systemctl ]; then
+            systemctl is-enabled salt-$fname.service || (systemctl preset salt-$fname.service && systemctl enable salt-$fname.service)
+            sleep 0.1
+            systemctl daemon-reload
+            continue
+        fi
+
+        /sbin/chkconfig --add salt-$fname
+        /sbin/chkconfig salt-$fname on
+
+    done
+}
+
+install_opensuse_git_post() {
+    for fname in minion master syndic; do
+
+        # Skip if not meant to be installed
+        [ $fname = "minion" ] && [ $INSTALL_MINION -eq $BS_FALSE ] && continue
+        [ $fname = "master" ] && [ $INSTALL_MASTER -eq $BS_FALSE ] && continue
+        [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq $BS_FALSE ] && continue
+
+        if [ -f /bin/systemctl ]; then
+            cp ${SALT_GIT_CHECKOUT_DIR}/pkg/salt-$fname.service /lib/systemd/system/salt-$fname.service
+            continue
+        fi
+
+        cp ${SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-$fname /etc/init.d/salt-$fname
+        chmod +x /etc/init.d/salt-$fname
+
+    done
+
+    install_opensuse_stable_post
+}
+
+install_opensuse_restart_daemons() {
+    for fname in minion master syndic; do
+
+        # Skip if not meant to be installed
+        [ $fname = "minion" ] && [ $INSTALL_MINION -eq $BS_FALSE ] && continue
+        [ $fname = "master" ] && [ $INSTALL_MASTER -eq $BS_FALSE ] && continue
+        [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq $BS_FALSE ] && continue
+
+        if [ -f /bin/systemctl ]; then
+            systemctl stop salt-$fname > /dev/null 2>&1
+            systemctl start salt-$fname.service
+            continue
+        fi
+
+        service salt-$fname stop > /dev/null 2>&1
+        service salt-$fname start
+
+    done
+}
+#
+#   End of openSUSE Install Functions.
+#
+##############################################################################
+
+##############################################################################
+#
 #    SuSE Install Functions.
 #
-#install_suse_11_stable(){
-#    USE_SETUPTOOLS=1 pip install -U salt
-#}
-#
-#install_suse_11_deps() {
-#    echowarn "SuSE installations should be considered unstable. See #56"
-#    zypper --non-interactive install -l gcc-c++ python-devel libopenssl-devel zlib-devel swig
-#    zypper --non-interactive --no-gpg-checks -p http://download.opensuse.org/repositories/home:/fengshuo:/zeromq/SLE_11_SP1/ -v install zeromq
-#}
-#
-#install_suse_11_stable_deps(){
-#    install_suse_11_deps
-#    if [ ! -f /usr/local/bin/pip ]; then
-#        curl http://python-distribute.org/distribute_setup.py | python
-#        curl https://raw.github.com/pypa/pip/master/contrib/get-pip.py | python
-#        rm distribute-*.*.*.tar.gz
-#    fi
-#    pip install PyYAML M2Crypto pycrypto msgpack-python pyzmq jinja2
-#}
-#
-#install_suse_11_git_deps(){
-#    install_suse_11_stable_deps
-#    zypper --non-interactive install -l git
-#    pip install PyYAML M2Crypto pycrypto msgpack-python pyzmq jinja2
-#}
-#
-#install_suse_11_git(){
-#    install_suse_11_git_deps
-#    __git_clone_and_checkout
-#    python setup.py install
-#}
-#
-#install_suse_11_post(){
-#    if [ $INSTALL_MASTER = 1 ]; then
-#        tempfile=$(mktemp)
-#        curl https://raw.github.com/saltstack/salt/develop/pkg/rpm/salt-master > $tempfile
-#        sed 's/SALTMASTER=\/usr\/bin\/salt-master/SALTMASTER=\/usr\/local\/bin\/salt-master/g' $tempfile > /etc/init.d/salt-master
-#        rm $tempfile
-#        chmod +x /etc/init.d/salt-master
-#        /sbin/chkconfig --add salt-master
-#        /sbin/chkconfig salt-master on
-#    fi
-#
-#    if [ $INSTALL_MINION = 1 ]; then
-#        tempfile=$(mktemp)
-#        curl https://raw.github.com/saltstack/salt/develop/pkg/rpm/salt-minion > $tempfile
-#        sed 's/SALTMINION=\/usr\/bin\/salt-minion/SALTMINION=\/usr\/local\/bin\/salt-minion/g' $tempfile > /etc/init.d/salt-minion
-#        rm $tempfile
-#        chmod +x /etc/init.d/salt-minion
-#        /sbin/chkconfig --add salt-minion
-#        /sbin/chkconfig salt-minion on
-#    fi
-#}
-#
-#install_suse_11_git_post(){
-#    install_suse_11_post
-#}
-#
-#install_suse_11_stable_post(){
-#    install_suse_11_post
-#}
+install_suse_11_stable_deps() {
+    SUSE_PATCHLEVEL=$(grep PATCHLEVEL /etc/SuSE-release | awk '{print $3}')
+    if [ "x${SUSE_PATCHLEVEL}" != "x" ]; then
+        DISTRO_PATCHLEVEL="_SP${SUSE_PATCHLEVEL}"
+    fi
+    DISTRO_REPO="SLE_${DISTRO_MAJOR_VERSION}${DISTRO_PATCHLEVEL}"
+
+    zypper --non-interactive addrepo --refresh \
+        http://download.opensuse.org/repositories/devel:/languages:/python/${DISTRO_REPO}/devel:languages:python.repo
+    zypper --gpg-auto-import-keys --non-interactive refresh
+    if [ $SUSE_PATCHLEVEL -eq 1 ]; then
+        [ $PIP_ALLOWED -eq $BS_FALSE ] && pip_not_allowed
+        echowarn "PyYaml will be installed using pip"
+        zypper --non-interactive install --auto-agree-with-licenses libzmq3 python \
+        python-Jinja2 'python-M2Crypto>=0.21' python-msgpack-python \
+        python-pycrypto python-pyzmq python-pip
+        # There's no python-PyYaml in SP1, let's install it using pip
+        pip install PyYaml
+    else
+        zypper --non-interactive install --auto-agree-with-licenses libzmq3 python \
+        python-Jinja2 'python-M2Crypto>=0.21' python-PyYAML python-msgpack-python \
+        python-pycrypto python-pyzmq
+    fi
+}
+
+install_suse_11_git_deps() {
+    install_suse_11_stable_deps
+    zypper --non-interactive install --auto-agree-with-licenses git
+
+    __git_clone_and_checkout || return 1
+
+    # Let's trigger config_salt()
+    if [ "$TEMP_CONFIG_DIR" = "null" ]; then
+        TEMP_CONFIG_DIR="${SALT_GIT_CHECKOUT_DIR}/conf/"
+        CONFIG_SALT_FUNC="config_salt"
+    fi
+
+    return 0
+}
+
+install_suse_11_stable() {
+    if [ $SUSE_PATCHLEVEL -gt 1 ]; then
+        install_opensuse_stable
+    else
+        # USE_SETUPTOOLS=1 To work around
+        # error: option --single-version-externally-managed not recognized
+        USE_SETUPTOOLS=1 pip install salt
+    fi
+}
+
+install_suse_11_git() {
+    install_opensuse_git
+}
+
+install_suse_11_stable_post() {
+    if [ $SUSE_PATCHLEVEL -gt 1 ]; then
+        install_opensuse_stable_post
+    else
+        for fname in minion master syndic; do
+
+            # Skip if not meant to be installed
+            [ $fname = "minion" ] && [ $INSTALL_MINION -eq $BS_FALSE ] && continue
+            [ $fname = "master" ] && [ $INSTALL_MASTER -eq $BS_FALSE ] && continue
+            [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq $BS_FALSE ] && continue
+
+            if [ -f /bin/systemctl ]; then
+                curl -k -L https://github.com/saltstack/salt/raw/develop/pkg/salt-$fname.service \
+                    -o /lib/systemd/system/salt-$fname.service
+                continue
+            fi
+
+            curl -k -L https://github.com/saltstack/salt/raw/develop/pkg/rpm/salt-$fname \
+                -o /etc/init.d/salt-$fname
+            chmod +x /etc/init.d/salt-$fname
+
+        done
+    fi
+}
+
+install_suse_11_git_post() {
+    install_opensuse_git_post
+}
+
+install_suse_11_restart_daemons() {
+    install_opensuse_restart_daemons
+}
 #
 #   End of SuSE Install Functions.
 #
@@ -1792,12 +2032,38 @@ config_salt() {
     fi
 
     if [ $CONFIG_ONLY -eq $BS_TRUE ] && [ $CONFIGURED_ANYTHING -eq $BS_FALSE ]; then
-        echoerror "No configuration or keys were copied over. No configuration was done!"
-        exit 1
+        echowarn "No configuration or keys were copied over. No configuration was done!"
+        exit 0
     fi
 }
 #
 #  Ended Default Configuration function
+#
+##############################################################################
+
+
+##############################################################################
+#
+#   This function checks if all of the installed daemons are running or not.
+#
+daemons_running() {
+    FAILED_DAEMONS=0
+    for fname in minion master syndic; do
+
+        # Skip if not meant to be installed
+        [ $fname = "minion" ] && [ $INSTALL_MINION -eq $BS_FALSE ] && continue
+        [ $fname = "master" ] && [ $INSTALL_MASTER -eq $BS_FALSE ] && continue
+        [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq $BS_FALSE ] && continue
+
+        if [ "x$(ps aux | grep -v grep | grep salt-$fname)" = "x" ]; then
+            echoerror "salt-$fname was not found running"
+            FAILED_DAEMONS=$(expr $FAILED_DAEMONS + 1)
+        fi
+    done
+    return $FAILED_DAEMONS
+}
+#
+#  Ended daemons running check function
 #
 ##############################################################################
 
@@ -1892,6 +2158,25 @@ for FUNC_NAME in $(__strip_duplicates $STARTDAEMONS_FUNC_NAMES); do
 done
 
 
+# Let's get the daemons running check function.
+DAEMONS_RUNNING_FUNC="null"
+DAEMONS_RUNNING_FUNC_NAMES="daemons_running_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}_${ITYPE}"
+DAEMONS_RUNNING_FUNC_NAMES="$DAEMONS_RUNNING_FUNC_NAMES daemons_running_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}${PREFIXED_DISTRO_MINOR_VERSION}_${ITYPE}"
+DAEMONS_RUNNING_FUNC_NAMES="$DAEMONS_RUNNING_FUNC_NAMES daemons_running_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}"
+DAEMONS_RUNNING_FUNC_NAMES="$DAEMONS_RUNNING_FUNC_NAMES daemons_running_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}${PREFIXED_DISTRO_MINOR_VERSION}"
+DAEMONS_RUNNING_FUNC_NAMES="$DAEMONS_RUNNING_FUNC_NAMES daemons_running_${DISTRO_NAME_L}_${ITYPE}"
+DAEMONS_RUNNING_FUNC_NAMES="$DAEMONS_RUNNING_FUNC_NAMES daemons_running_${DISTRO_NAME_L}"
+DAEMONS_RUNNING_FUNC_NAMES="$DAEMONS_RUNNING_FUNC_NAMES daemons_running"
+
+for FUNC_NAME in $(__strip_duplicates $DAEMONS_RUNNING_FUNC_NAMES); do
+    if __function_defined $FUNC_NAME; then
+        DAEMONS_RUNNING_FUNC=$FUNC_NAME
+        break
+    fi
+done
+
+
+
 if [ $DEPS_INSTALL_FUNC = "null" ]; then
     echoerror "No dependencies installation function found. Exiting..."
     exit 1
@@ -1958,6 +2243,18 @@ if [ "$STARTDAEMONS_INSTALL_FUNC" != "null" ]; then
         exit 1
     fi
 fi
+
+# Check if the installed daemons are running or not
+if [ "$DAEMONS_RUNNING_FUNC" != "null" ]; then
+    sleep 3  # Sleep a little bit to let daemons start
+    echoinfo "Running ${DAEMONS_RUNNING_FUNC}()"
+    $DAEMONS_RUNNING_FUNC
+    if [ $? -ne 0 ]; then
+        echoerror "Failed to run ${DAEMONS_RUNNING_FUNC}()!!!"
+        exit 1
+    fi
+fi
+
 
 # Done!
 if [ $CONFIG_ONLY -eq $BS_FALSE ]; then

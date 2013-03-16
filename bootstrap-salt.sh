@@ -73,7 +73,7 @@ echoerror() {
 #   DESCRIPTION:  Echo information to stdout.
 #-------------------------------------------------------------------------------
 echoinfo() {
-    printf "${GC} *  INFO${EC}: $@\n";
+    printf "${GC} *  INFO${EC}: %s\n" "$@";
 }
 
 #---  FUNCTION  ----------------------------------------------------------------
@@ -81,7 +81,7 @@ echoinfo() {
 #   DESCRIPTION:  Echo warning informations to stdout.
 #-------------------------------------------------------------------------------
 echowarn() {
-    printf "${YC} *  WARN${EC}: $@\n";
+    printf "${YC} *  WARN${EC}: %s\n" "$@";
 }
 
 #---  FUNCTION  ----------------------------------------------------------------
@@ -90,7 +90,7 @@ echowarn() {
 #-------------------------------------------------------------------------------
 echodebug() {
     if [ $ECHO_DEBUG -eq $BS_TRUE ]; then
-        printf "${BC} * DEBUG${EC}: $@\n";
+        printf "${BC} * DEBUG${EC}: %s\n" "$@";
     fi
 }
 

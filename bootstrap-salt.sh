@@ -2272,6 +2272,18 @@ if [ "$DAEMONS_RUNNING_FUNC" != "null" ]; then
         for line in "$(ps auxwww)"; do
             echodebug "$line"
         done
+
+        for fname in minion master syndic; do
+            # Skip if not meant to be installed
+            [ $fname = "minion" ] && [ $INSTALL_MINION -eq $BS_FALSE ] && continue
+            [ $fname = "master" ] && [ $INSTALL_MASTER -eq $BS_FALSE ] && continue
+            [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq $BS_FALSE ] && continue
+
+            [ ! -f /var/log/$fname ] && continue
+
+            echodebug "DEAMON LOGS for $fname: $(cat /var/log/$fname)"
+
+        done
         exit 1
     fi
 fi

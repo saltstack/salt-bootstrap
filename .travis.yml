@@ -2,6 +2,7 @@ before_install:
   - "if [[ $TRAVIS_PYTHON_VERSION == '2.6' ]]; then sudo pip install unittest2; fi"
   - sudo pip install unittest-xml-reporting
   - sudo apt-get remove -y -o DPkg::Options::=--force-confold --purge libzmq3
+  - sudo apt-get autoremove -y -o DPkg::Options::=--force-confold --purge
 
 script:
   - sudo python tests/runtests.py -vv

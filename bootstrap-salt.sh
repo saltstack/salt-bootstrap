@@ -827,6 +827,22 @@ install_ubuntu_deps() {
     apt-get update
 }
 
+install_ubuntu_daily_deps() {
+    apt-get update
+    if [ $DISTRO_MAJOR_VERSION -eq 12 ] && [ $DISTRO_MINOR_VERSION -gt 04 ] || [ $DISTRO_MAJOR_VERSION -gt 12 ]; then
+        # Above Ubuntu 12.04 add-apt-repository is in a different package
+        __apt_get_noinput software-properties-common
+    else
+        __apt_get_noinput python-software-properties
+    fi
+    if [ $DISTRO_MAJOR_VERSION -lt 11 ] && [ $DISTRO_MINOR_VERSION -lt 10 ]; then
+        add-apt-repository ppa:saltstack/salt-daily
+    else
+        add-apt-repository -y ppa:saltstack/salt-daily
+    fi
+    apt-get update
+}
+
 install_ubuntu_11_10_deps() {
     apt-get update
     __apt_get_noinput python-software-properties

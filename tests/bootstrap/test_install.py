@@ -31,7 +31,8 @@ CLEANUP_COMMANDS_BY_OS_FAMILY = {
         'apt-get remove -y -o DPkg::Options::=--force-confold '
         '--purge salt-master salt-minion salt-syndic python-crypto '
         'python-jinja2 python-m2crypto python-yaml msgpack-python python-zmq',
-        'apt-get autoremove -y -o DPkg::Options::=--force-confold --purge'
+        'apt-get autoremove -y -o DPkg::Options::=--force-confold --purge',
+        'rm -rf /etc/apt/sources.list.d/saltstack-salt-*'
     ],
     'RedHat': [
         'yum -y remove salt-minion salt-master',

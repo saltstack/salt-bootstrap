@@ -5,7 +5,7 @@ before_install:
   - sudo apt-get autoremove -y -o DPkg::Options::=--force-confold --purge
 
 script:
-  - sudo python tests/runtests.py -vv
+  - BS_ECHO_DEBUG=1 sudo -E python tests/runtests.py -vv
 
 notifications:
   irc:

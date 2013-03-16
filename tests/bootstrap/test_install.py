@@ -231,7 +231,7 @@ class InstallationTestCase(BootstrapTestCase):
         )
 
     def test_install_daily(self):
-        args = []
+        args = ['-D']
         if GRAINS['os'] in OS_REQUIRES_PIP_ALLOWED:
             args.append('-P')
 

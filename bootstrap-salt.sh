@@ -2270,13 +2270,7 @@ if [ "$DAEMONS_RUNNING_FUNC" != "null" ]; then
     if [ $? -ne 0 ]; then
         echoerror "Failed to run ${DAEMONS_RUNNING_FUNC}()!!!"
         echodebug "Running Processes:"
-        OIFS=$IFS;
-        IFS=$'\n';
-        RUNNING_PROCESSES=$(ps auxwww)
-        for line in $RUNNING_PROCESSES; do
-            echodebug "$line"
-        done
-        IFS=$OIFS
+        echodebug "$(ps auxwww)"
 
         for fname in minion master syndic; do
             # Skip if not meant to be installed

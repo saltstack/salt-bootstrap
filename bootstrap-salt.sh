@@ -943,7 +943,7 @@ install_ubuntu_restart_daemons() {
             fi
         fi
 
-        if [ ! -f /etc/init.d/salt-$fname ]
+        if [ ! -f /etc/init.d/salt-$fname ]; then
             echoerror "No init.d support for salt-$fname was found"
             return 1
         fi

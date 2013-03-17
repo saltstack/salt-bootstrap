@@ -231,7 +231,7 @@ class InstallationTestCase(BootstrapTestCase):
         )
 
     def test_install_daily(self):
-        args = ['-D']
+        args = []
         if GRAINS['os'] in OS_REQUIRES_PIP_ALLOWED:
             args.append('-P')
 
@@ -325,7 +325,7 @@ class InstallationTestCase(BootstrapTestCase):
         if GRAINS['os'] in OS_REQUIRES_PIP_ALLOWED:
             args.append('-P')
 
-        args.extend(['git', 'v0.13.1'])
+        args.extend(['git', 'v0.13.2'])
 
         self.assert_script_result(
             'Failed to install using specific git tag',
@@ -555,7 +555,7 @@ class InstallationTestCase(BootstrapTestCase):
         if GRAINS['os'] in OS_REQUIRES_PIP_ALLOWED:
             args.append('-P')
 
-        args.extend(['git', 'v0.13.1'])
+        args.extend(['git', 'v0.13.2'])
 
         self.assert_script_result(
             'Failed to install using specific git tag',

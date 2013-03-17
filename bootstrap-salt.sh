@@ -25,6 +25,7 @@ ScriptName="bootstrap-salt.sh"
 #   * BS_COLORS:        If 0 disables colour support
 #   * BS_PIP_ALLOWED:   If 1 enable pip based installations(if needed)
 #   * BS_ECHO_DEBUG:    If 1 enable debug echo which can also be set by -D
+#   * BS_SALT_ETC_DIR:  Defaults to /etc/salt
 #===============================================================================
 
 
@@ -157,6 +158,7 @@ INSTALL_MINION=$BS_TRUE
 ECHO_DEBUG=${BS_ECHO_DEBUG:-$BS_FALSE}
 CONFIG_ONLY=$BS_FALSE
 PIP_ALLOWED=${BS_PIP_ALLOWED:-$BS_FALSE}
+SALT_ETC_DIR=${BS_SALT_ETC_DIR:-/etc/salt}
 
 while getopts ":hvnDc:MSNCP" opt
 do
@@ -2000,11 +2002,10 @@ config_salt() {
 
     CONFIGURED_ANYTHING=$BS_FALSE
 
-    SALT_DIR=/etc/salt
-    PKI_DIR=$SALT_DIR/pki
+    PKI_DIR=$SALT_ETC_DIR/pki
 
     # Let's create the necessary directories
-    [ -d $SALT_DIR ] || mkdir $SALT_DIR
+    [ -d $SALT_ETC_DIR ] || mkdir $SALT_ETC_DIR
     [ -d $PKI_DIR ] || mkdir -p $PKI_DIR && chmod 700 $PKI_DIR
 
     if [ $INSTALL_MINION -eq $BS_TRUE ]; then

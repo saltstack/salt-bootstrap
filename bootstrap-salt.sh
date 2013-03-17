@@ -24,6 +24,7 @@ ScriptName="bootstrap-salt.sh"
 #-------------------------------------------------------------------------------
 #   * BS_COLORS:        If 0 disables colour support
 #   * BS_PIP_ALLOWED:   If 1 enable pip based installations(if needed)
+#   * BS_ECHO_DEBUG:    If 1 enable debug echo which can also be set by -D
 #   * BS_SALT_ETC_DIR:  Defaults to /etc/salt
 #===============================================================================
 
@@ -73,7 +74,7 @@ echoerror() {
 #   DESCRIPTION:  Echo information to stdout.
 #-------------------------------------------------------------------------------
 echoinfo() {
-    printf "${GC} *  INFO${EC}: $@\n";
+    printf "${GC} *  INFO${EC}: %s\n" "$@";
 }
 
 #---  FUNCTION  ----------------------------------------------------------------
@@ -81,7 +82,7 @@ echoinfo() {
 #   DESCRIPTION:  Echo warning informations to stdout.
 #-------------------------------------------------------------------------------
 echowarn() {
-    printf "${YC} *  WARN${EC}: $@\n";
+    printf "${YC} *  WARN${EC}: %s\n" "$@";
 }
 
 #---  FUNCTION  ----------------------------------------------------------------
@@ -90,7 +91,7 @@ echowarn() {
 #-------------------------------------------------------------------------------
 echodebug() {
     if [ $ECHO_DEBUG -eq $BS_TRUE ]; then
-        printf "${BC} * DEBUG${EC}: $@\n";
+        printf "${BC} * DEBUG${EC}: %s\n" "$@";
     fi
 }
 
@@ -154,7 +155,7 @@ TEMP_CONFIG_DIR="null"
 INSTALL_MASTER=$BS_FALSE
 INSTALL_SYNDIC=$BS_FALSE
 INSTALL_MINION=$BS_TRUE
-ECHO_DEBUG=$BS_FALSE
+ECHO_DEBUG=${BS_ECHO_DEBUG:-$BS_FALSE}
 CONFIG_ONLY=$BS_FALSE
 PIP_ALLOWED=${BS_PIP_ALLOWED:-$BS_FALSE}
 SALT_ETC_DIR=${BS_SALT_ETC_DIR:-/etc/salt}
@@ -825,6 +826,22 @@ install_ubuntu_deps() {
         add-apt-repository ppa:saltstack/salt
     else
         add-apt-repository -y ppa:saltstack/salt
+    fi
+    apt-get update
+}
+
+install_ubuntu_daily_deps() {
+    apt-get update
+    if [ $DISTRO_MAJOR_VERSION -eq 12 ] && [ $DISTRO_MINOR_VERSION -gt 04 ] || [ $DISTRO_MAJOR_VERSION -gt 12 ]; then
+        # Above Ubuntu 12.04 add-apt-repository is in a different package
+        __apt_get_noinput software-properties-common
+    else
+        __apt_get_noinput python-software-properties
+    fi
+    if [ $DISTRO_MAJOR_VERSION -lt 11 ] && [ $DISTRO_MINOR_VERSION -lt 10 ]; then
+        add-apt-repository ppa:saltstack/salt-daily
+    else
+        add-apt-repository -y ppa:saltstack/salt-daily
     fi
     apt-get update
 }
@@ -2252,6 +2269,25 @@ if [ "$DAEMONS_RUNNING_FUNC" != "null" ]; then
     $DAEMONS_RUNNING_FUNC
     if [ $? -ne 0 ]; then
         echoerror "Failed to run ${DAEMONS_RUNNING_FUNC}()!!!"
+        echodebug "Running Processes:"
+        echodebug "$(ps auxwww)"
+
+        for fname in minion master syndic; do
+            # Skip if not meant to be installed
+            [ $fname = "minion" ] && [ $INSTALL_MINION -eq $BS_FALSE ] && continue
+            [ $fname = "master" ] && [ $INSTALL_MASTER -eq $BS_FALSE ] && continue
+            [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq $BS_FALSE ] && continue
+
+            [ ! $SALT_ETC_DIR/$fname ] && [ $fname != "syndic" ] && echodebug "$SALT_ETC_DIR/$fname does not exist"
+
+            echodebug "Running salt-$fname by hand outputs: $(salt-$fname -l debug)"
+
+            [ ! -f /var/log/salt/$fname ] && echodebug "/var/log/salt/$fname does not exist. Can't cat its contents!" && continue
+
+            echodebug "DEAMON LOGS for $fname:"
+            echodebug "$(cat /var/log/salt/$fname)"
+            echo
+        done
         exit 1
     fi
 fi

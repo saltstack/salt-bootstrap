@@ -906,13 +906,19 @@ install_ubuntu_git_post() {
 
         if [ -f /sbin/initctl ]; then
             # We have upstart support
-            /sbin/initctl status salt-$fname > /dev/null 2>&1
+            echodebug "There's upstart support"
+            /sbin/initctl status salt-$fname || \
+                echowarn "Upstart does not apparently know anything about salt-$fname"
+
             if [ $? -eq 1 ]; then
                 # upstart does not know about our service, let's copy the proper file
+                echodebug "Copying ${SALT_GIT_CHECKOUT_DIR}/pkg/salt-$fname.upstart to /etc/init/salt-$fname.conf"
                 cp ${SALT_GIT_CHECKOUT_DIR}/pkg/salt-$fname.upstart /etc/init/salt-$fname.conf
             fi
         # No upstart support in Ubuntu!?
         elif [ -f ${SALT_GIT_CHECKOUT_DIR}/debian/salt-$fname.init ]; then
+            echodebug "There's NO upstart support!?"
+            echodebug "Copying ${SALT_GIT_CHECKOUT_DIR}/debian/salt-$fname.init to /etc/init.d/salt-$fname"
             cp ${SALT_GIT_CHECKOUT_DIR}/debian/salt-$fname.init /etc/init.d/salt-$fname
             chmod +x /etc/init.d/salt-$fname
             update-rc.d salt-$fname defaults
@@ -930,9 +936,10 @@ install_ubuntu_restart_daemons() {
 
         if [ -f /sbin/initctl ]; then
             echodebug "There's upstart support"
-            /sbin/initctl status salt-$fname > /dev/null 2>&1
+            /sbin/initctl status salt-$fname || \
+                echowarn "Upstart does not apparently know anything about salt-$fname"
             if [ $? -eq 0 ]; then
-                echodebug "Upstart knows about salt-$fname"
+                echodebug "Upstart apparently knows about salt-$fname"
                 # upstart knows about this service, let's stop and start it.
                 # We could restart but earlier versions of the upstart script
                 # did not support restart, so, it's safer this way

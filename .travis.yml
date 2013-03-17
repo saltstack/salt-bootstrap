@@ -3,6 +3,7 @@ before_install:
   - sudo pip install unittest-xml-reporting
   - sudo apt-get remove -y -o DPkg::Options::=--force-confold --purge libzmq3
   - sudo apt-get autoremove -y -o DPkg::Options::=--force-confold --purge
+  - sudo add-apt-repository --remove ppa:travis-ci/zero-mq
 
 script:
   - BS_ECHO_DEBUG=1 sudo -E python tests/runtests.py -vv

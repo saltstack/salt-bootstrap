@@ -907,11 +907,11 @@ install_ubuntu_git_post() {
         if [ -f /sbin/initctl ]; then
             # We have upstart support
             echodebug "There's upstart support"
-            /sbin/initctl status salt-$fname || \
-                echowarn "Upstart does not apparently know anything about salt-$fname"
+            /sbin/initctl status salt-$fname > /dev/null 2>&1
 
             if [ $? -eq 1 ]; then
                 # upstart does not know about our service, let's copy the proper file
+                echowarn "Upstart does not apparently know anything about salt-$fname"
                 echodebug "Copying ${SALT_GIT_CHECKOUT_DIR}/pkg/salt-$fname.upstart to /etc/init/salt-$fname.conf"
                 cp ${SALT_GIT_CHECKOUT_DIR}/pkg/salt-$fname.upstart /etc/init/salt-$fname.conf
             fi
@@ -922,6 +922,8 @@ install_ubuntu_git_post() {
             cp ${SALT_GIT_CHECKOUT_DIR}/debian/salt-$fname.init /etc/init.d/salt-$fname
             chmod +x /etc/init.d/salt-$fname
             update-rc.d salt-$fname defaults
+        else
+            echoerror "Neither upstart not init.d was setup for salt-$fname"
         fi
     done
 }

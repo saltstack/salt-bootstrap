@@ -951,6 +951,66 @@ install_ubuntu_restart_daemons() {
 
 ##############################################################################
 #
+#   Trisquel(Ubuntu) Install Functions
+#
+#   Trisquel 6.0 is based on Ubuntu 12.04
+#
+install_trisquel_6_stable_deps() {
+    apt-get update
+    __apt_get_noinput python-software-properties
+    add-apt-repository -y ppa:saltstack/salt
+    apt-get update
+}
+
+install_trisquel_6_daily_deps() {
+    apt-get update
+    __apt_get_noinput python-software-properties
+    add-apt-repository -y ppa:saltstack/salt-daily
+    apt-get update
+}
+
+install_trisquel_6_git_deps() {
+    install_trisquel_6_stable_deps
+    __apt_get_noinput git-core python-yaml python-m2crypto python-crypto \
+        msgpack-python python-zmq python-jinja2
+
+    __git_clone_and_checkout || return 1
+
+    # Let's trigger config_salt()
+    if [ "$TEMP_CONFIG_DIR" = "null" ]; then
+        TEMP_CONFIG_DIR="${SALT_GIT_CHECKOUT_DIR}/conf/"
+        CONFIG_SALT_FUNC="config_salt"
+    fi
+
+    return 0
+}
+
+install_trisquel_6_stable() {
+    install_ubuntu_stable
+}
+
+install_trisquel_6_daily() {
+    install_ubuntu_daily
+}
+
+install_trisquel_6_git() {
+    install_ubuntu_git
+}
+
+install_trisquel_git_post() {
+    install_ubuntu_git_post
+}
+
+install_trisquel_restart_daemons() {
+    install_ubuntu_restart_daemons
+}
+#
+#   End of Tristel(Ubuntu) Install Functions
+#
+##############################################################################
+
+##############################################################################
+#
 #   Debian Install Functions
 #
 install_debian_deps() {

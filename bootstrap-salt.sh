@@ -2285,11 +2285,8 @@ if [ "$DAEMONS_RUNNING_FUNC" != "null" ]; then
             [ ! -f /var/log/salt/$fname ] && echodebug "/var/log/salt/$fname does not exist. Can't cat its contents!" && continue
 
             echodebug "DEAMON LOGS for $fname:"
-            while IFS=$'\n' read -r line; do
-                echodebug "$line"
-            done < /var/log/salt/$fname
+            echodebug "$(cat /var/log/salt/$fname)"
             echo
-
         done
         exit 1
     fi

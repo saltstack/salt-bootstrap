@@ -693,8 +693,9 @@ DISTRO_NAME_L=$(echo $DISTRO_NAME | tr '[:upper:]' '[:lower:]' | sed 's/[^a-zA-Z
 
 
 # Only Ubuntu has daily packages, let's let users know about that
-if ([ "${DISTRO_NAME_L}" != "ubuntu" ] || [ "${DISTRO_NAME_L}" != "trisquel" ]) && [ $ITYPE = "daily" ]; then
-    echoerror "Only Ubuntu has daily packages support"
+if ([ "${DISTRO_NAME_L}" != "ubuntu" ] && [ $ITYPE = "daily" ]) || \
+   ([ "${DISTRO_NAME_L}" != "trisquel" ] && [ $ITYPE = "daily" ]); then
+    echoerror "${DISTRO_NAME} does not have daily packages support"
     exit 1
 fi
 

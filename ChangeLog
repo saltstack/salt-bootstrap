@@ -2,6 +2,8 @@ Version 1.5.2:
 	* Fix issue with travis testing(it installs it's own ZeroMQ3 lib
 	* Allow setting the debug output from an environment variable
 	* Fix an escape issue in the `printf` calls used in our echo calls
+	* Don't overwrite files(config, init.d, etc). Use a specific flag to
+	force overwrites.
 	* Distro Support Fixed:
 		* Ubuntu daily installs.
 

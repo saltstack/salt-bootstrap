@@ -1,0 +1,35 @@
+Version 1.5.2:
+	* Fix issue with travis testing(it installs it's own ZeroMQ3 lib
+	* Allow setting the debug output from an environment variable
+	* Fix an escape issue in the `printf` calls used in our echo calls
+	* Distro Support Fixed:
+		* Ubuntu daily installs.
+
+Version 1.5.1:
+	* Improved unittesting.
+	* Starting daemons.
+	* Make sure that daemons are really running.
+	* For the users to make the choice if installing from PIP(if required
+	since there aren't system pacakges).
+	* Fixed salt's git cloning when the salt git tree is already present on
+	the system.
+	* Distro Support Fixed:
+		* Debian 6
+		* Ubuntu 12.10
+		* CentOS
+	* Distro Support Added:
+		* SuSE 11 SP1/11 SP2
+		* OpenSUSE 12.x
+
+Version 1.5:
+	* First stable version of the script
+	* Support for:
+		* Ubuntu 10.x/11.x/12.x
+		* Debian 6.x
+		* CentOS 5/6
+		* Red Hat 5/6
+		* Red Hat Enterprise 5/6
+		* Fedora
+		* Arch
+		* SmartOS
+		* FreeBSD 9.0

@@ -22,10 +22,11 @@ ScriptName="bootstrap-salt.sh"
 #===============================================================================
 #  Environment variables taken into account.
 #-------------------------------------------------------------------------------
-#   * BS_COLORS:        If 0 disables colour support
-#   * BS_PIP_ALLOWED:   If 1 enable pip based installations(if needed)
-#   * BS_ECHO_DEBUG:    If 1 enable debug echo which can also be set by -D
-#   * BS_SALT_ETC_DIR:  Defaults to /etc/salt
+#   * BS_COLORS:          If 0 disables colour support
+#   * BS_PIP_ALLOWED:     If 1 enable pip based installations(if needed)
+#   * BS_ECHO_DEBUG:      If 1 enable debug echo which can also be set by -D
+#   * BS_SALT_ETC_DIR:    Defaults to /etc/salt
+#   * BS_FORCE_OVERWRITE: Force overriding copied files(config, init.d, etc)
 #===============================================================================
 
 
@@ -144,6 +145,7 @@ usage() {
       distribution. Using this flag allows the script to use pip as a last
       resort method. NOTE: This works for functions which actually implement
       pip based installations.
+  -F  Allow copied files to overwrite existing(config, init.d, etc)
 
 EOT
 }   # ----------  end of function usage  ----------
@@ -159,6 +161,7 @@ ECHO_DEBUG=${BS_ECHO_DEBUG:-$BS_FALSE}
 CONFIG_ONLY=$BS_FALSE
 PIP_ALLOWED=${BS_PIP_ALLOWED:-$BS_FALSE}
 SALT_ETC_DIR=${BS_SALT_ETC_DIR:-/etc/salt}
+FORCE_OVERWRITE=${BS_FORCE_OVERWRITE:-$BS_FALSE}
 
 while getopts ":hvnDc:MSNCP" opt
 do
@@ -181,6 +184,7 @@ do
     N )  INSTALL_MINION=$BS_FALSE                       ;;
     C )  CONFIG_ONLY=$BS_TRUE                           ;;
     P )  PIP_ALLOWED=$BS_TRUE                           ;;
+    F )  FORCE_OVERWRITE=$BS_TRUE                       ;;
 
     \?)  echo
          echoerror "Option does not exist : $OPTARG"
@@ -759,6 +763,46 @@ __apt_get_noinput() {
 }
 
 
+#---  FUNCTION  ----------------------------------------------------------------
+#          NAME:  copyfile
+#   DESCRIPTION:  Simple function to copy files. Overrides if asked.
+#-------------------------------------------------------------------------------
+copyfile() {
+    overwrite=$FORCE_OVERWRITE
+    if [ $# -eq 2 ]; then
+        sfile=$1
+        dfile=$2
+    elif [ $# -eq 3 ]; then
+        sfile=$1
+        dfile=$2
+        overwrite=$3
+    else
+        echoerror "Wrong number of arguments for copyfile()"
+        echoinfo "USAGE: copyfile <source> <dest>  OR  copyfile <source> <dest> <overwrite>"
+        exit 1
+    fi
+
+    # Does the source file exist?
+    if [ ! -f "$sfile" ]; then
+        echowarn "$sfile does not exist!"
+        return 1
+    fi
+
+    if [ ! -f "$dfile" ]; then
+        # The destination file does not exist, copy
+        echodebug "Copying $sfile to $dfile"
+        cp "$sfile" "$dfile"
+    elif [ -f "$dfile" ] && [ $overwrite -eq $BS_TRUE ]; then
+        # The destination exist and we're overwriting
+        echodebug "Overriding $dfile with $sfile"
+        cp -f "$sfile" "$dfile"
+    elif [ -f "$dfile" ] && [ $overwrite -ne $BS_TRUE ]; then
+        echodebug "Not overriding $dfile with $sfile"
+    fi
+    return 0
+}
+
+
 ##############################################################################
 #
 #   Distribution install functions
@@ -908,11 +952,11 @@ install_ubuntu_git_post() {
             /sbin/initctl status salt-$fname > /dev/null 2>&1
             if [ $? -eq 1 ]; then
                 # upstart does not know about our service, let's copy the proper file
-                cp ${SALT_GIT_CHECKOUT_DIR}/pkg/salt-$fname.upstart /etc/init/salt-$fname.conf
+                copyfile ${SALT_GIT_CHECKOUT_DIR}/pkg/salt-$fname.upstart /etc/init/salt-$fname.conf
             fi
         # No upstart support in Ubuntu!?
         elif [ -f ${SALT_GIT_CHECKOUT_DIR}/debian/salt-$fname.init ]; then
-            cp ${SALT_GIT_CHECKOUT_DIR}/debian/salt-$fname.init /etc/init.d/salt-$fname
+            copyfile ${SALT_GIT_CHECKOUT_DIR}/debian/salt-$fname.init /etc/init.d/salt-$fname
             chmod +x /etc/init.d/salt-$fname
             update-rc.d salt-$fname defaults
         fi
@@ -1081,7 +1125,7 @@ install_debian_git_post() {
         [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq $BS_FALSE ] && continue
 
         if [ -f ${SALT_GIT_CHECKOUT_DIR}/debian/salt-$fname.init ]; then
-            cp ${SALT_GIT_CHECKOUT_DIR}/debian/salt-$fname.init /etc/init.d/salt-$fname
+            copyfile ${SALT_GIT_CHECKOUT_DIR}/debian/salt-$fname.init /etc/init.d/salt-$fname
         fi
         chmod +x /etc/init.d/salt-$fname
         update-rc.d salt-$fname defaults
@@ -1151,7 +1195,7 @@ install_fedora_git_post() {
         [ $fname = "master" ] && [ $INSTALL_MASTER -eq $BS_FALSE ] && continue
         [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq $BS_FALSE ] && continue
 
-        cp ${SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-$fname.service /lib/systemd/system/salt-$fname.service
+        copyfile ${SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-$fname.service /lib/systemd/system/salt-$fname.service
 
         systemctl is-enabled salt-$fname.service || (systemctl preset salt-$fname.service && systemctl enable salt-$fname.service)
         sleep 0.1
@@ -1267,11 +1311,11 @@ install_centos_git_post() {
             /sbin/initctl status salt-$fname > /dev/null 2>&1
             if [ $? -eq 1 ]; then
                 # upstart does not know about our service, let's copy the proper file
-                cp ${SALT_GIT_CHECKOUT_DIR}/pkg/salt-$fname.upstart /etc/init/salt-$fname.conf
+                copyfile ${SALT_GIT_CHECKOUT_DIR}/pkg/salt-$fname.upstart /etc/init/salt-$fname.conf
             fi
         # Still in SysV init?!
         elif [ ! -f /etc/init.d/salt-$fname ]; then
-            cp ${SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-${fname} /etc/init.d/
+            copyfile ${SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-${fname} /etc/init.d/
             chmod +x /etc/init.d/salt-${fname}
             /sbin/chkconfig salt-${fname} on
         fi
@@ -1532,7 +1576,7 @@ install_arch_linux_git_post() {
         [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq $BS_FALSE ] && continue
 
         if [ -f /usr/bin/systemctl ]; then
-            cp ${SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-$fname.service /lib/systemd/system/salt-$fname.service
+            copyfile ${SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-$fname.service /lib/systemd/system/salt-$fname.service
 
             /usr/bin/systemctl is-enabled salt-$fname.service > /dev/null 2>&1 || (
                 /usr/bin/systemctl preset salt-$fname.service > /dev/null 2>&1 &&
@@ -1544,7 +1588,7 @@ install_arch_linux_git_post() {
         fi
 
         # SysV init!?
-        cp ${SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-$fname /etc/rc.d/init.d/salt-$fname
+        copyfile ${SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-$fname /etc/rc.d/init.d/salt-$fname
         chmod +x /etc/rc.d/init.d/salt-$fname
     done
 }
@@ -1649,7 +1693,7 @@ install_freebsd_9_stable_post() {
         grep "$enable_string" /etc/rc.conf >/dev/null 2>&1
         [ $? -eq 1 ] && echo "$enable_string" >> /etc/rc.conf
 
-        [ -f /usr/local/etc/salt/${fname}.sample ] && cp /usr/local/etc/salt/${fname}.sample /usr/local/etc/salt/${fname}
+        [ -f /usr/local/etc/salt/${fname}.sample ] && copyfile /usr/local/etc/salt/${fname}.sample /usr/local/etc/salt/${fname}
 
         if [ $fname = "minion" ] ; then
             grep "salt_minion_paths" /etc/rc.conf >/dev/null 2>&1
@@ -1860,11 +1904,11 @@ install_opensuse_git_post() {
         [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq $BS_FALSE ] && continue
 
         if [ -f /bin/systemctl ]; then
-            cp ${SALT_GIT_CHECKOUT_DIR}/pkg/salt-$fname.service /lib/systemd/system/salt-$fname.service
+            copyfile ${SALT_GIT_CHECKOUT_DIR}/pkg/salt-$fname.service /lib/systemd/system/salt-$fname.service
             continue
         fi
 
-        cp ${SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-$fname /etc/init.d/salt-$fname
+        copyfile ${SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-$fname /etc/init.d/salt-$fname
         chmod +x /etc/init.d/salt-$fname
 
     done

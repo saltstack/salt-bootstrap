@@ -4,6 +4,8 @@ Version 1.5.2:
 	* Fix an escape issue in the `printf` calls used in our echo calls
 	* Distro Support Fixed:
 		* Ubuntu daily installs.
+	* Distro Support Added:
+		* Trisquel 6.0 (Ubuntu 12.04)
 
 Version 1.5.1:
 	* Improved unittesting.

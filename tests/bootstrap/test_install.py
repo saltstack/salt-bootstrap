@@ -31,7 +31,8 @@ CLEANUP_COMMANDS_BY_OS_FAMILY = {
         'apt-get remove -y -o DPkg::Options::=--force-confold '
         '--purge salt-master salt-minion salt-syndic python-crypto '
         'python-jinja2 python-m2crypto python-yaml msgpack-python python-zmq',
-        'apt-get autoremove -y -o DPkg::Options::=--force-confold --purge'
+        'apt-get autoremove -y -o DPkg::Options::=--force-confold --purge',
+        'rm -rf /etc/apt/sources.list.d/saltstack-salt-*'
     ],
     'RedHat': [
         'yum -y remove salt-minion salt-master',
@@ -239,7 +240,7 @@ class InstallationTestCase(BootstrapTestCase):
         rc, out, err = self.run_script(
             args=args, timeout=15 * 60, stream_stds=True
         )
-        if GRAINS['os'] == 'Ubuntu':
+        if GRAINS['os'] in ('Ubuntu', 'Trisquel'):
             self.assert_script_result(
                 'Failed to install daily',
                 0, (rc, out, err)

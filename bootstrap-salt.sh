@@ -16,14 +16,17 @@
 #       CREATED: 10/15/2012 09:49:37 PM WEST
 #===============================================================================
 set -o nounset                              # Treat unset variables as an error
-ScriptVersion="1.5.1"
+ScriptVersion="1.5.2"
 ScriptName="bootstrap-salt.sh"
 
 #===============================================================================
 #  Environment variables taken into account.
 #-------------------------------------------------------------------------------
-#   * BS_COLORS:        If 0 disables colour support
-#   * BS_PIP_ALLOWED:   If 1 enable pip based installations(if needed)
+#   * BS_COLORS:          If 0 disables colour support
+#   * BS_PIP_ALLOWED:     If 1 enable pip based installations(if needed)
+#   * BS_ECHO_DEBUG:      If 1 enable debug echo which can also be set by -D
+#   * BS_SALT_ETC_DIR:    Defaults to /etc/salt
+#   * BS_FORCE_OVERWRITE: Force overriding copied files(config, init.d, etc)
 #===============================================================================
 
 
@@ -72,7 +75,7 @@ echoerror() {
 #   DESCRIPTION:  Echo information to stdout.
 #-------------------------------------------------------------------------------
 echoinfo() {
-    printf "${GC} *  INFO${EC}: $@\n";
+    printf "${GC} *  INFO${EC}: %s\n" "$@";
 }
 
 #---  FUNCTION  ----------------------------------------------------------------
@@ -80,7 +83,7 @@ echoinfo() {
 #   DESCRIPTION:  Echo warning informations to stdout.
 #-------------------------------------------------------------------------------
 echowarn() {
-    printf "${YC} *  WARN${EC}: $@\n";
+    printf "${YC} *  WARN${EC}: %s\n" "$@";
 }
 
 #---  FUNCTION  ----------------------------------------------------------------
@@ -89,7 +92,7 @@ echowarn() {
 #-------------------------------------------------------------------------------
 echodebug() {
     if [ $ECHO_DEBUG -eq $BS_TRUE ]; then
-        printf "${BC} * DEBUG${EC}: $@\n";
+        printf "${BC} * DEBUG${EC}: %s\n" "$@";
     fi
 }
 
@@ -142,6 +145,7 @@ usage() {
       distribution. Using this flag allows the script to use pip as a last
       resort method. NOTE: This works for functions which actually implement
       pip based installations.
+  -F  Allow copied files to overwrite existing(config, init.d, etc)
 
 EOT
 }   # ----------  end of function usage  ----------
@@ -153,9 +157,11 @@ TEMP_CONFIG_DIR="null"
 INSTALL_MASTER=$BS_FALSE
 INSTALL_SYNDIC=$BS_FALSE
 INSTALL_MINION=$BS_TRUE
-ECHO_DEBUG=$BS_FALSE
+ECHO_DEBUG=${BS_ECHO_DEBUG:-$BS_FALSE}
 CONFIG_ONLY=$BS_FALSE
 PIP_ALLOWED=${BS_PIP_ALLOWED:-$BS_FALSE}
+SALT_ETC_DIR=${BS_SALT_ETC_DIR:-/etc/salt}
+FORCE_OVERWRITE=${BS_FORCE_OVERWRITE:-$BS_FALSE}
 
 while getopts ":hvnDc:MSNCP" opt
 do
@@ -178,6 +184,7 @@ do
     N )  INSTALL_MINION=$BS_FALSE                       ;;
     C )  CONFIG_ONLY=$BS_TRUE                           ;;
     P )  PIP_ALLOWED=$BS_TRUE                           ;;
+    F )  FORCE_OVERWRITE=$BS_TRUE                       ;;
 
     \?)  echo
          echoerror "Option does not exist : $OPTARG"
@@ -690,8 +697,9 @@ DISTRO_NAME_L=$(echo $DISTRO_NAME | tr '[:upper:]' '[:lower:]' | sed 's/[^a-zA-Z
 
 
 # Only Ubuntu has daily packages, let's let users know about that
-if [ "${DISTRO_NAME_L}" != "ubuntu" ] && [ $ITYPE = "daily" ]; then
-    echoerror "Only Ubuntu has daily packages support"
+if ([ "${DISTRO_NAME_L}" != "ubuntu" ] && [ $ITYPE = "daily" ]) && \
+   ([ "${DISTRO_NAME_L}" != "trisquel" ] && [ $ITYPE = "daily" ]); then
+    echoerror "${DISTRO_NAME} does not have daily packages support"
     exit 1
 fi
 
@@ -753,6 +761,46 @@ __git_clone_and_checkout() {
 #-------------------------------------------------------------------------------
 __apt_get_noinput() {
     apt-get install -y -o DPkg::Options::=--force-confold $@; return $?
+}
+
+
+#---  FUNCTION  ----------------------------------------------------------------
+#          NAME:  copyfile
+#   DESCRIPTION:  Simple function to copy files. Overrides if asked.
+#-------------------------------------------------------------------------------
+copyfile() {
+    overwrite=$FORCE_OVERWRITE
+    if [ $# -eq 2 ]; then
+        sfile=$1
+        dfile=$2
+    elif [ $# -eq 3 ]; then
+        sfile=$1
+        dfile=$2
+        overwrite=$3
+    else
+        echoerror "Wrong number of arguments for copyfile()"
+        echoinfo "USAGE: copyfile <source> <dest>  OR  copyfile <source> <dest> <overwrite>"
+        exit 1
+    fi
+
+    # Does the source file exist?
+    if [ ! -f "$sfile" ]; then
+        echowarn "$sfile does not exist!"
+        return 1
+    fi
+
+    if [ ! -f "$dfile" ]; then
+        # The destination file does not exist, copy
+        echodebug "Copying $sfile to $dfile"
+        cp "$sfile" "$dfile"
+    elif [ -f "$dfile" ] && [ $overwrite -eq $BS_TRUE ]; then
+        # The destination exist and we're overwriting
+        echodebug "Overriding $dfile with $sfile"
+        cp -f "$sfile" "$dfile"
+    elif [ -f "$dfile" ] && [ $overwrite -ne $BS_TRUE ]; then
+        echodebug "Not overriding $dfile with $sfile"
+    fi
+    return 0
 }
 
 
@@ -827,6 +875,22 @@ install_ubuntu_deps() {
     apt-get update
 }
 
+install_ubuntu_daily_deps() {
+    apt-get update
+    if [ $DISTRO_MAJOR_VERSION -eq 12 ] && [ $DISTRO_MINOR_VERSION -gt 04 ] || [ $DISTRO_MAJOR_VERSION -gt 12 ]; then
+        # Above Ubuntu 12.04 add-apt-repository is in a different package
+        __apt_get_noinput software-properties-common
+    else
+        __apt_get_noinput python-software-properties
+    fi
+    if [ $DISTRO_MAJOR_VERSION -lt 11 ] && [ $DISTRO_MINOR_VERSION -lt 10 ]; then
+        add-apt-repository ppa:saltstack/salt-daily
+    else
+        add-apt-repository -y ppa:saltstack/salt-daily
+    fi
+    apt-get update
+}
+
 install_ubuntu_11_10_deps() {
     apt-get update
     __apt_get_noinput python-software-properties
@@ -886,16 +950,24 @@ install_ubuntu_git_post() {
 
         if [ -f /sbin/initctl ]; then
             # We have upstart support
+            echodebug "There's upstart support"
             /sbin/initctl status salt-$fname > /dev/null 2>&1
+
             if [ $? -eq 1 ]; then
                 # upstart does not know about our service, let's copy the proper file
-                cp ${SALT_GIT_CHECKOUT_DIR}/pkg/salt-$fname.upstart /etc/init/salt-$fname.conf
+                echowarn "Upstart does not apparently know anything about salt-$fname"
+                echodebug "Copying ${SALT_GIT_CHECKOUT_DIR}/pkg/salt-$fname.upstart to /etc/init/salt-$fname.conf"
+                copyfile ${SALT_GIT_CHECKOUT_DIR}/pkg/salt-$fname.upstart /etc/init/salt-$fname.conf
             fi
         # No upstart support in Ubuntu!?
         elif [ -f ${SALT_GIT_CHECKOUT_DIR}/debian/salt-$fname.init ]; then
-            cp ${SALT_GIT_CHECKOUT_DIR}/debian/salt-$fname.init /etc/init.d/salt-$fname
+            echodebug "There's NO upstart support!?"
+            echodebug "Copying ${SALT_GIT_CHECKOUT_DIR}/debian/salt-$fname.init to /etc/init.d/salt-$fname"
+            copyfile ${SALT_GIT_CHECKOUT_DIR}/debian/salt-$fname.init /etc/init.d/salt-$fname
             chmod +x /etc/init.d/salt-$fname
             update-rc.d salt-$fname defaults
+        else
+            echoerror "Neither upstart not init.d was setup for salt-$fname"
         fi
     done
 }
@@ -909,24 +981,94 @@ install_ubuntu_restart_daemons() {
         [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq $BS_FALSE ] && continue
 
         if [ -f /sbin/initctl ]; then
-            # We have upstart support
-            /sbin/initctl status salt-$fname > /dev/null 2>&1
+            echodebug "There's upstart support"
+            /sbin/initctl status salt-$fname || \
+                echowarn "Upstart does not apparently know anything about salt-$fname"
             if [ $? -eq 0 ]; then
+                echodebug "Upstart apparently knows about salt-$fname"
                 # upstart knows about this service, let's stop and start it.
                 # We could restart but earlier versions of the upstart script
                 # did not support restart, so, it's safer this way
-                /sbin/initctl stop salt-$fname > /dev/null 2>&1
-                /sbin/initctl start salt-$fname > /dev/null 2>&1
+                /sbin/initctl stop salt-$fname || echodebug "Failed to stop salt-$fname"
+                /sbin/initctl start salt-$fname
                 [ $? -eq 0 ] && continue
                 # We failed to start the service, let's test the SysV code bellow
+                echodebug "Failed to start salt-$fname"
             fi
         fi
+
+        if [ ! -f /etc/init.d/salt-$fname ]; then
+            echoerror "No init.d support for salt-$fname was found"
+            return 1
+        fi
+
         /etc/init.d/salt-$fname stop > /dev/null 2>&1
         /etc/init.d/salt-$fname start
     done
+    return 0
 }
 #
 #   End of Ubuntu Install Functions
+#
+##############################################################################
+
+##############################################################################
+#
+#   Trisquel(Ubuntu) Install Functions
+#
+#   Trisquel 6.0 is based on Ubuntu 12.04
+#
+install_trisquel_6_stable_deps() {
+    apt-get update
+    __apt_get_noinput python-software-properties
+    add-apt-repository -y ppa:saltstack/salt
+    apt-get update
+}
+
+install_trisquel_6_daily_deps() {
+    apt-get update
+    __apt_get_noinput python-software-properties
+    add-apt-repository -y ppa:saltstack/salt-daily
+    apt-get update
+}
+
+install_trisquel_6_git_deps() {
+    install_trisquel_6_stable_deps
+    __apt_get_noinput git-core python-yaml python-m2crypto python-crypto \
+        msgpack-python python-zmq python-jinja2
+
+    __git_clone_and_checkout || return 1
+
+    # Let's trigger config_salt()
+    if [ "$TEMP_CONFIG_DIR" = "null" ]; then
+        TEMP_CONFIG_DIR="${SALT_GIT_CHECKOUT_DIR}/conf/"
+        CONFIG_SALT_FUNC="config_salt"
+    fi
+
+    return 0
+}
+
+install_trisquel_6_stable() {
+    install_ubuntu_stable
+}
+
+install_trisquel_6_daily() {
+    install_ubuntu_daily
+}
+
+install_trisquel_6_git() {
+    install_ubuntu_git
+}
+
+install_trisquel_git_post() {
+    install_ubuntu_git_post
+}
+
+install_trisquel_restart_daemons() {
+    install_ubuntu_restart_daemons
+}
+#
+#   End of Tristel(Ubuntu) Install Functions
 #
 ##############################################################################
 
@@ -1062,7 +1204,7 @@ install_debian_git_post() {
         [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq $BS_FALSE ] && continue
 
         if [ -f ${SALT_GIT_CHECKOUT_DIR}/debian/salt-$fname.init ]; then
-            cp ${SALT_GIT_CHECKOUT_DIR}/debian/salt-$fname.init /etc/init.d/salt-$fname
+            copyfile ${SALT_GIT_CHECKOUT_DIR}/debian/salt-$fname.init /etc/init.d/salt-$fname
         fi
         chmod +x /etc/init.d/salt-$fname
         update-rc.d salt-$fname defaults
@@ -1132,7 +1274,7 @@ install_fedora_git_post() {
         [ $fname = "master" ] && [ $INSTALL_MASTER -eq $BS_FALSE ] && continue
         [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq $BS_FALSE ] && continue
 
-        cp ${SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-$fname.service /lib/systemd/system/salt-$fname.service
+        copyfile ${SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-$fname.service /lib/systemd/system/salt-$fname.service
 
         systemctl is-enabled salt-$fname.service || (systemctl preset salt-$fname.service && systemctl enable salt-$fname.service)
         sleep 0.1
@@ -1248,11 +1390,11 @@ install_centos_git_post() {
             /sbin/initctl status salt-$fname > /dev/null 2>&1
             if [ $? -eq 1 ]; then
                 # upstart does not know about our service, let's copy the proper file
-                cp ${SALT_GIT_CHECKOUT_DIR}/pkg/salt-$fname.upstart /etc/init/salt-$fname.conf
+                copyfile ${SALT_GIT_CHECKOUT_DIR}/pkg/salt-$fname.upstart /etc/init/salt-$fname.conf
             fi
         # Still in SysV init?!
         elif [ ! -f /etc/init.d/salt-$fname ]; then
-            cp ${SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-${fname} /etc/init.d/
+            copyfile ${SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-${fname} /etc/init.d/
             chmod +x /etc/init.d/salt-${fname}
             /sbin/chkconfig salt-${fname} on
         fi
@@ -1513,7 +1655,7 @@ install_arch_linux_git_post() {
         [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq $BS_FALSE ] && continue
 
         if [ -f /usr/bin/systemctl ]; then
-            cp ${SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-$fname.service /lib/systemd/system/salt-$fname.service
+            copyfile ${SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-$fname.service /lib/systemd/system/salt-$fname.service
 
             /usr/bin/systemctl is-enabled salt-$fname.service > /dev/null 2>&1 || (
                 /usr/bin/systemctl preset salt-$fname.service > /dev/null 2>&1 &&
@@ -1525,7 +1667,7 @@ install_arch_linux_git_post() {
         fi
 
         # SysV init!?
-        cp ${SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-$fname /etc/rc.d/init.d/salt-$fname
+        copyfile ${SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-$fname /etc/rc.d/init.d/salt-$fname
         chmod +x /etc/rc.d/init.d/salt-$fname
     done
 }
@@ -1630,7 +1772,7 @@ install_freebsd_9_stable_post() {
         grep "$enable_string" /etc/rc.conf >/dev/null 2>&1
         [ $? -eq 1 ] && echo "$enable_string" >> /etc/rc.conf
 
-        [ -f /usr/local/etc/salt/${fname}.sample ] && cp /usr/local/etc/salt/${fname}.sample /usr/local/etc/salt/${fname}
+        [ -f /usr/local/etc/salt/${fname}.sample ] && copyfile /usr/local/etc/salt/${fname}.sample /usr/local/etc/salt/${fname}
 
         if [ $fname = "minion" ] ; then
             grep "salt_minion_paths" /etc/rc.conf >/dev/null 2>&1
@@ -1841,11 +1983,11 @@ install_opensuse_git_post() {
         [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq $BS_FALSE ] && continue
 
         if [ -f /bin/systemctl ]; then
-            cp ${SALT_GIT_CHECKOUT_DIR}/pkg/salt-$fname.service /lib/systemd/system/salt-$fname.service
+            copyfile ${SALT_GIT_CHECKOUT_DIR}/pkg/salt-$fname.service /lib/systemd/system/salt-$fname.service
             continue
         fi
 
-        cp ${SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-$fname /etc/init.d/salt-$fname
+        copyfile ${SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-$fname /etc/init.d/salt-$fname
         chmod +x /etc/init.d/salt-$fname
 
     done
@@ -1983,11 +2125,10 @@ config_salt() {
 
     CONFIGURED_ANYTHING=$BS_FALSE
 
-    SALT_DIR=/etc/salt
-    PKI_DIR=$SALT_DIR/pki
+    PKI_DIR=$SALT_ETC_DIR/pki
 
     # Let's create the necessary directories
-    [ -d $SALT_DIR ] || mkdir $SALT_DIR
+    [ -d $SALT_ETC_DIR ] || mkdir $SALT_ETC_DIR
     [ -d $PKI_DIR ] || mkdir -p $PKI_DIR && chmod 700 $PKI_DIR
 
     if [ $INSTALL_MINION -eq $BS_TRUE ]; then
@@ -2251,6 +2392,25 @@ if [ "$DAEMONS_RUNNING_FUNC" != "null" ]; then
     $DAEMONS_RUNNING_FUNC
     if [ $? -ne 0 ]; then
         echoerror "Failed to run ${DAEMONS_RUNNING_FUNC}()!!!"
+        echodebug "Running Processes:"
+        echodebug "$(ps auxwww)"
+
+        for fname in minion master syndic; do
+            # Skip if not meant to be installed
+            [ $fname = "minion" ] && [ $INSTALL_MINION -eq $BS_FALSE ] && continue
+            [ $fname = "master" ] && [ $INSTALL_MASTER -eq $BS_FALSE ] && continue
+            [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq $BS_FALSE ] && continue
+
+            [ ! $SALT_ETC_DIR/$fname ] && [ $fname != "syndic" ] && echodebug "$SALT_ETC_DIR/$fname does not exist"
+
+            echodebug "Running salt-$fname by hand outputs: $(salt-$fname -l debug)"
+
+            [ ! -f /var/log/salt/$fname ] && echodebug "/var/log/salt/$fname does not exist. Can't cat its contents!" && continue
+
+            echodebug "DEAMON LOGS for $fname:"
+            echodebug "$(cat /var/log/salt/$fname)"
+            echo
+        done
         exit 1
     fi
 fi

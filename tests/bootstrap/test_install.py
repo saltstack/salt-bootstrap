@@ -240,7 +240,7 @@ class InstallationTestCase(BootstrapTestCase):
         rc, out, err = self.run_script(
             args=args, timeout=15 * 60, stream_stds=True
         )
-        if GRAINS['os'] == 'Ubuntu':
+        if GRAINS['os'] not in ('Ubuntu', 'Trisquel'):
             self.assert_script_result(
                 'Failed to install daily',
                 0, (rc, out, err)

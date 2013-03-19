@@ -16,7 +16,7 @@
 #       CREATED: 10/15/2012 09:49:37 PM WEST
 #===============================================================================
 set -o nounset                              # Treat unset variables as an error
-ScriptVersion="1.5.1"
+ScriptVersion="1.5.2"
 ScriptName="bootstrap-salt.sh"
 
 #===============================================================================
@@ -697,8 +697,9 @@ DISTRO_NAME_L=$(echo $DISTRO_NAME | tr '[:upper:]' '[:lower:]' | sed 's/[^a-zA-Z
 
 
 # Only Ubuntu has daily packages, let's let users know about that
-if [ "${DISTRO_NAME_L}" != "ubuntu" ] && [ $ITYPE = "daily" ]; then
-    echoerror "Only Ubuntu has daily packages support"
+if ([ "${DISTRO_NAME_L}" != "ubuntu" ] && [ $ITYPE = "daily" ]) && \
+   ([ "${DISTRO_NAME_L}" != "trisquel" ] && [ $ITYPE = "daily" ]); then
+    echoerror "${DISTRO_NAME} does not have daily packages support"
     exit 1
 fi
 
@@ -949,16 +950,24 @@ install_ubuntu_git_post() {
 
         if [ -f /sbin/initctl ]; then
             # We have upstart support
+            echodebug "There's upstart support"
             /sbin/initctl status salt-$fname > /dev/null 2>&1
+
             if [ $? -eq 1 ]; then
                 # upstart does not know about our service, let's copy the proper file
+                echowarn "Upstart does not apparently know anything about salt-$fname"
+                echodebug "Copying ${SALT_GIT_CHECKOUT_DIR}/pkg/salt-$fname.upstart to /etc/init/salt-$fname.conf"
                 copyfile ${SALT_GIT_CHECKOUT_DIR}/pkg/salt-$fname.upstart /etc/init/salt-$fname.conf
             fi
         # No upstart support in Ubuntu!?
         elif [ -f ${SALT_GIT_CHECKOUT_DIR}/debian/salt-$fname.init ]; then
+            echodebug "There's NO upstart support!?"
+            echodebug "Copying ${SALT_GIT_CHECKOUT_DIR}/debian/salt-$fname.init to /etc/init.d/salt-$fname"
             copyfile ${SALT_GIT_CHECKOUT_DIR}/debian/salt-$fname.init /etc/init.d/salt-$fname
             chmod +x /etc/init.d/salt-$fname
             update-rc.d salt-$fname defaults
+        else
+            echoerror "Neither upstart not init.d was setup for salt-$fname"
         fi
     done
 }
@@ -972,24 +981,94 @@ install_ubuntu_restart_daemons() {
         [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq $BS_FALSE ] && continue
 
         if [ -f /sbin/initctl ]; then
-            # We have upstart support
-            /sbin/initctl status salt-$fname > /dev/null 2>&1
+            echodebug "There's upstart support"
+            /sbin/initctl status salt-$fname || \
+                echowarn "Upstart does not apparently know anything about salt-$fname"
             if [ $? -eq 0 ]; then
+                echodebug "Upstart apparently knows about salt-$fname"
                 # upstart knows about this service, let's stop and start it.
                 # We could restart but earlier versions of the upstart script
                 # did not support restart, so, it's safer this way
-                /sbin/initctl stop salt-$fname > /dev/null 2>&1
-                /sbin/initctl start salt-$fname > /dev/null 2>&1
+                /sbin/initctl stop salt-$fname || echodebug "Failed to stop salt-$fname"
+                /sbin/initctl start salt-$fname
                 [ $? -eq 0 ] && continue
                 # We failed to start the service, let's test the SysV code bellow
+                echodebug "Failed to start salt-$fname"
             fi
         fi
+
+        if [ ! -f /etc/init.d/salt-$fname ]; then
+            echoerror "No init.d support for salt-$fname was found"
+            return 1
+        fi
+
         /etc/init.d/salt-$fname stop > /dev/null 2>&1
         /etc/init.d/salt-$fname start
     done
+    return 0
 }
 #
 #   End of Ubuntu Install Functions
+#
+##############################################################################
+
+##############################################################################
+#
+#   Trisquel(Ubuntu) Install Functions
+#
+#   Trisquel 6.0 is based on Ubuntu 12.04
+#
+install_trisquel_6_stable_deps() {
+    apt-get update
+    __apt_get_noinput python-software-properties
+    add-apt-repository -y ppa:saltstack/salt
+    apt-get update
+}
+
+install_trisquel_6_daily_deps() {
+    apt-get update
+    __apt_get_noinput python-software-properties
+    add-apt-repository -y ppa:saltstack/salt-daily
+    apt-get update
+}
+
+install_trisquel_6_git_deps() {
+    install_trisquel_6_stable_deps
+    __apt_get_noinput git-core python-yaml python-m2crypto python-crypto \
+        msgpack-python python-zmq python-jinja2
+
+    __git_clone_and_checkout || return 1
+
+    # Let's trigger config_salt()
+    if [ "$TEMP_CONFIG_DIR" = "null" ]; then
+        TEMP_CONFIG_DIR="${SALT_GIT_CHECKOUT_DIR}/conf/"
+        CONFIG_SALT_FUNC="config_salt"
+    fi
+
+    return 0
+}
+
+install_trisquel_6_stable() {
+    install_ubuntu_stable
+}
+
+install_trisquel_6_daily() {
+    install_ubuntu_daily
+}
+
+install_trisquel_6_git() {
+    install_ubuntu_git
+}
+
+install_trisquel_git_post() {
+    install_ubuntu_git_post
+}
+
+install_trisquel_restart_daemons() {
+    install_ubuntu_restart_daemons
+}
+#
+#   End of Tristel(Ubuntu) Install Functions
 #
 ##############################################################################
 

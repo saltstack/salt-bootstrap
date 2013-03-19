@@ -61,6 +61,7 @@ _OS_FAMILY_MAP = {
     'SmartOS': 'Solaris',
     'Arch ARM': 'Arch',
     'ALT': 'RedHat',
+    'Trisquel': 'Debian'
 }
 
 

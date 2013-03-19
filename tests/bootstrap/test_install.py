@@ -231,7 +231,7 @@ class InstallationTestCase(BootstrapTestCase):
         )
 
     def test_install_daily(self):
-        args = ['-D']
+        args = []
         if GRAINS['os'] in OS_REQUIRES_PIP_ALLOWED:
             args.append('-P')
 
@@ -240,7 +240,7 @@ class InstallationTestCase(BootstrapTestCase):
         rc, out, err = self.run_script(
             args=args, timeout=15 * 60, stream_stds=True
         )
-        if GRAINS['os'] == 'Ubuntu':
+        if GRAINS['os'] in ('Ubuntu', 'Trisquel'):
             self.assert_script_result(
                 'Failed to install daily',
                 0, (rc, out, err)

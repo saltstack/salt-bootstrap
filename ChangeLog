@@ -6,6 +6,8 @@ Version 1.5.2:
 	force overwrites.
 	* Distro Support Fixed:
 		* Ubuntu daily installs.
+	* Distro Support Added:
+		* Trisquel 6.0 (Ubuntu 12.04)
 
 Version 1.5.1:
 	* Improved unittesting.

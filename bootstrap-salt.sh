@@ -347,7 +347,7 @@ exec 2>$LOGPIPE
 #-------------------------------------------------------------------------------
 __gather_hardware_info() {
     if [ -f /proc/cpuinfo ]; then
-        CPU_VENDOR_ID=$(cat /proc/cpuinfo | grep -E 'vendor_id|Processor' | head -n 1 | awk '{print $3}' | cut -d '-' -f1 )
+        CPU_VENDOR_ID=$(awk '/vendor_id|Processor/ {sub(/-.*$/,"",$3); print $3}' /proc/cpuinfo )
     elif [ -f /usr/bin/kstat ]; then
         # SmartOS.
         # Solaris!?
@@ -554,7 +554,7 @@ __gather_linux_system_info() {
 #-------------------------------------------------------------------------------
 __gather_sunos_system_info() {
     if [ -f /sbin/uname ]; then
-        DISTRO_VERSION=$(/sbin/uname -X | grep -i kernelid | awk '{ print $3}')
+        DISTRO_VERSION=$(/sbin/uname -X | awk '/[kK][eE][rR][nN][eE][lL][iI][dD]/ { print $3}')
     fi
 
     DISTRO_NAME=""
@@ -2024,7 +2024,7 @@ install_opensuse_restart_daemons() {
 #    SuSE Install Functions.
 #
 install_suse_11_stable_deps() {
-    SUSE_PATCHLEVEL=$(grep PATCHLEVEL /etc/SuSE-release | awk '{print $3}')
+    SUSE_PATCHLEVEL=$(awk '/PATCHLEVEL/ {print $3}' /etc/SuSE-release )
     if [ "x${SUSE_PATCHLEVEL}" != "x" ]; then
         DISTRO_PATCHLEVEL="_SP${SUSE_PATCHLEVEL}"
     fi

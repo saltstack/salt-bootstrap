@@ -1156,6 +1156,33 @@ _eof
     __apt_get_noinput build-essential python-dev python-pip
 }
 
+install_debian_7_deps() {
+    [ $PIP_ALLOWED -eq $BS_FALSE ] && pip_not_allowed
+    echowarn "PyZMQ will be installed from PyPi in order to compile it against ZMQ3"
+    echowarn "This is required for long term stable minion connections to the master."
+
+    if [ ! -f /etc/apt/sources.list.d/debian-experimental.list ]; then
+        cat <<_eof > /etc/apt/sources.list.d/debian-experimental.list
+deb http://ftp.debian.org/debian experimental main
+deb-src http://ftp.debian.org/debian experimental main
+_eof
+
+        cat <<_eof > /etc/apt/preferences.d/libzmq3-debian-experimental.pref
+Package: libzmq3
+Pin: release a=experimental
+Pin-Priority: 800
+
+Package: libzmq3-dev
+Pin: release a=experimental
+Pin-Priority: 800
+_eof
+    fi
+
+    apt-get update
+    __apt_get_noinput -t experimental libzmq3 libzmq3-dev
+    __apt_get_noinput build-essential python-dev python-pip
+}
+
 install_debian_git_deps() {
     [ $PIP_ALLOWED -eq $BS_FALSE ] && pip_not_allowed
     echowarn "PyZMQ will be installed from PyPi in order to compile it against ZMQ3"
@@ -1180,7 +1207,12 @@ install_debian_git_deps() {
 }
 
 install_debian_6_git_deps() {
-    install_debian_6_deps  # Add backports
+    install_debian_6_deps    # Add backports
+    install_debian_git_deps  # Grab the actual deps
+}
+
+install_debian_7_git_deps() {
+    install_debian_7_deps    # Add experimental repository for ZMQ3
     install_debian_git_deps  # Grab the actual deps
 }
 
@@ -1219,6 +1251,10 @@ install_debian_git() {
 }
 
 install_debian_6_git() {
+    install_debian_git
+}
+
+install_debian_7_git() {
     install_debian_git
 }
 

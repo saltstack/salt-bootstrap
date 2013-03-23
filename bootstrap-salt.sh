@@ -1098,10 +1098,13 @@ install_trisquel_restart_daemons() {
 #   Debian Install Functions
 #
 install_debian_deps() {
+    # No user interaction, libc6 restart services for example
+    export DEBIAN_FRONTEND=noninteractive
+
     apt-get update
 }
 
-install_debian_6_0_deps() {
+install_debian_6_deps() {
     [ $PIP_ALLOWED -eq $BS_FALSE ] && pip_not_allowed
     echowarn "PyZMQ will be installed from PyPi in order to compile it against ZMQ3"
     echowarn "This is required for long term stable minion connections to the master."
@@ -1176,12 +1179,13 @@ install_debian_git_deps() {
     return 0
 }
 
-install_debian_6_0_git_deps() {
-    install_debian_6_0_deps  # Add backports
+install_debian_6_git_deps() {
+    install_debian_6_deps  # Add backports
     install_debian_git_deps  # Grab the actual deps
 }
 
-install_debian_stable() {
+__install_debian_stable() {
+    [ $PIP_ALLOWED -eq $BS_FALSE ] && pip_not_allowed
     packages=""
     if [ $INSTALL_MINION -eq $BS_TRUE ]; then
         packages="${packages} salt-minion"
@@ -1192,16 +1196,18 @@ install_debian_stable() {
     if [ $INSTALL_SYNDIC -eq $BS_TRUE ]; then
         packages="${packages} salt-syndic"
     fi
-    __apt_get_noinput ${packages}
+    __apt_get_noinput ${packages} || return 1
 
     # Building pyzmq from source to build it against libzmq3.
     # Should override current installation
-    pip install -U pyzmq
+    pip install -U pyzmq || return 1
+
+    return 0
 }
 
 
-install_debian_6_0() {
-    install_debian_stable
+install_debian_6() {
+    __install_debian_stable
 }
 
 install_debian_git() {
@@ -1212,7 +1218,7 @@ install_debian_git() {
     pip install -U pyzmq
 }
 
-install_debian_6_0_git() {
+install_debian_6_git() {
     install_debian_git
 }
 

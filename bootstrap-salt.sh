@@ -536,8 +536,29 @@ __gather_linux_system_info() {
                 done < /etc/${rsource}
                 ;;
             os                 )
-                n=$(__unquote_string $(grep '^NAME=' /etc/os-release | sed -e 's/^NAME=\(.*\)$/\1/g'))
-                [ "${n}" = "Arch Linux" ] && v=""   # Arch Linux does not provide a version.
+                nn=$(__unquote_string $(grep '^ID=' /etc/os-release | sed -e 's/^ID=\(.*\)$/\1/g'))
+                rv=$(__unquote_string $(grep '^VERSION_ID=' /etc/os-release | sed -e 's/^VERSION_ID=\(.*\)$/\1/g'))
+                [ "${rv}x" != "x" ] && v=$(__parse_version_string "$rv") || v=""
+                case $(echo ${nn} | tr '[:upper:]' '[:lower:]') in
+                    arch        )
+                        n="Arch Linux"
+                        v=""  # Arch Linux does not provide a version.
+                        ;;
+                    debian      )
+                        n="Debian"
+                        if [ "${v}x" = "x" ]; then
+                            if [ "$(cat /etc/debian_version)" = "wheezy/sid" ]; then
+                                # I've found an EC2 wheezy image which did not tell its version
+                                v=$(__parse_version_string "7.0")
+                            fi
+                        else
+                            echowarn "Unable to parse the Debian Version"
+                        fi
+                        ;;
+                    *           )
+                        n=${nn}
+                        ;;
+                esac
                 ;;
             *                  ) n="${n}"           ;
         esac

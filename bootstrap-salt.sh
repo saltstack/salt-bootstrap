@@ -2537,8 +2537,6 @@ if [ "$DAEMONS_RUNNING_FUNC" != "null" ]; then
     $DAEMONS_RUNNING_FUNC
     if [ $? -ne 0 ]; then
         echoerror "Failed to run ${DAEMONS_RUNNING_FUNC}()!!!"
-        echodebug "Running Processes:"
-        echodebug "$(ps auxwww)"
 
         for fname in minion master syndic; do
             # Skip if not meant to be installed
@@ -2546,9 +2544,15 @@ if [ "$DAEMONS_RUNNING_FUNC" != "null" ]; then
             [ $fname = "master" ] && [ $INSTALL_MASTER -eq $BS_FALSE ] && continue
             [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq $BS_FALSE ] && continue
 
+            if [ $ECHO_DEBUG -eq $BS_FALSE ]; then
+                echoerror "salt-$fname was not found running. Pass '-D' for additional debugging information..."
+                continue
+            fi
+
+
             [ ! $SALT_ETC_DIR/$fname ] && [ $fname != "syndic" ] && echodebug "$SALT_ETC_DIR/$fname does not exist"
 
-            echodebug "Running salt-$fname by hand outputs: $(salt-$fname -l debug)"
+            echodebug "Running salt-$fname by hand outputs: $(nohup salt-$fname -l debug)"
 
             [ ! -f /var/log/salt/$fname ] && echodebug "/var/log/salt/$fname does not exist. Can't cat its contents!" && continue
 
@@ -2556,6 +2560,10 @@ if [ "$DAEMONS_RUNNING_FUNC" != "null" ]; then
             echodebug "$(cat /var/log/salt/$fname)"
             echo
         done
+
+        echodebug "Running Processes:"
+        echodebug "$(ps auxwww)"
+
         exit 1
     fi
 fi

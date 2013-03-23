@@ -884,45 +884,49 @@ install_ubuntu_deps() {
     apt-get update
     if [ $DISTRO_MAJOR_VERSION -eq 12 ] && [ $DISTRO_MINOR_VERSION -gt 04 ] || [ $DISTRO_MAJOR_VERSION -gt 12 ]; then
         # Above Ubuntu 12.04 add-apt-repository is in a different package
-        __apt_get_noinput software-properties-common
+        __apt_get_noinput software-properties-common || return 1
     else
-        __apt_get_noinput python-software-properties
+        __apt_get_noinput python-software-properties || return 1
     fi
     if [ $DISTRO_MAJOR_VERSION -lt 11 ] && [ $DISTRO_MINOR_VERSION -lt 10 ]; then
-        add-apt-repository ppa:saltstack/salt
+        add-apt-repository ppa:saltstack/salt || return 1
     else
-        add-apt-repository -y ppa:saltstack/salt
+        add-apt-repository -y ppa:saltstack/salt || return 1
     fi
     apt-get update
+    return 0
 }
 
 install_ubuntu_daily_deps() {
     apt-get update
     if [ $DISTRO_MAJOR_VERSION -eq 12 ] && [ $DISTRO_MINOR_VERSION -gt 04 ] || [ $DISTRO_MAJOR_VERSION -gt 12 ]; then
         # Above Ubuntu 12.04 add-apt-repository is in a different package
-        __apt_get_noinput software-properties-common
+        __apt_get_noinput software-properties-common || return 1
     else
-        __apt_get_noinput python-software-properties
+        __apt_get_noinput python-software-properties || return 1
     fi
     if [ $DISTRO_MAJOR_VERSION -lt 11 ] && [ $DISTRO_MINOR_VERSION -lt 10 ]; then
-        add-apt-repository ppa:saltstack/salt-daily
+        add-apt-repository ppa:saltstack/salt-daily || return 1
     else
-        add-apt-repository -y ppa:saltstack/salt-daily
+        add-apt-repository -y ppa:saltstack/salt-daily || return 1
     fi
     apt-get update
+    return 0
 }
 
 install_ubuntu_11_10_deps() {
     apt-get update
-    __apt_get_noinput python-software-properties
-    add-apt-repository -y 'deb http://us.archive.ubuntu.com/ubuntu/ oneiric universe'
-    add-apt-repository -y ppa:saltstack/salt
+    __apt_get_noinput python-software-properties || return 1
+    add-apt-repository -y 'deb http://us.archive.ubuntu.com/ubuntu/ oneiric universe' || return 1
+    add-apt-repository -y ppa:saltstack/salt || return 1
     apt-get update
+    return 0
 }
 
 install_ubuntu_git_deps() {
-    install_ubuntu_deps
-    __apt_get_noinput git-core python-yaml python-m2crypto python-crypto msgpack-python python-zmq python-jinja2
+    install_ubuntu_deps || return 1
+    __apt_get_noinput git-core python-yaml python-m2crypto python-crypto \
+        msgpack-python python-zmq python-jinja2 || return 1
 
     __git_clone_and_checkout || return 1
 
@@ -936,7 +940,8 @@ install_ubuntu_git_deps() {
 }
 
 install_ubuntu_11_10_post() {
-    add-apt-repository -y --remove 'deb http://us.archive.ubuntu.com/ubuntu/ oneiric universe'
+    add-apt-repository -y --remove 'deb http://us.archive.ubuntu.com/ubuntu/ oneiric universe' || return 1
+    return 0
 }
 
 install_ubuntu_stable() {
@@ -950,15 +955,18 @@ install_ubuntu_stable() {
     if [ $INSTALL_SYNDIC -eq $BS_TRUE ]; then
         packages="${packages} salt-syndic"
     fi
-    __apt_get_noinput ${packages}
+    __apt_get_noinput ${packages} || return 1
+    return 0
 }
 
 install_ubuntu_daily() {
-    install_ubuntu_stable
+    install_ubuntu_stable || return 1
+    return 0
 }
 
 install_ubuntu_git() {
-    python setup.py install --install-layout=deb
+    python setup.py install --install-layout=deb || return 1
+    return 0
 }
 
 install_ubuntu_git_post() {
@@ -1041,22 +1049,24 @@ install_ubuntu_restart_daemons() {
 #
 install_trisquel_6_stable_deps() {
     apt-get update
-    __apt_get_noinput python-software-properties
-    add-apt-repository -y ppa:saltstack/salt
+    __apt_get_noinput python-software-properties || return 1
+    add-apt-repository -y ppa:saltstack/salt || return 1
     apt-get update
+    return 0
 }
 
 install_trisquel_6_daily_deps() {
     apt-get update
-    __apt_get_noinput python-software-properties
-    add-apt-repository -y ppa:saltstack/salt-daily
+    __apt_get_noinput python-software-properties || return 1
+    add-apt-repository -y ppa:saltstack/salt-daily || return 1
     apt-get update
+    return 0
 }
 
 install_trisquel_6_git_deps() {
-    install_trisquel_6_stable_deps
+    install_trisquel_6_stable_deps || return 1
     __apt_get_noinput git-core python-yaml python-m2crypto python-crypto \
-        msgpack-python python-zmq python-jinja2
+        msgpack-python python-zmq python-jinja2 || return 1
 
     __git_clone_and_checkout || return 1
 
@@ -1070,23 +1080,28 @@ install_trisquel_6_git_deps() {
 }
 
 install_trisquel_6_stable() {
-    install_ubuntu_stable
+    install_ubuntu_stable || return 1
+    return 0
 }
 
 install_trisquel_6_daily() {
-    install_ubuntu_daily
+    install_ubuntu_daily || return 1
+    return 0
 }
 
 install_trisquel_6_git() {
-    install_ubuntu_git
+    install_ubuntu_git || return 1
+    return 0
 }
 
 install_trisquel_git_post() {
-    install_ubuntu_git_post
+    install_ubuntu_git_post || return 1
+    return 0
 }
 
 install_trisquel_restart_daemons() {
-    install_ubuntu_restart_daemons
+    install_ubuntu_restart_daemons || return 1
+    return 0
 }
 #
 #   End of Tristel(Ubuntu) Install Functions
@@ -1131,7 +1146,7 @@ deb http://debian.madduck.net/repo squeeze-backports main
 deb-src http://debian.madduck.net/repo squeeze-backports main
 _eof
 
-        wget -q http://debian.madduck.net/repo/gpg/archive.key -O - | apt-key add -
+        wget -q http://debian.madduck.net/repo/gpg/archive.key -O - | apt-key add - || return 1
     fi
 
     if [ ! -f /etc/apt/sources.list.d/debian-experimental.list ]; then
@@ -1152,8 +1167,9 @@ _eof
     fi
 
     apt-get update
-    __apt_get_noinput -t experimental libzmq3 libzmq3-dev
-    __apt_get_noinput build-essential python-dev python-pip
+    __apt_get_noinput -t experimental libzmq3 libzmq3-dev || return 1
+    __apt_get_noinput build-essential python-dev python-pip || return 1
+    return 0
 }
 
 install_debian_7_deps() {
@@ -1179,8 +1195,9 @@ _eof
     fi
 
     apt-get update
-    __apt_get_noinput -t experimental libzmq3 libzmq3-dev
-    __apt_get_noinput build-essential python-dev python-pip
+    __apt_get_noinput -t experimental libzmq3 libzmq3-dev || return 1
+    __apt_get_noinput build-essential python-dev python-pip || return 1
+    return 0
 }
 
 install_debian_git_deps() {
@@ -1193,7 +1210,8 @@ install_debian_git_deps() {
 
     apt-get update
     __apt_get_noinput lsb-release python python-pkg-resources python-crypto \
-        python-jinja2 python-m2crypto python-yaml msgpack-python python-pip git
+        python-jinja2 python-m2crypto python-yaml msgpack-python python-pip \
+        git || return 1
 
     __git_clone_and_checkout || return 1
 
@@ -1207,13 +1225,15 @@ install_debian_git_deps() {
 }
 
 install_debian_6_git_deps() {
-    install_debian_6_deps    # Add backports
-    install_debian_git_deps  # Grab the actual deps
+    install_debian_6_deps || return 1    # Add backports
+    install_debian_git_deps || return 1  # Grab the actual deps
+    return 0
 }
 
 install_debian_7_git_deps() {
-    install_debian_7_deps    # Add experimental repository for ZMQ3
-    install_debian_git_deps  # Grab the actual deps
+    install_debian_7_deps || return 1    # Add experimental repository for ZMQ3
+    install_debian_git_deps || return 1  # Grab the actual deps
+    return 0
 }
 
 __install_debian_stable() {
@@ -1239,23 +1259,27 @@ __install_debian_stable() {
 
 
 install_debian_6() {
-    __install_debian_stable
+    __install_debian_stable || return 1
+    return 0
 }
 
 install_debian_git() {
-    python setup.py install --install-layout=deb
+    python setup.py install --install-layout=deb || return 1
 
     # Building pyzmq from source to build it against libzmq3.
     # Should override current installation
-    pip install -U pyzmq
+    pip install -U pyzmq || return 1
+    return 0
 }
 
 install_debian_6_git() {
-    install_debian_git
+    install_debian_git || return 1
+    return 0
 }
 
 install_debian_7_git() {
-    install_debian_git
+    install_debian_git || return 1
+    return 0
 }
 
 install_debian_git_post() {
@@ -1296,7 +1320,9 @@ install_debian_restart_daemons() {
 #   Fedora Install Functions
 #
 install_fedora_deps() {
-    yum install -y PyYAML libyaml m2crypto python-crypto python-jinja2 python-msgpack python-zmq
+    yum install -y PyYAML libyaml m2crypto python-crypto python-jinja2 \
+        python-msgpack python-zmq || return 1
+    return 0
 }
 
 install_fedora_stable() {
@@ -1307,12 +1333,13 @@ install_fedora_stable() {
     if [ $INSTALL_MASTER -eq $BS_TRUE ] || [ $INSTALL_SYNDIC -eq $BS_TRUE ]; then
         packages="${packages} salt-master"
     fi
-    yum install -y ${packages}
+    yum install -y ${packages} || return 1
+    return 0
 }
 
 install_fedora_git_deps() {
-    install_fedora_deps
-    yum install -y git
+    install_fedora_deps || return 1
+    yum install -y git || return 1
 
     __git_clone_and_checkout || return 1
 
@@ -1326,7 +1353,8 @@ install_fedora_git_deps() {
 }
 
 install_fedora_git() {
-    python setup.py install
+    python setup.py install || return 1
+    return 0
 }
 
 install_fedora_git_post() {
@@ -1373,23 +1401,25 @@ install_centos_stable_deps() {
         EPEL_ARCH=$CPU_ARCH_L
     fi
     if [ $DISTRO_MAJOR_VERSION -eq 5 ]; then
-        rpm -Uvh --force http://mirrors.kernel.org/fedora-epel/5/${EPEL_ARCH}/epel-release-5-4.noarch.rpm
+        rpm -Uvh --force http://mirrors.kernel.org/fedora-epel/5/${EPEL_ARCH}/epel-release-5-4.noarch.rpm || return 1
     elif [ $DISTRO_MAJOR_VERSION -eq 6 ]; then
-        rpm -Uvh --force http://mirrors.kernel.org/fedora-epel/6/${EPEL_ARCH}/epel-release-6-8.noarch.rpm
+        rpm -Uvh --force http://mirrors.kernel.org/fedora-epel/6/${EPEL_ARCH}/epel-release-6-8.noarch.rpm || return 1
     else
         echoerror "Failed add EPEL repository support."
-        exit 1
+        return 1
     fi
 
-    yum -y update
+    yum -y update || return 1
 
     if [ $DISTRO_MAJOR_VERSION -eq 5 ]; then
-        yum -y install PyYAML python26-m2crypto m2crypto python26 python26-crypto \
-            python26-msgpack python26-zmq python26-jinja2 --enablerepo=epel-testing
+        yum -y install PyYAML python26-m2crypto m2crypto python26 \
+            python26-crypto python26-msgpack python26-zmq \
+            python26-jinja2 --enablerepo=epel-testing || return 1
     else
-        yum -y install PyYAML m2crypto python-crypto python-msgpack python-zmq \
-            python-jinja2 --enablerepo=epel-testing
+        yum -y install PyYAML m2crypto python-crypto python-msgpack \
+            python-zmq python-jinja2 --enablerepo=epel-testing || return 1
     fi
+    return 0
 }
 
 install_centos_stable() {
@@ -1400,7 +1430,8 @@ install_centos_stable() {
     if [ $INSTALL_MASTER -eq $BS_TRUE ] || [ $INSTALL_SYNDIC -eq $BS_TRUE ]; then
         packages="${packages} salt-master"
     fi
-    yum -y install ${packages} --enablerepo=epel-testing
+    yum -y install ${packages} --enablerepo=epel-testing || return 1
+    return 0
 }
 
 install_centos_stable_post() {
@@ -1418,8 +1449,8 @@ install_centos_stable_post() {
 }
 
 install_centos_git_deps() {
-    install_centos_stable_deps
-    yum -y install git --enablerepo=epel-testing
+    install_centos_stable_deps || return 1
+    yum -y install git --enablerepo=epel-testing || return 1
 
     __git_clone_and_checkout || return 1
 
@@ -1434,10 +1465,11 @@ install_centos_git_deps() {
 
 install_centos_git() {
     if [ $DISTRO_MAJOR_VERSION -eq 5 ]; then
-        python2.6 setup.py install
+        python2.6 setup.py install || return 1
     else
-        python2 setup.py install
+        python2 setup.py install || return 1
     fi
+    return 0
 }
 
 install_centos_git_post() {
@@ -1502,87 +1534,108 @@ install_centos_restart_daemons() {
 #   RedHat Install Functions
 #
 install_red_hat_linux_stable_deps() {
-    install_centos_stable_deps
+    install_centos_stable_deps || return 1
+    return 0
 }
 
 install_red_hat_linux_git_deps() {
-    install_centos_git_deps
+    install_centos_git_deps || return 1
+    return 0
 }
 
 install_red_hat_enterprise_linux_stable_deps() {
-    install_red_hat_linux_stable_deps
+    install_red_hat_linux_stable_deps || return 1
+    return 0
 }
 
 install_red_hat_enterprise_linux_git_deps() {
-    install_red_hat_linux_git_deps
+    install_red_hat_linux_git_deps || return 1
+    return 0
 }
 
 install_red_hat_enterprise_server_stable_deps() {
-    install_red_hat_linux_stable_deps
+    install_red_hat_linux_stable_deps || return 1
+    return 0
 }
 
 install_red_hat_enterprise_server_git_deps() {
-    install_red_hat_linux_git_deps
+    install_red_hat_linux_git_deps || return 1
+    return 0
 }
 
 install_red_hat_linux_stable() {
-    install_centos_stable
+    install_centos_stable || return 1
+    return 0
 }
 
 install_red_hat_linux_git() {
-    install_centos_git
+    install_centos_git || return 1
+    return 0
 }
 
 install_red_hat_enterprise_linux_stable() {
-    install_red_hat_linux_stable
+    install_red_hat_linux_stable || return 1
+    return 0
 }
 
 install_red_hat_enterprise_linux_git() {
-    install_red_hat_linux_git
+    install_red_hat_linux_git || return 1
+    return 0
 }
 
 install_red_hat_enterprise_server_stable() {
-    install_red_hat_linux_stable
+    install_red_hat_linux_stable || return 1
+    return 0
 }
 
 install_red_hat_enterprise_server_git() {
-    install_red_hat_linux_git
+    install_red_hat_linux_git || return 1
+    return 0
 }
 
 install_red_hat_linux_stable_post() {
-    install_centos_stable_post
+    install_centos_stable_post || return 1
+    return 0
 }
 
 install_red_hat_linux_restart_daemons() {
-    install_centos_restart_daemons
+    install_centos_restart_daemons || return 1
+    return 0
 }
 
 install_red_hat_linux_git_post() {
-    install_centos_git_post
+    install_centos_git_post || return 1
+    return 0
 }
 
 install_red_hat_enterprise_linux_stable_post() {
-    install_red_hat_linux_stable_post
+    install_red_hat_linux_stable_post || return 1
+    return 0
 }
 
 install_red_hat_enterprise_linux_restart_daemons() {
-    install_red_hat_linux_restart_daemons
+    install_red_hat_linux_restart_daemons || return 1
+    return 0
 }
 
 install_red_hat_enterprise_linux_git_post() {
-    install_red_hat_linux_git_post
+    install_red_hat_linux_git_post || return 1
+    return 0
 }
 
 install_red_hat_enterprise_server_stable_post() {
-    install_red_hat_linux_stable_post
+    install_red_hat_linux_stable_post || return 1
+    return 0
 }
 
 install_red_hat_enterprise_server_restart_daemons() {
-    install_red_hat_linux_restart_daemons
+    install_red_hat_linux_restart_daemons || return 1
+    return 0
 }
 
 install_red_hat_enterprise_server_git_post() {
-    install_red_hat_linux_git_post
+    install_red_hat_linux_git_post || return 1
+    return 0
 }
 #
 #   Ended RedHat Install Functions
@@ -1601,15 +1654,15 @@ install_amazon_linux_ami_deps() {
     else
         EPEL_ARCH=$CPU_ARCH_L
     fi
-    rpm -Uvh --force http://mirrors.kernel.org/fedora-epel/6/${EPEL_ARCH}/epel-release-6-8.noarch.rpm
-    yum -y update
+    rpm -Uvh --force http://mirrors.kernel.org/fedora-epel/6/${EPEL_ARCH}/epel-release-6-8.noarch.rpm || return 1
+    yum -y update || return 1
     yum -y install PyYAML m2crypto python-crypto python-msgpack python-zmq \
-        python-ordereddict python-jinja2 --enablerepo=epel-testing
+        python-ordereddict python-jinja2 --enablerepo=epel-testing || return 1
 }
 
 install_amazon_linux_ami_git_deps() {
-    install_amazon_linux_ami_deps
-    yum -y install git --enablerepo=epel-testing
+    install_amazon_linux_ami_deps || return 1
+    yum -y install git --enablerepo=epel-testing || return 1
 
     __git_clone_and_checkout || return 1
 
@@ -1623,23 +1676,28 @@ install_amazon_linux_ami_git_deps() {
 }
 
 install_amazon_linux_ami_stable() {
-    install_centos_stable
+    install_centos_stable || return 1
+    return 0
 }
 
 install_amazon_linux_ami_stable_post() {
-    install_centos_stable_post
+    install_centos_stable_post || return 1
+    return 0
 }
 
 install_amazon_linux_ami_restart_daemons() {
-    install_centos_restart_daemons
+    install_centos_restart_daemons || return 1
+    return 0
 }
 
 install_amazon_linux_ami_git() {
-    install_centos_git
+    install_centos_git || return 1
+    return 0
 }
 
 install_amazon_linux_ami_git_post() {
-    install_centos_git_post
+    install_centos_git_post || return 1
+    return 0
 }
 #
 #   Ended Amazon Linux AMI Install Functions
@@ -1661,10 +1719,10 @@ install_arch_linux_git_deps() {
 Server = http://intothesaltmine.org/archlinux
 ' >> /etc/pacman.conf
 
-    pacman -Sy --noconfirm pacman
+    pacman -Sy --noconfirm pacman || return 1
     pacman -Sy --noconfirm git python2-crypto python2-distribute \
         python2-jinja python2-m2crypto python2-markupsafe python2-msgpack \
-        python2-psutil python2-yaml python2-pyzmq zeromq
+        python2-psutil python2-yaml python2-pyzmq zeromq || return 1
 
     __git_clone_and_checkout || return 1
 
@@ -1678,12 +1736,14 @@ Server = http://intothesaltmine.org/archlinux
 }
 
 install_arch_linux_stable() {
-    pacman -Sy --noconfirm pacman
-    pacman -Syu --noconfirm salt
+    pacman -Sy --noconfirm pacman || return 1
+    pacman -Syu --noconfirm salt || return 1
+    return 0
 }
 
 install_arch_linux_git() {
-    python2 setup.py install
+    python2 setup.py install || return 1
+    return 0
 }
 
 install_arch_linux_post() {
@@ -1782,25 +1842,26 @@ __freebsd_get_packagesite() {
 install_freebsd_9_stable_deps() {
     __freebsd_get_packagesite
 
-    fetch "${BS_PACKAGESITE}/Latest/pkg.txz"
-    tar xf ./pkg.txz -s ",/.*/,,g" "*/pkg-static"
-    ./pkg-static add ./pkg.txz
-    /usr/local/sbin/pkg2ng
+    fetch "${BS_PACKAGESITE}/Latest/pkg.txz" || return 1
+    tar xf ./pkg.txz -s ",/.*/,,g" "*/pkg-static" || return 1
+    ./pkg-static add ./pkg.txz || return 1
+    /usr/local/sbin/pkg2ng || return 1
     echo "PACKAGESITE: ${BS_PACKAGESITE}" > /usr/local/etc/pkg.conf
 
-    /usr/local/sbin/pkg install -y swig
+    /usr/local/sbin/pkg install -y swig || return 1
+    return 0
 }
 
 install_freebsd_git_deps() {
     __freebsd_get_packagesite
 
-    fetch "${BS_PACKAGESITE}/Latest/pkg.txz"
-    tar xf ./pkg.txz -s ",/.*/,,g" "*/pkg-static"
-    ./pkg-static add ./pkg.txz
-    /usr/local/sbin/pkg2ng
+    fetch "${BS_PACKAGESITE}/Latest/pkg.txz" || return 1
+    tar xf ./pkg.txz -s ",/.*/,,g" "*/pkg-static" || return 1
+    ./pkg-static add ./pkg.txz || return 1
+    /usr/local/sbin/pkg2ng || return 1
     echo "PACKAGESITE: ${BS_PACKAGESITE}" > /usr/local/etc/pkg.conf
 
-    /usr/local/sbin/pkg install -y swig
+    /usr/local/sbin/pkg install -y swig || return 1
 
     __git_clone_and_checkout || return 1
     # Let's trigger config_salt()
@@ -1813,14 +1874,16 @@ install_freebsd_git_deps() {
 }
 
 install_freebsd_9_stable() {
-    /usr/local/sbin/pkg install -y sysutils/py-salt
+    /usr/local/sbin/pkg install -y sysutils/py-salt || return 1
+    return 0
 }
 
 install_freebsd_git() {
-    /usr/local/sbin/pkg install -y git sysutils/py-salt
-    /usr/local/sbin/pkg delete -y sysutils/py-salt
+    /usr/local/sbin/pkg install -y git sysutils/py-salt || return 1
+    /usr/local/sbin/pkg delete -y sysutils/py-salt || return 1
 
-    /usr/local/bin/python setup.py install
+    /usr/local/bin/python setup.py install || return 1
+    return 0
 }
 
 install_freebsd_9_stable_post() {
@@ -1846,7 +1909,8 @@ install_freebsd_9_stable_post() {
 }
 
 install_freebsd_git_post() {
-    install_freebsd_9_stable_post
+    install_freebsd_9_stable_post || return 1
+    return 0
 }
 
 install_freebsd_restart_daemons() {
@@ -1876,17 +1940,17 @@ install_smartos_deps() {
 
     ZEROMQ_VERSION='3.2.2'
     pkgin -y in libtool-base autoconf automake libuuid gcc-compiler gmake \
-        python27 py27-pip py27-setuptools py27-yaml py27-crypto swig
+        python27 py27-pip py27-setuptools py27-yaml py27-crypto swig || return 1
     [ -d zeromq-${ZEROMQ_VERSION} ] || (
         wget http://download.zeromq.org/zeromq-${ZEROMQ_VERSION}.tar.gz &&
         tar -xvf zeromq-${ZEROMQ_VERSION}.tar.gz
     )
     cd zeromq-${ZEROMQ_VERSION}
-    ./configure
-    make
-    make install
+    ./configure || return 1
+    make || return 1
+    make install || return 1
 
-    pip-2.7 install pyzmq
+    pip-2.7 install pyzmq || return 1
 
     # Let's trigger config_salt()
     if [ "$TEMP_CONFIG_DIR" = "null" ]; then
@@ -1896,18 +1960,22 @@ install_smartos_deps() {
 
         # Let's download, since they were not provided, the default configuration files
         if [ ! -f /etc/salt/minion ] && [ ! -f $TEMP_CONFIG_DIR/minion ]; then
-            curl -sk -o $TEMP_CONFIG_DIR/minion -L https://raw.github.com/saltstack/salt/blob/develop/conf/minion
+            curl -sk -o $TEMP_CONFIG_DIR/minion -L \
+                https://raw.github.com/saltstack/salt/blob/develop/conf/minion || return 1
         fi
         if [ ! -f /etc/salt/master ] && [ ! -f $TEMP_CONFIG_DIR/master ]; then
-            curl -sk -o $TEMP_CONFIG_DIR/master -L https://raw.github.com/saltstack/salt/blob/develop/conf/master
+            curl -sk -o $TEMP_CONFIG_DIR/master -L \
+                https://raw.github.com/saltstack/salt/blob/develop/conf/master || return 1
         fi
     fi
+
+    return 0
 
 }
 
 install_smartos_git_deps() {
-    install_smartos_deps
-    pkgin -y in scmgit
+    install_smartos_deps || return 1
+    pkgin -y in scmgit || return 1
 
     __git_clone_and_checkout || return 1
     # Let's trigger config_salt()
@@ -1920,12 +1988,14 @@ install_smartos_git_deps() {
 }
 
 install_smartos_stable() {
-    USE_SETUPTOOLS=1 pip-2.7 install salt
+    USE_SETUPTOOLS=1 pip-2.7 install salt || return 1
+    return 0
 }
 
 install_smartos_git() {
     # Use setuptools in order to also install dependencies
-    USE_SETUPTOOLS=1 /opt/local/bin/python setup.py install
+    USE_SETUPTOOLS=1 /opt/local/bin/python setup.py install || return 1
+    return 0
 }
 
 install_smartos_post() {
@@ -1976,16 +2046,17 @@ install_smartos_restart_daemons() {
 install_opensuse_stable_deps() {
     DISTRO_REPO="openSUSE_${DISTRO_MAJOR_VERSION}.${DISTRO_MINOR_VERSION}"
     zypper --non-interactive addrepo --refresh \
-        http://download.opensuse.org/repositories/devel:/languages:/python/${DISTRO_REPO}/devel:languages:python.repo
-    zypper --gpg-auto-import-keys --non-interactive refresh
+        http://download.opensuse.org/repositories/devel:/languages:/python/${DISTRO_REPO}/devel:languages:python.repo || return 1
+    zypper --gpg-auto-import-keys --non-interactive refresh || return 1
     zypper --non-interactive install --auto-agree-with-licenses libzmq3 python \
         python-Jinja2 python-M2Crypto python-PyYAML python-msgpack-python \
-        python-pycrypto python-pyzmq
+        python-pycrypto python-pyzmq || return 1
+    return 0
 }
 
 install_opensuse_git_deps() {
-    install_opensuse_stable_deps
-    zypper --non-interactive install --auto-agree-with-licenses git
+    install_opensuse_stable_deps || return 1
+    zypper --non-interactive install --auto-agree-with-licenses git || return 1
 
     __git_clone_and_checkout || return 1
 
@@ -2009,11 +2080,13 @@ install_opensuse_stable() {
     if [ $INSTALL_SYNDIC -eq $BS_TRUE ]; then
         packages="${packages} salt-syndic"
     fi
-    zypper --non-interactive install --auto-agree-with-licenses $packages
+    zypper --non-interactive install --auto-agree-with-licenses $packages || return 1
+    return 0
 }
 
 install_opensuse_git() {
-    python setup.py install --prefix=/usr
+    python setup.py install --prefix=/usr || return 1
+    return 0
 }
 
 install_opensuse_stable_post() {
@@ -2094,26 +2167,27 @@ install_suse_11_stable_deps() {
     DISTRO_REPO="SLE_${DISTRO_MAJOR_VERSION}${DISTRO_PATCHLEVEL}"
 
     zypper --non-interactive addrepo --refresh \
-        http://download.opensuse.org/repositories/devel:/languages:/python/${DISTRO_REPO}/devel:languages:python.repo
-    zypper --gpg-auto-import-keys --non-interactive refresh
+        http://download.opensuse.org/repositories/devel:/languages:/python/${DISTRO_REPO}/devel:languages:python.repo || return 1
+    zypper --gpg-auto-import-keys --non-interactive refresh || return 1
     if [ $SUSE_PATCHLEVEL -eq 1 ]; then
         [ $PIP_ALLOWED -eq $BS_FALSE ] && pip_not_allowed
         echowarn "PyYaml will be installed using pip"
         zypper --non-interactive install --auto-agree-with-licenses libzmq3 python \
         python-Jinja2 'python-M2Crypto>=0.21' python-msgpack-python \
-        python-pycrypto python-pyzmq python-pip
+        python-pycrypto python-pyzmq python-pip || return 1
         # There's no python-PyYaml in SP1, let's install it using pip
-        pip install PyYaml
+        pip install PyYaml || return 1
     else
         zypper --non-interactive install --auto-agree-with-licenses libzmq3 python \
         python-Jinja2 'python-M2Crypto>=0.21' python-PyYAML python-msgpack-python \
-        python-pycrypto python-pyzmq
+        python-pycrypto python-pyzmq || return 1
     fi
+    return 0
 }
 
 install_suse_11_git_deps() {
-    install_suse_11_stable_deps
-    zypper --non-interactive install --auto-agree-with-licenses git
+    install_suse_11_stable_deps || return 1
+    zypper --non-interactive install --auto-agree-with-licenses git || return 1
 
     __git_clone_and_checkout || return 1
 
@@ -2128,21 +2202,23 @@ install_suse_11_git_deps() {
 
 install_suse_11_stable() {
     if [ $SUSE_PATCHLEVEL -gt 1 ]; then
-        install_opensuse_stable
+        install_opensuse_stable || return 1
     else
         # USE_SETUPTOOLS=1 To work around
         # error: option --single-version-externally-managed not recognized
-        USE_SETUPTOOLS=1 pip install salt
+        USE_SETUPTOOLS=1 pip install salt || return 1
     fi
+    return 0
 }
 
 install_suse_11_git() {
-    install_opensuse_git
+    install_opensuse_git || return 1
+    return 0
 }
 
 install_suse_11_stable_post() {
     if [ $SUSE_PATCHLEVEL -gt 1 ]; then
-        install_opensuse_stable_post
+        install_opensuse_stable_post || return 1
     else
         for fname in minion master syndic; do
 
@@ -2153,24 +2229,27 @@ install_suse_11_stable_post() {
 
             if [ -f /bin/systemctl ]; then
                 curl -k -L https://github.com/saltstack/salt/raw/develop/pkg/salt-$fname.service \
-                    -o /lib/systemd/system/salt-$fname.service
+                    -o /lib/systemd/system/salt-$fname.service || return 1
                 continue
             fi
 
             curl -k -L https://github.com/saltstack/salt/raw/develop/pkg/rpm/salt-$fname \
-                -o /etc/init.d/salt-$fname
+                -o /etc/init.d/salt-$fname || return 1
             chmod +x /etc/init.d/salt-$fname
 
         done
     fi
+    return 0
 }
 
 install_suse_11_git_post() {
-    install_opensuse_git_post
+    install_opensuse_git_post || return 1
+    return 0
 }
 
 install_suse_11_restart_daemons() {
-    install_opensuse_restart_daemons
+    install_opensuse_restart_daemons || return 1
+    return 0
 }
 #
 #   End of SuSE Install Functions.
@@ -2191,25 +2270,26 @@ config_salt() {
     PKI_DIR=$SALT_ETC_DIR/pki
 
     # Let's create the necessary directories
-    [ -d $SALT_ETC_DIR ] || mkdir $SALT_ETC_DIR
-    [ -d $PKI_DIR ] || mkdir -p $PKI_DIR && chmod 700 $PKI_DIR
+    [ -d $SALT_ETC_DIR ] || mkdir $SALT_ETC_DIR || return 1
+    [ -d $PKI_DIR ] || mkdir -p $PKI_DIR && chmod 700 $PKI_DIR || return 1
 
     if [ $INSTALL_MINION -eq $BS_TRUE ]; then
         # Create the PKI directory
-        [ -d $PKI_DIR/minion ] || mkdir -p $PKI_DIR/minion && chmod 700 $PKI_DIR/minion
+        [ -d $PKI_DIR/minion ] || mkdir -p $PKI_DIR/minion && chmod 700 $PKI_DIR/minion || return 1
 
         # Copy the minions configuration if found
-        [ -f "$TEMP_CONFIG_DIR/minion" ] && mv "$TEMP_CONFIG_DIR/minion" /etc/salt && CONFIGURED_ANYTHING=$BS_TRUE
+        [ -f "$TEMP_CONFIG_DIR/minion" ] && mv "$TEMP_CONFIG_DIR/minion" /etc/salt && \
+            CONFIGURED_ANYTHING=$BS_TRUE || return 1
 
         # Copy the minion's keys if found
         if [ -f "$TEMP_CONFIG_DIR/minion.pem" ]; then
-            mv "$TEMP_CONFIG_DIR/minion.pem" $PKI_DIR/minion/
-            chmod 400 $PKI_DIR/minion/minion.pem
+            mv "$TEMP_CONFIG_DIR/minion.pem" $PKI_DIR/minion/ || return 1
+            chmod 400 $PKI_DIR/minion/minion.pem || return 1
             CONFIGURED_ANYTHING=$BS_TRUE
         fi
         if [ -f "$TEMP_CONFIG_DIR/minion.pub" ]; then
-            mv "$TEMP_CONFIG_DIR/minion.pub" $PKI_DIR/minion/
-            chmod 664 $PKI_DIR/minion/minion.pub
+            mv "$TEMP_CONFIG_DIR/minion.pub" $PKI_DIR/minion/ || return 1
+            chmod 664 $PKI_DIR/minion/minion.pub || return 1
             CONFIGURED_ANYTHING=$BS_TRUE
         fi
     fi
@@ -2217,20 +2297,21 @@ config_salt() {
 
     if [ $INSTALL_MASTER -eq $BS_TRUE ] || [ $INSTALL_SYNDIC -eq $BS_TRUE ]; then
         # Create the PKI directory
-        [ -d $PKI_DIR/master ] || mkdir -p $PKI_DIR/master && chmod 700 $PKI_DIR/master
+        [ -d $PKI_DIR/master ] || mkdir -p $PKI_DIR/master && chmod 700 $PKI_DIR/master || return 1
 
         # Copy the masters configuration if found
-        [ -f "$TEMP_CONFIG_DIR/master" ] && mv "$TEMP_CONFIG_DIR/master" /etc/salt && CONFIGURED_ANYTHING=$BS_TRUE
+        [ -f "$TEMP_CONFIG_DIR/master" ] && mv "$TEMP_CONFIG_DIR/master" /etc/salt && \
+            CONFIGURED_ANYTHING=$BS_TRUE || return 1
 
         # Copy the master's keys if found
         if [ -f "$TEMP_CONFIG_DIR/master.pem" ]; then
-            mv "$TEMP_CONFIG_DIR/master.pem" $PKI_DIR/master/
-            chmod 400 $PKI_DIR/master/master.pem
+            mv "$TEMP_CONFIG_DIR/master.pem" $PKI_DIR/master/ || return 1
+            chmod 400 $PKI_DIR/master/master.pem || return 1
             CONFIGURED_ANYTHING=$BS_TRUE
         fi
         if [ -f "$TEMP_CONFIG_DIR/master.pub" ]; then
-            mv "$TEMP_CONFIG_DIR/master.pub" $PKI_DIR/master/
-            chmod 664 $PKI_DIR/master/master.pub
+            mv "$TEMP_CONFIG_DIR/master.pub" $PKI_DIR/master/ || return 1
+            chmod 664 $PKI_DIR/master/master.pub || return 1
             CONFIGURED_ANYTHING=$BS_TRUE
         fi
     fi
@@ -2239,6 +2320,7 @@ config_salt() {
         echowarn "No configuration or keys were copied over. No configuration was done!"
         exit 0
     fi
+    return 0
 }
 #
 #  Ended Default Configuration function

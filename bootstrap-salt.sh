@@ -2278,8 +2278,10 @@ config_salt() {
         [ -d $PKI_DIR/minion ] || mkdir -p $PKI_DIR/minion && chmod 700 $PKI_DIR/minion || return 1
 
         # Copy the minions configuration if found
-        [ -f "$TEMP_CONFIG_DIR/minion" ] && mv "$TEMP_CONFIG_DIR/minion" /etc/salt && \
-            CONFIGURED_ANYTHING=$BS_TRUE || return 1
+        if [ -f "$TEMP_CONFIG_DIR/minion" ]; then
+            mv "$TEMP_CONFIG_DIR/minion" /etc/salt || return 1
+            CONFIGURED_ANYTHING=$BS_TRUE
+        fi
 
         # Copy the minion's keys if found
         if [ -f "$TEMP_CONFIG_DIR/minion.pem" ]; then
@@ -2300,8 +2302,10 @@ config_salt() {
         [ -d $PKI_DIR/master ] || mkdir -p $PKI_DIR/master && chmod 700 $PKI_DIR/master || return 1
 
         # Copy the masters configuration if found
-        [ -f "$TEMP_CONFIG_DIR/master" ] && mv "$TEMP_CONFIG_DIR/master" /etc/salt && \
-            CONFIGURED_ANYTHING=$BS_TRUE || return 1
+        if [ -f "$TEMP_CONFIG_DIR/master" ]; then
+            mv "$TEMP_CONFIG_DIR/master" /etc/salt || return 1
+            CONFIGURED_ANYTHING=$BS_TRUE
+        fi
 
         # Copy the master's keys if found
         if [ -f "$TEMP_CONFIG_DIR/master.pem" ]; then

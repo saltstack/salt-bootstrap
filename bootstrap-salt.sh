@@ -1019,7 +1019,7 @@ install_ubuntu_restart_daemons() {
                 # did not support restart, so, it's safer this way
 
                 # Is it running???
-                status salt-$name | grep -q running
+                status salt-$fname | grep -q running
                 # If it is, stop it
                 [ $? -eq 0 ] && (stop salt-$fname || echodebug "Failed to stop salt-$fname")
                 # Now start it

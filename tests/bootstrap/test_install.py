@@ -325,7 +325,7 @@ class InstallationTestCase(BootstrapTestCase):
         if GRAINS['os'] in OS_REQUIRES_PIP_ALLOWED:
             args.append('-P')
 
-        args.extend(['git', 'v0.13.1'])
+        args.extend(['git', 'v0.14.0'])
 
         self.assert_script_result(
             'Failed to install using specific git tag',
@@ -555,7 +555,7 @@ class InstallationTestCase(BootstrapTestCase):
         if GRAINS['os'] in OS_REQUIRES_PIP_ALLOWED:
             args.append('-P')
 
-        args.extend(['git', 'v0.13.1'])
+        args.extend(['git', 'v0.14.0'])
 
         self.assert_script_result(
             'Failed to install using specific git tag',
@@ -583,4 +583,4 @@ class InstallationTestCase(BootstrapTestCase):
 
         # Make sure the installation updated the git repository to the proper
         # git tag before installing.
-        self.assertIn('0.13.1', '\n'.join(out))
+        self.assertIn('0.14.0', '\n'.join(out))

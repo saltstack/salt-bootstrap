@@ -1010,15 +1010,19 @@ install_ubuntu_restart_daemons() {
         [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq $BS_FALSE ] && continue
 
         if [ -f /sbin/initctl ]; then
-            echodebug "There's upstart support"
-            /sbin/initctl status salt-$fname || \
-                echowarn "Upstart does not apparently know anything about salt-$fname"
+            echodebug "There's upstart support while checking salt-$fname"
+            status salt-$fname || echowarn "Upstart does not apparently know anything about salt-$fname"
             if [ $? -eq 0 ]; then
                 echodebug "Upstart apparently knows about salt-$fname"
                 # upstart knows about this service, let's stop and start it.
                 # We could restart but earlier versions of the upstart script
                 # did not support restart, so, it's safer this way
-                stop salt-$fname || echodebug "Failed to stop salt-$fname"
+
+                # Is it running???
+                status salt-$name | grep -q running
+                # If it is, stop it
+                [ $? -eq 0 ] && (stop salt-$fname || echodebug "Failed to stop salt-$fname")
+                # Now start it
                 start salt-$fname
                 [ $? -eq 0 ] && continue
                 # We failed to start the service, let's test the SysV code bellow

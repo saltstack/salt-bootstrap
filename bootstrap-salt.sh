@@ -1018,8 +1018,8 @@ install_ubuntu_restart_daemons() {
                 # upstart knows about this service, let's stop and start it.
                 # We could restart but earlier versions of the upstart script
                 # did not support restart, so, it's safer this way
-                /sbin/initctl stop salt-$fname || echodebug "Failed to stop salt-$fname"
-                /sbin/initctl start salt-$fname
+                stop salt-$fname || echodebug "Failed to stop salt-$fname"
+                start salt-$fname
                 [ $? -eq 0 ] && continue
                 # We failed to start the service, let's test the SysV code bellow
                 echodebug "Failed to start salt-$fname"

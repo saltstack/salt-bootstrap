@@ -1012,7 +1012,7 @@ install_ubuntu_restart_daemons() {
         if [ -f /sbin/initctl ]; then
             echodebug "There's upstart support while checking salt-$fname"
             status salt-$fname || echowarn "Upstart does not apparently know anything about salt-$fname"
-            sleep 0.5
+            sleep 1
             if [ $? -eq 0 ]; then
                 echodebug "Upstart apparently knows about salt-$fname"
                 # upstart knows about this service, let's stop and start it.
@@ -1022,9 +1022,12 @@ install_ubuntu_restart_daemons() {
                 # Is it running???
                 status salt-$fname | grep -q running
                 # If it is, stop it
-                [ $? -eq 0 ] && sleep 0.5 && (stop salt-$fname || (echodebug "Failed to stop salt-$fname" && return 1))
+                if [ $? -eq 0 ]; then
+                    sleep 1
+                    stop salt-$fname || (echodebug "Failed to stop salt-$fname" && return 1)
+                fi
                 # Now start it
-                sleep 0.5
+                sleep 1
                 start salt-$fname
                 [ $? -eq 0 ] && continue
                 # We failed to start the service, let's test the SysV code bellow

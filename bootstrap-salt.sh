@@ -409,7 +409,7 @@ __unquote_string() {
 #   DESCRIPTION:  Convert CamelCased strings to Camel_Cased
 #-------------------------------------------------------------------------------
 __camelcase_split() {
-    echo $@ | sed -r 's/([^A-Z-])([A-Z])/\1 \2/g'
+    echo $@ | ${SED_EXTENDED_REGEX} 's/([^A-Z-])([A-Z])/\1 \2/g'
 }
 
 #---  FUNCTION  ----------------------------------------------------------------
@@ -428,11 +428,11 @@ __strip_duplicates() {
 __sort_release_files() {
     KNOWN_RELEASE_FILES=$(echo "(arch|centos|debian|ubuntu|fedora|redhat|suse|\
         mandrake|mandriva|gentoo|slackware|turbolinux|unitedlinux|lsb|system|\
-        os)(-|_)(release|version)" | sed -r 's:[[:space:]]::g')
+        os)(-|_)(release|version)" | ${SED_EXTENDED_REGEX} 's:[[:space:]]::g')
     primary_release_files=""
     secondary_release_files=""
     # Sort know VS un-known files first
-    for release_file in $(echo $@ | sed -r 's:[[:space:]]:\n:g' | sort --unique --ignore-case); do
+    for release_file in $(echo $@ | ${SED_EXTENDED_REGEX} 's:[[:space:]]:\n:g' | sort --unique --ignore-case); do
         match=$(echo $release_file | egrep -i ${KNOWN_RELEASE_FILES})
         if [ "x${match}" != "x" ]; then
             primary_release_files="${primary_release_files} ${release_file}"
@@ -457,7 +457,7 @@ __sort_release_files() {
     done
 
     # Echo the results collapsing multiple white-space into a single white-space
-    echo "${primary_release_files} ${secondary_release_files}" | sed -r 's:[[:space:]]:\n:g'
+    echo "${primary_release_files} ${secondary_release_files}" | ${SED_EXTENDED_REGEX} 's:[[:space:]]:\n:g'
 }
 
 
@@ -642,6 +642,14 @@ __gather_bsd_system_info() {
 #-------------------------------------------------------------------------------
 __gather_system_info() {
     case ${OS_NAME_L} in
+        darwin )
+            SED_EXTENDED_REGEX='sed -E'
+            ;;
+        * )
+            SED_EXTENDED_REGEX='sed -r'
+            ;;
+    esac
+    case ${OS_NAME_L} in
         linux )
             __gather_linux_system_info
             ;;
@@ -714,7 +722,7 @@ else
     fi
 fi
 # Simplify distro name naming on functions
-DISTRO_NAME_L=$(echo $DISTRO_NAME | tr '[:upper:]' '[:lower:]' | sed 's/[^a-zA-Z0-9_ ]//g' | sed -re 's/([[:space:]])+/_/g')
+DISTRO_NAME_L=$(echo $DISTRO_NAME | tr '[:upper:]' '[:lower:]' | sed 's/[^a-zA-Z0-9_ ]//g' | ${SED_EXTENDED_REGEX} -e 's/([[:space:]])+/_/g')
 
 
 # Only Ubuntu has daily packages, let's let users know about that

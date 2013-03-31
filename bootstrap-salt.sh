@@ -27,6 +27,7 @@ ScriptName="bootstrap-salt.sh"
 #   * BS_ECHO_DEBUG:      If 1 enable debug echo which can also be set by -D
 #   * BS_SALT_ETC_DIR:    Defaults to /etc/salt
 #   * BS_FORCE_OVERWRITE: Force overriding copied files(config, init.d, etc)
+#   * BS_XCODE_CLT_DMG:   URL to "Command Line Tools for Xcode" installer dmg
 #===============================================================================
 
 
@@ -162,6 +163,7 @@ CONFIG_ONLY=$BS_FALSE
 PIP_ALLOWED=${BS_PIP_ALLOWED:-$BS_FALSE}
 SALT_ETC_DIR=${BS_SALT_ETC_DIR:-/etc/salt}
 FORCE_OVERWRITE=${BS_FORCE_OVERWRITE:-$BS_FALSE}
+XCODE_CLT_DMG=${BS_XCODE_CLT_DMG:-null}
 
 while getopts ":hvnDc:MSNCP" opt
 do
@@ -635,6 +637,15 @@ __gather_bsd_system_info() {
     DISTRO_VERSION=$(echo "${OS_VERSION}" | sed -e 's;[()];;' -e 's/-.*$//')
 }
 
+#---  FUNCTION  ----------------------------------------------------------------
+#          NAME:  __gather_darwin_system_info
+#   DESCRIPTION:  Discover Darwin system information
+#-------------------------------------------------------------------------------
+__gather_darwin_system_info() {
+    DISTRO_NAME=${OS_NAME}
+    DISTRO_VERSION=$(sw_vers -productVersion)
+}
+
 
 #---  FUNCTION  ----------------------------------------------------------------
 #          NAME:  __gather_system_info
@@ -658,6 +669,9 @@ __gather_system_info() {
             ;;
         openbsd|freebsd|netbsd )
             __gather_bsd_system_info
+            ;;
+        darwin )
+            __gather_darwin_system_info
             ;;
         * )
             echoerror "${OS_NAME} not supported.";
@@ -1831,6 +1845,210 @@ install_arch_linux_restart_daemons() {
 }
 #
 #   Ended Arch Install Functions
+#
+##############################################################################
+
+##############################################################################
+#
+#   OS X 10.8.x Install Functions
+#
+install_darwin_10_8_deps() {
+    [ $PIP_ALLOWED -eq $BS_FALSE ] && pip_not_allowed
+    echowarn "salt dependencies will be installed using pip"
+
+    command -v clang >/dev/null 2>&1
+    if [ $? -ne 0 ]; then
+        if [ "$XCODE_CLT_DMG" = "null" ]; then
+            echoerror "Installing Salt is not currently possible without"
+            echoerror "first installing \"Command Line Tools for Xcode"\"
+            echoerror ""
+            echoerror " 1a) Install Xcode (via Mac App Store)"
+            echoerror "       - https://itunes.apple.com/us/app/xcode/id497799835?mt=12"
+            echoerror " 1b) Install \"Command Line Tools\" via"
+            echoerror "     Xcode -> File -> Preferences -> Downloads"
+            echoerror ""
+            echoerror "    OR"
+            echoerror ""
+            echoerror " 2) Install \"Command Line Tools for Xcode\""
+            echoerror "      - https://developer.apple.com/downloads/"
+            echoerror ""
+            echoerror "    OR"
+            echoerror ""
+            echoerror " 3) Download the \"Command Line Tools for Xcode\" disk image"
+            echoerror "    to a location accessible via HTTP and this script will"
+            echoerror "    automate the install process and if passed a URL via"
+            echoerror "    the -x option. Note that directly linking to the dmg"
+            echoerror "    from the Apple site is not allowed by Apple."
+            echoerror "    It must be downloaded and served from a local server."
+            echoerror "      - https://developer.apple.com/downloads/"
+            echoerror ""
+            echoerror "    Example:"
+            echoerror "      $ export BS_XCODE_CLT_DMG=\"http://salt-master.example.com/deps/xcode461_cltools_10_86938245a.dmg\""
+            echoerror "      $ curl -L http://bootstrap.saltstack.org | sudo BS_XCODE_CLT_DMG=\$BS_XCODE_CLT_DMG sh -s -- git develop"
+            return 1
+        fi
+        image_name="${XCODE_CLT_DMG##*/}"
+        mount_dir="/tmp/${image_name%.*}"
+        dest_file="/tmp/${image_name}"
+
+        echoinfo "Downloading \"Command Line Tools for Xcode\" disk image"
+        curl ${XCODE_CLT_DMG} -o ${dest_file}
+        if [ $? -ne 0 ]; then
+            echoerror "Failed to download disk image"
+            return 1
+        fi
+        mkdir -p ${mount_dir}
+        echoinfo "Attaching disk image"
+        hdiutil attach -quiet -nobrowse -noautoopen -mountroot ${mount_dir} ${dest_file}
+        if [ $? -ne 0 ]; then
+            echoerror "Failed to attach the disk image"
+            return 1
+        fi
+        package=$(find ${mount_dir} -iname '*.mpkg')
+        echoinfo "Running \"Command Line Tools for Xcode\" installer"
+        installer -pkg "${package}" -target /
+        install_result_code=$?
+        echoinfo "Unmounting disk image"
+        hdiutil unmount -quiet ${mount_dir}/*
+        rmdir ${mount_dir}
+        rm ${dest_file}
+        if [ $install_result_code -ne 0 ]; then
+            echoerror "Failed to install Xcode Command Line Tools"
+            return 1
+        fi
+    else
+        echoinfo "Xcode or Xcode Command Line Tools found"
+    fi
+
+    command -v pip >/dev/null 2>&1
+    if [ $? -ne 0 ]; then
+        echoinfo "Installing distribute and pip"
+
+        curl http://python-distribute.org/distribute_setup.py | python >/dev/null 2>&1
+        if [ $? -ne 0 ]; then
+            echoerror "Failed to install distribute"
+            return 1
+        fi
+
+        curl https://raw.github.com/pypa/pip/master/contrib/get-pip.py | python >/dev/null 2>&1
+        if [ $? -ne 0 ]; then
+            echoerror "Failed to install pip"
+            return 1
+        fi
+    fi
+
+    command -v swig >/dev/null 2>&1
+    if [ $? -ne 0 ]; then
+        echoinfo "Installing PCRE"
+        PCRE_VERSION='8.32'
+        curl -L -O ftp://ftp.csx.cam.ac.uk/pub/software/programming/pcre/pcre-${PCRE_VERSION}.tar.bz2 &&
+        tar -xf pcre-${PCRE_VERSION}.tar.bz2 &&
+        cd pcre-${PCRE_VERSION} &&
+        ./configure --enable-utf8 --enable-unicode-properties --enable-pcregrep-libz --enable-pcregrep-libbz2 >/dev/null 2>&1 &&
+        make >/dev/null 2>&1 &&
+        make install >/dev/null 2>&1
+        if [ $? -ne 0 ]; then
+            echoerror "Failed to install swig"
+            return 1
+        fi
+
+        echoinfo "Installing swig"
+        SWIG_VERSION='2.0.9'
+        curl -L -O http://sourceforge.net/projects/swig/files/swig/swig-2.0.9/swig-${SWIG_VERSION}.tar.gz &&
+        tar -xf swig-${SWIG_VERSION}.tar.gz &&
+        cd swig-${SWIG_VERSION} &&
+        ./configure >/dev/null 2>&1 &&
+        make >/dev/null 2>&1 &&
+        make install >/dev/null 2>&1
+        if [ $? -ne 0 ]; then
+            echoerror "Failed to install swig"
+            return 1
+        fi
+    fi
+
+    return 0
+}
+
+install_darwin_10_8_git_deps() {
+    install_darwin_10_8_deps || return 1
+
+    echoinfo "Installing zeromq"
+    ZEROMQ_VERSION='3.2.2'
+    curl -L -O http://download.zeromq.org/zeromq-${ZEROMQ_VERSION}.tar.gz &&
+    tar -xvf zeromq-${ZEROMQ_VERSION}.tar.gz &&
+    cd zeromq-${ZEROMQ_VERSION} &&
+    ./configure >/dev/null 2>&1 &&
+    make >/dev/null 2>&1 &&
+    make install >/dev/null 2>&1
+    if [ $? -ne 0 ]; then
+        echoerror "Failed to install zeromq"
+        return 1
+    fi
+
+    __git_clone_and_checkout || return 1
+
+    echoinfo "Installing dependencies"
+    pip install -r requirements.txt >/dev/null 2>&1
+    if [ $? -ne 0 ]; then
+        echoerror "Failed to install salt dependencies"
+        return 1
+    fi
+
+    # Let's trigger config_salt()
+    if [ "$TEMP_CONFIG_DIR" = "null" ]; then
+        TEMP_CONFIG_DIR="${SALT_GIT_CHECKOUT_DIR}/conf/"
+        CONFIG_SALT_FUNC="config_salt"
+    fi
+
+    return 0
+}
+
+install_darwin_10_8_stable() {
+    echoinfo "Installing salt"
+    pip install -U salt >/dev/null 2>&1
+    if [ $? -ne 0 ]; then
+        echoerror "Failed to install salt"
+        return 1
+    fi
+}
+
+install_darwin_10_8_git() {
+    echoinfo "Installing salt"
+    python2.7 setup.py install >/dev/null 2>&1
+    if [ $? -ne 0 ]; then
+        echoerror "Failed to install salt"
+        return 1
+    fi
+}
+
+install_darwin_10_8_git_post() {
+    for fname in minion master syndic; do
+
+        # Skip if not meant to be installed
+        [ $fname = "minion" ] && [ $INSTALL_MINION -eq $BS_FALSE ] && continue
+        [ $fname = "master" ] && [ $INSTALL_MASTER -eq $BS_FALSE ] && continue
+        [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq $BS_FALSE ] && continue
+
+        copyfile ${SALT_GIT_CHECKOUT_DIR}/pkg/darwin/com.saltstack.salt.$fname.plist /Library/LaunchDaemons/com.saltstack.salt.$fname.plist
+
+        launchctl load -w /Library/LaunchDaemons/com.saltstack.salt.$fname.plist
+    done
+}
+
+install_darwin_10_8_restart_daemons() {
+    for fname in minion master syndic; do
+
+        # Skip if not meant to be installed
+        [ $fname = "minion" ] && [ $INSTALL_MINION -eq $BS_FALSE ] && continue
+        [ $fname = "master" ] && [ $INSTALL_MASTER -eq $BS_FALSE ] && continue
+        [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq $BS_FALSE ] && continue
+
+        launchctl unload -w /Library/LaunchDaemons/com.saltstack.salt.$fname.plist
+        launchctl load -w /Library/LaunchDaemons/com.saltstack.salt.$fname.plist
+    done
+}
+#
+#   Ended Darwin Install Functions
 #
 ##############################################################################
 

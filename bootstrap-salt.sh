@@ -2054,8 +2054,15 @@ install_smartos_restart_daemons() {
 #
 install_opensuse_stable_deps() {
     DISTRO_REPO="openSUSE_${DISTRO_MAJOR_VERSION}.${DISTRO_MINOR_VERSION}"
-    zypper --non-interactive addrepo --refresh \
-        http://download.opensuse.org/repositories/devel:/languages:/python/${DISTRO_REPO}/devel:languages:python.repo || return 1
+
+    # Is the repository already known
+    $(zypper repos | grep devel_languages_python >/dev/null 2>&1)
+    if [ $? -eq 1 ]; then
+        # zypper does not yet know nothing about devel_languages_python
+        zypper --non-interactive addrepo --refresh \
+            http://download.opensuse.org/repositories/devel:/languages:/python/${DISTRO_REPO}/devel:languages:python.repo || return 1
+    fi
+
     zypper --gpg-auto-import-keys --non-interactive refresh || return 1
     zypper --non-interactive install --auto-agree-with-licenses libzmq3 python \
         python-Jinja2 python-M2Crypto python-PyYAML python-msgpack-python \
@@ -2175,8 +2182,14 @@ install_suse_11_stable_deps() {
     fi
     DISTRO_REPO="SLE_${DISTRO_MAJOR_VERSION}${DISTRO_PATCHLEVEL}"
 
-    zypper --non-interactive addrepo --refresh \
-        http://download.opensuse.org/repositories/devel:/languages:/python/${DISTRO_REPO}/devel:languages:python.repo || return 1
+    # Is the repository already known
+    $(zypper repos | grep devel_languages_python >/dev/null 2>&1)
+    if [ $? -eq 1 ]; then
+        # zypper does not yet know nothing about devel_languages_python
+        zypper --non-interactive addrepo --refresh \
+            http://download.opensuse.org/repositories/devel:/languages:/python/${DISTRO_REPO}/devel:languages:python.repo || return 1
+    fi
+
     zypper --gpg-auto-import-keys --non-interactive refresh || return 1
     if [ $SUSE_PATCHLEVEL -eq 1 ]; then
         [ $PIP_ALLOWED -eq $BS_FALSE ] && pip_not_allowed

@@ -2204,28 +2204,9 @@ install_suse_11_stable_deps() {
         python-Jinja2 'python-M2Crypto>=0.21' python-PyYAML python-msgpack-python \
         python-pycrypto python-pyzmq || return 1
     fi
-    return 0
-}
 
-install_suse_11_git_deps() {
-    install_suse_11_stable_deps || return 1
-    zypper --non-interactive install --auto-agree-with-licenses git || return 1
-
-    __git_clone_and_checkout || return 1
-
-    # Let's trigger config_salt()
-    if [ "$TEMP_CONFIG_DIR" = "null" ]; then
-        TEMP_CONFIG_DIR="${SALT_GIT_CHECKOUT_DIR}/conf/"
-        CONFIG_SALT_FUNC="config_salt"
-    fi
-
-    return 0
-}
-
-install_suse_11_stable() {
-    if [ $SUSE_PATCHLEVEL -gt 1 ]; then
-        install_opensuse_stable || return 1
-    else
+    # PIP based installs need to copy configuration files "by hand".
+    if [ $SUSE_PATCHLEVEL -eq 1 ]; then
         # Let's trigger config_salt()
         if [ "$TEMP_CONFIG_DIR" = "null" ]; then
             # Let's set the configuration directory to /tmp
@@ -2249,6 +2230,29 @@ install_suse_11_stable() {
                 fi
             done
         fi
+    fi
+    return 0
+}
+
+install_suse_11_git_deps() {
+    install_suse_11_stable_deps || return 1
+    zypper --non-interactive install --auto-agree-with-licenses git || return 1
+
+    __git_clone_and_checkout || return 1
+
+    # Let's trigger config_salt()
+    if [ "$TEMP_CONFIG_DIR" = "null" ]; then
+        TEMP_CONFIG_DIR="${SALT_GIT_CHECKOUT_DIR}/conf/"
+        CONFIG_SALT_FUNC="config_salt"
+    fi
+
+    return 0
+}
+
+install_suse_11_stable() {
+    if [ $SUSE_PATCHLEVEL -gt 1 ]; then
+        install_opensuse_stable || return 1
+    else
         # USE_SETUPTOOLS=1 To work around
         # error: option --single-version-externally-managed not recognized
         USE_SETUPTOOLS=1 pip install salt || return 1

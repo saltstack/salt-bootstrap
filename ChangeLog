@@ -1,3 +1,17 @@
+Version 1.5.3:
+	* Return 0 or 1 from functions
+	* Convert several pipes into a single awk call
+	* Fixed `/etc/os-release` parsing
+	* Fixed `config_salt()`
+	* Distro Support Fixed:
+		* EPEL based installations (CentOS, Amazon Linux, RedHat)
+		* SuSE/OpenSUSE (problem running the script twice, ie, existing
+		`devel_languages_python` repository)
+		* SuSE 11 SP1 (pip based install and config trigger)
+	* Distro Support Added:
+		* Debian 7 (Only git installations at the moment)
+
+
 Version 1.5.2:
 	* Fix issue with travis testing(it installs it's own ZeroMQ3 lib
 	* Allow setting the debug output from an environment variable
@@ -8,6 +22,7 @@ Version 1.5.2:
 		* Ubuntu daily installs.
 	* Distro Support Added:
 		* Trisquel 6.0 (Ubuntu 12.04)
+
 
 Version 1.5.1:
 	* Improved unittesting.
@@ -24,6 +39,7 @@ Version 1.5.1:
 	* Distro Support Added:
 		* SuSE 11 SP1/11 SP2
 		* OpenSUSE 12.x
+
 
 Version 1.5:
 	* First stable version of the script

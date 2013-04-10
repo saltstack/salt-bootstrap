@@ -1970,11 +1970,11 @@ install_smartos_deps() {
         # Let's download, since they were not provided, the default configuration files
         if [ ! -f /etc/salt/minion ] && [ ! -f $TEMP_CONFIG_DIR/minion ]; then
             curl -sk -o $TEMP_CONFIG_DIR/minion -L \
-                https://raw.github.com/saltstack/salt/blob/develop/conf/minion || return 1
+                https://raw.github.com/saltstack/salt/develop/conf/minion || return 1
         fi
         if [ ! -f /etc/salt/master ] && [ ! -f $TEMP_CONFIG_DIR/master ]; then
             curl -sk -o $TEMP_CONFIG_DIR/master -L \
-                https://raw.github.com/saltstack/salt/blob/develop/conf/master || return 1
+                https://raw.github.com/saltstack/salt/develop/conf/master || return 1
         fi
     fi
 
@@ -2226,6 +2226,29 @@ install_suse_11_stable() {
     if [ $SUSE_PATCHLEVEL -gt 1 ]; then
         install_opensuse_stable || return 1
     else
+        # Let's trigger config_salt()
+        if [ "$TEMP_CONFIG_DIR" = "null" ]; then
+            # Let's set the configuration directory to /tmp
+            TEMP_CONFIG_DIR="/tmp"
+            CONFIG_SALT_FUNC="config_salt"
+
+            for fname in minion master syndic; do
+
+                # Skip if not meant to be installed
+                [ $fname = "minion" ] && [ $INSTALL_MINION -eq $BS_FALSE ] && continue
+                [ $fname = "master" ] && [ $INSTALL_MASTER -eq $BS_FALSE ] && continue
+                [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq $BS_FALSE ] && continue
+
+                # Syndic uses the same configuration file as the master
+                [ $fname = "syndic" ] && fname=master
+
+                # Let's download, since they were not provided, the default configuration files
+                if [ ! -f /etc/salt/$fname ] && [ ! -f $TEMP_CONFIG_DIR/$fname ]; then
+                    curl -sk -o $TEMP_CONFIG_DIR/$fname -L \
+                        https://raw.github.com/saltstack/salt/develop/conf/$fname || return 1
+                fi
+            done
+        fi
         # USE_SETUPTOOLS=1 To work around
         # error: option --single-version-externally-managed not recognized
         USE_SETUPTOOLS=1 pip install salt || return 1

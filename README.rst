@@ -202,7 +202,7 @@ supported versions or variants should not be made, to avoid failed or broken ins
 Supported Operating Systems
 ---------------------------
 - Ubuntu 10.x/11.x/12.x
-- Debian 6.x
+- Debian 6.x/7(git installs)
 - CentOS 5/6
 - Red Hat 5/6
 - Red Hat Enterprise 5/6

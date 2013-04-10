@@ -1423,10 +1423,10 @@ install_centos_stable_deps() {
     if [ $DISTRO_MAJOR_VERSION -eq 5 ]; then
         yum -y install PyYAML python26-m2crypto m2crypto python26 \
             python26-crypto python26-msgpack python26-zmq \
-            python26-jinja2 --enablerepo=epel-testing || return 1
+            python26-jinja2 --enablerepo=epel || return 1
     else
         yum -y install PyYAML m2crypto python-crypto python-msgpack \
-            python-zmq python-jinja2 --enablerepo=epel-testing || return 1
+            python-zmq python-jinja2 --enablerepo=epel || return 1
     fi
     return 0
 }
@@ -1439,7 +1439,7 @@ install_centos_stable() {
     if [ $INSTALL_MASTER -eq $BS_TRUE ] || [ $INSTALL_SYNDIC -eq $BS_TRUE ]; then
         packages="${packages} salt-master"
     fi
-    yum -y install ${packages} --enablerepo=epel-testing || return 1
+    yum -y install ${packages} --enablerepo=epel || return 1
     return 0
 }
 
@@ -1459,7 +1459,7 @@ install_centos_stable_post() {
 
 install_centos_git_deps() {
     install_centos_stable_deps || return 1
-    yum -y install git --enablerepo=epel-testing || return 1
+    yum -y install git --enablerepo=epel || return 1
 
     __git_clone_and_checkout || return 1
 
@@ -1666,12 +1666,12 @@ install_amazon_linux_ami_deps() {
     rpm -Uvh --force http://mirrors.kernel.org/fedora-epel/6/${EPEL_ARCH}/epel-release-6-8.noarch.rpm || return 1
     yum -y update || return 1
     yum -y install PyYAML m2crypto python-crypto python-msgpack python-zmq \
-        python-ordereddict python-jinja2 --enablerepo=epel-testing || return 1
+        python-ordereddict python-jinja2 --enablerepo=epel || return 1
 }
 
 install_amazon_linux_ami_git_deps() {
     install_amazon_linux_ami_deps || return 1
-    yum -y install git --enablerepo=epel-testing || return 1
+    yum -y install git --enablerepo=epel || return 1
 
     __git_clone_and_checkout || return 1
 

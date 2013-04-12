@@ -1,4 +1,6 @@
 Version 1.5.X:
+	* Fixed an issue we had when /proc/cpuinfo had more than one CPU.
+	Detected on AMD cpu's.
 	* Distro Support Fixed:
 		* FreeBSD (Don't let the script fail if PACKAGESITE is not
 		set)

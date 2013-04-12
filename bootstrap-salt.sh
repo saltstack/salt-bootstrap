@@ -1846,11 +1846,17 @@ __freebsd_get_packagesite() {
         BSD_ARCH="x86:32"
     fi
 
+    # Since the variable might not be set, don't, momentarily treat it as a failure
+    set +o nounset
+
     if [ "x${PACKAGESITE}" = "x" ]; then
         echowarn "The environment variable PACKAGESITE is not set."
         echowarn "The installation will, most likely fail since pkgbeta.freebsd.org does not yet contain any packages"
     fi
     BS_PACKAGESITE=${PACKAGESITE:-"http://pkgbeta.freebsd.org/freebsd:${DISTRO_MAJOR_VERSION}:${BSD_ARCH}/latest"}
+
+    # Treat unset variables as errors once more
+    set -o nounset
 }
 
 install_freebsd_9_stable_deps() {

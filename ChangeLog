@@ -1,3 +1,9 @@
+Version 1.5.X:
+	* Distro Support Fixed:
+		* FreeBSD (Don't let the script fail if PACKAGESITE is not
+		set)
+
+
 Version 1.5.3:
 	* Return 0 or 1 from functions
 	* Convert several pipes into a single awk call

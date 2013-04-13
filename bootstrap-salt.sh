@@ -347,7 +347,7 @@ exec 2>$LOGPIPE
 #-------------------------------------------------------------------------------
 __gather_hardware_info() {
     if [ -f /proc/cpuinfo ]; then
-        CPU_VENDOR_ID=$(awk '/vendor_id|Processor/ {sub(/-.*$/,"",$3); print $3}' /proc/cpuinfo )
+        CPU_VENDOR_ID=$(awk '/vendor_id|Processor/ {sub(/-.*$/,"",$3); print $3; exit}' /proc/cpuinfo )
     elif [ -f /usr/bin/kstat ]; then
         # SmartOS.
         # Solaris!?

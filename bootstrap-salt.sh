@@ -723,6 +723,11 @@ if ([ "${DISTRO_NAME_L}" != "ubuntu" ] && [ $ITYPE = "daily" ]) && \
     echoerror "${DISTRO_NAME} does not have daily packages support"
     exit 1
 fi
+ 
+#lsb_release -si returns "openSUSE project" on openSUSE 12.3
+if [ "${DISTRO_NAME_L}" == "opensuse_project" ]; then
+    DISTRO_NAME_L="opensuse"
+fi
 
 
 #---  FUNCTION  ----------------------------------------------------------------

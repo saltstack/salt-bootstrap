@@ -923,11 +923,6 @@ install_ubuntu_11_10_deps() {
     return 0
 }
 
-install_ubuntu_13_deps() {
-    echoerror "Ubuntu 13.X Support is not yet available. Please file a ticket if you really need it."
-    return 1
-}
-
 install_ubuntu_git_deps() {
     install_ubuntu_deps || return 1
     __apt_get_noinput git-core python-yaml python-m2crypto python-crypto \

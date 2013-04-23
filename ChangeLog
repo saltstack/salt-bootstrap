@@ -1,6 +1,8 @@
 Version 1.5.X:
 	* Fixed an issue we had when /proc/cpuinfo had more than one CPU.
 	Detected on AMD cpu's.
+	* OpenSUSE 12.3 uses lsb_release. Fix the returned distro name
+	"openSUSE project" to "openSUSE" which the script handles.
 	* Distro Support Fixed:
 		* FreeBSD (Don't let the script fail if PACKAGESITE is not
 		set)

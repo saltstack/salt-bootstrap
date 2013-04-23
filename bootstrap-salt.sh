@@ -1332,7 +1332,7 @@ __install_debian_stable() {
 }
 
 
-install_debian_6() {
+install_debian_6_stable() {
     __install_debian_stable || return 1
     return 0
 }

@@ -7,6 +7,7 @@ Version 1.5.X:
 	argument.
 	* Distro Support Fixed:
 		* FreeBSD (Don't let the script fail if PACKAGESITE is not set)
+		* Debian Stable installations(the function search was not working as supposed)
 	* Distro Support Added:
 		* Ubuntu 13.04 (Was disabled because of a bad beta1. Fixed in beta2)
 

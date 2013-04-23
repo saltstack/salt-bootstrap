@@ -477,6 +477,10 @@ __gather_linux_system_info() {
             # Let's convert CamelCase to Camel Case
             DISTRO_NAME=$(__camelcase_split "$DISTRO_NAME")
         fi
+        #lsb_release -si returns "openSUSE project" on openSUSE 12.3
+        if [ "${DISTRO_NAME}" = "openSUSE project" ]; then
+            DISTRO_NAME="opensuse"
+        fi
         rv=$(lsb_release -sr)
         [ "${rv}x" != "x" ] && DISTRO_VERSION=$(__parse_version_string "$rv")
     elif [ -f /etc/lsb-release ]; then
@@ -723,7 +727,6 @@ if ([ "${DISTRO_NAME_L}" != "ubuntu" ] && [ $ITYPE = "daily" ]) && \
     echoerror "${DISTRO_NAME} does not have daily packages support"
     exit 1
 fi
-
 
 #---  FUNCTION  ----------------------------------------------------------------
 #          NAME:  __function_defined

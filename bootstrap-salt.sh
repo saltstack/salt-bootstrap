@@ -16,7 +16,7 @@
 #       CREATED: 10/15/2012 09:49:37 PM WEST
 #===============================================================================
 set -o nounset                              # Treat unset variables as an error
-ScriptVersion="1.5.3"
+ScriptVersion="1.5.4"
 ScriptName="bootstrap-salt.sh"
 
 #===============================================================================
@@ -97,14 +97,16 @@ echodebug() {
 }
 
 #---  FUNCTION  ----------------------------------------------------------------
-#          NAME:  pip_not_allowed
+#          NAME:  check_pip_allowed
 #   DESCRIPTION:  Simple function to let the users know that -P needs to be
 #                 used.
 #-------------------------------------------------------------------------------
-pip_not_allowed() {
-    echoerror "pip based installations were not allowed. Retry using '-P'"
-    usage
-    exit 1
+check_pip_allowed() {
+    if [ $PIP_ALLOWED -eq $BS_FALSE ]; then
+        echoerror "pip based installations were not allowed. Retry using '-P'"
+        usage
+        exit 1
+    fi
 }
 
 #===  FUNCTION  ================================================================
@@ -135,6 +137,8 @@ usage() {
   -n  No colours.
   -D  Show debug output.
   -c  Temporary configuration directory
+  -k  Temporary directory holding the minion keys which will pre-seed
+      the master.
   -M  Also install salt-master
   -S  Also install salt-syndic
   -N  Do not install salt-minion
@@ -154,6 +158,7 @@ EOT
 #  Handle command line arguments
 #-----------------------------------------------------------------------
 TEMP_CONFIG_DIR="null"
+TEMP_KEYS_DIR="null"
 INSTALL_MASTER=$BS_FALSE
 INSTALL_SYNDIC=$BS_FALSE
 INSTALL_MINION=$BS_TRUE
@@ -163,7 +168,7 @@ PIP_ALLOWED=${BS_PIP_ALLOWED:-$BS_FALSE}
 SALT_ETC_DIR=${BS_SALT_ETC_DIR:-/etc/salt}
 FORCE_OVERWRITE=${BS_FORCE_OVERWRITE:-$BS_FALSE}
 
-while getopts ":hvnDc:MSNCP" opt
+while getopts ":hvnDc:k:MSNCP" opt
 do
   case "${opt}" in
 
@@ -176,6 +181,13 @@ do
          # If the configuration directory does not exist, error out
          if [ ! -d "$TEMP_CONFIG_DIR" ]; then
              echoerror "The configuration directory ${TEMP_CONFIG_DIR} does not exist."
+             exit 1
+         fi
+         ;;
+    k )  TEMP_KEYS_DIR="$OPTARG"
+         # If the configuration directory does not exist, error out
+         if [ ! -d "$TEMP_KEYS_DIR" ]; then
+             echoerror "The pre-seed keys directory ${TEMP_KEYS_DIR} does not exist."
              exit 1
          fi
          ;;
@@ -477,8 +489,8 @@ __gather_linux_system_info() {
             # Let's convert CamelCase to Camel Case
             DISTRO_NAME=$(__camelcase_split "$DISTRO_NAME")
         fi
-        #lsb_release -si returns "openSUSE project" on openSUSE 12.3
         if [ "${DISTRO_NAME}" = "openSUSE project" ]; then
+            # lsb_release -si returns "openSUSE project" on openSUSE 12.3
             DISTRO_NAME="opensuse"
         fi
         rv=$(lsb_release -sr)
@@ -816,17 +828,57 @@ copyfile() {
     if [ ! -f "$dfile" ]; then
         # The destination file does not exist, copy
         echodebug "Copying $sfile to $dfile"
-        cp "$sfile" "$dfile"
+        cp "$sfile" "$dfile" || return 1
     elif [ -f "$dfile" ] && [ $overwrite -eq $BS_TRUE ]; then
         # The destination exist and we're overwriting
         echodebug "Overriding $dfile with $sfile"
-        cp -f "$sfile" "$dfile"
+        cp -f "$sfile" "$dfile" || return 2
     elif [ -f "$dfile" ] && [ $overwrite -ne $BS_TRUE ]; then
         echodebug "Not overriding $dfile with $sfile"
     fi
     return 0
 }
 
+
+#---  FUNCTION  ----------------------------------------------------------------
+#          NAME:  movefile
+#   DESCRIPTION:  Simple function to move files. Overrides if asked.
+#-------------------------------------------------------------------------------
+movefile() {
+    overwrite=$FORCE_OVERWRITE
+    if [ $# -eq 2 ]; then
+        sfile=$1
+        dfile=$2
+    elif [ $# -eq 3 ]; then
+        sfile=$1
+        dfile=$2
+        overwrite=$3
+    else
+        echoerror "Wrong number of arguments for movefile()"
+        echoinfo "USAGE: movefile <source> <dest>  OR  movefile <source> <dest> <overwrite>"
+        exit 1
+    fi
+
+    # Does the source file exist?
+    if [ ! -f "$sfile" ]; then
+        echowarn "$sfile does not exist!"
+        return 1
+    fi
+
+    if [ ! -f "$dfile" ]; then
+        # The destination file does not exist, copy
+        echodebug "Moving $sfile to $dfile"
+        mv "$sfile" "$dfile" || return 1
+    elif [ -f "$dfile" ] && [ $overwrite -eq $BS_TRUE ]; then
+        # The destination exist and we're overwriting
+        echodebug "Overriding $dfile with $sfile"
+        mv -f "$sfile" "$dfile" || return 1
+    elif [ -f "$dfile" ] && [ $overwrite -ne $BS_TRUE ]; then
+        echodebug "Not overriding $dfile with $sfile"
+    fi
+
+    return 0
+}
 
 ##############################################################################
 #
@@ -843,7 +895,7 @@ copyfile() {
 #       6. install_<distro>_deps
 #
 #   Optionally, define a salt configuration function, which will be called if
-#   the -c|config-dir option is passed. One of:
+#   the -c (config-dir) option is passed. One of:
 #       1. config_<distro>_<major_version>_<install_type>_salt
 #       2. config_<distro>_<major_version>_<minor_version>_<install_type>_salt
 #       3. config_<distro>_<major_version>_salt
@@ -851,6 +903,16 @@ copyfile() {
 #       5. config_<distro>_<install_type>_salt
 #       6. config_<distro>_salt
 #       7. config_salt [THIS ONE IS ALREADY DEFINED AS THE DEFAULT]
+#
+#   Optionally, define a salt master pre-seed function, which will be called if
+#   the -k (pre-seed master keys) option is passed. One of:
+#       1. pressed_<distro>_<major_version>_<install_type>_master
+#       2. pressed_<distro>_<major_version>_<minor_version>_<install_type>_master
+#       3. pressed_<distro>_<major_version>_master
+#       4  pressed_<distro>_<major_version>_<minor_version>_master
+#       5. pressed_<distro>_<install_type>_master
+#       6. pressed_<distro>_master
+#       7. pressed_master [THIS ONE IS ALREADY DEFINED AS THE DEFAULT]
 #
 #   To install salt, which, of course, is required, one of:
 #       1. install_<distro>_<major_version>_<install_type>
@@ -1132,7 +1194,7 @@ install_debian_deps() {
 }
 
 install_debian_6_deps() {
-    [ $PIP_ALLOWED -eq $BS_FALSE ] && pip_not_allowed
+    check_pip_allowed
     echowarn "PyZMQ will be installed from PyPi in order to compile it against ZMQ3"
     echowarn "This is required for long term stable minion connections to the master."
 
@@ -1185,7 +1247,7 @@ _eof
 }
 
 install_debian_7_deps() {
-    [ $PIP_ALLOWED -eq $BS_FALSE ] && pip_not_allowed
+    check_pip_allowed
     echowarn "PyZMQ will be installed from PyPi in order to compile it against ZMQ3"
     echowarn "This is required for long term stable minion connections to the master."
 
@@ -1213,7 +1275,7 @@ _eof
 }
 
 install_debian_git_deps() {
-    [ $PIP_ALLOWED -eq $BS_FALSE ] && pip_not_allowed
+    check_pip_allowed
     echowarn "PyZMQ will be installed from PyPi in order to compile it against ZMQ3"
     echowarn "This is required for long term stable minion connections to the master."
 
@@ -1249,7 +1311,7 @@ install_debian_7_git_deps() {
 }
 
 __install_debian_stable() {
-    [ $PIP_ALLOWED -eq $BS_FALSE ] && pip_not_allowed
+    check_pip_allowed
     packages=""
     if [ $INSTALL_MINION -eq $BS_TRUE ]; then
         packages="${packages} salt-minion"
@@ -1270,7 +1332,7 @@ __install_debian_stable() {
 }
 
 
-install_debian_6() {
+install_debian_6_stable() {
     __install_debian_stable || return 1
     return 0
 }
@@ -1953,7 +2015,7 @@ install_freebsd_restart_daemons() {
 #   SmartOS Install Functions
 #
 install_smartos_deps() {
-    [ $PIP_ALLOWED -eq $BS_FALSE ] && pip_not_allowed
+    check_pip_allowed
     echowarn "PyZMQ will be installed using pip"
 
     ZEROMQ_VERSION='3.2.2'
@@ -2201,7 +2263,7 @@ install_suse_11_stable_deps() {
 
     zypper --gpg-auto-import-keys --non-interactive refresh || return 1
     if [ $SUSE_PATCHLEVEL -eq 1 ]; then
-        [ $PIP_ALLOWED -eq $BS_FALSE ] && pip_not_allowed
+        check_pip_allowed
         echowarn "PyYaml will be installed using pip"
         zypper --non-interactive install --auto-agree-with-licenses libzmq3 python \
         python-Jinja2 'python-M2Crypto>=0.21' python-msgpack-python \
@@ -2392,6 +2454,34 @@ config_salt() {
 
 ##############################################################################
 #
+#   Default salt master minion keys pre-seed function. Matches ANY distribution
+#   as long as the -k option is passed.
+#
+preseed_master() {
+    # Create the PKI directory
+    [ -d $PKI_DIR/minions ] || mkdir -p $PKI_DIR/minions && chmod 700 $PKI_DIR/minions || return 1
+
+    for keyfile in $(ls $TEMP_KEYS_DIR); do
+        src_keyfile="${TEMP_KEYS_DIR}/${keyfile}"
+        dst_keyfile="${PKI_DIR}/minions/${keyfile}"
+
+        # If it's not a file, skip to the next
+        [ ! -f $keyfile_path ] && continue
+
+        movefile "$src_keyfile" "$dst_keyfile" || return 1
+        chmod 664 $dst_keyfile || return 1
+    done
+
+    return 0
+}
+#
+#  Ended Default Salt Master Pre-Seed minion keys function
+#
+##############################################################################
+
+
+##############################################################################
+#
 #   This function checks if all of the installed daemons are running or not.
 #
 daemons_running() {
@@ -2451,6 +2541,27 @@ if [ "$TEMP_CONFIG_DIR" != "null" ]; then
     for FUNC_NAME in $(__strip_duplicates $CONFIG_FUNC_NAMES); do
         if __function_defined $FUNC_NAME; then
             CONFIG_SALT_FUNC=$FUNC_NAME
+            break
+        fi
+    done
+fi
+
+
+# Let's get the pre-seed master function
+PRESEED_MASTER_FUNC="null"
+if [ "$TEMP_CONFIG_DIR" != "null" ]; then
+
+    PRESEED_FUNC_NAMES="preseed_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}_${ITYPE}_master"
+    PRESEED_FUNC_NAMES="$PRESEED_FUNC_NAMES preseed_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}${PREFIXED_DISTRO_MINOR_VERSION}_${ITYPE}_master"
+    PRESEED_FUNC_NAMES="$PRESEED_FUNC_NAMES preseed_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}_master"
+    PRESEED_FUNC_NAMES="$PRESEED_FUNC_NAMES preseed_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}${PREFIXED_DISTRO_MINOR_VERSION}_master"
+    PRESEED_FUNC_NAMES="$PRESEED_FUNC_NAMES preseed_${DISTRO_NAME_L}_${ITYPE}_master"
+    PRESEED_FUNC_NAMES="$PRESEED_FUNC_NAMES preseed_${DISTRO_NAME_L}_master"
+    PRESEED_FUNC_NAMES="$PRESEED_FUNC_NAMES preseed_master"
+
+    for FUNC_NAME in $(__strip_duplicates $PRESEED_FUNC_NAMES); do
+        if __function_defined $FUNC_NAME; then
+            PRESEED_MASTER_FUNC=$FUNC_NAME
             break
         fi
     done
@@ -2554,6 +2665,17 @@ if [ "$TEMP_CONFIG_DIR" != "null" ] && [ "$CONFIG_SALT_FUNC" != "null" ]; then
     $CONFIG_SALT_FUNC
     if [ $? -ne 0 ]; then
         echoerror "Failed to run ${CONFIG_SALT_FUNC}()!!!"
+        exit 1
+    fi
+fi
+
+
+# Pre-Seed master keys
+if [ "$TEMP_KEYS_DIR" != "null" ] && [ "$PRESEED_MASTER_FUNC" != "null" ]; then
+    echoinfo "Running ${PRESEED_MASTER_FUNC}()"
+    $PRESEED_MASTER_FUNC
+    if [ $? -ne 0 ]; then
+        echoerror "Failed to run ${PRESEED_MASTER_FUNC}()!!!"
         exit 1
     fi
 fi

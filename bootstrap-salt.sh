@@ -477,8 +477,8 @@ __gather_linux_system_info() {
             # Let's convert CamelCase to Camel Case
             DISTRO_NAME=$(__camelcase_split "$DISTRO_NAME")
         fi
-        #lsb_release -si returns "openSUSE project" on openSUSE 12.3
         if [ "${DISTRO_NAME}" = "openSUSE project" ]; then
+            # lsb_release -si returns "openSUSE project" on openSUSE 12.3
             DISTRO_NAME="opensuse"
         fi
         rv=$(lsb_release -sr)

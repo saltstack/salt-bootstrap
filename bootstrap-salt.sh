@@ -97,14 +97,16 @@ echodebug() {
 }
 
 #---  FUNCTION  ----------------------------------------------------------------
-#          NAME:  pip_not_allowed
+#          NAME:  check_pip_allowed
 #   DESCRIPTION:  Simple function to let the users know that -P needs to be
 #                 used.
 #-------------------------------------------------------------------------------
-pip_not_allowed() {
-    echoerror "pip based installations were not allowed. Retry using '-P'"
-    usage
-    exit 1
+check_pip_allowed() {
+    if [ $PIP_ALLOWED -eq $BS_FALSE ]; then
+        echoerror "pip based installations were not allowed. Retry using '-P'"
+        usage
+        exit 1
+    fi
 }
 
 #===  FUNCTION  ================================================================
@@ -1132,7 +1134,7 @@ install_debian_deps() {
 }
 
 install_debian_6_deps() {
-    [ $PIP_ALLOWED -eq $BS_FALSE ] && pip_not_allowed
+    check_pip_allowed
     echowarn "PyZMQ will be installed from PyPi in order to compile it against ZMQ3"
     echowarn "This is required for long term stable minion connections to the master."
 
@@ -1185,7 +1187,7 @@ _eof
 }
 
 install_debian_7_deps() {
-    [ $PIP_ALLOWED -eq $BS_FALSE ] && pip_not_allowed
+    check_pip_allowed
     echowarn "PyZMQ will be installed from PyPi in order to compile it against ZMQ3"
     echowarn "This is required for long term stable minion connections to the master."
 
@@ -1213,7 +1215,7 @@ _eof
 }
 
 install_debian_git_deps() {
-    [ $PIP_ALLOWED -eq $BS_FALSE ] && pip_not_allowed
+    check_pip_allowed
     echowarn "PyZMQ will be installed from PyPi in order to compile it against ZMQ3"
     echowarn "This is required for long term stable minion connections to the master."
 
@@ -1249,7 +1251,7 @@ install_debian_7_git_deps() {
 }
 
 __install_debian_stable() {
-    [ $PIP_ALLOWED -eq $BS_FALSE ] && pip_not_allowed
+    check_pip_allowed
     packages=""
     if [ $INSTALL_MINION -eq $BS_TRUE ]; then
         packages="${packages} salt-minion"
@@ -1953,7 +1955,7 @@ install_freebsd_restart_daemons() {
 #   SmartOS Install Functions
 #
 install_smartos_deps() {
-    [ $PIP_ALLOWED -eq $BS_FALSE ] && pip_not_allowed
+    check_pip_allowed
     echowarn "PyZMQ will be installed using pip"
 
     ZEROMQ_VERSION='3.2.2'
@@ -2201,7 +2203,7 @@ install_suse_11_stable_deps() {
 
     zypper --gpg-auto-import-keys --non-interactive refresh || return 1
     if [ $SUSE_PATCHLEVEL -eq 1 ]; then
-        [ $PIP_ALLOWED -eq $BS_FALSE ] && pip_not_allowed
+        check_pip_allowed
         echowarn "PyYaml will be installed using pip"
         zypper --non-interactive install --auto-agree-with-licenses libzmq3 python \
         python-Jinja2 'python-M2Crypto>=0.21' python-msgpack-python \

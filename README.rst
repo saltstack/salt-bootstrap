@@ -106,7 +106,21 @@ In order to install salt for a distribution you need to define:
   config_salt [THIS ONE IS ALREADY DEFINED AS THE DEFAULT]
 
 
-3. To install salt, which, of course, is required, one of:
+3. Optionally, define a salt master pre-seed function, which will be called if the -k (pre-seed 
+   master keys) option is passed. One of:
+
+.. code:: bash
+
+  pressed_<distro>_<major_version>_<install_type>_master
+  pressed_<distro>_<major_version>_<minor_version>_<install_type>_master
+  pressed_<distro>_<major_version>_master
+  pressed_<distro>_<major_version>_<minor_version>_master
+  pressed_<distro>_<install_type>_master
+  pressed_<distro>_master
+  pressed_master [THIS ONE IS ALREADY DEFINED AS THE DEFAULT]
+
+
+4. To install salt, which, of course, is required, one of:
 
 .. code:: bash
 
@@ -115,7 +129,7 @@ In order to install salt for a distribution you need to define:
   install_<distro>_<install_type>
 
 
-4. Optionally, define a post install function, one of:
+5. Optionally, define a post install function, one of:
 
 .. code:: bash
 
@@ -127,7 +141,7 @@ In order to install salt for a distribution you need to define:
   install_<distro>_post
 
 
-5. Optionally, define a start daemons function, one of:
+6. Optionally, define a start daemons function, one of:
 
 .. code:: bash
 
@@ -201,8 +215,8 @@ supported versions or variants should not be made, to avoid failed or broken ins
 
 Supported Operating Systems
 ---------------------------
-- Ubuntu 10.x/11.x/12.x
-- Debian 6.x
+- Ubuntu 10.x/11.x/12.x/13.04
+- Debian 6.x/7(git installs)
 - CentOS 5/6
 - Red Hat 5/6
 - Red Hat Enterprise 5/6

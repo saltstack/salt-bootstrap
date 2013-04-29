@@ -1,3 +1,7 @@
+Version 1.5.5:
+	* Fixed a variable error in the new pressed feature.
+
+
 Version 1.5.4:
 	* Fixed an issue we had when /proc/cpuinfo had more than one CPU. Detected on AMD cpu's.
 	* OpenSUSE 12.3 uses lsb_release. Fix the returned distro name "openSUSE project" to "openSUSE" 

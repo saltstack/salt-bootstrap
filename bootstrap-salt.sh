@@ -2466,7 +2466,7 @@ preseed_master() {
         dst_keyfile="${PKI_DIR}/minions/${keyfile}"
 
         # If it's not a file, skip to the next
-        [ ! -f $keyfile_path ] && continue
+        [ ! -f $src_keyfile ] && continue
 
         movefile "$src_keyfile" "$dst_keyfile" || return 1
         chmod 664 $dst_keyfile || return 1

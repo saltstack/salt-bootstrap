@@ -1,5 +1,6 @@
 Version 1.5.5:
-	* Fixed a variable error in the new pressed feature.
+	* Fixed a variable error in the new pre-seed feature.
+	* Fixed the destination path to where the pre-seed minions keys should be copied.
 
 
 Version 1.5.4:

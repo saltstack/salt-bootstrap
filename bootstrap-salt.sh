@@ -1202,7 +1202,7 @@ install_debian_6_deps() {
             /etc/apt/sources.list.d/backports.list
     fi
 
-    # Saltstack's debian repositoy
+    # Saltstack's Debian repository
     if [ "x$(grep -R 'squeeze-saltstack' /etc/apt)" = "x" ]; then
         echo "deb http://debian.saltstack.com/debian squeeze-saltstack main" >> \
             /etc/apt/sources.list.d/saltstack.list
@@ -1211,6 +1211,9 @@ install_debian_6_deps() {
     fi
 
     if [ $PIP_ALLOWED -eq $BS_TRUE ]; then
+        echowarn "PyZMQ will be installed from PyPi in order to compile it against ZMQ3"
+        echowarn "This is required for long term stable minion connections to the master."
+
         if [ ! -f /etc/apt/sources.list.d/debian-experimental.list ]; then
            cat <<_eof > /etc/apt/sources.list.d/debian-experimental.list
 deb http://ftp.debian.org/debian experimental main
@@ -1239,17 +1242,25 @@ _eof
 }
 
 install_debian_7_deps() {
-    check_pip_allowed
-    echowarn "PyZMQ will be installed from PyPi in order to compile it against ZMQ3"
-    echowarn "This is required for long term stable minion connections to the master."
+    # Saltstack's Debian repository
+    if [ "x$(grep -R 'wheezy-saltstack' /etc/apt)" = "x" ]; then
+        echo "deb http://debian.saltstack.com/debian wheezy-saltstack main" >> \
+            /etc/apt/sources.list.d/saltstack.list
 
-    if [ ! -f /etc/apt/sources.list.d/debian-experimental.list ]; then
-        cat <<_eof > /etc/apt/sources.list.d/debian-experimental.list
+        wget -q http://debian.saltstack.com/debian-salt-team-joehealy.gpg.key -O - | apt-key add - || return 1
+    fi
+
+    if [ $PIP_ALLOWED -eq $BS_TRUE ]; then
+        echowarn "PyZMQ will be installed from PyPi in order to compile it against ZMQ3"
+        echowarn "This is required for long term stable minion connections to the master."
+
+        if [ ! -f /etc/apt/sources.list.d/debian-experimental.list ]; then
+           cat <<_eof > /etc/apt/sources.list.d/debian-experimental.list
 deb http://ftp.debian.org/debian experimental main
 deb-src http://ftp.debian.org/debian experimental main
 _eof
 
-        cat <<_eof > /etc/apt/preferences.d/libzmq3-debian-experimental.pref
+           cat <<_eof > /etc/apt/preferences.d/libzmq3-debian-experimental.pref
 Package: libzmq3
 Pin: release a=experimental
 Pin-Priority: 800
@@ -1258,19 +1269,19 @@ Package: libzmq3-dev
 Pin: release a=experimental
 Pin-Priority: 800
 _eof
-    fi
+       fi
 
-    apt-get update
-    __apt_get_noinput -t experimental libzmq3 libzmq3-dev || return 1
-    __apt_get_noinput build-essential python-dev python-pip || return 1
+       apt-get update
+
+       __apt_get_noinput -t experimental libzmq3 libzmq3-dev || return 1
+       __apt_get_noinput build-essential python-dev python-pip || return 1
+    else
+        apt-get update
+    fi
     return 0
 }
 
 install_debian_git_deps() {
-    check_pip_allowed
-    echowarn "PyZMQ will be installed from PyPi in order to compile it against ZMQ3"
-    echowarn "This is required for long term stable minion connections to the master."
-
     # No user interaction, libc6 restart services for example
     export DEBIAN_FRONTEND=noninteractive
 
@@ -1278,6 +1289,14 @@ install_debian_git_deps() {
     __apt_get_noinput lsb-release python python-pkg-resources python-crypto \
         python-jinja2 python-m2crypto python-yaml msgpack-python python-pip \
         git || return 1
+
+    if [ $PIP_ALLOWED -eq $BS_TRUE ]; then
+        echowarn "PyZMQ will be installed from PyPi in order to compile it against ZMQ3"
+        echowarn "This is required for long term stable minion connections to the master."
+
+        __apt_get_noinput -t experimental libzmq3 libzmq3-dev || return 1
+        __apt_get_noinput build-essential python-dev python-pip || return 1
+    fi
 
     __git_clone_and_checkout || return 1
 
@@ -1318,6 +1337,8 @@ __install_debian_stable() {
     if [ $PIP_ALLOWED -eq $BS_TRUE ]; then
         # Building pyzmq from source to build it against libzmq3.
         # Should override current installation
+        # Using easy_install instead of pip because at least on Debian 6,
+        # there's no default virtualenv active.
         easy_install -U pyzmq || return 1
     fi
 
@@ -1331,12 +1352,15 @@ install_debian_6_stable() {
 }
 
 install_debian_git() {
-    python setup.py install --install-layout=deb || return 1
+    if [ $PIP_ALLOWED -eq $BS_TRUE ]; then
+        # Building pyzmq from source to build it against libzmq3.
+        # Should override current installation
+        # Using easy_install instead of pip because at least on Debian 6,
+        # there's no default virtualenv active.
+        easy_install -U pyzmq || return 1
+    fi
 
-    # Building pyzmq from source to build it against libzmq3.
-    # Should override current installation
-    pip install -U pyzmq || return 1
-    return 0
+    python setup.py install --install-layout=deb || return 1
 }
 
 install_debian_6_git() {

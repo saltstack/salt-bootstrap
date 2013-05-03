@@ -1194,10 +1194,6 @@ install_debian_deps() {
 }
 
 install_debian_6_deps() {
-    check_pip_allowed
-    echowarn "PyZMQ will be installed from PyPi in order to compile it against ZMQ3"
-    echowarn "This is required for long term stable minion connections to the master."
-
     # No user interaction, libc6 restart services for example
     export DEBIAN_FRONTEND=noninteractive
 
@@ -1206,30 +1202,22 @@ install_debian_6_deps() {
             /etc/apt/sources.list.d/backports.list
     fi
 
-    if [ ! -f /etc/apt/preferences.d/local-salt-backport.pref ]; then
-        # Add madduck's repo since squeeze packages have been deprecated
-        for fname in salt-common salt-master salt-minion salt-syndic salt-doc; do
-            echo "Package: $fname"
-            echo "Pin: release a=squeeze-backports"
-            echo "Pin-Priority: 600"
-            echo
-        done > /etc/apt/preferences.d/local-salt-backport.pref
+    # Saltstack's debian repositoy
+    if [ "x$(grep -R 'squeeze-saltstack' /etc/apt)" = "x" ]; then
+        echo "deb http://debian.saltstack.com/debian squeeze-saltstack main" >> \
+            /etc/apt/sources.list.d/saltstack.list
 
-        cat <<_eof > /etc/apt/sources.list.d/local-madduck-backports.list
-deb http://debian.madduck.net/repo squeeze-backports main
-deb-src http://debian.madduck.net/repo squeeze-backports main
-_eof
-
-        wget -q http://debian.madduck.net/repo/gpg/archive.key -O - | apt-key add - || return 1
+        wget -q http://debian.saltstack.com/debian-salt-team-joehealy.gpg.key -O - | apt-key add - || return 1
     fi
 
-    if [ ! -f /etc/apt/sources.list.d/debian-experimental.list ]; then
-        cat <<_eof > /etc/apt/sources.list.d/debian-experimental.list
+    if [ $PIP_ALLOWED -eq $BS_TRUE ]; then
+        if [ ! -f /etc/apt/sources.list.d/debian-experimental.list ]; then
+           cat <<_eof > /etc/apt/sources.list.d/debian-experimental.list
 deb http://ftp.debian.org/debian experimental main
 deb-src http://ftp.debian.org/debian experimental main
 _eof
 
-        cat <<_eof > /etc/apt/preferences.d/libzmq3-debian-experimental.pref
+           cat <<_eof > /etc/apt/preferences.d/libzmq3-debian-experimental.pref
 Package: libzmq3
 Pin: release a=experimental
 Pin-Priority: 800
@@ -1238,11 +1226,15 @@ Package: libzmq3-dev
 Pin: release a=experimental
 Pin-Priority: 800
 _eof
-    fi
+       fi
 
-    apt-get update
-    __apt_get_noinput -t experimental libzmq3 libzmq3-dev || return 1
-    __apt_get_noinput build-essential python-dev python-pip || return 1
+       apt-get update
+
+       __apt_get_noinput -t experimental libzmq3 libzmq3-dev || return 1
+       __apt_get_noinput build-essential python-dev python-pip || return 1
+    else
+        apt-get update
+    fi
     return 0
 }
 
@@ -1311,7 +1303,6 @@ install_debian_7_git_deps() {
 }
 
 __install_debian_stable() {
-    check_pip_allowed
     packages=""
     if [ $INSTALL_MINION -eq $BS_TRUE ]; then
         packages="${packages} salt-minion"
@@ -1324,9 +1315,11 @@ __install_debian_stable() {
     fi
     __apt_get_noinput ${packages} || return 1
 
-    # Building pyzmq from source to build it against libzmq3.
-    # Should override current installation
-    pip install -U pyzmq || return 1
+    if [ $PIP_ALLOWED -eq $BS_TRUE ]; then
+        # Building pyzmq from source to build it against libzmq3.
+        # Should override current installation
+        easy_install -U pyzmq || return 1
+    fi
 
     return 0
 }

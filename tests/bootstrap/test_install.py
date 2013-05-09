@@ -76,13 +76,13 @@ OS_REQUIRES_PIP_ALLOWED = (
     # Some distributions can only install salt or some of its dependencies
     # passing -P to the bootstrap script.
     # The GRAINS['os'] which are in this list, requires that extra argument.
-    'Debian',
     'SmartOS',
     'Suse'  # Need to revisit openSUSE and SLES for the proper OS grain.
 )
 
 # SLES grains differ from openSUSE, let do a 1:1 direct mapping
-CLEANUP_COMMANDS_BY_OS_FAMILY['SUSE  Enterprise Server'] = CLEANUP_COMMANDS_BY_OS_FAMILY['Suse']
+CLEANUP_COMMANDS_BY_OS_FAMILY['SUSE  Enterprise Server'] = \
+    CLEANUP_COMMANDS_BY_OS_FAMILY['Suse']
 
 
 class InstallationTestCase(BootstrapTestCase):

@@ -32,6 +32,7 @@ except ImportError:
 
 
 TEST_DIR = os.path.abspath(os.path.dirname(__file__))
+TEST_RESULTS = []
 XML_OUTPUT_DIR = os.environ.get(
     'XML_TEST_REPORTS', os.path.join(TEST_DIR, 'xml-test-reports')
 )
@@ -84,6 +85,7 @@ def run_suite(opts, path, display_name, suffix='[!_]*.py'):
         runner = TextTestRunner(
             verbosity=opts.verbosity
         ).run(tests)
+        TEST_RESULTS.append((header, runner))
     return runner.wasSuccessful()
 
 
@@ -196,6 +198,65 @@ def main():
     if options.install:
         status = run_integration_suite(options, 'Installation', "*install.py")
         overall_status.append(status)
+
+    print
+    print_header(
+        u'  Overall Tests Report  ', sep=u'=', centered=True, inline=True
+    )
+
+    no_problems_found = True
+    for (name, results) in TEST_RESULTS:
+        if not results.failures and not results.errors and not results.skipped:
+            continue
+
+        no_problems_found = False
+
+        print_header(u'*** {0}  '.format(name), sep=u'*', inline=True)
+        if results.skipped:
+            print_header(u' --------  Skipped Tests  ', sep='-', inline=True)
+            maxlen = len(
+                max([tc.id() for (tc, reason) in results.skipped], key=len)
+            )
+            fmt = u'   -> {0: <{maxlen}}  ->  {1}'
+            for tc, reason in results.skipped:
+                print(fmt.format(tc.id(), reason, maxlen=maxlen))
+            print_header(u' ', sep='-', inline=True)
+
+        if results.errors:
+            print_header(
+                u' --------  Tests with Errors  ', sep='-', inline=True
+            )
+            for tc, reason in results.errors:
+                print_header(
+                    u'   -> {0}  '.format(tc.id()), sep=u'.', inline=True
+                )
+                for line in reason.rstrip().splitlines():
+                    print('       {0}'.format(line.rstrip()))
+                print_header(u'   ', sep=u'.', inline=True)
+            print_header(u' ', sep='-', inline=True)
+
+        if results.failures:
+            print_header(u' --------  Failed Tests  ', sep='-', inline=True)
+            for tc, reason in results.failures:
+                print_header(
+                    u'   -> {0}  '.format(tc.id()), sep=u'.', inline=True
+                )
+                for line in reason.rstrip().splitlines():
+                    print('       {0}'.format(line.rstrip()))
+                print_header(u'   ', sep=u'.', inline=True)
+            print_header(u' ', sep='-', inline=True)
+
+        print_header(u'', sep=u'*', inline=True)
+
+    if no_problems_found:
+        print_header(
+            u'***  No Problems Found While Running Tests  ',
+            sep=u'*', inline=True
+        )
+
+    print_header(
+        '  Overall Tests Report  ', sep='=', centered=True, inline=True
+    )
 
     if overall_status.count(False) > 0:
         # We have some false results, the test-suite failed

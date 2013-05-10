@@ -71,9 +71,8 @@ def run_suite(opts, path, display_name, suffix='[!_]*.py'):
     else:
         tests = loader.discover(path, suffix, TEST_DIR)
 
-    if not opts.subunit_out:
-        header = '{0} Tests'.format(display_name)
-        print_header('Starting {0}'.format(header))
+    header = '{0} Tests'.format(display_name)
+    print_header('Starting {0}'.format(header))
 
     if opts.xmlout:
         if not os.path.isdir(XML_OUTPUT_DIR):
@@ -82,12 +81,6 @@ def run_suite(opts, path, display_name, suffix='[!_]*.py'):
             output=XML_OUTPUT_DIR,
             verbosity=opts.verbosity
         ).run(tests)
-    elif opts.subunit_out:
-        from subunit.run import SubunitTestRunner
-        runner = SubunitTestRunner(
-            verbosity=opts.verbosity
-        ).run(tests)
-        #TEST_RESULTS.append((header, runner))
     else:
         runner = TextTestRunner(
             verbosity=opts.verbosity
@@ -158,12 +151,6 @@ def main():
         )
     )
     output_options_group.add_option(
-        '--subunit-out',
-        default=False,
-        action='store_true',
-        help='Subunit test runner output'
-    )
-    output_options_group.add_option(
         '--no-clean',
         default=False,
         action='store_true',
@@ -193,9 +180,8 @@ def main():
     if not options.no_clean and os.path.isdir(XML_OUTPUT_DIR):
         shutil.rmtree(XML_OUTPUT_DIR)
 
-    if not options.subunit_out:
-        print 'Detected system grains:'
-        pprint.pprint(GRAINS)
+    print 'Detected system grains:'
+    pprint.pprint(GRAINS)
 
     overall_status = []
 
@@ -212,12 +198,6 @@ def main():
     if options.install:
         status = run_integration_suite(options, 'Installation', "*install.py")
         overall_status.append(status)
-
-    if options.subunit_out:
-        if overall_status.count(False) > 0:
-            # We have some false results, the test-suite failed
-            parser.exit(1)
-        parser.exit(0)
 
     print
     print_header(

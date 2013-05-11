@@ -15,6 +15,7 @@ import os
 import pprint
 import shutil
 import optparse
+import tempfile
 
 from bootstrap.unittesting import TestLoader, TextTestRunner
 from bootstrap.ext.os_data import GRAINS
@@ -34,7 +35,9 @@ except ImportError:
 TEST_DIR = os.path.abspath(os.path.dirname(__file__))
 TEST_RESULTS = []
 XML_OUTPUT_DIR = os.environ.get(
-    'XML_TEST_REPORTS', os.path.join(TEST_DIR, 'xml-test-reports')
+    'XML_TEST_REPORTS', os.path.join(
+        tempfile.gettempdir(), 'xml-test-reports'
+    )
 )
 
 

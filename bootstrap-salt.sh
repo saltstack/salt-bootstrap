@@ -1802,6 +1802,7 @@ install_amazon_linux_ami_git_post() {
 install_arch_linux_stable_deps() {
     grep '\[salt\]' /etc/pacman.conf >/dev/null 2>&1 || echo '[salt]
 Server = http://intothesaltmine.org/archlinux
+SigLevel = Optional TrustAll
 ' >> /etc/pacman.conf
 }
 

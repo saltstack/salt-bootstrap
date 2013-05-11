@@ -963,7 +963,7 @@ install_ubuntu_deps() {
 }
 
 install_ubuntu_daily_deps() {
-    apt-get update
+    install_ubuntu_deps
     if [ $DISTRO_MAJOR_VERSION -eq 12 ] && [ $DISTRO_MINOR_VERSION -gt 04 ] || [ $DISTRO_MAJOR_VERSION -gt 12 ]; then
         # Above Ubuntu 12.04 add-apt-repository is in a different package
         __apt_get_noinput software-properties-common || return 1

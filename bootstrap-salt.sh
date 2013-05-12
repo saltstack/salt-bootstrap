@@ -1221,6 +1221,15 @@ deb-src http://ftp.debian.org/debian unstable main
 _eof
 
            cat <<_eof > /etc/apt/preferences.d/libzmq3-debian-unstable.pref
+# Don't pull packages from unstable besides libzmq3 and libzmq3-dev.
+# Leave priority at 50 because the backports priority is 100 and the
+# unstable msgpack-python superseeds the backport's msgpack-python which
+# pulls lot's of unstable packages.
+
+Package: *
+Pin: release a=unstable
+Pin-Priority: 50
+
 Package: libzmq3
 Pin: release a=unstable
 Pin-Priority: 800
@@ -1237,6 +1246,7 @@ _eof
        __apt_get_noinput build-essential python-dev python-pip || return 1
     else
         apt-get update
+        __apt_get_noinput python-zmq
     fi
     return 0
 }
@@ -1261,6 +1271,15 @@ deb-src http://ftp.debian.org/debian unstable main
 _eof
 
            cat <<_eof > /etc/apt/preferences.d/libzmq3-debian-unstable.pref
+# Don't pull packages from unstable besides libzmq3 and libzmq3-dev.
+# Leave priority at 50 because the backports priority is 100 and the
+# unstable msgpack-python superseeds the backport's msgpack-python which
+# pulls lot's of unstable packages.
+
+Package: *
+Pin: release a=unstable
+Pin-Priority: 50
+
 Package: libzmq3
 Pin: release a=unstable
 Pin-Priority: 800
@@ -1277,6 +1296,7 @@ _eof
        __apt_get_noinput build-essential python-dev python-pip || return 1
     else
         apt-get update
+        __apt_get_noinput python-zmq
     fi
     return 0
 }
@@ -1296,6 +1316,8 @@ install_debian_git_deps() {
 
         __apt_get_noinput -t unstable libzmq3 libzmq3-dev || return 1
         __apt_get_noinput build-essential python-dev python-pip || return 1
+    else
+        __apt_get_noinput python-zmq
     fi
 
     __git_clone_and_checkout || return 1

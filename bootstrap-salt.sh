@@ -1237,6 +1237,7 @@ _eof
        __apt_get_noinput build-essential python-dev python-pip || return 1
     else
         apt-get update
+        __apt_get_noinput python-zmq
     fi
     return 0
 }
@@ -1277,6 +1278,7 @@ _eof
        __apt_get_noinput build-essential python-dev python-pip || return 1
     else
         apt-get update
+        __apt_get_noinput python-zmq
     fi
     return 0
 }
@@ -1296,6 +1298,8 @@ install_debian_git_deps() {
 
         __apt_get_noinput -t unstable libzmq3 libzmq3-dev || return 1
         __apt_get_noinput build-essential python-dev python-pip || return 1
+    else
+        __apt_get_noinput python-zmq
     fi
 
     __git_clone_and_checkout || return 1

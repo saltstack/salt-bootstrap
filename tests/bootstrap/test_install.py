@@ -130,7 +130,7 @@ class InstallationTestCase(BootstrapTestCase):
             )
 
         # As a last resort, by hand house cleaning...
-        for glob_rule in ('/tmp/git', '/usr/lib*/python*/site-packages/salt*',
+        for glob_rule in ('/tmp/git', '/usr/lib*/python*/*-packages/salt*',
                           '/usr/bin/salt*', '/usr/lib/systemd/system/salt*',
                           '/etc/init*/salt*', '/usr/share/doc/salt*',
                           '/usr/share/man/man*/salt*', '/var/*/salt*',

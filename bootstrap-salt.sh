@@ -2079,11 +2079,11 @@ install_smartos_deps() {
         CONFIG_SALT_FUNC="config_salt"
 
         # Let's download, since they were not provided, the default configuration files
-        if [ ! -f /etc/salt/minion ] && [ ! -f $TEMP_CONFIG_DIR/minion ]; then
+        if [ ! -f $SALT_ETC_DIR/minion ] && [ ! -f $TEMP_CONFIG_DIR/minion ]; then
             curl -sk -o $TEMP_CONFIG_DIR/minion -L \
                 https://raw.github.com/saltstack/salt/develop/conf/minion || return 1
         fi
-        if [ ! -f /etc/salt/master ] && [ ! -f $TEMP_CONFIG_DIR/master ]; then
+        if [ ! -f $SALT_ETC_DIR/master ] && [ ! -f $TEMP_CONFIG_DIR/master ]; then
             curl -sk -o $TEMP_CONFIG_DIR/master -L \
                 https://raw.github.com/saltstack/salt/develop/conf/master || return 1
         fi
@@ -2335,7 +2335,7 @@ install_suse_11_stable_deps() {
                 [ $fname = "syndic" ] && fname=master
 
                 # Let's download, since they were not provided, the default configuration files
-                if [ ! -f /etc/salt/$fname ] && [ ! -f $TEMP_CONFIG_DIR/$fname ]; then
+                if [ ! -f $SALT_ETC_DIR/$fname ] && [ ! -f $TEMP_CONFIG_DIR/$fname ]; then
                     curl -sk -o $TEMP_CONFIG_DIR/$fname -L \
                         https://raw.github.com/saltstack/salt/develop/conf/$fname || return 1
                 fi
@@ -2439,7 +2439,7 @@ config_salt() {
 
         # Copy the minions configuration if found
         if [ -f "$TEMP_CONFIG_DIR/minion" ]; then
-            mv "$TEMP_CONFIG_DIR/minion" /etc/salt || return 1
+            mv "$TEMP_CONFIG_DIR/minion" $SALT_ETC_DIR || return 1
             CONFIGURED_ANYTHING=$BS_TRUE
         fi
 
@@ -2463,7 +2463,7 @@ config_salt() {
 
         # Copy the masters configuration if found
         if [ -f "$TEMP_CONFIG_DIR/master" ]; then
-            mv "$TEMP_CONFIG_DIR/master" /etc/salt || return 1
+            mv "$TEMP_CONFIG_DIR/master" $SALT_ETC_DIR || return 1
             CONFIGURED_ANYTHING=$BS_TRUE
         fi
 

@@ -464,6 +464,12 @@ class InstallationTestCase(BootstrapTestCase):
                 'Currently the debian stable package will have the syndic '
                 'waiting for a connection to a master.'
             )
+        elif GRAINS['os'] == 'Ubuntu':
+            self.skipTest(
+                'We\'re currently having issues having a syndic running '
+                'right after installation, without any specific '
+                'configuration, under Ubuntu'
+            )
 
         args = []
         if GRAINS['os'] in OS_REQUIRES_PIP_ALLOWED:

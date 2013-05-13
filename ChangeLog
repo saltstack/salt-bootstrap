@@ -6,6 +6,7 @@ Version 1.5.5:
 		* Debian's optional ZMQ3 support was fixed (libzmq3 has moved from experimental to 
 		unstable).
 		* Ubuntu Lucid Daily PPA
+		* SmartOS no longer ignores $SALT_ETC_DIR
 
 
 Version 1.5.4:

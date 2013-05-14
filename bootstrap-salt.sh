@@ -639,6 +639,13 @@ __gather_sunos_system_info() {
                 -e 's;^5\.\([0-9][0-9]*\).*;\1;'
         )
     fi
+
+    if [ "${DISTRO_NAME}" = "SmartOS" ]; then
+        VIRTUAL_TYPE="smartmachine"
+        if [ "$(zonename)" = "global" ]; then
+            VIRTUAL_TYPE="global"
+        fi
+    fi
 }
 
 
@@ -2119,24 +2126,54 @@ install_smartos_git() {
 }
 
 install_smartos_post() {
+    smf_dir="/opt/custom/smf"
     # Install manifest files if needed.
     for fname in minion master syndic; do
+
+        # Skip if not meant to be installed
+        [ $fname = "minion" ] && [ $INSTALL_MINION -eq $BS_FALSE ] && continue
+        [ $fname = "master" ] && [ $INSTALL_MASTER -eq $BS_FALSE ] && continue
+        [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq $BS_FALSE ] && continue
+
         svcs network/salt-$fname > /dev/null 2>&1
         if [ $? -eq 1 ]; then
             if [ ! -f $TEMP_CONFIG_DIR/salt-$fname.xml ]; then
-                curl -sk -o $TEMP_CONFIG_DIR/salt-$fname.xml -L https://raw.github.com/saltstack/salt/develop/pkg/solaris/salt-$fname.xml
+                curl -sk -o $TEMP_CONFIG_DIR/salt-$fname.xml -L https://raw.github.com/saltstack/salt/develop/pkg/smartos/salt-$fname.xml
             fi
             svccfg import $TEMP_CONFIG_DIR/salt-$fname.xml
+            if [ "${VIRTUAL_TYPE}" = "global" ]; then
+                if [ ! -d $smf_dir ]; then
+                    mkdir -p $smf_dir && cp $TEMP_CONFIG_DIR/salt-$fname.xml $smf_dir/
+                fi
+                if [ ! -f $smf_dir/salt-$fname.xml ]; then
+                    cp $TEMP_CONFIG_DIR/salt-$fname.xml $smf_dir/
+                fi
+            fi
         fi
     done
 }
 
 install_smartos_git_post() {
+    smf_dir="/opt/custom/smf"
     # Install manifest files if needed.
     for fname in minion master syndic; do
+
+        # Skip if not meant to be installed
+        [ $fname = "minion" ] && [ $INSTALL_MINION -eq $BS_FALSE ] && continue
+        [ $fname = "master" ] && [ $INSTALL_MASTER -eq $BS_FALSE ] && continue
+        [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq $BS_FALSE ] && continue
+
         svcs network/salt-$fname > /dev/null 2>&1
         if [ $? -eq 1 ]; then
-            svccfg import ${SALT_GIT_CHECKOUT_DIR}/pkg/solaris/salt-$fname.xml
+            svccfg import ${SALT_GIT_CHECKOUT_DIR}/pkg/smartos/salt-$fname.xml
+            if [ "${VIRTUAL_TYPE}" = "global" ]; then
+                if [ ! -d $smf_dir ]; then
+                    mkdir -p $smf_dir && cp ${SALT_GIT_CHECKOUT_DIR}/pkg/smartos/salt-$fname.xml $smf_dir/
+                fi
+                if [ ! -f $smf_dir/salt-$fname.xml ]; then
+                    cp ${SALT_GIT_CHECKOUT_DIR}/pkg/smartos/salt-$fname.xml $smf_dir/
+                fi
+            fi
         fi
     done
 }

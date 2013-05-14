@@ -2540,7 +2540,12 @@ daemons_running() {
         [ $fname = "master" ] && [ $INSTALL_MASTER -eq $BS_FALSE ] && continue
         [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq $BS_FALSE ] && continue
 
-        if [ "x$(ps aux | grep -v grep | grep salt-$fname)" = "x" ]; then
+        if [ ${DISTRO_NAME} == "SmartOS" ]; then
+            if [[ $(svcs -Ho STA salt-$fname) != "ON" ]]; then
+                echoerror "salt-$fname was not found running"
+                FAILED_DAEMONS=$(expr $FAILED_DAEMONS + 1)
+            fi
+        elif [ "x$(ps aux | grep -v grep | grep salt-$fname)" = "x" ]; then
             echoerror "salt-$fname was not found running"
             FAILED_DAEMONS=$(expr $FAILED_DAEMONS + 1)
         fi

@@ -154,6 +154,65 @@ usage() {
 EOT
 }   # ----------  end of function usage  ----------
 
+#===  FUNCTION  ================================================================
+#         NAME:  __fetch_url
+#  DESCRIPTION:  Retrieves a URL and writes it to a given path
+#===============================================================================
+__fetch_url() {
+    curl --insecure -s -o "$1" "$2" >/dev/null 2>&1 ||
+        wget --no-check-certificate -q -O "$1" "$2" >/dev/null 2>&1 ||
+            fetch -q -o "$1" "$2" >/dev/null 2>&1
+}
+
+#===  FUNCTION  ================================================================
+#         NAME:  __check_config_dir
+#  DESCRIPTION:  Checks the config directory, retrieves URLs if provided.
+#===============================================================================
+__check_config_dir() {
+    CC_DIR_NAME="$1"
+    CC_DIR_BASE=$(basename "${CC_DIR_NAME}")
+
+    case "$CC_DIR_NAME" in
+        http://*|https://*)
+            __fetch_url "/tmp/${CC_DIR_BASE}" "${CC_DIR_NAME}"
+            CC_DIR_NAME="/tmp/${CC_DIR_BASE}"
+            ;;
+        ftp://*)
+            __fetch_url "/tmp/${CC_DIR_BASE}" "${CC_DIR_NAME}"
+            CC_DIR_NAME="/tmp/${CC_DIR_BASE}"
+            ;;
+        *)
+            if [ ! -e "${CC_DIR_NAME}" ]; then
+                echo "null"
+                return 0
+            fi
+            ;;
+    esac
+
+    case "$CC_DIR_NAME" in
+        *.tgz|*.tar.gz)
+            tar -zxf "${CC_DIR_NAME}" -C /tmp
+            CC_DIR_BASE=$(basename ${CC_DIR_BASE} ".tgz")
+            CC_DIR_BASE=$(basename ${CC_DIR_BASE} ".tar.gz")
+            CC_DIR_NAME="/tmp/${CC_DIR_BASE}"
+            ;;
+        *.tbz|*.tar.bz2)
+            tar -xjf "${CC_DIR_NAME}" -C /tmp
+            CC_DIR_BASE=$(basename ${CC_DIR_BASE} ".tbz")
+            CC_DIR_BASE=$(basename ${CC_DIR_BASE} ".tar.bz2")
+            CC_DIR_NAME="/tmp/${CC_DIR_BASE}"
+            ;;
+        *.txz|*.tar.xz)
+            tar -xJf "${CC_DIR_NAME}" -C /tmp
+            CC_DIR_BASE=$(basename ${CC_DIR_BASE} ".txz")
+            CC_DIR_BASE=$(basename ${CC_DIR_BASE} ".tar.xz")
+            CC_DIR_NAME="/tmp/${CC_DIR_BASE}"
+            ;;
+    esac
+
+    echo "${CC_DIR_NAME}"
+}
+
 #-----------------------------------------------------------------------
 #  Handle command line arguments
 #-----------------------------------------------------------------------
@@ -177,8 +236,12 @@ do
     v )  echo "$0 -- Version $ScriptVersion"; exit 0    ;;
     n )  COLORS=0; __detect_color_support               ;;
     D )  ECHO_DEBUG=$BS_TRUE                            ;;
-    c )  TEMP_CONFIG_DIR="$OPTARG"
+    c )  TEMP_CONFIG_DIR=$(__check_config_dir "$OPTARG")
          # If the configuration directory does not exist, error out
+         if [ "$TEMP_CONFIG_DIR" = "null" ]; then
+             echoerror "Unsupported URI scheme for $OPTARG"
+             exit 1
+         fi
          if [ ! -d "$TEMP_CONFIG_DIR" ]; then
              echoerror "The configuration directory ${TEMP_CONFIG_DIR} does not exist."
              exit 1

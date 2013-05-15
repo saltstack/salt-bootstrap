@@ -1976,6 +1976,12 @@ install_freebsd_9_stable_deps() {
     echo "PACKAGESITE: ${BS_PACKAGESITE}" > /usr/local/etc/pkg.conf
 
     /usr/local/sbin/pkg install -y swig || return 1
+
+    # Lets set SALT_ETC_DIR to ports default
+    if [ "$TEMP_CONFIG_DIR" != "null" ]; then
+        SALT_ETC_DIR="/usr/local/${SALT_ETC_DIR}"
+    fi
+
     return 0
 }
 

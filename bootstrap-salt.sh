@@ -1204,22 +1204,14 @@ install_debian_6_deps() {
     # No user interaction, libc6 restart services for example
     export DEBIAN_FRONTEND=noninteractive
 
-    if [ "x$(grep -R 'backports.debian.org' /etc/apt)" = "x" ]; then
-        echo "deb http://backports.debian.org/debian-backports squeeze-backports main" >> \
-            /etc/apt/sources.list.d/backports.list
-    fi
-
-    # Saltstack's Debian repository
-    if [ "x$(grep -R 'squeeze-saltstack' /etc/apt)" = "x" ]; then
-        echo "deb http://debian.saltstack.com/debian squeeze-saltstack main" >> \
-            /etc/apt/sources.list.d/saltstack.list
-
-        wget -q http://debian.saltstack.com/debian-salt-team-joehealy.gpg.key -O - | apt-key add - || return 1
-    fi
+    wget -q http://debian.saltstack.com/debian-salt-team-joehealy.gpg.key -O - | apt-key add - || return 1
 
     if [ $PIP_ALLOWED -eq $BS_TRUE ]; then
         echowarn "PyZMQ will be installed from PyPi in order to compile it against ZMQ3"
         echowarn "This is required for long term stable minion connections to the master."
+        echowarn "YOU WILL END UP WILL QUITE A FEW PACKAGES FROM DEBIAN UNSTABLE"
+        echowarn "Sleeping for 3 seconds so you can cancel..."
+        sleep 3
 
         if [ ! -f /etc/apt/sources.list.d/debian-unstable.list ]; then
            cat <<_eof > /etc/apt/sources.list.d/debian-unstable.list
@@ -1228,15 +1220,6 @@ deb-src http://ftp.debian.org/debian unstable main
 _eof
 
            cat <<_eof > /etc/apt/preferences.d/libzmq3-debian-unstable.pref
-# Don't pull packages from unstable besides libzmq3 and libzmq3-dev.
-# Leave priority at 50 because the backports priority is 100 and the
-# unstable msgpack-python superseeds the backport's msgpack-python which
-# pulls lot's of unstable packages.
-
-Package: *
-Pin: release a=unstable
-Pin-Priority: 50
-
 Package: libzmq3
 Pin: release a=unstable
 Pin-Priority: 800
@@ -1245,16 +1228,35 @@ Package: libzmq3-dev
 Pin: release a=unstable
 Pin-Priority: 800
 _eof
-       fi
+        fi
 
-       apt-get update
-
-       __apt_get_noinput -t unstable libzmq3 libzmq3-dev || return 1
-       __apt_get_noinput build-essential python-dev python-pip || return 1
-    else
         apt-get update
-        __apt_get_noinput python-zmq
+        # We NEED to install the unstable dpkg or mime-support WILL fail to install
+        __apt_get_noinput -t unstable dpkg liblzma5 python mime-support || return 1
+        __apt_get_noinput -t unstable libzmq3 libzmq3-dev || return 1
+        __apt_get_noinput build-essential python-dev python-pip || return 1
+
+        # Saltstack's Unstable Debian repository
+        if [ "x$(grep -R 'debian.saltstack.com' /etc/apt)" = "x" ]; then
+            echo "deb http://debian.saltstack.com/debian unstable main" >> \
+                /etc/apt/sources.list.d/saltstack.list
+        fi
+        return 0
     fi
+
+    # Debian Backports
+    if [ "x$(grep -R 'backports.debian.org' /etc/apt)" = "x" ]; then
+        echo "deb http://backports.debian.org/debian-backports squeeze-backports main" >> \
+            /etc/apt/sources.list.d/backports.list
+    fi
+
+    # Saltstack's Stable Debian repository
+    if [ "x$(grep -R 'squeeze-saltstack' /etc/apt)" = "x" ]; then
+        echo "deb http://debian.saltstack.com/debian squeeze-saltstack main" >> \
+            /etc/apt/sources.list.d/saltstack.list
+    fi
+    apt-get update || return 1
+    __apt_get_noinput python-zmq || return 1
     return 0
 }
 

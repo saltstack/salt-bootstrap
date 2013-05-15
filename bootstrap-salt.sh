@@ -2541,7 +2541,7 @@ daemons_running() {
         [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq $BS_FALSE ] && continue
 
         if [ "${DISTRO_NAME}" = "SmartOS" ]; then
-            if [[ $(svcs -Ho STA salt-$fname) != "ON" ]]; then
+            if [ "$(svcs -Ho STA salt-$fname)" != "ON" ]; then
                 echoerror "salt-$fname was not found running"
                 FAILED_DAEMONS=$(expr $FAILED_DAEMONS + 1)
             fi

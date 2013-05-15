@@ -1204,72 +1204,80 @@ install_debian_6_deps() {
     # No user interaction, libc6 restart services for example
     export DEBIAN_FRONTEND=noninteractive
 
+    wget -q http://debian.saltstack.com/debian-salt-team-joehealy.gpg.key -O - | apt-key add - || return 1
+
+    if [ $PIP_ALLOWED -eq $BS_TRUE ]; then
+        echowarn "PyZMQ will be installed from PyPi in order to compile it against ZMQ3"
+        echowarn "This is required for long term stable minion connections to the master."
+        echowarn "YOU WILL END UP WILL QUITE A FEW PACKAGES FROM DEBIAN UNSTABLE"
+        echowarn "Sleeping for 3 seconds so you can cancel..."
+        sleep 3
+
+        if [ ! -f /etc/apt/sources.list.d/debian-unstable.list ]; then
+           cat <<_eof > /etc/apt/sources.list.d/debian-unstable.list
+deb http://ftp.debian.org/debian unstable main
+deb-src http://ftp.debian.org/debian unstable main
+_eof
+
+           cat <<_eof > /etc/apt/preferences.d/libzmq3-debian-unstable.pref
+Package: libzmq3
+Pin: release a=unstable
+Pin-Priority: 800
+
+Package: libzmq3-dev
+Pin: release a=unstable
+Pin-Priority: 800
+_eof
+        fi
+
+        apt-get update
+        # We NEED to install the unstable dpkg or mime-support WILL fail to install
+        __apt_get_noinput -t unstable dpkg liblzma5 python mime-support || return 1
+        __apt_get_noinput -t unstable libzmq3 libzmq3-dev || return 1
+        __apt_get_noinput build-essential python-dev python-pip || return 1
+
+        # Saltstack's Unstable Debian repository
+        if [ "x$(grep -R 'debian.saltstack.com' /etc/apt)" = "x" ]; then
+            echo "deb http://debian.saltstack.com/debian unstable main" >> \
+                /etc/apt/sources.list.d/saltstack.list
+        fi
+        return 0
+    fi
+
+    # Debian Backports
     if [ "x$(grep -R 'backports.debian.org' /etc/apt)" = "x" ]; then
         echo "deb http://backports.debian.org/debian-backports squeeze-backports main" >> \
             /etc/apt/sources.list.d/backports.list
     fi
 
-    # Saltstack's Debian repository
+    # Saltstack's Stable Debian repository
     if [ "x$(grep -R 'squeeze-saltstack' /etc/apt)" = "x" ]; then
         echo "deb http://debian.saltstack.com/debian squeeze-saltstack main" >> \
             /etc/apt/sources.list.d/saltstack.list
-
-        wget -q http://debian.saltstack.com/debian-salt-team-joehealy.gpg.key -O - | apt-key add - || return 1
     fi
-
-    if [ $PIP_ALLOWED -eq $BS_TRUE ]; then
-        echowarn "PyZMQ will be installed from PyPi in order to compile it against ZMQ3"
-        echowarn "This is required for long term stable minion connections to the master."
-
-        if [ ! -f /etc/apt/sources.list.d/debian-unstable.list ]; then
-           cat <<_eof > /etc/apt/sources.list.d/debian-unstable.list
-deb http://ftp.debian.org/debian unstable main
-deb-src http://ftp.debian.org/debian unstable main
-_eof
-
-           cat <<_eof > /etc/apt/preferences.d/libzmq3-debian-unstable.pref
-# Don't pull packages from unstable besides libzmq3 and libzmq3-dev.
-# Leave priority at 50 because the backports priority is 100 and the
-# unstable msgpack-python superseeds the backport's msgpack-python which
-# pulls lot's of unstable packages.
-
-Package: *
-Pin: release a=unstable
-Pin-Priority: 50
-
-Package: libzmq3
-Pin: release a=unstable
-Pin-Priority: 800
-
-Package: libzmq3-dev
-Pin: release a=unstable
-Pin-Priority: 800
-_eof
-       fi
-
-       apt-get update
-
-       __apt_get_noinput -t unstable libzmq3 libzmq3-dev || return 1
-       __apt_get_noinput build-essential python-dev python-pip || return 1
-    else
-        apt-get update
-        __apt_get_noinput python-zmq
-    fi
+    apt-get update || return 1
+    __apt_get_noinput python-zmq || return 1
     return 0
 }
 
 install_debian_7_deps() {
-    # Saltstack's Debian repository
+    # No user interaction, libc6 restart services for example
+    export DEBIAN_FRONTEND=noninteractive
+
+    # Saltstack's Stable Debian repository
     if [ "x$(grep -R 'wheezy-saltstack' /etc/apt)" = "x" ]; then
         echo "deb http://debian.saltstack.com/debian wheezy-saltstack main" >> \
             /etc/apt/sources.list.d/saltstack.list
-
-        wget -q http://debian.saltstack.com/debian-salt-team-joehealy.gpg.key -O - | apt-key add - || return 1
     fi
+
+    wget -q http://debian.saltstack.com/debian-salt-team-joehealy.gpg.key -O - | apt-key add - || return 1
 
     if [ $PIP_ALLOWED -eq $BS_TRUE ]; then
         echowarn "PyZMQ will be installed from PyPi in order to compile it against ZMQ3"
         echowarn "This is required for long term stable minion connections to the master."
+        echowarn "YOU WILL END UP WILL QUITE A FEW PACKAGES FROM DEBIAN UNSTABLE"
+        echowarn "Sleeping for 3 seconds so you can cancel..."
+        sleep 3
 
         if [ ! -f /etc/apt/sources.list.d/debian-unstable.list ]; then
            cat <<_eof > /etc/apt/sources.list.d/debian-unstable.list
@@ -1278,15 +1286,6 @@ deb-src http://ftp.debian.org/debian unstable main
 _eof
 
            cat <<_eof > /etc/apt/preferences.d/libzmq3-debian-unstable.pref
-# Don't pull packages from unstable besides libzmq3 and libzmq3-dev.
-# Leave priority at 50 because the backports priority is 100 and the
-# unstable msgpack-python superseeds the backport's msgpack-python which
-# pulls lot's of unstable packages.
-
-Package: *
-Pin: release a=unstable
-Pin-Priority: 50
-
 Package: libzmq3
 Pin: release a=unstable
 Pin-Priority: 800
@@ -1295,15 +1294,14 @@ Package: libzmq3-dev
 Pin: release a=unstable
 Pin-Priority: 800
 _eof
-       fi
+        fi
 
-       apt-get update
-
-       __apt_get_noinput -t unstable libzmq3 libzmq3-dev || return 1
-       __apt_get_noinput build-essential python-dev python-pip || return 1
-    else
         apt-get update
-        __apt_get_noinput python-zmq
+        __apt_get_noinput -t unstable libzmq3 libzmq3-dev || return 1
+        __apt_get_noinput build-essential python-dev python-pip || return 1
+    else
+        apt-get update || return 1
+        __apt_get_noinput python-zmq || return 1
     fi
     return 0
 }
@@ -1317,16 +1315,6 @@ install_debian_git_deps() {
         python-jinja2 python-m2crypto python-yaml msgpack-python python-pip \
         git || return 1
 
-    if [ $PIP_ALLOWED -eq $BS_TRUE ]; then
-        echowarn "PyZMQ will be installed from PyPi in order to compile it against ZMQ3"
-        echowarn "This is required for long term stable minion connections to the master."
-
-        __apt_get_noinput -t unstable libzmq3 libzmq3-dev || return 1
-        __apt_get_noinput build-essential python-dev python-pip || return 1
-    else
-        __apt_get_noinput python-zmq
-    fi
-
     __git_clone_and_checkout || return 1
 
     # Let's trigger config_salt()
@@ -1339,13 +1327,13 @@ install_debian_git_deps() {
 }
 
 install_debian_6_git_deps() {
-    install_debian_6_deps || return 1    # Add backports
+    install_debian_6_deps || return 1
     install_debian_git_deps || return 1  # Grab the actual deps
     return 0
 }
 
 install_debian_7_git_deps() {
-    install_debian_7_deps || return 1    # Add unstable repository for ZMQ3
+    install_debian_7_deps || return 1
     install_debian_git_deps || return 1  # Grab the actual deps
     return 0
 }
@@ -1376,6 +1364,11 @@ __install_debian_stable() {
 
 
 install_debian_6_stable() {
+    __install_debian_stable || return 1
+    return 0
+}
+
+install_debian_7_stable() {
     __install_debian_stable || return 1
     return 0
 }

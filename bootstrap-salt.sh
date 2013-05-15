@@ -163,7 +163,7 @@ __check_config_dir() {
     CC_DIR_BASE=$(basename "${CC_DIR_NAME}")
 
     case "$CC_DIR_NAME" in
-        http://*)
+        http://*|https://*)
             fetch -q -o "/tmp/${CC_DIR_BASE}" "${CC_DIR_NAME}"
             CC_DIR_NAME="/tmp/${CC_DIR_BASE}"
             ;;

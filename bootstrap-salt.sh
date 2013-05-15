@@ -154,6 +154,54 @@ usage() {
 EOT
 }   # ----------  end of function usage  ----------
 
+#===  FUNCTION  ================================================================
+#         NAME:  __check_config_dir
+#  DESCRIPTION:  Checks the config directory, retrieves URLs if provided.
+#===============================================================================
+__check_config_dir() {
+    CC_DIR_NAME="$1"
+    CC_DIR_BASE=$(basename "${CC_DIR_NAME}")
+
+    case "$CC_DIR_NAME" in
+        http://*)
+            fetch -q -o "/tmp/${CC_DIR_BASE}" "${CC_DIR_NAME}"
+            CC_DIR_NAME="/tmp/${CC_DIR_BASE}"
+            ;;
+        ftp://*)
+            fetch -q -o "/tmp/${CC_DIR_BASE}" "${CC_DIR_NAME}"
+            CC_DIR_NAME="/tmp/${CC_DIR_BASE}"
+            ;;
+        *)
+            if [ ! -e "${CC_DIR_NAME}" ]; then
+                echo "null"
+            fi
+            ;;
+    esac
+
+    case "$CC_DIR_NAME" in
+        *.tgz|*.tar.gz)
+            tar -zxf "${CC_DIR_NAME}" -C /tmp
+            CC_DIR_BASE=$(basename ${CC_DIR_BASE} ".tgz")
+            CC_DIR_BASE=$(basename ${CC_DIR_BASE} ".tar.gz")
+            CC_DIR_NAME="/tmp/${CC_DIR_BASE}"
+            ;;
+        *.tbz|*.tar.bz2)
+            tar -xjf "${CC_DIR_NAME}" -C /tmp
+            CC_DIR_BASE=$(basename ${CC_DIR_BASE} ".tbz")
+            CC_DIR_BASE=$(basename ${CC_DIR_BASE} ".tar.bz2")
+            CC_DIR_NAME="/tmp/${CC_DIR_BASE}"
+            ;;
+        *.txz|*.tar.xz)
+            tar -xJf "${CC_DIR_NAME}" -C /tmp
+            CC_DIR_BASE=$(basename ${CC_DIR_BASE} ".txz")
+            CC_DIR_BASE=$(basename ${CC_DIR_BASE} ".tar.xz")
+            CC_DIR_NAME="/tmp/${CC_DIR_BASE}"
+            ;;
+    esac
+
+    echo "${CC_DIR_NAME}"
+}
+
 #-----------------------------------------------------------------------
 #  Handle command line arguments
 #-----------------------------------------------------------------------
@@ -177,7 +225,7 @@ do
     v )  echo "$0 -- Version $ScriptVersion"; exit 0    ;;
     n )  COLORS=0; __detect_color_support               ;;
     D )  ECHO_DEBUG=$BS_TRUE                            ;;
-    c )  TEMP_CONFIG_DIR="$OPTARG"
+    c )  TEMP_CONFIG_DIR=$(__check_config_dir "$OPTARG")
          # If the configuration directory does not exist, error out
          if [ ! -d "$TEMP_CONFIG_DIR" ]; then
              echoerror "The configuration directory ${TEMP_CONFIG_DIR} does not exist."

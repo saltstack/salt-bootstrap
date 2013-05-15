@@ -1,12 +1,13 @@
 Version 1.5.5:
 	* Fixed a variable error in the new pre-seed feature.
 	* Fixed the destination path to where the pre-seed minions keys should be copied.
-	* Debian installations now use SaltStack's repository
+	* Debian installations now use SaltStack's repository.
+	* Configuration files can now be passed as an URL to a compressed file. Thanks Geoff Garside!
 	* Distro Support Fixed:
 		* Debian's optional ZMQ3 support was fixed (libzmq3 has moved from experimental to 
 		unstable).
 		* Ubuntu Lucid Daily PPA
-		* SmartOS no longer ignores $SALT_ETC_DIR
+		* SmartOS no longer ignores $SALT_ETC_DIR. Thanks Geoff Garside!
 
 
 Version 1.5.4:

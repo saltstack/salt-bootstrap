@@ -155,6 +155,16 @@ EOT
 }   # ----------  end of function usage  ----------
 
 #===  FUNCTION  ================================================================
+#         NAME:  __fetch_url
+#  DESCRIPTION:  Retrieves a URL and writes it to a given path
+#===============================================================================
+__fetch_url() {
+    curl --insecure -s -o "$1" "$2" >/dev/null 2>&1 ||
+        wget --no-check-certificate -q -O "$1" "$2" >/dev/null 2>&1 ||
+            fetch -q -o "$1" "$2" >/dev/null 2>&1
+}
+
+#===  FUNCTION  ================================================================
 #         NAME:  __check_config_dir
 #  DESCRIPTION:  Checks the config directory, retrieves URLs if provided.
 #===============================================================================
@@ -164,11 +174,11 @@ __check_config_dir() {
 
     case "$CC_DIR_NAME" in
         http://*|https://*)
-            fetch -q -o "/tmp/${CC_DIR_BASE}" "${CC_DIR_NAME}"
+            __fetch_url "/tmp/${CC_DIR_BASE}" "${CC_DIR_NAME}"
             CC_DIR_NAME="/tmp/${CC_DIR_BASE}"
             ;;
         ftp://*)
-            fetch -q -o "/tmp/${CC_DIR_BASE}" "${CC_DIR_NAME}"
+            __fetch_url "/tmp/${CC_DIR_BASE}" "${CC_DIR_NAME}"
             CC_DIR_NAME="/tmp/${CC_DIR_BASE}"
             ;;
         *)

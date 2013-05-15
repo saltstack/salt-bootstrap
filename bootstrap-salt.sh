@@ -174,6 +174,7 @@ __check_config_dir() {
         *)
             if [ ! -e "${CC_DIR_NAME}" ]; then
                 echo "null"
+                return 0
             fi
             ;;
     esac

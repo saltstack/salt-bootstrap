@@ -228,6 +228,10 @@ do
     D )  ECHO_DEBUG=$BS_TRUE                            ;;
     c )  TEMP_CONFIG_DIR=$(__check_config_dir "$OPTARG")
          # If the configuration directory does not exist, error out
+         if [ "$TEMP_CONFIG_DIR" = "null" ]; then
+             echoerror "Unsupported URI scheme for $OPTARG"
+             exit 1
+         fi
          if [ ! -d "$TEMP_CONFIG_DIR" ]; then
              echoerror "The configuration directory ${TEMP_CONFIG_DIR} does not exist."
              exit 1

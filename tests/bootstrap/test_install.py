@@ -14,6 +14,8 @@ import glob
 import shutil
 from bootstrap.unittesting import *
 
+CURRENT_SALT_STABLE_VERSION = 'v0.15.1'
+
 
 CLEANUP_COMMANDS_BY_OS_FAMILY = {
     'Arch': [
@@ -325,7 +327,7 @@ class InstallationTestCase(BootstrapTestCase):
         if GRAINS['os'] in OS_REQUIRES_PIP_ALLOWED:
             args.append('-P')
 
-        args.extend(['git', 'v0.15.0'])
+        args.extend(['git', CURRENT_SALT_STABLE_VERSION])
 
         self.assert_script_result(
             'Failed to install using specific git tag',
@@ -561,7 +563,7 @@ class InstallationTestCase(BootstrapTestCase):
         if GRAINS['os'] in OS_REQUIRES_PIP_ALLOWED:
             args.append('-P')
 
-        args.extend(['git', 'v0.15.0'])
+        args.extend(['git', CURRENT_SALT_STABLE_VERSION])
 
         self.assert_script_result(
             'Failed to install using specific git tag',
@@ -589,4 +591,4 @@ class InstallationTestCase(BootstrapTestCase):
 
         # Make sure the installation updated the git repository to the proper
         # git tag before installing.
-        self.assertIn('0.15.0', '\n'.join(out))
+        self.assertIn(CURRENT_SALT_STABLE_VERSION.lstrip('v'), '\n'.join(out))

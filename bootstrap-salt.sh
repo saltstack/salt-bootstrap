@@ -1270,7 +1270,7 @@ install_debian_6_deps() {
     wget -q http://debian.saltstack.com/debian-salt-team-joehealy.gpg.key -O - | apt-key add - || return 1
 
     if [ $PIP_ALLOWED -eq $BS_TRUE ]; then
-        echowarn "PyZMQ will be installed from PyPi in order to compile it against ZMQ3"
+        echowarn "PyZMQ will be installed from PyPI in order to compile it against ZMQ3"
         echowarn "This is required for long term stable minion connections to the master."
         echowarn "YOU WILL END UP WILL QUITE A FEW PACKAGES FROM DEBIAN UNSTABLE"
         echowarn "Sleeping for 3 seconds so you can cancel..."
@@ -1336,7 +1336,7 @@ install_debian_7_deps() {
     wget -q http://debian.saltstack.com/debian-salt-team-joehealy.gpg.key -O - | apt-key add - || return 1
 
     if [ $PIP_ALLOWED -eq $BS_TRUE ]; then
-        echowarn "PyZMQ will be installed from PyPi in order to compile it against ZMQ3"
+        echowarn "PyZMQ will be installed from PyPI in order to compile it against ZMQ3"
         echowarn "This is required for long term stable minion connections to the master."
         echowarn "YOU WILL END UP WILL QUITE A FEW PACKAGES FROM DEBIAN UNSTABLE"
         echowarn "Sleeping for 3 seconds so you can cancel..."

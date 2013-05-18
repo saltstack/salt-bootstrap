@@ -274,7 +274,13 @@ shift $(($OPTIND-1))
 
 __check_unparsed_options() {
     shellopts="$1"
-    unparsed_options=$( echo "$shellopts" | grep -E '[-]+[[:alnum:]]' )
+    # grep alternative for SunOS
+    if [ -f /usr/xpg4/bin/grep ]; then
+        grep='/usr/xpg4/bin/grep'
+    else
+        grep='grep'
+    fi
+    unparsed_options=$( echo "$shellopts" | ${grep} -E '[-]+[[:alnum:]]' )
     if [ "x$unparsed_options" != "x" ]; then
         usage
         echo
@@ -330,9 +336,14 @@ if [ "$#" -gt 0 ]; then
     echoerror "Too many arguments."
     exit 1
 fi
-
+# whoami alternative for SunOS
+if [ -f /usr/xpg4/bin/id ]; then
+    whoami='/usr/xpg4/bin/id -un'
+else
+    whoami='whoami'
+fi
 # Root permissions are required to run this script
-if [ $(whoami) != "root" ] ; then
+if [ $(${whoami}) != "root" ]; then
     echoerror "Salt requires root privileges to install. Please re-run this script as root."
     exit 1
 fi

@@ -8,6 +8,7 @@ Version 1.5.5:
 		unstable).
 		* Ubuntu Lucid Daily PPA
 		* SmartOS no longer ignores $SALT_ETC_DIR. Thanks Geoff Garside!
+		* SunOS (Make use of XPG4 binaries on SunOS). Thanks Matthieu Guegan!
 
 
 Version 1.5.4:

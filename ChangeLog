@@ -7,7 +7,8 @@ Version 1.5.5:
 		* Debian's optional ZMQ3 support was fixed (libzmq3 has moved from experimental to 
 		unstable).
 		* Ubuntu Lucid Daily PPA
-		* SmartOS no longer ignores $SALT_ETC_DIR. Thanks Geoff Garside!
+		* SmartOS no longer ignores $SALT_ETC_DIR. Matthieu Guegan!
+		* FreeBSD no longer ignores $SALT_ETC_DIR. Thanks Geoff Garside!
 		* SunOS (Make use of XPG4 binaries on SunOS). Thanks Matthieu Guegan!
 
 

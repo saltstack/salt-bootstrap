@@ -141,7 +141,7 @@ class BootstrapTestCase(TestCase):
             'stream_stds': stream_stds,
 
             # detach from parent group (no more inherited signals!)
-            #'preexec_fn': os.setpgrp
+            'preexec_fn': os.setpgrp
         }
 
         cmd = ' '.join(filter(None, [script] + list(args)))

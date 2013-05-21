@@ -2297,7 +2297,8 @@ install_opensuse_stable_deps() {
 
 install_opensuse_git_deps() {
     install_opensuse_stable_deps || return 1
-    zypper --non-interactive install --auto-agree-with-licenses git || return 1
+    zypper --non-interactive install --auto-agree-with-licenses \
+        ca-certificates-mozilla git || return 1
 
     __git_clone_and_checkout || return 1
 

@@ -864,7 +864,7 @@ __git_clone_and_checkout() {
             git pull --rebase || return 1
         fi
     else
-        git clone https://github.com/saltstack/salt.git salt || return 1
+        git clone git://github.com/saltstack/salt.git || return 1
         cd $SALT_GIT_CHECKOUT_DIR
         git checkout $GIT_REV || return 1
     fi
@@ -2297,8 +2297,7 @@ install_opensuse_stable_deps() {
 
 install_opensuse_git_deps() {
     install_opensuse_stable_deps || return 1
-    zypper --non-interactive install --auto-agree-with-licenses \
-        ca-certificates-mozilla git || return 1
+    zypper --non-interactive install --auto-agree-with-licenses git || return 1
 
     __git_clone_and_checkout || return 1
 

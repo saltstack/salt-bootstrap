@@ -1903,9 +1903,7 @@ SigLevel = Optional TrustAll
 }
 
 install_arch_linux_git_deps() {
-    grep '\[salt\]' /etc/pacman.conf >/dev/null 2>&1 || echo '[salt]
-Server = http://intothesaltmine.org/archlinux
-' >> /etc/pacman.conf
+    install_arch_linux_stable_deps
 
     pacman -Sy --noconfirm pacman || return 1
     pacman -Sy --noconfirm git python2-crypto python2-distribute \

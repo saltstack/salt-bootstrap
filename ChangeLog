@@ -10,6 +10,8 @@ Version 1.5.5:
 		* SmartOS no longer ignores $SALT_ETC_DIR. Matthieu Guegan!
 		* FreeBSD no longer ignores $SALT_ETC_DIR. Thanks Geoff Garside!
 		* SunOS (Make use of XPG4 binaries on SunOS). Thanks Matthieu Guegan!
+		* openSUSE (Don't fail if only one of the repositories failed to update)
+		* Arch (Fixed the GPG issues for git installations)
 
 
 Version 1.5.4:

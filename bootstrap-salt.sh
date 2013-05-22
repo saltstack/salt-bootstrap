@@ -864,7 +864,7 @@ __git_clone_and_checkout() {
             git pull --rebase || return 1
         fi
     else
-        git clone https://github.com/saltstack/salt.git salt || return 1
+        git clone git://github.com/saltstack/salt.git || return 1
         cd $SALT_GIT_CHECKOUT_DIR
         git checkout $GIT_REV || return 1
     fi
@@ -1903,9 +1903,7 @@ SigLevel = Optional TrustAll
 }
 
 install_arch_linux_git_deps() {
-    grep '\[salt\]' /etc/pacman.conf >/dev/null 2>&1 || echo '[salt]
-Server = http://intothesaltmine.org/archlinux
-' >> /etc/pacman.conf
+    install_arch_linux_stable_deps
 
     pacman -Sy --noconfirm pacman || return 1
     pacman -Sy --noconfirm git python2-crypto python2-distribute \
@@ -2282,7 +2280,13 @@ install_opensuse_stable_deps() {
             http://download.opensuse.org/repositories/devel:/languages:/python/${DISTRO_REPO}/devel:languages:python.repo || return 1
     fi
 
-    zypper --gpg-auto-import-keys --non-interactive refresh || return 1
+    zypper --gpg-auto-import-keys --non-interactive refresh
+    exitcode=$?
+    if [ $? -ne 0 ] && [ $? -ne 4 ]; then
+        # If the exit code is not 0, and it's not 4(failed to update a
+        # repository) return a failure. Otherwise continue.
+        return 1
+    fi
     zypper --non-interactive install --auto-agree-with-licenses libzmq3 python \
         python-Jinja2 python-M2Crypto python-PyYAML python-msgpack-python \
         python-pycrypto python-pyzmq || return 1

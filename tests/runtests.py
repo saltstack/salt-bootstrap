@@ -237,8 +237,16 @@ def main():
         u'  Overall Tests Report  ', sep=u'=', centered=True, inline=True
     )
 
+    failures = errors = skipped = passed = 0
     no_problems_found = True
     for (name, results) in TEST_RESULTS:
+        failures += len(results.failures)
+        errors += len(results.errors)
+        skipped += len(results.skipped)
+        passed += results.testsRun - len(
+            results.failures + results.errors + results.skipped
+        )
+
         if not results.failures and not results.errors and not results.skipped:
             continue
 
@@ -286,6 +294,13 @@ def main():
             u'***  No Problems Found While Running Tests  ',
             sep=u'*', inline=True
         )
+
+    total = passed + skipped + errors + failures
+    print '   Tests Passed: {0:>3}/{1:<3}'.format(passed, total)
+    print '  Tests Skipped: {0:>3}/{1:<3}'.format(skipped, total)
+    print '   Tests Errors: {0:>3}/{1:<3}'.format(errors, total)
+    print '   Tests Failed: {0:>3}/{1:<3}'.format(failures, total)
+    print_header(u'', sep=u'*', inline=True)
 
     print_header(
         '  Overall Tests Report  ', sep='=', centered=True, inline=True

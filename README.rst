@@ -9,6 +9,9 @@ script runs through a series of checks to determine operating system type and ve
 install the `Salt`_ binaries using the appropriate methods.
 
 
+In case you found a bug, please read `I found a bug`_ first before submitting a new issue.
+
+
 One Line Bootstrap
 ------------------
 
@@ -229,5 +232,25 @@ Supported Operating Systems
 
 
 
+
+I found a bug
+-------------
+
+If you found a possible problem, or bug, please try to bootstrap using the develop version. The 
+issue you are having might have already been fixed and it's just not yet included in the stable 
+version.
+
+.. code:: console
+
+  curl -L https://raw.github.com/saltstack/salt-bootstrap/develop/bootstrap-salt.sh | \
+      sudo sh -s -- git develop
+
+
+If after trying this, you still see the same problems, then, please `file an issue`_.
+
+
+
 .. _`Salt`: http://saltstack.org/
+.. _`file an issue`: https://github.com/saltstack/salt-bootstrap/issues/new
+
 .. vim: fenc=utf-8 spell spl=en cc=100 tw=99 fo=want sts=2 sw=2 et

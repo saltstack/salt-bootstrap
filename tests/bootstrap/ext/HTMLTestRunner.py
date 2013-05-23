@@ -629,8 +629,6 @@ class HTMLTestRunner(Template_mixin):
         self.stopTime = datetime.datetime.now()
         self.generateReport(test, result)
         print >>sys.stderr, '\nTime Elapsed: %s' % (self.stopTime-self.startTime)
-        print result, dir(result)
-        print 444, result.result
         return result
 
 

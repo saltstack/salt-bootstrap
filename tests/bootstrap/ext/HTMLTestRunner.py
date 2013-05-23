@@ -571,7 +571,7 @@ class _TestResult(TestResult):
         output = self.complete_output()
         self.result.append((0, test, output, ''))
         if self.verbosity > 1:
-            sys.stderr.write('ok1 ')
+            sys.stderr.write('ok ')
             sys.stderr.write(str(test))
             sys.stderr.write('\n')
         else:

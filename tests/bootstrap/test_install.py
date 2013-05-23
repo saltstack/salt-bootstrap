@@ -457,49 +457,49 @@ class InstallationTestCase(BootstrapTestCase):
             )
         )
 
-    def test_install_salt_syndic(self):
-        '''
-        Test if installing a salt-syndic works
-        '''
-        if GRAINS['os'] == 'Debian':
-            self.skipTest(
-                'Currently the debian stable package will have the syndic '
-                'waiting for a connection to a master.'
-            )
-        elif GRAINS['os'] == 'Ubuntu':
-            self.skipTest(
-                'We\'re currently having issues having a syndic running '
-                'right after installation, without any specific '
-                'configuration, under Ubuntu'
-            )
-
-        args = []
-        if GRAINS['os'] in OS_REQUIRES_PIP_ALLOWED:
-            args.append('-P')
-
-        args.extend(['-N', '-S'])
-
-        self.assert_script_result(
-            'Failed to install salt-syndic',
-            0,
-            self.run_script(
-                args=args,
-                timeout=15 * 60,
-                stream_stds=True
-            )
-        )
-
-        # Try to get the versions report
-        self.assert_script_result(
-            'Failed to get the versions report from salt-syndic',
-            0,
-            self.run_script(
-                script=None,
-                args=('salt-syndic', '--versions-report'),
-                timeout=15 * 60,
-                stream_stds=True
-            )
-        )
+#    def test_install_salt_syndic(self):
+#        '''
+#        Test if installing a salt-syndic works
+#        '''
+#        if GRAINS['os'] == 'Debian':
+#            self.skipTest(
+#                'Currently the debian stable package will have the syndic '
+#                'waiting for a connection to a master.'
+#            )
+#        elif GRAINS['os'] == 'Ubuntu':
+#            self.skipTest(
+#                'We\'re currently having issues having a syndic running '
+#                'right after installation, without any specific '
+#                'configuration, under Ubuntu'
+#            )
+#
+#        args = []
+#        if GRAINS['os'] in OS_REQUIRES_PIP_ALLOWED:
+#            args.append('-P')
+#
+#        args.extend(['-N', '-S'])
+#
+#        self.assert_script_result(
+#            'Failed to install salt-syndic',
+#            0,
+#            self.run_script(
+#                args=args,
+#                timeout=15 * 60,
+#                stream_stds=True
+#            )
+#        )
+#
+#        # Try to get the versions report
+#        self.assert_script_result(
+#            'Failed to get the versions report from salt-syndic',
+#            0,
+#            self.run_script(
+#                script=None,
+#                args=('salt-syndic', '--versions-report'),
+#                timeout=15 * 60,
+#                stream_stds=True
+#            )
+#        )
 
     def test_install_pip_not_allowed(self):
         '''

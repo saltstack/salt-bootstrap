@@ -9,7 +9,7 @@ script runs through a series of checks to determine operating system type and ve
 install the `Salt`_ binaries using the appropriate methods.
 
 
-In case you found a bug, please read `I found a bug`_ first before submitting a new issue.
+**In case you found a bug, please read `I found a bug`_ first before submitting a new issue.**
 
 
 One Line Bootstrap

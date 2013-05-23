@@ -19,6 +19,7 @@ import tempfile
 
 from bootstrap.unittesting import TestLoader, TextTestRunner
 from bootstrap.ext.os_data import GRAINS
+from bootstrap.ext.HTMLTestRunner import HTMLTestRunner
 try:
     from bootstrap.ext import console
     width, height = console.getTerminalSize()
@@ -37,6 +38,11 @@ TEST_RESULTS = []
 XML_OUTPUT_DIR = os.environ.get(
     'XML_TEST_REPORTS', os.path.join(
         tempfile.gettempdir(), 'xml-test-reports'
+    )
+)
+HTML_OUTPUT_DIR = os.environ.get(
+    'HTML_OUTPUT_DIR', os.path.join(
+        tempfile.gettempdir(), 'html-test-results'
     )
 )
 
@@ -70,7 +76,7 @@ def run_suite(opts, path, display_name, suffix='[!_]*.py'):
     '''
     loader = TestLoader()
     if opts.name:
-        tests = tests = loader.loadTestsFromName(display_name)
+        tests = loader.loadTestsFromName(display_name)
     else:
         tests = loader.discover(path, suffix, TEST_DIR)
 
@@ -84,6 +90,23 @@ def run_suite(opts, path, display_name, suffix='[!_]*.py'):
             output=XML_OUTPUT_DIR,
             verbosity=opts.verbosity
         ).run(tests)
+    elif opts.html_out:
+        if not os.path.isdir(HTML_OUTPUT_DIR):
+            os.makedirs(HTML_OUTPUT_DIR)
+
+        for test in tests._tests:
+            for t in test:
+                print 2, t._tests
+                if not t._tests:
+                    continue
+                print str(t._tests[0].__class__.__name__)
+            print dir(test)
+        exit(1)
+        runner = HTMLTestRunner(
+            stream=open(HTML_OUTPUT_DIR, 'w'),
+            verbosity=opts.verbosity
+        ).run(tests)
+        TEST_RESULTS.append((header, runner))
     else:
         runner = TextTestRunner(
             verbosity=opts.verbosity
@@ -151,6 +174,14 @@ def main():
         action='store_true',
         help='XML test runner output(Output directory: {0})'.format(
             XML_OUTPUT_DIR
+        )
+    )
+    output_options_group.add_option(
+        '--html-out',
+        default=False,
+        action='store_true',
+        help='HTML test runner output(Output directory: {0})'.format(
+            HTML_OUTPUT_DIR
         )
     )
     output_options_group.add_option(

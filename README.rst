@@ -12,6 +12,7 @@ install the `Salt`_ binaries using the appropriate methods.
 **In case you found a bug, please read** `I found a bug`_ **first before submitting a new issue.**
 
 
+
 One Line Bootstrap
 ------------------
 

@@ -1402,7 +1402,21 @@ install_debian_git_deps() {
 
 install_debian_6_git_deps() {
     install_debian_6_deps || return 1
-    install_debian_git_deps || return 1  # Grab the actual deps
+    if [ $PIP_ALLOWED -eq $BS_TRUE ]; then
+        easy_install -U Jinja2 || return 1
+        __apt_get_noinput lsb-release python python-pkg-resources python-crypto \
+            python-m2crypto python-yaml msgpack-python python-pip git || return 1
+
+        __git_clone_and_checkout || return 1
+
+        # Let's trigger config_salt()
+        if [ "$TEMP_CONFIG_DIR" = "null" ]; then
+            TEMP_CONFIG_DIR="${SALT_GIT_CHECKOUT_DIR}/conf/"
+            CONFIG_SALT_FUNC="config_salt"
+        fi
+    else
+        install_debian_git_deps || return 1  # Grab the actual deps
+    fi
     return 0
 }
 

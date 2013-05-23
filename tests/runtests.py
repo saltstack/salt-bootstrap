@@ -93,18 +93,17 @@ def run_suite(opts, path, display_name, suffix='[!_]*.py'):
     elif opts.html_out:
         if not os.path.isdir(HTML_OUTPUT_DIR):
             os.makedirs(HTML_OUTPUT_DIR)
-
-        for test in tests._tests:
-            for t in test:
-                print 2, t._tests
-                if not t._tests:
-                    continue
-                print str(t._tests[0].__class__.__name__)
-            print dir(test)
-        exit(1)
         runner = HTMLTestRunner(
-            stream=open(HTML_OUTPUT_DIR, 'w'),
-            verbosity=opts.verbosity
+            stream=open(
+                os.path.join(
+                    HTML_OUTPUT_DIR, 'bootstrap_{0}.html'.format(
+                        header.replace(' ', '_')
+                    )
+                ),
+                'w'
+            ),
+            verbosity=opts.verbosity,
+            title=header,
         ).run(tests)
         TEST_RESULTS.append((header, runner))
     else:

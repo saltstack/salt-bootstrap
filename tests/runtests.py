@@ -287,19 +287,20 @@ def main():
                 print_header(u'   ', sep=u'.', inline=True)
             print_header(u' ', sep='-', inline=True)
 
-        print_header(u'', sep=u'*', inline=True)
-
     if no_problems_found:
         print_header(
             u'***  No Problems Found While Running Tests  ',
             sep=u'*', inline=True
         )
 
+    print_header(u'*** Test Results Counters ', sep=u'*', inline=True)
+
     total = passed + skipped + errors + failures
-    print ' Tests Passed: {0:>3}/{1:<3}'.format(passed, total)
-    print 'Tests Skipped: {0:>3}/{1:<3}'.format(skipped, total)
-    print ' Tests Errors: {0:>3}/{1:<3}'.format(errors, total)
-    print ' Tests Failed: {0:>3}/{1:<3}'.format(failures, total)
+    length = len(str(total))
+    print ' Passed: {0:>{2}}/{1:<{2}}'.format(passed, total, length)
+    print 'Skipped: {0:>{2}}/{1:<{2}}'.format(skipped, total, length)
+    print 'Errored: {0:>{2}}/{1:<{2}}'.format(errors, total, length)
+    print ' Failed: {0:>{2}}/{1:<{2}}'.format(failures, total, length)
     print_header(u'', sep=u'*', inline=True)
 
     print_header(

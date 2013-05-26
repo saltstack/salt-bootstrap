@@ -296,10 +296,10 @@ def main():
         )
 
     total = passed + skipped + errors + failures
-    print '   Tests Passed: {0:>3}/{1:<3}'.format(passed, total)
-    print '  Tests Skipped: {0:>3}/{1:<3}'.format(skipped, total)
-    print '   Tests Errors: {0:>3}/{1:<3}'.format(errors, total)
-    print '   Tests Failed: {0:>3}/{1:<3}'.format(failures, total)
+    print ' Tests Passed: {0:>3}/{1:<3}'.format(passed, total)
+    print 'Tests Skipped: {0:>3}/{1:<3}'.format(skipped, total)
+    print ' Tests Errors: {0:>3}/{1:<3}'.format(errors, total)
+    print ' Tests Failed: {0:>3}/{1:<3}'.format(failures, total)
     print_header(u'', sep=u'*', inline=True)
 
     print_header(

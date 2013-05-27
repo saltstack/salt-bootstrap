@@ -1911,14 +1911,14 @@ install_amazon_linux_ami_git_post() {
 #
 install_arch_linux_stable_deps() {
     grep '\[salt\]' /etc/pacman.conf >/dev/null 2>&1 || echo '[salt]
-Include = /etc/pacman.conf.d/salt.conf
+Include = /etc/pacman.d/salt.conf
 ' >> /etc/pacman.conf
 
-    # Create a pacman conf.d directory so we can just override salt's
-    # included configuration
-    [ -d /etc/pacman.conf.d ] || mkdir -p /etc/pacman.conf.d
+    # Create a pacman .d directory so we can just override salt's
+    # included configuration if needed
+    [ -d /etc/pacman.d ] || mkdir -p /etc/pacman.d
 
-    cat <<_eof > /etc/pacman.conf.d/salt.conf
+    cat <<_eof > /etc/pacman.d/salt.conf
 Server = http://intothesaltmine.org/archlinux
 SigLevel = Optional TrustAll
 _eof

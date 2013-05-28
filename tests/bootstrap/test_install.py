@@ -38,7 +38,7 @@ CLEANUP_COMMANDS_BY_OS_FAMILY = {
     ],
     'RedHat': [
         'yum -y remove salt-minion salt-master',
-        'yum -y remove python{0}-m2crypto m2crypto python{0}-crypto '
+        'yum -y remove python{0}-m2crypto python{0}-crypto '
         'python{0}-msgpack python{0}-zmq python{0}-jinja2'.format(
             GRAINS['osrelease'].split('.')[0] == '5' and '26' or ''
         ),

@@ -34,7 +34,6 @@ if sys.version_info < (2, 7):
             TestSuite,
             skipIf,
             TestResult,
-            Testrogram
         )
     except ImportError:
         raise SystemExit('You need to install unittest2 to run the salt tests')
@@ -47,7 +46,6 @@ else:
         TestSuite,
         skipIf,
         TestResult,
-        TestProgram
     )
 
 

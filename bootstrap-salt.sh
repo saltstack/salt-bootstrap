@@ -2644,7 +2644,7 @@ install_gentoo_restart_daemons() {
         [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq $BS_FALSE ] && continue
 
         /etc/init.d/salt-$fname stop > /dev/null 2>&1
-        /etc/init.d/salt-$fname start &
+        /etc/init.d/salt-$fname start
     done
 }
 

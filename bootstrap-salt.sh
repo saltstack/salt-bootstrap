@@ -145,7 +145,7 @@ usage() {
   -C  Only run the configuration function. This option automaticaly
       bypasses any installation.
   -P  Allow pip based installations. On some distributions the required salt
-      packages or it's dependencies are not available as a package for that
+      packages or its dependencies are not available as a package for that
       distribution. Using this flag allows the script to use pip as a last
       resort method. NOTE: This works for functions which actually implement
       pip based installations.

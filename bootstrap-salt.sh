@@ -2615,7 +2615,7 @@ install_gentoo_git_deps() {
 }
 
 install_gentoo_stable() {
-    emerge -v salt
+    emerge -v salt || return 1
 }
 
 install_gentoo_git() {

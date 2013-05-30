@@ -206,7 +206,7 @@ Below is an example for Ubuntu Oneiric:
               fi
           fi
           /etc/init.d/salt-$fname stop > /dev/null 2>&1
-          /etc/init.d/salt-$fname start &
+          /etc/init.d/salt-$fname start
       done
   }
 

@@ -2079,7 +2079,7 @@ install_freebsd_git_deps() {
     /usr/local/sbin/pkg2ng || return 1
     echo "PACKAGESITE: ${BS_PACKAGESITE}" > /usr/local/etc/pkg.conf
 
-    /usr/local/sbin/pkg install -y swig || return 1
+    /usr/local/sbin/pkg install -y swig git || return 1
 
     __git_clone_and_checkout || return 1
     # Let's trigger config_salt()
@@ -2097,7 +2097,7 @@ install_freebsd_9_stable() {
 }
 
 install_freebsd_git() {
-    /usr/local/sbin/pkg install -y git sysutils/py-salt || return 1
+    /usr/local/sbin/pkg install -y sysutils/py-salt || return 1
     /usr/local/sbin/pkg delete -y sysutils/py-salt || return 1
 
     /usr/local/bin/python setup.py install || return 1

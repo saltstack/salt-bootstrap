@@ -2054,13 +2054,15 @@ __freebsd_get_packagesite() {
 }
 
 install_freebsd_9_stable_deps() {
-    __freebsd_get_packagesite
+    if [ ! -x /usr/local/sbin/pkg ]; then
+        __freebsd_get_packagesite
 
-    fetch "${BS_PACKAGESITE}/Latest/pkg.txz" || return 1
-    tar xf ./pkg.txz -s ",/.*/,,g" "*/pkg-static" || return 1
-    ./pkg-static add ./pkg.txz || return 1
-    /usr/local/sbin/pkg2ng || return 1
-    echo "PACKAGESITE: ${BS_PACKAGESITE}" > /usr/local/etc/pkg.conf
+        fetch "${BS_PACKAGESITE}/Latest/pkg.txz" || return 1
+        tar xf ./pkg.txz -s ",/.*/,,g" "*/pkg-static" || return 1
+        ./pkg-static add ./pkg.txz || return 1
+        /usr/local/sbin/pkg2ng || return 1
+        echo "PACKAGESITE: ${BS_PACKAGESITE}" > /usr/local/etc/pkg.conf
+    fi
 
     /usr/local/sbin/pkg install -y swig || return 1
 
@@ -2071,13 +2073,15 @@ install_freebsd_9_stable_deps() {
 }
 
 install_freebsd_git_deps() {
-    __freebsd_get_packagesite
+    if [ ! -x /usr/local/sbin/pkg ]; then
+        __freebsd_get_packagesite
 
-    fetch "${BS_PACKAGESITE}/Latest/pkg.txz" || return 1
-    tar xf ./pkg.txz -s ",/.*/,,g" "*/pkg-static" || return 1
-    ./pkg-static add ./pkg.txz || return 1
-    /usr/local/sbin/pkg2ng || return 1
-    echo "PACKAGESITE: ${BS_PACKAGESITE}" > /usr/local/etc/pkg.conf
+        fetch "${BS_PACKAGESITE}/Latest/pkg.txz" || return 1
+        tar xf ./pkg.txz -s ",/.*/,,g" "*/pkg-static" || return 1
+        ./pkg-static add ./pkg.txz || return 1
+        /usr/local/sbin/pkg2ng || return 1
+        echo "PACKAGESITE: ${BS_PACKAGESITE}" > /usr/local/etc/pkg.conf
+    fi
 
     /usr/local/sbin/pkg install -y swig || return 1
 

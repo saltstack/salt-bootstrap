@@ -9,6 +9,10 @@ script runs through a series of checks to determine operating system type and ve
 install the `Salt`_ binaries using the appropriate methods.
 
 
+**In case you found a bug, please read** `I found a bug`_ **first before submitting a new issue.**
+
+
+
 One Line Bootstrap
 ------------------
 
@@ -202,7 +206,7 @@ Below is an example for Ubuntu Oneiric:
               fi
           fi
           /etc/init.d/salt-$fname stop > /dev/null 2>&1
-          /etc/init.d/salt-$fname start &
+          /etc/init.d/salt-$fname start
       done
   }
 
@@ -215,19 +219,40 @@ supported versions or variants should not be made, to avoid failed or broken ins
 
 Supported Operating Systems
 ---------------------------
-- Ubuntu 10.x/11.x/12.x/13.04
-- Debian 6.x/7(git installs)
-- CentOS 5/6
+- Arch
+  CentOS 5/6
+- Debian 6.x/7.x
+- Fedora 17/18
+- FreeBSD 9.1
+- Gentoo
+- OpenSUSE 12.x
 - Red Hat 5/6
 - Red Hat Enterprise 5/6
-- Fedora
-- Arch
-- FreeBSD 9.0
 - SmartOS
 - SuSE 11 SP1/11 SP2
-- OpenSUSE 12.x
+- Ubuntu 10.x/11.x/12.x/13.04
+
+
+
+
+I found a bug
+-------------
+
+If you found a possible problem, or bug, please try to bootstrap using the develop version. The 
+issue you are having might have already been fixed and it's just not yet included in the stable 
+version.
+
+.. code:: console
+
+  curl -L https://raw.github.com/saltstack/salt-bootstrap/develop/bootstrap-salt.sh | \
+      sudo sh -s -- git develop
+
+
+If after trying this, you still see the same problems, then, please `file an issue`_.
 
 
 
 .. _`Salt`: http://saltstack.org/
+.. _`file an issue`: https://github.com/saltstack/salt-bootstrap/issues/new
+
 .. vim: fenc=utf-8 spell spl=en cc=100 tw=99 fo=want sts=2 sw=2 et

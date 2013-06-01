@@ -1,5 +1,24 @@
+Version 1.5.5:
+	* Fixed a variable error in the new pre-seed feature.
+	* Fixed the destination path to where the pre-seed minions keys should be copied.
+	* Debian installations now use SaltStack's repository.
+	* Configuration files can now be passed as an URL to a compressed file. Thanks Geoff Garside!
+	* Distro Support Fixed:
+		* Debian's optional ZMQ3 support was fixed (libzmq3 has moved from experimental to 
+		unstable).
+		* Ubuntu Lucid Daily PPA
+		* SmartOS no longer ignores $SALT_ETC_DIR. Matthieu Guegan!
+		* FreeBSD no longer ignores $SALT_ETC_DIR. Thanks Geoff Garside!
+		* FreeBSD does not try to install pkgng if pkg is installed. Thanks Geoff Garside!
+		* SunOS (Make use of XPG4 binaries on SunOS). Thanks Matthieu Guegan!
+		* openSUSE (Don't fail if only one of the repositories failed to update)
+		* Arch (Fixed the GPG issues for git installations)
+	* Distro Support Added:
+		* Gentoo. Thanks kaithar!
+
+
 Version 1.5.4:
-	* Fixed an issue we had when /proc/cpuinfo had more than one CPU. Detected on AMD cpu's.
+	* Fixed an issue we had when /proc/cpuinfo had more than one CPU. Detected on AMD CPUs.
 	* OpenSUSE 12.3 uses lsb_release. Fix the returned distro name "openSUSE project" to "openSUSE" 
 	which the script handles.
 	* Added an custom move function which will only override if required and if we permit it.
@@ -7,7 +26,7 @@ Version 1.5.4:
 	argument.
 	* Distro Support Fixed:
 		* FreeBSD (Don't let the script fail if PACKAGESITE is not set)
-		* Debian Stable installations(the function search was not working as supposed)
+		* Debian Stable installations (the function search was not working as supposed)
 	* Distro Support Added:
 		* Ubuntu 13.04 (Was disabled because of a bad beta1. Fixed in beta2)
 
@@ -18,7 +37,7 @@ Version 1.5.3:
 	* Fixed `/etc/os-release` parsing
 	* Fixed `config_salt()`
 	* Distro Support Fixed:
-		* EPEL based installations (CentOS, Amazon Linux, RedHat)
+		* EPEL-based installations (CentOS, Amazon Linux, RedHat)
 		* SuSE/OpenSUSE (problem running the script twice, ie, existing `devel_languages_python` 
 		repository)
 		* SuSE 11 SP1 (pip based install and config trigger)
@@ -27,10 +46,10 @@ Version 1.5.3:
 
 
 Version 1.5.2:
-	* Fix issue with travis testing(it installs it's own ZeroMQ3 lib
+	* Fix issue with Travis testing (it installs it's own ZeroMQ3 lib
 	* Allow setting the debug output from an environment variable
 	* Fix an escape issue in the `printf` calls used in our echo calls
-	* Don't overwrite files(config, init.d, etc). Use a specific flag to force overwrites.
+	* Don't overwrite files (`config`, `init.d`, etc). Use a specific flag to force overwrites.
 	* Distro Support Fixed:
 		* Ubuntu daily installs.
 	* Distro Support Added:
@@ -41,7 +60,7 @@ Version 1.5.1:
 	* Improved unittesting.
 	* Starting daemons.
 	* Make sure that daemons are really running.
-	* For the users to make the choice if installing from PIP(if required since there aren't system 
+	* For the users to make the choice if installing from PIP (if required since there aren't system 
 	pacakges).
 	* Fixed salt's git cloning when the salt git tree is already present on the system.
 	* Distro Support Fixed:

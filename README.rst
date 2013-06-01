@@ -219,17 +219,18 @@ supported versions or variants should not be made, to avoid failed or broken ins
 
 Supported Operating Systems
 ---------------------------
-- Ubuntu 10.x/11.x/12.x/13.04
+- Arch
+  CentOS 5/6
 - Debian 6.x/7.x
-- CentOS 5/6
+- Fedora 17/18
+- FreeBSD 9.1
+- Gentoo
+- OpenSUSE 12.x
 - Red Hat 5/6
 - Red Hat Enterprise 5/6
-- Fedora
-- Arch
-- FreeBSD 9.0
 - SmartOS
 - SuSE 11 SP1/11 SP2
-- OpenSUSE 12.x
+- Ubuntu 10.x/11.x/12.x/13.04
 
 
 

@@ -2635,7 +2635,7 @@ install_gentoo_post() {
         [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq $BS_FALSE ] && continue
 
         rc-update add salt-$fname default
-        /etc/init.d/salt-$fname start &
+        /etc/init.d/salt-$fname start
     done
 }
 

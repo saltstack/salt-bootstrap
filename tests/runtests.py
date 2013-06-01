@@ -15,9 +15,11 @@ import os
 import pprint
 import shutil
 import optparse
+import tempfile
 
 from bootstrap.unittesting import TestLoader, TextTestRunner
 from bootstrap.ext.os_data import GRAINS
+from bootstrap.ext.HTMLTestRunner import HTMLTestRunner
 try:
     from bootstrap.ext import console
     width, height = console.getTerminalSize()
@@ -32,8 +34,16 @@ except ImportError:
 
 
 TEST_DIR = os.path.abspath(os.path.dirname(__file__))
+TEST_RESULTS = []
 XML_OUTPUT_DIR = os.environ.get(
-    'XML_TEST_REPORTS', os.path.join(TEST_DIR, 'xml-test-reports')
+    'XML_TEST_REPORTS', os.path.join(
+        tempfile.gettempdir(), 'xml-test-reports'
+    )
+)
+HTML_OUTPUT_DIR = os.environ.get(
+    'HTML_OUTPUT_DIR', os.path.join(
+        tempfile.gettempdir(), 'html-test-results'
+    )
 )
 
 
@@ -66,7 +76,7 @@ def run_suite(opts, path, display_name, suffix='[!_]*.py'):
     '''
     loader = TestLoader()
     if opts.name:
-        tests = tests = loader.loadTestsFromName(display_name)
+        tests = loader.loadTestsFromName(display_name)
     else:
         tests = loader.discover(path, suffix, TEST_DIR)
 
@@ -80,10 +90,27 @@ def run_suite(opts, path, display_name, suffix='[!_]*.py'):
             output=XML_OUTPUT_DIR,
             verbosity=opts.verbosity
         ).run(tests)
+    elif opts.html_out:
+        if not os.path.isdir(HTML_OUTPUT_DIR):
+            os.makedirs(HTML_OUTPUT_DIR)
+        runner = HTMLTestRunner(
+            stream=open(
+                os.path.join(
+                    HTML_OUTPUT_DIR, 'bootstrap_{0}.html'.format(
+                        header.replace(' ', '_')
+                    )
+                ),
+                'w'
+            ),
+            verbosity=opts.verbosity,
+            title=header,
+        ).run(tests)
+        TEST_RESULTS.append((header, runner))
     else:
         runner = TextTestRunner(
             verbosity=opts.verbosity
         ).run(tests)
+        TEST_RESULTS.append((header, runner))
     return runner.wasSuccessful()
 
 
@@ -149,6 +176,14 @@ def main():
         )
     )
     output_options_group.add_option(
+        '--html-out',
+        default=False,
+        action='store_true',
+        help='HTML test runner output(Output directory: {0})'.format(
+            HTML_OUTPUT_DIR
+        )
+    )
+    output_options_group.add_option(
         '--no-clean',
         default=False,
         action='store_true',
@@ -196,6 +231,81 @@ def main():
     if options.install:
         status = run_integration_suite(options, 'Installation', "*install.py")
         overall_status.append(status)
+
+    print
+    print_header(
+        u'  Overall Tests Report  ', sep=u'=', centered=True, inline=True
+    )
+
+    failures = errors = skipped = passed = 0
+    no_problems_found = True
+    for (name, results) in TEST_RESULTS:
+        failures += len(results.failures)
+        errors += len(results.errors)
+        skipped += len(results.skipped)
+        passed += results.testsRun - len(
+            results.failures + results.errors + results.skipped
+        )
+
+        if not results.failures and not results.errors and not results.skipped:
+            continue
+
+        no_problems_found = False
+
+        print_header(u'*** {0}  '.format(name), sep=u'*', inline=True)
+        if results.skipped:
+            print_header(u' --------  Skipped Tests  ', sep='-', inline=True)
+            maxlen = len(
+                max([tc.id() for (tc, reason) in results.skipped], key=len)
+            )
+            fmt = u'   -> {0: <{maxlen}}  ->  {1}'
+            for tc, reason in results.skipped:
+                print(fmt.format(tc.id(), reason, maxlen=maxlen))
+            print_header(u' ', sep='-', inline=True)
+
+        if results.errors:
+            print_header(
+                u' --------  Tests with Errors  ', sep='-', inline=True
+            )
+            for tc, reason in results.errors:
+                print_header(
+                    u'   -> {0}  '.format(tc.id()), sep=u'.', inline=True
+                )
+                for line in reason.rstrip().splitlines():
+                    print('       {0}'.format(line.rstrip()))
+                print_header(u'   ', sep=u'.', inline=True)
+            print_header(u' ', sep='-', inline=True)
+
+        if results.failures:
+            print_header(u' --------  Failed Tests  ', sep='-', inline=True)
+            for tc, reason in results.failures:
+                print_header(
+                    u'   -> {0}  '.format(tc.id()), sep=u'.', inline=True
+                )
+                for line in reason.rstrip().splitlines():
+                    print('       {0}'.format(line.rstrip()))
+                print_header(u'   ', sep=u'.', inline=True)
+            print_header(u' ', sep='-', inline=True)
+
+    if no_problems_found:
+        print_header(
+            u'***  No Problems Found While Running Tests  ',
+            sep=u'*', inline=True
+        )
+
+    print_header(u'*** Test Results Counters ', sep=u'*', inline=True)
+
+    total = passed + skipped + errors + failures
+    length = len(str(total))
+    print ' Passed: {0:>{2}}/{1:<{2}}'.format(passed, total, length)
+    print 'Skipped: {0:>{2}}/{1:<{2}}'.format(skipped, total, length)
+    print 'Errored: {0:>{2}}/{1:<{2}}'.format(errors, total, length)
+    print ' Failed: {0:>{2}}/{1:<{2}}'.format(failures, total, length)
+    print_header(u'', sep=u'*', inline=True)
+
+    print_header(
+        '  Overall Tests Report  ', sep='=', centered=True, inline=True
+    )
 
     if overall_status.count(False) > 0:
         # We have some false results, the test-suite failed

@@ -9,9 +9,12 @@ Version 1.5.5:
 		* Ubuntu Lucid Daily PPA
 		* SmartOS no longer ignores $SALT_ETC_DIR. Matthieu Guegan!
 		* FreeBSD no longer ignores $SALT_ETC_DIR. Thanks Geoff Garside!
+		* FreeBSD does not try to install pkgng if pkg is installed. Thanks Geoff Garside!
 		* SunOS (Make use of XPG4 binaries on SunOS). Thanks Matthieu Guegan!
 		* openSUSE (Don't fail if only one of the repositories failed to update)
 		* Arch (Fixed the GPG issues for git installations)
+	* Distro Support Added:
+		* Gentoo. Thanks kaithar!
 
 
 Version 1.5.4:

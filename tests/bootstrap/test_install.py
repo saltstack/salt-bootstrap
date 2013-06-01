@@ -170,7 +170,7 @@ class InstallationTestCase(BootstrapTestCase):
             self.skipTest('\'/bin/bash\' was not found on this system')
 
         args = []
-        if GRAINS['os'] in OS_REQUIRES_PIP_ALLOWED:
+        if requires_pip_based_installations():
             args.append('-P')
 
         self.assert_script_result(

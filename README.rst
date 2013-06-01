@@ -219,8 +219,9 @@ supported versions or variants should not be made, to avoid failed or broken ins
 
 Supported Operating Systems
 ---------------------------
+- Amazon Linux 2012.09
 - Arch
-  CentOS 5/6
+- CentOS 5/6
 - Debian 6.x/7.x
 - Fedora 17/18
 - FreeBSD 9.1

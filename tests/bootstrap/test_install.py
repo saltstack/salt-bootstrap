@@ -10,6 +10,7 @@
     :license: Apache 2.0, see LICENSE for more details.
 '''
 
+import re
 import glob
 import shutil
 from bootstrap.unittesting import *
@@ -79,12 +80,31 @@ OS_REQUIRES_PIP_ALLOWED = (
     # passing -P to the bootstrap script.
     # The GRAINS['os'] which are in this list, requires that extra argument.
     'SmartOS',
-    'Suse'  # Need to revisit openSUSE and SLES for the proper OS grain.
+    'Suse',  # Need to revisit openSUSE and SLES for the proper OS grain.
+    #'SUSE  Enterprise Server',  # Only SuSE SLES SP1 requires -P (commented out)
 )
 
 # SLES grains differ from openSUSE, let do a 1:1 direct mapping
 CLEANUP_COMMANDS_BY_OS_FAMILY['SUSE  Enterprise Server'] = \
     CLEANUP_COMMANDS_BY_OS_FAMILY['Suse']
+
+
+IS_SUSE_SP1 = False
+if os.path.isfile('/etc/SuSE-release'):
+    match = re.search(
+        r'PATCHLEVEL(?:[\s]+)=(?:[\s]+)1',
+        open('/etc/SuSE-release').read()
+    )
+    IS_SUSE_SP1 = match is not None
+
+
+def requires_pip_based_installations():
+    if GRAINS['os'] == 'SUSE  Enterprise Server' and IS_SUSE_SP1:
+        # Only SuSE SLES SP1 requires -P
+        return True
+    if GRAINS['os'] not in OS_REQUIRES_PIP_ALLOWED:
+        return False
+    return True
 
 
 class InstallationTestCase(BootstrapTestCase):
@@ -150,7 +170,7 @@ class InstallationTestCase(BootstrapTestCase):
             self.skipTest('\'/bin/bash\' was not found on this system')
 
         args = []
-        if GRAINS['os'] in OS_REQUIRES_PIP_ALLOWED:
+        if requires_pip_based_installations():
             args.append('-P')
 
         self.assert_script_result(
@@ -178,7 +198,7 @@ class InstallationTestCase(BootstrapTestCase):
 
     def test_install_using_sh(self):
         args = []
-        if GRAINS['os'] in OS_REQUIRES_PIP_ALLOWED:
+        if requires_pip_based_installations():
             args.append('-P')
 
         self.assert_script_result(
@@ -205,7 +225,7 @@ class InstallationTestCase(BootstrapTestCase):
 
     def test_install_explicit_stable(self):
         args = []
-        if GRAINS['os'] in OS_REQUIRES_PIP_ALLOWED:
+        if requires_pip_based_installations():
             args.append('-P')
 
         args.append('stable')
@@ -234,7 +254,7 @@ class InstallationTestCase(BootstrapTestCase):
 
     def test_install_daily(self):
         args = []
-        if GRAINS['os'] in OS_REQUIRES_PIP_ALLOWED:
+        if requires_pip_based_installations():
             args.append('-P')
 
         args.append('daily')
@@ -267,7 +287,7 @@ class InstallationTestCase(BootstrapTestCase):
 
     def test_install_stable_piped_through_sh(self):
         args = 'cat {0} | sh '.format(BOOTSTRAP_SCRIPT_PATH).split()
-        if GRAINS['os'] in OS_REQUIRES_PIP_ALLOWED:
+        if requires_pip_based_installations():
             args.extend('-s -- -P'.split())
 
         self.assert_script_result(
@@ -324,7 +344,7 @@ class InstallationTestCase(BootstrapTestCase):
 
     def test_install_specific_git_tag(self):
         args = []
-        if GRAINS['os'] in OS_REQUIRES_PIP_ALLOWED:
+        if requires_pip_based_installations():
             args.append('-P')
 
         args.extend(['git', CURRENT_SALT_STABLE_VERSION])
@@ -353,7 +373,7 @@ class InstallationTestCase(BootstrapTestCase):
 
     def test_install_specific_git_sha(self):
         args = []
-        if GRAINS['os'] in OS_REQUIRES_PIP_ALLOWED:
+        if requires_pip_based_installations():
             args.append('-P')
 
         args.extend(['git', '2b6264de62bf2ea221bb2c0b8af36dfcfaafe7cf'])
@@ -430,7 +450,7 @@ class InstallationTestCase(BootstrapTestCase):
         Test if installing a salt-master works
         '''
         args = []
-        if GRAINS['os'] in OS_REQUIRES_PIP_ALLOWED:
+        if requires_pip_based_installations():
             args.append('-P')
 
         args.extend(['-N', '-M'])
@@ -474,7 +494,7 @@ class InstallationTestCase(BootstrapTestCase):
 #            )
 #
 #        args = []
-#        if GRAINS['os'] in OS_REQUIRES_PIP_ALLOWED:
+#        if requires_pip_based_installations():
 #            args.append('-P')
 #
 #        args.extend(['-N', '-S'])
@@ -506,7 +526,7 @@ class InstallationTestCase(BootstrapTestCase):
         Check if distributions which require `-P` to allow pip to install
         packages, fail if that flag is not passed.
         '''
-        if GRAINS['os'] not in OS_REQUIRES_PIP_ALLOWED:
+        if not requires_pip_based_installations():
             self.skipTest(
                 'Distribution {0} does not require the extra `-P` flag'.format(
                     GRAINS['os']
@@ -560,7 +580,7 @@ class InstallationTestCase(BootstrapTestCase):
         # Now run the bootstrap script over an existing git checkout and see
         # if it properly updates.
         args = []
-        if GRAINS['os'] in OS_REQUIRES_PIP_ALLOWED:
+        if requires_pip_based_installations():
             args.append('-P')
 
         args.extend(['git', CURRENT_SALT_STABLE_VERSION])

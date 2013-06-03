@@ -562,7 +562,7 @@ class InstallationTestCase(BootstrapTestCase):
             0,
             self.run_script(
                 script=None,
-                args=('git', 'clone', 'https://github.com/saltstack/salt.git'),
+                args=('git', 'clone', 'git://github.com/saltstack/salt.git'),
                 cwd='/tmp/git',
                 timeout=15 * 60,
                 stream_stds=True

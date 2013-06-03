@@ -155,11 +155,11 @@ class InstallationTestCase(BootstrapTestCase):
         for glob_rule in ('/tmp/git',
                           '/usr/lib*/python*/*-packages/salt*',
                           '/usr/bin/salt*',
-                          #'/usr/lib/systemd/system/salt*',
+                          '/usr/lib/systemd/system/salt*',
                           '/etc/init*/salt*',
                           '/usr/share/doc/salt*',
                           '/usr/share/man/man*/salt*',
-                          #'/var/*/salt*',
+                          '/var/*/salt*',
                           '/etc/salt'
                           ):
             for entry in glob.glob(glob_rule):

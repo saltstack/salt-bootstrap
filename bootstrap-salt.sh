@@ -1945,6 +1945,12 @@ install_arch_linux_git_deps() {
 
 install_arch_linux_stable() {
     pacman -Sy --noconfirm pacman || return 1
+    # See https://mailman.archlinux.org/pipermail/arch-dev-public/2013-June/025043.html
+    # to know why we're ignoring below.
+    pacman -Syu --noconfirm --ignore filesystem,bash || return 1
+    pacman -S --noconfirm bash || return 1
+    pacman -Su --noconfirm || return 1
+    # We can now resume regular salt update
     pacman -Syu --noconfirm salt || return 1
     return 0
 }

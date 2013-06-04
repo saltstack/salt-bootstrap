@@ -160,6 +160,7 @@ class InstallationTestCase(BootstrapTestCase):
                           '/usr/bin/salt*',
                           '/usr/lib*/python*/*-packages/salt*',
                           '/usr/lib/systemd/system/salt*',
+                          '/usr/local/etc/salt*',
                           '/usr/share/doc/salt*',
                           '/usr/share/man/man*/salt*',
                           '/var/*/salt*',

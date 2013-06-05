@@ -2186,6 +2186,7 @@ install_smartos_deps() {
 
     # Install dependencies by hand. The were not getting pulled-in by the
     # setup install functions below.
+    easy_install-2.7 pip
     pip-2.7 install PyYaml Jinja2 M2Crypto msgpack-python pyzmq>=2.1.9 || return 1
 
     # Let's trigger config_salt()

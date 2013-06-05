@@ -2173,7 +2173,7 @@ install_smartos_deps() {
     echowarn "PyZMQ will be installed using pip"
 
     # Use the distribution persistent /etc directory
-    SALT_ETC_DIR=/opt/local/etc/salt
+    SALT_ETC_DIR=${BS_SALT_ETC_DIR:-/opt/local/etc/salt}
 
     ZEROMQ_VERSION='3.2.3'
     pkgin -y in libtool-base autoconf automake libuuid gcc-compiler gmake \

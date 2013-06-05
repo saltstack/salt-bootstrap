@@ -690,6 +690,12 @@ __gather_sunos_system_info() {
                     ;;
                 *Solaris*)
                     DISTRO_NAME="Solaris"
+                    # Let's make sure we not actually on a Joyent's SmartOS VM since some releases
+                    # don't have SmartOS in `/etc/release`, only `Solaris`
+                    $(uname -v | grep joyent >/dev/null 2>&1)
+                    if [ $? -eq 0 ]; then
+                        DISTRO_NAME="SmartOS"
+                    fi
                     break
                     ;;
                 *NexentaCore*)

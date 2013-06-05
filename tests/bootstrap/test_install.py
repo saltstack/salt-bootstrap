@@ -50,13 +50,14 @@ CLEANUP_COMMANDS_BY_OS_FAMILY = {
     ],
     'Solaris': [
         'pkgin -y rm libtool-base autoconf automake libuuid gcc-compiler '
-        'gmake py27-setuptools py27-yaml py27-crypto swig',
+        'gmake py27-setuptools py27-crypto swig',
         'svcs network/salt-minion >/dev/null 2>&1 && svcadm disable network/salt-minion >/dev/null 2>&1 || exit 0',
         'svcs network/salt-minion >/dev/null 2>&1 && svccfg delete network/salt-minion >/dev/null 2>&1 || exit 0',
         'svcs network/salt-master >/dev/null 2>&1 && svcadm disable network/salt-master >/dev/null 2>&1 || exit 0',
         'svcs network/salt-master >/dev/null 2>&1 && svccfg delete network/salt-master >/dev/null 2>&1 || exit 0',
         'svcs network/salt-syndic >/dev/null 2>&1 && svcadm disable network/salt-syndic >/dev/null 2>&1 || exit 0',
-        'svcs network/salt-syndic >/dev/null 2>&1 && svccfg delete network/salt-syndic >/dev/null 2>&1 || exit 0'
+        'svcs network/salt-syndic >/dev/null 2>&1 && svccfg delete network/salt-syndic >/dev/null 2>&1 || exit 0',
+        'pip-2.7 uninstall -y PyYaml Jinja2 M2Crypto msgpack-python pyzmq'
     ],
     'Suse': [
         '(zypper --non-interactive se -i salt-master || exit 0 && zypper --non-interactive remove salt-master && exit 0) || '
@@ -152,15 +153,18 @@ class InstallationTestCase(BootstrapTestCase):
             )
 
         # As a last resort, by hand house cleaning...
-        for glob_rule in ('/tmp/git',
-                          '/usr/lib*/python*/*-packages/salt*',
-                          '/usr/bin/salt*',
-                          '/usr/lib/systemd/system/salt*',
+        for glob_rule in ('/etc/salt',
                           '/etc/init*/salt*',
+                          '/etc/rc.d/init.d/salt*',
+                          '/lib/systemd/system/salt*',
+                          '/tmp/git',
+                          '/usr/bin/salt*',
+                          '/usr/lib*/python*/*-packages/salt*',
+                          '/usr/lib/systemd/system/salt*',
+                          '/usr/local/etc/salt*',
                           '/usr/share/doc/salt*',
                           '/usr/share/man/man*/salt*',
                           '/var/*/salt*',
-                          '/etc/salt'
                           ):
             for entry in glob.glob(glob_rule):
                 if os.path.isfile(entry):
@@ -562,7 +566,7 @@ class InstallationTestCase(BootstrapTestCase):
             0,
             self.run_script(
                 script=None,
-                args=('git', 'clone', 'https://github.com/saltstack/salt.git'),
+                args=('git', 'clone', 'git://github.com/saltstack/salt.git'),
                 cwd='/tmp/git',
                 timeout=15 * 60,
                 stream_stds=True

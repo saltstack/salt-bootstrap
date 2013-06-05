@@ -690,6 +690,12 @@ __gather_sunos_system_info() {
                     ;;
                 *Solaris*)
                     DISTRO_NAME="Solaris"
+                    # Let's make sure we not actually on a Joyent's SmartOS VM since some releases
+                    # don't have SmartOS in `/etc/release`, only `Solaris`
+                    $(uname -v | grep joyent >/dev/null 2>&1)
+                    if [ $? -eq 0 ]; then
+                        DISTRO_NAME="SmartOS"
+                    fi
                     break
                     ;;
                 *NexentaCore*)
@@ -1945,6 +1951,12 @@ install_arch_linux_git_deps() {
 
 install_arch_linux_stable() {
     pacman -Sy --noconfirm pacman || return 1
+    # See https://mailman.archlinux.org/pipermail/arch-dev-public/2013-June/025043.html
+    # to know why we're ignoring below.
+    pacman -Syu --noconfirm --ignore filesystem,bash || return 1
+    pacman -S --noconfirm bash || return 1
+    pacman -Su --noconfirm || return 1
+    # We can now resume regular salt update
     pacman -Syu --noconfirm salt || return 1
     return 0
 }
@@ -2160,9 +2172,12 @@ install_smartos_deps() {
     check_pip_allowed
     echowarn "PyZMQ will be installed using pip"
 
-    ZEROMQ_VERSION='3.2.2'
+    # Use the distribution persistent /etc directory
+    SALT_ETC_DIR=${BS_SALT_ETC_DIR:-/opt/local/etc/salt}
+
+    ZEROMQ_VERSION='3.2.3'
     pkgin -y in libtool-base autoconf automake libuuid gcc-compiler gmake \
-        python27 py27-pip py27-setuptools py27-yaml py27-crypto swig || return 1
+        python27 py27-setuptools py27-crypto swig || return 1
     [ -d zeromq-${ZEROMQ_VERSION} ] || (
         wget http://download.zeromq.org/zeromq-${ZEROMQ_VERSION}.tar.gz &&
         tar -xvf zeromq-${ZEROMQ_VERSION}.tar.gz
@@ -2172,7 +2187,10 @@ install_smartos_deps() {
     make || return 1
     make install || return 1
 
-    pip-2.7 install pyzmq || return 1
+    # Install dependencies by hand. The were not getting pulled-in by the
+    # setup install functions below.
+    easy_install-2.7 pip
+    pip-2.7 install PyYaml Jinja2 M2Crypto msgpack-python pyzmq>=2.1.9 || return 1
 
     # Let's trigger config_salt()
     if [ "$TEMP_CONFIG_DIR" = "null" ]; then

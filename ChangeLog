@@ -1,3 +1,9 @@
+Version 1.5.6:
+	* Distro Support Fixed:
+		* Arch now upgrades it's system package properly as suggested on their mailing list.
+		* Fixed SmartOS detection(was being detected as Solaris) and bootstrapping.
+
+
 Version 1.5.5:
 	* Fixed a variable error in the new pre-seed feature.
 	* Fixed the destination path to where the pre-seed minions keys should be copied.

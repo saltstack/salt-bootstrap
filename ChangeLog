@@ -1,7 +1,7 @@
 Version 1.5.6:
 	* Distro Support Fixed:
 		* Arch now upgrades it's system package properly as suggested on their mailing list.
-		* Fixed SmartOS detection(was being detected as Solaris)
+		* Fixed SmartOS detection(was being detected as Solaris) and bootstrapping.
 
 
 Version 1.5.5:

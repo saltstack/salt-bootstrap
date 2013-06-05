@@ -2174,7 +2174,7 @@ install_smartos_deps() {
 
     ZEROMQ_VERSION='3.2.2'
     pkgin -y in libtool-base autoconf automake libuuid gcc-compiler gmake \
-        python27 py27-pip py27-setuptools py27-yaml py27-crypto swig || return 1
+        python27 py27-setuptools py27-yaml py27-crypto swig || return 1
     [ -d zeromq-${ZEROMQ_VERSION} ] || (
         wget http://download.zeromq.org/zeromq-${ZEROMQ_VERSION}.tar.gz &&
         tar -xvf zeromq-${ZEROMQ_VERSION}.tar.gz
@@ -2184,7 +2184,9 @@ install_smartos_deps() {
     make || return 1
     make install || return 1
 
-    pip-2.7 install pyzmq || return 1
+    # Install dependencies by hand. The were not getting pulled-in by the
+    # setup install functions below.
+    easy_install-2.7 Jinja2 M2Crypto msgpack-python pyzmq>=2.1.9 || return 1
 
     # Let's trigger config_salt()
     if [ "$TEMP_CONFIG_DIR" = "null" ]; then
@@ -2222,7 +2224,7 @@ install_smartos_git_deps() {
 }
 
 install_smartos_stable() {
-    USE_SETUPTOOLS=1 pip-2.7 install salt || return 1
+    USE_SETUPTOOLS=1 easy_install-2.7 install salt || return 1
     return 0
 }
 

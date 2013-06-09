@@ -2116,8 +2116,8 @@ install_freebsd_git() {
     /usr/local/sbin/pkg install -y sysutils/py-salt || return 1
 
     # Let's keep the rc.d files before deleting the pacakge
-    mkdir /tmp/rc-scripts
-    cp /usr/local/etc/rc.d/salt* /tmp/rc-scripts
+    mkdir /tmp/rc-scripts || return 1
+    cp /usr/local/etc/rc.d/salt* /tmp/rc-scripts || return 1
 
     # Let's delete the package
     /usr/local/sbin/pkg delete -y sysutils/py-salt || return 1
@@ -2126,10 +2126,10 @@ install_freebsd_git() {
     /usr/local/bin/python setup.py install || return 1
 
     # Restore the rc.d scripts
-    cp /tmp/rc-scripts/salt* /usr/local/etc/rc.d/
+    cp /tmp/rc-scripts/salt* /usr/local/etc/rc.d/ || return 1
 
     # Delete our temporary scripts directory
-    rm -rf /tmp/rc-scripts
+    rm -rf /tmp/rc-scripts || return 1
 
     # And we're good to go
     return 0

@@ -2104,6 +2104,10 @@ install_freebsd_git_deps() {
         CONFIG_SALT_FUNC="config_salt"
     fi
 
+    # Since we will be relying on the ports rc.d files, let's
+    # set SALT_ETC_DIR to ports default
+    SALT_ETC_DIR=${BS_SALT_ETC_DIR:-/usr/local/etc/salt}
+
     return 0
 }
 

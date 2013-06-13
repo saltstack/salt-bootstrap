@@ -227,7 +227,7 @@ PIP_ALLOWED=${BS_PIP_ALLOWED:-$BS_FALSE}
 SALT_ETC_DIR=${BS_SALT_ETC_DIR:-/etc/salt}
 FORCE_OVERWRITE=${BS_FORCE_OVERWRITE:-$BS_FALSE}
 
-while getopts ":hvnDc:k:MSNCP" opt
+while getopts ":hvnDc:k:MSNCPF" opt
 do
   case "${opt}" in
 

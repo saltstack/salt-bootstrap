@@ -2195,7 +2195,9 @@ install_smartos_deps() {
     SALT_ETC_DIR=${BS_SALT_ETC_DIR:-/opt/local/etc/salt}
 
     ZEROMQ_VERSION='3.2.3'
-    pkgin -y in libtool-base autoconf automake libuuid gcc-compiler gmake \
+    (pkg_info gcc-compiler > /dev/null 2>&1 && pkgin -y in gcc-compiler) || \
+        (pkg_info gcc47 > /dev/null 2>&1 && pkgin -y in gcc47) || return 1
+    pkgin -y in libtool-base autoconf automake libuuid gmake \
         python27 py27-setuptools py27-crypto swig || return 1
     [ -d zeromq-${ZEROMQ_VERSION} ] || (
         wget http://download.zeromq.org/zeromq-${ZEROMQ_VERSION}.tar.gz &&

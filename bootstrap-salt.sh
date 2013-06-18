@@ -2991,18 +2991,6 @@ if [ $CONFIG_ONLY -eq $BS_FALSE ]; then
     fi
 fi
 
-
-# Configure Salt
-if [ "$TEMP_CONFIG_DIR" != "null" ] && [ "$CONFIG_SALT_FUNC" != "null" ]; then
-    echoinfo "Running ${CONFIG_SALT_FUNC}()"
-    $CONFIG_SALT_FUNC
-    if [ $? -ne 0 ]; then
-        echoerror "Failed to run ${CONFIG_SALT_FUNC}()!!!"
-        exit 1
-    fi
-fi
-
-
 # Pre-Seed master keys
 if [ "$TEMP_KEYS_DIR" != "null" ] && [ "$PRESEED_MASTER_FUNC" != "null" ]; then
     echoinfo "Running ${PRESEED_MASTER_FUNC}()"
@@ -3012,7 +3000,6 @@ if [ "$TEMP_KEYS_DIR" != "null" ] && [ "$PRESEED_MASTER_FUNC" != "null" ]; then
         exit 1
     fi
 fi
-
 
 # Install Salt
 if [ $CONFIG_ONLY -eq $BS_FALSE ]; then
@@ -3025,6 +3012,15 @@ if [ $CONFIG_ONLY -eq $BS_FALSE ]; then
     fi
 fi
 
+# Configure Salt
+if [ "$TEMP_CONFIG_DIR" != "null" ] && [ "$CONFIG_SALT_FUNC" != "null" ]; then
+    echoinfo "Running ${CONFIG_SALT_FUNC}()"
+    $CONFIG_SALT_FUNC
+    if [ $? -ne 0 ]; then
+        echoerror "Failed to run ${CONFIG_SALT_FUNC}()!!!"
+        exit 1
+    fi
+fi
 
 # Run any post install function, Only execute function is not in config mode only
 if [ $CONFIG_ONLY -eq $BS_FALSE ] && [ "$POST_INSTALL_FUNC" != "null" ]; then

@@ -1,6 +1,8 @@
 Version 1.5.6:
 	* Distro Support Fixed:
 		* Arch now upgrades it's system package properly as suggested on their mailing list.
+		* Arch now moves back any configuration files provided by the user renamed by pacman on the 
+		installation process.
 		* Fixed SmartOS detection(was being detected as Solaris) and bootstrapping. Fixed SmartOS 
 		different gcc package names for different package sets.
 		* Fixed FreeBSD git based installations(no rc.d scripts were available).

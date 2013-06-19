@@ -1967,12 +1967,21 @@ install_arch_linux_git() {
 }
 
 install_arch_linux_post() {
+
     for fname in minion master syndic; do
 
         # Skip if not meant to be installed
         [ $fname = "minion" ] && [ $INSTALL_MINION -eq $BS_FALSE ] && continue
         [ $fname = "master" ] && [ $INSTALL_MASTER -eq $BS_FALSE ] && continue
         [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq $BS_FALSE ] && continue
+
+        # Since Arch's pacman renames configuration files
+        if [ "$TEMP_CONFIG_DIR" != "null" ] && [ -f $SALT_ETC_DIR/$fname.pacorig ]; then
+            # Since a configuration directory was provided, it also means that any
+            # configuration file copied was renamed by Arch, see:
+            #   https://wiki.archlinux.org/index.php/Pacnew_and_Pacsave_Files#.pacorig
+            copyfile $SALT_ETC_DIR/$fname.pacorig $SALT_ETC_DIR/$fname $BS_TRUE
+        fi
 
         if [ -f /usr/bin/systemctl ]; then
             # Using systemd

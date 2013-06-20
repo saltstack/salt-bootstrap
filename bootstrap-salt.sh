@@ -226,6 +226,8 @@ CONFIG_ONLY=$BS_FALSE
 PIP_ALLOWED=${BS_PIP_ALLOWED:-$BS_FALSE}
 SALT_ETC_DIR=${BS_SALT_ETC_DIR:-/etc/salt}
 FORCE_OVERWRITE=${BS_FORCE_OVERWRITE:-$BS_FALSE}
+# __SIMPLIFY_VERSION is mostly used in Solaris based distributions
+__SIMPLIFY_VERSION=$BS_TRUE
 
 while getopts ":hvnDc:k:MSNCPF" opt
 do
@@ -706,6 +708,12 @@ __gather_sunos_system_info() {
                     DISTRO_NAME="SmartOS"
                     break
                     ;;
+                *OmniOS*)
+                    DISTRO_NAME="OmniOS"
+                    DISTRO_VERSION=$(echo "$line" | awk '{print $3}'
+                    __SIMPLIFY_VERSION=$BS_FALSE
+                    break
+                    ;;
             esac
         done < /etc/release
     fi
@@ -799,7 +807,7 @@ if [ $INSTALL_SYNDIC -eq $BS_TRUE ]; then
 fi
 
 # Simplify version naming on functions
-if [ "x${DISTRO_VERSION}" = "x" ]; then
+if [ "x${DISTRO_VERSION}" = "x" ] || [ $__SIMPLIFY_VERSION -eq $BS_FALSE ]; then
     DISTRO_MAJOR_VERSION=""
     DISTRO_MINOR_VERSION=""
     PREFIXED_DISTRO_MAJOR_VERSION=""

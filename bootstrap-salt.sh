@@ -710,7 +710,7 @@ __gather_sunos_system_info() {
                     ;;
                 *OmniOS*)
                     DISTRO_NAME="OmniOS"
-                    DISTRO_VERSION=$(echo "$line" | awk '{print $3}'
+                    DISTRO_VERSION=$(echo "$line" | awk '{print $3}')
                     __SIMPLIFY_VERSION=$BS_FALSE
                     break
                     ;;

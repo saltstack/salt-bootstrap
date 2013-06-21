@@ -27,6 +27,7 @@ ScriptName="bootstrap-salt.sh"
 #   * BS_ECHO_DEBUG:      If 1 enable debug echo which can also be set by -D
 #   * BS_SALT_ETC_DIR:    Defaults to /etc/salt
 #   * BS_FORCE_OVERWRITE: Force overriding copied files(config, init.d, etc)
+#   * BS_GENTOO_USE_BINHOST: If 1 add `--getbinpkg` to gentoo's emerge
 #===============================================================================
 
 
@@ -226,6 +227,7 @@ CONFIG_ONLY=$BS_FALSE
 PIP_ALLOWED=${BS_PIP_ALLOWED:-$BS_FALSE}
 SALT_ETC_DIR=${BS_SALT_ETC_DIR:-/etc/salt}
 FORCE_OVERWRITE=${BS_FORCE_OVERWRITE:-$BS_FALSE}
+BS_GENTOO_USE_BINHOST=${BS_GENTOO_USE_BINHOST:-$BS_FALSE}
 # __SIMPLIFY_VERSION is mostly used in Solaris based distributions
 __SIMPLIFY_VERSION=$BS_TRUE
 
@@ -2614,6 +2616,12 @@ install_suse_11_restart_daemons() {
 #
 #    Gentoo Install Functions.
 #
+__gentoo_use_binhost() {
+    if [ $BS_GENTOO_USE_BINHOST -eq $BS_TRUE ]; then
+        return "--getbinpkg"
+    fi
+    return ""
+}
 
 __gentoo_set_ackeys() {
     GENTOO_ACKEYS=""
@@ -2630,7 +2638,7 @@ __gentoo_set_ackeys() {
             GENTOO_ACKEYS="/etc/portage/package.accept_keywords/salt"
         else
             # We could use accept_keywords env, but this likely indicates a bigger problem.
-            echo "Error: /etc/portage/package.accept_keywords is neither directory nor file."
+            echoerror "/etc/portage/package.accept_keywords is neither directory nor file."
             return 1
         fi
     fi
@@ -2658,7 +2666,7 @@ __gentoo_post_dep() {
 # End of bootstrap-salt keywords.
 _EOT
     # the -o option asks it to emerge the deps but not the package.
-    emerge -vo salt
+    emerge ${__gentoo_use_binhost} -vo salt
 }
 
 install_gentoo_deps() {
@@ -2675,7 +2683,7 @@ install_gentoo_git_deps() {
 }
 
 install_gentoo_stable() {
-    emerge -v salt || return 1
+    emerge ${__gentoo_use_binhost} -v salt || return 1
 }
 
 install_gentoo_git() {

@@ -5,6 +5,7 @@ before_install:
   - sudo apt-get autoremove -y -o DPkg::Options::=--force-confold --purge
   - sudo ls -lah /etc/apt/sources.list.d/
   - sudo rm -f /etc/apt/sources.list.d/travis_ci_zeromq3-source.list
+  - pip install git+https://github.com/saltstack/salt-testing.git#egg=SaltTesting
 
 script:
   - BS_ECHO_DEBUG=1 sudo -E python tests/runtests.py -vv

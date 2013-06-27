@@ -27,7 +27,7 @@ HTML_OUTPUT_DIR = os.environ.get(
     )
 )
 
-from salttesting.parser import SaltTestingParser, print_header
+from salttesting.parser import SaltTestingParser
 from salttesting.ext.os_data import GRAINS
 
 
@@ -97,12 +97,10 @@ def main():
         status = parser.run_integration_suite('Installation', '*install.py')
         overall_status.append(status)
 
-    parser.print_overall_testsuite_report()
-
     if overall_status.count(False) > 0:
-        # We have some false results, the test-suite failed
-        parser.exit(1)
-    parser.exit(0)
+        parser.finalize(1)
+    parser.finalize(0)
+
 
 if __name__ == '__main__':
     main()

@@ -226,6 +226,7 @@ ECHO_DEBUG=${BS_ECHO_DEBUG:-$BS_FALSE}
 CONFIG_ONLY=$BS_FALSE
 PIP_ALLOWED=${BS_PIP_ALLOWED:-$BS_FALSE}
 SALT_ETC_DIR=${BS_SALT_ETC_DIR:-/etc/salt}
+PKI_DIR=${SALT_ETC_DIR}/pki
 FORCE_OVERWRITE=${BS_FORCE_OVERWRITE:-$BS_FALSE}
 BS_GENTOO_USE_BINHOST=${BS_GENTOO_USE_BINHOST:-$BS_FALSE}
 # __SIMPLIFY_VERSION is mostly used in Solaris based distributions
@@ -2733,8 +2734,6 @@ config_salt() {
 
     CONFIGURED_ANYTHING=$BS_FALSE
 
-    PKI_DIR=$SALT_ETC_DIR/pki
-
     # Let's create the necessary directories
     [ -d $SALT_ETC_DIR ] || mkdir $SALT_ETC_DIR || return 1
     [ -d $PKI_DIR ] || mkdir -p $PKI_DIR && chmod 700 $PKI_DIR || return 1
@@ -2882,7 +2881,7 @@ for DEP_FUNC_NAME in $(__strip_duplicates $DEP_FUNC_NAMES); do
         break
     fi
 done
-
+echodebug "DEPS_INSTALL_FUNC=${DEPS_INSTALL_FUNC}"
 
 # Let's get the minion config function
 CONFIG_SALT_FUNC="null"
@@ -2903,11 +2902,11 @@ if [ "$TEMP_CONFIG_DIR" != "null" ]; then
         fi
     done
 fi
-
+echodebug "CONFIG_SALT_FUNC=${CONFIG_SALT_FUNC}"
 
 # Let's get the pre-seed master function
 PRESEED_MASTER_FUNC="null"
-if [ "$TEMP_CONFIG_DIR" != "null" ]; then
+if [ "$TEMP_KEYS_DIR" != "null" ]; then
 
     PRESEED_FUNC_NAMES="preseed_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}_${ITYPE}_master"
     PRESEED_FUNC_NAMES="$PRESEED_FUNC_NAMES preseed_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}${PREFIXED_DISTRO_MINOR_VERSION}_${ITYPE}_master"
@@ -2924,7 +2923,7 @@ if [ "$TEMP_CONFIG_DIR" != "null" ]; then
         fi
     done
 fi
-
+echodebug "PRESEED_MASTER_FUNC=${PRESEED_MASTER_FUNC}"
 
 # Let's get the install function
 INSTALL_FUNC_NAMES="install_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}_${ITYPE}"
@@ -2938,7 +2937,7 @@ for FUNC_NAME in $(__strip_duplicates $INSTALL_FUNC_NAMES); do
         break
     fi
 done
-
+echodebug "INSTALL_FUNC=${INSTALL_FUNC}"
 
 # Let's get the post install function
 POST_FUNC_NAMES="install_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}_${ITYPE}_post"
@@ -2956,7 +2955,7 @@ for FUNC_NAME in $(__strip_duplicates $POST_FUNC_NAMES); do
         break
     fi
 done
-
+echodebug "POST_INSTALL_FUNC=${POST_INSTALL_FUNC}"
 
 # Let's get the start daemons install function
 STARTDAEMONS_FUNC_NAMES="install_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}_${ITYPE}_restart_daemons"
@@ -2973,7 +2972,7 @@ for FUNC_NAME in $(__strip_duplicates $STARTDAEMONS_FUNC_NAMES); do
         break
     fi
 done
-
+echodebug "STARTDAEMONS_INSTALL_FUNC=${STARTDAEMONS_INSTALL_FUNC}"
 
 # Let's get the daemons running check function.
 DAEMONS_RUNNING_FUNC="null"
@@ -2991,7 +2990,7 @@ for FUNC_NAME in $(__strip_duplicates $DAEMONS_RUNNING_FUNC_NAMES); do
         break
     fi
 done
-
+echodebug "DAEMONS_RUNNING_FUNC=${DAEMONS_RUNNING_FUNC}"
 
 
 if [ $DEPS_INSTALL_FUNC = "null" ]; then

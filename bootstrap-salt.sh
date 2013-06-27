@@ -226,6 +226,7 @@ ECHO_DEBUG=${BS_ECHO_DEBUG:-$BS_FALSE}
 CONFIG_ONLY=$BS_FALSE
 PIP_ALLOWED=${BS_PIP_ALLOWED:-$BS_FALSE}
 SALT_ETC_DIR=${BS_SALT_ETC_DIR:-/etc/salt}
+PKI_DIR=${SALT_ETC_DIR}/pki
 FORCE_OVERWRITE=${BS_FORCE_OVERWRITE:-$BS_FALSE}
 BS_GENTOO_USE_BINHOST=${BS_GENTOO_USE_BINHOST:-$BS_FALSE}
 # __SIMPLIFY_VERSION is mostly used in Solaris based distributions
@@ -2732,8 +2733,6 @@ config_salt() {
     [ "$TEMP_CONFIG_DIR" = "null" ] && return
 
     CONFIGURED_ANYTHING=$BS_FALSE
-
-    PKI_DIR=$SALT_ETC_DIR/pki
 
     # Let's create the necessary directories
     [ -d $SALT_ETC_DIR ] || mkdir $SALT_ETC_DIR || return 1

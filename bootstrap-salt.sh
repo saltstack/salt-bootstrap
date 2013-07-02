@@ -2738,6 +2738,13 @@ config_salt() {
     [ -d $SALT_ETC_DIR ] || mkdir $SALT_ETC_DIR || return 1
     [ -d $PKI_DIR ] || mkdir -p $PKI_DIR && chmod 700 $PKI_DIR || return 1
 
+    # Copy the grains file if found
+    if [ -f "$TEMP_CONFIG_DIR/grains" ]; then
+        echodebug "Moving provided grains file from $TEMP_CONFIG_DIR/grains to $SALT_ETC_DIR/grains"
+        movefile "$TEMP_CONFIG_DIR/grains" "$SALT_ETC_DIR/grains" || return 1
+        CONFIGURED_ANYTHING=$BS_TRUE
+    fi
+
     if [ $INSTALL_MINION -eq $BS_TRUE ]; then
         # Create the PKI directory
         [ -d $PKI_DIR/minion ] || mkdir -p $PKI_DIR/minion && chmod 700 $PKI_DIR/minion || return 1

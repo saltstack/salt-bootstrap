@@ -1,4 +1,8 @@
 Version 1.5.6:
+	* If there's a `grains` file on the provided temporary configuration directory, move it to the 
+	proper place while moving the minion configuration file.
+	* Gentoo bootstraps can now use a bin host to provide binary packages, just set the 
+	`BS_GENTOO_USE_BINHOST` environment variable.
 	* Distro Support Fixed:
 		* Arch now upgrades it's system package properly as suggested on their mailing list.
 		* Arch now moves back any configuration files provided by the user renamed by pacman on the 

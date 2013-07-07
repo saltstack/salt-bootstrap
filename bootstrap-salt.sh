@@ -2100,6 +2100,8 @@ install_freebsd_9_stable_deps() {
 
     # Lets set SALT_ETC_DIR to ports default
     SALT_ETC_DIR=${BS_SALT_ETC_DIR:-/usr/local/etc/salt}
+    # We also need to redefine the PKI directory
+    PKI_DIR=${SALT_ETC_DIR}/pki
 
     return 0
 }
@@ -2127,6 +2129,8 @@ install_freebsd_git_deps() {
     # Since we will be relying on the ports rc.d files, let's
     # set SALT_ETC_DIR to ports default
     SALT_ETC_DIR=${BS_SALT_ETC_DIR:-/usr/local/etc/salt}
+    # We also need to redefine the PKI directory
+    PKI_DIR=${SALT_ETC_DIR}/pki
 
     return 0
 }

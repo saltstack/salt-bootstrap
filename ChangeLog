@@ -10,6 +10,8 @@ Version 1.5.6:
 		* Fixed SmartOS detection(was being detected as Solaris) and bootstrapping. Fixed SmartOS 
 		different gcc package names for different package sets.
 		* Fixed FreeBSD git based installations(no rc.d scripts were available).
+		* Fixed FreeBSD not re-evaluating the `PKI_DIR` variable since the `SALT_ETC_DIR` was 
+		redefined.
 
 
 Version 1.5.5:

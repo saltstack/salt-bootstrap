@@ -143,7 +143,7 @@ usage() {
   -M  Also install salt-master
   -S  Also install salt-syndic
   -N  Do not install salt-minion
-  -C  Only run the configuration function. This option automaticaly
+  -C  Only run the configuration function. This option automatically
       bypasses any installation.
   -P  Allow pip based installations. On some distributions the required salt
       packages or its dependencies are not available as a package for that

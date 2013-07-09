@@ -572,6 +572,10 @@ __gather_linux_system_info() {
             # lsb_release -si returns "openSUSE project" on openSUSE 12.3
             DISTRO_NAME="opensuse"
         fi
+        if [ "${DISTRO_NAME}" = "SUSE LINUX" ]; then
+            # lsb_release -si returns "SUSE LINUX" on SLES 11 SP3
+            DISTRO_NAME="suse"
+        fi
         rv=$(lsb_release -sr)
         [ "${rv}x" != "x" ] && DISTRO_VERSION=$(__parse_version_string "$rv")
     elif [ -f /etc/lsb-release ]; then

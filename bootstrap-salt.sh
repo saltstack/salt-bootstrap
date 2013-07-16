@@ -963,7 +963,7 @@ movefile() {
         exit 1
     fi
 
-    if [ $BS_KEEP_TEMP_FILES -eq $BS_TRUE ]; then
+    if [ $KEEP_TEMP_FILES -eq $BS_TRUE ]; then
         # We're being told not to move files, instead copy them so we can keep
         # them around
         echodebug "Since BS_KEEP_TEMP_FILES=1 we're copying files instead of moving them"

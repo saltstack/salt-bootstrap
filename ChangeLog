@@ -5,6 +5,9 @@ Version 1.5.6:
 	`BS_GENTOO_USE_BINHOST` environment variable.
 	* If `BS_KEEP_TEMP_FILES=1` is found on the environment, the script will copy the files instead 
 	of moving them.
+	* There were still some `mv` and `cp` occurrences which were not using their `{move,copy}file` 
+	replacements which ended up on now respecting the "Do not override existing configuration" 
+	feature.
 	* Distro Support Fixed:
 		* Arch now upgrades it's system package properly as suggested on their mailing list.
 		* Arch now moves back any configuration files provided by the user renamed by pacman on the 

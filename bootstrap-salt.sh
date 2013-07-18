@@ -2156,7 +2156,7 @@ install_freebsd_9_stable() {
 install_freebsd_git() {
     /usr/local/sbin/pkg install -y sysutils/py-salt || return 1
 
-    # Let's keep the rc.d files before deleting the pacakge
+    # Let's keep the rc.d files before deleting the package
     mkdir /tmp/rc-scripts || return 1
     cp /usr/local/etc/rc.d/salt* /tmp/rc-scripts || return 1
 
@@ -2313,11 +2313,11 @@ install_smartos_post() {
             fi
             svccfg import $TEMP_CONFIG_DIR/salt-$fname.xml
             if [ "${VIRTUAL_TYPE}" = "global" ]; then
-                if [ ! -d $smf_dir ]; then
-                    mkdir -p $smf_dir && cp $TEMP_CONFIG_DIR/salt-$fname.xml $smf_dir/
+                if [ ! -d "$smf_dir" ]; then
+                    mkdir -p "$smf_dir" || return 1
                 fi
-                if [ ! -f $smf_dir/salt-$fname.xml ]; then
-                    cp $TEMP_CONFIG_DIR/salt-$fname.xml $smf_dir/
+                if [ ! -f "$smf_dir/salt-$fname.xml" ]; then
+                    copyfile "$TEMP_CONFIG_DIR/salt-$fname.xml" "$smf_dir/" || return 1
                 fi
             fi
         fi
@@ -2339,10 +2339,10 @@ install_smartos_git_post() {
             svccfg import ${SALT_GIT_CHECKOUT_DIR}/pkg/smartos/salt-$fname.xml
             if [ "${VIRTUAL_TYPE}" = "global" ]; then
                 if [ ! -d $smf_dir ]; then
-                    mkdir -p $smf_dir && cp ${SALT_GIT_CHECKOUT_DIR}/pkg/smartos/salt-$fname.xml $smf_dir/
+                    mkdir -p "$smf_dir"
                 fi
-                if [ ! -f $smf_dir/salt-$fname.xml ]; then
-                    cp ${SALT_GIT_CHECKOUT_DIR}/pkg/smartos/salt-$fname.xml $smf_dir/
+                if [ ! -f "$smf_dir/salt-$fname.xml" ]; then
+                    copyfile "${SALT_GIT_CHECKOUT_DIR}/pkg/smartos/salt-$fname.xml" "$smf_dir/"
                 fi
             fi
         fi
@@ -2768,18 +2768,18 @@ config_salt() {
 
         # Copy the minions configuration if found
         if [ -f "$TEMP_CONFIG_DIR/minion" ]; then
-            mv "$TEMP_CONFIG_DIR/minion" $SALT_ETC_DIR || return 1
+            movefile "$TEMP_CONFIG_DIR/minion" $SALT_ETC_DIR || return 1
             CONFIGURED_ANYTHING=$BS_TRUE
         fi
 
         # Copy the minion's keys if found
         if [ -f "$TEMP_CONFIG_DIR/minion.pem" ]; then
-            mv "$TEMP_CONFIG_DIR/minion.pem" $PKI_DIR/minion/ || return 1
+            movefile "$TEMP_CONFIG_DIR/minion.pem" $PKI_DIR/minion/ || return 1
             chmod 400 $PKI_DIR/minion/minion.pem || return 1
             CONFIGURED_ANYTHING=$BS_TRUE
         fi
         if [ -f "$TEMP_CONFIG_DIR/minion.pub" ]; then
-            mv "$TEMP_CONFIG_DIR/minion.pub" $PKI_DIR/minion/ || return 1
+            movefile "$TEMP_CONFIG_DIR/minion.pub" $PKI_DIR/minion/ || return 1
             chmod 664 $PKI_DIR/minion/minion.pub || return 1
             CONFIGURED_ANYTHING=$BS_TRUE
         fi
@@ -2792,18 +2792,18 @@ config_salt() {
 
         # Copy the masters configuration if found
         if [ -f "$TEMP_CONFIG_DIR/master" ]; then
-            mv "$TEMP_CONFIG_DIR/master" $SALT_ETC_DIR || return 1
+            movefile "$TEMP_CONFIG_DIR/master" $SALT_ETC_DIR || return 1
             CONFIGURED_ANYTHING=$BS_TRUE
         fi
 
         # Copy the master's keys if found
         if [ -f "$TEMP_CONFIG_DIR/master.pem" ]; then
-            mv "$TEMP_CONFIG_DIR/master.pem" $PKI_DIR/master/ || return 1
+            movefile "$TEMP_CONFIG_DIR/master.pem" $PKI_DIR/master/ || return 1
             chmod 400 $PKI_DIR/master/master.pem || return 1
             CONFIGURED_ANYTHING=$BS_TRUE
         fi
         if [ -f "$TEMP_CONFIG_DIR/master.pub" ]; then
-            mv "$TEMP_CONFIG_DIR/master.pub" $PKI_DIR/master/ || return 1
+            movefile "$TEMP_CONFIG_DIR/master.pub" $PKI_DIR/master/ || return 1
             chmod 664 $PKI_DIR/master/master.pub || return 1
             CONFIGURED_ANYTHING=$BS_TRUE
         fi

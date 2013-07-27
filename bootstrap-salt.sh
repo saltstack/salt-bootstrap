@@ -778,8 +778,37 @@ __gather_system_info() {
     esac
 
 }
-__gather_system_info
 
+#---  FUNCTION  ----------------------------------------------------------------
+#          NAME:  __ubuntu_derivatives_translation
+#   DESCRIPTION:  Map Ubuntu derivatives to their Ubuntu base versions.
+#                 If distro has a known Ubuntu base version, use those install
+#                 functions by pretending to be Ubuntu (i.e. change global vars)
+#-------------------------------------------------------------------------------
+__ubuntu_derivatives_translation() {
+    UBUNTU_DERIVATIVES="(trisquel|linuxmint)"
+    # Mappings
+    trisquel_6_ubuntu_base="12.04"
+    linuxmint_13_ubuntu_base="12.04"
+    linuxmint_14_ubuntu_base="12.10"
+    #linuxmint_15_ubuntu_base="13.04"
+    # Bug preventing add-apt-repository from working on Mint 15:
+    # https://bugs.launchpad.net/linuxmint/+bug/1198751
+
+    # Translate Ubuntu derivatives to their base Ubuntu version
+    match=$(echo $DISTRO_NAME_L | egrep ${UBUNTU_DERIVATIVES})
+    if [ "x${match}" != "x" ]; then
+        _major="$(echo $DISTRO_VERSION | sed 's/^\([0-9]*\).*/\1/g')"
+        _ubuntu_version="$(eval echo \$${1}_${_major}_ubuntu_base)"
+        if [ "x$_ubuntu_version" != "x" ]; then
+            echodebug "Detected Ubuntu $_ubuntu_version derivative"
+            DISTRO_NAME_L="ubuntu"
+            DISTRO_VERSION="$_ubuntu_version"
+        fi
+    fi
+}
+
+__gather_system_info
 
 echo
 echoinfo "System Information:"
@@ -815,6 +844,12 @@ if [ $INSTALL_SYNDIC -eq $BS_TRUE ]; then
     fi
 fi
 
+# Simplify distro name naming on functions
+DISTRO_NAME_L=$(echo $DISTRO_NAME | tr '[:upper:]' '[:lower:]' | sed 's/[^a-zA-Z0-9_ ]//g' | sed -re 's/([[:space:]])+/_/g')
+
+# For Ubuntu derivatives, pretend to be their Ubuntu base version
+__ubuntu_derivatives_translation "$DISTRO_NAME_L"
+
 # Simplify version naming on functions
 if [ "x${DISTRO_VERSION}" = "x" ] || [ $__SIMPLIFY_VERSION -eq $BS_FALSE ]; then
     DISTRO_MAJOR_VERSION=""
@@ -833,13 +868,9 @@ else
         PREFIXED_DISTRO_MINOR_VERSION=""
     fi
 fi
-# Simplify distro name naming on functions
-DISTRO_NAME_L=$(echo $DISTRO_NAME | tr '[:upper:]' '[:lower:]' | sed 's/[^a-zA-Z0-9_ ]//g' | sed -re 's/([[:space:]])+/_/g')
-
 
 # Only Ubuntu has daily packages, let's let users know about that
-if ([ "${DISTRO_NAME_L}" != "ubuntu" ] && [ $ITYPE = "daily" ]) && \
-   ([ "${DISTRO_NAME_L}" != "trisquel" ] && [ $ITYPE = "daily" ]); then
+if ([ "${DISTRO_NAME_L}" != "ubuntu" ] && [ $ITYPE = "daily" ]); then
     echoerror "${DISTRO_NAME} does not have daily packages support"
     exit 1
 fi
@@ -1212,73 +1243,6 @@ install_ubuntu_restart_daemons() {
 }
 #
 #   End of Ubuntu Install Functions
-#
-##############################################################################
-
-##############################################################################
-#
-#   Trisquel(Ubuntu) Install Functions
-#
-#   Trisquel 6.0 is based on Ubuntu 12.04
-#
-install_trisquel_6_stable_deps() {
-    apt-get update
-    __apt_get_noinput python-software-properties || return 1
-    add-apt-repository -y ppa:saltstack/salt || return 1
-    apt-get update
-    return 0
-}
-
-install_trisquel_6_daily_deps() {
-    apt-get update
-    __apt_get_noinput python-software-properties || return 1
-    add-apt-repository -y ppa:saltstack/salt-daily || return 1
-    apt-get update
-    return 0
-}
-
-install_trisquel_6_git_deps() {
-    install_trisquel_6_stable_deps || return 1
-    __apt_get_noinput git-core python-yaml python-m2crypto python-crypto \
-        msgpack-python python-zmq python-jinja2 || return 1
-
-    __git_clone_and_checkout || return 1
-
-    # Let's trigger config_salt()
-    if [ "$TEMP_CONFIG_DIR" = "null" ]; then
-        TEMP_CONFIG_DIR="${SALT_GIT_CHECKOUT_DIR}/conf/"
-        CONFIG_SALT_FUNC="config_salt"
-    fi
-
-    return 0
-}
-
-install_trisquel_6_stable() {
-    install_ubuntu_stable || return 1
-    return 0
-}
-
-install_trisquel_6_daily() {
-    install_ubuntu_daily || return 1
-    return 0
-}
-
-install_trisquel_6_git() {
-    install_ubuntu_git || return 1
-    return 0
-}
-
-install_trisquel_git_post() {
-    install_ubuntu_git_post || return 1
-    return 0
-}
-
-install_trisquel_restart_daemons() {
-    install_ubuntu_restart_daemons || return 1
-    return 0
-}
-#
-#   End of Tristel(Ubuntu) Install Functions
 #
 ##############################################################################
 

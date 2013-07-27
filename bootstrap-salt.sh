@@ -778,8 +778,37 @@ __gather_system_info() {
     esac
 
 }
-__gather_system_info
 
+#---  FUNCTION  ----------------------------------------------------------------
+#          NAME:  __ubuntu_derivatives_translation
+#   DESCRIPTION:  Map Ubuntu derivatives to their Ubuntu base versions.
+#                 If distro has a known Ubuntu base version, use those install
+#                 functions by pretending to be Ubuntu (i.e. change global vars)
+#-------------------------------------------------------------------------------
+__ubuntu_derivatives_translation() {
+    UBUNTU_DERIVATIVES="(trisquel|linuxmint)"
+    # Mappings
+    trisquel_6_ubuntu_base="12.04"
+    linuxmint_13_ubuntu_base="12.04"
+    linuxmint_14_ubuntu_base="12.10"
+    #linuxmint_15_ubuntu_base="13.04"
+    # Bug preventing add-apt-repository from working on Mint 15:
+    # https://bugs.launchpad.net/linuxmint/+bug/1198751
+
+    # Translate Ubuntu derivatives to their base Ubuntu version
+    match=$(echo $DISTRO_NAME_L | egrep ${UBUNTU_DERIVATIVES})
+    if [ "x${match}" != "x" ]; then
+        _major="$(echo $DISTRO_VERSION | sed 's/^\([0-9]*\).*/\1/g')"
+        _ubuntu_version="$(eval echo \$${1}_${_major}_ubuntu_base)"
+        if [ "x$_ubuntu_version" != "x" ]; then
+            echodebug "Detected Ubuntu $_ubuntu_version derivative"
+            DISTRO_NAME_L="ubuntu"
+            DISTRO_VERSION="$_ubuntu_version"
+        fi
+    fi
+}
+
+__gather_system_info
 
 echo
 echoinfo "System Information:"
@@ -815,6 +844,12 @@ if [ $INSTALL_SYNDIC -eq $BS_TRUE ]; then
     fi
 fi
 
+# Simplify distro name naming on functions
+DISTRO_NAME_L=$(echo $DISTRO_NAME | tr '[:upper:]' '[:lower:]' | sed 's/[^a-zA-Z0-9_ ]//g' | sed -re 's/([[:space:]])+/_/g')
+
+# For Ubuntu derivatives, pretend to be their Ubuntu base version
+__ubuntu_derivatives_translation "$DISTRO_NAME_L"
+
 # Simplify version naming on functions
 if [ "x${DISTRO_VERSION}" = "x" ] || [ $__SIMPLIFY_VERSION -eq $BS_FALSE ]; then
     DISTRO_MAJOR_VERSION=""
@@ -833,13 +868,9 @@ else
         PREFIXED_DISTRO_MINOR_VERSION=""
     fi
 fi
-# Simplify distro name naming on functions
-DISTRO_NAME_L=$(echo $DISTRO_NAME | tr '[:upper:]' '[:lower:]' | sed 's/[^a-zA-Z0-9_ ]//g' | sed -re 's/([[:space:]])+/_/g')
-
 
 # Only Ubuntu has daily packages, let's let users know about that
-if ([ "${DISTRO_NAME_L}" != "ubuntu" ] && [ $ITYPE = "daily" ]) && \
-   ([ "${DISTRO_NAME_L}" != "trisquel" ] && [ $ITYPE = "daily" ]); then
+if ([ "${DISTRO_NAME_L}" != "ubuntu" ] && [ $ITYPE = "daily" ]); then
     echoerror "${DISTRO_NAME} does not have daily packages support"
     exit 1
 fi
@@ -1154,15 +1185,14 @@ install_ubuntu_git_post() {
         [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq $BS_FALSE ] && continue
 
         if [ -f /sbin/initctl ]; then
+            _upstart_conf="/etc/init/salt-$fname.conf"
             # We have upstart support
             echodebug "There's upstart support"
-            /sbin/initctl status salt-$fname > /dev/null 2>&1
-
-            if [ $? -eq 1 ]; then
+            if [ ! -f $_upstart_conf ]; then
                 # upstart does not know about our service, let's copy the proper file
-                echowarn "Upstart does not apparently know anything about salt-$fname"
-                echodebug "Copying ${SALT_GIT_CHECKOUT_DIR}/pkg/salt-$fname.upstart to /etc/init/salt-$fname.conf"
-                copyfile ${SALT_GIT_CHECKOUT_DIR}/pkg/salt-$fname.upstart /etc/init/salt-$fname.conf
+                echowarn "Upstart does not appear to know about salt-$fname"
+                echodebug "Copying ${SALT_GIT_CHECKOUT_DIR}/pkg/salt-$fname.upstart to $_upstart_conf"
+                copyfile ${SALT_GIT_CHECKOUT_DIR}/pkg/salt-$fname.upstart $_upstart_conf
             fi
         # No upstart support in Ubuntu!?
         elif [ -f ${SALT_GIT_CHECKOUT_DIR}/debian/salt-$fname.init ]; then
@@ -1178,6 +1208,8 @@ install_ubuntu_git_post() {
 }
 
 install_ubuntu_restart_daemons() {
+    # Ensure upstart configs are loaded
+    [ -f /sbin/initctl ] && /sbin/initctl reload-configuration
     for fname in minion master syndic; do
 
         # Skip if not meant to be installed
@@ -1187,28 +1219,16 @@ install_ubuntu_restart_daemons() {
 
         if [ -f /sbin/initctl ]; then
             echodebug "There's upstart support while checking salt-$fname"
-            status salt-$fname || echowarn "Upstart does not apparently know anything about salt-$fname"
-            sleep 1
-            if [ $? -eq 0 ]; then
-                echodebug "Upstart apparently knows about salt-$fname"
-                # upstart knows about this service, let's stop and start it.
-                # We could restart but earlier versions of the upstart script
-                # did not support restart, so, it's safer this way
 
-                # Is it running???
-                status salt-$fname | grep -q running
-                # If it is, stop it
-                if [ $? -eq 0 ]; then
-                    sleep 1
-                    stop salt-$fname || (echodebug "Failed to stop salt-$fname" && return 1)
-                fi
-                # Now start it
-                sleep 1
-                start salt-$fname
-                [ $? -eq 0 ] && continue
-                # We failed to start the service, let's test the SysV code bellow
-                echodebug "Failed to start salt-$fname"
+            status salt-$fname 2>/dev/null | grep -q running
+            if [ $? -eq 0 ]; then
+                stop salt-$fname || (echodebug "Failed to stop salt-$fname" && return 1)
             fi
+
+            start salt-$fname
+            [ $? -eq 0 ] && continue
+            # We failed to start the service, let's test the SysV code below
+            echodebug "Failed to start salt-$fname using Upstart"
         fi
 
         if [ ! -f /etc/init.d/salt-$fname ]; then
@@ -1223,73 +1243,6 @@ install_ubuntu_restart_daemons() {
 }
 #
 #   End of Ubuntu Install Functions
-#
-##############################################################################
-
-##############################################################################
-#
-#   Trisquel(Ubuntu) Install Functions
-#
-#   Trisquel 6.0 is based on Ubuntu 12.04
-#
-install_trisquel_6_stable_deps() {
-    apt-get update
-    __apt_get_noinput python-software-properties || return 1
-    add-apt-repository -y ppa:saltstack/salt || return 1
-    apt-get update
-    return 0
-}
-
-install_trisquel_6_daily_deps() {
-    apt-get update
-    __apt_get_noinput python-software-properties || return 1
-    add-apt-repository -y ppa:saltstack/salt-daily || return 1
-    apt-get update
-    return 0
-}
-
-install_trisquel_6_git_deps() {
-    install_trisquel_6_stable_deps || return 1
-    __apt_get_noinput git-core python-yaml python-m2crypto python-crypto \
-        msgpack-python python-zmq python-jinja2 || return 1
-
-    __git_clone_and_checkout || return 1
-
-    # Let's trigger config_salt()
-    if [ "$TEMP_CONFIG_DIR" = "null" ]; then
-        TEMP_CONFIG_DIR="${SALT_GIT_CHECKOUT_DIR}/conf/"
-        CONFIG_SALT_FUNC="config_salt"
-    fi
-
-    return 0
-}
-
-install_trisquel_6_stable() {
-    install_ubuntu_stable || return 1
-    return 0
-}
-
-install_trisquel_6_daily() {
-    install_ubuntu_daily || return 1
-    return 0
-}
-
-install_trisquel_6_git() {
-    install_ubuntu_git || return 1
-    return 0
-}
-
-install_trisquel_git_post() {
-    install_ubuntu_git_post || return 1
-    return 0
-}
-
-install_trisquel_restart_daemons() {
-    install_ubuntu_restart_daemons || return 1
-    return 0
-}
-#
-#   End of Tristel(Ubuntu) Install Functions
 #
 ##############################################################################
 

@@ -1154,15 +1154,14 @@ install_ubuntu_git_post() {
         [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq $BS_FALSE ] && continue
 
         if [ -f /sbin/initctl ]; then
+            _upstart_conf="/etc/init/salt-$fname.conf"
             # We have upstart support
             echodebug "There's upstart support"
-            /sbin/initctl status salt-$fname > /dev/null 2>&1
-
-            if [ $? -eq 1 ]; then
+            if [ ! -f $_upstart_conf ]; then
                 # upstart does not know about our service, let's copy the proper file
-                echowarn "Upstart does not apparently know anything about salt-$fname"
-                echodebug "Copying ${SALT_GIT_CHECKOUT_DIR}/pkg/salt-$fname.upstart to /etc/init/salt-$fname.conf"
-                copyfile ${SALT_GIT_CHECKOUT_DIR}/pkg/salt-$fname.upstart /etc/init/salt-$fname.conf
+                echowarn "Upstart does not appear to know about salt-$fname"
+                echodebug "Copying ${SALT_GIT_CHECKOUT_DIR}/pkg/salt-$fname.upstart to $_upstart_conf"
+                copyfile ${SALT_GIT_CHECKOUT_DIR}/pkg/salt-$fname.upstart $_upstart_conf
             fi
         # No upstart support in Ubuntu!?
         elif [ -f ${SALT_GIT_CHECKOUT_DIR}/debian/salt-$fname.init ]; then
@@ -1178,6 +1177,8 @@ install_ubuntu_git_post() {
 }
 
 install_ubuntu_restart_daemons() {
+    # Ensure upstart configs are loaded
+    [ -f /sbin/initctl ] && /sbin/initctl reload-configuration
     for fname in minion master syndic; do
 
         # Skip if not meant to be installed
@@ -1187,28 +1188,16 @@ install_ubuntu_restart_daemons() {
 
         if [ -f /sbin/initctl ]; then
             echodebug "There's upstart support while checking salt-$fname"
-            status salt-$fname || echowarn "Upstart does not apparently know anything about salt-$fname"
-            sleep 1
-            if [ $? -eq 0 ]; then
-                echodebug "Upstart apparently knows about salt-$fname"
-                # upstart knows about this service, let's stop and start it.
-                # We could restart but earlier versions of the upstart script
-                # did not support restart, so, it's safer this way
 
-                # Is it running???
-                status salt-$fname | grep -q running
-                # If it is, stop it
-                if [ $? -eq 0 ]; then
-                    sleep 1
-                    stop salt-$fname || (echodebug "Failed to stop salt-$fname" && return 1)
-                fi
-                # Now start it
-                sleep 1
-                start salt-$fname
-                [ $? -eq 0 ] && continue
-                # We failed to start the service, let's test the SysV code bellow
-                echodebug "Failed to start salt-$fname"
+            status salt-$fname 2>/dev/null | grep -q running
+            if [ $? -eq 0 ]; then
+                stop salt-$fname || (echodebug "Failed to stop salt-$fname" && return 1)
             fi
+
+            start salt-$fname
+            [ $? -eq 0 ] && continue
+            # We failed to start the service, let's test the SysV code below
+            echodebug "Failed to start salt-$fname using Upstart"
         fi
 
         if [ ! -f /etc/init.d/salt-$fname ]; then

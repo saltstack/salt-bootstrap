@@ -1593,7 +1593,7 @@ install_centos_stable_deps() {
         return 1
     fi
 
-    yum -y update || return 1
+    yum -y makecache || return 1
 
     if [ $DISTRO_MAJOR_VERSION -eq 5 ]; then
         yum -y install PyYAML python26-m2crypto m2crypto python26 \

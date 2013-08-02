@@ -3026,6 +3026,13 @@ if [ $CONFIG_ONLY -eq $BS_FALSE ]; then
     fi
 fi
 
+# Ensure that the cachedir exists
+# (Workaround for https://github.com/saltstack/salt/issues/6502)
+if [ $INSTALL_MINION -eq $BS_TRUE ]; then
+    if [ ! -d /var/cache/salt/minion/proc ]; then
+        echodebug "Making cachedir"
+        mkdir -p /var/cache/salt/minion/proc
+fi
 
 # Run any post install function, Only execute function is not in config mode only
 if [ $CONFIG_ONLY -eq $BS_FALSE ] && [ "$POST_INSTALL_FUNC" != "null" ]; then

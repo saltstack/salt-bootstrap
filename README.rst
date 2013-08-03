@@ -226,6 +226,7 @@ Supported Operating Systems
 - Fedora 17/18
 - FreeBSD 9.1
 - Gentoo
+- Linaro
 - Linux Mint 13/14
 - OpenSUSE 12.x
 - Red Hat 5/6

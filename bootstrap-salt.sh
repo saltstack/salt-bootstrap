@@ -786,7 +786,7 @@ __gather_system_info() {
 #                 functions by pretending to be Ubuntu (i.e. change global vars)
 #-------------------------------------------------------------------------------
 __ubuntu_derivatives_translation() {
-    UBUNTU_DERIVATIVES="(trisquel|linuxmint)"
+    UBUNTU_DERIVATIVES="(trisquel|linuxmint|linaro)"
     # Mappings
     trisquel_6_ubuntu_base="12.04"
     linuxmint_13_ubuntu_base="12.04"
@@ -794,6 +794,7 @@ __ubuntu_derivatives_translation() {
     #linuxmint_15_ubuntu_base="13.04"
     # Bug preventing add-apt-repository from working on Mint 15:
     # https://bugs.launchpad.net/linuxmint/+bug/1198751
+    linaro_12_ubuntu_base="12.04"
 
     # Translate Ubuntu derivatives to their base Ubuntu version
     match=$(echo $DISTRO_NAME_L | egrep ${UBUNTU_DERIVATIVES})

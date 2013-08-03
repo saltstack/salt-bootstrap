@@ -3031,8 +3031,9 @@ fi
 # (Workaround for https://github.com/saltstack/salt/issues/6502)
 if [ $INSTALL_MINION -eq $BS_TRUE ]; then
     if [ ! -d /var/cache/salt/minion/proc ]; then
-        echodebug "Making cachedir"
+        echodebug "Creating salt's cachedir"
         mkdir -p /var/cache/salt/minion/proc
+    fi
 fi
 
 # Run any post install function, Only execute function is not in config mode only

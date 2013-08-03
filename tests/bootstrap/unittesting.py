@@ -15,39 +15,12 @@ import os
 import sys
 import fcntl
 import signal
-import tempfile
 import subprocess
 from datetime import datetime, timedelta
 
 # Import salt bootstrap libs
-from bootstrap.ext.os_data import GRAINS
-
-
-# support python < 2.7 via unittest2
-if sys.version_info < (2, 7):
-    try:
-        from unittest2 import (
-            TestLoader,
-            TextTestRunner,
-            TestCase,
-            expectedFailure,
-            TestSuite,
-            skipIf,
-            TestResult,
-        )
-    except ImportError:
-        raise SystemExit('You need to install unittest2 to run the salt tests')
-else:
-    from unittest import (
-        TestLoader,
-        TextTestRunner,
-        TestCase,
-        expectedFailure,
-        TestSuite,
-        skipIf,
-        TestResult,
-    )
-
+from salttesting import *
+from salttesting.ext.os_data import GRAINS
 
 TEST_DIR = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
 EXT_DIR = os.path.join(TEST_DIR, 'ext')

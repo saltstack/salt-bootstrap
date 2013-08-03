@@ -16,7 +16,7 @@
 #       CREATED: 10/15/2012 09:49:37 PM WEST
 #===============================================================================
 set -o nounset                              # Treat unset variables as an error
-ScriptVersion="1.5.5"
+ScriptVersion="1.5.6"
 ScriptName="bootstrap-salt.sh"
 
 #===============================================================================
@@ -26,7 +26,9 @@ ScriptName="bootstrap-salt.sh"
 #   * BS_PIP_ALLOWED:     If 1 enable pip based installations(if needed)
 #   * BS_ECHO_DEBUG:      If 1 enable debug echo which can also be set by -D
 #   * BS_SALT_ETC_DIR:    Defaults to /etc/salt
+#   * BS_KEEP_TEMP_FILES: If 1, don't move temporary files, instead copy them
 #   * BS_FORCE_OVERWRITE: Force overriding copied files(config, init.d, etc)
+#   * BS_GENTOO_USE_BINHOST: If 1 add `--getbinpkg` to gentoo's emerge
 #===============================================================================
 
 
@@ -142,7 +144,7 @@ usage() {
   -M  Also install salt-master
   -S  Also install salt-syndic
   -N  Do not install salt-minion
-  -C  Only run the configuration function. This option automaticaly
+  -C  Only run the configuration function. This option automatically
       bypasses any installation.
   -P  Allow pip based installations. On some distributions the required salt
       packages or its dependencies are not available as a package for that
@@ -216,6 +218,7 @@ __check_config_dir() {
 #-----------------------------------------------------------------------
 #  Handle command line arguments
 #-----------------------------------------------------------------------
+KEEP_TEMP_FILES=${BS_KEEP_TEMP_FILES:-$BS_FALSE}
 TEMP_CONFIG_DIR="null"
 TEMP_KEYS_DIR="null"
 INSTALL_MASTER=$BS_FALSE
@@ -225,9 +228,13 @@ ECHO_DEBUG=${BS_ECHO_DEBUG:-$BS_FALSE}
 CONFIG_ONLY=$BS_FALSE
 PIP_ALLOWED=${BS_PIP_ALLOWED:-$BS_FALSE}
 SALT_ETC_DIR=${BS_SALT_ETC_DIR:-/etc/salt}
+PKI_DIR=${SALT_ETC_DIR}/pki
 FORCE_OVERWRITE=${BS_FORCE_OVERWRITE:-$BS_FALSE}
+BS_GENTOO_USE_BINHOST=${BS_GENTOO_USE_BINHOST:-$BS_FALSE}
+# __SIMPLIFY_VERSION is mostly used in Solaris based distributions
+__SIMPLIFY_VERSION=$BS_TRUE
 
-while getopts ":hvnDc:k:MSNCP" opt
+while getopts ":hvnDc:k:MSNCPF" opt
 do
   case "${opt}" in
 
@@ -567,6 +574,10 @@ __gather_linux_system_info() {
             # lsb_release -si returns "openSUSE project" on openSUSE 12.3
             DISTRO_NAME="opensuse"
         fi
+        if [ "${DISTRO_NAME}" = "SUSE LINUX" ]; then
+            # lsb_release -si returns "SUSE LINUX" on SLES 11 SP3
+            DISTRO_NAME="suse"
+        fi
         rv=$(lsb_release -sr)
         [ "${rv}x" != "x" ] && DISTRO_VERSION=$(__parse_version_string "$rv")
     elif [ -f /etc/lsb-release ]; then
@@ -690,6 +701,12 @@ __gather_sunos_system_info() {
                     ;;
                 *Solaris*)
                     DISTRO_NAME="Solaris"
+                    # Let's make sure we not actually on a Joyent's SmartOS VM since some releases
+                    # don't have SmartOS in `/etc/release`, only `Solaris`
+                    $(uname -v | grep joyent >/dev/null 2>&1)
+                    if [ $? -eq 0 ]; then
+                        DISTRO_NAME="SmartOS"
+                    fi
                     break
                     ;;
                 *NexentaCore*)
@@ -698,6 +715,12 @@ __gather_sunos_system_info() {
                     ;;
                 *SmartOS*)
                     DISTRO_NAME="SmartOS"
+                    break
+                    ;;
+                *OmniOS*)
+                    DISTRO_NAME="OmniOS"
+                    DISTRO_VERSION=$(echo "$line" | awk '{print $3}')
+                    __SIMPLIFY_VERSION=$BS_FALSE
                     break
                     ;;
             esac
@@ -755,8 +778,38 @@ __gather_system_info() {
     esac
 
 }
-__gather_system_info
 
+#---  FUNCTION  ----------------------------------------------------------------
+#          NAME:  __ubuntu_derivatives_translation
+#   DESCRIPTION:  Map Ubuntu derivatives to their Ubuntu base versions.
+#                 If distro has a known Ubuntu base version, use those install
+#                 functions by pretending to be Ubuntu (i.e. change global vars)
+#-------------------------------------------------------------------------------
+__ubuntu_derivatives_translation() {
+    UBUNTU_DERIVATIVES="(trisquel|linuxmint|linaro)"
+    # Mappings
+    trisquel_6_ubuntu_base="12.04"
+    linuxmint_13_ubuntu_base="12.04"
+    linuxmint_14_ubuntu_base="12.10"
+    #linuxmint_15_ubuntu_base="13.04"
+    # Bug preventing add-apt-repository from working on Mint 15:
+    # https://bugs.launchpad.net/linuxmint/+bug/1198751
+    linaro_12_ubuntu_base="12.04"
+
+    # Translate Ubuntu derivatives to their base Ubuntu version
+    match=$(echo $DISTRO_NAME_L | egrep ${UBUNTU_DERIVATIVES})
+    if [ "x${match}" != "x" ]; then
+        _major="$(echo $DISTRO_VERSION | sed 's/^\([0-9]*\).*/\1/g')"
+        _ubuntu_version="$(eval echo \$${1}_${_major}_ubuntu_base)"
+        if [ "x$_ubuntu_version" != "x" ]; then
+            echodebug "Detected Ubuntu $_ubuntu_version derivative"
+            DISTRO_NAME_L="ubuntu"
+            DISTRO_VERSION="$_ubuntu_version"
+        fi
+    fi
+}
+
+__gather_system_info
 
 echo
 echoinfo "System Information:"
@@ -792,8 +845,14 @@ if [ $INSTALL_SYNDIC -eq $BS_TRUE ]; then
     fi
 fi
 
+# Simplify distro name naming on functions
+DISTRO_NAME_L=$(echo $DISTRO_NAME | tr '[:upper:]' '[:lower:]' | sed 's/[^a-zA-Z0-9_ ]//g' | sed -re 's/([[:space:]])+/_/g')
+
+# For Ubuntu derivatives, pretend to be their Ubuntu base version
+__ubuntu_derivatives_translation "$DISTRO_NAME_L"
+
 # Simplify version naming on functions
-if [ "x${DISTRO_VERSION}" = "x" ]; then
+if [ "x${DISTRO_VERSION}" = "x" ] || [ $__SIMPLIFY_VERSION -eq $BS_FALSE ]; then
     DISTRO_MAJOR_VERSION=""
     DISTRO_MINOR_VERSION=""
     PREFIXED_DISTRO_MAJOR_VERSION=""
@@ -810,13 +869,9 @@ else
         PREFIXED_DISTRO_MINOR_VERSION=""
     fi
 fi
-# Simplify distro name naming on functions
-DISTRO_NAME_L=$(echo $DISTRO_NAME | tr '[:upper:]' '[:lower:]' | sed 's/[^a-zA-Z0-9_ ]//g' | sed -re 's/([[:space:]])+/_/g')
-
 
 # Only Ubuntu has daily packages, let's let users know about that
-if ([ "${DISTRO_NAME_L}" != "ubuntu" ] && [ $ITYPE = "daily" ]) && \
-   ([ "${DISTRO_NAME_L}" != "trisquel" ] && [ $ITYPE = "daily" ]); then
+if ([ "${DISTRO_NAME_L}" != "ubuntu" ] && [ $ITYPE = "daily" ]); then
     echoerror "${DISTRO_NAME} does not have daily packages support"
     exit 1
 fi
@@ -938,6 +993,13 @@ movefile() {
         echoerror "Wrong number of arguments for movefile()"
         echoinfo "USAGE: movefile <source> <dest>  OR  movefile <source> <dest> <overwrite>"
         exit 1
+    fi
+
+    if [ $KEEP_TEMP_FILES -eq $BS_TRUE ]; then
+        # We're being told not to move files, instead copy them so we can keep
+        # them around
+        echodebug "Since BS_KEEP_TEMP_FILES=1 we're copying files instead of moving them"
+        return copyfile "$sfile" "$dfile" $overwrite
     fi
 
     # Does the source file exist?
@@ -1124,15 +1186,14 @@ install_ubuntu_git_post() {
         [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq $BS_FALSE ] && continue
 
         if [ -f /sbin/initctl ]; then
+            _upstart_conf="/etc/init/salt-$fname.conf"
             # We have upstart support
             echodebug "There's upstart support"
-            /sbin/initctl status salt-$fname > /dev/null 2>&1
-
-            if [ $? -eq 1 ]; then
+            if [ ! -f $_upstart_conf ]; then
                 # upstart does not know about our service, let's copy the proper file
-                echowarn "Upstart does not apparently know anything about salt-$fname"
-                echodebug "Copying ${SALT_GIT_CHECKOUT_DIR}/pkg/salt-$fname.upstart to /etc/init/salt-$fname.conf"
-                copyfile ${SALT_GIT_CHECKOUT_DIR}/pkg/salt-$fname.upstart /etc/init/salt-$fname.conf
+                echowarn "Upstart does not appear to know about salt-$fname"
+                echodebug "Copying ${SALT_GIT_CHECKOUT_DIR}/pkg/salt-$fname.upstart to $_upstart_conf"
+                copyfile ${SALT_GIT_CHECKOUT_DIR}/pkg/salt-$fname.upstart $_upstart_conf
             fi
         # No upstart support in Ubuntu!?
         elif [ -f ${SALT_GIT_CHECKOUT_DIR}/debian/salt-$fname.init ]; then
@@ -1148,6 +1209,8 @@ install_ubuntu_git_post() {
 }
 
 install_ubuntu_restart_daemons() {
+    # Ensure upstart configs are loaded
+    [ -f /sbin/initctl ] && /sbin/initctl reload-configuration
     for fname in minion master syndic; do
 
         # Skip if not meant to be installed
@@ -1157,28 +1220,16 @@ install_ubuntu_restart_daemons() {
 
         if [ -f /sbin/initctl ]; then
             echodebug "There's upstart support while checking salt-$fname"
-            status salt-$fname || echowarn "Upstart does not apparently know anything about salt-$fname"
-            sleep 1
-            if [ $? -eq 0 ]; then
-                echodebug "Upstart apparently knows about salt-$fname"
-                # upstart knows about this service, let's stop and start it.
-                # We could restart but earlier versions of the upstart script
-                # did not support restart, so, it's safer this way
 
-                # Is it running???
-                status salt-$fname | grep -q running
-                # If it is, stop it
-                if [ $? -eq 0 ]; then
-                    sleep 1
-                    stop salt-$fname || (echodebug "Failed to stop salt-$fname" && return 1)
-                fi
-                # Now start it
-                sleep 1
-                start salt-$fname
-                [ $? -eq 0 ] && continue
-                # We failed to start the service, let's test the SysV code bellow
-                echodebug "Failed to start salt-$fname"
+            status salt-$fname 2>/dev/null | grep -q running
+            if [ $? -eq 0 ]; then
+                stop salt-$fname || (echodebug "Failed to stop salt-$fname" && return 1)
             fi
+
+            start salt-$fname
+            [ $? -eq 0 ] && continue
+            # We failed to start the service, let's test the SysV code below
+            echodebug "Failed to start salt-$fname using Upstart"
         fi
 
         if [ ! -f /etc/init.d/salt-$fname ]; then
@@ -1193,73 +1244,6 @@ install_ubuntu_restart_daemons() {
 }
 #
 #   End of Ubuntu Install Functions
-#
-##############################################################################
-
-##############################################################################
-#
-#   Trisquel(Ubuntu) Install Functions
-#
-#   Trisquel 6.0 is based on Ubuntu 12.04
-#
-install_trisquel_6_stable_deps() {
-    apt-get update
-    __apt_get_noinput python-software-properties || return 1
-    add-apt-repository -y ppa:saltstack/salt || return 1
-    apt-get update
-    return 0
-}
-
-install_trisquel_6_daily_deps() {
-    apt-get update
-    __apt_get_noinput python-software-properties || return 1
-    add-apt-repository -y ppa:saltstack/salt-daily || return 1
-    apt-get update
-    return 0
-}
-
-install_trisquel_6_git_deps() {
-    install_trisquel_6_stable_deps || return 1
-    __apt_get_noinput git-core python-yaml python-m2crypto python-crypto \
-        msgpack-python python-zmq python-jinja2 || return 1
-
-    __git_clone_and_checkout || return 1
-
-    # Let's trigger config_salt()
-    if [ "$TEMP_CONFIG_DIR" = "null" ]; then
-        TEMP_CONFIG_DIR="${SALT_GIT_CHECKOUT_DIR}/conf/"
-        CONFIG_SALT_FUNC="config_salt"
-    fi
-
-    return 0
-}
-
-install_trisquel_6_stable() {
-    install_ubuntu_stable || return 1
-    return 0
-}
-
-install_trisquel_6_daily() {
-    install_ubuntu_daily || return 1
-    return 0
-}
-
-install_trisquel_6_git() {
-    install_ubuntu_git || return 1
-    return 0
-}
-
-install_trisquel_git_post() {
-    install_ubuntu_git_post || return 1
-    return 0
-}
-
-install_trisquel_restart_daemons() {
-    install_ubuntu_restart_daemons || return 1
-    return 0
-}
-#
-#   End of Tristel(Ubuntu) Install Functions
 #
 ##############################################################################
 
@@ -1945,6 +1929,12 @@ install_arch_linux_git_deps() {
 
 install_arch_linux_stable() {
     pacman -Sy --noconfirm pacman || return 1
+    # See https://mailman.archlinux.org/pipermail/arch-dev-public/2013-June/025043.html
+    # to know why we're ignoring below.
+    pacman -Syu --noconfirm --ignore filesystem,bash || return 1
+    pacman -S --noconfirm bash || return 1
+    pacman -Su --noconfirm || return 1
+    # We can now resume regular salt update
     pacman -Syu --noconfirm salt || return 1
     return 0
 }
@@ -1955,12 +1945,21 @@ install_arch_linux_git() {
 }
 
 install_arch_linux_post() {
+
     for fname in minion master syndic; do
 
         # Skip if not meant to be installed
         [ $fname = "minion" ] && [ $INSTALL_MINION -eq $BS_FALSE ] && continue
         [ $fname = "master" ] && [ $INSTALL_MASTER -eq $BS_FALSE ] && continue
         [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq $BS_FALSE ] && continue
+
+        # Since Arch's pacman renames configuration files
+        if [ "$TEMP_CONFIG_DIR" != "null" ] && [ -f $SALT_ETC_DIR/$fname.pacorig ]; then
+            # Since a configuration directory was provided, it also means that any
+            # configuration file copied was renamed by Arch, see:
+            #   https://wiki.archlinux.org/index.php/Pacnew_and_Pacsave_Files#.pacorig
+            copyfile $SALT_ETC_DIR/$fname.pacorig $SALT_ETC_DIR/$fname $BS_TRUE
+        fi
 
         if [ -f /usr/bin/systemctl ]; then
             # Using systemd
@@ -2068,6 +2067,8 @@ install_freebsd_9_stable_deps() {
 
     # Lets set SALT_ETC_DIR to ports default
     SALT_ETC_DIR=${BS_SALT_ETC_DIR:-/usr/local/etc/salt}
+    # We also need to redefine the PKI directory
+    PKI_DIR=${SALT_ETC_DIR}/pki
 
     return 0
 }
@@ -2092,6 +2093,12 @@ install_freebsd_git_deps() {
         CONFIG_SALT_FUNC="config_salt"
     fi
 
+    # Since we will be relying on the ports rc.d files, let's
+    # set SALT_ETC_DIR to ports default
+    SALT_ETC_DIR=${BS_SALT_ETC_DIR:-/usr/local/etc/salt}
+    # We also need to redefine the PKI directory
+    PKI_DIR=${SALT_ETC_DIR}/pki
+
     return 0
 }
 
@@ -2102,9 +2109,24 @@ install_freebsd_9_stable() {
 
 install_freebsd_git() {
     /usr/local/sbin/pkg install -y sysutils/py-salt || return 1
+
+    # Let's keep the rc.d files before deleting the package
+    mkdir /tmp/rc-scripts || return 1
+    cp /usr/local/etc/rc.d/salt* /tmp/rc-scripts || return 1
+
+    # Let's delete the package
     /usr/local/sbin/pkg delete -y sysutils/py-salt || return 1
 
+    # Install from git
     /usr/local/bin/python setup.py install || return 1
+
+    # Restore the rc.d scripts
+    cp /tmp/rc-scripts/salt* /usr/local/etc/rc.d/ || return 1
+
+    # Delete our temporary scripts directory
+    rm -rf /tmp/rc-scripts || return 1
+
+    # And we're good to go
     return 0
 }
 
@@ -2160,9 +2182,14 @@ install_smartos_deps() {
     check_pip_allowed
     echowarn "PyZMQ will be installed using pip"
 
-    ZEROMQ_VERSION='3.2.2'
-    pkgin -y in libtool-base autoconf automake libuuid gcc-compiler gmake \
-        python27 py27-pip py27-setuptools py27-yaml py27-crypto swig || return 1
+    # Use the distribution persistent /etc directory
+    SALT_ETC_DIR=${BS_SALT_ETC_DIR:-/opt/local/etc/salt}
+
+    ZEROMQ_VERSION='3.2.3'
+    (pkg_info gcc-compiler > /dev/null 2>&1 && pkgin -y in gcc-compiler) || \
+        (pkg_info gcc47 > /dev/null 2>&1 && pkgin -y in gcc47) || return 1
+    pkgin -y in libtool-base autoconf automake libuuid gmake \
+        python27 py27-setuptools py27-crypto swig || return 1
     [ -d zeromq-${ZEROMQ_VERSION} ] || (
         wget http://download.zeromq.org/zeromq-${ZEROMQ_VERSION}.tar.gz &&
         tar -xvf zeromq-${ZEROMQ_VERSION}.tar.gz
@@ -2172,7 +2199,10 @@ install_smartos_deps() {
     make || return 1
     make install || return 1
 
-    pip-2.7 install pyzmq || return 1
+    # Install dependencies by hand. The were not getting pulled-in by the
+    # setup install functions below.
+    easy_install-2.7 pip
+    pip-2.7 install PyYaml Jinja2 M2Crypto msgpack-python pyzmq>=2.1.9 || return 1
 
     # Let's trigger config_salt()
     if [ "$TEMP_CONFIG_DIR" = "null" ]; then
@@ -2237,11 +2267,11 @@ install_smartos_post() {
             fi
             svccfg import $TEMP_CONFIG_DIR/salt-$fname.xml
             if [ "${VIRTUAL_TYPE}" = "global" ]; then
-                if [ ! -d $smf_dir ]; then
-                    mkdir -p $smf_dir && cp $TEMP_CONFIG_DIR/salt-$fname.xml $smf_dir/
+                if [ ! -d "$smf_dir" ]; then
+                    mkdir -p "$smf_dir" || return 1
                 fi
-                if [ ! -f $smf_dir/salt-$fname.xml ]; then
-                    cp $TEMP_CONFIG_DIR/salt-$fname.xml $smf_dir/
+                if [ ! -f "$smf_dir/salt-$fname.xml" ]; then
+                    copyfile "$TEMP_CONFIG_DIR/salt-$fname.xml" "$smf_dir/" || return 1
                 fi
             fi
         fi
@@ -2263,10 +2293,10 @@ install_smartos_git_post() {
             svccfg import ${SALT_GIT_CHECKOUT_DIR}/pkg/smartos/salt-$fname.xml
             if [ "${VIRTUAL_TYPE}" = "global" ]; then
                 if [ ! -d $smf_dir ]; then
-                    mkdir -p $smf_dir && cp ${SALT_GIT_CHECKOUT_DIR}/pkg/smartos/salt-$fname.xml $smf_dir/
+                    mkdir -p "$smf_dir"
                 fi
-                if [ ! -f $smf_dir/salt-$fname.xml ]; then
-                    cp ${SALT_GIT_CHECKOUT_DIR}/pkg/smartos/salt-$fname.xml $smf_dir/
+                if [ ! -f "$smf_dir/salt-$fname.xml" ]; then
+                    copyfile "${SALT_GIT_CHECKOUT_DIR}/pkg/smartos/salt-$fname.xml" "$smf_dir/"
                 fi
             fi
         fi
@@ -2558,6 +2588,12 @@ install_suse_11_restart_daemons() {
 #
 #    Gentoo Install Functions.
 #
+__gentoo_use_binhost() {
+    if [ $BS_GENTOO_USE_BINHOST -eq $BS_TRUE ]; then
+        return "--getbinpkg"
+    fi
+    return ""
+}
 
 __gentoo_set_ackeys() {
     GENTOO_ACKEYS=""
@@ -2574,7 +2610,7 @@ __gentoo_set_ackeys() {
             GENTOO_ACKEYS="/etc/portage/package.accept_keywords/salt"
         else
             # We could use accept_keywords env, but this likely indicates a bigger problem.
-            echo "Error: /etc/portage/package.accept_keywords is neither directory nor file."
+            echoerror "/etc/portage/package.accept_keywords is neither directory nor file."
             return 1
         fi
     fi
@@ -2602,7 +2638,7 @@ __gentoo_post_dep() {
 # End of bootstrap-salt keywords.
 _EOT
     # the -o option asks it to emerge the deps but not the package.
-    emerge -vo salt
+    emerge ${__gentoo_use_binhost} -vo salt
 }
 
 install_gentoo_deps() {
@@ -2619,7 +2655,7 @@ install_gentoo_git_deps() {
 }
 
 install_gentoo_stable() {
-    emerge -v salt || return 1
+    emerge ${__gentoo_use_binhost} -v salt || return 1
 }
 
 install_gentoo_git() {
@@ -2669,11 +2705,16 @@ config_salt() {
 
     CONFIGURED_ANYTHING=$BS_FALSE
 
-    PKI_DIR=$SALT_ETC_DIR/pki
-
     # Let's create the necessary directories
     [ -d $SALT_ETC_DIR ] || mkdir $SALT_ETC_DIR || return 1
     [ -d $PKI_DIR ] || mkdir -p $PKI_DIR && chmod 700 $PKI_DIR || return 1
+
+    # Copy the grains file if found
+    if [ -f "$TEMP_CONFIG_DIR/grains" ]; then
+        echodebug "Moving provided grains file from $TEMP_CONFIG_DIR/grains to $SALT_ETC_DIR/grains"
+        movefile "$TEMP_CONFIG_DIR/grains" "$SALT_ETC_DIR/grains" || return 1
+        CONFIGURED_ANYTHING=$BS_TRUE
+    fi
 
     if [ $INSTALL_MINION -eq $BS_TRUE ]; then
         # Create the PKI directory
@@ -2681,18 +2722,18 @@ config_salt() {
 
         # Copy the minions configuration if found
         if [ -f "$TEMP_CONFIG_DIR/minion" ]; then
-            mv "$TEMP_CONFIG_DIR/minion" $SALT_ETC_DIR || return 1
+            movefile "$TEMP_CONFIG_DIR/minion" $SALT_ETC_DIR || return 1
             CONFIGURED_ANYTHING=$BS_TRUE
         fi
 
         # Copy the minion's keys if found
         if [ -f "$TEMP_CONFIG_DIR/minion.pem" ]; then
-            mv "$TEMP_CONFIG_DIR/minion.pem" $PKI_DIR/minion/ || return 1
+            movefile "$TEMP_CONFIG_DIR/minion.pem" $PKI_DIR/minion/ || return 1
             chmod 400 $PKI_DIR/minion/minion.pem || return 1
             CONFIGURED_ANYTHING=$BS_TRUE
         fi
         if [ -f "$TEMP_CONFIG_DIR/minion.pub" ]; then
-            mv "$TEMP_CONFIG_DIR/minion.pub" $PKI_DIR/minion/ || return 1
+            movefile "$TEMP_CONFIG_DIR/minion.pub" $PKI_DIR/minion/ || return 1
             chmod 664 $PKI_DIR/minion/minion.pub || return 1
             CONFIGURED_ANYTHING=$BS_TRUE
         fi
@@ -2705,18 +2746,18 @@ config_salt() {
 
         # Copy the masters configuration if found
         if [ -f "$TEMP_CONFIG_DIR/master" ]; then
-            mv "$TEMP_CONFIG_DIR/master" $SALT_ETC_DIR || return 1
+            movefile "$TEMP_CONFIG_DIR/master" $SALT_ETC_DIR || return 1
             CONFIGURED_ANYTHING=$BS_TRUE
         fi
 
         # Copy the master's keys if found
         if [ -f "$TEMP_CONFIG_DIR/master.pem" ]; then
-            mv "$TEMP_CONFIG_DIR/master.pem" $PKI_DIR/master/ || return 1
+            movefile "$TEMP_CONFIG_DIR/master.pem" $PKI_DIR/master/ || return 1
             chmod 400 $PKI_DIR/master/master.pem || return 1
             CONFIGURED_ANYTHING=$BS_TRUE
         fi
         if [ -f "$TEMP_CONFIG_DIR/master.pub" ]; then
-            mv "$TEMP_CONFIG_DIR/master.pub" $PKI_DIR/master/ || return 1
+            movefile "$TEMP_CONFIG_DIR/master.pub" $PKI_DIR/master/ || return 1
             chmod 664 $PKI_DIR/master/master.pub || return 1
             CONFIGURED_ANYTHING=$BS_TRUE
         fi
@@ -2818,7 +2859,7 @@ for DEP_FUNC_NAME in $(__strip_duplicates $DEP_FUNC_NAMES); do
         break
     fi
 done
-
+echodebug "DEPS_INSTALL_FUNC=${DEPS_INSTALL_FUNC}"
 
 # Let's get the minion config function
 CONFIG_SALT_FUNC="null"
@@ -2839,11 +2880,11 @@ if [ "$TEMP_CONFIG_DIR" != "null" ]; then
         fi
     done
 fi
-
+echodebug "CONFIG_SALT_FUNC=${CONFIG_SALT_FUNC}"
 
 # Let's get the pre-seed master function
 PRESEED_MASTER_FUNC="null"
-if [ "$TEMP_CONFIG_DIR" != "null" ]; then
+if [ "$TEMP_KEYS_DIR" != "null" ]; then
 
     PRESEED_FUNC_NAMES="preseed_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}_${ITYPE}_master"
     PRESEED_FUNC_NAMES="$PRESEED_FUNC_NAMES preseed_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}${PREFIXED_DISTRO_MINOR_VERSION}_${ITYPE}_master"
@@ -2860,7 +2901,7 @@ if [ "$TEMP_CONFIG_DIR" != "null" ]; then
         fi
     done
 fi
-
+echodebug "PRESEED_MASTER_FUNC=${PRESEED_MASTER_FUNC}"
 
 # Let's get the install function
 INSTALL_FUNC_NAMES="install_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}_${ITYPE}"
@@ -2874,7 +2915,7 @@ for FUNC_NAME in $(__strip_duplicates $INSTALL_FUNC_NAMES); do
         break
     fi
 done
-
+echodebug "INSTALL_FUNC=${INSTALL_FUNC}"
 
 # Let's get the post install function
 POST_FUNC_NAMES="install_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}_${ITYPE}_post"
@@ -2892,7 +2933,7 @@ for FUNC_NAME in $(__strip_duplicates $POST_FUNC_NAMES); do
         break
     fi
 done
-
+echodebug "POST_INSTALL_FUNC=${POST_INSTALL_FUNC}"
 
 # Let's get the start daemons install function
 STARTDAEMONS_FUNC_NAMES="install_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}_${ITYPE}_restart_daemons"
@@ -2909,7 +2950,7 @@ for FUNC_NAME in $(__strip_duplicates $STARTDAEMONS_FUNC_NAMES); do
         break
     fi
 done
-
+echodebug "STARTDAEMONS_INSTALL_FUNC=${STARTDAEMONS_INSTALL_FUNC}"
 
 # Let's get the daemons running check function.
 DAEMONS_RUNNING_FUNC="null"
@@ -2927,7 +2968,7 @@ for FUNC_NAME in $(__strip_duplicates $DAEMONS_RUNNING_FUNC_NAMES); do
         break
     fi
 done
-
+echodebug "DAEMONS_RUNNING_FUNC=${DAEMONS_RUNNING_FUNC}"
 
 
 if [ $DEPS_INSTALL_FUNC = "null" ]; then
@@ -2986,6 +3027,14 @@ if [ $CONFIG_ONLY -eq $BS_FALSE ]; then
     fi
 fi
 
+# Ensure that the cachedir exists
+# (Workaround for https://github.com/saltstack/salt/issues/6502)
+if [ $INSTALL_MINION -eq $BS_TRUE ]; then
+    if [ ! -d /var/cache/salt/minion/proc ]; then
+        echodebug "Creating salt's cachedir"
+        mkdir -p /var/cache/salt/minion/proc
+    fi
+fi
 
 # Run any post install function, Only execute function is not in config mode only
 if [ $CONFIG_ONLY -eq $BS_FALSE ] && [ "$POST_INSTALL_FUNC" != "null" ]; then

@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
-"""
+'''
     bootstrap.test_usage
     ~~~~~~~~~~~~~~~~~~~~
 
     :codeauthor: :email:`Pedro Algarvio (pedro@algarvio.me)`
     :copyright: © 2013 by the UfSoft.org Team, see AUTHORS for more details.
     :license: BSD, see LICENSE for more details.
-"""
+'''
 from bootstrap.unittesting import *
 
 

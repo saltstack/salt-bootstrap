@@ -304,7 +304,7 @@ class InstallationTestCase(BootstrapTestCase):
         rc, out, err = self.run_script(
             args=args, timeout=15 * 60, stream_stds=True
         )
-        if GRAINS['os_family'] != 'RedHat':
+        if GRAINS['os_family'] == 'RedHat':
             self.assert_script_result(
                 'Failed to install testing',
                 0, (rc, out, err)

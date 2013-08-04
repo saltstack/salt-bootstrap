@@ -231,6 +231,7 @@ SALT_ETC_DIR=${BS_SALT_ETC_DIR:-/etc/salt}
 PKI_DIR=${SALT_ETC_DIR}/pki
 FORCE_OVERWRITE=${BS_FORCE_OVERWRITE:-$BS_FALSE}
 BS_GENTOO_USE_BINHOST=${BS_GENTOO_USE_BINHOST:-$BS_FALSE}
+BS_EPEL_REPO=${BS_EPEL_REPO:-epel}
 # __SIMPLIFY_VERSION is mostly used in Solaris based distributions
 __SIMPLIFY_VERSION=$BS_TRUE
 
@@ -319,7 +320,7 @@ else
 fi
 
 # Check installation type
-if [ "$ITYPE" != "stable" ] && [ "$ITYPE" != "daily" ] && [ "$ITYPE" != "git" ]; then
+if [ "$(echo $ITYPE | egrep '(stable|testing|daily|git)')" != "x" ]; then
     echoerror "Installation type \"$ITYPE\" is not known..."
     exit 1
 fi
@@ -343,18 +344,21 @@ if [ "$#" -gt 0 ]; then
     echoerror "Too many arguments."
     exit 1
 fi
+
 # whoami alternative for SunOS
 if [ -f /usr/xpg4/bin/id ]; then
     whoami='/usr/xpg4/bin/id -un'
 else
     whoami='whoami'
 fi
+
 # Root permissions are required to run this script
-if [ $(${whoami}) != "root" ]; then
+if [ "$(${whoami})" != "root" ]; then
     echoerror "Salt requires root privileges to install. Please re-run this script as root."
     exit 1
 fi
 
+# Let's discover how we're being called
 CALLER=$(echo `ps -a -o pid,args | grep $$ | grep -v grep | tr -s ' '` | cut -d ' ' -f 2)
 if [ "${CALLER}x" = "${0}x" ]; then
     CALLER="PIPED THROUGH"
@@ -874,6 +878,15 @@ fi
 if ([ "${DISTRO_NAME_L}" != "ubuntu" ] && [ $ITYPE = "daily" ]); then
     echoerror "${DISTRO_NAME} does not have daily packages support"
     exit 1
+fi
+
+# Only RedHat based distros have testing support
+if [ ${ITYPE} = "testing" ]; then
+    if [ "$(echo ${DISTRO_NAME_L} | egrep 'centos|red_hat|amazon')x" != "x" ]; then
+        echoerror "${DISTRO_NAME} does not have testing packages support"
+        exit 1
+    fi
+    BS_EPEL_REPO="epel-testing"
 fi
 
 #---  FUNCTION  ----------------------------------------------------------------
@@ -1599,10 +1612,10 @@ install_centos_stable_deps() {
     if [ $DISTRO_MAJOR_VERSION -eq 5 ]; then
         yum -y install PyYAML python26-m2crypto m2crypto python26 \
             python26-crypto python26-msgpack python26-zmq \
-            python26-jinja2 --enablerepo=epel || return 1
+            python26-jinja2 --enablerepo=${BS_EPEL_REPO} || return 1
     else
         yum -y install PyYAML m2crypto python-crypto python-msgpack \
-            python-zmq python-jinja2 --enablerepo=epel || return 1
+            python-zmq python-jinja2 --enablerepo=${BS_EPEL_REPO} || return 1
     fi
     return 0
 }
@@ -1615,7 +1628,7 @@ install_centos_stable() {
     if [ $INSTALL_MASTER -eq $BS_TRUE ] || [ $INSTALL_SYNDIC -eq $BS_TRUE ]; then
         packages="${packages} salt-master"
     fi
-    yum -y install ${packages} --enablerepo=epel || return 1
+    yum -y install ${packages} --enablerepo=${BS_EPEL_REPO} || return 1
     return 0
 }
 
@@ -1635,7 +1648,7 @@ install_centos_stable_post() {
 
 install_centos_git_deps() {
     install_centos_stable_deps || return 1
-    yum -y install git --enablerepo=epel || return 1
+    yum -y install git --enablerepo=${BS_EPEL_REPO} || return 1
 
     __git_clone_and_checkout || return 1
 
@@ -1842,12 +1855,12 @@ install_amazon_linux_ami_deps() {
     rpm -Uvh --force http://mirrors.kernel.org/fedora-epel/6/${EPEL_ARCH}/epel-release-6-8.noarch.rpm || return 1
     yum -y update || return 1
     yum -y install PyYAML m2crypto python-crypto python-msgpack python-zmq \
-        python-ordereddict python-jinja2 --enablerepo=epel || return 1
+        python-ordereddict python-jinja2 --enablerepo=${BS_EPEL_REPO} || return 1
 }
 
 install_amazon_linux_ami_git_deps() {
     install_amazon_linux_ami_deps || return 1
-    yum -y install git --enablerepo=epel || return 1
+    yum -y install git --enablerepo=${BS_EPEL_REPO} || return 1
 
     __git_clone_and_checkout || return 1
 

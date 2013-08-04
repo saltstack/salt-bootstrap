@@ -320,7 +320,7 @@ else
 fi
 
 # Check installation type
-if [ "$(echo $ITYPE | egrep '(stable|testing|daily|git)')" != "x" ]; then
+if [ "$(echo $ITYPE | egrep '(stable|testing|daily|git)')x" = "x" ]; then
     echoerror "Installation type \"$ITYPE\" is not known..."
     exit 1
 fi

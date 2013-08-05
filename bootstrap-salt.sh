@@ -29,7 +29,7 @@ ScriptName="bootstrap-salt.sh"
 #   * BS_SALT_ETC_DIR:    Defaults to /etc/salt
 #   * BS_KEEP_TEMP_FILES: If 1, don't move temporary files, instead copy them
 #   * BS_FORCE_OVERWRITE: Force overriding copied files(config, init.d, etc)
-#   * BS_UPGRADE_SYS:     If 0 and an option, don't upgrade system. Default 1.
+#   * BS_UPGRADE_SYS:     If 1 and an option, upgrade system. Default 0.
 #   * BS_GENTOO_USE_BINHOST: If 1 add `--getbinpkg` to gentoo's emerge
 #===============================================================================
 
@@ -235,7 +235,7 @@ PKI_DIR=${SALT_ETC_DIR}/pki
 FORCE_OVERWRITE=${BS_FORCE_OVERWRITE:-$BS_FALSE}
 BS_GENTOO_USE_BINHOST=${BS_GENTOO_USE_BINHOST:-$BS_FALSE}
 BS_EPEL_REPO=${BS_EPEL_REPO:-epel}
-UPGRADE_SYS=${BS_UPGRADE_SYS:-$BS_TRUE}
+UPGRADE_SYS=${BS_UPGRADE_SYS:-$BS_FALSE}
 # __SIMPLIFY_VERSION is mostly used in Solaris based distributions
 __SIMPLIFY_VERSION=$BS_TRUE
 
@@ -272,7 +272,7 @@ do
     C )  CONFIG_ONLY=$BS_TRUE                           ;;
     P )  PIP_ALLOWED=$BS_TRUE                           ;;
     F )  FORCE_OVERWRITE=$BS_TRUE                       ;;
-    U )  UPGRADE_SYS=$BS_FALSE                          ;;
+    U )  UPGRADE_SYS=$BS_TRUE                           ;;
 
     \?)  echo
          echoerror "Option does not exist : $OPTARG"

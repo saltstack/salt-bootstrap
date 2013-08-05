@@ -9,6 +9,9 @@
 #
 #          BUGS: https://github.com/saltstack/salt-boostrap/issues
 #
+#     COPYRIGHT: (c) 2012-2013 by the SaltStack Team, see AUTHORS.rst for more
+#                details.
+#
 #       LICENSE: Apache 2.0
 #  ORGANIZATION: Salt Stack (saltstack.org)
 #       CREATED: 10/15/2012 09:49:37 PM WEST

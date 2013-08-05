@@ -1119,7 +1119,13 @@ install_ubuntu_deps() {
     else
         add-apt-repository -y ppa:saltstack/salt || return 1
     fi
+
     apt-get update
+
+    if [ $UPGRADE_SYS -eq $BS_TRUE ]; then
+        apt-get upgrade -y -o DPkg::Options::=--force-confold || return 1
+    fi
+
     return 0
 }
 
@@ -1136,7 +1142,13 @@ install_ubuntu_daily_deps() {
     else
         add-apt-repository -y ppa:saltstack/salt-daily || return 1
     fi
+
     apt-get update
+
+    if [ $UPGRADE_SYS -eq $BS_TRUE ]; then
+        apt-get upgrade -y -o DPkg::Options::=--force-confold || return 1
+    fi
+
     return 0
 }
 
@@ -1145,7 +1157,13 @@ install_ubuntu_11_10_deps() {
     __apt_get_noinput python-software-properties || return 1
     add-apt-repository -y 'deb http://us.archive.ubuntu.com/ubuntu/ oneiric universe' || return 1
     add-apt-repository -y ppa:saltstack/salt || return 1
+
     apt-get update
+
+    if [ $UPGRADE_SYS -eq $BS_TRUE ]; then
+        apt-get upgrade -y -o DPkg::Options::=--force-confold || return 1
+    fi
+
     return 0
 }
 
@@ -1274,6 +1292,11 @@ install_debian_deps() {
     export DEBIAN_FRONTEND=noninteractive
 
     apt-get update
+
+    if [ $UPGRADE_SYS -eq $BS_TRUE ]; then
+        apt-get upgrade -y -o DPkg::Options::=--force-confold || return 1
+    fi
+
 }
 
 install_debian_6_deps() {
@@ -1332,6 +1355,11 @@ _eof
             /etc/apt/sources.list.d/saltstack.list
     fi
     apt-get update || return 1
+
+    if [ $UPGRADE_SYS -eq $BS_TRUE ]; then
+        apt-get upgrade -y -o DPkg::Options::=--force-confold || return 1
+    fi
+
     __apt_get_noinput python-zmq || return 1
     return 0
 }
@@ -1379,6 +1407,11 @@ _eof
         apt-get update || return 1
         __apt_get_noinput python-zmq || return 1
     fi
+
+    if [ $UPGRADE_SYS -eq $BS_TRUE ]; then
+        apt-get upgrade -y -o DPkg::Options::=--force-confold || return 1
+    fi
+
     return 0
 }
 
@@ -1397,6 +1430,10 @@ install_debian_git_deps() {
     if [ "$TEMP_CONFIG_DIR" = "null" ]; then
         TEMP_CONFIG_DIR="${SALT_GIT_CHECKOUT_DIR}/conf/"
         CONFIG_SALT_FUNC="config_salt"
+    fi
+
+    if [ $UPGRADE_SYS -eq $BS_TRUE ]; then
+        apt-get upgrade -y -o DPkg::Options::=--force-confold || return 1
     fi
 
     return 0
@@ -1419,6 +1456,11 @@ install_debian_6_git_deps() {
     else
         install_debian_git_deps || return 1  # Grab the actual deps
     fi
+
+    if [ $UPGRADE_SYS -eq $BS_TRUE ]; then
+        apt-get upgrade -y -o DPkg::Options::=--force-confold || return 1
+    fi
+
     return 0
 }
 

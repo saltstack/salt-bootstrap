@@ -1567,6 +1567,11 @@ install_debian_restart_daemons() {
 install_fedora_deps() {
     yum install -y PyYAML libyaml m2crypto python-crypto python-jinja2 \
         python-msgpack python-zmq || return 1
+
+    if [ $UPGRADE_SYS -eq $BS_TRUE ]; then
+        yum -y update || return 1
+    fi
+
     return 0
 }
 

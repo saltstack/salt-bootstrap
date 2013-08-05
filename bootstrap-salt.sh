@@ -29,6 +29,7 @@ ScriptName="bootstrap-salt.sh"
 #   * BS_SALT_ETC_DIR:    Defaults to /etc/salt
 #   * BS_KEEP_TEMP_FILES: If 1, don't move temporary files, instead copy them
 #   * BS_FORCE_OVERWRITE: Force overriding copied files(config, init.d, etc)
+#   * BS_UPGRADE_SYS:     If 0 and an option, don't upgrade system. Default 1.
 #   * BS_GENTOO_USE_BINHOST: If 1 add `--getbinpkg` to gentoo's emerge
 #===============================================================================
 
@@ -153,6 +154,7 @@ usage() {
       resort method. NOTE: This works for functions which actually implement
       pip based installations.
   -F  Allow copied files to overwrite existing(config, init.d, etc)
+  -U  If optional, don't fully upgrade the system prior to bootstrapping salt
 
 EOT
 }   # ----------  end of function usage  ----------
@@ -233,10 +235,11 @@ PKI_DIR=${SALT_ETC_DIR}/pki
 FORCE_OVERWRITE=${BS_FORCE_OVERWRITE:-$BS_FALSE}
 BS_GENTOO_USE_BINHOST=${BS_GENTOO_USE_BINHOST:-$BS_FALSE}
 BS_EPEL_REPO=${BS_EPEL_REPO:-epel}
+UPGRADE_SYS=${BS_UPGRADE_SYS:-$BS_TRUE}
 # __SIMPLIFY_VERSION is mostly used in Solaris based distributions
 __SIMPLIFY_VERSION=$BS_TRUE
 
-while getopts ":hvnDc:k:MSNCPF" opt
+while getopts ":hvnDc:k:MSNCPFU" opt
 do
   case "${opt}" in
 
@@ -269,6 +272,7 @@ do
     C )  CONFIG_ONLY=$BS_TRUE                           ;;
     P )  PIP_ALLOWED=$BS_TRUE                           ;;
     F )  FORCE_OVERWRITE=$BS_TRUE                       ;;
+    U )  UPGRADE_SYS=$BS_FALSE                          ;;
 
     \?)  echo
          echoerror "Option does not exist : $OPTARG"
@@ -1608,7 +1612,9 @@ install_centos_stable_deps() {
         return 1
     fi
 
-    yum -y update || return 1
+    if [ $UPGRADE_SYS -eq $BS_TRUE ]; then
+        yum -y update || return 1
+    fi
 
     if [ $DISTRO_MAJOR_VERSION -eq 5 ]; then
         yum -y install PyYAML python26-m2crypto m2crypto python26 \
@@ -1854,7 +1860,11 @@ install_amazon_linux_ami_deps() {
         EPEL_ARCH=$CPU_ARCH_L
     fi
     rpm -Uvh --force http://mirrors.kernel.org/fedora-epel/6/${EPEL_ARCH}/epel-release-6-8.noarch.rpm || return 1
-    yum -y update || return 1
+
+    if [ $UPGRADE_SYS -eq $BS_TRUE ]; then
+        yum -y update || return 1
+    fi
+
     yum -y install PyYAML m2crypto python-crypto python-msgpack python-zmq \
         python-ordereddict python-jinja2 --enablerepo=${BS_EPEL_REPO} || return 1
 }

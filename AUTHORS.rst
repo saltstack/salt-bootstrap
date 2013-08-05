@@ -7,7 +7,6 @@ order.
 ==========================  =====================  ============================
 Name                        Nick                   Email
 ==========================  =====================  ============================
-
 Alec Koumjian               akoumjian              akoumjian@gmail.com
 Alex Van't Hof              alexvh
 Angelo Gründler             plueschopath           angelo.gruendler@w1r3.net
@@ -28,3 +27,4 @@ Tate Eskew                  tateeskew
 Thomas S. Hatch             thatch45               thatch45@saltstack.com
 Vladimir Kozhukalov         kozhukalov
 Whit Morriss                whitmo                 whit@nocoast.us
+==========================  =====================  ============================

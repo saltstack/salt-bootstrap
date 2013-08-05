@@ -1594,8 +1594,6 @@ install_centos_stable_deps() {
         return 1
     fi
 
-    yum -y update || return 1
-
     if [ $DISTRO_MAJOR_VERSION -eq 5 ]; then
         yum -y install PyYAML python26-m2crypto m2crypto python26 \
             python26-crypto python26-msgpack python26-zmq \
@@ -1840,7 +1838,6 @@ install_amazon_linux_ami_deps() {
         EPEL_ARCH=$CPU_ARCH_L
     fi
     rpm -Uvh --force http://mirrors.kernel.org/fedora-epel/6/${EPEL_ARCH}/epel-release-6-8.noarch.rpm || return 1
-    yum -y update || return 1
     yum -y install PyYAML m2crypto python-crypto python-msgpack python-zmq \
         python-ordereddict python-jinja2 --enablerepo=epel || return 1
 }

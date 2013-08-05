@@ -4,9 +4,9 @@ Authors
 Here's a list of everyone who contributed to salt-bootstrap in aphabetical
 order.
 
---------------------------  ---------------------  ----------------------------
+==========================  =====================  ============================
 Name                        Nick                   Email
---------------------------  ---------------------  ----------------------------
+==========================  =====================  ============================
 Alec Koumjian               akoumjian              akoumjian@gmail.com
 Alex Van't Hof              alexvh
 Angelo Gründler             plueschopath           angelo.gruendler@w1r3.net

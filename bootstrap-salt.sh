@@ -7,10 +7,8 @@
 #
 #   DESCRIPTION: Bootstrap salt installation for various systems/distributions
 #
-#          BUGS: https://github.com/saltstack/salty-vagrant/issues
-#        AUTHOR: Pedro Algarvio (s0undt3ch), pedro@algarvio.me
-#                Alec Koumjian (akoumjian), akoumjian@gmail.com
-#                Geoff Garside (geoffgarside), geoff@geoffgarside.co.uk
+#          BUGS: https://github.com/saltstack/salt-boostrap/issues
+#
 #       LICENSE: Apache 2.0
 #  ORGANIZATION: Salt Stack (saltstack.org)
 #       CREATED: 10/15/2012 09:49:37 PM WEST

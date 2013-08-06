@@ -1,7 +1,7 @@
 Authors
 =======
 
-Here's a list of everyone who contributed to salt-bootstrap in aphabetical
+Here's a list of everyone who contributed to salt-bootstrap in alphabetical
 order.
 
 ==========================  =====================  ============================

@@ -1,6 +1,9 @@
 Version 1.5.7:
 	* For RedHat based distributions which rely on `epel`, the user can now pass `testing` to the 
 	script and `epel-testing` shall be used to bootstrap salt and it's dependencies.
+	* No full system upgrades, if optional by the distribution, shall be done unless `-U` is passed 
+	to the bootstrap script(required upgrade procedures must exist on the script, currently Debian 
+	and RedHat based distributions support system upgrades).
 
 
 Version 1.5.6:

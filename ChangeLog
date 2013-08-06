@@ -1,3 +1,8 @@
+Version 1.5.7:
+	* For RedHat based distributions which rely on `epel`, the user can now pass `testing` to the 
+	script and `epel-testing` shall be used to bootstrap salt and it's dependencies.
+
+
 Version 1.5.6:
 	* If there's a `grains` file on the provided temporary configuration directory, move it to the 
 	proper place while moving the minion configuration file.

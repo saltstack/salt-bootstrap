@@ -29,6 +29,7 @@ ScriptName="bootstrap-salt.sh"
 #   * BS_SALT_ETC_DIR:    Defaults to /etc/salt
 #   * BS_KEEP_TEMP_FILES: If 1, don't move temporary files, instead copy them
 #   * BS_FORCE_OVERWRITE: Force overriding copied files(config, init.d, etc)
+#   * BS_UPGRADE_SYS:     If 1 and an option, upgrade system. Default 0.
 #   * BS_GENTOO_USE_BINHOST: If 1 add `--getbinpkg` to gentoo's emerge
 #===============================================================================
 
@@ -153,6 +154,7 @@ usage() {
       resort method. NOTE: This works for functions which actually implement
       pip based installations.
   -F  Allow copied files to overwrite existing(config, init.d, etc)
+  -U  If optional, don't fully upgrade the system prior to bootstrapping salt
 
 EOT
 }   # ----------  end of function usage  ----------
@@ -233,10 +235,11 @@ PKI_DIR=${SALT_ETC_DIR}/pki
 FORCE_OVERWRITE=${BS_FORCE_OVERWRITE:-$BS_FALSE}
 BS_GENTOO_USE_BINHOST=${BS_GENTOO_USE_BINHOST:-$BS_FALSE}
 BS_EPEL_REPO=${BS_EPEL_REPO:-epel}
+UPGRADE_SYS=${BS_UPGRADE_SYS:-$BS_FALSE}
 # __SIMPLIFY_VERSION is mostly used in Solaris based distributions
 __SIMPLIFY_VERSION=$BS_TRUE
 
-while getopts ":hvnDc:k:MSNCPF" opt
+while getopts ":hvnDc:k:MSNCPFU" opt
 do
   case "${opt}" in
 
@@ -269,6 +272,7 @@ do
     C )  CONFIG_ONLY=$BS_TRUE                           ;;
     P )  PIP_ALLOWED=$BS_TRUE                           ;;
     F )  FORCE_OVERWRITE=$BS_TRUE                       ;;
+    U )  UPGRADE_SYS=$BS_TRUE                           ;;
 
     \?)  echo
          echoerror "Option does not exist : $OPTARG"
@@ -1115,7 +1119,13 @@ install_ubuntu_deps() {
     else
         add-apt-repository -y ppa:saltstack/salt || return 1
     fi
+
     apt-get update
+
+    if [ $UPGRADE_SYS -eq $BS_TRUE ]; then
+        apt-get upgrade -y -o DPkg::Options::=--force-confold || return 1
+    fi
+
     return 0
 }
 
@@ -1132,7 +1142,13 @@ install_ubuntu_daily_deps() {
     else
         add-apt-repository -y ppa:saltstack/salt-daily || return 1
     fi
+
     apt-get update
+
+    if [ $UPGRADE_SYS -eq $BS_TRUE ]; then
+        apt-get upgrade -y -o DPkg::Options::=--force-confold || return 1
+    fi
+
     return 0
 }
 
@@ -1141,7 +1157,13 @@ install_ubuntu_11_10_deps() {
     __apt_get_noinput python-software-properties || return 1
     add-apt-repository -y 'deb http://us.archive.ubuntu.com/ubuntu/ oneiric universe' || return 1
     add-apt-repository -y ppa:saltstack/salt || return 1
+
     apt-get update
+
+    if [ $UPGRADE_SYS -eq $BS_TRUE ]; then
+        apt-get upgrade -y -o DPkg::Options::=--force-confold || return 1
+    fi
+
     return 0
 }
 
@@ -1270,6 +1292,11 @@ install_debian_deps() {
     export DEBIAN_FRONTEND=noninteractive
 
     apt-get update
+
+    if [ $UPGRADE_SYS -eq $BS_TRUE ]; then
+        apt-get upgrade -y -o DPkg::Options::=--force-confold || return 1
+    fi
+
 }
 
 install_debian_6_deps() {
@@ -1328,6 +1355,11 @@ _eof
             /etc/apt/sources.list.d/saltstack.list
     fi
     apt-get update || return 1
+
+    if [ $UPGRADE_SYS -eq $BS_TRUE ]; then
+        apt-get upgrade -y -o DPkg::Options::=--force-confold || return 1
+    fi
+
     __apt_get_noinput python-zmq || return 1
     return 0
 }
@@ -1375,6 +1407,11 @@ _eof
         apt-get update || return 1
         __apt_get_noinput python-zmq || return 1
     fi
+
+    if [ $UPGRADE_SYS -eq $BS_TRUE ]; then
+        apt-get upgrade -y -o DPkg::Options::=--force-confold || return 1
+    fi
+
     return 0
 }
 
@@ -1393,6 +1430,10 @@ install_debian_git_deps() {
     if [ "$TEMP_CONFIG_DIR" = "null" ]; then
         TEMP_CONFIG_DIR="${SALT_GIT_CHECKOUT_DIR}/conf/"
         CONFIG_SALT_FUNC="config_salt"
+    fi
+
+    if [ $UPGRADE_SYS -eq $BS_TRUE ]; then
+        apt-get upgrade -y -o DPkg::Options::=--force-confold || return 1
     fi
 
     return 0
@@ -1415,6 +1456,11 @@ install_debian_6_git_deps() {
     else
         install_debian_git_deps || return 1  # Grab the actual deps
     fi
+
+    if [ $UPGRADE_SYS -eq $BS_TRUE ]; then
+        apt-get upgrade -y -o DPkg::Options::=--force-confold || return 1
+    fi
+
     return 0
 }
 
@@ -1521,6 +1567,11 @@ install_debian_restart_daemons() {
 install_fedora_deps() {
     yum install -y PyYAML libyaml m2crypto python-crypto python-jinja2 \
         python-msgpack python-zmq || return 1
+
+    if [ $UPGRADE_SYS -eq $BS_TRUE ]; then
+        yum -y update || return 1
+    fi
+
     return 0
 }
 
@@ -1608,7 +1659,9 @@ install_centos_stable_deps() {
         return 1
     fi
 
-    yum -y update || return 1
+    if [ $UPGRADE_SYS -eq $BS_TRUE ]; then
+        yum -y update || return 1
+    fi
 
     if [ $DISTRO_MAJOR_VERSION -eq 5 ]; then
         yum -y install PyYAML python26-m2crypto m2crypto python26 \
@@ -1854,7 +1907,11 @@ install_amazon_linux_ami_deps() {
         EPEL_ARCH=$CPU_ARCH_L
     fi
     rpm -Uvh --force http://mirrors.kernel.org/fedora-epel/6/${EPEL_ARCH}/epel-release-6-8.noarch.rpm || return 1
-    yum -y update || return 1
+
+    if [ $UPGRADE_SYS -eq $BS_TRUE ]; then
+        yum -y update || return 1
+    fi
+
     yum -y install PyYAML m2crypto python-crypto python-msgpack python-zmq \
         python-ordereddict python-jinja2 --enablerepo=${BS_EPEL_REPO} || return 1
 }

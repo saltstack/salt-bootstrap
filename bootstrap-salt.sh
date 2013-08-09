@@ -2659,11 +2659,11 @@ install_suse_11_restart_daemons() {
 #
 #    Gentoo Install Functions.
 #
-__gentoo_use_binhost() {
+__emerge() {
     if [ $BS_GENTOO_USE_BINHOST -eq $BS_TRUE ]; then
-        return "--getbinpkg"
+        emerge --getbinpkg $@; return $?
     fi
-    return ""
+    emerge $@; return $?
 }
 
 __gentoo_set_ackeys() {
@@ -2709,7 +2709,7 @@ __gentoo_post_dep() {
 # End of bootstrap-salt keywords.
 _EOT
     # the -o option asks it to emerge the deps but not the package.
-    emerge ${__gentoo_use_binhost} -vo salt
+    __emerge -vo salt
 }
 
 install_gentoo_deps() {
@@ -2726,7 +2726,7 @@ install_gentoo_git_deps() {
 }
 
 install_gentoo_stable() {
-    emerge ${__gentoo_use_binhost} -v salt || return 1
+    __emerge -v salt || return 1
 }
 
 install_gentoo_git() {

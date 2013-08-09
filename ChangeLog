@@ -4,6 +4,8 @@ Version 1.5.7:
 	* No full system upgrades, if optional by the distribution, shall be done unless `-U` is passed 
 	to the bootstrap script(required upgrade procedures must exist on the script, currently Debian 
 	and RedHat based distributions support system upgrades).
+	* Distro Support Fixed:
+		* Fixed an unbound variable while bootstraping Gentoo.
 
 
 Version 1.5.6:

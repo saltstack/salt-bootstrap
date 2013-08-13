@@ -1664,7 +1664,7 @@ install_centos_stable_deps() {
     fi
 
     if [ $DISTRO_MAJOR_VERSION -eq 5 ]; then
-        yum -y install PyYAML python26-m2crypto m2crypto python26 \
+        yum -y install python26-PyYAML python26-m2crypto m2crypto python26 \
             python26-crypto python26-msgpack python26-zmq \
             python26-jinja2 --enablerepo=${BS_EPEL_REPO} || return 1
     else

@@ -6,6 +6,7 @@ Version 1.5.7:
 	and RedHat based distributions support system upgrades).
 	* Distro Support Fixed:
 		* Fixed an unbound variable while bootstraping Gentoo.
+		* Fixed CentOS/RHEL 5.
 
 
 Version 1.5.6:

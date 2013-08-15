@@ -7,6 +7,7 @@ Version 1.5.7:
 	* Distro Support Fixed:
 		* Fixed an unbound variable while bootstraping Gentoo.
 		* Fixed CentOS/RHEL 5.
+		* Fixed crypto++ compilation. Thanks Kenneth Wilke(KennethWilke)!
 
 
 Version 1.5.6:

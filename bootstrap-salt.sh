@@ -2689,7 +2689,7 @@ __gentoo_set_ackeys() {
 }
 
 __gentoo_pre_dep() {
-    emerge --sync
+    emerge --sync --quiet
     if [ ! -d /etc/portage ]; then
         mkdir /etc/portage
     fi
@@ -2708,6 +2708,8 @@ __gentoo_post_dep() {
     cat >> ${GENTOO_ACKEYS} << _EOT
 # End of bootstrap-salt keywords.
 _EOT
+    # ensures dev-lib/crypto++ compiles happily
+    __emerge libtool
     # the -o option asks it to emerge the deps but not the package.
     __emerge -vo salt
 }
@@ -2719,7 +2721,7 @@ install_gentoo_deps() {
 }
 
 install_gentoo_git_deps() {
-    emerge git
+    __emerge git
     __gentoo_pre_dep || return 1
     echo "=app-admin/salt-9999 **" >> ${GENTOO_ACKEYS}
     __gentoo_post_dep

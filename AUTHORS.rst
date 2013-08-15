@@ -16,6 +16,7 @@ deployboy                   deployboy
 Erik Johnson                terminalmage           erik@saltstack.com
 Geoff Garside               geoffgarside           geoff@geoffgarside.co.uk
 Jeff Hui                    jeffh                  jeff@jeffhui.net
+Kenneth Wilke               KennethWilke
 Matthew Willson             ixela
 Matthieu Guegan             mguegan
 nevins-b                    nevins-b

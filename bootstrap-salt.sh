@@ -986,7 +986,7 @@ copyfile() {
     elif [ -f "$dfile" ] && [ $overwrite -eq $BS_TRUE ]; then
         # The destination exist and we're overwriting
         echodebug "Overriding $dfile with $sfile"
-        cp -f "$sfile" "$dfile" || return 2
+        cp -f "$sfile" "$dfile" || return 1
     elif [ -f "$dfile" ] && [ $overwrite -ne $BS_TRUE ]; then
         echodebug "Not overriding $dfile with $sfile"
     fi
@@ -1017,7 +1017,8 @@ movefile() {
         # We're being told not to move files, instead copy them so we can keep
         # them around
         echodebug "Since BS_KEEP_TEMP_FILES=1 we're copying files instead of moving them"
-        return copyfile "$sfile" "$dfile" $overwrite
+        copyfile "$sfile" "$dfile" $overwrite
+        return $?
     fi
 
     # Does the source file exist?

@@ -2689,7 +2689,11 @@ __gentoo_set_ackeys() {
 }
 
 __gentoo_pre_dep() {
-    emerge --sync --quiet
+    if [ $BS_ECHO_DEBUG -eq $BS_TRUE ]; then
+        emerge --sync
+    else
+        emerge --sync --quiet
+    fi
     if [ ! -d /etc/portage ]; then
         mkdir /etc/portage
     fi

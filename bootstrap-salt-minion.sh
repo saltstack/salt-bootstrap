@@ -738,7 +738,7 @@ install_freebsd_90_stable_deps() {
     make install clean
     cd
     /usr/local/sbin/pkg2ng
-    echo "PACKAGESITE: http://pkgbeta.freebsd.org/freebsd-9-${ARCH}/latest" > /usr/local/etc/pkg.conf
+    echo "PACKAGESITE: http://freebsd.saltstack.com/${ABI}/" > /usr/local/etc/pkg.conf
 }
 
 install_freebsd_git_deps() {
@@ -759,7 +759,7 @@ install_freebsd_git_deps() {
     make install clean
     cd
     /usr/local/sbin/pkg2ng
-    echo "PACKAGESITE: http://pkgbeta.freebsd.org/freebsd-9-${ARCH}/latest" > /usr/local/etc/pkg.conf
+    echo "PACKAGESITE: http://freebsd.saltstack.com/${ABI}/" > /usr/local/etc/pkg.conf
 }
 
 install_freebsd_90_stable() {

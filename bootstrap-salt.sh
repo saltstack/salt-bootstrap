@@ -2118,7 +2118,7 @@ __freebsd_get_packagesite() {
         echowarn "The environment variable PACKAGESITE is not set."
         echowarn "The installation will, most likely fail since pkgbeta.freebsd.org does not yet contain any packages"
     fi
-    BS_PACKAGESITE=${PACKAGESITE:-"http://freebsd.saltstack.com/${ABI}/"}
+    BS_PACKAGESITE="http://freebsd.saltstack.com/freebsd:${DISTRO_MAJOR_VERSION}:${BSD_ARCH}/"
 
     # Treat unset variables as errors once more
     set -o nounset

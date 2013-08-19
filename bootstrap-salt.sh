@@ -1795,6 +1795,7 @@ install_red_hat_linux_stable_deps() {
     if [ $(rhn-channel -l | grep optional) != "rhel-${OPTIONAL_ARCH}-server-optional-${DISTRO_MAJOR_VERSION}" ]; then 
       echoerror "Failed to find RHN optional repo, please enable it."
       return 1
+    fi
     if [ $DISTRO_MAJOR_VERSION -eq 5 ]; then
         rpm -Uvh --force http://mirrors.kernel.org/fedora-epel/5/${EPEL_ARCH}/epel-release-5-4.noarch.rpm || return 1
     elif [ $DISTRO_MAJOR_VERSION -eq 6 ]; then

@@ -1796,27 +1796,7 @@ install_red_hat_linux_stable_deps() {
       echoerror "Failed to find RHN optional repo, please enable it using the GUI or rhn-channel command."
       return 1
     fi
-    if [ $DISTRO_MAJOR_VERSION -eq 5 ]; then
-        rpm -Uvh --force http://mirrors.kernel.org/fedora-epel/5/${EPEL_ARCH}/epel-release-5-4.noarch.rpm || return 1
-    elif [ $DISTRO_MAJOR_VERSION -eq 6 ]; then
-        rpm -Uvh --force http://mirrors.kernel.org/fedora-epel/6/${EPEL_ARCH}/epel-release-6-8.noarch.rpm || return 1
-    else
-        echoerror "Failed add EPEL repository support."
-        return 1
-    fi
-
-    if [ $UPGRADE_SYS -eq $BS_TRUE ]; then
-        yum -y update || return 1
-    fi
-
-    if [ $DISTRO_MAJOR_VERSION -eq 5 ]; then
-        yum -y install python26-PyYAML python26-m2crypto m2crypto python26 \
-            python26-crypto python26-msgpack python26-zmq \
-            python26-jinja2 --enablerepo=${BS_EPEL_REPO} || return 1
-    else
-        yum -y install PyYAML m2crypto python-crypto python-msgpack \
-            python-zmq python-jinja2 --enablerepo=${BS_EPEL_REPO} || return 1
-    fi
+    install_centos_stable_deps || return 1
     return 0
 }
 

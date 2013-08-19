@@ -1793,7 +1793,7 @@ install_red_hat_linux_stable_deps() {
         OPTIONAL_ARCH=$CPU_ARCH_L
     fi
     if [ $(rhn-channel -l | grep optional) != "rhel-${OPTIONAL_ARCH}-server-optional-${DISTRO_MAJOR_VERSION}" ]; then 
-      echoerror "Failed to find RHN optional repo, please enable it."
+      echoerror "Failed to find RHN optional repo, please enable it using the GUI or rhn-channel command."
       return 1
     fi
     if [ $DISTRO_MAJOR_VERSION -eq 5 ]; then

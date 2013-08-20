@@ -15,6 +15,7 @@ Chris Rebert                cvrebert               chris.rebert@hulu.com
 Christer Edwards            cedwards
 deployboy                   deployboy
 Erik Johnson                terminalmage           erik@saltstack.com
+Forrest Alvarez             gravyboat
 Geoff Garside               geoffgarside           geoff@geoffgarside.co.uk
 Jeff Hui                    jeffh                  jeff@jeffhui.net
 Kenneth Wilke               KennethWilke

@@ -2155,30 +2155,34 @@ install_freebsd_9_stable_deps() {
 }
 
 install_freebsd_git_deps() {
-    if [ ! -x /usr/local/sbin/pkg ]; then
-        __freebsd_get_packagesite
+    install_freebsd_9_stable_deps || return 1
 
-        fetch "${BS_PACKAGESITE}/Latest/pkg.txz" || return 1
-        tar xf ./pkg.txz -s ",/.*/,,g" "*/pkg-static" || return 1
-        ./pkg-static add ./pkg.txz || return 1
-        /usr/local/sbin/pkg2ng || return 1
-        echo "PACKAGESITE: ${BS_PACKAGESITE}" > /usr/local/etc/pkg.conf
-    fi
-
-    /usr/local/sbin/pkg install -y swig git || return 1
+    /usr/local/sbin/pkg install -y git || return 1
 
     __git_clone_and_checkout || return 1
+
+    # Let's patch salt's source and adapt paths to what's expected on FreeBSD
+    echodebug "Replacing occurrences of '/etc/salt' with '/usr/local/etc/salt'"
+    # The list of files was taken from Salt's BSD port Makefile
+    for file in conf/minion conf/master doc/man/salt-key.1 \
+                doc/man/salt-cp.1 doc/man/salt-minion.1 doc/man/salt-syndic.1 \
+                doc/man/salt-master.1 doc/man/salt-run.1 doc/man/salt.7 doc/man/salt.1 \
+                doc/man/salt-call.1 salt/config.py salt/client.py \
+                salt/modules/mysql.py salt/utils/parsers.py salt/modules/tls.py \
+                salt/modules/postgres.py salt/utils/migrations.py; do
+        [ ! -f $file ] && continue
+        echodebug "Patching ${file}"
+        sed -in -e "s|/etc/salt|/usr/local/etc/salt|" \
+            -e "s|/srv/salt|/usr/local/etc/salt/states|" \
+            -e "s|/srv/pillar|/usr/local/etc/salt/pillar|" ${file}
+    done
+    echodebug "Finished patching"
+
     # Let's trigger config_salt()
     if [ "$TEMP_CONFIG_DIR" = "null" ]; then
         TEMP_CONFIG_DIR="${SALT_GIT_CHECKOUT_DIR}/conf/"
         CONFIG_SALT_FUNC="config_salt"
     fi
-
-    # Since we will be relying on the ports rc.d files, let's
-    # set SALT_ETC_DIR to ports default
-    SALT_ETC_DIR=${BS_SALT_ETC_DIR:-/usr/local/etc/salt}
-    # We also need to redefine the PKI directory
-    PKI_DIR=${SALT_ETC_DIR}/pki
 
     return 0
 }

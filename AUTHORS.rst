@@ -11,7 +11,7 @@ Alec Koumjian               akoumjian              akoumjian@gmail.com
 Alex Van't Hof              alexvh
 Angelo Gründler             plueschopath           angelo.gruendler@w1r3.net
 bruce-one                   bruce-one
-Chris Rebert                cvrebert
+Chris Rebert                cvrebert               chris.rebert@hulu.com
 deployboy                   deployboy
 Erik Johnson                terminalmage           erik@saltstack.com
 Geoff Garside               geoffgarside           geoff@geoffgarside.co.uk

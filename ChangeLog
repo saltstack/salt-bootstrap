@@ -10,6 +10,8 @@ Version 1.5.7:
 		* Fixed an unbound variable while bootstraping Gentoo.
 		* Fixed CentOS/RHEL 5.
 		* Fixed crypto++ compilation. Thanks Kenneth Wilke(KennethWilke)!
+		* Fixed FreeBSD git installations not pointing to the proper salt configuration directory, 
+		which on FreeBSD is '/usr/local/etc/salt'.
 
 
 Version 1.5.6:

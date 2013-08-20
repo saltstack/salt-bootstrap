@@ -5,6 +5,7 @@ Version 1.5.7:
 	to the bootstrap script(required upgrade procedures must exist on the script, currently Debian 
 	and RedHat based distributions support system upgrades).
 	* Fixed an issue where passing BS_KEEP_TEMP_FILES=1 to the script was causing an error. #206.
+	* Switched to the SaltStack's FreeBSD package repository. Thanks Christer Edwards(cedwards).
 	* Distro Support Fixed:
 		* Fixed an unbound variable while bootstraping Gentoo.
 		* Fixed CentOS/RHEL 5.

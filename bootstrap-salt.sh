@@ -2170,8 +2170,9 @@ install_freebsd_git_deps() {
                 doc/man/salt-call.1 salt/config.py salt/client.py \
                 salt/modules/mysql.py salt/utils/parsers.py salt/modules/tls.py \
                 salt/modules/postgres.py salt/utils/migrations.py; do
+        [ ! -f $file ] && continue
         echodebug "Patching ${file}"
-        sed -e "s|/etc/salt|/usr/local/etc/salt|" \
+        sed -in -e "s|/etc/salt|/usr/local/etc/salt|" \
             -e "s|/srv/salt|/usr/local/etc/salt/states|" \
             -e "s|/srv/pillar|/usr/local/etc/salt/pillar|" ${file}
     done

@@ -2127,7 +2127,8 @@ __freebsd_get_packagesite() {
         echowarn "The environment variable PACKAGESITE is not set."
         echowarn "The installation will, most likely fail since pkgbeta.freebsd.org does not yet contain any packages"
     fi
-    BS_PACKAGESITE="http://freebsd.saltstack.com/freebsd:${DISTRO_MAJOR_VERSION}:${BSD_ARCH}/"
+    BS_PACKAGESITE="http://pkg.cdn.pcbsd.org/9.1-RELEASE/amd64/"
+    BS_SALTREPO="http://freebsd.saltstack.com/freebsd:${DISTRO_MAJOR_VERSION}:${BSD_ARCH}/"
 
     # Treat unset variables as errors once more
     set -o nounset
@@ -2142,9 +2143,15 @@ install_freebsd_9_stable_deps() {
         ./pkg-static add ./pkg.txz || return 1
         /usr/local/sbin/pkg2ng || return 1
         echo "PACKAGESITE: ${BS_PACKAGESITE}" > /usr/local/etc/pkg.conf
+	echo "PKG_MULTIREPOS: YES" >> /usr/local/etc/pkg.conf
+
+	mkdir -p /usr/local/etc/pkg/repos/
+	echo "salt:" > /usr/local/etc/pkg/repos/salt.conf
+	echo "    URL: ${BS_SALTREPO}" >> /usr/local/etc/pkg/repos/salt.conf
+	echo "    ENABLED: YES" >> /usr/local/etc/pkg/repos/salt.conf
     fi
 
-    /usr/local/sbin/pkg install -y swig || return 1
+    /usr/local/sbin/pkg install -r salt -y swig || return 1
 
     # Lets set SALT_ETC_DIR to ports default
     SALT_ETC_DIR=${BS_SALT_ETC_DIR:-/usr/local/etc/salt}
@@ -2188,12 +2195,12 @@ install_freebsd_git_deps() {
 }
 
 install_freebsd_9_stable() {
-    /usr/local/sbin/pkg install -y sysutils/py-salt || return 1
+    /usr/local/sbin/pkg install -r salt -y sysutils/py-salt || return 1
     return 0
 }
 
 install_freebsd_git() {
-    /usr/local/sbin/pkg install -y sysutils/py-salt || return 1
+    /usr/local/sbin/pkg install -r salt -y sysutils/py-salt || return 1
 
     # Let's keep the rc.d files before deleting the package
     mkdir /tmp/rc-scripts || return 1

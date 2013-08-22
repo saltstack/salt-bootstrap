@@ -2435,6 +2435,12 @@ install_opensuse_stable_deps() {
         # repository) return a failure. Otherwise continue.
         return 1
     fi
+
+    if [ $DISTRO_MAJOR_VERSION -eq 12 ] && [ $DISTRO_MINOR_VERSION -eq 3 ]; then
+        # Because patterns-openSUSE-minimal_base-conflicts conflicts with python, lets remove the first one
+        zypper --non-interactive remove patterns-openSUSE-minimal_base-conflicts
+    fi
+
     zypper --non-interactive install --auto-agree-with-licenses libzmq3 python \
         python-Jinja2 python-M2Crypto python-PyYAML python-msgpack-python \
         python-pycrypto python-pyzmq || return 1

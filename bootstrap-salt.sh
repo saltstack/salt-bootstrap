@@ -2198,12 +2198,12 @@ install_freebsd_9_stable_deps() {
         ./pkg-static add ./pkg.txz || return 1
         /usr/local/sbin/pkg2ng || return 1
 
-        echo "PACKAGESITE: ${BS_PACKAGESITE}" > /usr/local/etc/pkg.conf
+        echo "PACKAGESITE: ${_PACKAGESITE}" > /usr/local/etc/pkg.conf
         echo "PKG_MULTIREPOS: YES" >> /usr/local/etc/pkg.conf
 
         mkdir -p /usr/local/etc/pkg/repos/
         echo "salt:" > /usr/local/etc/pkg/repos/salt.conf
-        echo "    URL: ${BS_SALTREPO}" >> /usr/local/etc/pkg/repos/salt.conf
+        echo "    URL: ${SALTREPO}" >> /usr/local/etc/pkg/repos/salt.conf
         echo "    ENABLED: YES" >> /usr/local/etc/pkg/repos/salt.conf
     fi
 

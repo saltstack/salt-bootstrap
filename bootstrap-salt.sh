@@ -2142,13 +2142,14 @@ install_freebsd_9_stable_deps() {
         tar xf ./pkg.txz -s ",/.*/,,g" "*/pkg-static" || return 1
         ./pkg-static add ./pkg.txz || return 1
         /usr/local/sbin/pkg2ng || return 1
-        echo "PACKAGESITE: ${BS_PACKAGESITE}" > /usr/local/etc/pkg.conf
-	echo "PKG_MULTIREPOS: YES" >> /usr/local/etc/pkg.conf
 
-	mkdir -p /usr/local/etc/pkg/repos/
-	echo "salt:" > /usr/local/etc/pkg/repos/salt.conf
-	echo "    URL: ${BS_SALTREPO}" >> /usr/local/etc/pkg/repos/salt.conf
-	echo "    ENABLED: YES" >> /usr/local/etc/pkg/repos/salt.conf
+        echo "PACKAGESITE: ${BS_PACKAGESITE}" > /usr/local/etc/pkg.conf
+        echo "PKG_MULTIREPOS: YES" >> /usr/local/etc/pkg.conf
+
+        mkdir -p /usr/local/etc/pkg/repos/
+        echo "salt:" > /usr/local/etc/pkg/repos/salt.conf
+        echo "    URL: ${BS_SALTREPO}" >> /usr/local/etc/pkg/repos/salt.conf
+        echo "    ENABLED: YES" >> /usr/local/etc/pkg/repos/salt.conf
     fi
 
     /usr/local/sbin/pkg install -r salt -y swig || return 1
@@ -2716,7 +2717,7 @@ __gentoo_set_ackeys() {
 }
 
 __gentoo_pre_dep() {
-    if [ $BS_ECHO_DEBUG -eq $BS_TRUE ]; then
+    if [ $ECHO_DEBUG -eq $BS_TRUE ]; then
         emerge --sync
     else
         emerge --sync --quiet

@@ -2123,12 +2123,8 @@ __freebsd_get_packagesite() {
     # Since the variable might not be set, don't, momentarily treat it as a failure
     set +o nounset
 
-    if [ "x${PACKAGESITE}" = "x" ]; then
-        echowarn "The environment variable PACKAGESITE is not set."
-        echowarn "The installation will, most likely fail since pkgbeta.freebsd.org does not yet contain any packages"
-    fi
-    BS_PACKAGESITE="http://pkg.cdn.pcbsd.org/9.1-RELEASE/amd64/"
-    BS_SALTREPO="http://freebsd.saltstack.com/freebsd:${DISTRO_MAJOR_VERSION}:${BSD_ARCH}/"
+    _PACKAGESITE=${PACKAGESITE:-"http://pkg.cdn.pcbsd.org/9.1-RELEASE/amd64/"}
+    SALTREPO=${SALTREPO:-"http://freebsd.saltstack.com/freebsd:${DISTRO_MAJOR_VERSION}:${BSD_ARCH}/"}
 
     # Treat unset variables as errors once more
     set -o nounset
@@ -2138,17 +2134,17 @@ install_freebsd_9_stable_deps() {
     if [ ! -x /usr/local/sbin/pkg ]; then
         __freebsd_get_packagesite
 
-        fetch "${BS_PACKAGESITE}/Latest/pkg.txz" || return 1
+        fetch "${_PACKAGESITE}/Latest/pkg.txz" || return 1
         tar xf ./pkg.txz -s ",/.*/,,g" "*/pkg-static" || return 1
         ./pkg-static add ./pkg.txz || return 1
         /usr/local/sbin/pkg2ng || return 1
 
-        echo "PACKAGESITE: ${BS_PACKAGESITE}" > /usr/local/etc/pkg.conf
+        echo "PACKAGESITE: ${_PACKAGESITE}" > /usr/local/etc/pkg.conf
         echo "PKG_MULTIREPOS: YES" >> /usr/local/etc/pkg.conf
 
         mkdir -p /usr/local/etc/pkg/repos/
         echo "salt:" > /usr/local/etc/pkg/repos/salt.conf
-        echo "    URL: ${BS_SALTREPO}" >> /usr/local/etc/pkg/repos/salt.conf
+        echo "    URL: ${SALTREPO}" >> /usr/local/etc/pkg/repos/salt.conf
         echo "    ENABLED: YES" >> /usr/local/etc/pkg/repos/salt.conf
     fi
 

@@ -5,14 +5,16 @@ Version 1.5.7:
 	to the bootstrap script(required upgrade procedures must exist on the script, currently Debian 
 	and RedHat based distributions support system upgrades).
 	* Fixed an issue where passing BS_KEEP_TEMP_FILES=1 to the script was causing an error. #206.
-	* Switched to the SaltStack's FreeBSD package repository. Thanks Christer Edwards(cedwards).
+	* Switched FreeBSD default packages repository to PCBSD(http://www.pcbsd.org) and added 
+	multiple repository support to install salt from the SaltStack's FreeBSD repository.  Thanks 
+	Christer Edwards(cedwards).
 	* Distro Support Fixed:
 		* Fixed an unbound variable while bootstraping Gentoo.
 		* Fixed CentOS/RHEL 5.
 		* Fixed crypto++ compilation. Thanks Kenneth Wilke(KennethWilke)!
 		* Fixed FreeBSD git installations not pointing to the proper salt configuration directory, 
 		which on FreeBSD is '/usr/local/etc/salt'.
-
+		* Fixed testing installation for Red Hat based distributions. Thanks Jeff Strunk(jstrunk)
 
 Version 1.5.6:
 	* If there's a `grains` file on the provided temporary configuration directory, move it to the 

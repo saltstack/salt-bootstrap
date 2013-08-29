@@ -1777,6 +1777,22 @@ install_centos_restart_daemons() {
         fi
     done
 }
+
+install_centos_testing_deps() {
+    install_centos_stable_deps || return 1
+    return 0
+}
+
+install_centos_testing() {
+    install_centos_stable || return 1
+    return 0
+}
+
+install_centos_testing_post() {
+    install_centos_stable_post || return 1
+    return 0
+}
+
 #
 #   Ended CentOS Install Functions
 #
@@ -1899,6 +1915,38 @@ install_red_hat_enterprise_server_git_post() {
     install_red_hat_linux_git_post || return 1
     return 0
 }
+
+install_red_hat_linux_testing_deps() {
+    install_centos_testing_deps || return 1
+    return 0
+}
+
+install_red_hat_linux_testing() {
+    install_centos_testing || return 1
+    return 0
+}
+
+install_red_hat_linux_testing_post() {
+    install_centos_testing_post || return 1
+    return 0
+}
+
+install_red_hat_enterprise_server_testing_deps() {
+    install_centos_testing_deps || return 1
+    return 0
+}
+
+install_red_hat_enterprise_server_testing() {
+    install_centos_testing || return 1
+    return 0
+}
+
+install_red_hat_enterprise_server_testing_post() {
+    install_centos_testing_post || return 1
+    return 0
+}
+
+
 #
 #   Ended RedHat Install Functions
 #
@@ -1965,6 +2013,17 @@ install_amazon_linux_ami_git_post() {
     install_centos_git_post || return 1
     return 0
 }
+
+install_amazon_linux_ami_testing() {
+    install_centos_testing || return 1
+    return 0
+}
+
+install_amazon_linux_ami_testing_post() {
+    install_centos_testing_post || return 1
+    return 0
+}
+
 #
 #   Ended Amazon Linux AMI Install Functions
 #

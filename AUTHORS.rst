@@ -18,6 +18,7 @@ Erik Johnson                terminalmage           erik@saltstack.com
 Forrest Alvarez             gravyboat
 Geoff Garside               geoffgarside           geoff@geoffgarside.co.uk
 Jeff Hui                    jeffh                  jeff@jeffhui.net
+Jeff Strunk                 jstrunk
 Kenneth Wilke               KennethWilke
 Matthew Willson             ixela
 Matthieu Guegan             mguegan

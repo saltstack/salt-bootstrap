@@ -2225,21 +2225,32 @@ install_freebsd_git_deps() {
 
     __git_clone_and_checkout || return 1
 
-    # Let's patch salt's source and adapt paths to what's expected on FreeBSD
-    echodebug "Replacing occurrences of '/etc/salt' with '/usr/local/etc/salt'"
+    echodebug "Adapting paths to FreeBSD"
     # The list of files was taken from Salt's BSD port Makefile
-    for file in conf/minion conf/master doc/man/salt-key.1 \
-                doc/man/salt-cp.1 doc/man/salt-minion.1 doc/man/salt-syndic.1 \
-                doc/man/salt-master.1 doc/man/salt-run.1 doc/man/salt.7 doc/man/salt.1 \
-                doc/man/salt-call.1 salt/config.py salt/client.py \
-                salt/modules/mysql.py salt/utils/parsers.py salt/modules/tls.py \
-                salt/modules/postgres.py salt/utils/migrations.py; do
+    for file in doc/man/salt-key.1 doc/man/salt-cp.1 doc/man/salt-minion.1 \
+                doc/man/salt-syndic.1 doc/man/salt-master.1 doc/man/salt-run.1 \
+                doc/man/salt.7 doc/man/salt.1 doc/man/salt-call.1; do
         [ ! -f $file ] && continue
         echodebug "Patching ${file}"
         sed -in -e "s|/etc/salt|/usr/local/etc/salt|" \
-            -e "s|/srv/salt|/usr/local/etc/salt/states|" \
-            -e "s|/srv/pillar|/usr/local/etc/salt/pillar|" ${file}
+                -e "s|/srv/salt|/usr/local/etc/salt/states|" \
+                -e "s|/srv/pillar|/usr/local/etc/salt/pillar|" ${file}
     done
+    if [ ! -f salt/syspaths.py ]; then
+        # We still can't provide the system paths, salt 0.16.x
+        # Let's patch salt's source and adapt paths to what's expected on FreeBSD
+        echodebug "Replacing occurrences of '/etc/salt' with '/usr/local/etc/salt'"
+        # The list of files was taken from Salt's BSD port Makefile
+        for file in conf/minion conf/master salt/config.py salt/client.py \
+                    salt/modules/mysql.py salt/utils/parsers.py salt/modules/tls.py \
+                    salt/modules/postgres.py salt/utils/migrations.py; do
+            [ ! -f $file ] && continue
+            echodebug "Patching ${file}"
+            sed -in -e "s|/etc/salt|/usr/local/etc/salt|" \
+                    -e "s|/srv/salt|/usr/local/etc/salt/states|" \
+                    -e "s|/srv/pillar|/usr/local/etc/salt/pillar|" ${file}
+        done
+    fi
     echodebug "Finished patching"
 
     # Let's trigger config_salt()
@@ -2267,7 +2278,23 @@ install_freebsd_git() {
     /usr/local/sbin/pkg delete -y sysutils/py-salt || return 1
 
     # Install from git
-    /usr/local/bin/python setup.py install || return 1
+    if [ ! -f salt/syspaths.py ]; then
+        # We still can't provide the system paths, salt 0.16.x
+        /usr/local/bin/python setup.py install || return 1
+    else
+        /usr/local/bin/python setup.py install \
+            --salt-root-dir=/usr/local \
+            --salt-config-dir=/usr/local/etc/salt \
+            --salt-cache-dir=/var/cache/salt \
+            --salt-sock-dir=/var/run/salt \
+            --salt-srv-root-dir=/srv \
+            --salt-base-file-roots-dir=/usr/local/etc/salt/states \
+            --salt-base-pillar-roots-dir=/usr/local/etc/salt/pillar \
+            --salt-base-master-roots-dir=/usr/local/etc/salt/salt-master \
+            --salt-logs-dir=/var/log/salt \
+            --salt-pidfile-dir=/var/run \
+            || return 1
+    fi
 
     # Restore the rc.d scripts
     cp /tmp/rc-scripts/salt* /usr/local/etc/rc.d/ || return 1

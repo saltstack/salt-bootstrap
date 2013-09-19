@@ -2777,28 +2777,6 @@ __emerge() {
     emerge $@; return $?
 }
 
-__gentoo_set_ackeys() {
-    GENTOO_ACKEYS=""
-    if [ ! -e /etc/portage/package.accept_keywords ]; then
-        # This is technically bad, but probably for the best.
-        # We'll assume that they want a file, as that's the default behaviour of portage.
-        # If they really want a folder they'll need to handle that themselves.
-        # We could use the ACCEPT_KEYWORDS environment variable, but that exceeds the minimum requires.
-        GENTOO_ACKEYS="/etc/portage/package.accept_keywords"
-    else
-        if [ -f /etc/portage/package.accept_keywords ]; then
-            GENTOO_ACKEYS="/etc/portage/package.accept_keywords"
-        elif [ -d /etc/portage/package.accept_keywords ]; then
-            GENTOO_ACKEYS="/etc/portage/package.accept_keywords/salt"
-        else
-            # We could use accept_keywords env, but this likely indicates a bigger problem.
-            echoerror "/etc/portage/package.accept_keywords is neither directory nor file."
-            return 1
-        fi
-    fi
-    return 0
-}
-
 __gentoo_pre_dep() {
     if [ $_ECHO_DEBUG -eq $BS_TRUE ]; then
         emerge --sync
@@ -2808,21 +2786,8 @@ __gentoo_pre_dep() {
     if [ ! -d /etc/portage ]; then
         mkdir /etc/portage
     fi
-    __gentoo_set_ackeys || return 1
-    cat >> ${GENTOO_ACKEYS} << _EOT
-# Keywords added by bootstrap-salt
-# required by salt, based on the 0.15.1 ebuild
->=dev-python/pycryptopp-0.6.0
->=dev-python/m2crypto-0.21.1-r1
->=dev-python/pyyaml-3.10-r1
->=dev-python/pyzmq-13.1.0
->=dev-python/msgpack-0.3.0
-_EOT
 }
 __gentoo_post_dep() {
-    cat >> ${GENTOO_ACKEYS} << _EOT
-# End of bootstrap-salt keywords.
-_EOT
     # ensures dev-lib/crypto++ compiles happily
     __emerge libtool
     # the -o option asks it to emerge the deps but not the package.
@@ -2831,7 +2796,6 @@ _EOT
 
 install_gentoo_deps() {
     __gentoo_pre_dep || return 1
-    echo "app-admin/salt" >> ${GENTOO_ACKEYS}
     __gentoo_post_dep
 }
 

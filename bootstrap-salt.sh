@@ -2779,9 +2779,17 @@ __emerge() {
 
 __gentoo_pre_dep() {
     if [ $_ECHO_DEBUG -eq $BS_TRUE ]; then
-        emerge --sync
+        if which eix &> /dev/null; then
+            eix-sync
+        else
+            emerge --sync
+        fi
     else
-        emerge --sync --quiet
+        if which eix &> /dev/null; then
+            eix-sync -q
+        else
+            emerge --sync --quiet
+        fi
     fi
     if [ ! -d /etc/portage ]; then
         mkdir /etc/portage

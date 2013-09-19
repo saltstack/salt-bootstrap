@@ -2800,7 +2800,6 @@ install_gentoo_deps() {
 }
 
 install_gentoo_git_deps() {
-    __emerge git
     __gentoo_pre_dep || return 1
     echo "=app-admin/salt-9999 **" >> ${GENTOO_ACKEYS}
     __gentoo_post_dep

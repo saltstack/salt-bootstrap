@@ -2772,9 +2772,9 @@ install_suse_11_restart_daemons() {
 #
 __emerge() {
     if [ $_GENTOO_USE_BINHOST -eq $BS_TRUE ]; then
-        emerge --getbinpkg $@; return $?
+        emerge --autounmask-write --getbinpkg $@; return $?
     fi
-    emerge $@; return $?
+    emerge --autounmask-write $@; return $?
 }
 
 __gentoo_pre_dep() {

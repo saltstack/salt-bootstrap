@@ -2809,7 +2809,7 @@ install_gentoo_stable() {
 }
 
 install_gentoo_git() {
-    install_gentoo_stable || return 1
+    __emerge -v '=app-admin/salt-9999' || return 1
 }
 
 install_gentoo_post() {

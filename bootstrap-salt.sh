@@ -2789,9 +2789,9 @@ __gentoo_pre_dep() {
 }
 __gentoo_post_dep() {
     # ensures dev-lib/crypto++ compiles happily
-    __emerge libtool
+    __emerge 'sys-devel/libtool'
     # the -o option asks it to emerge the deps but not the package.
-    __emerge -vo salt
+    __emerge -vo 'app-admin/salt'
 }
 
 install_gentoo_deps() {
@@ -2805,7 +2805,7 @@ install_gentoo_git_deps() {
 }
 
 install_gentoo_stable() {
-    __emerge -v salt || return 1
+    __emerge -v 'app-admin/salt' || return 1
 }
 
 install_gentoo_git() {

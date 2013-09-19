@@ -2789,7 +2789,7 @@ __gentoo_pre_dep() {
 }
 __gentoo_post_dep() {
     # ensures dev-lib/crypto++ compiles happily
-    __emerge 'sys-devel/libtool'
+    __emerge --oneshot 'sys-devel/libtool'
     # the -o option asks it to emerge the deps but not the package.
     __emerge -vo 'app-admin/salt'
 }

@@ -2778,6 +2778,11 @@ __emerge() {
 }
 
 __gentoo_config_protection() {
+    # usually it's a good thing to have config files protected by portage, but
+    # in this case this would require to interrupt the bootstrapping script at
+    # this point, manually merge the changes using etc-update/dispatch-conf/
+    # cfg-update and then restart the bootstrapping script, so instead we allow
+    # at this point to modify certain config files directly
     export CONFIG_PROTECT_MASK="$CONFIG_PROTECT_MASK /etc/portage/package.keywords /etc/portage/package.unmask /etc/portage/package.use /etc/portage/package.license"
 }
 

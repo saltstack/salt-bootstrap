@@ -2778,7 +2778,7 @@ __emerge() {
 }
 
 __gentoo_config_protection() {
-    export CONFIG_PROTECT_MASK=$CONFIG_PROTECT_MASK:/etc/portage/package.keywords:/etc/portage/package.unmask:/etc/portage/package.use:/etc/portage/package.license
+    export CONFIG_PROTECT_MASK="$CONFIG_PROTECT_MASK /etc/portage/package.keywords /etc/portage/package.unmask /etc/portage/package.use /etc/portage/package.license"
 }
 
 __gentoo_pre_dep() {

@@ -2777,6 +2777,10 @@ __emerge() {
     emerge --autounmask-write $@; return $?
 }
 
+__gentoo_config_protection() {
+    export CONFIG_PROTECT_MASK=/etc/portage/package.keywords:/etc/portage/package.unmask:/etc/portage/package.use:/etc/portage/package.license
+}
+
 __gentoo_pre_dep() {
     if [ $_ECHO_DEBUG -eq $BS_TRUE ]; then
         if which eix &> /dev/null; then
@@ -2799,6 +2803,7 @@ __gentoo_post_dep() {
     # ensures dev-lib/crypto++ compiles happily
     __emerge --oneshot 'sys-devel/libtool'
     # the -o option asks it to emerge the deps but not the package.
+    __gentoo_config_protection
     __emerge -vo 'app-admin/salt'
 }
 

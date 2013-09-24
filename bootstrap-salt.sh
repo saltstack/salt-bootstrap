@@ -2823,10 +2823,12 @@ install_gentoo_git_deps() {
 }
 
 install_gentoo_stable() {
+    __gentoo_config_protection
     __emerge -v 'app-admin/salt' || return 1
 }
 
 install_gentoo_git() {
+    __gentoo_config_protection
     __emerge -v '=app-admin/salt-9999' || return 1
 }
 
@@ -2838,8 +2840,13 @@ install_gentoo_post() {
         [ $fname = "master" ] && [ $_INSTALL_MASTER -eq $BS_FALSE ] && continue
         [ $fname = "syndic" ] && [ $_INSTALL_SYNDIC -eq $BS_FALSE ] && continue
 
-        rc-update add salt-$fname default
-        /etc/init.d/salt-$fname start
+        if [ -d "/run/systemd/system" ]; then
+            systemctl enable salt-$fname.service
+            systemctl start salt-$fname.service
+        else
+            rc-update add salt-$fname default
+            /etc/init.d/salt-$fname start
+        fi
     done
 }
 

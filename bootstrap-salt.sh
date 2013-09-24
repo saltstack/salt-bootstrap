@@ -2788,13 +2788,13 @@ __gentoo_config_protection() {
 
 __gentoo_pre_dep() {
     if [ $_ECHO_DEBUG -eq $BS_TRUE ]; then
-        if which eix &> /dev/null; then
+        if [ "x$(which eix)" != "x" ]; then
             eix-sync
         else
             emerge --sync
         fi
     else
-        if which eix &> /dev/null; then
+        if [ "x$(which eix)" != "x" ]; then
             eix-sync -q
         else
             emerge --sync --quiet

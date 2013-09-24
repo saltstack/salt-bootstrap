@@ -2772,82 +2772,64 @@ install_suse_11_restart_daemons() {
 #
 __emerge() {
     if [ $_GENTOO_USE_BINHOST -eq $BS_TRUE ]; then
-        emerge --getbinpkg $@; return $?
+        emerge --autounmask-write --getbinpkg $@; return $?
     fi
-    emerge $@; return $?
+    emerge --autounmask-write $@; return $?
 }
 
-__gentoo_set_ackeys() {
-    GENTOO_ACKEYS=""
-    if [ ! -e /etc/portage/package.accept_keywords ]; then
-        # This is technically bad, but probably for the best.
-        # We'll assume that they want a file, as that's the default behaviour of portage.
-        # If they really want a folder they'll need to handle that themselves.
-        # We could use the ACCEPT_KEYWORDS environment variable, but that exceeds the minimum requires.
-        GENTOO_ACKEYS="/etc/portage/package.accept_keywords"
-    else
-        if [ -f /etc/portage/package.accept_keywords ]; then
-            GENTOO_ACKEYS="/etc/portage/package.accept_keywords"
-        elif [ -d /etc/portage/package.accept_keywords ]; then
-            GENTOO_ACKEYS="/etc/portage/package.accept_keywords/salt"
-        else
-            # We could use accept_keywords env, but this likely indicates a bigger problem.
-            echoerror "/etc/portage/package.accept_keywords is neither directory nor file."
-            return 1
-        fi
-    fi
-    return 0
+__gentoo_config_protection() {
+    # usually it's a good thing to have config files protected by portage, but
+    # in this case this would require to interrupt the bootstrapping script at
+    # this point, manually merge the changes using etc-update/dispatch-conf/
+    # cfg-update and then restart the bootstrapping script, so instead we allow
+    # at this point to modify certain config files directly
+    export CONFIG_PROTECT_MASK="$CONFIG_PROTECT_MASK /etc/portage/package.keywords /etc/portage/package.unmask /etc/portage/package.use /etc/portage/package.license"
 }
 
 __gentoo_pre_dep() {
     if [ $_ECHO_DEBUG -eq $BS_TRUE ]; then
-        emerge --sync
+        if [ "x$(which eix)" != "x" ]; then
+            eix-sync
+        else
+            emerge --sync
+        fi
     else
-        emerge --sync --quiet
+        if [ "x$(which eix)" != "x" ]; then
+            eix-sync -q
+        else
+            emerge --sync --quiet
+        fi
     fi
     if [ ! -d /etc/portage ]; then
         mkdir /etc/portage
     fi
-    __gentoo_set_ackeys || return 1
-    cat >> ${GENTOO_ACKEYS} << _EOT
-# Keywords added by bootstrap-salt
-# required by salt, based on the 0.15.1 ebuild
->=dev-python/pycryptopp-0.6.0
->=dev-python/m2crypto-0.21.1-r1
->=dev-python/pyyaml-3.10-r1
->=dev-python/pyzmq-13.1.0
->=dev-python/msgpack-0.3.0
-_EOT
 }
 __gentoo_post_dep() {
-    cat >> ${GENTOO_ACKEYS} << _EOT
-# End of bootstrap-salt keywords.
-_EOT
     # ensures dev-lib/crypto++ compiles happily
-    __emerge libtool
+    __emerge --oneshot 'sys-devel/libtool'
     # the -o option asks it to emerge the deps but not the package.
-    __emerge -vo salt
+    __gentoo_config_protection
+    __emerge -vo 'app-admin/salt'
 }
 
 install_gentoo_deps() {
     __gentoo_pre_dep || return 1
-    echo "app-admin/salt" >> ${GENTOO_ACKEYS}
     __gentoo_post_dep
 }
 
 install_gentoo_git_deps() {
-    __emerge git
     __gentoo_pre_dep || return 1
-    echo "=app-admin/salt-9999 **" >> ${GENTOO_ACKEYS}
     __gentoo_post_dep
 }
 
 install_gentoo_stable() {
-    __emerge -v salt || return 1
+    __gentoo_config_protection
+    __emerge -v 'app-admin/salt' || return 1
 }
 
 install_gentoo_git() {
-    install_gentoo_stable || return 1
+    __gentoo_config_protection
+    __emerge -v '=app-admin/salt-9999' || return 1
 }
 
 install_gentoo_post() {
@@ -2858,8 +2840,13 @@ install_gentoo_post() {
         [ $fname = "master" ] && [ $_INSTALL_MASTER -eq $BS_FALSE ] && continue
         [ $fname = "syndic" ] && [ $_INSTALL_SYNDIC -eq $BS_FALSE ] && continue
 
-        rc-update add salt-$fname default
-        /etc/init.d/salt-$fname start
+        if [ -d "/run/systemd/system" ]; then
+            systemctl enable salt-$fname.service
+            systemctl start salt-$fname.service
+        else
+            rc-update add salt-$fname default
+            /etc/init.d/salt-$fname start
+        fi
     done
 }
 
@@ -2871,8 +2858,13 @@ install_gentoo_restart_daemons() {
         [ $fname = "master" ] && [ $_INSTALL_MASTER -eq $BS_FALSE ] && continue
         [ $fname = "syndic" ] && [ $_INSTALL_SYNDIC -eq $BS_FALSE ] && continue
 
-        /etc/init.d/salt-$fname stop > /dev/null 2>&1
-        /etc/init.d/salt-$fname start
+        if [ -d "/run/systemd/system" ]; then
+            systemctl stop salt-$fname > /dev/null 2>&1
+            systemctl start salt-$fname.service
+        else
+            /etc/init.d/salt-$fname stop > /dev/null 2>&1
+            /etc/init.d/salt-$fname start
+        fi
     done
 }
 

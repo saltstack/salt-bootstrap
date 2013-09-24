@@ -8,6 +8,7 @@ Version 1.5.7:
 	* Switched FreeBSD default packages repository to PCBSD(http://www.pcbsd.org) and added 
 	multiple repository support to install salt from the SaltStack's FreeBSD repository.  Thanks 
 	Christer Edwards(cedwards).
+	* Improved Gentoo Support. Thanks Elias Probst(eliasp).
 	* Distro Support Fixed:
 		* Fixed an unbound variable while bootstraping Gentoo.
 		* Fixed CentOS/RHEL 5.

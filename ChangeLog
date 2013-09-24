@@ -17,6 +17,7 @@ Version 1.5.7:
 		which on FreeBSD is '/usr/local/etc/salt'.
 		* Fixed testing installation for Red Hat based distributions. Thanks Jeff Strunk(jstrunk)
 		* Fixed wrong package name on Arch. Thanks Niels Abspoel(aboe76)
+		* Make sure the Ubuntu universe repository is enabled. Thanks Karl Grzeszczak(karlgrz).
 
 Version 1.5.6:
 	* If there's a `grains` file on the provided temporary configuration directory, move it to the 

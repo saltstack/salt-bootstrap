@@ -1115,10 +1115,20 @@ install_ubuntu_deps() {
     else
         __apt_get_noinput python-software-properties || return 1
     fi
+
+    if [ "x$(grep -R universe /etc/apt/sources.list /etc/apt/sources.list.d/ | grep -v '#')" != "x" ]; then
+        __IS_UNIVERSE_ENABLED=$BS_TRUE
+    else
+        __IS_UNIVERSE_ENABLED=$BS_FALSE
+    fi
+
+
     if [ $DISTRO_MAJOR_VERSION -lt 11 ] && [ $DISTRO_MINOR_VERSION -lt 10 ]; then
         add-apt-repository ppa:saltstack/salt || return 1
+        add-apt-repository "deb http://archive.ubuntu.com/ubuntu $(lsb_release -sc) universe" || return 1
     else
         add-apt-repository -y ppa:saltstack/salt || return 1
+        add-apt-repository -y "deb http://archive.ubuntu.com/ubuntu $(lsb_release -sc) universe" || return 1
     fi
 
     apt-get update

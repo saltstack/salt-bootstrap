@@ -1116,6 +1116,26 @@ movefile() {
 #
 #   Ubuntu Install Functions
 #
+__enable_universe_repository() {
+    if [ "x$(grep -R universe /etc/apt/sources.list /etc/apt/sources.list.d/ | grep -v '#')" != "x" ]; then
+        # The universe repository is already enabled
+        return 0
+    fi
+
+    echodebug "Enabling the universe repository"
+
+    # Ubuntu versions higher than 12.04 do not live in the old repositories
+    if [ $DISTRO_MAJOR_VERSION -gt 12 ] || ([ $DISTRO_MAJOR_VERSION -eq 12 ] && [ $DISTRO_MINOR_VERSION -gt 04 ]); then
+        add-apt-repository -y "deb http://archive.ubuntu.com/ubuntu $(lsb_release -sc) universe" || return 1
+    elif [ $DISTRO_MAJOR_VERSION -lt 11 ] && [ $DISTRO_MINOR_VERSION -lt 10 ]; then
+        add-apt-repository "deb http://old-releases.ubuntu.com/ubuntu $(lsb_release -sc) universe" || return 1
+    fi
+
+    add-apt-repository -y "deb http://old-releases.ubuntu.com/ubuntu $(lsb_release -sc) universe" || return 1
+
+    return 0
+}
+
 install_ubuntu_deps() {
     apt-get update
     if [ $DISTRO_MAJOR_VERSION -eq 12 ] && [ $DISTRO_MINOR_VERSION -gt 04 ] || [ $DISTRO_MAJOR_VERSION -gt 12 ]; then
@@ -1123,21 +1143,13 @@ install_ubuntu_deps() {
         __apt_get_install_noinput software-properties-common || return 1
     else
         __apt_get_install_noinput python-software-properties || return 1
-    fi
 
-    if [ "x$(grep -R universe /etc/apt/sources.list /etc/apt/sources.list.d/ | grep -v '#')" != "x" ]; then
-        __IS_UNIVERSE_ENABLED=$BS_TRUE
-    else
-        __IS_UNIVERSE_ENABLED=$BS_FALSE
-    fi
-
+    __enable_universe_repository || return 1
 
     if [ $DISTRO_MAJOR_VERSION -lt 11 ] && [ $DISTRO_MINOR_VERSION -lt 10 ]; then
         add-apt-repository ppa:saltstack/salt || return 1
-        add-apt-repository "deb http://archive.ubuntu.com/ubuntu $(lsb_release -sc) universe" || return 1
     else
         add-apt-repository -y ppa:saltstack/salt || return 1
-        add-apt-repository -y "deb http://archive.ubuntu.com/ubuntu $(lsb_release -sc) universe" || return 1
     fi
 
     apt-get update
@@ -1162,21 +1174,6 @@ install_ubuntu_daily_deps() {
     else
         add-apt-repository -y ppa:saltstack/salt-daily || return 1
     fi
-
-    apt-get update
-
-    if [ $_UPGRADE_SYS -eq $BS_TRUE ]; then
-        __apt_get_upgrade_noinput || return 1
-    fi
-
-    return 0
-}
-
-install_ubuntu_11_10_deps() {
-    apt-get update
-    __apt_get_install_noinput python-software-properties || return 1
-    add-apt-repository -y 'deb http://us.archive.ubuntu.com/ubuntu/ oneiric universe' || return 1
-    add-apt-repository -y ppa:saltstack/salt || return 1
 
     apt-get update
 

@@ -1150,7 +1150,7 @@ install_ubuntu_deps() {
 
     __enable_universe_repository || return 1
 
-    if [ $DISTRO_MAJOR_VERSION -gt 12 ] || ([ $DISTRO_MAJOR_VERSION -eq 11 ] && [ $DISTRO_MINOR_VERSION -gt 04 ]); then
+    if [ $DISTRO_MAJOR_VERSION -gt 11 ] || ([ $DISTRO_MAJOR_VERSION -eq 11 ] && [ $DISTRO_MINOR_VERSION -gt 04 ]); then
         # Above Ubuntu 11.04 add a -y flag
         add-apt-repository -y ppa:saltstack/salt || return 1
     else
@@ -1178,7 +1178,7 @@ install_ubuntu_daily_deps() {
     __enable_universe_repository || return 1
 
     # for anything up to and including 11.04 do not use the -y option
-    if [ $DISTRO_MAJOR_VERSION -gt 12 ] || ([ $DISTRO_MAJOR_VERSION -eq 11 ] && [ $DISTRO_MINOR_VERSION -gt 04 ]); then
+    if [ $DISTRO_MAJOR_VERSION -gt 11 ] || ([ $DISTRO_MAJOR_VERSION -eq 11 ] && [ $DISTRO_MINOR_VERSION -gt 04 ]); then
         # Above Ubuntu 11.04 add a -y flag
         add-apt-repository -y ppa:saltstack/salt-daily || return 1
     else

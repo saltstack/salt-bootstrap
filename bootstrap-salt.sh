@@ -946,11 +946,20 @@ __git_clone_and_checkout() {
 
 
 #---  FUNCTION  ----------------------------------------------------------------
-#          NAME:  __apt_get_noinput
+#          NAME:  __apt_get_install_noinput
 #   DESCRIPTION:  (DRY) apt-get install with noinput options
 #-------------------------------------------------------------------------------
-__apt_get_noinput() {
+__apt_get_install_noinput() {
     apt-get install -y -o DPkg::Options::=--force-confold $@; return $?
+}
+
+
+#---  FUNCTION  ----------------------------------------------------------------
+#          NAME:  __apt_get_upgrade_noinput
+#   DESCRIPTION:  (DRY) apt-get upgrade with noinput options
+#-------------------------------------------------------------------------------
+__apt_get_upgrade_noinput() {
+    apt-get upgrade -y -o DPkg::Options::=--force-confold $@; return $?
 }
 
 
@@ -1107,34 +1116,47 @@ movefile() {
 #
 #   Ubuntu Install Functions
 #
+__enable_universe_repository() {
+    if [ "x$(grep -R universe /etc/apt/sources.list /etc/apt/sources.list.d/ | grep -v '#')" != "x" ]; then
+        # The universe repository is already enabled
+        return 0
+    fi
+
+    echodebug "Enabling the universe repository"
+
+    # Ubuntu versions higher than 12.04 do not live in the old repositories
+    if [ $DISTRO_MAJOR_VERSION -gt 12 ] || ([ $DISTRO_MAJOR_VERSION -eq 12 ] && [ $DISTRO_MINOR_VERSION -gt 04 ]); then
+        add-apt-repository -y "deb http://archive.ubuntu.com/ubuntu $(lsb_release -sc) universe" || return 1
+    elif [ $DISTRO_MAJOR_VERSION -lt 11 ] && [ $DISTRO_MINOR_VERSION -lt 10 ]; then
+        add-apt-repository "deb http://old-releases.ubuntu.com/ubuntu $(lsb_release -sc) universe" || return 1
+    fi
+
+    add-apt-repository -y "deb http://old-releases.ubuntu.com/ubuntu $(lsb_release -sc) universe" || return 1
+
+    return 0
+}
+
 install_ubuntu_deps() {
     apt-get update
     if [ $DISTRO_MAJOR_VERSION -eq 12 ] && [ $DISTRO_MINOR_VERSION -gt 04 ] || [ $DISTRO_MAJOR_VERSION -gt 12 ]; then
         # Above Ubuntu 12.04 add-apt-repository is in a different package
-        __apt_get_noinput software-properties-common || return 1
+        __apt_get_install_noinput software-properties-common || return 1
     else
-        __apt_get_noinput python-software-properties || return 1
+        __apt_get_install_noinput python-software-properties || return 1
     fi
 
-    if [ "x$(grep -R universe /etc/apt/sources.list /etc/apt/sources.list.d/ | grep -v '#')" != "x" ]; then
-        __IS_UNIVERSE_ENABLED=$BS_TRUE
-    else
-        __IS_UNIVERSE_ENABLED=$BS_FALSE
-    fi
-
+    __enable_universe_repository || return 1
 
     if [ $DISTRO_MAJOR_VERSION -lt 11 ] && [ $DISTRO_MINOR_VERSION -lt 10 ]; then
         add-apt-repository ppa:saltstack/salt || return 1
-        add-apt-repository "deb http://archive.ubuntu.com/ubuntu $(lsb_release -sc) universe" || return 1
     else
         add-apt-repository -y ppa:saltstack/salt || return 1
-        add-apt-repository -y "deb http://archive.ubuntu.com/ubuntu $(lsb_release -sc) universe" || return 1
     fi
 
     apt-get update
 
     if [ $_UPGRADE_SYS -eq $BS_TRUE ]; then
-        apt-get upgrade -y -o DPkg::Options::=--force-confold || return 1
+        __apt_get_upgrade_noinput || return 1
     fi
 
     return 0
@@ -1144,9 +1166,9 @@ install_ubuntu_daily_deps() {
     install_ubuntu_deps
     if [ $DISTRO_MAJOR_VERSION -eq 12 ] && [ $DISTRO_MINOR_VERSION -gt 04 ] || [ $DISTRO_MAJOR_VERSION -gt 12 ]; then
         # Above Ubuntu 12.04 add-apt-repository is in a different package
-        __apt_get_noinput software-properties-common || return 1
+        __apt_get_install_noinput software-properties-common || return 1
     else
-        __apt_get_noinput python-software-properties || return 1
+        __apt_get_install_noinput python-software-properties || return 1
     fi
     if [ $DISTRO_MAJOR_VERSION -lt 11 ] && [ $DISTRO_MINOR_VERSION -lt 10 ]; then
         add-apt-repository ppa:saltstack/salt-daily || return 1
@@ -1157,22 +1179,7 @@ install_ubuntu_daily_deps() {
     apt-get update
 
     if [ $_UPGRADE_SYS -eq $BS_TRUE ]; then
-        apt-get upgrade -y -o DPkg::Options::=--force-confold || return 1
-    fi
-
-    return 0
-}
-
-install_ubuntu_11_10_deps() {
-    apt-get update
-    __apt_get_noinput python-software-properties || return 1
-    add-apt-repository -y 'deb http://us.archive.ubuntu.com/ubuntu/ oneiric universe' || return 1
-    add-apt-repository -y ppa:saltstack/salt || return 1
-
-    apt-get update
-
-    if [ $_UPGRADE_SYS -eq $BS_TRUE ]; then
-        apt-get upgrade -y -o DPkg::Options::=--force-confold || return 1
+        __apt_get_upgrade_noinput || return 1
     fi
 
     return 0
@@ -1180,7 +1187,7 @@ install_ubuntu_11_10_deps() {
 
 install_ubuntu_git_deps() {
     install_ubuntu_deps || return 1
-    __apt_get_noinput git-core python-yaml python-m2crypto python-crypto \
+    __apt_get_install_noinput git-core python-yaml python-m2crypto python-crypto \
         msgpack-python python-zmq python-jinja2 || return 1
 
     __git_clone_and_checkout || return 1
@@ -1210,7 +1217,7 @@ install_ubuntu_stable() {
     if [ $_INSTALL_SYNDIC -eq $BS_TRUE ]; then
         packages="${packages} salt-syndic"
     fi
-    __apt_get_noinput ${packages} || return 1
+    __apt_get_install_noinput ${packages} || return 1
     return 0
 }
 
@@ -1305,7 +1312,7 @@ install_debian_deps() {
     apt-get update
 
     if [ $_UPGRADE_SYS -eq $BS_TRUE ]; then
-        apt-get upgrade -y -o DPkg::Options::=--force-confold || return 1
+        __apt_get_upgrade_noinput || return 1
     fi
 
 }
@@ -1342,9 +1349,9 @@ _eof
 
         apt-get update
         # We NEED to install the unstable dpkg or mime-support WILL fail to install
-        __apt_get_noinput -t unstable dpkg liblzma5 python mime-support || return 1
-        __apt_get_noinput -t unstable libzmq3 libzmq3-dev || return 1
-        __apt_get_noinput build-essential python-dev python-pip || return 1
+        __apt_get_install_noinput -t unstable dpkg liblzma5 python mime-support || return 1
+        __apt_get_install_noinput -t unstable libzmq3 libzmq3-dev || return 1
+        __apt_get_install_noinput build-essential python-dev python-pip || return 1
 
         # Saltstack's Unstable Debian repository
         if [ "x$(grep -R 'debian.saltstack.com' /etc/apt)" = "x" ]; then
@@ -1368,10 +1375,10 @@ _eof
     apt-get update || return 1
 
     if [ $_UPGRADE_SYS -eq $BS_TRUE ]; then
-        apt-get upgrade -y -o DPkg::Options::=--force-confold || return 1
+        __apt_get_upgrade_noinput || return 1
     fi
 
-    __apt_get_noinput python-zmq || return 1
+    __apt_get_install_noinput python-zmq || return 1
     return 0
 }
 
@@ -1412,15 +1419,15 @@ _eof
         fi
 
         apt-get update
-        __apt_get_noinput -t unstable libzmq3 libzmq3-dev || return 1
-        __apt_get_noinput build-essential python-dev python-pip || return 1
+        __apt_get_install_noinput -t unstable libzmq3 libzmq3-dev || return 1
+        __apt_get_install_noinput build-essential python-dev python-pip || return 1
     else
         apt-get update || return 1
-        __apt_get_noinput python-zmq || return 1
+        __apt_get_install_noinput python-zmq || return 1
     fi
 
     if [ $_UPGRADE_SYS -eq $BS_TRUE ]; then
-        apt-get upgrade -y -o DPkg::Options::=--force-confold || return 1
+        __apt_get_upgrade_noinput || return 1
     fi
 
     return 0
@@ -1431,7 +1438,7 @@ install_debian_git_deps() {
     export DEBIAN_FRONTEND=noninteractive
 
     apt-get update
-    __apt_get_noinput lsb-release python python-pkg-resources python-crypto \
+    __apt_get_install_noinput lsb-release python python-pkg-resources python-crypto \
         python-jinja2 python-m2crypto python-yaml msgpack-python python-pip \
         git || return 1
 
@@ -1444,7 +1451,7 @@ install_debian_git_deps() {
     fi
 
     if [ $_UPGRADE_SYS -eq $BS_TRUE ]; then
-        apt-get upgrade -y -o DPkg::Options::=--force-confold || return 1
+        __apt_get_upgrade_noinput || return 1
     fi
 
     return 0
@@ -1454,7 +1461,7 @@ install_debian_6_git_deps() {
     install_debian_6_deps || return 1
     if [ $_PIP_ALLOWED -eq $BS_TRUE ]; then
         easy_install -U Jinja2 || return 1
-        __apt_get_noinput lsb-release python python-pkg-resources python-crypto \
+        __apt_get_install_noinput lsb-release python python-pkg-resources python-crypto \
             python-m2crypto python-yaml msgpack-python python-pip git || return 1
 
         __git_clone_and_checkout || return 1
@@ -1469,7 +1476,7 @@ install_debian_6_git_deps() {
     fi
 
     if [ $_UPGRADE_SYS -eq $BS_TRUE ]; then
-        apt-get upgrade -y -o DPkg::Options::=--force-confold || return 1
+        __apt_get_upgrade_noinput || return 1
     fi
 
     return 0
@@ -1492,7 +1499,7 @@ __install_debian_stable() {
     if [ $_INSTALL_SYNDIC -eq $BS_TRUE ]; then
         packages="${packages} salt-syndic"
     fi
-    __apt_get_noinput ${packages} || return 1
+    __apt_get_install_noinput ${packages} || return 1
 
     if [ $_PIP_ALLOWED -eq $BS_TRUE ]; then
         # Building pyzmq from source to build it against libzmq3.

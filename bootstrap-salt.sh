@@ -154,7 +154,9 @@ usage() {
       resort method. NOTE: This works for functions which actually implement
       pip based installations.
   -F  Allow copied files to overwrite existing(config, init.d, etc)
-  -U  If optional, don't fully upgrade the system prior to bootstrapping salt
+  -U  If set, fully upgrade the system prior to bootstrapping salt
+  -K  If set, keep the temporary files in the temporary directories specified
+      with -c and -k.
 
 EOT
 }   # ----------  end of function usage  ----------
@@ -239,7 +241,7 @@ _UPGRADE_SYS=${BS_UPGRADE_SYS:-$BS_FALSE}
 # __SIMPLIFY_VERSION is mostly used in Solaris based distributions
 __SIMPLIFY_VERSION=$BS_TRUE
 
-while getopts ":hvnDc:k:MSNCPFU" opt
+while getopts ":hvnDc:k:MSNCPFUK" opt
 do
   case "${opt}" in
 
@@ -273,6 +275,7 @@ do
     P )  _PIP_ALLOWED=$BS_TRUE                          ;;
     F )  _FORCE_OVERWRITE=$BS_TRUE                      ;;
     U )  _UPGRADE_SYS=$BS_TRUE                          ;;
+    K )  _KEEP_TEMP_FILES=$BS_TRUE                      ;;
 
     \?)  echo
          echoerror "Option does not exist : $OPTARG"
@@ -1122,13 +1125,18 @@ install_ubuntu_deps() {
         __IS_UNIVERSE_ENABLED=$BS_FALSE
     fi
 
-
-    if [ $DISTRO_MAJOR_VERSION -lt 11 ] && [ $DISTRO_MINOR_VERSION -lt 10 ]; then
-        add-apt-repository ppa:saltstack/salt || return 1
-        add-apt-repository "deb http://archive.ubuntu.com/ubuntu $(lsb_release -sc) universe" || return 1
-    else
+    # for anything up to and including 11.04 do not use the -y option
+    if [ $DISTRO_MAJOR_VERSION -eq 11 ] && [ $DISTRO_MINOR_VERSION -gt 04 ] || [ $DISTRO_MAJOR_VERSION -gt 12 ]; then
+        # Above Ubuntu 11.04 add a -y flag
         add-apt-repository -y ppa:saltstack/salt || return 1
-        add-apt-repository -y "deb http://archive.ubuntu.com/ubuntu $(lsb_release -sc) universe" || return 1
+        if [ $__IS_UNIVERSE_ENABLED -eq $BS_FALSE ]; then
+            add-apt-repository -y "deb http://archive.ubuntu.com/ubuntu $(lsb_release -sc) universe" || return 1
+        fi
+    else
+        add-apt-repository ppa:saltstack/salt || return 1
+        if [ $__IS_UNIVERSE_ENABLED -eq $BS_FALSE ]; then
+            add-apt-repository "deb http://archive.ubuntu.com/ubuntu $(lsb_release -sc) universe" || return 1
+        fi
     fi
 
     apt-get update
@@ -1148,10 +1156,12 @@ install_ubuntu_daily_deps() {
     else
         __apt_get_noinput python-software-properties || return 1
     fi
-    if [ $DISTRO_MAJOR_VERSION -lt 11 ] && [ $DISTRO_MINOR_VERSION -lt 10 ]; then
-        add-apt-repository ppa:saltstack/salt-daily || return 1
-    else
+    # for anything up to and including 11.04 do not use the -y option
+    if [ $DISTRO_MAJOR_VERSION -eq 11 ] && [ $DISTRO_MINOR_VERSION -gt 04 ] || [ $DISTRO_MAJOR_VERSION -gt 12 ]; then
+        # Above Ubuntu 11.04 add a -y flag
         add-apt-repository -y ppa:saltstack/salt-daily || return 1
+    else
+        add-apt-repository ppa:saltstack/salt-daily || return 1
     fi
 
     apt-get update

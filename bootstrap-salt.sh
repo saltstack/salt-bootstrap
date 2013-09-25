@@ -154,7 +154,9 @@ usage() {
       resort method. NOTE: This works for functions which actually implement
       pip based installations.
   -F  Allow copied files to overwrite existing(config, init.d, etc)
-  -U  If optional, don't fully upgrade the system prior to bootstrapping salt
+  -U  If set, fully upgrade the system prior to bootstrapping salt
+  -K  If set, keep the temporary files in the temporary directories specified
+      with -c and -k.
 
 EOT
 }   # ----------  end of function usage  ----------
@@ -239,7 +241,7 @@ _UPGRADE_SYS=${BS_UPGRADE_SYS:-$BS_FALSE}
 # __SIMPLIFY_VERSION is mostly used in Solaris based distributions
 __SIMPLIFY_VERSION=$BS_TRUE
 
-while getopts ":hvnDc:k:MSNCPFU" opt
+while getopts ":hvnDc:k:MSNCPFUK" opt
 do
   case "${opt}" in
 
@@ -273,6 +275,7 @@ do
     P )  _PIP_ALLOWED=$BS_TRUE                          ;;
     F )  _FORCE_OVERWRITE=$BS_TRUE                      ;;
     U )  _UPGRADE_SYS=$BS_TRUE                          ;;
+    K )  _KEEP_TEMP_FILES=$BS_TRUE                      ;;
 
     \?)  echo
          echoerror "Option does not exist : $OPTARG"
@@ -1138,8 +1141,8 @@ __enable_universe_repository() {
 
 install_ubuntu_deps() {
     apt-get update
-    if [ $DISTRO_MAJOR_VERSION -eq 12 ] && [ $DISTRO_MINOR_VERSION -gt 04 ] || [ $DISTRO_MAJOR_VERSION -gt 12 ]; then
-        # Above Ubuntu 12.04 add-apt-repository is in a different package
+    if [ $DISTRO_MAJOR_VERSION -eq 12 ] || [ $DISTRO_MAJOR_VERSION -gt 12 ]; then
+        # Above Ubuntu 11.10 add-apt-repository is in a different package
         __apt_get_install_noinput software-properties-common || return 1
     else
         __apt_get_install_noinput python-software-properties || return 1
@@ -1147,10 +1150,11 @@ install_ubuntu_deps() {
 
     __enable_universe_repository || return 1
 
-    if [ $DISTRO_MAJOR_VERSION -lt 11 ] && [ $DISTRO_MINOR_VERSION -lt 10 ]; then
-        add-apt-repository ppa:saltstack/salt || return 1
-    else
+    if [ $DISTRO_MAJOR_VERSION -gt 11 ] || ([ $DISTRO_MAJOR_VERSION -eq 11 ] && [ $DISTRO_MINOR_VERSION -gt 04 ]); then
+        # Above Ubuntu 11.04 add a -y flag
         add-apt-repository -y ppa:saltstack/salt || return 1
+    else
+        add-apt-repository ppa:saltstack/salt || return 1
     fi
 
     apt-get update
@@ -1164,16 +1168,21 @@ install_ubuntu_deps() {
 
 install_ubuntu_daily_deps() {
     install_ubuntu_deps
-    if [ $DISTRO_MAJOR_VERSION -eq 12 ] && [ $DISTRO_MINOR_VERSION -gt 04 ] || [ $DISTRO_MAJOR_VERSION -gt 12 ]; then
-        # Above Ubuntu 12.04 add-apt-repository is in a different package
+    if [ $DISTRO_MAJOR_VERSION -eq 12 ] || [ $DISTRO_MAJOR_VERSION -gt 12 ]; then
+        # Above Ubuntu 11.10 add-apt-repository is in a different package
         __apt_get_install_noinput software-properties-common || return 1
     else
         __apt_get_install_noinput python-software-properties || return 1
     fi
-    if [ $DISTRO_MAJOR_VERSION -lt 11 ] && [ $DISTRO_MINOR_VERSION -lt 10 ]; then
-        add-apt-repository ppa:saltstack/salt-daily || return 1
-    else
+
+    __enable_universe_repository || return 1
+
+    # for anything up to and including 11.04 do not use the -y option
+    if [ $DISTRO_MAJOR_VERSION -gt 11 ] || ([ $DISTRO_MAJOR_VERSION -eq 11 ] && [ $DISTRO_MINOR_VERSION -gt 04 ]); then
+        # Above Ubuntu 11.04 add a -y flag
         add-apt-repository -y ppa:saltstack/salt-daily || return 1
+    else
+        add-apt-repository ppa:saltstack/salt-daily || return 1
     fi
 
     apt-get update
@@ -1198,11 +1207,6 @@ install_ubuntu_git_deps() {
         CONFIG_SALT_FUNC="config_salt"
     fi
 
-    return 0
-}
-
-install_ubuntu_11_10_post() {
-    add-apt-repository -y --remove 'deb http://us.archive.ubuntu.com/ubuntu/ oneiric universe' || return 1
     return 0
 }
 

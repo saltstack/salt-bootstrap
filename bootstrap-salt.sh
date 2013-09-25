@@ -966,6 +966,24 @@ __apt_get_upgrade_noinput() {
 }
 
 
+__check_end_of_life_versions() {
+
+    if [ "${DISTRO_NAME_L}" = "ubuntu" ]; then
+        if ([ $DISTRO_MAJOR_VERSION -eq 10 ] && [ $DISTRO_MAJOR_VERSION -eq 10 ]) || \
+           ([ $DISTRO_MAJOR_VERSION -eq 11 ] && [ $DISTRO_MAJOR_VERSION -eq 04 ]) || \
+           ([ $DISTRO_MAJOR_VERSION -eq 11 ] && [ $DISTRO_MAJOR_VERSION -eq 10 ]); then
+                echoerror "End of life distributions are not supported."
+                echoerror "Please consider upgrading to the next stable. See:"
+                echoerror "    https://wiki.ubuntu.com/Releases"
+                exit 1
+        fi
+    fi
+}
+
+# Fail soon for end of life versions
+__check_end_of_life_versions
+
+
 #---  FUNCTION  ----------------------------------------------------------------
 #          NAME:  copyfile
 #   DESCRIPTION:  Simple function to copy files. Overrides if asked.

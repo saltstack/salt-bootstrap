@@ -1143,6 +1143,7 @@ install_ubuntu_deps() {
         __apt_get_install_noinput software-properties-common || return 1
     else
         __apt_get_install_noinput python-software-properties || return 1
+    fi
 
     __enable_universe_repository || return 1
 

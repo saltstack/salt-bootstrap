@@ -966,20 +966,37 @@ __apt_get_upgrade_noinput() {
 }
 
 
+#---  FUNCTION  ----------------------------------------------------------------
+#          NAME:  __check_end_of_life_versions
+#   DESCRIPTION:  Check for end of life distribution versions
+#-------------------------------------------------------------------------------
 __check_end_of_life_versions() {
 
-    if [ "${DISTRO_NAME_L}" = "ubuntu" ]; then
-        if ([ $DISTRO_MAJOR_VERSION -eq 10 ] && [ $DISTRO_MAJOR_VERSION -eq 10 ]) || \
-           ([ $DISTRO_MAJOR_VERSION -eq 11 ] && [ $DISTRO_MAJOR_VERSION -eq 04 ]) || \
-           ([ $DISTRO_MAJOR_VERSION -eq 11 ] && [ $DISTRO_MAJOR_VERSION -eq 10 ]); then
+    case "${DISTRO_NAME_L}" in
+        ubuntu)
+            if ([ $DISTRO_MAJOR_VERSION -eq 10 ] && [ $DISTRO_MAJOR_VERSION -eq 10 ]) || \
+               ([ $DISTRO_MAJOR_VERSION -eq 11 ] && [ $DISTRO_MAJOR_VERSION -eq 04 ]) || \
+               ([ $DISTRO_MAJOR_VERSION -eq 11 ] && [ $DISTRO_MAJOR_VERSION -eq 10 ]); then
                 echoerror "End of life distributions are not supported."
                 echoerror "Please consider upgrading to the next stable. See:"
                 echoerror "    https://wiki.ubuntu.com/Releases"
                 exit 1
-        fi
-    fi
-}
+            fi
+            ;;
 
+        opensuse)
+            if ([ $DISTRO_MAJOR_VERSION -eq 12 ] && [ $DISTRO_MAJOR_VERSION -eq 01 ]) || [ $DISTRO_MAJOR_VERSION -lt 12 ]; then
+                echoerror "End of life distributions are not supported."
+                echoerror "Please consider upgrading to the next stable. See:"
+                echoerror "    http://en.opensuse.org/Lifetime"
+                exit 1
+            fi
+            ;;
+
+        *)
+            ;;
+    esac
+}
 # Fail soon for end of life versions
 __check_end_of_life_versions
 

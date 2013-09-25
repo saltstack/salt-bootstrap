@@ -954,6 +954,14 @@ __apt_get_install_noinput() {
 }
 
 
+#---  FUNCTION  ----------------------------------------------------------------
+#          NAME:  __apt_get_upgrade_noinput
+#   DESCRIPTION:  (DRY) apt-get upgrade with noinput options
+#-------------------------------------------------------------------------------
+__apt_get_upgrade_noinput() {
+    apt-get upgrade -y -o DPkg::Options::=--force-confold $@; return $?
+}
+
 
 #---  FUNCTION  ----------------------------------------------------------------
 #          NAME:  copyfile
@@ -1135,7 +1143,7 @@ install_ubuntu_deps() {
     apt-get update
 
     if [ $_UPGRADE_SYS -eq $BS_TRUE ]; then
-        apt-get upgrade -y -o DPkg::Options::=--force-confold || return 1
+        __apt_get_upgrade_noinput || return 1
     fi
 
     return 0
@@ -1158,7 +1166,7 @@ install_ubuntu_daily_deps() {
     apt-get update
 
     if [ $_UPGRADE_SYS -eq $BS_TRUE ]; then
-        apt-get upgrade -y -o DPkg::Options::=--force-confold || return 1
+        __apt_get_upgrade_noinput || return 1
     fi
 
     return 0
@@ -1173,7 +1181,7 @@ install_ubuntu_11_10_deps() {
     apt-get update
 
     if [ $_UPGRADE_SYS -eq $BS_TRUE ]; then
-        apt-get upgrade -y -o DPkg::Options::=--force-confold || return 1
+        __apt_get_upgrade_noinput || return 1
     fi
 
     return 0
@@ -1306,7 +1314,7 @@ install_debian_deps() {
     apt-get update
 
     if [ $_UPGRADE_SYS -eq $BS_TRUE ]; then
-        apt-get upgrade -y -o DPkg::Options::=--force-confold || return 1
+        __apt_get_upgrade_noinput || return 1
     fi
 
 }
@@ -1369,7 +1377,7 @@ _eof
     apt-get update || return 1
 
     if [ $_UPGRADE_SYS -eq $BS_TRUE ]; then
-        apt-get upgrade -y -o DPkg::Options::=--force-confold || return 1
+        __apt_get_upgrade_noinput || return 1
     fi
 
     __apt_get_install_noinput python-zmq || return 1
@@ -1421,7 +1429,7 @@ _eof
     fi
 
     if [ $_UPGRADE_SYS -eq $BS_TRUE ]; then
-        apt-get upgrade -y -o DPkg::Options::=--force-confold || return 1
+        __apt_get_upgrade_noinput || return 1
     fi
 
     return 0
@@ -1445,7 +1453,7 @@ install_debian_git_deps() {
     fi
 
     if [ $_UPGRADE_SYS -eq $BS_TRUE ]; then
-        apt-get upgrade -y -o DPkg::Options::=--force-confold || return 1
+        __apt_get_upgrade_noinput || return 1
     fi
 
     return 0
@@ -1470,7 +1478,7 @@ install_debian_6_git_deps() {
     fi
 
     if [ $_UPGRADE_SYS -eq $BS_TRUE ]; then
-        apt-get upgrade -y -o DPkg::Options::=--force-confold || return 1
+        __apt_get_upgrade_noinput || return 1
     fi
 
     return 0

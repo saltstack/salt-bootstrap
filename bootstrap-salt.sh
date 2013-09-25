@@ -1168,7 +1168,7 @@ install_ubuntu_deps() {
 
 install_ubuntu_daily_deps() {
     install_ubuntu_deps
-    if ([ $DISTRO_MAJOR_VERSION -eq 12 ] || [ $DISTRO_MAJOR_VERSION -gt 12 ]; then
+    if [ $DISTRO_MAJOR_VERSION -eq 12 ] || [ $DISTRO_MAJOR_VERSION -gt 12 ]; then
         # Above Ubuntu 11.10 add-apt-repository is in a different package
         __apt_get_install_noinput software-properties-common || return 1
     else

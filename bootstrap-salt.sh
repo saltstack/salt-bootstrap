@@ -2365,30 +2365,9 @@ install_freebsd_restart_daemons() {
 #   SmartOS Install Functions
 #
 install_smartos_deps() {
-    check_pip_allowed
-    echowarn "PyZMQ will be installed using pip"
-
-    # Use the distribution persistent /etc directory
-    _SALT_ETC_DIR=${BS_SALT_ETC_DIR:-/opt/local/etc/salt}
-
-    ZEROMQ_VERSION='3.2.3'
-    (pkg_info gcc-compiler > /dev/null 2>&1 && pkgin -y in gcc-compiler) || \
-        (pkg_info gcc47 > /dev/null 2>&1 && pkgin -y in gcc47) || return 1
-    pkgin -y in libtool-base autoconf automake libuuid gmake \
-        python27 py27-setuptools py27-crypto swig || return 1
-    [ -d zeromq-${ZEROMQ_VERSION} ] || (
-        wget http://download.zeromq.org/zeromq-${ZEROMQ_VERSION}.tar.gz &&
-        tar -xvf zeromq-${ZEROMQ_VERSION}.tar.gz
-    )
-    cd zeromq-${ZEROMQ_VERSION}
-    ./configure || return 1
-    make || return 1
-    make install || return 1
-
-    # Install dependencies by hand. The were not getting pulled-in by the
-    # setup install functions below.
-    easy_install-2.7 pip
-    pip-2.7 install PyYaml Jinja2 M2Crypto msgpack-python pyzmq>=2.1.9 || return 1
+    pkgin -y in \
+        zeromq py27-m2crypto py27-crypto py27-msgpack py27-yaml \
+        py27-jinja2 py27-zmq || return 1
 
     # Let's trigger config_salt()
     if [ "$_TEMP_CONFIG_DIR" = "null" ]; then
@@ -2426,7 +2405,7 @@ install_smartos_git_deps() {
 }
 
 install_smartos_stable() {
-    USE_SETUPTOOLS=1 pip-2.7 install salt || return 1
+    pkgin -y in salt || return 1
     return 0
 }
 

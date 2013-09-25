@@ -1210,11 +1210,6 @@ install_ubuntu_git_deps() {
     return 0
 }
 
-install_ubuntu_11_10_post() {
-    add-apt-repository -y --remove 'deb http://us.archive.ubuntu.com/ubuntu/ oneiric universe' || return 1
-    return 0
-}
-
 install_ubuntu_stable() {
     packages=""
     if [ $_INSTALL_MINION -eq $BS_TRUE ]; then

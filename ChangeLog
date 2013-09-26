@@ -1,3 +1,26 @@
+Version 1.5.7:
+	* For RedHat based distributions which rely on `epel`, the user can now pass `testing` to the 
+	script and `epel-testing` shall be used to bootstrap salt and it's dependencies.
+	* No full system upgrades, if optional by the distribution, shall be done unless `-U` is passed 
+	to the bootstrap script(required upgrade procedures must exist on the script, currently Debian 
+	and RedHat based distributions support system upgrades).
+	* Fixed an issue where passing BS_KEEP_TEMP_FILES=1 to the script was causing an error. #206.
+	* Switched FreeBSD default packages repository to PCBSD(http://www.pcbsd.org) and added 
+	multiple repository support to install salt from the SaltStack's FreeBSD repository.  Thanks 
+	Christer Edwards(cedwards).
+	* Improved Gentoo Support. Thanks Elias Probst(eliasp).
+	* Stop execution soon for end of life distributions or non supported distribution versions.
+	* Distro Support Fixed:
+		* Fixed an unbound variable while bootstraping Gentoo.
+		* Fixed CentOS/RHEL 5.
+		* Fixed crypto++ compilation. Thanks Kenneth Wilke(KennethWilke)!
+		* Fixed FreeBSD git installations not pointing to the proper salt configuration directory, 
+		which on FreeBSD is '/usr/local/etc/salt'.
+		* Fixed testing installation for Red Hat based distributions. Thanks Jeff Strunk(jstrunk)
+		* Fixed wrong package name on Arch. Thanks Niels Abspoel(aboe76)
+		* Make sure the Ubuntu universe repository is enabled. Thanks Karl Grzeszczak(karlgrz).
+		* Fixed SmartOS installation. Thanks Matthieu Guegan(mguegan).
+
 Version 1.5.6:
 	* If there's a `grains` file on the provided temporary configuration directory, move it to the 
 	proper place while moving the minion configuration file.

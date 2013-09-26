@@ -78,6 +78,11 @@ If all you want is to install a ``salt-master`` using latest git:
 
   curl -L http://bootstrap.saltstack.org | sudo sh -s -- -M -N git develop
 
+If you want to install a specific release version (based on the git tags):
+
+.. code:: console
+
+  curl -L http://bootstrap.saltstack.org | sudo sh -s -- git v0.16.4
 
 
 Adding support for other operating systems

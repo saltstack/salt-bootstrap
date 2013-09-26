@@ -294,6 +294,40 @@ class InstallationTestCase(BootstrapTestCase):
                 1, (rc, out, err)
             )
 
+    def test_install_testing(self):
+        args = []
+        if requires_pip_based_installations():
+            args.append('-P')
+
+        args.append('testing')
+
+        rc, out, err = self.run_script(
+            args=args, timeout=15 * 60, stream_stds=True
+        )
+        if GRAINS['os_family'] == 'RedHat':
+            self.assert_script_result(
+                'Failed to install testing',
+                0, (rc, out, err)
+            )
+
+            # Try to get the versions report
+            self.assert_script_result(
+                'Failed to get the versions report (\'--versions-report\')',
+                0,
+                self.run_script(
+                    script=None,
+                    args=('salt-minion', '--versions-report'),
+                    timeout=15 * 60,
+                    stream_stds=True
+                )
+            )
+        else:
+            self.assert_script_result(
+                'Although system is not RedHat based, we managed to install '
+                'testing',
+                1, (rc, out, err)
+            )
+
     def test_install_stable_piped_through_sh(self):
         args = 'cat {0} | sh '.format(BOOTSTRAP_SCRIPT_PATH).split()
         if requires_pip_based_installations():

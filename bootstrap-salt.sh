@@ -1038,6 +1038,16 @@ __check_end_of_life_versions() {
             fi
             ;;
 
+        centos)
+            # CentOS versions lower than 5 are no longer supported
+            if [ $DISTRO_MAJOR_VERSION -lt 5 ]; then
+                echoerror "End of life distributions are not supported."
+                echoerror "Please consider upgrading to the next stable. See:"
+                echoerror "    http://wiki.centos.org/Download"
+                exit 1
+            fi
+            ;;
+
         *)
             ;;
     esac

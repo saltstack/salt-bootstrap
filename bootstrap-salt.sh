@@ -1,6 +1,6 @@
 #!/bin/sh -
 #===============================================================================
-# vim: softtabstop=4 shiftwidth=4 expandtab fenc=utf-8 spell spelllang=en
+# vim: softtabstop=4 shiftwidth=4 expandtab fenc=utf-8 spell spelllang=en cc=81
 #===============================================================================
 #
 #          FILE: bootstrap-salt.sh
@@ -973,6 +973,16 @@ __apt_get_upgrade_noinput() {
 __check_end_of_life_versions() {
 
     case "${DISTRO_NAME_L}" in
+        debian)
+            # Debian versions bellow 6 are not supported
+            if [ $DISTRO_MAJOR_VERSION -lt 6 ]; then
+                echoerror "End of life distributions are not supported."
+                echoerror "Please consider upgrading to the next stable. See:"
+                echoerror "    https://wiki.debian.org/DebianReleases"
+                exit 1
+            fi
+            ;;
+
         ubuntu)
             # Ubuntu versions not supported
             #
@@ -980,9 +990,9 @@ __check_end_of_life_versions() {
             #  = 10.10
             #  = 11.04
             #  = 11.10
-            if ([ $DISTRO_MAJOR_VERSION -eq 10 ] && [ $DISTRO_MAJOR_VERSION -eq 10 ]) || \
-               ([ $DISTRO_MAJOR_VERSION -eq 11 ] && [ $DISTRO_MAJOR_VERSION -eq 04 ]) || \
-               ([ $DISTRO_MAJOR_VERSION -eq 11 ] && [ $DISTRO_MAJOR_VERSION -eq 10 ]) || \
+            if ([ $DISTRO_MAJOR_VERSION -eq 10 ] && [ $DISTRO_MINOR_VERSION -eq 10 ]) || \
+               ([ $DISTRO_MAJOR_VERSION -eq 11 ] && [ $DISTRO_MINOR_VERSION -eq 04 ]) || \
+               ([ $DISTRO_MAJOR_VERSION -eq 11 ] && [ $DISTRO_MINOR_VERSION -eq 10 ]) || \
                [ $DISTRO_MAJOR_VERSION -lt 10 ]; then
                 echoerror "End of life distributions are not supported."
                 echoerror "Please consider upgrading to the next stable. See:"
@@ -994,8 +1004,8 @@ __check_end_of_life_versions() {
         opensuse)
             # openSUSE versions not supported
             #
-            #  <= 12.01
-            if ([ $DISTRO_MAJOR_VERSION -eq 12 ] && [ $DISTRO_MAJOR_VERSION -eq 01 ]) || [ $DISTRO_MAJOR_VERSION -lt 12 ]; then
+            #  <= 12.1
+            if ([ $DISTRO_MAJOR_VERSION -eq 12 ] && [ $DISTRO_MINOR_VERSION -eq 1 ]) || [ $DISTRO_MAJOR_VERSION -lt 12 ]; then
                 echoerror "End of life distributions are not supported."
                 echoerror "Please consider upgrading to the next stable. See:"
                 echoerror "    http://en.opensuse.org/Lifetime"
@@ -1016,6 +1026,45 @@ __check_end_of_life_versions() {
                 echoerror "Please consider upgrading to the next stable"
                 exit 1
             fi
+            ;;
+
+        fedora)
+            # Fedora lower than 18 are no longer supported
+            if [ $DISTRO_MAJOR_VERSION -lt 18 ]; then
+                echoerror "End of life distributions are not supported."
+                echoerror "Please consider upgrading to the next stable. See:"
+                echoerror "    https://fedoraproject.org/wiki/Releases"
+                exit 1
+            fi
+            ;;
+
+        centos)
+            # CentOS versions lower than 5 are no longer supported
+            if [ $DISTRO_MAJOR_VERSION -lt 5 ]; then
+                echoerror "End of life distributions are not supported."
+                echoerror "Please consider upgrading to the next stable. See:"
+                echoerror "    http://wiki.centos.org/Download"
+                exit 1
+            fi
+            ;;
+
+        red_hat*linux)
+            # Red Hat (Enterprise) Linux versions lower than 5 are no longer supported
+            if [ $DISTRO_MAJOR_VERSION -lt 5 ]; then
+                echoerror "End of life distributions are not supported."
+                echoerror "Please consider upgrading to the next stable. See:"
+                echoerror "    https://access.redhat.com/support/policy/updates/errata/"
+                exit 1
+            fi
+            ;;
+
+        freebsd)
+            # FreeBSD versions lower than 9.1 are not supported.
+            if ([ $DISTRO_MAJOR_VERSION -eq 9 ] && [ $DISTRO_MINOR_VERSION -lt 01 ]) || [ $DISTRO_MAJOR_VERSION -lt 9 ]; then
+                echoerror "Versions lower than FreeBSD 9.1 are not supported."
+                exit 1
+            fi
+            ;;
 
         *)
             ;;
@@ -1190,6 +1239,7 @@ __enable_universe_repository() {
     if [ $DISTRO_MAJOR_VERSION -gt 12 ] || ([ $DISTRO_MAJOR_VERSION -eq 12 ] && [ $DISTRO_MINOR_VERSION -gt 04 ]); then
         add-apt-repository -y "deb http://archive.ubuntu.com/ubuntu $(lsb_release -sc) universe" || return 1
     elif [ $DISTRO_MAJOR_VERSION -lt 11 ] && [ $DISTRO_MINOR_VERSION -lt 10 ]; then
+        # Below Ubuntu 11.10, the -y flag to add-apt-repository is not supported
         add-apt-repository "deb http://old-releases.ubuntu.com/ubuntu $(lsb_release -sc) universe" || return 1
     fi
 

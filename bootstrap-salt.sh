@@ -1,6 +1,6 @@
 #!/bin/sh -
 #===============================================================================
-# vim: softtabstop=4 shiftwidth=4 expandtab fenc=utf-8 spell spelllang=en
+# vim: softtabstop=4 shiftwidth=4 expandtab fenc=utf-8 spell spelllang=en cc=81
 #===============================================================================
 #
 #          FILE: bootstrap-salt.sh

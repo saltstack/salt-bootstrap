@@ -974,9 +974,16 @@ __check_end_of_life_versions() {
 
     case "${DISTRO_NAME_L}" in
         ubuntu)
+            # Ubuntu versions not supported
+            #
+            #  < 10
+            #  = 10.10
+            #  = 11.04
+            #  = 11.10
             if ([ $DISTRO_MAJOR_VERSION -eq 10 ] && [ $DISTRO_MAJOR_VERSION -eq 10 ]) || \
                ([ $DISTRO_MAJOR_VERSION -eq 11 ] && [ $DISTRO_MAJOR_VERSION -eq 04 ]) || \
-               ([ $DISTRO_MAJOR_VERSION -eq 11 ] && [ $DISTRO_MAJOR_VERSION -eq 10 ]); then
+               ([ $DISTRO_MAJOR_VERSION -eq 11 ] && [ $DISTRO_MAJOR_VERSION -eq 10 ]) || \
+               [ $DISTRO_MAJOR_VERSION -lt 10 ]; then
                 echoerror "End of life distributions are not supported."
                 echoerror "Please consider upgrading to the next stable. See:"
                 echoerror "    https://wiki.ubuntu.com/Releases"
@@ -985,6 +992,9 @@ __check_end_of_life_versions() {
             ;;
 
         opensuse)
+            # openSUSE versions not supported
+            #
+            #  <= 12.01
             if ([ $DISTRO_MAJOR_VERSION -eq 12 ] && [ $DISTRO_MAJOR_VERSION -eq 01 ]) || [ $DISTRO_MAJOR_VERSION -lt 12 ]; then
                 echoerror "End of life distributions are not supported."
                 echoerror "Please consider upgrading to the next stable. See:"
@@ -994,6 +1004,9 @@ __check_end_of_life_versions() {
             ;;
 
         suse)
+            # SuSE versions not supported
+            #
+            # < 11 SP2
             SUSE_PATCHLEVEL=$(awk '/PATCHLEVEL/ {print $3}' /etc/SuSE-release )
             if [ "x${SUSE_PATCHLEVEL}" = "x" ]; then
                 SUSE_PATCHLEVEL="00"

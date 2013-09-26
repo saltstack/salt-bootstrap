@@ -1028,6 +1028,16 @@ __check_end_of_life_versions() {
             fi
             ;;
 
+        fedora)
+            # Fedora lower than 18 are no longer supported
+            if [ $DISTRO_MAJOR_VERSION -lt 18 ]; then
+                echoerror "End of life distributions are not supported."
+                echoerror "Please consider upgrading to the next stable. See:"
+                echoerror "    https://fedoraproject.org/wiki/Releases"
+                exit 1
+            fi
+            ;;
+
         *)
             ;;
     esac

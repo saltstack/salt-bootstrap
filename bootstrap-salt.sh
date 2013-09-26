@@ -973,6 +973,15 @@ __apt_get_upgrade_noinput() {
 __check_end_of_life_versions() {
 
     case "${DISTRO_NAME_L}" in
+        debian)
+            # Debian versions bellow 6 are not supported
+            if ([ $DISTRO_MAJOR_VERSION -lt 6 ]; then
+                echoerror "End of life distributions are not supported."
+                echoerror "Please consider upgrading to the next stable. See:"
+                echoerror "    https://wiki.debian.org/DebianReleases"
+                exit 1
+            fi
+            ;;
         ubuntu)
             # Ubuntu versions not supported
             #

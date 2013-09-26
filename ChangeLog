@@ -1,3 +1,6 @@
+Version 1.5.8:
+
+
 Version 1.5.7:
 	* For RedHat based distributions which rely on `epel`, the user can now pass `testing` to the 
 	script and `epel-testing` shall be used to bootstrap salt and it's dependencies.

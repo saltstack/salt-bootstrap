@@ -982,6 +982,7 @@ __check_end_of_life_versions() {
                 exit 1
             fi
             ;;
+
         ubuntu)
             # Ubuntu versions not supported
             #
@@ -1025,6 +1026,7 @@ __check_end_of_life_versions() {
                 echoerror "Please consider upgrading to the next stable"
                 exit 1
             fi
+            ;;
 
         *)
             ;;

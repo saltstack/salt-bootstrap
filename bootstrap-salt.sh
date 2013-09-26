@@ -993,6 +993,17 @@ __check_end_of_life_versions() {
             fi
             ;;
 
+        suse)
+            SUSE_PATCHLEVEL=$(awk '/PATCHLEVEL/ {print $3}' /etc/SuSE-release )
+            if [ "x${SUSE_PATCHLEVEL}" = "x" ]; then
+                SUSE_PATCHLEVEL="00"
+            fi
+            if ([ $DISTRO_MAJOR_VERSION -eq 11 ] && [ $SUSE_PATCHLEVEL -lt 02 ]) || [ $DISTRO_MAJOR_VERSION -lt 11 ]; then
+                echoerror "Versions lower than SuSE 11 SP2 are not supported."
+                echoerror "Please consider upgrading to the next stable"
+                exit 1
+            fi
+
         *)
             ;;
     esac

@@ -967,6 +967,65 @@ __apt_get_upgrade_noinput() {
 
 
 #---  FUNCTION  ----------------------------------------------------------------
+#          NAME:  __check_end_of_life_versions
+#   DESCRIPTION:  Check for end of life distribution versions
+#-------------------------------------------------------------------------------
+__check_end_of_life_versions() {
+
+    case "${DISTRO_NAME_L}" in
+        ubuntu)
+            # Ubuntu versions not supported
+            #
+            #  < 10
+            #  = 10.10
+            #  = 11.04
+            #  = 11.10
+            if ([ $DISTRO_MAJOR_VERSION -eq 10 ] && [ $DISTRO_MAJOR_VERSION -eq 10 ]) || \
+               ([ $DISTRO_MAJOR_VERSION -eq 11 ] && [ $DISTRO_MAJOR_VERSION -eq 04 ]) || \
+               ([ $DISTRO_MAJOR_VERSION -eq 11 ] && [ $DISTRO_MAJOR_VERSION -eq 10 ]) || \
+               [ $DISTRO_MAJOR_VERSION -lt 10 ]; then
+                echoerror "End of life distributions are not supported."
+                echoerror "Please consider upgrading to the next stable. See:"
+                echoerror "    https://wiki.ubuntu.com/Releases"
+                exit 1
+            fi
+            ;;
+
+        opensuse)
+            # openSUSE versions not supported
+            #
+            #  <= 12.01
+            if ([ $DISTRO_MAJOR_VERSION -eq 12 ] && [ $DISTRO_MAJOR_VERSION -eq 01 ]) || [ $DISTRO_MAJOR_VERSION -lt 12 ]; then
+                echoerror "End of life distributions are not supported."
+                echoerror "Please consider upgrading to the next stable. See:"
+                echoerror "    http://en.opensuse.org/Lifetime"
+                exit 1
+            fi
+            ;;
+
+        suse)
+            # SuSE versions not supported
+            #
+            # < 11 SP2
+            SUSE_PATCHLEVEL=$(awk '/PATCHLEVEL/ {print $3}' /etc/SuSE-release )
+            if [ "x${SUSE_PATCHLEVEL}" = "x" ]; then
+                SUSE_PATCHLEVEL="00"
+            fi
+            if ([ $DISTRO_MAJOR_VERSION -eq 11 ] && [ $SUSE_PATCHLEVEL -lt 02 ]) || [ $DISTRO_MAJOR_VERSION -lt 11 ]; then
+                echoerror "Versions lower than SuSE 11 SP2 are not supported."
+                echoerror "Please consider upgrading to the next stable"
+                exit 1
+            fi
+
+        *)
+            ;;
+    esac
+}
+# Fail soon for end of life versions
+__check_end_of_life_versions
+
+
+#---  FUNCTION  ----------------------------------------------------------------
 #          NAME:  copyfile
 #   DESCRIPTION:  Simple function to copy files. Overrides if asked.
 #-------------------------------------------------------------------------------

@@ -14,6 +14,7 @@ bruce-one                   bruce-one
 Chris Rebert                cvrebert               chris.rebert@hulu.com
 Christer Edwards            cedwards
 deployboy                   deployboy
+Diego Woitasen              diegows                diego.woitasen@vhgroup.net
 Elias Probst                eliasp
 Erik Johnson                terminalmage           erik@saltstack.com
 Forrest Alvarez             gravyboat

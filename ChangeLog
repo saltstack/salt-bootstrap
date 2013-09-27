@@ -1,5 +1,6 @@
 Version 1.5.8:
-
+	* Fixed an Ubuntu regression. `add-apt-repository` is only available on 
+	`software-properties-common` after 12.10, inclusive. Thanks Diego Woitasen(diegows)
 
 Version 1.5.7:
 	* For RedHat based distributions which rely on `epel`, the user can now pass `testing` to the 

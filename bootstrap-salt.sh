@@ -133,6 +133,7 @@ usage() {
     $ ${__ScriptName} daily
     $ ${__ScriptName} git
     $ ${__ScriptName} git develop
+    $ ${__ScriptName} git v0.17.0
     $ ${__ScriptName} git 8c3fadf15ec183e5ce8c63739850d543617e4357
 
   Options:

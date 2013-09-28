@@ -2637,7 +2637,7 @@ install_opensuse_stable_deps() {
 
     zypper --non-interactive install --auto-agree-with-licenses libzmq3 python \
         python-Jinja2 python-M2Crypto python-PyYAML python-msgpack-python \
-        python-pycrypto python-pyzmq python-elementtree || return 1
+        python-pycrypto python-pyzmq python-xml || return 1
     return 0
 }
 
@@ -2767,13 +2767,13 @@ install_suse_11_stable_deps() {
         echowarn "PyYaml will be installed using pip"
         zypper --non-interactive install --auto-agree-with-licenses libzmq3 python \
         python-Jinja2 'python-M2Crypto>=0.21' python-msgpack-python \
-        python-pycrypto python-pyzmq python-pip python-elementtree || return 1
+        python-pycrypto python-pyzmq python-pip python-xml || return 1
         # There's no python-PyYaml in SP1, let's install it using pip
         pip install PyYaml || return 1
     else
         zypper --non-interactive install --auto-agree-with-licenses libzmq3 python \
         python-Jinja2 'python-M2Crypto>=0.21' python-PyYAML python-msgpack-python \
-        python-pycrypto python-pyzmq python-elementtree || return 1
+        python-pycrypto python-pyzmq python-xml || return 1
     fi
 
     # PIP based installs need to copy configuration files "by hand".

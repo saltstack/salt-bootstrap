@@ -1,12 +1,12 @@
 Version 1.5.9:
+	* Distro Support Fixed:
+		* Salt >= 0.17 requires ElementTree which is on the python standard library after python 
+		2.6 but openSUSE split that into a separate package.
 
 
 Version 1.5.8:
 	* Fixed an Ubuntu regression. `add-apt-repository` is only available on 
 	`software-properties-common` after 12.10, inclusive. Thanks Diego Woitasen(diegows)
-	* Distro Support Fixed:
-		* Salt >= 0.17 requires ElementTree which is on the python standard library after python 
-		2.6 but openSUSE split that into a separate package.
 
 Version 1.5.7:
 	* For RedHat based distributions which rely on `epel`, the user can now pass `testing` to the 

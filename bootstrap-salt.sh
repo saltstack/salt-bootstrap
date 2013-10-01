@@ -1931,6 +1931,153 @@ install_centos_testing_post() {
 
 ##############################################################################
 #
+#   Oracle Linux Install Functions
+#
+
+install_oraclevmserver_stable_deps() {
+    if [ $CPU_ARCH_L = "i686" ]; then
+        EPEL_ARCH="i386"
+    else
+        EPEL_ARCH=$CPU_ARCH_L
+    fi
+    if [ $DISTRO_MAJOR_VERSION -eq 3 ]; then
+        rpm -Uvh --force http://mirrors.kernel.org/fedora-epel/5/${EPEL_ARCH}/epel-release-5-4.noarch.rpm || return 1
+    else
+        echoerror "Failed add EPEL repository support."
+        return 1
+    fi
+
+    if [ $_UPGRADE_SYS -eq $BS_TRUE ]; then
+        yum -y update || return 1
+    fi
+
+    if [ $DISTRO_MAJOR_VERSION -eq 3 ]; then
+        yum -y install python26-PyYAML python26-m2crypto m2crypto python26 \
+            python26-crypto python26-msgpack python26-zmq \
+            python26-jinja2 --enablerepo=${_EPEL_REPO} || return 1
+    else
+            return 1
+    fi
+    return 0
+}
+
+install_oracleserver_stable_deps() {
+    install_centos_stable_deps || return 1
+    return 0
+}
+
+install_oraclevmserver_git_deps() {
+    install_oraclevmserver_stable_deps || return 1
+    yum -y install git --enablerepo=${_EPEL_REPO} || return 1
+    wget -q -O - --no-check-certificate https://raw.github.com/scalp42/python-2.7.x-on-Centos-5.x/master/install_python27.sh | sh
+
+    __git_clone_and_checkout || return 1
+
+    # Let's trigger config_salt()
+    if [ "$_TEMP_CONFIG_DIR" = "null" ]; then
+        _TEMP_CONFIG_DIR="${SALT_GIT_CHECKOUT_DIR}/conf/"
+        CONFIG_SALT_FUNC="config_salt"
+    fi
+
+    return 0
+}
+
+install_oracleserver_git_deps() {
+    install_centos_git_deps || return 1
+    return 0
+}
+
+install_oraclevmserver_stable() {
+    install_centos_stable || return 1
+    return 0
+}
+
+install_oracleserver_stable() {
+    install_centos_stable || return 1
+    return 0
+}
+
+install_oraclevmserver_git() {
+    if [ $DISTRO_MAJOR_VERSION -eq 3 ]; then
+        python2.7 setup.py install || return 1
+    else
+        python setup.py install || return 1
+    fi
+    return 0
+}
+
+install_oracleserver_git() {
+    install_centos_git || return 1
+    return 0
+}
+
+install_oraclevmserver_stable_post() {
+    install_centos_stable_post || return 1
+    return 0
+}
+
+install_oracleserver_stable_post() {
+    install_centos_stable_post || return 1
+    return 0
+}
+
+install_oraclevmserver_restart_daemons() {
+    install_centos_restart_daemons || return 1
+    return 0
+}
+
+install_oracleserver_restart_daemons() {
+    install_centos_restart_daemons || return 1
+    return 0
+}
+
+install_oraclevmserver_git_post() {
+    install_centos_git_post || return 1
+    return 0
+}
+
+install_oracleserver_git_post() {
+    install_centos_git_post || return 1
+    return 0
+}
+
+install_oraclevmserver_testing_deps() {
+    install_centos_testing_deps || return 1
+    return 0
+}
+
+install_oraclevmserver_testing() {
+    install_centos_testing || return 1
+    return 0
+}
+
+install_oraclevmserver_testing_post() {
+    install_centos_testing_post || return 1
+    return 0
+}
+
+install_oracleserver_testing_deps() {
+    install_centos_testing_deps || return 1
+    return 0
+}
+
+install_oracleserver_testing() {
+    install_centos_testing || return 1
+    return 0
+}
+
+install_oracleserver_testing_post() {
+    install_centos_testing_post || return 1
+    return 0
+}
+
+#
+#   Ended Oracle Linux Install Functions
+#
+##############################################################################
+
+##############################################################################
+#
 #   RedHat Install Functions
 #
 install_red_hat_linux_stable_deps() {

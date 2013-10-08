@@ -47,6 +47,13 @@ If you have certificate issues using ``wget`` try the following:
   wget --no-check-certificate -O - http://bootstrap.saltstack.org | sudo sh
 
 
+Install a specific version from git using ``wget``:
+
+.. code:: console
+
+  wget -O - http://bootstrap.saltstack.org | sh -s -- -P git v0.16.4
+
+
 
 If you already have python installed, ``python 2.6``, then it's as easy as:
 

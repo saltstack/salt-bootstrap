@@ -147,6 +147,7 @@ usage() {
   -M  Also install salt-master
   -S  Also install salt-syndic
   -N  Do not install salt-minion
+  -X  Do not start daemons after installation
   -C  Only run the configuration function. This option automatically
       bypasses any installation.
   -P  Allow pip based installations. On some distributions the required salt
@@ -230,6 +231,7 @@ _TEMP_KEYS_DIR="null"
 _INSTALL_MASTER=$BS_FALSE
 _INSTALL_SYNDIC=$BS_FALSE
 _INSTALL_MINION=$BS_TRUE
+_START_DAEMONS=$BS_TRUE
 _ECHO_DEBUG=${BS_ECHO_DEBUG:-$BS_FALSE}
 _CONFIG_ONLY=$BS_FALSE
 _PIP_ALLOWED=${BS_PIP_ALLOWED:-$BS_FALSE}
@@ -242,7 +244,7 @@ _UPGRADE_SYS=${BS_UPGRADE_SYS:-$BS_FALSE}
 # __SIMPLIFY_VERSION is mostly used in Solaris based distributions
 __SIMPLIFY_VERSION=$BS_TRUE
 
-while getopts ":hvnDc:k:MSNCPFUK" opt
+while getopts ":hvnDc:k:MSNXCPFUK" opt
 do
   case "${opt}" in
 
@@ -272,6 +274,7 @@ do
     M )  _INSTALL_MASTER=$BS_TRUE                       ;;
     S )  _INSTALL_SYNDIC=$BS_TRUE                       ;;
     N )  _INSTALL_MINION=$BS_FALSE                      ;;
+    X )  _START_DAEMONS=$BS_FALSE                       ;;
     C )  _CONFIG_ONLY=$BS_TRUE                          ;;
     P )  _PIP_ALLOWED=$BS_TRUE                          ;;
     F )  _FORCE_OVERWRITE=$BS_TRUE                      ;;
@@ -858,6 +861,10 @@ if [ $_INSTALL_SYNDIC -eq $BS_TRUE ]; then
     fi
 fi
 
+if [ $_START_DAEMONS -eq $BS_FALSE ]; then
+    echoinfo "Daemons will not be started"
+fi
+
 # Simplify distro name naming on functions
 DISTRO_NAME_L=$(echo $DISTRO_NAME | tr '[:upper:]' '[:lower:]' | sed 's/[^a-zA-Z0-9_ ]//g' | sed -re 's/([[:space:]])+/_/g')
 
@@ -1189,13 +1196,13 @@ movefile() {
 #
 #   Optionally, define a salt master pre-seed function, which will be called if
 #   the -k (pre-seed master keys) option is passed. One of:
-#       1. pressed_<distro>_<major_version>_<install_type>_master
-#       2. pressed_<distro>_<major_version>_<minor_version>_<install_type>_master
-#       3. pressed_<distro>_<major_version>_master
-#       4  pressed_<distro>_<major_version>_<minor_version>_master
-#       5. pressed_<distro>_<install_type>_master
-#       6. pressed_<distro>_master
-#       7. pressed_master [THIS ONE IS ALREADY DEFINED AS THE DEFAULT]
+#       1. preseed_<distro>_<major_version>_<install_type>_master
+#       2. preseed_<distro>_<major_version>_<minor_version>_<install_type>_master
+#       3. preseed_<distro>_<major_version>_master
+#       4  preseed_<distro>_<major_version>_<minor_version>_master
+#       5. preseed_<distro>_<install_type>_master
+#       6. preseed_<distro>_master
+#       7. preseed_master [THIS ONE IS ALREADY DEFINED AS THE DEFAULT]
 #
 #   To install salt, which, of course, is required, one of:
 #       1. install_<distro>_<major_version>_<install_type>
@@ -1377,6 +1384,8 @@ install_ubuntu_git_post() {
 }
 
 install_ubuntu_restart_daemons() {
+    [ $_START_DAEMONS -eq $BS_FALSE ] && return
+
     # Ensure upstart configs are loaded
     [ -f /sbin/initctl ] && /sbin/initctl reload-configuration
     for fname in minion master syndic; do
@@ -1676,6 +1685,8 @@ install_debian_git_post() {
 }
 
 install_debian_restart_daemons() {
+    [ $_START_DAEMONS -eq $BS_FALSE ] && return
+
     for fname in minion master syndic; do
 
         # Skip if not meant to be installed
@@ -1756,6 +1767,8 @@ install_fedora_git_post() {
 }
 
 install_fedora_restart_daemons() {
+    [ $_START_DAEMONS -eq $BS_FALSE ] && return
+
     for fname in minion master syndic; do
 
         # Skip if not meant to be installed
@@ -1881,6 +1894,8 @@ install_centos_git_post() {
 }
 
 install_centos_restart_daemons() {
+    [ $_START_DAEMONS -eq $BS_FALSE ] && return
+
     for fname in minion master syndic; do
         # Skip if not meant to be installed
         [ $fname = "minion" ] && [ $_INSTALL_MINION -eq $BS_FALSE ] && continue
@@ -2276,6 +2291,8 @@ install_arch_linux_git_post() {
 }
 
 install_arch_linux_restart_daemons() {
+    [ $_START_DAEMONS -eq $BS_FALSE ] && return
+
     for fname in minion master syndic; do
 
         # Skip if not meant to be installed
@@ -2466,6 +2483,8 @@ install_freebsd_git_post() {
 }
 
 install_freebsd_restart_daemons() {
+    [ $_START_DAEMONS -eq $BS_FALSE ] && return
+
     for fname in minion master syndic; do
 
         # Skip if not meant to be installed
@@ -2591,6 +2610,8 @@ install_smartos_git_post() {
 }
 
 install_smartos_restart_daemons() {
+    [ $_START_DAEMONS -eq $BS_FALSE ] && return
+
     for fname in minion master syndic; do
 
         # Skip if not meant to be installed
@@ -2720,6 +2741,8 @@ install_opensuse_git_post() {
 }
 
 install_opensuse_restart_daemons() {
+    [ $_START_DAEMONS -eq $BS_FALSE ] && return
+
     for fname in minion master syndic; do
 
         # Skip if not meant to be installed
@@ -2962,6 +2985,8 @@ install_gentoo_post() {
 }
 
 install_gentoo_restart_daemons() {
+    [ $_START_DAEMONS -eq $BS_FALSE ] && return
+
     for fname in minion master syndic; do
 
         # Skip if not meant to be installed
@@ -3106,6 +3131,8 @@ preseed_master() {
 #   This function checks if all of the installed daemons are running or not.
 #
 daemons_running() {
+    [ $_START_DAEMONS -eq $BS_FALSE ] && return
+
     FAILED_DAEMONS=0
     for fname in minion master syndic; do
 
@@ -3349,7 +3376,7 @@ if [ "$STARTDAEMONS_INSTALL_FUNC" != "null" ]; then
 fi
 
 # Check if the installed daemons are running or not
-if [ "$DAEMONS_RUNNING_FUNC" != "null" ]; then
+if [ "$DAEMONS_RUNNING_FUNC" != "null" ] && [ $_START_DAEMONS -eq $BS_TRUE ]; then
     sleep 3  # Sleep a little bit to let daemons start
     echoinfo "Running ${DAEMONS_RUNNING_FUNC}()"
     $DAEMONS_RUNNING_FUNC

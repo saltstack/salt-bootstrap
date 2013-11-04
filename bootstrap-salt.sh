@@ -142,6 +142,7 @@ usage() {
   -n  No colours.
   -D  Show debug output.
   -c  Temporary configuration directory
+  -g  Salt repository URL. (default: git://github.com/saltstack/salt.git)
   -k  Temporary directory holding the minion keys which will pre-seed
       the master.
   -M  Also install salt-master
@@ -227,6 +228,7 @@ __check_config_dir() {
 #-----------------------------------------------------------------------
 _KEEP_TEMP_FILES=${BS_KEEP_TEMP_FILES:-$BS_FALSE}
 _TEMP_CONFIG_DIR="null"
+_SALTSTACK_REPO_URL="git://github.com/saltstack/salt.git"
 _TEMP_KEYS_DIR="null"
 _INSTALL_MASTER=$BS_FALSE
 _INSTALL_SYNDIC=$BS_FALSE
@@ -244,7 +246,7 @@ _UPGRADE_SYS=${BS_UPGRADE_SYS:-$BS_FALSE}
 # __SIMPLIFY_VERSION is mostly used in Solaris based distributions
 __SIMPLIFY_VERSION=$BS_TRUE
 
-while getopts ":hvnDc:k:MSNXCPFUK" opt
+while getopts ":hvnDc:g:k:MSNXCPFUK" opt
 do
   case "${opt}" in
 
@@ -264,6 +266,7 @@ do
              exit 1
          fi
          ;;
+    g ) _SALTSTACK_REPO_URL=$OPTARG                     ;;
     k )  _TEMP_KEYS_DIR="$OPTARG"
          # If the configuration directory does not exist, error out
          if [ ! -d "$_TEMP_KEYS_DIR" ]; then
@@ -300,7 +303,7 @@ __check_unparsed_options() {
     else
         grep='grep'
     fi
-    unparsed_options=$( echo "$shellopts" | ${grep} -E '[-]+[[:alnum:]]' )
+    unparsed_options=$( echo "$shellopts" | ${grep} -E '[-]+[[:alnum:]][[:blank:]]' )
     if [ "x$unparsed_options" != "x" ]; then
         usage
         echo
@@ -948,7 +951,7 @@ __git_clone_and_checkout() {
             git pull --rebase || return 1
         fi
     else
-        git clone git://github.com/saltstack/salt.git || return 1
+        git clone $_SALTSTACK_REPO_URL || return 1
         cd $SALT_GIT_CHECKOUT_DIR
         git checkout $GIT_REV || return 1
     fi

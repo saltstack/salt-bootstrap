@@ -17,7 +17,7 @@
 #       CREATED: 10/15/2012 09:49:37 PM WEST
 #===============================================================================
 set -o nounset                              # Treat unset variables as an error
-__ScriptVersion="1.5.9"
+__ScriptVersion="1.5.10"
 __ScriptName="bootstrap-salt.sh"
 
 #===============================================================================

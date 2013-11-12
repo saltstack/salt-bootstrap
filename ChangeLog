@@ -1,3 +1,11 @@
+Version 1.5.9:
+	* Allow to not start the daemons after bootstrapping salt. This will allow `vagrant-lxc`
+	installations,  `debootstrap*`, etc, to finish properly. Thanks Henrik Holmboe (holmboe).
+	* Distro Support Fixed:
+		* Salt >= 0.17 requires ElementTree which is on the python standard library after python 
+		2.6 but openSUSE split that into a separate package.
+		* Fixed a logic preventing proper Ubuntu bootstrapping on some situations.
+
 Version 1.5.8:
 	* Fixed an Ubuntu regression. `add-apt-repository` is only available on 
 	`software-properties-common` after 12.10, inclusive. Thanks Diego Woitasen(diegows)

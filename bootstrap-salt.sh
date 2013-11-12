@@ -1276,6 +1276,9 @@ install_ubuntu_deps() {
 
     apt-get update
 
+    # Minimal systems might not have upstart installed, install it
+    __apt_get_install_noinput upstart
+
     if [ $_UPGRADE_SYS -eq $BS_TRUE ]; then
         __apt_get_upgrade_noinput || return 1
     fi

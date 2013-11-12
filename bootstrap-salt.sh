@@ -2357,7 +2357,11 @@ install_freebsd_9_stable_deps() {
         echo "    ENABLED: YES" >> /usr/local/etc/pkg/repos/salt.conf
     fi
 
-    /usr/local/sbin/pkg install -r salt -y swig || return 1
+    if [ -f /usr/local/etc/pkg/repos/salt.conf ]; then
+        /usr/local/sbin/pkg install -r salt -y swig || return 1
+    else
+        /usr/local/sbin/pkg install -y swig || return 1
+    fi
 
     # Lets set _SALT_ETC_DIR to ports default
     _SALT_ETC_DIR=${BS_SALT_ETC_DIR:-/usr/local/etc/salt}
@@ -2412,7 +2416,11 @@ install_freebsd_git_deps() {
 }
 
 install_freebsd_9_stable() {
-    /usr/local/sbin/pkg install -r salt -y sysutils/py-salt || return 1
+    if [ -f /usr/local/etc/pkg/repos/salt.conf ]; then
+        /usr/local/sbin/pkg install -r salt -y sysutils/py-salt || return 1
+    else
+        /usr/local/sbin/pkg install -y sysutils/py-salt || return 1
+    fi
     return 0
 }
 

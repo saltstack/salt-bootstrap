@@ -2364,10 +2364,16 @@ install_freebsd_9_stable_deps() {
 
     /usr/local/sbin/pkg install ${SALT_PKG_FLAGS} -y swig || return 1
 
-    # Lets set _SALT_ETC_DIR to ports default
+    return 0
+}
+
+config_freebsd_salt() {
+    # Set _SALT_ETC_DIR to ports default
     _SALT_ETC_DIR=${BS_SALT_ETC_DIR:-/usr/local/etc/salt}
     # We also need to redefine the PKI directory
     _PKI_DIR=${_SALT_ETC_DIR}/pki
+
+    config_salt || return 1
 
     return 0
 }

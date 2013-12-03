@@ -2355,14 +2355,25 @@ install_freebsd_9_stable_deps() {
         echo "salt:" > /usr/local/etc/pkg/repos/salt.conf
         echo "    URL: ${SALTREPO}" >> /usr/local/etc/pkg/repos/salt.conf
         echo "    ENABLED: YES" >> /usr/local/etc/pkg/repos/salt.conf
+
+        SALT_PKG_FLAGS="-r salt"
+    else
+        # use default repository (FreeBSD 9.2+)
+        SALT_PKG_FLAGS=
     fi
 
-    /usr/local/sbin/pkg install -r salt -y swig || return 1
+    /usr/local/sbin/pkg install ${SALT_PKG_FLAGS} -y swig || return 1
 
-    # Lets set _SALT_ETC_DIR to ports default
+    return 0
+}
+
+config_freebsd_salt() {
+    # Set _SALT_ETC_DIR to ports default
     _SALT_ETC_DIR=${BS_SALT_ETC_DIR:-/usr/local/etc/salt}
     # We also need to redefine the PKI directory
     _PKI_DIR=${_SALT_ETC_DIR}/pki
+
+    config_salt || return 1
 
     return 0
 }
@@ -2412,12 +2423,12 @@ install_freebsd_git_deps() {
 }
 
 install_freebsd_9_stable() {
-    /usr/local/sbin/pkg install -r salt -y sysutils/py-salt || return 1
+    /usr/local/sbin/pkg install ${SALT_PKG_FLAGS} -y sysutils/py-salt || return 1
     return 0
 }
 
 install_freebsd_git() {
-    /usr/local/sbin/pkg install -r salt -y sysutils/py-salt || return 1
+    /usr/local/sbin/pkg install ${SALT_PKG_FLAGS} -y sysutils/py-salt || return 1
 
     # Let's keep the rc.d files before deleting the package
     mkdir /tmp/rc-scripts || return 1

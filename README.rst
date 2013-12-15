@@ -245,7 +245,7 @@ Supported Operating Systems
 - Red Hat Enterprise 5/6
 - SmartOS
 - SuSE 11 SP1/11 SP2
-- Ubuntu 10.x/11.x/12.x/13.04
+- Ubuntu 10.x/11.x/12.x/13.04/13.10
 
 
 

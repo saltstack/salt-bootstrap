@@ -1,4 +1,5 @@
 Version 1.5.10:
+	* Installing from Git on Fedora now also needs `yum-utils` installed.
 	* Distro Support Fixed:
 		* Minimal Ubuntu installation might not have upstart installed, fixed.
 

@@ -1735,7 +1735,7 @@ install_fedora_stable() {
 
 install_fedora_git_deps() {
     install_fedora_deps || return 1
-    yum install -y git || return 1
+    yum install -y git yum-utils || return 1
 
     __git_clone_and_checkout || return 1
 

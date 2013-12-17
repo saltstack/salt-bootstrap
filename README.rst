@@ -18,7 +18,7 @@ One Line Bootstrap
 
 If you're looking for the *one-liner* to install salt...
 
-.. admonition:: Attention
+.. note::
 
     Please remove ``sudo`` from the above calls if running the *one-liner* as the ``root`` user.
 

@@ -18,6 +18,11 @@ One Line Bootstrap
 
 If you're looking for the *one-liner* to install salt...
 
+.. admonition:: Attention
+
+    Please remove ``sudo`` from the above calls if running the *one-liner* as the ``root`` user.
+
+
 For example, using ``curl`` to install latest git:
 
 .. code:: console

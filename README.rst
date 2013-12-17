@@ -16,7 +16,8 @@ install the `Salt`_ binaries using the appropriate methods.
 One Line Bootstrap
 ------------------
 
-**Please remove ``sudo`` from the following *one-liners* if running them as the ``root`` user.**
+**Please remove** ``sudo`` **from the following** *one-liners* **if running them as the** ``root`` 
+**user.**
 
 If you're looking for the *one-liner* to install salt...
 

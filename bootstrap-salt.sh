@@ -17,7 +17,7 @@
 #       CREATED: 10/15/2012 09:49:37 PM WEST
 #===============================================================================
 set -o nounset                              # Treat unset variables as an error
-__ScriptVersion="1.5.10"
+__ScriptVersion="1.5.9"
 __ScriptName="bootstrap-salt.sh"
 
 #===============================================================================
@@ -375,8 +375,9 @@ CALLER=$(echo `ps -a -o pid,args | grep $$ | grep -v grep | tr -s ' '` | cut -d 
 if [ "${CALLER}x" = "${0}x" ]; then
     CALLER="PIPED THROUGH"
 fi
+
 echoinfo "${CALLER} ${0} -- Version ${__ScriptVersion}"
-echowarn "Running the unstable version of ${__ScriptName}"
+#echowarn "Running the unstable version of ${__ScriptName}"
 
 
 #---  FUNCTION  ----------------------------------------------------------------
@@ -1276,9 +1277,6 @@ install_ubuntu_deps() {
 
     apt-get update
 
-    # Minimal systems might not have upstart installed, install it
-    __apt_get_install_noinput upstart
-
     if [ $_UPGRADE_SYS -eq $BS_TRUE ]; then
         __apt_get_upgrade_noinput || return 1
     fi
@@ -1735,7 +1733,7 @@ install_fedora_stable() {
 
 install_fedora_git_deps() {
     install_fedora_deps || return 1
-    yum install -y git yum-utils || return 1
+    yum install -y git || return 1
 
     __git_clone_and_checkout || return 1
 
@@ -2335,8 +2333,9 @@ __freebsd_get_packagesite() {
     # Since the variable might not be set, don't, momentarily treat it as a failure
     set +o nounset
 
-    _PACKAGESITE=${PACKAGESITE:-"http://pkg.cdn.pcbsd.org/9.1-RELEASE/amd64/"}
-    SALTREPO=${SALTREPO:-"http://freebsd.saltstack.com/freebsd:${DISTRO_MAJOR_VERSION}:${BSD_ARCH}/"}
+    ABI="freebsd:${DISTRO_MAJOR_VERSION}:${BSD_ARCH}"
+    _PACKAGESITE=${PACKAGESITE:-"http://pkg.freebsd.org/${ABI}/latest"}
+    SALTREPO=${SALTREPO:-"http://freebsd.saltstack.com/${ABI}/"}
 
     # Treat unset variables as errors once more
     set -o nounset
@@ -2346,37 +2345,33 @@ install_freebsd_9_stable_deps() {
     if [ ! -x /usr/local/sbin/pkg ]; then
         __freebsd_get_packagesite
 
+        # fetch most recent pkg-ng tarball, and install into this machine
+        # forcibly converting it to pkg-ng.
+        # Perhaps a warning?
         fetch "${_PACKAGESITE}/Latest/pkg.txz" || return 1
         tar xf ./pkg.txz -s ",/.*/,,g" "*/pkg-static" || return 1
         ./pkg-static add ./pkg.txz || return 1
         /usr/local/sbin/pkg2ng || return 1
 
+        # configure pkg to use the right binaries-server
+        # this is deprecated but still works
         echo "PACKAGESITE: ${_PACKAGESITE}" > /usr/local/etc/pkg.conf
         echo "PKG_MULTIREPOS: YES" >> /usr/local/etc/pkg.conf
 
+        ## let pkg know about the salt repository 
         mkdir -p /usr/local/etc/pkg/repos/
-        echo "salt:" > /usr/local/etc/pkg/repos/salt.conf
-        echo "    URL: ${SALTREPO}" >> /usr/local/etc/pkg/repos/salt.conf
+        echo "salt:{" > /usr/local/etc/pkg/repos/salt.conf
+        echo "    URL: \"${SALTREPO}\"," >> /usr/local/etc/pkg/repos/salt.conf
         echo "    ENABLED: YES" >> /usr/local/etc/pkg/repos/salt.conf
-
-        SALT_PKG_FLAGS="-r salt"
-    else
-        # use default repository (FreeBSD 9.2+)
-        SALT_PKG_FLAGS=
+        echo "}" >> /usr/local/etc/pkg/repos/salt.conf
     fi
 
-    /usr/local/sbin/pkg install ${SALT_PKG_FLAGS} -y swig || return 1
+    /usr/local/sbin/pkg install -r salt -y swig || return 1
 
-    return 0
-}
-
-config_freebsd_salt() {
-    # Set _SALT_ETC_DIR to ports default
+    # Lets set _SALT_ETC_DIR to ports default
     _SALT_ETC_DIR=${BS_SALT_ETC_DIR:-/usr/local/etc/salt}
     # We also need to redefine the PKI directory
     _PKI_DIR=${_SALT_ETC_DIR}/pki
-
-    config_salt || return 1
 
     return 0
 }
@@ -2426,12 +2421,12 @@ install_freebsd_git_deps() {
 }
 
 install_freebsd_9_stable() {
-    /usr/local/sbin/pkg install ${SALT_PKG_FLAGS} -y sysutils/py-salt || return 1
+    /usr/local/sbin/pkg install -r salt -y sysutils/py-salt || return 1
     return 0
 }
 
 install_freebsd_git() {
-    /usr/local/sbin/pkg install ${SALT_PKG_FLAGS} -y sysutils/py-salt || return 1
+    /usr/local/sbin/pkg install -r salt -y sysutils/py-salt || return 1
 
     # Let's keep the rc.d files before deleting the package
     mkdir /tmp/rc-scripts || return 1

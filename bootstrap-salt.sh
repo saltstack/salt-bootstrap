@@ -303,7 +303,7 @@ __check_unparsed_options() {
     else
         grep='grep'
     fi
-    unparsed_options=$( echo "$shellopts" | ${grep} -E '[-]+[[:alnum:]][[:blank:]]' )
+    unparsed_options=$( echo "$shellopts" | ${grep} -E '(^|[[:space:]])[-]+[[:alnum:]]' )
     if [ "x$unparsed_options" != "x" ]; then
         usage
         echo

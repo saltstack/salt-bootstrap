@@ -154,8 +154,8 @@ usage() {
   -P  Allow pip based installations. On some distributions the required salt
       packages or its dependencies are not available as a package for that
       distribution. Using this flag allows the script to use pip as a last
-      resort method. NOTE: This works for functions which actually implement
-      pip based installations.
+      resort method. NOTE: This only works for functions which actually
+      implement pip based installations.
   -F  Allow copied files to overwrite existing(config, init.d, etc)
   -U  If set, fully upgrade the system prior to bootstrapping salt
   -K  If set, keep the temporary files in the temporary directories specified
@@ -1856,7 +1856,7 @@ install_centos_stable_post() {
 
 install_centos_git_deps() {
     install_centos_stable_deps || return 1
-    yum -y install git --enablerepo=${_EPEL_REPO} || return 1
+    yum -y install git yum-utils --enablerepo=${_EPEL_REPO} || return 1
 
     __git_clone_and_checkout || return 1
 

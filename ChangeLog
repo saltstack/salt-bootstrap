@@ -1,10 +1,11 @@
 Version 1.5.10:
-	* Installing from Git on Fedora now also needs `yum-utils` installed.
+	* Installing from Git on Red Hat based distributions now also needs `yum-utils` installed.
 	* Allow the script to use a different git repository to install from.
 	* Fixed a bug where a branch name with dashes would be wrongly detected as an option to the 
 	script.
 	* Distro Support Fixed:
 		* Minimal Ubuntu installation might not have upstart installed, fixed.
+		* FreeBSD now uses the official FreeBSD repository. Thank You Paul Brian(lifeisstillgood)!
 
 
 Version 1.5.9:

@@ -2342,18 +2342,18 @@ __freebsd_get_packagesite() {
     # failure
     set +o nounset
 
-    #ABI is a std format for identifying release / architecture combos
+    # ABI is a std format for identifying release / architecture combos
     ABI="freebsd:${DISTRO_MAJOR_VERSION}:${BSD_ARCH}"
     _PACKAGESITE="http://pkg.freebsd.org/${ABI}/latest"
-    #awkwardly, we want the `${ABI}` to be in conf file without escaping
+    # Awkwardly, we want the `${ABI}` to be in conf file without escaping
     PKGCONFURL="pkg+http://pkg.freebsd.org/\${ABI}/latest"
-    
+
     # Treat unset variables as errors once more
     set -o nounset
 }
 
-#Using a seperate conf step to head for idempotent install...
-configure_freebsd_pkg_details(){
+# Using a seperate conf step to head for idempotent install...
+__configure_freebsd_pkg_details() {
 
     ## pkg.conf is deprecated.  
     ## We use conf files in /usr/local or /etc instead
@@ -2367,7 +2367,7 @@ configure_freebsd_pkg_details(){
     echo "    mirror_type: \"SRV\"," >> $conf_file
     echo "    enabled: true" >> $conf_file
     echo "}" >> $conf_file
-    cp $conf_file /etc/pkg/FreeBSD.conf
+    copyfile $conf_file /etc/pkg/FreeBSD.conf
     SALT_PKG_FLAGS="-r FreeBSD"
     ## ensure future ports builds use pkgng
     echo "WITH_PKGNG=	yes" >> /etc/make.conf
@@ -2385,17 +2385,12 @@ install_freebsd_9_stable_deps() {
         tar xf ./pkg.txz -s ",/.*/,,g" "*/pkg-static" || return 1
         ./pkg-static add ./pkg.txz || return 1
         /usr/local/sbin/pkg2ng || return 1
- 
-        #configure the pkg repository using new approach
-        configure_freebsd_pkg_details || return 1
-
-    else
-        #configure the pkg repository using new approach
-        configure_freebsd_pkg_details || return 1
-
     fi
 
-    #now install swig
+    # Configure the pkg repository using new approach
+    __configure_freebsd_pkg_details || return 1
+
+    # Now install swig
     /usr/local/sbin/pkg install ${SALT_PKG_FLAGS} -y swig || return 1
 
     return 0

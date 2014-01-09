@@ -2338,39 +2338,64 @@ __freebsd_get_packagesite() {
         BSD_ARCH="x86:32"
     fi
 
-    # Since the variable might not be set, don't, momentarily treat it as a failure
+    # Since the variable might not be set, don't, momentarily treat it as a
+    # failure
     set +o nounset
 
-    _PACKAGESITE=${PACKAGESITE:-"http://pkg.cdn.pcbsd.org/9.1-RELEASE/amd64/"}
-    SALTREPO=${SALTREPO:-"http://freebsd.saltstack.com/freebsd:${DISTRO_MAJOR_VERSION}:${BSD_ARCH}/"}
-
+    #ABI is a std format for identifying release / architecture combos
+    ABI="freebsd:${DISTRO_MAJOR_VERSION}:${BSD_ARCH}"
+    _PACKAGESITE="http://pkg.freebsd.org/${ABI}/latest"
+    #awkwardly, we want the `${ABI}` to be in conf file without escaping
+    PKGCONFURL="pkg+http://pkg.freebsd.org/\${ABI}/latest"
+    
     # Treat unset variables as errors once more
     set -o nounset
 }
 
-install_freebsd_9_stable_deps() {
-    if [ ! -x /usr/local/sbin/pkg ]; then
-        __freebsd_get_packagesite
+#Using a seperate conf step to head for idempotent install...
+configure_freebsd_pkg_details(){
 
+    ## pkg.conf is deprecated.  
+    ## We use conf files in /usr/local or /etc instead
+    mkdir -p /usr/local/etc/pkg/repos/
+    mkdir -p /etc/pkg/
+
+    ## Use new JSON-like format for pkg repo configs
+    conf_file=/usr/local/etc/pkg/repos/freebsd.conf
+    echo "FreeBSD:{" > $conf_file
+    echo "    url: \"${PKGCONFURL}\"," >> $conf_file
+    echo "    mirror_type: \"SRV\"," >> $conf_file
+    echo "    enabled: true" >> $conf_file
+    echo "}" >> $conf_file
+    cp $conf_file /etc/pkg/FreeBSD.conf
+    SALT_PKG_FLAGS="-r FreeBSD"
+    ## ensure future ports builds use pkgng
+    echo "WITH_PKGNG=	yes" >> /etc/make.conf
+}
+
+install_freebsd_9_stable_deps() {
+
+    #make variables available even if pkg already installed
+    __freebsd_get_packagesite
+
+    if [ ! -x /usr/local/sbin/pkg ]; then
+
+        # install new `pkg` code from its own tarball.
         fetch "${_PACKAGESITE}/Latest/pkg.txz" || return 1
         tar xf ./pkg.txz -s ",/.*/,,g" "*/pkg-static" || return 1
         ./pkg-static add ./pkg.txz || return 1
         /usr/local/sbin/pkg2ng || return 1
+ 
+        #configure the pkg repository using new approach
+        configure_freebsd_pkg_details || return 1
 
-        echo "PACKAGESITE: ${_PACKAGESITE}" > /usr/local/etc/pkg.conf
-        echo "PKG_MULTIREPOS: YES" >> /usr/local/etc/pkg.conf
-
-        mkdir -p /usr/local/etc/pkg/repos/
-        echo "salt:" > /usr/local/etc/pkg/repos/salt.conf
-        echo "    URL: ${SALTREPO}" >> /usr/local/etc/pkg/repos/salt.conf
-        echo "    ENABLED: YES" >> /usr/local/etc/pkg/repos/salt.conf
-
-        SALT_PKG_FLAGS="-r salt"
     else
-        # use default repository (FreeBSD 9.2+)
-        SALT_PKG_FLAGS=
+        #configure the pkg repository using new approach
+        configure_freebsd_pkg_details || return 1
+
     fi
 
+    #now install swig
     /usr/local/sbin/pkg install ${SALT_PKG_FLAGS} -y swig || return 1
 
     return 0

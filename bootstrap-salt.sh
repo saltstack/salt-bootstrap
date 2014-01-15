@@ -343,7 +343,7 @@ fi
 # If doing a git install, check what branch/tag/sha will be checked out
 if [ $ITYPE = "git" ]; then
     if [ "$#" -eq 0 ];then
-        GIT_REV="master"
+        GIT_REV="develop"
     else
         __check_unparsed_options "$*"
         GIT_REV="$1"

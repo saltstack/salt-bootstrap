@@ -1,4 +1,5 @@
 Version 1.5.10:
+	* Salt no longer has the master branch in git, install from develop as default.
 	* Installing from Git on Red Hat based distributions now also needs `yum-utils` installed.
 	* Allow the script to use a different git repository to install from.
 	* Fixed a bug where a branch name with dashes would be wrongly detected as an option to the 

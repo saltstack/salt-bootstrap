@@ -7,7 +7,7 @@
 #
 #   DESCRIPTION: Bootstrap salt installation for various systems/distributions
 #
-#          BUGS: https://github.com/saltstack/salt-boostrap/issues
+#          BUGS: https://github.com/saltstack/salt-bootstrap/issues
 #
 #     COPYRIGHT: (c) 2012-2013 by the SaltStack Team, see AUTHORS.rst for more
 #                details.

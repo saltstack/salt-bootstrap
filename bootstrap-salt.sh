@@ -1470,7 +1470,7 @@ install_debian_6_deps() {
     # No user interaction, libc6 restart services for example
     export DEBIAN_FRONTEND=noninteractive
 
-    wget -q http://debian.saltstack.com/debian-salt-team-joehealy.gpg.key -O - | apt-key add - || return 1
+    wget $_WGET_ARGS -q http://debian.saltstack.com/debian-salt-team-joehealy.gpg.key -O - | apt-key add - || return 1
 
     if [ $_PIP_ALLOWED -eq $BS_TRUE ]; then
         echowarn "PyZMQ will be installed from PyPI in order to compile it against ZMQ3"
@@ -1541,7 +1541,7 @@ install_debian_7_deps() {
             /etc/apt/sources.list.d/saltstack.list
     fi
 
-    wget -q http://debian.saltstack.com/debian-salt-team-joehealy.gpg.key -O - | apt-key add - || return 1
+    wget $_WGET_ARGS -q http://debian.saltstack.com/debian-salt-team-joehealy.gpg.key -O - | apt-key add - || return 1
 
     if [ $_PIP_ALLOWED -eq $BS_TRUE ]; then
         echowarn "PyZMQ will be installed from PyPI in order to compile it against ZMQ3"
@@ -2575,11 +2575,11 @@ install_smartos_deps() {
 
         # Let's download, since they were not provided, the default configuration files
         if [ ! -f $_SALT_ETC_DIR/minion ] && [ ! -f $_TEMP_CONFIG_DIR/minion ]; then
-            curl -sk -o $_TEMP_CONFIG_DIR/minion -L \
+            curl $_CURL_ARGS -s -o $_TEMP_CONFIG_DIR/minion -L \
                 https://raw.github.com/saltstack/salt/develop/conf/minion || return 1
         fi
         if [ ! -f $_SALT_ETC_DIR/master ] && [ ! -f $_TEMP_CONFIG_DIR/master ]; then
-            curl -sk -o $_TEMP_CONFIG_DIR/master -L \
+            curl $_CURL_ARGS -s -o $_TEMP_CONFIG_DIR/master -L \
                 https://raw.github.com/saltstack/salt/develop/conf/master || return 1
         fi
     fi
@@ -2626,7 +2626,8 @@ install_smartos_post() {
         svcs network/salt-$fname > /dev/null 2>&1
         if [ $? -eq 1 ]; then
             if [ ! -f $_TEMP_CONFIG_DIR/salt-$fname.xml ]; then
-                curl -sk -o $_TEMP_CONFIG_DIR/salt-$fname.xml -L https://raw.github.com/saltstack/salt/develop/pkg/smartos/salt-$fname.xml
+                curl $_CURL_ARGS -s -o $_TEMP_CONFIG_DIR/salt-$fname.xml -L \
+                    https://raw.github.com/saltstack/salt/develop/pkg/smartos/salt-$fname.xml
             fi
             svccfg import $_TEMP_CONFIG_DIR/salt-$fname.xml
             if [ "${VIRTUAL_TYPE}" = "global" ]; then
@@ -2877,7 +2878,7 @@ install_suse_11_stable_deps() {
 
                 # Let's download, since they were not provided, the default configuration files
                 if [ ! -f $_SALT_ETC_DIR/$fname ] && [ ! -f $_TEMP_CONFIG_DIR/$fname ]; then
-                    curl -sk -o $_TEMP_CONFIG_DIR/$fname -L \
+                    curl $_CURL_ARGS -s -o $_TEMP_CONFIG_DIR/$fname -L \
                         https://raw.github.com/saltstack/salt/develop/conf/$fname || return 1
                 fi
             done
@@ -2929,12 +2930,12 @@ install_suse_11_stable_post() {
             [ $fname = "syndic" ] && [ $_INSTALL_SYNDIC -eq $BS_FALSE ] && continue
 
             if [ -f /bin/systemctl ]; then
-                curl -k -L https://github.com/saltstack/salt/raw/develop/pkg/salt-$fname.service \
+                curl $_CURL_ARGS -L https://github.com/saltstack/salt/raw/develop/pkg/salt-$fname.service \
                     -o /lib/systemd/system/salt-$fname.service || return 1
                 continue
             fi
 
-            curl -k -L https://github.com/saltstack/salt/raw/develop/pkg/rpm/salt-$fname \
+            curl $_CURL_ARGS -L https://github.com/saltstack/salt/raw/develop/pkg/rpm/salt-$fname \
                 -o /etc/init.d/salt-$fname || return 1
             chmod +x /etc/init.d/salt-$fname
 

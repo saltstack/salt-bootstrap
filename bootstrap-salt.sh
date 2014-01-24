@@ -160,68 +160,13 @@ usage() {
   -U  If set, fully upgrade the system prior to bootstrapping salt
   -K  If set, keep the temporary files in the temporary directories specified
       with -c and -k.
+  -I  If set, allow insecure connections while downloading any files. For
+      example, pass '--no-check-certificate' to 'wget' or '--insecure' to 'curl'
 
 EOT
 }   # ----------  end of function usage  ----------
 
-#===  FUNCTION  ================================================================
-#         NAME:  __fetch_url
-#  DESCRIPTION:  Retrieves a URL and writes it to a given path
-#===============================================================================
-__fetch_url() {
-    curl --insecure -s -o "$1" "$2" >/dev/null 2>&1 ||
-        wget --no-check-certificate -q -O "$1" "$2" >/dev/null 2>&1 ||
-            fetch -q -o "$1" "$2" >/dev/null 2>&1
-}
 
-#===  FUNCTION  ================================================================
-#         NAME:  __check_config_dir
-#  DESCRIPTION:  Checks the config directory, retrieves URLs if provided.
-#===============================================================================
-__check_config_dir() {
-    CC_DIR_NAME="$1"
-    CC_DIR_BASE=$(basename "${CC_DIR_NAME}")
-
-    case "$CC_DIR_NAME" in
-        http://*|https://*)
-            __fetch_url "/tmp/${CC_DIR_BASE}" "${CC_DIR_NAME}"
-            CC_DIR_NAME="/tmp/${CC_DIR_BASE}"
-            ;;
-        ftp://*)
-            __fetch_url "/tmp/${CC_DIR_BASE}" "${CC_DIR_NAME}"
-            CC_DIR_NAME="/tmp/${CC_DIR_BASE}"
-            ;;
-        *)
-            if [ ! -e "${CC_DIR_NAME}" ]; then
-                echo "null"
-                return 0
-            fi
-            ;;
-    esac
-
-    case "$CC_DIR_NAME" in
-        *.tgz|*.tar.gz)
-            tar -zxf "${CC_DIR_NAME}" -C /tmp
-            CC_DIR_BASE=$(basename ${CC_DIR_BASE} ".tgz")
-            CC_DIR_BASE=$(basename ${CC_DIR_BASE} ".tar.gz")
-            CC_DIR_NAME="/tmp/${CC_DIR_BASE}"
-            ;;
-        *.tbz|*.tar.bz2)
-            tar -xjf "${CC_DIR_NAME}" -C /tmp
-            CC_DIR_BASE=$(basename ${CC_DIR_BASE} ".tbz")
-            CC_DIR_BASE=$(basename ${CC_DIR_BASE} ".tar.bz2")
-            CC_DIR_NAME="/tmp/${CC_DIR_BASE}"
-            ;;
-        *.txz|*.tar.xz)
-            tar -xJf "${CC_DIR_NAME}" -C /tmp
-            CC_DIR_BASE=$(basename ${CC_DIR_BASE} ".txz")
-            CC_DIR_BASE=$(basename ${CC_DIR_BASE} ".tar.xz")
-            CC_DIR_NAME="/tmp/${CC_DIR_BASE}"
-            ;;
-    esac
-
-    echo "${CC_DIR_NAME}"
-}
 
 #-----------------------------------------------------------------------
 #  Handle command line arguments
@@ -243,17 +188,20 @@ _FORCE_OVERWRITE=${BS_FORCE_OVERWRITE:-$BS_FALSE}
 _GENTOO_USE_BINHOST=${BS_GENTOO_USE_BINHOST:-$BS_FALSE}
 _EPEL_REPO=${BS_EPEL_REPO:-epel}
 _UPGRADE_SYS=${BS_UPGRADE_SYS:-$BS_FALSE}
+_INSECURE_DL=${BS_INSECURE_DL:-$BS_FALSE}
+_WGET_ARGS=${BS_WGET_ARGS:-}
+_CURL_ARGS=${BS_CURL_ARGS:-}
 # __SIMPLIFY_VERSION is mostly used in Solaris based distributions
 __SIMPLIFY_VERSION=$BS_TRUE
 
-while getopts ":hvnDc:g:k:MSNXCPFUK" opt
+while getopts ":hvnDc:g:k:MSNXCPFUKI" opt
 do
   case "${opt}" in
 
     h )  usage; exit 0                                  ;;
 
-    v )  echo "$0 -- Version $__ScriptVersion"; exit 0    ;;
-    n )  _COLORS=0; __detect_color_support               ;;
+    v )  echo "$0 -- Version $__ScriptVersion"; exit 0  ;;
+    n )  _COLORS=0; __detect_color_support              ;;
     D )  _ECHO_DEBUG=$BS_TRUE                           ;;
     c )  _TEMP_CONFIG_DIR=$(__check_config_dir "$OPTARG")
          # If the configuration directory does not exist, error out
@@ -283,6 +231,7 @@ do
     F )  _FORCE_OVERWRITE=$BS_TRUE                      ;;
     U )  _UPGRADE_SYS=$BS_TRUE                          ;;
     K )  _KEEP_TEMP_FILES=$BS_TRUE                      ;;
+    I )  _INSECURE_DL=$BS_TRUE                          ;;
 
     \?)  echo
          echoerror "Option does not exist : $OPTARG"
@@ -451,6 +400,74 @@ exec 1>$LOGPIPE
 # Close STDERR, reopen it directing it to the logpipe
 exec 2>&-
 exec 2>$LOGPIPE
+
+
+# Handle the insecure flags
+if [ $_INSECURE_DL -eq $BS_TRUE ]; then
+    _CURL_ARGS="${_CURL_ARGS} --insecure"
+    _WGET_ARGS="${_WGET_ARGS} --no-check-certificate"
+fi
+
+#===  FUNCTION  ================================================================
+#         NAME:  __fetch_url
+#  DESCRIPTION:  Retrieves a URL and writes it to a given path
+#===============================================================================
+__fetch_url() {
+    curl $_CURL_ARGS -s -o "$1" "$2" >/dev/null 2>&1 ||
+        wget $_WGET_ARGS -q -O "$1" "$2" >/dev/null 2>&1 ||
+            fetch -q -o "$1" "$2" >/dev/null 2>&1
+}
+
+
+#===  FUNCTION  ================================================================
+#         NAME:  __check_config_dir
+#  DESCRIPTION:  Checks the config directory, retrieves URLs if provided.
+#===============================================================================
+__check_config_dir() {
+    CC_DIR_NAME="$1"
+    CC_DIR_BASE=$(basename "${CC_DIR_NAME}")
+
+    case "$CC_DIR_NAME" in
+        http://*|https://*)
+            __fetch_url "/tmp/${CC_DIR_BASE}" "${CC_DIR_NAME}"
+            CC_DIR_NAME="/tmp/${CC_DIR_BASE}"
+            ;;
+        ftp://*)
+            __fetch_url "/tmp/${CC_DIR_BASE}" "${CC_DIR_NAME}"
+            CC_DIR_NAME="/tmp/${CC_DIR_BASE}"
+            ;;
+        *)
+            if [ ! -e "${CC_DIR_NAME}" ]; then
+                echo "null"
+                return 0
+            fi
+            ;;
+    esac
+
+    case "$CC_DIR_NAME" in
+        *.tgz|*.tar.gz)
+            tar -zxf "${CC_DIR_NAME}" -C /tmp
+            CC_DIR_BASE=$(basename ${CC_DIR_BASE} ".tgz")
+            CC_DIR_BASE=$(basename ${CC_DIR_BASE} ".tar.gz")
+            CC_DIR_NAME="/tmp/${CC_DIR_BASE}"
+            ;;
+        *.tbz|*.tar.bz2)
+            tar -xjf "${CC_DIR_NAME}" -C /tmp
+            CC_DIR_BASE=$(basename ${CC_DIR_BASE} ".tbz")
+            CC_DIR_BASE=$(basename ${CC_DIR_BASE} ".tar.bz2")
+            CC_DIR_NAME="/tmp/${CC_DIR_BASE}"
+            ;;
+        *.txz|*.tar.xz)
+            tar -xJf "${CC_DIR_NAME}" -C /tmp
+            CC_DIR_BASE=$(basename ${CC_DIR_BASE} ".txz")
+            CC_DIR_BASE=$(basename ${CC_DIR_BASE} ".tar.xz")
+            CC_DIR_NAME="/tmp/${CC_DIR_BASE}"
+            ;;
+    esac
+
+    echo "${CC_DIR_NAME}"
+}
+
 
 
 #---  FUNCTION  ----------------------------------------------------------------
@@ -1453,7 +1470,7 @@ install_debian_6_deps() {
     # No user interaction, libc6 restart services for example
     export DEBIAN_FRONTEND=noninteractive
 
-    wget -q http://debian.saltstack.com/debian-salt-team-joehealy.gpg.key -O - | apt-key add - || return 1
+    wget $_WGET_ARGS -q http://debian.saltstack.com/debian-salt-team-joehealy.gpg.key -O - | apt-key add - || return 1
 
     if [ $_PIP_ALLOWED -eq $BS_TRUE ]; then
         echowarn "PyZMQ will be installed from PyPI in order to compile it against ZMQ3"
@@ -1524,7 +1541,7 @@ install_debian_7_deps() {
             /etc/apt/sources.list.d/saltstack.list
     fi
 
-    wget -q http://debian.saltstack.com/debian-salt-team-joehealy.gpg.key -O - | apt-key add - || return 1
+    wget $_WGET_ARGS -q http://debian.saltstack.com/debian-salt-team-joehealy.gpg.key -O - | apt-key add - || return 1
 
     if [ $_PIP_ALLOWED -eq $BS_TRUE ]; then
         echowarn "PyZMQ will be installed from PyPI in order to compile it against ZMQ3"
@@ -2558,11 +2575,11 @@ install_smartos_deps() {
 
         # Let's download, since they were not provided, the default configuration files
         if [ ! -f $_SALT_ETC_DIR/minion ] && [ ! -f $_TEMP_CONFIG_DIR/minion ]; then
-            curl -sk -o $_TEMP_CONFIG_DIR/minion -L \
+            curl $_CURL_ARGS -s -o $_TEMP_CONFIG_DIR/minion -L \
                 https://raw.github.com/saltstack/salt/develop/conf/minion || return 1
         fi
         if [ ! -f $_SALT_ETC_DIR/master ] && [ ! -f $_TEMP_CONFIG_DIR/master ]; then
-            curl -sk -o $_TEMP_CONFIG_DIR/master -L \
+            curl $_CURL_ARGS -s -o $_TEMP_CONFIG_DIR/master -L \
                 https://raw.github.com/saltstack/salt/develop/conf/master || return 1
         fi
     fi
@@ -2609,7 +2626,8 @@ install_smartos_post() {
         svcs network/salt-$fname > /dev/null 2>&1
         if [ $? -eq 1 ]; then
             if [ ! -f $_TEMP_CONFIG_DIR/salt-$fname.xml ]; then
-                curl -sk -o $_TEMP_CONFIG_DIR/salt-$fname.xml -L https://raw.github.com/saltstack/salt/develop/pkg/smartos/salt-$fname.xml
+                curl $_CURL_ARGS -s -o $_TEMP_CONFIG_DIR/salt-$fname.xml -L \
+                    https://raw.github.com/saltstack/salt/develop/pkg/smartos/salt-$fname.xml
             fi
             svccfg import $_TEMP_CONFIG_DIR/salt-$fname.xml
             if [ "${VIRTUAL_TYPE}" = "global" ]; then
@@ -2860,7 +2878,7 @@ install_suse_11_stable_deps() {
 
                 # Let's download, since they were not provided, the default configuration files
                 if [ ! -f $_SALT_ETC_DIR/$fname ] && [ ! -f $_TEMP_CONFIG_DIR/$fname ]; then
-                    curl -sk -o $_TEMP_CONFIG_DIR/$fname -L \
+                    curl $_CURL_ARGS -s -o $_TEMP_CONFIG_DIR/$fname -L \
                         https://raw.github.com/saltstack/salt/develop/conf/$fname || return 1
                 fi
             done
@@ -2912,12 +2930,12 @@ install_suse_11_stable_post() {
             [ $fname = "syndic" ] && [ $_INSTALL_SYNDIC -eq $BS_FALSE ] && continue
 
             if [ -f /bin/systemctl ]; then
-                curl -k -L https://github.com/saltstack/salt/raw/develop/pkg/salt-$fname.service \
+                curl $_CURL_ARGS -L https://github.com/saltstack/salt/raw/develop/pkg/salt-$fname.service \
                     -o /lib/systemd/system/salt-$fname.service || return 1
                 continue
             fi
 
-            curl -k -L https://github.com/saltstack/salt/raw/develop/pkg/rpm/salt-$fname \
+            curl $_CURL_ARGS -L https://github.com/saltstack/salt/raw/develop/pkg/rpm/salt-$fname \
                 -o /etc/init.d/salt-$fname || return 1
             chmod +x /etc/init.d/salt-$fname
 

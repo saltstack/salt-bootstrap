@@ -350,6 +350,17 @@ echowarn "Running the unstable version of ${__ScriptName}"
 __exit_cleanup() {
     EXIT_CODE=$?
 
+    if [ $ITYPE = "git" ] && [ -d /tmp/git/salt ]; then
+        if [ $_KEEP_TEMP_FILES -eq $BS_FALSE ]; then
+            # Clean up the checked out repositry
+            echodebug "Cleaning up the Salt Temporary Git Repository"
+            rm -rf /tmp/git/salt
+        else
+            echoinfo "Not cleaning up the Salt Temporary git repository on request"
+            echoinfo "Note that if you intend to re-run this script using the git approach, you might encounter some issues"
+        fi
+    fi
+
     # Remove the logging pipe when the script exits
     echodebug "Removing the logging pipe $LOGPIPE"
     rm -f $LOGPIPE

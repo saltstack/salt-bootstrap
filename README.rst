@@ -16,7 +16,8 @@ install the `Salt`_ binaries using the appropriate methods.
 One Line Bootstrap
 ------------------
 
-If you're looking for the *one-liner* to install salt...
+If you're looking for the *one-liner* to install salt(please remove ``sudo`` from the following
+*one-liners* if running them as the ``root`` user).
 
 For example, using ``curl`` to install latest git:
 
@@ -51,7 +52,7 @@ Install a specific version from git using ``wget``:
 
 .. code:: console
 
-  wget -O - http://bootstrap.saltstack.org | sh -s -- -P git v0.16.4
+  wget -O - http://bootstrap.saltstack.org | sudo sh -s -- -P git v0.16.4
 
 
 
@@ -245,7 +246,7 @@ Supported Operating Systems
 - Red Hat Enterprise 5/6
 - SmartOS
 - SuSE 11 SP1/11 SP2
-- Ubuntu 10.x/11.x/12.x/13.04
+- Ubuntu 10.x/11.x/12.x/13.04/13.10
 
 
 

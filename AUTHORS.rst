@@ -28,6 +28,7 @@ Matthew Willson             ixela
 Matthieu Guegan             mguegan
 nevins-b                    nevins-b
 Niels Abspoel               aboe76
+Paul Brian                  lifeisstillgood        paul@mikadosoftware.com
 Pedro Algarvio              s0undt3ch              pedro@algarvio.me
 Raymond Barbiero            visualphoenix
 Roberto Aguilar             rca                    roberto@baremetal.io

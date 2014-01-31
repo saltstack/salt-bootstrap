@@ -241,6 +241,7 @@ _UPGRADE_SYS=${BS_UPGRADE_SYS:-$BS_FALSE}
 _INSECURE_DL=${BS_INSECURE_DL:-$BS_FALSE}
 _WGET_ARGS=${BS_WGET_ARGS:-}
 _CURL_ARGS=${BS_CURL_ARGS:-}
+_FETCH_ARGS=${BS_FETCH_ARGS:-}
 # __SIMPLIFY_VERSION is mostly used in Solaris based distributions
 __SIMPLIFY_VERSION=$BS_TRUE
 
@@ -467,6 +468,7 @@ exec 2>$LOGPIPE
 if [ $_INSECURE_DL -eq $BS_TRUE ]; then
     _CURL_ARGS="${_CURL_ARGS} --insecure"
     _WGET_ARGS="${_WGET_ARGS} --no-check-certificate"
+    _FETCH_ARGS="${_FETCH_ARGS} --no-verify-peer"
 fi
 
 #===  FUNCTION  ================================================================
@@ -476,7 +478,9 @@ fi
 __fetch_url() {
     curl $_CURL_ARGS -s -o "$1" "$2" >/dev/null 2>&1 ||
         wget $_WGET_ARGS -q -O "$1" "$2" >/dev/null 2>&1 ||
-            fetch -q -o "$1" "$2" >/dev/null 2>&1
+            fetch $_FETCH_ARGS -q -o "$1" "$2" >/dev/null 2>&1 ||
+                fetch -q -o "$1" "$2" >/dev/null 2>&1           # Pre FreeBSD 10
+
 }
 
 

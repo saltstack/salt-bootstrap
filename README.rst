@@ -90,6 +90,12 @@ have ``fetch`` available though:
   fetch -o - http://bootstrap.saltstack.org | sudo sh
 
 
+For FreeBSD >= 10 you might need to make fetch ignore the certificate issue:
+
+.. code:: console
+
+  fetch --no-verify-peer -o - http://bootstrap.saltstack.org | sudo sh
+
 
 If all you want is to install a ``salt-master`` using latest git:
 

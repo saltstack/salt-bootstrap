@@ -254,7 +254,7 @@ Supported Operating Systems
 - CentOS 5/6
 - Debian 6.x/7.x
 - Fedora 17/18
-- FreeBSD 9.1/9.2
+- FreeBSD 9.1/9.2/10
 - Gentoo
 - Linaro
 - Linux Mint 13/14

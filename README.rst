@@ -189,7 +189,7 @@ In order to install salt for a distribution you need to define:
 
 ----
 
-Below is an example for Ubuntu Oneiric:
+Below is an example for Ubuntu Oneiric(the example may not be up to date with the script):
 
 .. code:: bash
 

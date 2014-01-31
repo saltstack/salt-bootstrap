@@ -2427,6 +2427,10 @@ install_freebsd_9_stable_deps() {
     return 0
 }
 
+install_freebsd_10_stable_deps() {
+    install_freebsd_9_stable_deps
+}
+
 config_freebsd_salt() {
     # Set _SALT_ETC_DIR to ports default
     _SALT_ETC_DIR=${BS_SALT_ETC_DIR:-/usr/local/etc/salt}
@@ -2485,6 +2489,10 @@ install_freebsd_git_deps() {
 install_freebsd_9_stable() {
     /usr/local/sbin/pkg install ${SALT_PKG_FLAGS} -y sysutils/py-salt || return 1
     return 0
+}
+
+install_freebsd_10_stable() {
+    install_freebsd_9_stable
 }
 
 install_freebsd_git() {
@@ -2546,6 +2554,10 @@ install_freebsd_9_stable_post() {
         fi
 
     done
+}
+
+install_freebsd_10_stable_post() {
+    install_freebsd_9_stable_post
 }
 
 install_freebsd_git_post() {

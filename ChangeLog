@@ -1,3 +1,8 @@
+Version 1.5.12:
+	* Distro Support Fixed:
+		* FreeBSD `fetch` now has a notion of insecure certificates. Handle this properly. Thank 
+		You Mike Carlson(m87carlson).
+
 Version 1.5.11:
 	* Fixed an out of scope variable missed when moving functions around.
 

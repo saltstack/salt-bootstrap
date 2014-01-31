@@ -1,3 +1,11 @@
+Version 1.5.12:
+	* Distro Support Fixed:
+		* FreeBSD `fetch` now has a notion of insecure certificates. Handle this properly. Thank 
+		You Mike Carlson(m87carlson).
+
+Version 1.5.11:
+	* Fixed an out of scope variable missed when moving functions around.
+
 Version 1.5.10:
 	* Salt no longer has the master branch in git, install from develop as default.
 	* Installing from Git on Red Hat based distributions now also needs `yum-utils` installed.
@@ -8,7 +16,6 @@ Version 1.5.10:
 	* Distro Support Fixed:
 		* Minimal Ubuntu installation might not have upstart installed, fixed.
 		* FreeBSD now uses the official FreeBSD repository. Thank You Paul Brian(lifeisstillgood)!
-
 
 Version 1.5.9:
 	* Allow to not start the daemons after bootstrapping salt. This will allow `vagrant-lxc`

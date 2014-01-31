@@ -19,7 +19,18 @@ One Line Bootstrap
 If you're looking for the *one-liner* to install salt(please remove ``sudo`` from the following
 *one-liners* if running them as the ``root`` user).
 
-For example, using ``curl`` to install latest git:
+.. Attention:: The following examples are provided as an helpful and short way to install Salt.  
+The URL used is just an HTTP redirect and as such it **will**, most likely, make either ``curl`` or 
+``wget`` or ``fetch`` (in FreeBSD >= 10), to complain about certificate issues. If this worries 
+you, you **should not** use this URL. Use instead::
+
+  https://github.com/saltstack/salt-bootstrap/raw/develop/bootstrap-salt.sh
+
+
+Examples
+~~~~~~~~
+
+Using ``curl`` to install latest git:
 
 .. code:: console
 
@@ -78,6 +89,12 @@ have ``fetch`` available though:
 
   fetch -o - http://bootstrap.saltstack.org | sudo sh
 
+
+For FreeBSD >= 10 you might need to make fetch ignore the certificate issue:
+
+.. code:: console
+
+  fetch --no-verify-peer -o - http://bootstrap.saltstack.org | sudo sh
 
 
 If all you want is to install a ``salt-master`` using latest git:
@@ -178,7 +195,7 @@ In order to install salt for a distribution you need to define:
 
 ----
 
-Below is an example for Ubuntu Oneiric:
+Below is an example for Ubuntu Oneiric(the example may not be up to date with the script):
 
 .. code:: bash
 

@@ -1,3 +1,9 @@
+.. raw:: html
+
+    <style> .red {color: red;} </style>
+
+.. role:: red
+
 ==================
 Bootstrapping Salt
 ==================
@@ -18,6 +24,15 @@ One Line Bootstrap
 
 If you're looking for the *one-liner* to install salt(please remove ``sudo`` from the following
 *one-liners* if running them as the ``root`` user).
+
+:red:`Attention`: The following examples are provided as an helpful and short way to install Salt.  
+                  The URL used is just an HTTP redirect and as such it **will**, most likely, make 
+                  either ``curl`` or ``wget`` or ``fetch`` (in FreeBSD >= 10), to complain about 
+                  certificate issues. If this worries you, you **should not** use this URL. Use
+                  instead::
+
+                    https://github.com/saltstack/salt-bootstrap/raw/develop/bootstrap-salt.sh
+
 
 For example, using ``curl`` to install latest git:
 

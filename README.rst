@@ -27,7 +27,10 @@ you, you **should not** use this URL. Use instead::
   https://github.com/saltstack/salt-bootstrap/raw/develop/bootstrap-salt.sh
 
 
-For example, using ``curl`` to install latest git:
+Examples
+~~~~~~~~
+
+Using ``curl`` to install latest git:
 
 .. code:: console
 

@@ -268,6 +268,19 @@ In order to install salt for a distribution you need to define:
   they're not running.
 
 
+7. Optionally, define a daemons running function, one of:
+
+.. code:: bash
+
+  daemons_running_<distro>_<major_version>_<install_type>
+  daemons_running_<distro>_<major_version>_<minor_version>_<install_type>
+  daemons_running_<distro>_<major_version>
+  daemons_running_<distro>_<major_version>_<minor_version>
+  daemons_running_<distro>_<install_type>
+  daemons_running_<distro>
+  daemons_running  [THIS ONE IS ALREADY DEFINED AS THE DEFAULT]
+
+
 ----
 
 Below is an example for Ubuntu Oneiric(the example may not be up to date with the script):

@@ -1311,6 +1311,14 @@ movefile() {
 #       NOTE: The start daemons function should be able to restart any daemons
 #             which are running, or start if they're not running.
 #
+#   Optionally, define a daemons running function, one of:
+#       1. daemons_running_<distro>_<major_version>_<install_type>
+#       2. daemons_running_<distro>_<major_version>_<minor_version>_<install_type>
+#       3. daemons_running_<distro>_<major_version>
+#       4  daemons_running_<distro>_<major_version>_<minor_version>
+#       5. daemons_running_<distro>_<install_type>
+#       6. daemons_running_<distro>
+#       7. daemons_running  [THIS ONE IS ALREADY DEFINED AS THE DEFAULT]
 ##############################################################################
 
 

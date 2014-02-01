@@ -1770,6 +1770,19 @@ install_fedora_stable() {
     return 0
 }
 
+install_fedora_stable_post() {
+    for fname in minion master syndic; do
+        # Skip if not meant to be installed
+        [ $fname = "minion" ] && [ $_INSTALL_MINION -eq $BS_FALSE ] && continue
+        [ $fname = "master" ] && [ $_INSTALL_MASTER -eq $BS_FALSE ] && continue
+        [ $fname = "syndic" ] && [ $_INSTALL_SYNDIC -eq $BS_FALSE ] && continue
+
+        systemctl is-enabled salt-$fname.service || (systemctl preset salt-$fname.service && systemctl enable salt-$fname.service)
+        sleep 0.1
+        systemctl daemon-reload
+    done
+}
+
 install_fedora_git_deps() {
     install_fedora_deps || return 1
     yum install -y git yum-utils || return 1

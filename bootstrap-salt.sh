@@ -3487,7 +3487,7 @@ if [ "$DAEMONS_RUNNING_FUNC" != "null" ] && [ $_START_DAEMONS -eq $BS_TRUE ]; th
             [ $fname = "syndic" ] && [ $_INSTALL_SYNDIC -eq $BS_FALSE ] && continue
 
             if [ $_ECHO_DEBUG -eq $BS_FALSE ]; then
-                echoerror "salt-$fname was not found running. Pass '-D' for additional debugging information..."
+                echoerror "salt-$fname was not found running. Pass '-D' to $__ScriptName when bootstrapping for additional debugging information..."
                 continue
             fi
 

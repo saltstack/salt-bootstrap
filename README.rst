@@ -9,6 +9,16 @@ script runs through a series of checks to determine operating system type and ve
 install the `Salt`_ binaries using the appropriate methods.
 
 
+.. Note::
+
+  This ``README`` file is not the absolute truth to what the bootstrap script is capable to do, for 
+  that, please read the generated help by passing ``-h`` to the script or even better, `read the 
+  source`_.
+
+
+.. _`read the source`: https://github.com/saltstack/salt-bootstrap/blob/develop/bootstrap-salt.sh
+
+
 **In case you found a bug, please read** `I found a bug`_ **first before submitting a new issue.**
 
 

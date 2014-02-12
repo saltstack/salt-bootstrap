@@ -154,6 +154,14 @@ If you want to install a specific release version (based on the git tags):
   curl -o salt_install.sh -L http://bootstrap.saltstack.org
   sudo sh salt_install.sh git v0.16.4
 
+To install a specific branch from a git fork:
+
+.. code:: console
+
+  curl -o salt_install.sh -L http://bootstrap.saltstack.org
+  sudo sh salt_install.sh -g https://github.com/myuser/salt.git git mybranch
+
+
 Installing via an Insecure One-Liner
 ------------------------------------
 

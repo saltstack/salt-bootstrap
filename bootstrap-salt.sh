@@ -2007,7 +2007,7 @@ install_red_hat_linux_stable_deps() {
     else
         OPTIONAL_ARCH=$CPU_ARCH_L
     fi
-    if [ $DISTRO_MAJOR_VERSION -eq 6 ] && [ $(rhn-channel -l | grep optional) != "rhel-${OPTIONAL_ARCH}-server-optional-${DISTRO_MAJOR_VERSION}" ]; then
+    if [ $DISTRO_MAJOR_VERSION -eq 6 ] && [ "X$(rhn-channel -l | grep optional)" != "Xrhel-${OPTIONAL_ARCH}-server-optional-${DISTRO_MAJOR_VERSION}" ]; then
       echoerror "Failed to find RHN optional repo, please enable it using the GUI or rhn-channel command."
       return 1
     fi
@@ -2036,6 +2036,16 @@ install_red_hat_enterprise_server_stable_deps() {
 }
 
 install_red_hat_enterprise_server_git_deps() {
+    install_red_hat_linux_git_deps || return 1
+    return 0
+}
+
+install_red_hat_enterprise_workstation_stable_deps() {
+    install_red_hat_linux_stable_deps || return 1
+    return 0
+}
+
+install_red_hat_enterprise_workstation_git_deps() {
     install_red_hat_linux_git_deps || return 1
     return 0
 }
@@ -2069,6 +2079,17 @@ install_red_hat_enterprise_server_git() {
     install_red_hat_linux_git || return 1
     return 0
 }
+
+install_red_hat_enterprise_workstation_stable() {
+    install_red_hat_linux_stable || return 1
+    return 0
+}
+
+install_red_hat_enterprise_workstation_git() {
+    install_red_hat_linux_git || return 1
+    return 0
+}
+
 
 install_red_hat_linux_stable_post() {
     install_centos_stable_post || return 1
@@ -2115,6 +2136,22 @@ install_red_hat_enterprise_server_git_post() {
     return 0
 }
 
+install_red_hat_enterprise_workstation_stable_post() {
+    install_red_hat_linux_stable_post || return 1
+    return 0
+}
+
+install_red_hat_enterprise_workstation_restart_daemons() {
+    install_red_hat_linux_restart_daemons || return 1
+    return 0
+}
+
+install_red_hat_enterprise_workstation_git_post() {
+    install_red_hat_linux_git_post || return 1
+    return 0
+}
+
+
 install_red_hat_linux_testing_deps() {
     install_centos_testing_deps || return 1
     return 0
@@ -2145,7 +2182,20 @@ install_red_hat_enterprise_server_testing_post() {
     return 0
 }
 
+install_red_hat_enterprise_workstation_testing_deps() {
+    install_centos_testing_deps || return 1
+    return 0
+}
 
+install_red_hat_enterprise_workstation_testing() {
+    install_centos_testing || return 1
+    return 0
+}
+
+install_red_hat_enterprise_workstation_testing_post() {
+    install_centos_testing_post || return 1
+    return 0
+}
 #
 #   Ended RedHat Install Functions
 #

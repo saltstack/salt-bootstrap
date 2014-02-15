@@ -213,7 +213,7 @@ usage() {
   -I  If set, allow insecure connections while downloading any files. For
       example, pass '--no-check-certificate' to 'wget' or '--insecure' to 'curl'
   -A  Pass the salt-master DNS name or IP. This will be stored under
-      \${BS_SALT_ETC_DIR}/minion.conf.d/master-address.conf
+      \${BS_SALT_ETC_DIR}/minion.conf.d/99-master-address.conf
 
 EOT
 }   # ----------  end of function usage  ----------

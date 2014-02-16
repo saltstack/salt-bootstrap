@@ -255,6 +255,7 @@ _FETCH_ARGS=${BS_FETCH_ARGS:-}
 _SALT_MASTER_ADDRESS="null"
 # __SIMPLIFY_VERSION is mostly used in Solaris based distributions
 __SIMPLIFY_VERSION=$BS_TRUE
+_LIBCLOUD_MIN_VERSION="0.14.0"
 
 while getopts ":hvnDc:g:k:MSNXCPFUKIA:L" opt
 do
@@ -1344,7 +1345,7 @@ install_ubuntu_deps() {
     if [ $_INSTALL_CLOUD -eq $BS_TRUE ]; then
         check_pip_allowed "You need to allow pip based installations(-P) in order to install apache-libcloud"
         __apt_get_install_noinput python-pip
-        pip install -U apache-libcloud >= 0.11.4
+        pip install -U apache-libcloud>=$_LIBCLOUD_MIN_VERSION
     fi
 
     if [ $_UPGRADE_SYS -eq $BS_TRUE ]; then
@@ -1508,7 +1509,7 @@ install_debian_deps() {
     if [ $_INSTALL_CLOUD -eq $BS_TRUE ]; then
         check_pip_allowed "You need to allow pip based installations(-P) in order to install apache-libcloud"
         __apt_get_install_noinput python-pip
-        pip install -U apache-libcloud >= 0.11.4
+        pip install -U apache-libcloud>=$_LIBCLOUD_MIN_VERSION
     fi
 
     if [ $_UPGRADE_SYS -eq $BS_TRUE ]; then
@@ -1576,7 +1577,7 @@ _eof
 
     if [ $_INSTALL_CLOUD -eq $BS_TRUE ]; then
         check_pip_allowed "You need to allow pip based installations(-P) in order to install apache-libcloud"
-        pip install -U apache-libcloud >= 0.11.4
+        pip install -U apache-libcloud>=$_LIBCLOUD_MIN_VERSION
     fi
 
     if [ $_UPGRADE_SYS -eq $BS_TRUE ]; then
@@ -1633,7 +1634,7 @@ _eof
 
     if [ $_INSTALL_CLOUD -eq $BS_TRUE ]; then
         check_pip_allowed "You need to allow pip based installations(-P) in order to install apache-libcloud"
-        pip install -U apache-libcloud >= 0.11.4
+        pip install -U apache-libcloud>=$_LIBCLOUD_MIN_VERSION
     fi
 
     if [ $_UPGRADE_SYS -eq $BS_TRUE ]; then
@@ -1662,7 +1663,7 @@ install_debian_git_deps() {
 
     if [ $_INSTALL_CLOUD -eq $BS_TRUE ]; then
         check_pip_allowed "You need to allow pip based installations(-P) in order to install apache-libcloud"
-        pip install -U apache-libcloud >= 0.11.4
+        pip install -U apache-libcloud>=$_LIBCLOUD_MIN_VERSION
     fi
 
     if [ $_UPGRADE_SYS -eq $BS_TRUE ]; then
@@ -1937,9 +1938,9 @@ install_centos_stable_deps() {
     if [ $_INSTALL_CLOUD -eq $BS_TRUE ]; then
         check_pip_allowed "You need to allow pip based installations(-P) in order to install apache-libcloud"
         if [ $DISTRO_MAJOR_VERSION -eq 5 ]; then
-            easy_install-2.6 apache-libcloud>=0.11.4
+            easy_install-2.6 apache-libcloud>=$_LIBCLOUD_MIN_VERSION
         else
-            pip-python install apache-libcloud>=0.11.4
+            pip-python install apache-libcloud>=$_LIBCLOUD_MIN_VERSION
         fi
     fi
     return 0

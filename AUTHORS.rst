@@ -26,6 +26,7 @@ Karl Grzeszczak             karlgrz
 Kenneth Wilke               KennethWilke
 Matthew Willson             ixela
 Matthieu Guegan             mguegan
+Mike Carlson                m87carlson             mike@bayphoto.com
 nevins-b                    nevins-b
 Niels Abspoel               aboe76
 Paul Brian                  lifeisstillgood        paul@mikadosoftware.com

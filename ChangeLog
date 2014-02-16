@@ -1,3 +1,24 @@
+Version 2014.02.16:
+	* The script now allows setting up the salt-master address as a separate configuration file by 
+	passing `-A` to the script.
+	* Add support to install apache-libcloud by passing the `-L` flag. In some distribution it's 
+	also needed to pass `-P` because the minimal apache-libcloud version is `0.14.0`. This support 
+	is still missing for FreeBSD and SmartOS.
+	* Fixed an issue when copying or moving files. We now test to see if the destination is a 
+	directory and create a full path from that so that the "do not override" logic works as 
+	supposed. #294.
+	* Allow passing additional package names to install while installing Salt's dependencies. #262
+	* Pass the salt configuration directory, default or from environment variable to the setup.py 
+	script for git based installations. #305
+	* Distro Support Fixed:
+		* FreeBSD `fetch` now has a notion of insecure certificates. Handle this properly. Thank 
+		You Mike Carlson(m87carlson).
+		* Arch, openSUSE and SuSE are now upgradable when the `-U` flag is passed.
+		* Force overwrites now works for existing init.d scripts on CentOS git installations. #259
+	* Distro Support Added:
+		* FreeBSD 10 is now also supported. Thank You Mike Carlson(m87carlson).
+		* Red Had Enterprise Workstation is now supported.
+
 Version 1.5.11:
 	* Fixed an out of scope variable missed when moving functions around.
 

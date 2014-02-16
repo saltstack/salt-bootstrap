@@ -106,8 +106,14 @@ echodebug() {
 #                 used.
 #-------------------------------------------------------------------------------
 check_pip_allowed() {
+    if [ $# -eq 1 ]; then
+        _PIP_ALLOWED_ERROR_MSG="$1"
+    else
+        _PIP_ALLOWED_ERROR_MSG="pip based installations were not allowed. Retry using '-P'"
+
+    fi
     if [ $_PIP_ALLOWED -eq $BS_FALSE ]; then
-        echoerror "pip based installations were not allowed. Retry using '-P'"
+        echoerror $_PIP_ALLOWED_ERROR_MSG
         usage
         exit 1
     fi
@@ -214,6 +220,7 @@ usage() {
       example, pass '--no-check-certificate' to 'wget' or '--insecure' to 'curl'
   -A  Pass the salt-master DNS name or IP. This will be stored under
       \${BS_SALT_ETC_DIR}/minion.conf.d/99-master-address.conf
+  -L  Install the Apache Libcloud package if possible(required for salt-cloud)
 
 EOT
 }   # ----------  end of function usage  ----------
@@ -230,6 +237,7 @@ _TEMP_KEYS_DIR="null"
 _INSTALL_MASTER=$BS_FALSE
 _INSTALL_SYNDIC=$BS_FALSE
 _INSTALL_MINION=$BS_TRUE
+_INSTALL_CLOUD=$BS_FALSE
 _START_DAEMONS=$BS_TRUE
 _ECHO_DEBUG=${BS_ECHO_DEBUG:-$BS_FALSE}
 _CONFIG_ONLY=$BS_FALSE
@@ -248,7 +256,7 @@ _SALT_MASTER_ADDRESS="null"
 # __SIMPLIFY_VERSION is mostly used in Solaris based distributions
 __SIMPLIFY_VERSION=$BS_TRUE
 
-while getopts ":hvnDc:g:k:MSNXCPFUKIA:" opt
+while getopts ":hvnDc:g:k:MSNXCPFUKIA:L" opt
 do
   case "${opt}" in
 
@@ -287,6 +295,8 @@ do
     K )  _KEEP_TEMP_FILES=$BS_TRUE                      ;;
     I )  _INSECURE_DL=$BS_TRUE                          ;;
     A )  _SALT_MASTER_ADDRESS=$OPTARG                   ;;
+    L )  _INSTALL_CLOUD=$BS_TRUE                        ;;
+
 
     \?)  echo
          echoerror "Option does not exist : $OPTARG"
@@ -909,6 +919,10 @@ if [ $_INSTALL_SYNDIC -eq $BS_TRUE ]; then
     fi
 fi
 
+if [ $_INSTALL_CLOUD -eq $BS_TRUE ] && [ $_CONFIG_ONLY -eq $BS_FALSE ]; then
+    echoinfo "Installing Apache-Libloud required for salt-cloud"
+fi
+
 if [ $_START_DAEMONS -eq $BS_FALSE ]; then
     echoinfo "Daemons will not be started"
 fi
@@ -1327,6 +1341,12 @@ install_ubuntu_deps() {
     # Minimal systems might not have upstart installed, install it
     __apt_get_install_noinput upstart
 
+    if [ $_INSTALL_CLOUD -eq $BS_TRUE ]; then
+        check_pip_allowed "You need to allow pip based installations(-P) in order to install apache-libcloud"
+        __apt_get_install_noinput python-pip
+        pip install -U apache-libcloud >= 0.11.4
+    fi
+
     if [ $_UPGRADE_SYS -eq $BS_TRUE ]; then
         __apt_get_upgrade_noinput || return 1
     fi
@@ -1485,6 +1505,12 @@ install_debian_deps() {
 
     apt-get update
 
+    if [ $_INSTALL_CLOUD -eq $BS_TRUE ]; then
+        check_pip_allowed "You need to allow pip based installations(-P) in order to install apache-libcloud"
+        __apt_get_install_noinput python-pip
+        pip install -U apache-libcloud >= 0.11.4
+    fi
+
     if [ $_UPGRADE_SYS -eq $BS_TRUE ]; then
         __apt_get_upgrade_noinput || return 1
     fi
@@ -1548,6 +1574,11 @@ _eof
     fi
     apt-get update || return 1
 
+    if [ $_INSTALL_CLOUD -eq $BS_TRUE ]; then
+        check_pip_allowed "You need to allow pip based installations(-P) in order to install apache-libcloud"
+        pip install -U apache-libcloud >= 0.11.4
+    fi
+
     if [ $_UPGRADE_SYS -eq $BS_TRUE ]; then
         __apt_get_upgrade_noinput || return 1
     fi
@@ -1600,6 +1631,11 @@ _eof
         __apt_get_install_noinput python-zmq || return 1
     fi
 
+    if [ $_INSTALL_CLOUD -eq $BS_TRUE ]; then
+        check_pip_allowed "You need to allow pip based installations(-P) in order to install apache-libcloud"
+        pip install -U apache-libcloud >= 0.11.4
+    fi
+
     if [ $_UPGRADE_SYS -eq $BS_TRUE ]; then
         __apt_get_upgrade_noinput || return 1
     fi
@@ -1622,6 +1658,11 @@ install_debian_git_deps() {
     if [ "$_TEMP_CONFIG_DIR" = "null" ]; then
         _TEMP_CONFIG_DIR="${SALT_GIT_CHECKOUT_DIR}/conf/"
         CONFIG_SALT_FUNC="config_salt"
+    fi
+
+    if [ $_INSTALL_CLOUD -eq $BS_TRUE ]; then
+        check_pip_allowed "You need to allow pip based installations(-P) in order to install apache-libcloud"
+        pip install -U apache-libcloud >= 0.11.4
     fi
 
     if [ $_UPGRADE_SYS -eq $BS_TRUE ]; then

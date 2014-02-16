@@ -136,6 +136,7 @@ For FreeBSD >= 10 you might need to make fetch ignore the certificate issue:
     to download the installation script with curl:
 
 .. code:: console
+
   fetch -o install_salt.sh install_salt.sh https://raw.github.com/saltstack/salt-bootstrap/stable/bootstrap-salt.sh
   sudo sh install_salt.sh
 
@@ -266,6 +267,31 @@ In order to install salt for a distribution you need to define:
 
   The start daemons function should be able to restart any daemons which are running, or start if 
   they're not running.
+
+
+7. Optionally, define a daemons running function, one of:
+
+.. code:: bash
+
+  daemons_running_<distro>_<major_version>_<install_type>
+  daemons_running_<distro>_<major_version>_<minor_version>_<install_type>
+  daemons_running_<distro>_<major_version>
+  daemons_running_<distro>_<major_version>_<minor_version>
+  daemons_running_<distro>_<install_type>
+  daemons_running_<distro>
+  daemons_running  [THIS ONE IS ALREADY DEFINED AS THE DEFAULT]
+
+
+8. Optionally, check enabled Services:
+
+.. code:: bash
+
+  install_<distro>_<major_version>_<install_type>_check_services
+  install_<distro>_<major_version>_<minor_version>_<install_type>_check_services
+  install_<distro>_<major_version>_check_services
+  install_<distro>_<major_version>_<minor_version>_check_services
+  install_<distro>_<install_type>_check_services
+  install_<distro>_check_services
 
 
 ----

@@ -3042,18 +3042,25 @@ install_suse_11_stable_deps() {
         zypper --gpg-auto-import-keys --non-interactive update || return 1
     fi
 
+    packages="libzmq3 python python-Jinja2 'python-M2Crypto>=0.21' python-msgpack-python"
+    packages="${packages} python-pycrypto python-pyzmq python-pip python-xml"
+
     if [ $SUSE_PATCHLEVEL -eq 1 ]; then
         check_pip_allowed
         echowarn "PyYaml will be installed using pip"
-        zypper --non-interactive install --auto-agree-with-licenses libzmq3 python \
-        python-Jinja2 'python-M2Crypto>=0.21' python-msgpack-python \
-        python-pycrypto python-pyzmq python-pip python-xml || return 1
+    else
+        packages="${packages} python-PyYAML"
+    fi
+
+    if [ $_INSTALL_CLOUD -eq $BS_TRUE ]; then
+        packages="${packages} python-apache-libcloud"
+    fi
+
+    zypper --non-interactive install --auto-agree-with-licenses ${packages} || return 1
+
+    if [ $SUSE_PATCHLEVEL -eq 1 ]; then
         # There's no python-PyYaml in SP1, let's install it using pip
         pip install PyYaml || return 1
-    else
-        zypper --non-interactive install --auto-agree-with-licenses libzmq3 python \
-        python-Jinja2 'python-M2Crypto>=0.21' python-PyYAML python-msgpack-python \
-        python-pycrypto python-pyzmq python-xml || return 1
     fi
 
     # PIP based installs need to copy configuration files "by hand".

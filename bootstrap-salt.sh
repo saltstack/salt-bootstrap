@@ -2028,7 +2028,7 @@ install_centos_git_post() {
                 copyfile ${SALT_GIT_CHECKOUT_DIR}/pkg/salt-$fname.upstart /etc/init/salt-$fname.conf
             fi
         # Still in SysV init?!
-        elif [ ! -f /etc/init.d/salt-$fname ]; then
+        elif [ ! -f /etc/init.d/salt-$fname ] || ([ -f /etc/init.d/salt-$fname ] && [ $_FORCE_OVERWRITE -eq $BS_TRUE ]); then
             copyfile ${SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-${fname} /etc/init.d/
             chmod +x /etc/init.d/salt-${fname}
             /sbin/chkconfig salt-${fname} on

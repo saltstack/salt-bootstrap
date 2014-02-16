@@ -11,6 +11,7 @@ Version 1.5.12:
 		* FreeBSD `fetch` now has a notion of insecure certificates. Handle this properly. Thank 
 		You Mike Carlson(m87carlson).
 		* Arch, openSUSE and SuSE are now upgradable when the `-U` flag is passed.
+		* Force overwrites now works for existing init.d scripts on CentOS git installations. #259
 	* Distro Support Added:
 		* FreeBSD 10 is now also supported. Thank You Mike Carlson(m87carlson).
 		* Red Had Enterprise Workstation is now supported.

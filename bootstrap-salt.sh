@@ -1970,8 +1970,10 @@ install_centos_stable_deps() {
         yum -y update || return 1
     fi
 
+    packages="yum-utils"
+
     if [ $DISTRO_MAJOR_VERSION -eq 5 ]; then
-        packages="python26-PyYAML python26-m2crypto m2crypto python26 "
+        packages="${packages} python26-PyYAML python26-m2crypto m2crypto python26 "
         packages="${packages} python26-crypto python26-msgpack python26-zmq python26-jinja2"
         if [ $_INSTALL_CLOUD -eq $BS_TRUE ]; then
             check_pip_allowed "You need to allow pip based installations(-P) in order to install apache-libcloud"
@@ -2032,7 +2034,7 @@ install_centos_stable_post() {
 
 install_centos_git_deps() {
     install_centos_stable_deps || return 1
-    yum -y install git yum-utils --enablerepo=${_EPEL_REPO} || return 1
+    yum -y install git --enablerepo=${_EPEL_REPO} || return 1
 
     __git_clone_and_checkout || return 1
 

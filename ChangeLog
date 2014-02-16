@@ -1,4 +1,4 @@
-Version 1.5.12:
+Version 2014.02.16:
 	* The script now allows setting up the salt-master address as a separate configuration file by 
 	passing `-A` to the script.
 	* Add support to install apache-libcloud by passing the `-L` flag. In some distribution it's 

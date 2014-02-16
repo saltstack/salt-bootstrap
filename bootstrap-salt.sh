@@ -3550,6 +3550,8 @@ STARTDAEMONS_FUNC_NAMES="$STARTDAEMONS_FUNC_NAMES install_${DISTRO_NAME_L}_resta
 STARTDAEMONS_INSTALL_FUNC="null"
 for FUNC_NAME in $(__strip_duplicates $STARTDAEMONS_FUNC_NAMES); do
     if __function_defined $FUNC_NAME; then
+        echodebug "Waiting 3 seconds for processes to settle before checking for them"
+        sleep 3
         STARTDAEMONS_INSTALL_FUNC=$FUNC_NAME
         break
     fi
@@ -3568,6 +3570,8 @@ DAEMONS_RUNNING_FUNC_NAMES="$DAEMONS_RUNNING_FUNC_NAMES daemons_running"
 
 for FUNC_NAME in $(__strip_duplicates $DAEMONS_RUNNING_FUNC_NAMES); do
     if __function_defined $FUNC_NAME; then
+        echodebug "Waiting 3 seconds for processes to settle before checking for them"
+        sleep 3
         DAEMONS_RUNNING_FUNC=$FUNC_NAME
         break
     fi

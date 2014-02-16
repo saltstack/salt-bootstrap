@@ -1800,8 +1800,13 @@ install_debian_restart_daemons() {
 #   Fedora Install Functions
 #
 install_fedora_deps() {
-    yum install -y PyYAML libyaml m2crypto python-crypto python-jinja2 \
-        python-msgpack python-zmq || return 1
+    packages="PyYAML libyaml m2crypto python-crypto python-jinja2 python-msgpack python-zmq"
+
+    if [ $_INSTALL_CLOUD -eq $BS_TRUE ]; then
+        packages="${packages} python-libcloud"
+    fi
+
+    yum install -y ${packages} || return 1
 
     if [ $_UPGRADE_SYS -eq $BS_TRUE ]; then
         yum -y update || return 1

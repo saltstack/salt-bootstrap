@@ -2902,9 +2902,15 @@ install_opensuse_stable_deps() {
         zypper --gpg-auto-import-keys --non-interactive update || return 1
     fi
 
-    zypper --non-interactive install --auto-agree-with-licenses libzmq3 python \
-        python-Jinja2 python-M2Crypto python-PyYAML python-msgpack-python \
-        python-pycrypto python-pyzmq python-xml || return 1
+    packages="libzmq3 python python-Jinja2 python-M2Crypto python-PyYAML "
+    packages="${packages} python-msgpack-python python-pycrypto python-pyzmq python-xml"
+
+    if [ $_INSTALL_CLOUD -eq $BS_TRUE]; then
+        packages="${packages} python-apache-libcloud"
+    fi
+
+    zypper --non-interactive install --auto-agree-with-licenses ${packages} || return 1
+
     return 0
 }
 

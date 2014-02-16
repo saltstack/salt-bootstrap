@@ -26,7 +26,7 @@ __ScriptName="bootstrap-salt.sh"
 #   * BS_COLORS:          If 0 disables colour support
 #   * BS_PIP_ALLOWED:     If 1 enable pip based installations(if needed)
 #   * BS_ECHO_DEBUG:      If 1 enable debug echo which can also be set by -D
-#   * BS_SALT_ETC_DIR:    Defaults to /etc/salt
+#   * BS_SALT_ETC_DIR:    Defaults to /etc/salt (Only tweak'able on git based installations)
 #   * BS_KEEP_TEMP_FILES: If 1, don't move temporary files, instead copy them
 #   * BS_FORCE_OVERWRITE: Force overriding copied files(config, init.d, etc)
 #   * BS_UPGRADE_SYS:     If 1 and an option, upgrade system. Default 0.
@@ -221,6 +221,8 @@ usage() {
   -A  Pass the salt-master DNS name or IP. This will be stored under
       \${BS_SALT_ETC_DIR}/minion.conf.d/99-master-address.conf
   -L  Install the Apache Libcloud package if possible(required for salt-cloud)
+  -p  Extra-package to install while installing salt dependencies. One package
+      per -p flag. You're responsible for providing the proper package name.
 
 EOT
 }   # ----------  end of function usage  ----------
@@ -256,8 +258,9 @@ _SALT_MASTER_ADDRESS="null"
 # __SIMPLIFY_VERSION is mostly used in Solaris based distributions
 __SIMPLIFY_VERSION=$BS_TRUE
 _LIBCLOUD_MIN_VERSION="0.14.0"
+_EXTRA_PACKAGES=""
 
-while getopts ":hvnDc:g:k:MSNXCPFUKIA:L" opt
+while getopts ":hvnDc:g:k:MSNXCPFUKIA:Lp:" opt
 do
   case "${opt}" in
 
@@ -297,6 +300,7 @@ do
     I )  _INSECURE_DL=$BS_TRUE                          ;;
     A )  _SALT_MASTER_ADDRESS=$OPTARG                   ;;
     L )  _INSTALL_CLOUD=$BS_TRUE                        ;;
+    p )  _EXTRA_PACKAGES="$_EXTRA_PACKAGES $OPTARG"     ;;
 
 
     \?)  echo
@@ -1368,6 +1372,11 @@ install_ubuntu_deps() {
         __apt_get_upgrade_noinput || return 1
     fi
 
+    if [ "x${_EXTRA_PACKAGES}" != "x" ]; then
+        echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
+        __apt_get_install_noinput ${_EXTRA_PACKAGES} || return 1
+    fi
+
     return 0
 }
 
@@ -1436,7 +1445,11 @@ install_ubuntu_daily() {
 }
 
 install_ubuntu_git() {
-    python setup.py install --install-layout=deb || return 1
+    if [ -f ${SALT_GIT_CHECKOUT_DIR}/salt/syspaths.py ]; then
+        python setup.py install --install-layout=deb --salt-config-dir=$_SALT_ETC_DIR || return 1
+    else
+        python setup.py install --install-layout=deb || return 1
+    fi
     return 0
 }
 
@@ -1532,6 +1545,12 @@ install_debian_deps() {
         __apt_get_upgrade_noinput || return 1
     fi
 
+    if [ "x${_EXTRA_PACKAGES}" != "x" ]; then
+        echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
+        __apt_get_install_noinput ${_EXTRA_PACKAGES} || return 1
+    fi
+
+    return 0
 }
 
 install_debian_6_deps() {
@@ -1601,6 +1620,12 @@ _eof
     fi
 
     __apt_get_install_noinput python-zmq || return 1
+
+    if [ "x${_EXTRA_PACKAGES}" != "x" ]; then
+        echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
+        __apt_get_install_noinput ${_EXTRA_PACKAGES} || return 1
+    fi
+
     return 0
 }
 
@@ -1657,6 +1682,11 @@ _eof
         __apt_get_upgrade_noinput || return 1
     fi
 
+    if [ "x${_EXTRA_PACKAGES}" != "x" ]; then
+        echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
+        __apt_get_install_noinput ${_EXTRA_PACKAGES} || return 1
+    fi
+
     return 0
 }
 
@@ -1684,6 +1714,11 @@ install_debian_git_deps() {
 
     if [ $_UPGRADE_SYS -eq $BS_TRUE ]; then
         __apt_get_upgrade_noinput || return 1
+    fi
+
+    if [ "x${_EXTRA_PACKAGES}" != "x" ]; then
+        echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
+        __apt_get_install_noinput ${_EXTRA_PACKAGES} || return 1
     fi
 
     return 0
@@ -1764,7 +1799,11 @@ install_debian_git() {
         easy_install -U pyzmq || return 1
     fi
 
-    python setup.py install --install-layout=deb || return 1
+    if [ -f ${SALT_GIT_CHECKOUT_DIR}/salt/syspaths.py ]; then
+        python setup.py install --install-layout=deb --salt-config-dir=$_SALT_ETC_DIR || return 1
+    else
+        python setup.py install --install-layout=deb || return 1
+    fi
 }
 
 install_debian_6_git() {
@@ -1829,6 +1868,11 @@ install_fedora_deps() {
         yum -y update || return 1
     fi
 
+    if [ "x${_EXTRA_PACKAGES}" != "x" ]; then
+        echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
+        yum install -y ${_EXTRA_PACKAGES} || return 1
+    fi
+
     return 0
 }
 
@@ -1872,7 +1916,11 @@ install_fedora_git_deps() {
 }
 
 install_fedora_git() {
-    python setup.py install || return 1
+    if [ -f ${SALT_GIT_CHECKOUT_DIR}/salt/syspaths.py ]; then
+        python setup.py install --salt-config-dir=$_SALT_ETC_DIR || return 1
+    else
+        python setup.py install || return 1
+    fi
     return 0
 }
 
@@ -1934,8 +1982,10 @@ install_centos_stable_deps() {
         yum -y update || return 1
     fi
 
+    packages="yum-utils"
+
     if [ $DISTRO_MAJOR_VERSION -eq 5 ]; then
-        packages="python26-PyYAML python26-m2crypto m2crypto python26 "
+        packages="${packages} python26-PyYAML python26-m2crypto m2crypto python26 "
         packages="${packages} python26-crypto python26-msgpack python26-zmq python26-jinja2"
         if [ $_INSTALL_CLOUD -eq $BS_TRUE ]; then
             check_pip_allowed "You need to allow pip based installations(-P) in order to install apache-libcloud"
@@ -1959,6 +2009,12 @@ install_centos_stable_deps() {
             pip-python install apache-libcloud>=$_LIBCLOUD_MIN_VERSION
         fi
     fi
+
+    if [ "x${_EXTRA_PACKAGES}" != "x" ]; then
+        echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
+        yum install -y ${_EXTRA_PACKAGES} --enablerepo=${_EPEL_REPO} || return 1
+    fi
+
     return 0
 }
 
@@ -1990,7 +2046,7 @@ install_centos_stable_post() {
 
 install_centos_git_deps() {
     install_centos_stable_deps || return 1
-    yum -y install git yum-utils --enablerepo=${_EPEL_REPO} || return 1
+    yum -y install git --enablerepo=${_EPEL_REPO} || return 1
 
     __git_clone_and_checkout || return 1
 
@@ -2005,9 +2061,14 @@ install_centos_git_deps() {
 
 install_centos_git() {
     if [ $DISTRO_MAJOR_VERSION -eq 5 ]; then
-        python2.6 setup.py install || return 1
+        _PYEXE=python2.6
     else
-        python2 setup.py install || return 1
+        _PYEXE=python2
+    fi
+    if [ -f ${SALT_GIT_CHECKOUT_DIR}/salt/syspaths.py ]; then
+        $_PYEXE setup.py install --salt-config-dir=$_SALT_ETC_DIR || return 1
+    else
+        $_PYEXE setup.py install || return 1
     fi
     return 0
 }
@@ -2322,6 +2383,12 @@ install_amazon_linux_ami_deps() {
         check_pip_allowed "You need to allow pip based installations(-P) in order to install apache-libcloud"
         pip-python install apache-libcloud>=$_LIBCLOUD_MIN_VERSION
     fi
+
+    if [ "x${_EXTRA_PACKAGES}" != "x" ]; then
+        echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
+        yum install -y ${_EXTRA_PACKAGES} --enablerepo=${_EPEL_REPO} || return 1
+    fi
+
 }
 
 install_amazon_linux_ami_git_deps() {
@@ -2401,10 +2468,15 @@ _eof
         pacman -Syyu --noconfirm --needed || return 1
     fi
 
-
     if [ $_INSTALL_CLOUD -eq $BS_TRUE ]; then
         pacman -Sy --noconfirm --needed apache-libcloud || return 1
     fi
+
+    if [ "x${_EXTRA_PACKAGES}" != "x" ]; then
+        echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
+        pacman -Sy --noconfirm --needed ${_EXTRA_PACKAGES} || return 1
+    fi
+
 }
 
 install_arch_linux_git_deps() {
@@ -2441,7 +2513,11 @@ install_arch_linux_stable() {
 }
 
 install_arch_linux_git() {
-    python2 setup.py install || return 1
+    if [ -f ${SALT_GIT_CHECKOUT_DIR}/salt/syspaths.py ]; then
+        python2 setup.py install --salt-config-dir=$_SALT_ETC_DIR || return 1
+    else
+        python2 setup.py install || return 1
+    fi
     return 0
 }
 
@@ -2597,6 +2673,11 @@ install_freebsd_9_stable_deps() {
     # Now install swig
     /usr/local/sbin/pkg install ${SALT_PKG_FLAGS} -y swig || return 1
 
+    if [ "x${_EXTRA_PACKAGES}" != "x" ]; then
+        echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
+        /usr/local/sbin/pkg install ${SALT_PKG_FLAGS} -y ${_EXTRA_PACKAGES} || return 1
+    fi
+
     return 0
 }
 
@@ -2685,7 +2766,7 @@ install_freebsd_git() {
     else
         /usr/local/bin/python setup.py install \
             --salt-root-dir=/usr/local \
-            --salt-config-dir=/usr/local/etc/salt \
+            --salt-config-dir=${_SALT_ETC_DIR} \
             --salt-cache-dir=/var/cache/salt \
             --salt-sock-dir=/var/run/salt \
             --salt-srv-root-dir=/srv \
@@ -2762,7 +2843,7 @@ install_freebsd_restart_daemons() {
 #   SmartOS Install Functions
 #
 install_smartos_deps() {
-    pkgin -y in \
+    pkgin -y install \
         zeromq py27-m2crypto py27-crypto py27-msgpack py27-yaml \
         py27-jinja2 py27-zmq || return 1
 
@@ -2783,13 +2864,18 @@ install_smartos_deps() {
         fi
     fi
 
+    if [ "x${_EXTRA_PACKAGES}" != "x" ]; then
+        echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
+        pkgin -y install ${_EXTRA_PACKAGES} || return 1
+    fi
+
     return 0
 
 }
 
 install_smartos_git_deps() {
     install_smartos_deps || return 1
-    pkgin -y in scmgit || return 1
+    pkgin -y install scmgit || return 1
 
     __git_clone_and_checkout || return 1
     # Let's trigger config_salt()
@@ -2802,7 +2888,7 @@ install_smartos_git_deps() {
 }
 
 install_smartos_stable() {
-    pkgin -y in salt || return 1
+    pkgin -y install salt || return 1
     return 0
 }
 
@@ -2926,6 +3012,11 @@ install_opensuse_stable_deps() {
     fi
 
     zypper --non-interactive install --auto-agree-with-licenses ${packages} || return 1
+
+    if [ "x${_EXTRA_PACKAGES}" != "x" ]; then
+        echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
+        zypper --non-interactive install --auto-agree-with-licenses ${_EXTRA_PACKAGES} || return 1
+    fi
 
     return 0
 }
@@ -3105,6 +3196,12 @@ install_suse_11_stable_deps() {
             done
         fi
     fi
+
+    if [ "x${_EXTRA_PACKAGES}" != "x" ]; then
+        echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
+        zypper --non-interactive install --auto-agree-with-licenses ${_EXTRA_PACKAGES} || return 1
+    fi
+
     return 0
 }
 
@@ -3230,6 +3327,12 @@ __gentoo_post_dep() {
     fi
 
     __emerge -vo 'app-admin/salt'
+
+    if [ "x${_EXTRA_PACKAGES}" != "x" ]; then
+        echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
+        __emerge -v ${_EXTRA_PACKAGES} || return 1
+    fi
+
 }
 
 install_gentoo_deps() {

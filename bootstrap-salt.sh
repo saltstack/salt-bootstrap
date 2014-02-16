@@ -26,7 +26,7 @@ __ScriptName="bootstrap-salt.sh"
 #   * BS_COLORS:          If 0 disables colour support
 #   * BS_PIP_ALLOWED:     If 1 enable pip based installations(if needed)
 #   * BS_ECHO_DEBUG:      If 1 enable debug echo which can also be set by -D
-#   * BS_SALT_ETC_DIR:    Defaults to /etc/salt
+#   * BS_SALT_ETC_DIR:    Defaults to /etc/salt (Only tweak'able on git based installations)
 #   * BS_KEEP_TEMP_FILES: If 1, don't move temporary files, instead copy them
 #   * BS_FORCE_OVERWRITE: Force overriding copied files(config, init.d, etc)
 #   * BS_UPGRADE_SYS:     If 1 and an option, upgrade system. Default 0.
@@ -1445,7 +1445,11 @@ install_ubuntu_daily() {
 }
 
 install_ubuntu_git() {
-    python setup.py install --install-layout=deb || return 1
+    if [ -f ${SALT_GIT_CHECKOUT_DIR}/salt/syspaths.py ]; then
+        python setup.py install --install-layout=deb --salt-config-dir=$_SALT_ETC_DIR || return 1
+    else
+        python setup.py install --install-layout=deb || return 1
+    fi
     return 0
 }
 
@@ -1795,7 +1799,11 @@ install_debian_git() {
         easy_install -U pyzmq || return 1
     fi
 
-    python setup.py install --install-layout=deb || return 1
+    if [ -f ${SALT_GIT_CHECKOUT_DIR}/salt/syspaths.py ]; then
+        python setup.py install --install-layout=deb --salt-config-dir=$_SALT_ETC_DIR || return 1
+    else
+        python setup.py install --install-layout=deb || return 1
+    fi
 }
 
 install_debian_6_git() {
@@ -1908,7 +1916,11 @@ install_fedora_git_deps() {
 }
 
 install_fedora_git() {
-    python setup.py install || return 1
+    if [ -f ${SALT_GIT_CHECKOUT_DIR}/salt/syspaths.py ]; then
+        python setup.py install --salt-config-dir=$_SALT_ETC_DIR || return 1
+    else
+        python setup.py install || return 1
+    fi
     return 0
 }
 
@@ -2049,9 +2061,14 @@ install_centos_git_deps() {
 
 install_centos_git() {
     if [ $DISTRO_MAJOR_VERSION -eq 5 ]; then
-        python2.6 setup.py install || return 1
+        _PYEXE=python2.6
     else
-        python2 setup.py install || return 1
+        _PYEXE=python2
+    fi
+    if [ -f ${SALT_GIT_CHECKOUT_DIR}/salt/syspaths.py ]; then
+        $_PYEXE setup.py install --salt-config-dir=$_SALT_ETC_DIR || return 1
+    else
+        $_PYEXE setup.py install || return 1
     fi
     return 0
 }
@@ -2496,7 +2513,11 @@ install_arch_linux_stable() {
 }
 
 install_arch_linux_git() {
-    python2 setup.py install || return 1
+    if [ -f ${SALT_GIT_CHECKOUT_DIR}/salt/syspaths.py ]; then
+        python2 setup.py install --salt-config-dir=$_SALT_ETC_DIR || return 1
+    else
+        python2 setup.py install || return 1
+    fi
     return 0
 }
 
@@ -2745,7 +2766,7 @@ install_freebsd_git() {
     else
         /usr/local/bin/python setup.py install \
             --salt-root-dir=/usr/local \
-            --salt-config-dir=/usr/local/etc/salt \
+            --salt-config-dir=${_SALT_ETC_DIR} \
             --salt-cache-dir=/var/cache/salt \
             --salt-sock-dir=/var/run/salt \
             --salt-srv-root-dir=/srv \

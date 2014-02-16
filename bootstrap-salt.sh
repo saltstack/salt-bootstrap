@@ -3206,6 +3206,13 @@ __gentoo_post_dep() {
     __emerge --oneshot 'sys-devel/libtool'
     # the -o option asks it to emerge the deps but not the package.
     __gentoo_config_protection
+
+    if [ $_INSTALL_CLOUD -eq $BS_TRUE ]; then
+        check_pip_allowed "You need to allow pip based installations(-P) in order to install apache-libcloud"
+        __emerge -v 'dev-python/pip'
+        pip install -U apache-libcloud>=$_LIBCLOUD_MIN_VERSION
+    fi
+
     __emerge -vo 'app-admin/salt'
 }
 

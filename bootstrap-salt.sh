@@ -1800,7 +1800,7 @@ install_debian_restart_daemons() {
 #   Fedora Install Functions
 #
 install_fedora_deps() {
-    packages="PyYAML libyaml m2crypto python-crypto python-jinja2 python-msgpack python-zmq"
+    packages="yum-utils PyYAML libyaml m2crypto python-crypto python-jinja2 python-msgpack python-zmq"
 
     if [ $_INSTALL_CLOUD -eq $BS_TRUE ]; then
         packages="${packages} python-libcloud"
@@ -1842,7 +1842,6 @@ install_fedora_stable_post() {
 
 install_fedora_git_deps() {
     install_fedora_deps || return 1
-    yum install -y git yum-utils || return 1
 
     __git_clone_and_checkout || return 1
 

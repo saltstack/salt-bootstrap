@@ -2380,6 +2380,15 @@ Include = /etc/pacman.d/salt.conf
 Server = http://intothesaltmine.org/archlinux
 SigLevel = Optional TrustAll
 _eof
+
+    if [ $_UPGRADE_SYS -eq $BS_TRUE ]; then
+        pacman -Syyu --noconfirm --needed || return 1
+    fi
+
+
+    if [ $_INSTALL_CLOUD -eq $BS_TRUE ]; then
+        pacman -Sy --noconfirm --needed apache-libcloud || return 1
+    fi
 }
 
 install_arch_linux_git_deps() {

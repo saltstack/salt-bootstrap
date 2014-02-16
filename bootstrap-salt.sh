@@ -1918,12 +1918,29 @@ install_centos_stable_deps() {
     fi
 
     if [ $DISTRO_MAJOR_VERSION -eq 5 ]; then
-        yum -y install python26-PyYAML python26-m2crypto m2crypto python26 \
-            python26-crypto python26-msgpack python26-zmq \
-            python26-jinja2 --enablerepo=${_EPEL_REPO} || return 1
+        packages="python26-PyYAML python26-m2crypto m2crypto python26 "
+        packages="${packages} python26-crypto python26-msgpack python26-zmq python26-jinja2"
+        if [ $_INSTALL_CLOUD -eq $BS_TRUE ]; then
+            check_pip_allowed "You need to allow pip based installations(-P) in order to install apache-libcloud"
+            packages="${packages} python26-setuptools"
+        fi
     else
-        yum -y install PyYAML m2crypto python-crypto python-msgpack \
-            python-zmq python-jinja2 --enablerepo=${_EPEL_REPO} || return 1
+        packages="PyYAML m2crypto python-crypto python-msgpack python-zmq python-jinja2"
+        if [ $_INSTALL_CLOUD -eq $BS_TRUE ]; then
+            check_pip_allowed "You need to allow pip based installations(-P) in order to install apache-libcloud"
+            packages="${packages} python-pip"
+        fi
+    fi
+
+    yum -y install ${packages} --enablerepo=${_EPEL_REPO} || return 1
+
+    if [ $_INSTALL_CLOUD -eq $BS_TRUE ]; then
+        check_pip_allowed "You need to allow pip based installations(-P) in order to install apache-libcloud"
+        if [ $DISTRO_MAJOR_VERSION -eq 5 ]; then
+            easy_install-2.6 apache-libcloud>=0.11.4
+        else
+            pip-python install apache-libcloud>=0.11.4
+        fi
     fi
     return 0
 }

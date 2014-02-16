@@ -1170,6 +1170,14 @@ copyfile() {
         return 1
     fi
 
+    # If the destination is a directory, let's make it a full path so the logic
+    # below works as expected
+    if [ -d "$dfile" ]; then
+        echodebug "The passed destination($dfile) is a directory"
+        dfile="${dfile}/$(basename $sfile)"
+        echodebug "Full destination path is now: $dfile"
+    fi
+
     if [ ! -f "$dfile" ]; then
         # The destination file does not exist, copy
         echodebug "Copying $sfile to $dfile"
@@ -1216,6 +1224,14 @@ movefile() {
     if [ ! -f "$sfile" ]; then
         echowarn "$sfile does not exist!"
         return 1
+    fi
+
+    # If the destination is a directory, let's make it a full path so the logic
+    # below works as expected
+    if [ -d "$dfile" ]; then
+        echodebug "The passed destination($dfile) is a directory"
+        dfile="${dfile}/$(basename $sfile)"
+        echodebug "Full destination path is now: $dfile"
     fi
 
     if [ ! -f "$dfile" ]; then

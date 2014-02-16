@@ -1170,6 +1170,14 @@ copyfile() {
         return 1
     fi
 
+    # If the destination is a directory, let's make it a full path so the logic
+    # below works as expected
+    if [ -d "$dfile" ]; then
+        echodebug "The passed destination($dfile) is a directory"
+        dfile="${dfile}/$(basename $sfile)"
+        echodebug "Full destination path is now: $dfile"
+    fi
+
     if [ ! -f "$dfile" ]; then
         # The destination file does not exist, copy
         echodebug "Copying $sfile to $dfile"
@@ -1216,6 +1224,14 @@ movefile() {
     if [ ! -f "$sfile" ]; then
         echowarn "$sfile does not exist!"
         return 1
+    fi
+
+    # If the destination is a directory, let's make it a full path so the logic
+    # below works as expected
+    if [ -d "$dfile" ]; then
+        echodebug "The passed destination($dfile) is a directory"
+        dfile="${dfile}/$(basename $sfile)"
+        echodebug "Full destination path is now: $dfile"
     fi
 
     if [ ! -f "$dfile" ]; then
@@ -3534,6 +3550,8 @@ STARTDAEMONS_FUNC_NAMES="$STARTDAEMONS_FUNC_NAMES install_${DISTRO_NAME_L}_resta
 STARTDAEMONS_INSTALL_FUNC="null"
 for FUNC_NAME in $(__strip_duplicates $STARTDAEMONS_FUNC_NAMES); do
     if __function_defined $FUNC_NAME; then
+        echodebug "Waiting 3 seconds for processes to settle before checking for them"
+        sleep 3
         STARTDAEMONS_INSTALL_FUNC=$FUNC_NAME
         break
     fi
@@ -3552,6 +3570,8 @@ DAEMONS_RUNNING_FUNC_NAMES="$DAEMONS_RUNNING_FUNC_NAMES daemons_running"
 
 for FUNC_NAME in $(__strip_duplicates $DAEMONS_RUNNING_FUNC_NAMES); do
     if __function_defined $FUNC_NAME; then
+        echodebug "Waiting 3 seconds for processes to settle before checking for them"
+        sleep 3
         DAEMONS_RUNNING_FUNC=$FUNC_NAME
         break
     fi

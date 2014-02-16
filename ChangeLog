@@ -4,6 +4,9 @@ Version 1.5.12:
 	* Add support to install apache-libcloud by passing the `-L` flag. In some distribution it's 
 	also needed to pass `-P` because the minimal apache-libcloud version is `0.14.0`. This support 
 	is still missing for FreeBSD and SmartOS.
+	* Fixed an issue when copying or moving files. We now test to see if the destination is a 
+	directory and create a full path from that so that the "do not override" logic works as 
+	supposed. #294.
 	* Distro Support Fixed:
 		* FreeBSD `fetch` now has a notion of insecure certificates. Handle this properly. Thank 
 		You Mike Carlson(m87carlson).

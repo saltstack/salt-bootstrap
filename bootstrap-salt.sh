@@ -2898,6 +2898,10 @@ install_opensuse_stable_deps() {
         zypper --non-interactive remove patterns-openSUSE-minimal_base-conflicts
     fi
 
+    if [ $_UPGRADE_SYS -eq $BS_TRUE ]; then
+        zypper --gpg-auto-import-keys --non-interactive update || return 1
+    fi
+
     zypper --non-interactive install --auto-agree-with-licenses libzmq3 python \
         python-Jinja2 python-M2Crypto python-PyYAML python-msgpack-python \
         python-pycrypto python-pyzmq python-xml || return 1

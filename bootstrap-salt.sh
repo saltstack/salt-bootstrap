@@ -106,8 +106,14 @@ echodebug() {
 #                 used.
 #-------------------------------------------------------------------------------
 check_pip_allowed() {
+    if [ $# -eq 1 ]; then
+        _PIP_ALLOWED_ERROR_MSG="$1"
+    else
+        _PIP_ALLOWED_ERROR_MSG="pip based installations were not allowed. Retry using '-P'"
+
+    fi
     if [ $_PIP_ALLOWED -eq $BS_FALSE ]; then
-        echoerror "pip based installations were not allowed. Retry using '-P'"
+        echoerror $_PIP_ALLOWED_ERROR_MSG
         usage
         exit 1
     fi
@@ -214,6 +220,7 @@ usage() {
       example, pass '--no-check-certificate' to 'wget' or '--insecure' to 'curl'
   -A  Pass the salt-master DNS name or IP. This will be stored under
       \${BS_SALT_ETC_DIR}/minion.conf.d/99-master-address.conf
+  -L  Install the Apache Libcloud package if possible(required for salt-cloud)
 
 EOT
 }   # ----------  end of function usage  ----------
@@ -230,6 +237,7 @@ _TEMP_KEYS_DIR="null"
 _INSTALL_MASTER=$BS_FALSE
 _INSTALL_SYNDIC=$BS_FALSE
 _INSTALL_MINION=$BS_TRUE
+_INSTALL_CLOUD=$BS_FALSE
 _START_DAEMONS=$BS_TRUE
 _ECHO_DEBUG=${BS_ECHO_DEBUG:-$BS_FALSE}
 _CONFIG_ONLY=$BS_FALSE
@@ -247,8 +255,9 @@ _FETCH_ARGS=${BS_FETCH_ARGS:-}
 _SALT_MASTER_ADDRESS="null"
 # __SIMPLIFY_VERSION is mostly used in Solaris based distributions
 __SIMPLIFY_VERSION=$BS_TRUE
+_LIBCLOUD_MIN_VERSION="0.14.0"
 
-while getopts ":hvnDc:g:k:MSNXCPFUKIA:" opt
+while getopts ":hvnDc:g:k:MSNXCPFUKIA:L" opt
 do
   case "${opt}" in
 
@@ -287,6 +296,8 @@ do
     K )  _KEEP_TEMP_FILES=$BS_TRUE                      ;;
     I )  _INSECURE_DL=$BS_TRUE                          ;;
     A )  _SALT_MASTER_ADDRESS=$OPTARG                   ;;
+    L )  _INSTALL_CLOUD=$BS_TRUE                        ;;
+
 
     \?)  echo
          echoerror "Option does not exist : $OPTARG"
@@ -909,6 +920,10 @@ if [ $_INSTALL_SYNDIC -eq $BS_TRUE ]; then
     fi
 fi
 
+if [ $_INSTALL_CLOUD -eq $BS_TRUE ] && [ $_CONFIG_ONLY -eq $BS_FALSE ]; then
+    echoinfo "Installing Apache-Libloud required for salt-cloud"
+fi
+
 if [ $_START_DAEMONS -eq $BS_FALSE ]; then
     echoinfo "Daemons will not be started"
 fi
@@ -1327,6 +1342,12 @@ install_ubuntu_deps() {
     # Minimal systems might not have upstart installed, install it
     __apt_get_install_noinput upstart
 
+    if [ $_INSTALL_CLOUD -eq $BS_TRUE ]; then
+        check_pip_allowed "You need to allow pip based installations(-P) in order to install apache-libcloud"
+        __apt_get_install_noinput python-pip
+        pip install -U apache-libcloud>=$_LIBCLOUD_MIN_VERSION
+    fi
+
     if [ $_UPGRADE_SYS -eq $BS_TRUE ]; then
         __apt_get_upgrade_noinput || return 1
     fi
@@ -1485,6 +1506,12 @@ install_debian_deps() {
 
     apt-get update
 
+    if [ $_INSTALL_CLOUD -eq $BS_TRUE ]; then
+        check_pip_allowed "You need to allow pip based installations(-P) in order to install apache-libcloud"
+        __apt_get_install_noinput python-pip
+        pip install -U apache-libcloud>=$_LIBCLOUD_MIN_VERSION
+    fi
+
     if [ $_UPGRADE_SYS -eq $BS_TRUE ]; then
         __apt_get_upgrade_noinput || return 1
     fi
@@ -1548,6 +1575,11 @@ _eof
     fi
     apt-get update || return 1
 
+    if [ $_INSTALL_CLOUD -eq $BS_TRUE ]; then
+        check_pip_allowed "You need to allow pip based installations(-P) in order to install apache-libcloud"
+        pip install -U apache-libcloud>=$_LIBCLOUD_MIN_VERSION
+    fi
+
     if [ $_UPGRADE_SYS -eq $BS_TRUE ]; then
         __apt_get_upgrade_noinput || return 1
     fi
@@ -1600,6 +1632,11 @@ _eof
         __apt_get_install_noinput python-zmq || return 1
     fi
 
+    if [ $_INSTALL_CLOUD -eq $BS_TRUE ]; then
+        check_pip_allowed "You need to allow pip based installations(-P) in order to install apache-libcloud"
+        pip install -U apache-libcloud>=$_LIBCLOUD_MIN_VERSION
+    fi
+
     if [ $_UPGRADE_SYS -eq $BS_TRUE ]; then
         __apt_get_upgrade_noinput || return 1
     fi
@@ -1622,6 +1659,11 @@ install_debian_git_deps() {
     if [ "$_TEMP_CONFIG_DIR" = "null" ]; then
         _TEMP_CONFIG_DIR="${SALT_GIT_CHECKOUT_DIR}/conf/"
         CONFIG_SALT_FUNC="config_salt"
+    fi
+
+    if [ $_INSTALL_CLOUD -eq $BS_TRUE ]; then
+        check_pip_allowed "You need to allow pip based installations(-P) in order to install apache-libcloud"
+        pip install -U apache-libcloud>=$_LIBCLOUD_MIN_VERSION
     fi
 
     if [ $_UPGRADE_SYS -eq $BS_TRUE ]; then
@@ -1759,8 +1801,13 @@ install_debian_restart_daemons() {
 #   Fedora Install Functions
 #
 install_fedora_deps() {
-    yum install -y PyYAML libyaml m2crypto python-crypto python-jinja2 \
-        python-msgpack python-zmq || return 1
+    packages="yum-utils PyYAML libyaml m2crypto python-crypto python-jinja2 python-msgpack python-zmq"
+
+    if [ $_INSTALL_CLOUD -eq $BS_TRUE ]; then
+        packages="${packages} python-libcloud"
+    fi
+
+    yum install -y ${packages} || return 1
 
     if [ $_UPGRADE_SYS -eq $BS_TRUE ]; then
         yum -y update || return 1
@@ -1796,7 +1843,6 @@ install_fedora_stable_post() {
 
 install_fedora_git_deps() {
     install_fedora_deps || return 1
-    yum install -y git yum-utils || return 1
 
     __git_clone_and_checkout || return 1
 
@@ -1873,12 +1919,29 @@ install_centos_stable_deps() {
     fi
 
     if [ $DISTRO_MAJOR_VERSION -eq 5 ]; then
-        yum -y install python26-PyYAML python26-m2crypto m2crypto python26 \
-            python26-crypto python26-msgpack python26-zmq \
-            python26-jinja2 --enablerepo=${_EPEL_REPO} || return 1
+        packages="python26-PyYAML python26-m2crypto m2crypto python26 "
+        packages="${packages} python26-crypto python26-msgpack python26-zmq python26-jinja2"
+        if [ $_INSTALL_CLOUD -eq $BS_TRUE ]; then
+            check_pip_allowed "You need to allow pip based installations(-P) in order to install apache-libcloud"
+            packages="${packages} python26-setuptools"
+        fi
     else
-        yum -y install PyYAML m2crypto python-crypto python-msgpack \
-            python-zmq python-jinja2 --enablerepo=${_EPEL_REPO} || return 1
+        packages="PyYAML m2crypto python-crypto python-msgpack python-zmq python-jinja2"
+        if [ $_INSTALL_CLOUD -eq $BS_TRUE ]; then
+            check_pip_allowed "You need to allow pip based installations(-P) in order to install apache-libcloud"
+            packages="${packages} python-pip"
+        fi
+    fi
+
+    yum -y install ${packages} --enablerepo=${_EPEL_REPO} || return 1
+
+    if [ $_INSTALL_CLOUD -eq $BS_TRUE ]; then
+        check_pip_allowed "You need to allow pip based installations(-P) in order to install apache-libcloud"
+        if [ $DISTRO_MAJOR_VERSION -eq 5 ]; then
+            easy_install-2.6 apache-libcloud>=$_LIBCLOUD_MIN_VERSION
+        else
+            pip-python install apache-libcloud>=$_LIBCLOUD_MIN_VERSION
+        fi
     fi
     return 0
 }
@@ -2230,8 +2293,19 @@ install_amazon_linux_ami_deps() {
         yum -y update || return 1
     fi
 
-    yum -y install PyYAML m2crypto python-crypto python-msgpack python-zmq \
-        python-ordereddict python-jinja2 --enablerepo=${_EPEL_REPO} || return 1
+    packages="PyYAML m2crypto python-crypto python-msgpack python-zmq python-ordereddict python-jinja2"
+
+    if [ $_INSTALL_CLOUD -eq $BS_TRUE ]; then
+        check_pip_allowed "You need to allow pip based installations(-P) in order to install apache-libcloud"
+        packages="${packages} python-pip"
+    fi
+
+    yum -y install ${packages} --enablerepo=${_EPEL_REPO} || return 1
+
+    if [ $_INSTALL_CLOUD -eq $BS_TRUE ]; then
+        check_pip_allowed "You need to allow pip based installations(-P) in order to install apache-libcloud"
+        pip-python install apache-libcloud>=$_LIBCLOUD_MIN_VERSION
+    fi
 }
 
 install_amazon_linux_ami_git_deps() {
@@ -2306,6 +2380,15 @@ Include = /etc/pacman.d/salt.conf
 Server = http://intothesaltmine.org/archlinux
 SigLevel = Optional TrustAll
 _eof
+
+    if [ $_UPGRADE_SYS -eq $BS_TRUE ]; then
+        pacman -Syyu --noconfirm --needed || return 1
+    fi
+
+
+    if [ $_INSTALL_CLOUD -eq $BS_TRUE ]; then
+        pacman -Sy --noconfirm --needed apache-libcloud || return 1
+    fi
 }
 
 install_arch_linux_git_deps() {
@@ -2815,9 +2898,19 @@ install_opensuse_stable_deps() {
         zypper --non-interactive remove patterns-openSUSE-minimal_base-conflicts
     fi
 
-    zypper --non-interactive install --auto-agree-with-licenses libzmq3 python \
-        python-Jinja2 python-M2Crypto python-PyYAML python-msgpack-python \
-        python-pycrypto python-pyzmq python-xml || return 1
+    if [ $_UPGRADE_SYS -eq $BS_TRUE ]; then
+        zypper --gpg-auto-import-keys --non-interactive update || return 1
+    fi
+
+    packages="libzmq3 python python-Jinja2 python-M2Crypto python-PyYAML "
+    packages="${packages} python-msgpack-python python-pycrypto python-pyzmq python-xml"
+
+    if [ $_INSTALL_CLOUD -eq $BS_TRUE]; then
+        packages="${packages} python-apache-libcloud"
+    fi
+
+    zypper --non-interactive install --auto-agree-with-licenses ${packages} || return 1
+
     return 0
 }
 
@@ -2944,18 +3037,30 @@ install_suse_11_stable_deps() {
     fi
 
     zypper --gpg-auto-import-keys --non-interactive refresh || return 1
+
+    if [ $_UPGRADE_SYS -eq $BS_TRUE ]; then
+        zypper --gpg-auto-import-keys --non-interactive update || return 1
+    fi
+
+    packages="libzmq3 python python-Jinja2 'python-M2Crypto>=0.21' python-msgpack-python"
+    packages="${packages} python-pycrypto python-pyzmq python-pip python-xml"
+
     if [ $SUSE_PATCHLEVEL -eq 1 ]; then
         check_pip_allowed
         echowarn "PyYaml will be installed using pip"
-        zypper --non-interactive install --auto-agree-with-licenses libzmq3 python \
-        python-Jinja2 'python-M2Crypto>=0.21' python-msgpack-python \
-        python-pycrypto python-pyzmq python-pip python-xml || return 1
+    else
+        packages="${packages} python-PyYAML"
+    fi
+
+    if [ $_INSTALL_CLOUD -eq $BS_TRUE ]; then
+        packages="${packages} python-apache-libcloud"
+    fi
+
+    zypper --non-interactive install --auto-agree-with-licenses ${packages} || return 1
+
+    if [ $SUSE_PATCHLEVEL -eq 1 ]; then
         # There's no python-PyYaml in SP1, let's install it using pip
         pip install PyYaml || return 1
-    else
-        zypper --non-interactive install --auto-agree-with-licenses libzmq3 python \
-        python-Jinja2 'python-M2Crypto>=0.21' python-PyYAML python-msgpack-python \
-        python-pycrypto python-pyzmq python-xml || return 1
     fi
 
     # PIP based installs need to copy configuration files "by hand".
@@ -3101,6 +3206,13 @@ __gentoo_post_dep() {
     __emerge --oneshot 'sys-devel/libtool'
     # the -o option asks it to emerge the deps but not the package.
     __gentoo_config_protection
+
+    if [ $_INSTALL_CLOUD -eq $BS_TRUE ]; then
+        check_pip_allowed "You need to allow pip based installations(-P) in order to install apache-libcloud"
+        __emerge -v 'dev-python/pip'
+        pip install -U apache-libcloud>=$_LIBCLOUD_MIN_VERSION
+    fi
+
     __emerge -vo 'app-admin/salt'
 }
 

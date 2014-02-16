@@ -13,7 +13,7 @@
 #                details.
 #
 #       LICENSE: Apache 2.0
-#  ORGANIZATION: Salt Stack (saltstack.org)
+#  ORGANIZATION: SaltStack (saltstack.org)
 #       CREATED: 10/15/2012 09:49:37 PM WEST
 #===============================================================================
 set -o nounset                              # Treat unset variables as an error
@@ -1319,6 +1319,15 @@ movefile() {
 #       5. daemons_running_<distro>_<install_type>
 #       6. daemons_running_<distro>
 #       7. daemons_running  [THIS ONE IS ALREADY DEFINED AS THE DEFAULT]
+#
+#   Optionally, check enabled Services:
+#       1. install_<distro>_<major_version>_<install_type>_check_services
+#       2. install_<distro>_<major_version>_<minor_version>_<install_type>_check_services
+#       3. install_<distro>_<major_version>_check_services
+#       4  install_<distro>_<major_version>_<minor_version>_check_services
+#       5. install_<distro>_<install_type>_check_services
+#       6. install_<distro>_check_services
+#
 ##############################################################################
 
 
@@ -3640,7 +3649,6 @@ POST_FUNC_NAMES="$POST_FUNC_NAMES install_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJO
 POST_FUNC_NAMES="$POST_FUNC_NAMES install_${DISTRO_NAME_L}_${ITYPE}_post"
 POST_FUNC_NAMES="$POST_FUNC_NAMES install_${DISTRO_NAME_L}_post"
 
-
 POST_INSTALL_FUNC="null"
 for FUNC_NAME in $(__strip_duplicates $POST_FUNC_NAMES); do
     if __function_defined $FUNC_NAME; then
@@ -3649,6 +3657,7 @@ for FUNC_NAME in $(__strip_duplicates $POST_FUNC_NAMES); do
     fi
 done
 echodebug "POST_INSTALL_FUNC=${POST_INSTALL_FUNC}"
+
 
 # Let's get the start daemons install function
 STARTDAEMONS_FUNC_NAMES="install_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}_${ITYPE}_restart_daemons"
@@ -3669,6 +3678,7 @@ for FUNC_NAME in $(__strip_duplicates $STARTDAEMONS_FUNC_NAMES); do
 done
 echodebug "STARTDAEMONS_INSTALL_FUNC=${STARTDAEMONS_INSTALL_FUNC}"
 
+
 # Let's get the daemons running check function.
 DAEMONS_RUNNING_FUNC="null"
 DAEMONS_RUNNING_FUNC_NAMES="daemons_running_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}_${ITYPE}"
@@ -3688,6 +3698,23 @@ for FUNC_NAME in $(__strip_duplicates $DAEMONS_RUNNING_FUNC_NAMES); do
     fi
 done
 echodebug "DAEMONS_RUNNING_FUNC=${DAEMONS_RUNNING_FUNC}"
+
+# Let's get the check services function
+CHECK_SERVICES_FUNC_NAMES="install_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}_${ITYPE}_check_services"
+CHECK_SERVICES_FUNC_NAMES="$POST_FUNC_NAMES install_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}${PREFIXED_DISTRO_MINOR_VERSION}_${ITYPE}_check_services"
+CHECK_SERVICES_FUNC_NAMES="$POST_FUNC_NAMES install_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}_check_services"
+CHECK_SERVICES_FUNC_NAMES="$POST_FUNC_NAMES install_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}${PREFIXED_DISTRO_MINOR_VERSION}_check_services"
+CHECK_SERVICES_FUNC_NAMES="$POST_FUNC_NAMES install_${DISTRO_NAME_L}_${ITYPE}_check_services"
+CHECK_SERVICES_FUNC_NAMES="$POST_FUNC_NAMES install_${DISTRO_NAME_L}_check_services"
+
+CHECK_SERVICES_FUNC="null"
+for FUNC_NAME in $(__strip_duplicates $CHECK_SERVICES_FUNC_NAMES); do
+    if __function_defined $FUNC_NAME; then
+        CHECK_SERVICES_FUNC=$FUNC_NAME
+        break
+    fi
+done
+echodebug "CHECK_SERVICES_FUNC=${CHECK_SERVICES_FUNC}"
 
 
 if [ $DEPS_INSTALL_FUNC = "null" ]; then
@@ -3755,7 +3782,6 @@ if [ $_INSTALL_MINION -eq $BS_TRUE ]; then
     fi
 fi
 
-
 # Drop the master address if passed
 if [ $_SALT_MASTER_ADDRESS != "null" ]; then
     [ ! -d $_SALT_ETC_DIR/minion.conf.d ] && mkdir -p $_SALT_ETC_DIR/minion.conf.d
@@ -3764,13 +3790,22 @@ master: $_SALT_MASTER_ADDRESS
 _eof
 fi
 
-
-# Run any post install function, Only execute function is not in config mode only
+# Run any post install function. Only execute function if not in config mode only
 if [ $_CONFIG_ONLY -eq $BS_FALSE ] && [ "$POST_INSTALL_FUNC" != "null" ]; then
     echoinfo "Running ${POST_INSTALL_FUNC}()"
     $POST_INSTALL_FUNC
     if [ $? -ne 0 ]; then
         echoerror "Failed to run ${POST_INSTALL_FUNC}()!!!"
+        exit 1
+    fi
+fi
+
+# Run any check services function, Only execute function if not in config mode only
+if [ $_CONFIG_ONLY -eq $BS_FALSE ] && [ "$CHECK_SERVICES_FUNC" != "null" ]; then
+    echoinfo "Running ${CHECK_SERVICES_FUNC}()"
+    $CHECK_SERVICES_FUNC
+    if [ $? -ne 0 ]; then
+        echoerror "Failed to run ${CHECK_SERVICES_FUNC}()!!!"
         exit 1
     fi
 fi

@@ -281,6 +281,18 @@ In order to install salt for a distribution you need to define:
   daemons_running  [THIS ONE IS ALREADY DEFINED AS THE DEFAULT]
 
 
+8. Optionally, check enabled Services:
+
+.. code:: bash
+
+  install_<distro>_<major_version>_<install_type>_check_services
+  install_<distro>_<major_version>_<minor_version>_<install_type>_check_services
+  install_<distro>_<major_version>_check_services
+  install_<distro>_<major_version>_<minor_version>_check_services
+  install_<distro>_<install_type>_check_services
+  install_<distro>_check_services
+
+
 ----
 
 Below is an example for Ubuntu Oneiric(the example may not be up to date with the script):

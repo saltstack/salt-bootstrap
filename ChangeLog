@@ -8,6 +8,8 @@ Version 1.5.12:
 	directory and create a full path from that so that the "do not override" logic works as 
 	supposed. #294.
 	* Allow passing additional package names to install while installing Salt's dependencies. #262
+	* Pass the salt configuration directory, default or from environment variable to the setup.py 
+	script for git based installations. #305
 	* Distro Support Fixed:
 		* FreeBSD `fetch` now has a notion of insecure certificates. Handle this properly. Thank 
 		You Mike Carlson(m87carlson).

@@ -7,6 +7,7 @@ Version 1.5.12:
 	* Fixed an issue when copying or moving files. We now test to see if the destination is a 
 	directory and create a full path from that so that the "do not override" logic works as 
 	supposed. #294.
+	* Allow passing additional package names to install while installing Salt's dependencies. #262
 	* Distro Support Fixed:
 		* FreeBSD `fetch` now has a notion of insecure certificates. Handle this properly. Thank 
 		You Mike Carlson(m87carlson).

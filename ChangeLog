@@ -1,11 +1,16 @@
 Version 1.5.12:
 	* The script now allows setting up the salt-master address as a separate configuration file by 
 	passing `-A` to the script.
+	* Add support to install apache-libcloud by passing the `-L` flag. In some distribution it's 
+	also needed to pass `-P` because the minimal apache-libcloud version is `0.14.0`. This support 
+	is still missing for FreeBSD and SmartOS.
 	* Distro Support Fixed:
 		* FreeBSD `fetch` now has a notion of insecure certificates. Handle this properly. Thank 
 		You Mike Carlson(m87carlson).
+		* Arch, openSUSE and SuSE are now upgradable when the `-U` flag is passed.
 	* Distro Support Added:
 		* FreeBSD 10 is now also supported. Thank You Mike Carlson(m87carlson).
+		* Red Had Enterprise Workstation is now supported.
 
 Version 1.5.11:
 	* Fixed an out of scope variable missed when moving functions around.

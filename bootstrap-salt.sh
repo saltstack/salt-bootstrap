@@ -2293,8 +2293,19 @@ install_amazon_linux_ami_deps() {
         yum -y update || return 1
     fi
 
-    yum -y install PyYAML m2crypto python-crypto python-msgpack python-zmq \
-        python-ordereddict python-jinja2 --enablerepo=${_EPEL_REPO} || return 1
+    packages="PyYAML m2crypto python-crypto python-msgpack python-zmq python-ordereddict python-jinja2"
+
+    if [ $_INSTALL_CLOUD -eq $BS_TRUE ]; then
+        check_pip_allowed "You need to allow pip based installations(-P) in order to install apache-libcloud"
+        packages="${packages} python-pip"
+    fi
+
+    yum -y install ${packages} --enablerepo=${_EPEL_REPO} || return 1
+
+    if [ $_INSTALL_CLOUD -eq $BS_TRUE ]; then
+        check_pip_allowed "You need to allow pip based installations(-P) in order to install apache-libcloud"
+        pip-python install apache-libcloud>=$_LIBCLOUD_MIN_VERSION
+    fi
 }
 
 install_amazon_linux_ami_git_deps() {

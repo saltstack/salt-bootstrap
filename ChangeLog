@@ -1,4 +1,6 @@
 Version 1.5.12:
+	* The script now allows setting up the salt-master address as a separate configuration file by 
+	passing `-A` to the script.
 	* Distro Support Fixed:
 		* FreeBSD `fetch` now has a notion of insecure certificates. Handle this properly. Thank 
 		You Mike Carlson(m87carlson).

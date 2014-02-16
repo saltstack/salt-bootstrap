@@ -212,6 +212,8 @@ usage() {
       with -c and -k.
   -I  If set, allow insecure connections while downloading any files. For
       example, pass '--no-check-certificate' to 'wget' or '--insecure' to 'curl'
+  -A  Pass the salt-master DNS name or IP. This will be stored under
+      \${BS_SALT_ETC_DIR}/minion.conf.d/99-master-address.conf
 
 EOT
 }   # ----------  end of function usage  ----------
@@ -242,10 +244,11 @@ _INSECURE_DL=${BS_INSECURE_DL:-$BS_FALSE}
 _WGET_ARGS=${BS_WGET_ARGS:-}
 _CURL_ARGS=${BS_CURL_ARGS:-}
 _FETCH_ARGS=${BS_FETCH_ARGS:-}
+_SALT_MASTER_ADDRESS="null"
 # __SIMPLIFY_VERSION is mostly used in Solaris based distributions
 __SIMPLIFY_VERSION=$BS_TRUE
 
-while getopts ":hvnDc:g:k:MSNXCPFUKI" opt
+while getopts ":hvnDc:g:k:MSNXCPFUKIA:" opt
 do
   case "${opt}" in
 
@@ -283,6 +286,7 @@ do
     U )  _UPGRADE_SYS=$BS_TRUE                          ;;
     K )  _KEEP_TEMP_FILES=$BS_TRUE                      ;;
     I )  _INSECURE_DL=$BS_TRUE                          ;;
+    A )  _SALT_MASTER_ADDRESS=$OPTARG                   ;;
 
     \?)  echo
          echoerror "Option does not exist : $OPTARG"
@@ -324,6 +328,13 @@ if [ $_CONFIG_ONLY -eq $BS_TRUE ] && [ "$_TEMP_CONFIG_DIR" = "null" ]; then
     echoerror "In order to run the script in configuration only mode you also need to provide the configuration directory."
     exit 1
 fi
+
+# Check that we're installing a minion if we're being passed a master address
+if [ $_INSTALL_MINION -eq $BS_FALSE ] && [ $_SALT_MASTER_ADDRESS != "null" ]; then
+    echoerror "Don't pass a master address(-A) if no minion is going to be bootstrapped."
+    exit 1
+fi
+
 
 # Define installation type
 if [ "$#" -eq 0 ];then
@@ -3500,6 +3511,16 @@ if [ $_INSTALL_MINION -eq $BS_TRUE ]; then
         mkdir -p /var/cache/salt/minion/proc
     fi
 fi
+
+
+# Drop the master address if passed
+if [ $_SALT_MASTER_ADDRESS != "null" ]; then
+    [ ! -d $_SALT_ETC_DIR/minion.conf.d ] && mkdir -p $_SALT_ETC_DIR/minion.conf.d
+    cat <<_eof > $_SALT_ETC_DIR/minion.conf.d/99-master-address.conf
+master: $_SALT_MASTER_ADDRESS
+_eof
+fi
+
 
 # Run any post install function, Only execute function is not in config mode only
 if [ $_CONFIG_ONLY -eq $BS_FALSE ] && [ "$POST_INSTALL_FUNC" != "null" ]; then

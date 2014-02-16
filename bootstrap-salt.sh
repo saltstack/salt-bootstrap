@@ -3037,6 +3037,11 @@ install_suse_11_stable_deps() {
     fi
 
     zypper --gpg-auto-import-keys --non-interactive refresh || return 1
+
+    if [ $_UPGRADE_SYS -eq $BS_TRUE ]; then
+        zypper --gpg-auto-import-keys --non-interactive update || return 1
+    fi
+
     if [ $SUSE_PATCHLEVEL -eq 1 ]; then
         check_pip_allowed
         echowarn "PyYaml will be installed using pip"

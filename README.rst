@@ -136,6 +136,7 @@ For FreeBSD >= 10 you might need to make fetch ignore the certificate issue:
     to download the installation script with curl:
 
 .. code:: console
+
   fetch -o install_salt.sh install_salt.sh https://raw.github.com/saltstack/salt-bootstrap/stable/bootstrap-salt.sh
   sudo sh install_salt.sh
 

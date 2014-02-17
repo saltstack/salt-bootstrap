@@ -110,8 +110,8 @@ check_pip_allowed() {
         _PIP_ALLOWED_ERROR_MSG="$1"
     else
         _PIP_ALLOWED_ERROR_MSG="pip based installations were not allowed. Retry using '-P'"
-
     fi
+
     if [ $_PIP_ALLOWED -eq $BS_FALSE ]; then
         echoerror $_PIP_ALLOWED_ERROR_MSG
         usage

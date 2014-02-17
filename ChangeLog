@@ -1,3 +1,8 @@
+Version 2014.xx.xx:
+	* Debian based distribution now get a warning stating that NOT starting daemons does not work 
+	as supposed, mainly because that's the Debian policy.
+
+
 Version 2014.02.16:
 	* The script now allows setting up the salt-master address as a separate configuration file by 
 	passing `-A` to the script.

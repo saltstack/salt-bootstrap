@@ -1357,6 +1357,9 @@ __enable_universe_repository() {
 }
 
 install_ubuntu_deps() {
+    if [ $_START_DAEMONS -eq $BS_FALSE ]; then
+        echowarn "Not starting daemons on Debian based distributions is not working mostly because starting them is the default behaviour."
+    fi
     apt-get update
     if [ $DISTRO_MAJOR_VERSION -gt 12 ] || ([ $DISTRO_MAJOR_VERSION -eq 12 ] && [ $DISTRO_MINOR_VERSION -eq 10 ]); then
         # Above Ubuntu 12.04 add-apt-repository is in a different package
@@ -1547,6 +1550,9 @@ install_ubuntu_restart_daemons() {
 #   Debian Install Functions
 #
 install_debian_deps() {
+    if [ $_START_DAEMONS -eq $BS_FALSE ]; then
+        echowarn "Not starting daemons on Debian based distributions is not working mostly because starting them is the default behaviour."
+    fi
     # No user interaction, libc6 restart services for example
     export DEBIAN_FRONTEND=noninteractive
 
@@ -1571,6 +1577,9 @@ install_debian_deps() {
 }
 
 install_debian_6_deps() {
+    if [ $_START_DAEMONS -eq $BS_FALSE ]; then
+        echowarn "Not starting daemons on Debian based distributions is not working mostly because starting them is the default behaviour."
+    fi
     # No user interaction, libc6 restart services for example
     export DEBIAN_FRONTEND=noninteractive
 
@@ -1647,6 +1656,9 @@ _eof
 }
 
 install_debian_7_deps() {
+    if [ $_START_DAEMONS -eq $BS_FALSE ]; then
+        echowarn "Not starting daemons on Debian based distributions is not working mostly because starting them is the default behaviour."
+    fi
     # No user interaction, libc6 restart services for example
     export DEBIAN_FRONTEND=noninteractive
 
@@ -1708,6 +1720,9 @@ _eof
 }
 
 install_debian_git_deps() {
+    if [ $_START_DAEMONS -eq $BS_FALSE ]; then
+        echowarn "Not starting daemons on Debian based distributions is not working mostly because starting them is the default behaviour."
+    fi
     # No user interaction, libc6 restart services for example
     export DEBIAN_FRONTEND=noninteractive
 

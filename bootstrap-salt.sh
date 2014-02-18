@@ -925,7 +925,7 @@ if [ $_INSTALL_SYNDIC -eq $BS_TRUE ]; then
 fi
 
 if [ $_INSTALL_CLOUD -eq $BS_TRUE ] && [ $_CONFIG_ONLY -eq $BS_FALSE ]; then
-    echoinfo "Installing Apache-Libloud required for salt-cloud"
+    echoinfo "Installing Apache-Libcloud required for salt-cloud"
 fi
 
 if [ $_START_DAEMONS -eq $BS_FALSE ]; then

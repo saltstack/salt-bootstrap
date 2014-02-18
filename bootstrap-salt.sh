@@ -219,7 +219,7 @@ usage() {
   -I  If set, allow insecure connections while downloading any files. For
       example, pass '--no-check-certificate' to 'wget' or '--insecure' to 'curl'
   -A  Pass the salt-master DNS name or IP. This will be stored under
-      \${BS_SALT_ETC_DIR}/minion.conf.d/99-master-address.conf
+      \${BS_SALT_ETC_DIR}/minion.d/99-master-address.conf
   -L  Install the Apache Libcloud package if possible(required for salt-cloud)
   -p  Extra-package to install while installing salt dependencies. One package
       per -p flag. You're responsible for providing the proper package name.
@@ -3799,8 +3799,8 @@ fi
 
 # Drop the master address if passed
 if [ $_SALT_MASTER_ADDRESS != "null" ]; then
-    [ ! -d $_SALT_ETC_DIR/minion.conf.d ] && mkdir -p $_SALT_ETC_DIR/minion.conf.d
-    cat <<_eof > $_SALT_ETC_DIR/minion.conf.d/99-master-address.conf
+    [ ! -d $_SALT_ETC_DIR/minion.d ] && mkdir -p $_SALT_ETC_DIR/minion.d
+    cat <<_eof > $_SALT_ETC_DIR/minion.d/99-master-address.conf
 master: $_SALT_MASTER_ADDRESS
 _eof
 fi

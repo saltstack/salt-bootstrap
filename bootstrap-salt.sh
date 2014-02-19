@@ -1938,7 +1938,6 @@ install_fedora_git_deps() {
 
     yum install -y git || return 1
 
-
     __git_clone_and_checkout || return 1
 
     # Let's trigger config_salt()

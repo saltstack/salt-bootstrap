@@ -404,6 +404,7 @@ CALLER=$(echo `ps -a -o pid,args | grep $$ | grep -v grep | tr -s ' '` | cut -d 
 if [ "${CALLER}x" = "${0}x" ]; then
     CALLER="PIPED THROUGH"
 fi
+
 echoinfo "${CALLER} ${0} -- Version ${__ScriptVersion}"
 echowarn "Running the unstable version of ${__ScriptName}"
 

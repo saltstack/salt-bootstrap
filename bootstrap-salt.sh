@@ -1989,6 +1989,10 @@ install_fedora_restart_daemons() {
         systemctl start salt-$fname.service
     done
 }
+
+install_fedora_check_services() {
+    __check_services_systemd || return 1
+}
 #
 #   Ended Fedora Install Functions
 #

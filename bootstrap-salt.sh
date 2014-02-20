@@ -1254,6 +1254,23 @@ movefile() {
     return 0
 }
 
+
+
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  __check_services_systemd
+#   DESCRIPTION:  Return 0 or 1 in case the service is enabled or not
+#    PARAMETERS:  servicename
+#----------------------------------------------------------------------------------------------------------------------
+__check_services_systemd() {
+    servicename=$?
+    if [ $(systemctl is-enabled ${servicename}) = "enabled" ]; then
+        return 0
+    else
+        return 1
+    fi
+}   # ----------  end of function __check_services_systemd  ----------
+
+
 #######################################################################################################################
 #
 #   Distribution install functions

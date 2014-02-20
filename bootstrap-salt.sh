@@ -1281,6 +1281,35 @@ __check_services_systemd() {
 }   # ----------  end of function __check_services_systemd  ----------
 
 
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  __check_services_upstart
+#   DESCRIPTION:  Return 0 or 1 in case the service is enabled or not
+#    PARAMETERS:  servicename
+#----------------------------------------------------------------------------------------------------------------------
+__check_services_upstart() {
+    if [ $# -eq 0 ]; then
+        echoerror "You need to pass a service name to check!"
+        exit 1
+    elif [ $# -ne 1 ]; then
+        echoerror "You need to pass a service name to check as the single argument to the function"
+    fi
+
+    servicename=$1
+    echodebug "Checking if service ${servicename} is enabled"
+
+    # Check if service is enabled to start at boot
+    initctl list | grep salt-master ${servicename} > /dev/null 2>&1
+
+    if [ $? -eq 0 ]; then
+        echodebug "Service ${servicename} is enabled"
+        return 0
+    else
+        echodebug "Service ${servicename} is NOT enabled"
+        return 1
+    fi
+}   # ----------  end of function __check_services_upstart  ----------
+
+
 #######################################################################################################################
 #
 #   Distribution install functions

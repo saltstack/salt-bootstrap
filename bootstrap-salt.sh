@@ -1268,7 +1268,10 @@ __check_services_systemd() {
     elif [ $# -ne 1 ]; then
         echoerror "You need to pass a service name to check as the single argument to the function"
     fi
+
     servicename=$1
+    echodebug "Checking if ${servicename} is enabled"
+
     if [ "$(systemctl is-enabled ${servicename})" = "enabled" ]; then
         return 0
     else

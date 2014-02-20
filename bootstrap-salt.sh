@@ -406,7 +406,7 @@ if [ "${CALLER}x" = "${0}x" ]; then
 fi
 
 echoinfo "${CALLER} ${0} -- Version ${__ScriptVersion}"
-#echowarn "Running the unstable version of ${__ScriptName}"
+echowarn "Running the unstable version of ${__ScriptName}"
 
 
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
@@ -2008,7 +2008,7 @@ install_fedora_restart_daemons() {
 }
 
 install_fedora_check_services() {
-    __check_services_systemd || return 1
+    __check_services_systemd
 }
 #
 #   Ended Fedora Install Functions
@@ -3740,11 +3740,11 @@ echodebug "DAEMONS_RUNNING_FUNC=${DAEMONS_RUNNING_FUNC}"
 
 # Let's get the check services function
 CHECK_SERVICES_FUNC_NAMES="install_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}_${ITYPE}_check_services"
-CHECK_SERVICES_FUNC_NAMES="$POST_FUNC_NAMES install_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}${PREFIXED_DISTRO_MINOR_VERSION}_${ITYPE}_check_services"
-CHECK_SERVICES_FUNC_NAMES="$POST_FUNC_NAMES install_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}_check_services"
-CHECK_SERVICES_FUNC_NAMES="$POST_FUNC_NAMES install_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}${PREFIXED_DISTRO_MINOR_VERSION}_check_services"
-CHECK_SERVICES_FUNC_NAMES="$POST_FUNC_NAMES install_${DISTRO_NAME_L}_${ITYPE}_check_services"
-CHECK_SERVICES_FUNC_NAMES="$POST_FUNC_NAMES install_${DISTRO_NAME_L}_check_services"
+CHECK_SERVICES_FUNC_NAMES="$CHECK_SERVICES_FUNC_NAMES install_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}${PREFIXED_DISTRO_MINOR_VERSION}_${ITYPE}_check_services"
+CHECK_SERVICES_FUNC_NAMES="$CHECK_SERVICES_FUNC_NAMES install_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}_check_services"
+CHECK_SERVICES_FUNC_NAMES="$CHECK_SERVICES_FUNC_NAMES install_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}${PREFIXED_DISTRO_MINOR_VERSION}_check_services"
+CHECK_SERVICES_FUNC_NAMES="$CHECK_SERVICES_FUNC_NAMES install_${DISTRO_NAME_L}_${ITYPE}_check_services"
+CHECK_SERVICES_FUNC_NAMES="$CHECK_SERVICES_FUNC_NAMES install_${DISTRO_NAME_L}_check_services"
 
 CHECK_SERVICES_FUNC="null"
 for FUNC_NAME in $(__strip_duplicates $CHECK_SERVICES_FUNC_NAMES); do

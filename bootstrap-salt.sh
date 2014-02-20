@@ -2018,7 +2018,7 @@ install_fedora_check_services() {
         [ $fname = "minion" ] && [ $_INSTALL_MINION -eq $BS_FALSE ] && continue
         [ $fname = "master" ] && [ $_INSTALL_MASTER -eq $BS_FALSE ] && continue
         [ $fname = "syndic" ] && [ $_INSTALL_SYNDIC -eq $BS_FALSE ] && continue
-        __check_services_systemd $fname || return 1
+        __check_services_systemd salt-$fname || return 1
     done
     return 0
 }

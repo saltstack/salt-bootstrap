@@ -1298,7 +1298,7 @@ __check_services_upstart() {
     echodebug "Checking if service ${servicename} is enabled"
 
     # Check if service is enabled to start at boot
-    initctl list | grep salt-master ${servicename} > /dev/null 2>&1
+    initctl list | grep ${servicename} > /dev/null 2>&1
 
     if [ $? -eq 0 ]; then
         echodebug "Service ${servicename} is enabled"

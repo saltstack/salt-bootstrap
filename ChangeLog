@@ -1,6 +1,7 @@
 Version 2014.xx.xx:
 	* Fixed a bug on the services enabled function searching logic.
 	* Arch, Fedora, openSUSE and SuSE now check for services enabled, if using systemd
+	* CentOS(and any RedHat based) and Ubuntu now check for services enabled is using upstart
 
 
 Version 2014.02.19:

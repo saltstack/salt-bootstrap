@@ -3515,6 +3515,21 @@ install_gentoo_restart_daemons() {
     done
 }
 
+install_gentoo_check_services() {
+    if [ ! -d "/run/systemd/system" ]; then
+        # Not running systemd!? Don't check!
+        return 0
+    fi
+
+    for fname in minion master syndic; do
+        # Skip if not meant to be installed
+        [ $fname = "minion" ] && [ $_INSTALL_MINION -eq $BS_FALSE ] && continue
+        [ $fname = "master" ] && [ $_INSTALL_MASTER -eq $BS_FALSE ] && continue
+        [ $fname = "syndic" ] && [ $_INSTALL_SYNDIC -eq $BS_FALSE ] && continue
+        __check_services_systemd salt-$fname || return 1
+    done
+    return 0
+}
 #
 #   End of Gentoo Install Functions.
 #

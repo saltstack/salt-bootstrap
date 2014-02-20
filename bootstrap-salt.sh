@@ -1270,11 +1270,13 @@ __check_services_systemd() {
     fi
 
     servicename=$1
-    echodebug "Checking if ${servicename} is enabled"
+    echodebug "Checking if service ${servicename} is enabled"
 
     if [ "$(systemctl is-enabled ${servicename})" = "enabled" ]; then
+        echodebug "Service ${servicename} is enabled"
         return 0
     else
+        echodebug "Service ${servicename} is NOT enabled"
         return 1
     fi
 }   # ----------  end of function __check_services_systemd  ----------

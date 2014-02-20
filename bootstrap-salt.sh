@@ -2583,18 +2583,6 @@ install_amazon_linux_ami_testing_post() {
 #   Arch Install Functions
 #
 install_arch_linux_stable_deps() {
-    grep '\[salt\]' /etc/pacman.conf >/dev/null 2>&1 || echo '[salt]
-Include = /etc/pacman.d/salt.conf
-' >> /etc/pacman.conf
-
-    # Create a pacman .d directory so we can just override salt's
-    # included configuration if needed
-    [ -d /etc/pacman.d ] || mkdir -p /etc/pacman.d
-
-    cat <<_eof > /etc/pacman.d/salt.conf
-Server = http://intothesaltmine.org/archlinux
-SigLevel = Optional TrustAll
-_eof
 
     if [ $_UPGRADE_SYS -eq $BS_TRUE ]; then
         pacman -Syyu --noconfirm --needed || return 1

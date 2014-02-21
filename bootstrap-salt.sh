@@ -727,6 +727,9 @@ __gather_linux_system_info() {
                             if [ "$(cat /etc/debian_version)" = "wheezy/sid" ]; then
                                 # I've found an EC2 wheezy image which did not tell its version
                                 v=$(__parse_version_string "7.0")
+                            elif [ "$(cat /etc/debian_version)" = "jessie/sid" ]; then
+                                # Let's start detecting the upcoming Debian 8 (Jessie)
+                                v=$(__parse_version_string "8.0")
                             fi
                         else
                             echowarn "Unable to parse the Debian Version"

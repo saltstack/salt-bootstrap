@@ -353,7 +353,7 @@ Supported Operating Systems
 - Amazon Linux 2012.09
 - Arch
 - CentOS 5/6
-- Debian 6.x/7.x
+- Debian 6.x/7.x/8(git installations only)
 - Fedora 17/18
 - FreeBSD 9.1/9.2/10
 - Gentoo

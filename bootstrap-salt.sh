@@ -727,6 +727,9 @@ __gather_linux_system_info() {
                             if [ "$(cat /etc/debian_version)" = "wheezy/sid" ]; then
                                 # I've found an EC2 wheezy image which did not tell its version
                                 v=$(__parse_version_string "7.0")
+                            elif [ "$(cat /etc/debian_version)" = "jessie/sid" ]; then
+                                # Let's start detecting the upcoming Debian 8 (Jessie)
+                                v=$(__parse_version_string "8.0")
                             fi
                         else
                             echowarn "Unable to parse the Debian Version"
@@ -1791,6 +1794,11 @@ _eof
     return 0
 }
 
+install_debian_8_deps__DISABLED() {
+    install_debian_7_deps || return 1
+    return 0
+}
+
 install_debian_git_deps() {
     if [ $_START_DAEMONS -eq $BS_FALSE ]; then
         echowarn "Not starting daemons on Debian based distributions is not working mostly because starting them is the default behaviour."
@@ -1859,6 +1867,11 @@ install_debian_7_git_deps() {
     return 0
 }
 
+install_debian_8_git_deps() {
+    install_debian_7_git_deps || return 1
+    return 0
+}
+
 __install_debian_stable() {
     packages=""
     if [ $_INSTALL_MINION -eq $BS_TRUE ]; then
@@ -1894,6 +1907,11 @@ install_debian_7_stable() {
     return 0
 }
 
+install_debian_8_stable() {
+    __install_debian_stable || return 1
+    return 0
+}
+
 install_debian_git() {
     if [ $_PIP_ALLOWED -eq $BS_TRUE ]; then
         # Building pyzmq from source to build it against libzmq3.
@@ -1916,6 +1934,11 @@ install_debian_6_git() {
 }
 
 install_debian_7_git() {
+    install_debian_git || return 1
+    return 0
+}
+
+install_debian_8_git() {
     install_debian_git || return 1
     return 0
 }

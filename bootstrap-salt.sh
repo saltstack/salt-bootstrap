@@ -1907,7 +1907,7 @@ install_debian_7_stable() {
     return 0
 }
 
-install_debian_8_stable() {
+install_debian_8_stable__disabled() {
     __install_debian_stable || return 1
     return 0
 }

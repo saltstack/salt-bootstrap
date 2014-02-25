@@ -1794,6 +1794,11 @@ _eof
     return 0
 }
 
+install_debian_8_deps() {
+    install_debian_7_deps || return 1
+    return 0
+}
+
 install_debian_git_deps() {
     if [ $_START_DAEMONS -eq $BS_FALSE ]; then
         echowarn "Not starting daemons on Debian based distributions is not working mostly because starting them is the default behaviour."
@@ -1862,6 +1867,11 @@ install_debian_7_git_deps() {
     return 0
 }
 
+install_debian_8_git_deps() {
+    install_debian_7_git_deps || return 1
+    return 0
+}
+
 __install_debian_stable() {
     packages=""
     if [ $_INSTALL_MINION -eq $BS_TRUE ]; then
@@ -1897,6 +1907,11 @@ install_debian_7_stable() {
     return 0
 }
 
+install_debian_8_stable() {
+    __install_debian_stable || return 1
+    return 0
+}
+
 install_debian_git() {
     if [ $_PIP_ALLOWED -eq $BS_TRUE ]; then
         # Building pyzmq from source to build it against libzmq3.
@@ -1919,6 +1934,11 @@ install_debian_6_git() {
 }
 
 install_debian_7_git() {
+    install_debian_git || return 1
+    return 0
+}
+
+install_debian_8_git() {
     install_debian_git || return 1
     return 0
 }

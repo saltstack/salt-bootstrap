@@ -1794,7 +1794,7 @@ _eof
     return 0
 }
 
-install_debian_8_deps() {
+install_debian_8_deps__DISABLED() {
     install_debian_7_deps || return 1
     return 0
 }
@@ -1907,7 +1907,7 @@ install_debian_7_stable() {
     return 0
 }
 
-install_debian_8_stable__disabled() {
+install_debian_8_stable() {
     __install_debian_stable || return 1
     return 0
 }

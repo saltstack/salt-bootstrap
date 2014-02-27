@@ -10,6 +10,7 @@ Name                        Nick                   Email
 Alec Koumjian               akoumjian              akoumjian@gmail.com
 Alex Van't Hof              alexvh
 Angelo Gründler             plueschopath           angelo.gruendler@w1r3.net
+Boris Feld                  Lothiraldan
 bruce-one                   bruce-one
 Chris Rebert                cvrebert               chris.rebert@hulu.com
 Christer Edwards            cedwards

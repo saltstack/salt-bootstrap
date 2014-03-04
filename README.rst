@@ -88,6 +88,8 @@ If you have certificate issues using ``wget`` try the following:
 Alternatively, if you wish not to bypass the certification verification step
 you may download the script without a redirect:
 
+.. code:: console
+
   wget -O install_salt.sh https://raw.github.com/saltstack/salt-bootstrap/stable/bootstrap-salt.sh
   sudo sh install_salt.sh
 

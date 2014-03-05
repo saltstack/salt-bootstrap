@@ -2246,7 +2246,7 @@ install_centos_restart_daemons() {
         [ $fname = "master" ] && [ $_INSTALL_MASTER -eq $BS_FALSE ] && continue
         [ $fname = "syndic" ] && [ $_INSTALL_SYNDIC -eq $BS_FALSE ] && continue
 
-        if [ -f /sbin/initctl ]; then
+        if [ -f /sbin/initctl -a -f /etc/init/salt-$fname ]; then
             # We have upstart support
             /sbin/initctl status salt-$fname > /dev/null 2>&1
             if [ $? -eq 0 ]; then
@@ -2258,9 +2258,7 @@ install_centos_restart_daemons() {
                 [ $? -eq 0 ] && continue
                 # We failed to start the service, let's test the SysV code bellow
             fi
-        fi
-
-        if [ -f /etc/init.d/salt-$fname ]; then
+        elif [ -f /etc/init.d/salt-$fname ]; then
             # Still in SysV init!?
             /etc/init.d/salt-$fname stop > /dev/null 2>&1
             /etc/init.d/salt-$fname start
@@ -2293,7 +2291,11 @@ install_centos_check_services() {
         [ $fname = "minion" ] && [ $_INSTALL_MINION -eq $BS_FALSE ] && continue
         [ $fname = "master" ] && [ $_INSTALL_MASTER -eq $BS_FALSE ] && continue
         [ $fname = "syndic" ] && [ $_INSTALL_SYNDIC -eq $BS_FALSE ] && continue
-        __check_services_upstart salt-$fname || return 1
+        if [ -f /sbin/initctl -a -f /etc/init/salt-$fname ]; then
+		__check_services_upstart salt-$fname || return 1
+        elif [ -f /etc/init.d/salt-$fname ]; then
+		chkconfig --list  | grep salt-$fname | grep -q '[2345]:on' || return 1
+	fi
     done
     return 0
 }

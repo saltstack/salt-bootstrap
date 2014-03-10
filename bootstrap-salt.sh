@@ -2240,7 +2240,7 @@ install_centos_stable_post() {
         [ $fname = "master" ] && [ $_INSTALL_MASTER -eq $BS_FALSE ] && continue
         [ $fname = "syndic" ] && [ $_INSTALL_SYNDIC -eq $BS_FALSE ] && continue
 
-        if [ ! -f /sbin/initctl ] && [ -f /etc/init.d/salt-$fname ]; then
+        if [ -f /etc/init.d/salt-$fname ]; then
             # Still in SysV init!?
             /sbin/chkconfig salt-$fname on
         fi

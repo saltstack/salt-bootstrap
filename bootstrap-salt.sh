@@ -2253,17 +2253,22 @@ install_centos_restart_daemons() {
         [ $fname = "master" ] && [ $_INSTALL_MASTER -eq $BS_FALSE ] && continue
         [ $fname = "syndic" ] && [ $_INSTALL_SYNDIC -eq $BS_FALSE ] && continue
 
-        if [ -f /sbin/initctl -a -f /etc/init/salt-$fname ]; then
-            # We have upstart support
+        if [ -f /sbin/initctl ] && [ -f /etc/init/salt-$fname ]; then
+            # We have upstart support and upstart knows about our service
             /sbin/initctl status salt-$fname > /dev/null 2>&1
-            if [ $? -eq 0 ]; then
-                # upstart knows about this service.
-                # Let's try to stop it, and then start it
-                /sbin/initctl stop salt-$fname > /dev/null 2>&1
-                /sbin/initctl start salt-$fname > /dev/null 2>&1
-                # Restart service
-                [ $? -eq 0 ] && continue
-                # We failed to start the service, let's test the SysV code bellow
+            if [ $? -ne 0 ]; then
+                # Everything is in place and upstart gave us an error code? Fail!
+                return 1
+            fi
+
+            # upstart knows about this service.
+            # Let's try to stop it, and then start it
+            /sbin/initctl stop salt-$fname > /dev/null 2>&1
+            /sbin/initctl start salt-$fname > /dev/null 2>&1
+            # Restart service
+            if [ $? -ne 0 ]; then
+                # Failed the restart?!
+                return 1
             fi
         elif [ -f /etc/init.d/salt-$fname ]; then
             # Still in SysV init!?

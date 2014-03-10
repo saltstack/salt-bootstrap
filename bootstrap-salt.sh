@@ -17,7 +17,7 @@
 #       CREATED: 10/15/2012 09:49:37 PM WEST
 #======================================================================================================================
 set -o nounset                              # Treat unset variables as an error
-__ScriptVersion="2014.02.19"
+__ScriptVersion="2014.02.27"
 __ScriptName="bootstrap-salt.sh"
 
 #======================================================================================================================
@@ -1313,6 +1313,58 @@ __check_services_upstart() {
 }   # ----------  end of function __check_services_upstart  ----------
 
 
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  __check_services_sysvinit
+#   DESCRIPTION:  Return 0 or 1 in case the service is enabled or not
+#    PARAMETERS:  servicename
+#----------------------------------------------------------------------------------------------------------------------
+__check_services_sysvinit() {
+    if [ $# -eq 0 ]; then
+        echoerror "You need to pass a service name to check!"
+        exit 1
+    elif [ $# -ne 1 ]; then
+        echoerror "You need to pass a service name to check as the single argument to the function"
+    fi
+
+    servicename=$1
+    echodebug "Checking if service ${servicename} is enabled"
+
+    if [ "$(chkconfig --list  | grep salt-$fname | grep '[2-5]:on')" != "" ]; then
+        echodebug "Service ${servicename} is enabled"
+        return 0
+    else
+        echodebug "Service ${servicename} is NOT enabled"
+        return 1
+    fi
+}   # ----------  end of function __check_services_sysvinit  ----------
+
+
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  __check_services_debian
+#   DESCRIPTION:  Return 0 or 1 in case the service is enabled or not
+#    PARAMETERS:  servicename
+#----------------------------------------------------------------------------------------------------------------------
+__check_services_debian() {
+    if [ $# -eq 0 ]; then
+        echoerror "You need to pass a service name to check!"
+        exit 1
+    elif [ $# -ne 1 ]; then
+        echoerror "You need to pass a service name to check as the single argument to the function"
+    fi
+
+    servicename=$1
+    echodebug "Checking if service ${servicename} is enabled"
+
+    if [ "$(service --status-all 2>1 | grep ${servicename} | grep '\[ + \]')" != "" ]; then
+        echodebug "Service ${servicename} is enabled"
+        return 0
+    else
+        echodebug "Service ${servicename} is NOT enabled"
+        return 1
+    fi
+}   # ----------  end of function __check_services_debian  ----------
+
+
 #######################################################################################################################
 #
 #   Distribution install functions
@@ -1602,16 +1654,16 @@ install_ubuntu_restart_daemons() {
 }
 
 install_ubuntu_check_services() {
-    if [ ! -f /sbin/initctl ]; then
-        return 0
-    fi
-
     for fname in minion master syndic; do
         # Skip if not meant to be installed
         [ $fname = "minion" ] && [ $_INSTALL_MINION -eq $BS_FALSE ] && continue
         [ $fname = "master" ] && [ $_INSTALL_MASTER -eq $BS_FALSE ] && continue
         [ $fname = "syndic" ] && [ $_INSTALL_SYNDIC -eq $BS_FALSE ] && continue
-        __check_services_upstart salt-$fname || return 1
+        if [ -f /sbin/initctl ] && [ -f /etc/init/salt-$fname ]; then
+            __check_services_upstart salt-$fname || return 1
+        elif [ -f /etc/init.d/salt-$fname ]; then
+            __check_services_debian salt-$fname || return 1
+        fi
     done
     return 0
 }
@@ -1973,6 +2025,17 @@ install_debian_restart_daemons() {
         /etc/init.d/salt-$fname start
     done
 }
+
+install_debian_check_services() {
+    for fname in minion master syndic; do
+        # Skip if not meant to be installed
+        [ $fname = "minion" ] && [ $_INSTALL_MINION -eq $BS_FALSE ] && continue
+        [ $fname = "master" ] && [ $_INSTALL_MASTER -eq $BS_FALSE ] && continue
+        [ $fname = "syndic" ] && [ $_INSTALL_SYNDIC -eq $BS_FALSE ] && continue
+        __check_services_debian salt-$fname || return 1
+    done
+    return 0
+}
 #
 #   Ended Debian Install Functions
 #
@@ -2177,7 +2240,7 @@ install_centos_stable_post() {
         [ $fname = "master" ] && [ $_INSTALL_MASTER -eq $BS_FALSE ] && continue
         [ $fname = "syndic" ] && [ $_INSTALL_SYNDIC -eq $BS_FALSE ] && continue
 
-        if [ ! -f /sbin/initctl ] && [ -f /etc/init.d/salt-$fname ]; then
+        if [ -f /etc/init.d/salt-$fname ]; then
             # Still in SysV init!?
             /sbin/chkconfig salt-$fname on
         fi
@@ -2221,19 +2284,26 @@ install_centos_git_post() {
         [ $fname = "master" ] && [ $_INSTALL_MASTER -eq $BS_FALSE ] && continue
         [ $fname = "syndic" ] && [ $_INSTALL_SYNDIC -eq $BS_FALSE ] && continue
 
-        if [ -f /sbin/initctl ]; then
-            # We have upstart support
-            /sbin/initctl status salt-$fname > /dev/null 2>&1
-            if [ $? -eq 1 ]; then
-                # upstart does not know about our service, let's copy the proper file
-                copyfile ${SALT_GIT_CHECKOUT_DIR}/pkg/salt-$fname.upstart /etc/init/salt-$fname.conf
-            fi
-        # Still in SysV init?!
-        elif [ ! -f /etc/init.d/salt-$fname ] || ([ -f /etc/init.d/salt-$fname ] && [ $_FORCE_OVERWRITE -eq $BS_TRUE ]); then
+        # While the RPM's use init.d, so will we.
+        if [ ! -f /etc/init.d/salt-$fname ] || ([ -f /etc/init.d/salt-$fname ] && [ $_FORCE_OVERWRITE -eq $BS_TRUE ]); then
             copyfile ${SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-${fname} /etc/init.d/
             chmod +x /etc/init.d/salt-${fname}
             /sbin/chkconfig salt-${fname} on
         fi
+
+        #if [ -f /sbin/initctl ]; then
+        #    # We have upstart support
+        #    /sbin/initctl status salt-$fname > /dev/null 2>&1
+        #    if [ $? -eq 1 ]; then
+        #        # upstart does not know about our service, let's copy the proper file
+        #        copyfile ${SALT_GIT_CHECKOUT_DIR}/pkg/salt-$fname.upstart /etc/init/salt-$fname.conf
+        #    fi
+        ## Still in SysV init?!
+        #elif [ ! -f /etc/init.d/salt-$fname ] || ([ -f /etc/init.d/salt-$fname ] && [ $_FORCE_OVERWRITE -eq $BS_TRUE ]); then
+        #    copyfile ${SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-${fname} /etc/init.d/
+        #    chmod +x /etc/init.d/salt-${fname}
+        #    /sbin/chkconfig salt-${fname} on
+        #fi
     done
 }
 
@@ -2246,17 +2316,22 @@ install_centos_restart_daemons() {
         [ $fname = "master" ] && [ $_INSTALL_MASTER -eq $BS_FALSE ] && continue
         [ $fname = "syndic" ] && [ $_INSTALL_SYNDIC -eq $BS_FALSE ] && continue
 
-        if [ -f /sbin/initctl -a -f /etc/init/salt-$fname ]; then
-            # We have upstart support
+        if [ -f /sbin/initctl ] && [ -f /etc/init/salt-$fname ]; then
+            # We have upstart support and upstart knows about our service
             /sbin/initctl status salt-$fname > /dev/null 2>&1
-            if [ $? -eq 0 ]; then
-                # upstart knows about this service.
-                # Let's try to stop it, and then start it
-                /sbin/initctl stop salt-$fname > /dev/null 2>&1
-                /sbin/initctl start salt-$fname > /dev/null 2>&1
-                # Restart service
-                [ $? -eq 0 ] && continue
-                # We failed to start the service, let's test the SysV code bellow
+            if [ $? -ne 0 ]; then
+                # Everything is in place and upstart gave us an error code? Fail!
+                return 1
+            fi
+
+            # upstart knows about this service.
+            # Let's try to stop it, and then start it
+            /sbin/initctl stop salt-$fname > /dev/null 2>&1
+            /sbin/initctl start salt-$fname > /dev/null 2>&1
+            # Restart service
+            if [ $? -ne 0 ]; then
+                # Failed the restart?!
+                return 1
             fi
         elif [ -f /etc/init.d/salt-$fname ]; then
             # Still in SysV init!?
@@ -2282,20 +2357,16 @@ install_centos_testing_post() {
 }
 
 install_centos_check_services() {
-    if [ ! -f /sbin/initctl ]; then
-        return 0
-    fi
-
     for fname in minion master syndic; do
         # Skip if not meant to be installed
         [ $fname = "minion" ] && [ $_INSTALL_MINION -eq $BS_FALSE ] && continue
         [ $fname = "master" ] && [ $_INSTALL_MASTER -eq $BS_FALSE ] && continue
         [ $fname = "syndic" ] && [ $_INSTALL_SYNDIC -eq $BS_FALSE ] && continue
-        if [ -f /sbin/initctl -a -f /etc/init/salt-$fname ]; then
-		__check_services_upstart salt-$fname || return 1
+        if [ -f /sbin/initctl ] && [ -f /etc/init/salt-$fname ]; then
+            __check_services_upstart salt-$fname || return 1
         elif [ -f /etc/init.d/salt-$fname ]; then
-		chkconfig --list  | grep salt-$fname | grep -q '[2345]:on' || return 1
-	fi
+            __check_services_sysvinit salt-$fname || return 1
+        fi
     done
     return 0
 }

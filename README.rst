@@ -88,6 +88,8 @@ If you have certificate issues using ``wget`` try the following:
 Alternatively, if you wish not to bypass the certification verification step
 you may download the script without a redirect:
 
+.. code:: console
+
   wget -O install_salt.sh https://raw.github.com/saltstack/salt-bootstrap/stable/bootstrap-salt.sh
   sudo sh install_salt.sh
 
@@ -221,13 +223,13 @@ In order to install salt for a distribution you need to define:
 
 .. code:: bash
 
-  pressed_<distro>_<major_version>_<install_type>_master
-  pressed_<distro>_<major_version>_<minor_version>_<install_type>_master
-  pressed_<distro>_<major_version>_master
-  pressed_<distro>_<major_version>_<minor_version>_master
-  pressed_<distro>_<install_type>_master
-  pressed_<distro>_master
-  pressed_master [THIS ONE IS ALREADY DEFINED AS THE DEFAULT]
+  preseed_<distro>_<major_version>_<install_type>_master
+  preseed_<distro>_<major_version>_<minor_version>_<install_type>_master
+  preseed_<distro>_<major_version>_master
+  preseed_<distro>_<major_version>_<minor_version>_master
+  preseed_<distro>_<install_type>_master
+  preseed_<distro>_master
+  preseed_master [THIS ONE IS ALREADY DEFINED AS THE DEFAULT]
 
 
 4. To install salt, which, of course, is required, one of:

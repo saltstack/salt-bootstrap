@@ -1,3 +1,7 @@
+Version 2014.03.10-1:
+	* Distro Support Fixed:
+		* Fix the Debian services running function
+
 Version 2014.03.10:
 	* Debian based distributions which don't use upstart now also check if the salt services are 
 	enabled.

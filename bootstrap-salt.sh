@@ -2317,7 +2317,7 @@ install_centos_restart_daemons() {
         [ $fname = "master" ] && [ $_INSTALL_MASTER -eq $BS_FALSE ] && continue
         [ $fname = "syndic" ] && [ $_INSTALL_SYNDIC -eq $BS_FALSE ] && continue
 
-        if [ -f /sbin/initctl ] && [ -f /etc/init/salt-$fname ]; then
+        if [ -f /sbin/initctl ] && [ -f /etc/init/salt-${fname}.conf ]; then
             # We have upstart support and upstart knows about our service
             /sbin/initctl status salt-$fname > /dev/null 2>&1
             if [ $? -ne 0 ]; then

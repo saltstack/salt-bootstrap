@@ -17,7 +17,7 @@
 #       CREATED: 10/15/2012 09:49:37 PM WEST
 #======================================================================================================================
 set -o nounset                              # Treat unset variables as an error
-__ScriptVersion="2014.03.10"
+__ScriptVersion="2014.03.10-1"
 __ScriptName="bootstrap-salt.sh"
 
 #======================================================================================================================
@@ -1355,7 +1355,7 @@ __check_services_debian() {
     servicename=$1
     echodebug "Checking if service ${servicename} is enabled"
 
-    if [ "$(service --status-all 2>1 | grep ${servicename} | grep '\[ + \]')" != "" ]; then
+    if [ -f /etc/rc$(runlevel | awk '{ print $2 }').d/S*${servicename} ]; then
         echodebug "Service ${servicename} is enabled"
         return 0
     else

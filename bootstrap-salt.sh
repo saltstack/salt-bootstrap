@@ -2195,7 +2195,7 @@ install_centos_stable_deps() {
             packages="${packages} python26-setuptools"
         fi
     else
-        packages="PyYAML m2crypto python-crypto python-msgpack python-zmq python-jinja2"
+        packages="${packages} PyYAML m2crypto python-crypto python-msgpack python-zmq python-jinja2"
         if [ $_INSTALL_CLOUD -eq $BS_TRUE ]; then
             check_pip_allowed "You need to allow pip based installations(-P) in order to install apache-libcloud"
             packages="${packages} python-pip"

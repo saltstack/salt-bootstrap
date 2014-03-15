@@ -362,6 +362,7 @@ Supported Operating Systems
 - Linaro
 - Linux Mint 13/14
 - OpenSUSE 12.x
+- Oracle Linux 5/5
 - Red Hat 5/6
 - Red Hat Enterprise 5/6
 - SmartOS

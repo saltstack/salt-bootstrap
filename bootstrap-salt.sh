@@ -2582,6 +2582,71 @@ install_red_hat_enterprise_workstation_testing_post() {
 
 #######################################################################################################################
 #
+#   Oracle Enterprise Linux Install Functions
+#
+install_enterpriseenterpriseserver_stable_deps() {
+    install_centos_stable_deps || return 1
+    return 0
+}
+
+install_enterpriseenterpriseserver_git_deps() {
+    install_centos_git_deps || return 1
+    return 0
+}
+
+install_enterpriseenterpriseserver_testing_deps() {
+    install_centos_testing_deps || return 1
+    return 0
+}
+
+install_enterpriseenterpriseserver_stable() {
+    install_centos_stable || return 1
+    return 0
+}
+
+install_enterpriseenterpriseserver_git() {
+    install_centos_git || return 1
+    return 0
+}
+
+install_enterpriseenterpriseserver_testing() {
+    install_centos_testing || return 1
+    return 0
+}
+
+install_enterpriseenterpriseserver_stable_post() {
+    install_centos_stable_post || return 1
+    return 0
+}
+
+install_enterpriseenterpriseserver_git_post() {
+    install_centos_git_post || return 1
+    return 0
+}
+
+
+install_enterpriseenterpriseserver_testing_post() {
+    install_centos_testing_post || return 1
+    return 0
+}
+
+install_enterpriseenterpriseserver_restart_daemons() {
+    install_centos_restart_daemons || return 1
+    return 0
+}
+
+install_enterpriseenterpriseserver_check_services() {
+    install_centos_check_services || return 1
+    return 0
+}
+#
+#   Ended Oracle Enterprise Linux Install Functions
+#
+#######################################################################################################################
+
+
+#######################################################################################################################
+#
 #   Amazon Linux AMI Install Functions
 #
 install_amazon_linux_ami_deps() {

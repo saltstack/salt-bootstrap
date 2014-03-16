@@ -597,7 +597,7 @@ __strip_duplicates() {
 __sort_release_files() {
     KNOWN_RELEASE_FILES=$(echo "(arch|centos|debian|ubuntu|fedora|redhat|suse|\
         mandrake|mandriva|gentoo|slackware|turbolinux|unitedlinux|lsb|system|\
-        os)(-|_)(release|version)" | sed -r 's:[[:space:]]::g')
+        oracle|os)(-|_)(release|version)" | sed -r 's:[[:space:]]::g')
     primary_release_files=""
     secondary_release_files=""
     # Sort know VS un-known files first
@@ -702,6 +702,7 @@ __gather_linux_system_info() {
             slackware          ) n="Slackware"      ;;
             turbolinux         ) n="TurboLinux"     ;;
             unitedlinux        ) n="UnitedLinux"    ;;
+            oracle             ) n="Oracle Linux"   ;;
             system             )
                 while read -r line; do
                     [ "${n}x" != "systemx" ] && break
@@ -2195,7 +2196,7 @@ install_centos_stable_deps() {
             packages="${packages} python26-setuptools"
         fi
     else
-        packages="PyYAML m2crypto python-crypto python-msgpack python-zmq python-jinja2"
+        packages="${packages} PyYAML m2crypto python-crypto python-msgpack python-zmq python-jinja2"
         if [ $_INSTALL_CLOUD -eq $BS_TRUE ]; then
             check_pip_allowed "You need to allow pip based installations(-P) in order to install apache-libcloud"
             packages="${packages} python-pip"
@@ -2579,6 +2580,71 @@ install_red_hat_enterprise_workstation_testing_post() {
 #   Ended RedHat Install Functions
 #
 #######################################################################################################################
+
+#######################################################################################################################
+#
+#   Oracle Linux Install Functions
+#
+install_oracle_linux_stable_deps() {
+    install_centos_stable_deps || return 1
+    return 0
+}
+
+install_oracle_linux_git_deps() {
+    install_centos_git_deps || return 1
+    return 0
+}
+
+install_oracle_linux_testing_deps() {
+    install_centos_testing_deps || return 1
+    return 0
+}
+
+install_oracle_linux_stable() {
+    install_centos_stable || return 1
+    return 0
+}
+
+install_oracle_linux_git() {
+    install_centos_git || return 1
+    return 0
+}
+
+install_oracle_linux_testing() {
+    install_centos_testing || return 1
+    return 0
+}
+
+install_oracle_linux_stable_post() {
+    install_centos_stable_post || return 1
+    return 0
+}
+
+install_oracle_linux_git_post() {
+    install_centos_git_post || return 1
+    return 0
+}
+
+
+install_oracle_linux_testing_post() {
+    install_centos_testing_post || return 1
+    return 0
+}
+
+install_oracle_linux_restart_daemons() {
+    install_centos_restart_daemons || return 1
+    return 0
+}
+
+install_oracle_linux_check_services() {
+    install_centos_check_services || return 1
+    return 0
+}
+#
+#   Ended Oracle Linux Install Functions
+#
+#######################################################################################################################
+
 
 #######################################################################################################################
 #

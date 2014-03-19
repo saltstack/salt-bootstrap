@@ -642,15 +642,15 @@ __gather_linux_system_info() {
     rv=$(lsb_release >/dev/null 2>&1)
     if [ $? -eq 0 ]; then
         DISTRO_NAME=$(lsb_release -si)
-        if [ "x$(echo "$DISTRO_NAME" | grep RedHat)" != "x" ]; then
+        if [ "${DISTRO_NAME}" = "Scientific" ]; then
+            DISTRO_NAME="Scientific Linux"
+        elif [ "x$(echo "$DISTRO_NAME" | grep RedHat)" != "x" ]; then
             # Let's convert CamelCase to Camel Case
             DISTRO_NAME=$(__camelcase_split "$DISTRO_NAME")
-        fi
-        if [ "${DISTRO_NAME}" = "openSUSE project" ]; then
+        elif [ "${DISTRO_NAME}" = "openSUSE project" ]; then
             # lsb_release -si returns "openSUSE project" on openSUSE 12.3
             DISTRO_NAME="opensuse"
-        fi
-        if [ "${DISTRO_NAME}" = "SUSE LINUX" ]; then
+        elif [ "${DISTRO_NAME}" = "SUSE LINUX" ]; then
             # lsb_release -si returns "SUSE LINUX" on SLES 11 SP3
             DISTRO_NAME="suse"
         fi
@@ -685,6 +685,8 @@ __gather_linux_system_info() {
             redhat             )
                 if [ ".$(egrep 'CentOS' /etc/${rsource})" != . ]; then
                     n="CentOS"
+                elif [ ".$(egrep 'Scientific' /etc/${rsource})" != . ]; then
+                    n="Scientific Linux"
                 elif [ ".$(egrep 'Red Hat Enterprise Linux' /etc/${rsource})" != . ]; then
                     n="<R>ed <H>at <E>nterprise <L>inux"
                 else

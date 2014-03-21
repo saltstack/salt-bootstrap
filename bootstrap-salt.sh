@@ -4203,6 +4203,9 @@ if [ $_SALT_MINION_ID != "null" ]; then
     cat <<_eof > $_SALT_ETC_DIR/minion.d/99-minion-id.conf
 id: $_SALT_MINION_ID
 _eof
+    # Technically not necessary, but preseeding this one, too, to keep things
+    # transparent.
+    echo $_SALT_MINION_ID > $_SALT_ETC_DIR/minion_id
 fi
 
 # Run any post install function. Only execute function if not in config mode only

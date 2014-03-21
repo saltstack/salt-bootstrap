@@ -346,7 +346,7 @@ fi
 
 # Check that we're installing a minion if we're being passed a master address
 if [ $_INSTALL_MINION -eq $BS_FALSE ] && [ $_SALT_MASTER_ADDRESS != "null" ]; then
-    echoerror "Don't pass a master address(-A) if no minion is going to be bootstrapped."
+    echoerror "Don't pass a master address (-A) if no minion is going to be bootstrapped."
     exit 1
 fi
 

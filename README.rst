@@ -393,4 +393,14 @@ If after trying this, you still see the same problems, then, please `file an iss
 .. _`Salt`: http://saltstack.org/
 .. _`file an issue`: https://github.com/saltstack/salt-bootstrap/issues/new
 
+Testing in Vagrant
+------------------
+You can use Vagrant_ to easily test changes on a clean machine. The ``Vagrantfile`` defaults to an Ubuntu box. First, install Vagrant, then::
+
+    $ vagrant up
+    $ vagrant ssh
+    <vm> $ cd /salt_bootstrap
+    <vm> $ sudo sh salt-bootstrap.sh
+
+.. _Vagrant: http://www.vagrantup.com
 .. vim: fenc=utf-8 spell spl=en cc=100 tw=99 fo=want sts=2 sw=2 et

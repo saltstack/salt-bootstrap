@@ -221,7 +221,7 @@ usage() {
   -A  Pass the salt-master DNS name or IP. This will be stored under
       \${BS_SALT_ETC_DIR}/minion.d/99-master-address.conf
   -i  Pass the salt-minion id. This will be stored under
-      \${BS_SALT_ETC_DIR}/minion.d/98-minion-id.conf
+      \${BS_SALT_ETC_DIR}/minion_id
   -L  Install the Apache Libcloud package if possible(required for salt-cloud)
   -p  Extra-package to install while installing salt dependencies. One package
       per -p flag. You're responsible for providing the proper package name.
@@ -4199,12 +4199,6 @@ fi
 
 # Drop the minion id if passed
 if [ $_SALT_MINION_ID != "null" ]; then
-    [ ! -d $_SALT_ETC_DIR/minion.d ] && mkdir -p $_SALT_ETC_DIR/minion.d
-    cat <<_eof > $_SALT_ETC_DIR/minion.d/99-minion-id.conf
-id: $_SALT_MINION_ID
-_eof
-    # Technically not necessary, but preseeding this one, too, to keep things
-    # transparent.
     echo $_SALT_MINION_ID > $_SALT_ETC_DIR/minion_id
 fi
 

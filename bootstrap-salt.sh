@@ -4199,6 +4199,7 @@ fi
 
 # Drop the minion id if passed
 if [ $_SALT_MINION_ID != "null" ]; then
+    [ ! -d $_SALT_ETC_DIR ] && mkdir -p $_SALT_ETC_DIR
     echo $_SALT_MINION_ID > $_SALT_ETC_DIR/minion_id
 fi
 

@@ -220,6 +220,8 @@ usage() {
       example, pass '--no-check-certificate' to 'wget' or '--insecure' to 'curl'
   -A  Pass the salt-master DNS name or IP. This will be stored under
       \${BS_SALT_ETC_DIR}/minion.d/99-master-address.conf
+  -i  Pass the salt-minion id. This will be stored under
+      \${BS_SALT_ETC_DIR}/minion_id
   -L  Install the Apache Libcloud package if possible(required for salt-cloud)
   -p  Extra-package to install while installing salt dependencies. One package
       per -p flag. You're responsible for providing the proper package name.
@@ -255,12 +257,13 @@ _WGET_ARGS=${BS_WGET_ARGS:-}
 _CURL_ARGS=${BS_CURL_ARGS:-}
 _FETCH_ARGS=${BS_FETCH_ARGS:-}
 _SALT_MASTER_ADDRESS="null"
+_SALT_MINION_ID="null"
 # __SIMPLIFY_VERSION is mostly used in Solaris based distributions
 __SIMPLIFY_VERSION=$BS_TRUE
 _LIBCLOUD_MIN_VERSION="0.14.0"
 _EXTRA_PACKAGES=""
 
-while getopts ":hvnDc:g:k:MSNXCPFUKIA:Lp:" opt
+while getopts ":hvnDc:g:k:MSNXCPFUKIA:i:Lp:" opt
 do
   case "${opt}" in
 
@@ -299,6 +302,7 @@ do
     K )  _KEEP_TEMP_FILES=$BS_TRUE                      ;;
     I )  _INSECURE_DL=$BS_TRUE                          ;;
     A )  _SALT_MASTER_ADDRESS=$OPTARG                   ;;
+    i )  _SALT_MINION_ID=$OPTARG                        ;;
     L )  _INSTALL_CLOUD=$BS_TRUE                        ;;
     p )  _EXTRA_PACKAGES="$_EXTRA_PACKAGES $OPTARG"     ;;
 
@@ -347,6 +351,12 @@ fi
 # Check that we're installing a minion if we're being passed a master address
 if [ $_INSTALL_MINION -eq $BS_FALSE ] && [ $_SALT_MASTER_ADDRESS != "null" ]; then
     echoerror "Don't pass a master address (-A) if no minion is going to be bootstrapped."
+    exit 1
+fi
+
+# Check that we're installing a minion if we're being passed a master address
+if [ $_INSTALL_MINION -eq $BS_FALSE ] && [ $_SALT_MINION_ID != "null" ]; then
+    echoerror "Don't pass a minion id (-i) if no minion is going to be bootstrapped."
     exit 1
 fi
 
@@ -4185,6 +4195,12 @@ if [ $_SALT_MASTER_ADDRESS != "null" ]; then
     cat <<_eof > $_SALT_ETC_DIR/minion.d/99-master-address.conf
 master: $_SALT_MASTER_ADDRESS
 _eof
+fi
+
+# Drop the minion id if passed
+if [ $_SALT_MINION_ID != "null" ]; then
+    [ ! -d $_SALT_ETC_DIR ] && mkdir -p $_SALT_ETC_DIR
+    echo $_SALT_MINION_ID > $_SALT_ETC_DIR/minion_id
 fi
 
 # Run any post install function. Only execute function if not in config mode only

@@ -3383,7 +3383,7 @@ install_opensuse_stable_deps() {
     packages="libzmq3 python python-Jinja2 python-M2Crypto python-PyYAML "
     packages="${packages} python-msgpack-python python-pycrypto python-pyzmq python-xml"
 
-    if [ $_INSTALL_CLOUD -eq $BS_TRUE]; then
+    if [ $_INSTALL_CLOUD -eq $BS_TRUE ]; then
         packages="${packages} python-apache-libcloud"
     fi
 

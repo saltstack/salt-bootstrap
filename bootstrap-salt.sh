@@ -71,7 +71,7 @@ __detect_color_support
 #   DESCRIPTION:  Echo errors to stderr.
 #----------------------------------------------------------------------------------------------------------------------
 echoerror() {
-    printf "${RC} * ERROR${EC}: $@\n" 1>&2;
+    printf "${RC} * ERROR${EC}: %s\n" "$@" 1>&2;
 }
 
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
@@ -184,13 +184,13 @@ usage() {
     - git
 
   Examples:
-    $ ${__ScriptName}
-    $ ${__ScriptName} stable
-    $ ${__ScriptName} daily
-    $ ${__ScriptName} git
-    $ ${__ScriptName} git develop
-    $ ${__ScriptName} git v0.17.0
-    $ ${__ScriptName} git 8c3fadf15ec183e5ce8c63739850d543617e4357
+    \$ ${__ScriptName}
+    \$ ${__ScriptName} stable
+    \$ ${__ScriptName} daily
+    \$ ${__ScriptName} git
+    \$ ${__ScriptName} git develop
+    \$ ${__ScriptName} git v0.17.0
+    \$ ${__ScriptName} git 8c3fadf15ec183e5ce8c63739850d543617e4357
 
   Options:
   -h  Display this message
@@ -315,7 +315,7 @@ do
 
   esac    # --- end of case ---
 done
-shift $(($OPTIND-1))
+shift $((OPTIND-1))
 
 
 __check_unparsed_options() {
@@ -795,7 +795,7 @@ __gather_sunos_system_info() {
                     DISTRO_NAME="Solaris"
                     # Let's make sure we not actually on a Joyent's SmartOS VM since some releases
                     # don't have SmartOS in `/etc/release`, only `Solaris`
-                    $(uname -v | grep joyent >/dev/null 2>&1)
+                    uname -v | grep joyent >/dev/null 2>&1
                     if [ $? -eq 0 ]; then
                         DISTRO_NAME="SmartOS"
                     fi
@@ -1053,7 +1053,7 @@ __apt_get_install_noinput() {
 #   DESCRIPTION:  (DRY) apt-get upgrade with noinput options
 #----------------------------------------------------------------------------------------------------------------------
 __apt_get_upgrade_noinput() {
-    apt-get upgrade -y -o DPkg::Options::=--force-confold $@; return $?
+    apt-get upgrade -y -o DPkg::Options::=--force-confold; return $?
 }
 
 
@@ -3356,7 +3356,7 @@ install_opensuse_stable_deps() {
     DISTRO_REPO="openSUSE_${DISTRO_MAJOR_VERSION}.${DISTRO_MINOR_VERSION}"
 
     # Is the repository already known
-    $(zypper repos | grep devel_languages_python >/dev/null 2>&1)
+    zypper repos | grep devel_languages_python >/dev/null 2>&1
     if [ $? -eq 1 ]; then
         # zypper does not yet know nothing about devel_languages_python
         zypper --non-interactive addrepo --refresh \
@@ -3529,7 +3529,7 @@ install_suse_11_stable_deps() {
     DISTRO_REPO="SLE_${DISTRO_MAJOR_VERSION}${DISTRO_PATCHLEVEL}"
 
     # Is the repository already known
-    $(zypper repos | grep devel_languages_python >/dev/null 2>&1)
+    zypper repos | grep devel_languages_python >/dev/null 2>&1
     if [ $? -eq 1 ]; then
         # zypper does not yet know nothing about devel_languages_python
         zypper --non-interactive addrepo --refresh \
@@ -3920,7 +3920,7 @@ preseed_master() {
     SEED_DEST="$_PKI_DIR/master/minions"
     [ -d $SEED_DEST ] || mkdir -p $SEED_DEST && chmod 700 $SEED_DEST || return 1
 
-    for keyfile in $(ls $_TEMP_KEYS_DIR); do
+    for keyfile in $_TEMP_KEYS_DIR/*; do
         src_keyfile="${_TEMP_KEYS_DIR}/${keyfile}"
         dst_keyfile="${SEED_DEST}/${keyfile}"
 
@@ -3957,11 +3957,11 @@ daemons_running() {
         if [ "${DISTRO_NAME}" = "SmartOS" ]; then
             if [ "$(svcs -Ho STA salt-$fname)" != "ON" ]; then
                 echoerror "salt-$fname was not found running"
-                FAILED_DAEMONS=$(expr $FAILED_DAEMONS + 1)
+                FAILED_DAEMONS=$((FAILED_DAEMONS + 1))
             fi
         elif [ "x$(ps wwwaux | grep -v grep | grep salt-$fname)" = "x" ]; then
             echoerror "salt-$fname was not found running"
-            FAILED_DAEMONS=$(expr $FAILED_DAEMONS + 1)
+            FAILED_DAEMONS=$((FAILED_DAEMONS + 1))
         fi
     done
     return $FAILED_DAEMONS

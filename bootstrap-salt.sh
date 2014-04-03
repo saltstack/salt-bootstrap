@@ -1698,6 +1698,9 @@ install_debian_deps() {
 
     apt-get update
 
+    # Install Keys
+    __apt_get_install_noinput debian-archive-keyring
+
     if [ $_INSTALL_CLOUD -eq $BS_TRUE ]; then
         check_pip_allowed "You need to allow pip based installations(-P) in order to install apache-libcloud"
         __apt_get_install_noinput python-pip
@@ -1722,6 +1725,11 @@ install_debian_6_deps() {
     fi
     # No user interaction, libc6 restart services for example
     export DEBIAN_FRONTEND=noninteractive
+
+    apt-get update
+
+    # Install Keys
+    __apt_get_install_noinput debian-archive-keyring
 
     wget $_WGET_ARGS -q http://debian.saltstack.com/debian-salt-team-joehealy.gpg.key -O - | apt-key add - || return 1
 
@@ -1802,6 +1810,10 @@ install_debian_7_deps() {
     # No user interaction, libc6 restart services for example
     export DEBIAN_FRONTEND=noninteractive
 
+    apt-get update
+    # Install Keys
+    __apt_get_install_noinput debian-archive-keyring
+
     # Saltstack's Stable Debian repository
     if [ "x$(grep -R 'wheezy-saltstack' /etc/apt)" = "x" ]; then
         echo "deb http://debian.saltstack.com/debian wheezy-saltstack main" >> \
@@ -1872,6 +1884,10 @@ install_debian_git_deps() {
     export DEBIAN_FRONTEND=noninteractive
 
     apt-get update
+
+    # Install Keys
+    __apt_get_install_noinput debian-archive-keyring
+
     __apt_get_install_noinput lsb-release python python-pkg-resources python-crypto \
         python-jinja2 python-m2crypto python-yaml msgpack-python python-pip \
         git || return 1

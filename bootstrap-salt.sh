@@ -1053,7 +1053,7 @@ __apt_get_install_noinput() {
 #   DESCRIPTION:  (DRY) apt-get upgrade with noinput options
 #----------------------------------------------------------------------------------------------------------------------
 __apt_get_upgrade_noinput() {
-    apt-get upgrade -y -o DPkg::Options::=--force-confold $@; return $?
+    apt-get upgrade -y -o DPkg::Options::=--force-confold; return $?
 }
 
 

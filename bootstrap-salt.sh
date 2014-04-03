@@ -3957,11 +3957,11 @@ daemons_running() {
         if [ "${DISTRO_NAME}" = "SmartOS" ]; then
             if [ "$(svcs -Ho STA salt-$fname)" != "ON" ]; then
                 echoerror "salt-$fname was not found running"
-                FAILED_DAEMONS=$(expr $FAILED_DAEMONS + 1)
+                FAILED_DAEMONS=$((FAILED_DAEMONS + 1))
             fi
         elif [ "x$(ps wwwaux | grep -v grep | grep salt-$fname)" = "x" ]; then
             echoerror "salt-$fname was not found running"
-            FAILED_DAEMONS=$(expr $FAILED_DAEMONS + 1)
+            FAILED_DAEMONS=$((FAILED_DAEMONS + 1))
         fi
     done
     return $FAILED_DAEMONS

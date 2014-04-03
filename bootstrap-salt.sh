@@ -315,7 +315,7 @@ do
 
   esac    # --- end of case ---
 done
-shift $(($OPTIND-1))
+shift $((OPTIND-1))
 
 
 __check_unparsed_options() {

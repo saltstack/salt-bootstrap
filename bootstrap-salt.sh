@@ -795,7 +795,7 @@ __gather_sunos_system_info() {
                     DISTRO_NAME="Solaris"
                     # Let's make sure we not actually on a Joyent's SmartOS VM since some releases
                     # don't have SmartOS in `/etc/release`, only `Solaris`
-                    $(uname -v | grep joyent >/dev/null 2>&1)
+                    uname -v | grep joyent >/dev/null 2>&1
                     if [ $? -eq 0 ]; then
                         DISTRO_NAME="SmartOS"
                     fi
@@ -3356,7 +3356,7 @@ install_opensuse_stable_deps() {
     DISTRO_REPO="openSUSE_${DISTRO_MAJOR_VERSION}.${DISTRO_MINOR_VERSION}"
 
     # Is the repository already known
-    $(zypper repos | grep devel_languages_python >/dev/null 2>&1)
+    zypper repos | grep devel_languages_python >/dev/null 2>&1
     if [ $? -eq 1 ]; then
         # zypper does not yet know nothing about devel_languages_python
         zypper --non-interactive addrepo --refresh \
@@ -3529,7 +3529,7 @@ install_suse_11_stable_deps() {
     DISTRO_REPO="SLE_${DISTRO_MAJOR_VERSION}${DISTRO_PATCHLEVEL}"
 
     # Is the repository already known
-    $(zypper repos | grep devel_languages_python >/dev/null 2>&1)
+    zypper repos | grep devel_languages_python >/dev/null 2>&1
     if [ $? -eq 1 ]; then
         # zypper does not yet know nothing about devel_languages_python
         zypper --non-interactive addrepo --refresh \

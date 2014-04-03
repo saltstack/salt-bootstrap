@@ -3920,7 +3920,7 @@ preseed_master() {
     SEED_DEST="$_PKI_DIR/master/minions"
     [ -d $SEED_DEST ] || mkdir -p $SEED_DEST && chmod 700 $SEED_DEST || return 1
 
-    for keyfile in $(ls $_TEMP_KEYS_DIR); do
+    for keyfile in $_TEMP_KEYS_DIR/*; do
         src_keyfile="${_TEMP_KEYS_DIR}/${keyfile}"
         dst_keyfile="${SEED_DEST}/${keyfile}"
 

@@ -410,7 +410,7 @@ if [ "$(${whoami})" != "root" ]; then
 fi
 
 # Let's discover how we're being called
-CALLER=$(echo `ps -a -o pid,args | grep $$ | grep -v grep | tr -s ' '` | cut -d ' ' -f 2)
+CALLER="$(echo `ps -a -o pid,args | grep $$ | grep -v grep | tr -s ' '` | cut -d ' ' -f 2)"
 if [ "${CALLER}x" = "${0}x" ]; then
     CALLER="PIPED THROUGH"
 fi
@@ -580,7 +580,7 @@ __parse_version_string() {
 #   DESCRIPTION:  Strip single or double quotes from the provided string.
 #----------------------------------------------------------------------------------------------------------------------
 __unquote_string() {
-    echo $@ | sed "s/^\([\"']\)\(.*\)\1\$/\2/g"
+    echo "${@}" | sed "s/^\([\"']\)\(.*\)\1\$/\2/g"
 }
 
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
@@ -588,7 +588,7 @@ __unquote_string() {
 #   DESCRIPTION:  Convert CamelCased strings to Camel_Cased
 #----------------------------------------------------------------------------------------------------------------------
 __camelcase_split() {
-    echo $@ | sed -r 's/([^A-Z-])([A-Z])/\1 \2/g'
+    echo "${@}" | sed -r 's/([^A-Z-])([A-Z])/\1 \2/g'
 }
 
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
@@ -596,7 +596,7 @@ __camelcase_split() {
 #   DESCRIPTION:  Strip duplicate strings
 #----------------------------------------------------------------------------------------------------------------------
 __strip_duplicates() {
-    echo $@ | tr -s '[:space:]' '\n' | awk '!x[$0]++'
+    echo "${@}" | tr -s '[:space:]' '\n' | awk '!x[$0]++'
 }
 
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
@@ -611,7 +611,7 @@ __sort_release_files() {
     primary_release_files=""
     secondary_release_files=""
     # Sort know VS un-known files first
-    for release_file in $(echo $@ | sed -r 's:[[:space:]]:\n:g' | sort --unique --ignore-case); do
+    for release_file in $(echo "${@}" | sed -r 's:[[:space:]]:\n:g' | sort --unique --ignore-case); do
         match=$(echo $release_file | egrep -i ${KNOWN_RELEASE_FILES})
         if [ "x${match}" != "x" ]; then
             primary_release_files="${primary_release_files} ${release_file}"
@@ -726,8 +726,8 @@ __gather_linux_system_info() {
                 done < /etc/${rsource}
                 ;;
             os                 )
-                nn=$(__unquote_string $(grep '^ID=' /etc/os-release | sed -e 's/^ID=\(.*\)$/\1/g'))
-                rv=$(__unquote_string $(grep '^VERSION_ID=' /etc/os-release | sed -e 's/^VERSION_ID=\(.*\)$/\1/g'))
+                nn="$(__unquote_string $(grep '^ID=' /etc/os-release | sed -e 's/^ID=\(.*\)$/\1/g'))"
+                rv="$(__unquote_string $(grep '^VERSION_ID=' /etc/os-release | sed -e 's/^VERSION_ID=\(.*\)$/\1/g'))"
                 [ "${rv}x" != "x" ] && v=$(__parse_version_string "$rv") || v=""
                 case $(echo ${nn} | tr '[:upper:]' '[:lower:]') in
                     arch        )
@@ -1044,7 +1044,7 @@ __git_clone_and_checkout() {
 #   DESCRIPTION:  (DRY) apt-get install with noinput options
 #----------------------------------------------------------------------------------------------------------------------
 __apt_get_install_noinput() {
-    apt-get install -y -o DPkg::Options::=--force-confold $@; return $?
+    apt-get install -y -o DPkg::Options::=--force-confold "${@}"; return $?
 }
 
 
@@ -1368,7 +1368,7 @@ __check_services_debian() {
     servicename=$1
     echodebug "Checking if service ${servicename} is enabled"
 
-    if [ -f /etc/rc$(runlevel | awk '{ print $2 }').d/S*${servicename} ]; then
+    if [ -f "/etc/rc$(runlevel | awk '{ print $2 }').d/S*${servicename}" ]; then
         echodebug "Service ${servicename} is enabled"
         return 0
     else
@@ -3716,9 +3716,9 @@ install_suse_check_services() {
 #
 __emerge() {
     if [ $_GENTOO_USE_BINHOST -eq $BS_TRUE ]; then
-        emerge --autounmask-write --getbinpkg $@; return $?
+        emerge --autounmask-write --getbinpkg "${@}"; return $?
     fi
-    emerge --autounmask-write $@; return $?
+    emerge --autounmask-write "${@}"; return $?
 }
 
 __gentoo_config_protection() {

@@ -1515,7 +1515,7 @@ install_ubuntu_deps() {
     if [ $_INSTALL_CLOUD -eq $BS_TRUE ]; then
         check_pip_allowed "You need to allow pip based installations(-P) in order to install apache-libcloud"
         __apt_get_install_noinput python-pip
-        pip install -U apache-libcloud>=$_LIBCLOUD_MIN_VERSION
+        pip install -U "apache-libcloud>=$_LIBCLOUD_MIN_VERSION"
     fi
 
     if [ $_UPGRADE_SYS -eq $BS_TRUE ]; then
@@ -1709,7 +1709,7 @@ install_debian_deps() {
     if [ $_INSTALL_CLOUD -eq $BS_TRUE ]; then
         check_pip_allowed "You need to allow pip based installations(-P) in order to install apache-libcloud"
         __apt_get_install_noinput python-pip
-        pip install -U apache-libcloud>=$_LIBCLOUD_MIN_VERSION
+        pip install -U "apache-libcloud>=$_LIBCLOUD_MIN_VERSION"
     fi
 
     if [ $_UPGRADE_SYS -eq $BS_TRUE ]; then
@@ -1791,7 +1791,7 @@ _eof
 
     if [ $_INSTALL_CLOUD -eq $BS_TRUE ]; then
         check_pip_allowed "You need to allow pip based installations(-P) in order to install apache-libcloud"
-        pip install -U apache-libcloud>=$_LIBCLOUD_MIN_VERSION
+        pip install -U "apache-libcloud>=$_LIBCLOUD_MIN_VERSION"
     fi
 
     if [ $_UPGRADE_SYS -eq $BS_TRUE ]; then
@@ -1861,7 +1861,7 @@ _eof
 
     if [ $_INSTALL_CLOUD -eq $BS_TRUE ]; then
         check_pip_allowed "You need to allow pip based installations(-P) in order to install apache-libcloud"
-        pip install -U apache-libcloud>=$_LIBCLOUD_MIN_VERSION
+        pip install -U "apache-libcloud>=$_LIBCLOUD_MIN_VERSION"
     fi
 
     if [ $_UPGRADE_SYS -eq $BS_TRUE ]; then
@@ -1907,7 +1907,7 @@ install_debian_git_deps() {
 
     if [ $_INSTALL_CLOUD -eq $BS_TRUE ]; then
         check_pip_allowed "You need to allow pip based installations(-P) in order to install apache-libcloud"
-        pip install -U apache-libcloud>=$_LIBCLOUD_MIN_VERSION
+        pip install -U "apache-libcloud>=$_LIBCLOUD_MIN_VERSION"
     fi
 
     if [ $_UPGRADE_SYS -eq $BS_TRUE ]; then
@@ -2241,7 +2241,7 @@ install_centos_stable_deps() {
     if [ $_INSTALL_CLOUD -eq $BS_TRUE ]; then
         check_pip_allowed "You need to allow pip based installations(-P) in order to install apache-libcloud"
         if [ $DISTRO_MAJOR_VERSION -eq 5 ]; then
-            easy_install-2.6 apache-libcloud>=$_LIBCLOUD_MIN_VERSION
+            easy_install-2.6 "apache-libcloud>=$_LIBCLOUD_MIN_VERSION"
         else
             pip-python install "apache-libcloud>=$_LIBCLOUD_MIN_VERSION"
         fi
@@ -3753,7 +3753,7 @@ __gentoo_post_dep() {
     if [ $_INSTALL_CLOUD -eq $BS_TRUE ]; then
         check_pip_allowed "You need to allow pip based installations(-P) in order to install apache-libcloud"
         __emerge -v 'dev-python/pip'
-        pip install -U apache-libcloud>=$_LIBCLOUD_MIN_VERSION
+        pip install -U "apache-libcloud>=$_LIBCLOUD_MIN_VERSION"
     fi
 
     __emerge -vo 'app-admin/salt'

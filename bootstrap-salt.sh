@@ -1766,7 +1766,7 @@ _eof
         # We NEED to install the unstable dpkg or mime-support WILL fail to install
         __apt_get_install_noinput -t unstable dpkg liblzma5 python mime-support || return 1
         __apt_get_install_noinput -t unstable libzmq3 libzmq3-dev || return 1
-        __apt_get_install_noinput build-essential python-dev python-pip || return 1
+        __apt_get_install_noinput debian-archive-keyring build-essential python-dev python-pip || return 1
 
         # Saltstack's Unstable Debian repository
         if [ "x$(grep -R 'debian.saltstack.com' /etc/apt)" = "x" ]; then

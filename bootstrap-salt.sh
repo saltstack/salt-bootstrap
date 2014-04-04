@@ -184,13 +184,13 @@ usage() {
     - git
 
   Examples:
-    \$ ${__ScriptName}
-    \$ ${__ScriptName} stable
-    \$ ${__ScriptName} daily
-    \$ ${__ScriptName} git
-    \$ ${__ScriptName} git develop
-    \$ ${__ScriptName} git v0.17.0
-    \$ ${__ScriptName} git 8c3fadf15ec183e5ce8c63739850d543617e4357
+    - ${__ScriptName}
+    - ${__ScriptName} stable
+    - ${__ScriptName} daily
+    - ${__ScriptName} git
+    - ${__ScriptName} git develop
+    - ${__ScriptName} git v0.17.0
+    - ${__ScriptName} git 8c3fadf15ec183e5ce8c63739850d543617e4357
 
   Options:
   -h  Display this message
@@ -1485,7 +1485,12 @@ install_ubuntu_deps() {
     if [ $_START_DAEMONS -eq $BS_FALSE ]; then
         echowarn "Not starting daemons on Debian based distributions is not working mostly because starting them is the default behaviour."
     fi
+
     apt-get update
+
+    # Install Keys
+    __apt_get_install_noinput debian-archive-keyring && apt-get update
+
     if [ $DISTRO_MAJOR_VERSION -gt 12 ] || ([ $DISTRO_MAJOR_VERSION -eq 12 ] && [ $DISTRO_MINOR_VERSION -eq 10 ]); then
         # Above Ubuntu 12.04 add-apt-repository is in a different package
         __apt_get_install_noinput software-properties-common || return 1
@@ -1510,7 +1515,7 @@ install_ubuntu_deps() {
     if [ $_INSTALL_CLOUD -eq $BS_TRUE ]; then
         check_pip_allowed "You need to allow pip based installations(-P) in order to install apache-libcloud"
         __apt_get_install_noinput python-pip
-        pip install -U apache-libcloud>=$_LIBCLOUD_MIN_VERSION
+        pip install -U "apache-libcloud>=$_LIBCLOUD_MIN_VERSION"
     fi
 
     if [ $_UPGRADE_SYS -eq $BS_TRUE ]; then
@@ -1698,10 +1703,13 @@ install_debian_deps() {
 
     apt-get update
 
+    # Install Keys
+    __apt_get_install_noinput debian-archive-keyring && apt-get update
+
     if [ $_INSTALL_CLOUD -eq $BS_TRUE ]; then
         check_pip_allowed "You need to allow pip based installations(-P) in order to install apache-libcloud"
         __apt_get_install_noinput python-pip
-        pip install -U apache-libcloud>=$_LIBCLOUD_MIN_VERSION
+        pip install -U "apache-libcloud>=$_LIBCLOUD_MIN_VERSION"
     fi
 
     if [ $_UPGRADE_SYS -eq $BS_TRUE ]; then
@@ -1722,6 +1730,11 @@ install_debian_6_deps() {
     fi
     # No user interaction, libc6 restart services for example
     export DEBIAN_FRONTEND=noninteractive
+
+    apt-get update
+
+    # Install Keys
+    __apt_get_install_noinput debian-archive-keyring && apt-get update
 
     wget $_WGET_ARGS -q http://debian.saltstack.com/debian-salt-team-joehealy.gpg.key -O - | apt-key add - || return 1
 
@@ -1767,6 +1780,10 @@ _eof
     if [ "x$(grep -R 'backports.debian.org' /etc/apt)" = "x" ]; then
         echo "deb http://backports.debian.org/debian-backports squeeze-backports main" >> \
             /etc/apt/sources.list.d/backports.list
+
+        # Add the backports key
+        gpg --keyserver pgpkeys.mit.edu --recv-key 8B48AD6246925553
+        gpg -a --export 8B48AD6246925553 | apt-key add -
     fi
 
     # Saltstack's Stable Debian repository
@@ -1778,7 +1795,7 @@ _eof
 
     if [ $_INSTALL_CLOUD -eq $BS_TRUE ]; then
         check_pip_allowed "You need to allow pip based installations(-P) in order to install apache-libcloud"
-        pip install -U apache-libcloud>=$_LIBCLOUD_MIN_VERSION
+        pip install -U "apache-libcloud>=$_LIBCLOUD_MIN_VERSION"
     fi
 
     if [ $_UPGRADE_SYS -eq $BS_TRUE ]; then
@@ -1801,6 +1818,10 @@ install_debian_7_deps() {
     fi
     # No user interaction, libc6 restart services for example
     export DEBIAN_FRONTEND=noninteractive
+
+    apt-get update
+    # Install Keys
+    __apt_get_install_noinput debian-archive-keyring && apt-get update
 
     # Saltstack's Stable Debian repository
     if [ "x$(grep -R 'wheezy-saltstack' /etc/apt)" = "x" ]; then
@@ -1844,7 +1865,7 @@ _eof
 
     if [ $_INSTALL_CLOUD -eq $BS_TRUE ]; then
         check_pip_allowed "You need to allow pip based installations(-P) in order to install apache-libcloud"
-        pip install -U apache-libcloud>=$_LIBCLOUD_MIN_VERSION
+        pip install -U "apache-libcloud>=$_LIBCLOUD_MIN_VERSION"
     fi
 
     if [ $_UPGRADE_SYS -eq $BS_TRUE ]; then
@@ -1872,6 +1893,10 @@ install_debian_git_deps() {
     export DEBIAN_FRONTEND=noninteractive
 
     apt-get update
+
+    # Install Keys
+    __apt_get_install_noinput debian-archive-keyring && apt-get update
+
     __apt_get_install_noinput lsb-release python python-pkg-resources python-crypto \
         python-jinja2 python-m2crypto python-yaml msgpack-python python-pip \
         git || return 1
@@ -1886,7 +1911,7 @@ install_debian_git_deps() {
 
     if [ $_INSTALL_CLOUD -eq $BS_TRUE ]; then
         check_pip_allowed "You need to allow pip based installations(-P) in order to install apache-libcloud"
-        pip install -U apache-libcloud>=$_LIBCLOUD_MIN_VERSION
+        pip install -U "apache-libcloud>=$_LIBCLOUD_MIN_VERSION"
     fi
 
     if [ $_UPGRADE_SYS -eq $BS_TRUE ]; then
@@ -2220,7 +2245,7 @@ install_centos_stable_deps() {
     if [ $_INSTALL_CLOUD -eq $BS_TRUE ]; then
         check_pip_allowed "You need to allow pip based installations(-P) in order to install apache-libcloud"
         if [ $DISTRO_MAJOR_VERSION -eq 5 ]; then
-            easy_install-2.6 apache-libcloud>=$_LIBCLOUD_MIN_VERSION
+            easy_install-2.6 "apache-libcloud>=$_LIBCLOUD_MIN_VERSION"
         else
             pip-python install "apache-libcloud>=$_LIBCLOUD_MIN_VERSION"
         fi
@@ -3732,7 +3757,7 @@ __gentoo_post_dep() {
     if [ $_INSTALL_CLOUD -eq $BS_TRUE ]; then
         check_pip_allowed "You need to allow pip based installations(-P) in order to install apache-libcloud"
         __emerge -v 'dev-python/pip'
-        pip install -U apache-libcloud>=$_LIBCLOUD_MIN_VERSION
+        pip install -U "apache-libcloud>=$_LIBCLOUD_MIN_VERSION"
     fi
 
     __emerge -vo 'app-admin/salt'

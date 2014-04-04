@@ -580,7 +580,7 @@ __parse_version_string() {
 #   DESCRIPTION:  Strip single or double quotes from the provided string.
 #----------------------------------------------------------------------------------------------------------------------
 __unquote_string() {
-    echo $@ | sed "s/^\([\"']\)\(.*\)\1\$/\2/g"
+    echo "${@}" | sed "s/^\([\"']\)\(.*\)\1\$/\2/g"
 }
 
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
@@ -588,7 +588,7 @@ __unquote_string() {
 #   DESCRIPTION:  Convert CamelCased strings to Camel_Cased
 #----------------------------------------------------------------------------------------------------------------------
 __camelcase_split() {
-    echo $@ | sed -r 's/([^A-Z-])([A-Z])/\1 \2/g'
+    echo "${@}" | sed -r 's/([^A-Z-])([A-Z])/\1 \2/g'
 }
 
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
@@ -596,7 +596,7 @@ __camelcase_split() {
 #   DESCRIPTION:  Strip duplicate strings
 #----------------------------------------------------------------------------------------------------------------------
 __strip_duplicates() {
-    echo $@ | tr -s '[:space:]' '\n' | awk '!x[$0]++'
+    echo "${@}" | tr -s '[:space:]' '\n' | awk '!x[$0]++'
 }
 
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
@@ -611,7 +611,7 @@ __sort_release_files() {
     primary_release_files=""
     secondary_release_files=""
     # Sort know VS un-known files first
-    for release_file in $(echo $@ | sed -r 's:[[:space:]]:\n:g' | sort --unique --ignore-case); do
+    for release_file in $(echo "${@}" | sed -r 's:[[:space:]]:\n:g' | sort --unique --ignore-case); do
         match=$(echo $release_file | egrep -i ${KNOWN_RELEASE_FILES})
         if [ "x${match}" != "x" ]; then
             primary_release_files="${primary_release_files} ${release_file}"
@@ -1044,7 +1044,7 @@ __git_clone_and_checkout() {
 #   DESCRIPTION:  (DRY) apt-get install with noinput options
 #----------------------------------------------------------------------------------------------------------------------
 __apt_get_install_noinput() {
-    apt-get install -y -o DPkg::Options::=--force-confold $@; return $?
+    apt-get install -y -o DPkg::Options::=--force-confold "${@}"; return $?
 }
 
 
@@ -3716,9 +3716,9 @@ install_suse_check_services() {
 #
 __emerge() {
     if [ $_GENTOO_USE_BINHOST -eq $BS_TRUE ]; then
-        emerge --autounmask-write --getbinpkg $@; return $?
+        emerge --autounmask-write --getbinpkg "${@}"; return $?
     fi
-    emerge --autounmask-write $@; return $?
+    emerge --autounmask-write "${@}"; return $?
 }
 
 __gentoo_config_protection() {

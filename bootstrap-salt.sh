@@ -1489,7 +1489,7 @@ install_ubuntu_deps() {
     apt-get update
 
     # Install Keys
-    __apt_get_install_noinput debian-archive-keyring
+    __apt_get_install_noinput debian-archive-keyring && apt-get update
 
     if [ $DISTRO_MAJOR_VERSION -gt 12 ] || ([ $DISTRO_MAJOR_VERSION -eq 12 ] && [ $DISTRO_MINOR_VERSION -eq 10 ]); then
         # Above Ubuntu 12.04 add-apt-repository is in a different package
@@ -1704,7 +1704,7 @@ install_debian_deps() {
     apt-get update
 
     # Install Keys
-    __apt_get_install_noinput debian-archive-keyring
+    __apt_get_install_noinput debian-archive-keyring && apt-get update
 
     if [ $_INSTALL_CLOUD -eq $BS_TRUE ]; then
         check_pip_allowed "You need to allow pip based installations(-P) in order to install apache-libcloud"
@@ -1734,7 +1734,7 @@ install_debian_6_deps() {
     apt-get update
 
     # Install Keys
-    __apt_get_install_noinput debian-archive-keyring
+    __apt_get_install_noinput debian-archive-keyring && apt-get update
 
     wget $_WGET_ARGS -q http://debian.saltstack.com/debian-salt-team-joehealy.gpg.key -O - | apt-key add - || return 1
 
@@ -1780,6 +1780,10 @@ _eof
     if [ "x$(grep -R 'backports.debian.org' /etc/apt)" = "x" ]; then
         echo "deb http://backports.debian.org/debian-backports squeeze-backports main" >> \
             /etc/apt/sources.list.d/backports.list
+
+        # Add the backports key
+        gpg --keyserver pgpkeys.mit.edu --recv-key 8B48AD6246925553
+        gpg -a --export 8B48AD6246925553 | apt-key add -
     fi
 
     # Saltstack's Stable Debian repository
@@ -1817,7 +1821,7 @@ install_debian_7_deps() {
 
     apt-get update
     # Install Keys
-    __apt_get_install_noinput debian-archive-keyring
+    __apt_get_install_noinput debian-archive-keyring && apt-get update
 
     # Saltstack's Stable Debian repository
     if [ "x$(grep -R 'wheezy-saltstack' /etc/apt)" = "x" ]; then
@@ -1891,7 +1895,7 @@ install_debian_git_deps() {
     apt-get update
 
     # Install Keys
-    __apt_get_install_noinput debian-archive-keyring
+    __apt_get_install_noinput debian-archive-keyring && apt-get update
 
     __apt_get_install_noinput lsb-release python python-pkg-resources python-crypto \
         python-jinja2 python-m2crypto python-yaml msgpack-python python-pip \

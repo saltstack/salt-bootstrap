@@ -2222,7 +2222,7 @@ install_centos_stable_deps() {
         if [ $DISTRO_MAJOR_VERSION -eq 5 ]; then
             easy_install-2.6 apache-libcloud>=$_LIBCLOUD_MIN_VERSION
         else
-            pip-python install apache-libcloud>=$_LIBCLOUD_MIN_VERSION
+            pip-python install "apache-libcloud>=$_LIBCLOUD_MIN_VERSION"
         fi
     fi
 
@@ -2753,7 +2753,7 @@ install_amazon_linux_ami_deps() {
 
     if [ $_INSTALL_CLOUD -eq $BS_TRUE ]; then
         check_pip_allowed "You need to allow pip based installations(-P) in order to install apache-libcloud"
-        pip-python install apache-libcloud>=$_LIBCLOUD_MIN_VERSION
+        pip-python install "apache-libcloud>=$_LIBCLOUD_MIN_VERSION"
     fi
 
     if [ "x${_EXTRA_PACKAGES}" != "x" ]; then

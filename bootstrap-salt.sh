@@ -410,7 +410,7 @@ if [ "$(${whoami})" != "root" ]; then
 fi
 
 # Let's discover how we're being called
-CALLER=$(echo `ps -a -o pid,args | grep $$ | grep -v grep | tr -s ' '` | cut -d ' ' -f 2)
+CALLER="$(echo `ps -a -o pid,args | grep $$ | grep -v grep | tr -s ' '` | cut -d ' ' -f 2)"
 if [ "${CALLER}x" = "${0}x" ]; then
     CALLER="PIPED THROUGH"
 fi
@@ -726,8 +726,8 @@ __gather_linux_system_info() {
                 done < /etc/${rsource}
                 ;;
             os                 )
-                nn=$(__unquote_string $(grep '^ID=' /etc/os-release | sed -e 's/^ID=\(.*\)$/\1/g'))
-                rv=$(__unquote_string $(grep '^VERSION_ID=' /etc/os-release | sed -e 's/^VERSION_ID=\(.*\)$/\1/g'))
+                nn="$(__unquote_string $(grep '^ID=' /etc/os-release | sed -e 's/^ID=\(.*\)$/\1/g'))"
+                rv="$(__unquote_string $(grep '^VERSION_ID=' /etc/os-release | sed -e 's/^VERSION_ID=\(.*\)$/\1/g'))"
                 [ "${rv}x" != "x" ] && v=$(__parse_version_string "$rv") || v=""
                 case $(echo ${nn} | tr '[:upper:]' '[:lower:]') in
                     arch        )
@@ -1368,7 +1368,7 @@ __check_services_debian() {
     servicename=$1
     echodebug "Checking if service ${servicename} is enabled"
 
-    if [ -f /etc/rc$(runlevel | awk '{ print $2 }').d/S*${servicename} ]; then
+    if [ -f "/etc/rc$(runlevel | awk '{ print $2 }').d/S*${servicename}" ]; then
         echodebug "Service ${servicename} is enabled"
         return 0
     else

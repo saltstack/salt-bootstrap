@@ -1799,16 +1799,14 @@ _eof
     fi
     apt-get update || return 1
 
-    # Both python-requests which is a hard dependency and apache-libcloud which is a soft dependency, under debian < 7
-    # need to be installed using pip
-    check_pip_allowed "You need to allow pip based installations(-P) in order to install python-requests"
-
-    __PIP_PACKAGES="requests"
+    # Python requests is available through Squeeze backports
+    __apt_get_install_noinput python-requests
 
     if [ $_INSTALL_CLOUD -eq $BS_TRUE ]; then
-        __PIP_PACKAGES="${__PIP_PACKAGES} 'apache-libcloud>=$_LIBCLOUD_MIN_VERSION'"
+        check_pip_allowed "You need to allow pip based installations(-P) in order to install apache-libcloud"
+        __apt_get_install_noinput python-pip
+        pip install -U "apache-libcloud>=$_LIBCLOUD_MIN_VERSION"
     fi
-    pip install -U ${__PIP_PACKAGES}
 
     if [ $_UPGRADE_SYS -eq $BS_TRUE ]; then
         __apt_get_upgrade_noinput || return 1

@@ -1709,7 +1709,8 @@ install_debian_deps() {
     # Both python-requests which is a hard dependency and apache-libcloud which is a soft dependency, under debian < 7
     # need to be installed using pip
     check_pip_allowed "You need to allow pip based installations(-P) in order to install python-requests"
-    __apt_get_install_noinput python-pip
+    # Additionally install procps and pciutils which allows for Docker boostraps. See 366#issuecomment-39666813
+    __apt_get_install_noinput python-pip procps pciutils
 
     __PIP_PACKAGES="requests"
 
@@ -1800,7 +1801,8 @@ _eof
     apt-get update || return 1
 
     # Python requests is available through Squeeze backports
-    __apt_get_install_noinput python-requests
+    # Additionally install procps and pciutils which allows for Docker boostraps. See 366#issuecomment-39666813
+    __apt_get_install_noinput python-requests python-pip procps pciutils
 
     if [ $_INSTALL_CLOUD -eq $BS_TRUE ]; then
         check_pip_allowed "You need to allow pip based installations(-P) in order to install apache-libcloud"
@@ -1867,10 +1869,17 @@ _eof
 
         apt-get update
         __apt_get_install_noinput -t unstable libzmq3 libzmq3-dev || return 1
-        __apt_get_install_noinput build-essential python-dev python-pip python-requests || return 1
+        __PACKAGES="build-essential python-dev python-pip python-requests"
+        # Additionally install procps and pciutils which allows for Docker boostraps. See 366#issuecomment-39666813
+        __PACKAGES="${__PACKAGES} procps pciutils"
+        __apt_get_install_noinput ${__PACKAGES} || return 1
     else
         apt-get update || return 1
-        __apt_get_install_noinput python-zmq python-requests || return 1
+        __PACKAGES="python-zmq python-requests"
+        # Additionally install procps and pciutils which allows for Docker boostraps. See 366#issuecomment-39666813
+        __PACKAGES="${__PACKAGES} procps pciutils"
+        __apt_get_install_noinput ${__PACKAGES} || return 1
+
     fi
 
     if [ $_INSTALL_CLOUD -eq $BS_TRUE ]; then

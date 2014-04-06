@@ -1368,7 +1368,13 @@ __check_services_debian() {
     servicename=$1
     echodebug "Checking if service ${servicename} is enabled"
 
-    if [ -f "/etc/rc$(runlevel | awk '{ print $2 }').d/S*${servicename}" ]; then
+    rl=$(runlevel | awk '{ print $2 }')
+    : ${rl:=$RUNLEVEL}
+
+    echodebug "Service Lookup Result:" "/etc/rc$rl.d/S"*"${servicename}"
+
+    # Quoting a wildcard inhibits globbing
+    if [ -f "/etc/rc$rl.d/S"*"${servicename}" ]; then
         echodebug "Service ${servicename} is enabled"
         return 0
     else

@@ -1706,11 +1706,17 @@ install_debian_deps() {
     # Install Keys
     __apt_get_install_noinput debian-archive-keyring && apt-get update
 
+    # Both python-requests which is a hard dependency and apache-libcloud which is a soft dependency, under debian < 7
+    # need to be installed using pip
+    check_pip_allowed "You need to allow pip based installations(-P) in order to install python-requests"
+    __apt_get_install_noinput python-pip
+
+    __PIP_PACKAGES="requests"
+
     if [ $_INSTALL_CLOUD -eq $BS_TRUE ]; then
-        check_pip_allowed "You need to allow pip based installations(-P) in order to install apache-libcloud"
-        __apt_get_install_noinput python-pip
-        pip install -U "apache-libcloud>=$_LIBCLOUD_MIN_VERSION"
+        __PIP_PACKAGES="${__PIP_PACKAGES} 'apache-libcloud>=$_LIBCLOUD_MIN_VERSION'"
     fi
+    pip install -U ${__PIP_PACKAGES}
 
     if [ $_UPGRADE_SYS -eq $BS_TRUE ]; then
         __apt_get_upgrade_noinput || return 1
@@ -1793,10 +1799,16 @@ _eof
     fi
     apt-get update || return 1
 
+    # Both python-requests which is a hard dependency and apache-libcloud which is a soft dependency, under debian < 7
+    # need to be installed using pip
+    check_pip_allowed "You need to allow pip based installations(-P) in order to install python-requests"
+
+    __PIP_PACKAGES="requests"
+
     if [ $_INSTALL_CLOUD -eq $BS_TRUE ]; then
-        check_pip_allowed "You need to allow pip based installations(-P) in order to install apache-libcloud"
-        pip install -U "apache-libcloud>=$_LIBCLOUD_MIN_VERSION"
+        __PIP_PACKAGES="${__PIP_PACKAGES} 'apache-libcloud>=$_LIBCLOUD_MIN_VERSION'"
     fi
+    pip install -U ${__PIP_PACKAGES}
 
     if [ $_UPGRADE_SYS -eq $BS_TRUE ]; then
         __apt_get_upgrade_noinput || return 1
@@ -1857,10 +1869,10 @@ _eof
 
         apt-get update
         __apt_get_install_noinput -t unstable libzmq3 libzmq3-dev || return 1
-        __apt_get_install_noinput build-essential python-dev python-pip || return 1
+        __apt_get_install_noinput build-essential python-dev python-pip python-requests || return 1
     else
         apt-get update || return 1
-        __apt_get_install_noinput python-zmq || return 1
+        __apt_get_install_noinput python-zmq python-requests || return 1
     fi
 
     if [ $_INSTALL_CLOUD -eq $BS_TRUE ]; then

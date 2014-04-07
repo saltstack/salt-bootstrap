@@ -2123,7 +2123,7 @@ install_debian_check_services() {
 #   Fedora Install Functions
 #
 install_fedora_deps() {
-    packages="yum-utils PyYAML libyaml m2crypto python-crypto python-jinja2 python-msgpack python-zmq"
+    packages="yum-utils PyYAML libyaml m2crypto python-crypto python-jinja2 python-msgpack python-zmq python-requests"
 
     if [ $_INSTALL_CLOUD -eq $BS_TRUE ]; then
         packages="${packages} python-libcloud"

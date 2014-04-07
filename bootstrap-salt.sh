@@ -3284,8 +3284,7 @@ install_freebsd_restart_daemons() {
 #
 install_smartos_deps() {
     pkgin -y install \
-        zeromq py27-m2crypto py27-crypto py27-msgpack py27-yaml \
-        py27-jinja2 py27-zmq || return 1
+        zeromq py27-m2crypto py27-crypto py27-msgpack py27-yaml py27-jinja2 py27-zmq py27-requests || return 1
 
     # Let's trigger config_salt()
     if [ "$_TEMP_CONFIG_DIR" = "null" ]; then

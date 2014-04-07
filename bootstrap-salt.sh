@@ -3799,6 +3799,7 @@ __gentoo_post_dep() {
         pip install -U "apache-libcloud>=$_LIBCLOUD_MIN_VERSION"
     fi
 
+    __emerge -vo 'dev-python/requests'
     __emerge -vo 'app-admin/salt'
 
     if [ "x${_EXTRA_PACKAGES}" != "x" ]; then

@@ -1512,6 +1512,14 @@ install_ubuntu_deps() {
     # Minimal systems might not have upstart installed, install it
     __apt_get_install_noinput upstart
 
+    if [ $DISTRO_MAJOR_VERSION -gt 12 ] || ([ $DISTRO_MAJOR_VERSION -eq 12 ] && [ $DISTRO_MINOR_VERSION -eq 04 ]); then
+        __apt_get_install_noinput python-requests
+    else
+        check_pip_allowed "You need to allow pip based installations(-P) in order to install the python package 'requests'"
+        __apt_get_install_noinput python-pip
+        pip install requests
+    fi
+
     if [ $_INSTALL_CLOUD -eq $BS_TRUE ]; then
         check_pip_allowed "You need to allow pip based installations(-P) in order to install apache-libcloud"
         __apt_get_install_noinput python-pip

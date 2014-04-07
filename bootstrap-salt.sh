@@ -1368,7 +1368,7 @@ __check_services_debian() {
     servicename=$1
     echodebug "Checking if service ${servicename} is enabled"
 
-    if [ -f "/etc/rc$(runlevel | awk '{ print $2 }').d/S*${servicename}" ]; then
+    if [ -f /etc/rc$(runlevel | awk '{ print $2 }').d/S*${servicename} ]; then
         echodebug "Service ${servicename} is enabled"
         return 0
     else

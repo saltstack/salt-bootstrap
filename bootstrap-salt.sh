@@ -3444,7 +3444,7 @@ install_opensuse_stable_deps() {
         zypper --gpg-auto-import-keys --non-interactive update || return 1
     fi
 
-    packages="libzmq3 python python-Jinja2 python-M2Crypto python-PyYAML "
+    packages="libzmq3 python python-Jinja2 python-M2Crypto python-PyYAML python-requests"
     packages="${packages} python-msgpack-python python-pycrypto python-pyzmq python-xml"
 
     if [ $_INSTALL_CLOUD -eq $BS_TRUE ]; then

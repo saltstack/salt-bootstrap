@@ -3139,7 +3139,7 @@ config_freebsd_salt() {
 install_freebsd_git_deps() {
     install_freebsd_9_stable_deps || return 1
 
-    /usr/local/sbin/pkg install -y git || return 1
+    /usr/local/sbin/pkg install -y git www/py-requests || return 1
 
     __git_clone_and_checkout || return 1
 

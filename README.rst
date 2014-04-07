@@ -398,7 +398,7 @@ Unsupported Distro
 ------------------
 
 You found out a Linux distribution which we still do not support or we do not correctly identify?
-Please run the following commands when creating a ticket:
+Please run the following commands and report their output when creating a ticket:
 
 .. code:: console
 

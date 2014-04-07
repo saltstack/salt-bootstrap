@@ -237,6 +237,7 @@ EOT
 _KEEP_TEMP_FILES=${BS_KEEP_TEMP_FILES:-$BS_FALSE}
 _TEMP_CONFIG_DIR="null"
 _SALTSTACK_REPO_URL="git://github.com/saltstack/salt.git"
+_SALT_REPO_URL=${_SALTSTACK_REPO_URL}
 _TEMP_KEYS_DIR="null"
 _INSTALL_MASTER=$BS_FALSE
 _INSTALL_SYNDIC=$BS_FALSE
@@ -283,7 +284,7 @@ do
              exit 1
          fi
          ;;
-    g ) _SALTSTACK_REPO_URL=$OPTARG                     ;;
+    g ) _SALT_REPO_URL=$OPTARG                          ;;
     k )  _TEMP_KEYS_DIR="$OPTARG"
          # If the configuration directory does not exist, error out
          if [ ! -d "$_TEMP_KEYS_DIR" ]; then
@@ -1019,6 +1020,15 @@ __git_clone_and_checkout() {
         git fetch || return 1
         # Tags are needed because of salt's versioning, also fetch that
         git fetch --tags || return 1
+
+        # If we have the SaltStack remote set as upstream, we also need to fetch the tags from there
+        if [ "x$(git remote -v | grep $_SALTSTACK_REPO_URL)" != "x" ]; then
+            git fetch --tags upstream
+        else
+            git remote add upstream $_SALTSTACK_REPO_URL
+            git fetch --tags upstream
+        fi
+
         git reset --hard $GIT_REV || return 1
 
         # Just calling `git reset --hard $GIT_REV` on a branch name that has
@@ -1031,9 +1041,17 @@ __git_clone_and_checkout() {
             git pull --rebase || return 1
         fi
     else
-        git clone $_SALTSTACK_REPO_URL || return 1
+        git clone $_SALT_REPO_URL || return 1
         cd $SALT_GIT_CHECKOUT_DIR
+
+        if [ $_SALT_REPO_URL != $_SALTSTACK_REPO_URL ]; then
+            # We need to add the saltstack repository as a remote and fetch tags for proper versioning
+            git remote add upstream $_SALTSTACK_REPO_URL
+            git fetch --tags upstream
+        fi
+
         git checkout $GIT_REV || return 1
+
     fi
     return 0
 }

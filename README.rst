@@ -393,9 +393,23 @@ If after trying this, you still see the same problems, then, please `file an iss
 .. _`Salt`: http://saltstack.org/
 .. _`file an issue`: https://github.com/saltstack/salt-bootstrap/issues/new
 
+
+Unsupported Distro
+------------------
+
+You found out a Linux distribution which we still do not support or we do not correctly identify?
+Please run the following commands and report their output when creating a ticket:
+
+.. code:: console
+
+  sudo find /etc/ -name '*-release' -print -exec cat {} \;
+  which lsb_release && lsb_release -a
+
+
 Testing in Vagrant
 ------------------
-You can use Vagrant_ to easily test changes on a clean machine. The ``Vagrantfile`` defaults to an Ubuntu box. First, install Vagrant, then::
+You can use Vagrant_ to easily test changes on a clean machine. The ``Vagrantfile`` defaults to an 
+Ubuntu box. First, install Vagrant, then::
 
     $ vagrant up
     $ vagrant ssh

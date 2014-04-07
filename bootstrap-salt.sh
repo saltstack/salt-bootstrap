@@ -237,6 +237,7 @@ EOT
 _KEEP_TEMP_FILES=${BS_KEEP_TEMP_FILES:-$BS_FALSE}
 _TEMP_CONFIG_DIR="null"
 _SALTSTACK_REPO_URL="git://github.com/saltstack/salt.git"
+_SALT_REPO_URL=${_SALTSTACK_REPO_URL}
 _TEMP_KEYS_DIR="null"
 _INSTALL_MASTER=$BS_FALSE
 _INSTALL_SYNDIC=$BS_FALSE
@@ -283,7 +284,7 @@ do
              exit 1
          fi
          ;;
-    g ) _SALTSTACK_REPO_URL=$OPTARG                     ;;
+    g ) _SALT_REPO_URL=$OPTARG                          ;;
     k )  _TEMP_KEYS_DIR="$OPTARG"
          # If the configuration directory does not exist, error out
          if [ ! -d "$_TEMP_KEYS_DIR" ]; then
@@ -1019,6 +1020,15 @@ __git_clone_and_checkout() {
         git fetch || return 1
         # Tags are needed because of salt's versioning, also fetch that
         git fetch --tags || return 1
+
+        # If we have the SaltStack remote set as upstream, we also need to fetch the tags from there
+        if [ "x$(git remote -v | grep $_SALTSTACK_REPO_URL)" != "x" ]; then
+            git fetch --tags upstream
+        else
+            git remote add upstream $_SALTSTACK_REPO_URL
+            git fetch --tags upstream
+        fi
+
         git reset --hard $GIT_REV || return 1
 
         # Just calling `git reset --hard $GIT_REV` on a branch name that has
@@ -1031,9 +1041,17 @@ __git_clone_and_checkout() {
             git pull --rebase || return 1
         fi
     else
-        git clone $_SALTSTACK_REPO_URL || return 1
+        git clone $_SALT_REPO_URL || return 1
         cd $SALT_GIT_CHECKOUT_DIR
+
+        if [ $_SALT_REPO_URL != $_SALTSTACK_REPO_URL ]; then
+            # We need to add the saltstack repository as a remote and fetch tags for proper versioning
+            git remote add upstream $_SALTSTACK_REPO_URL
+            git fetch --tags upstream
+        fi
+
         git checkout $GIT_REV || return 1
+
     fi
     return 0
 }
@@ -1368,7 +1386,7 @@ __check_services_debian() {
     servicename=$1
     echodebug "Checking if service ${servicename} is enabled"
 
-    if [ -f "/etc/rc$(runlevel | awk '{ print $2 }').d/S*${servicename}" ]; then
+    if [ -f /etc/rc$(runlevel | awk '{ print $2 }').d/S*${servicename} ]; then
         echodebug "Service ${servicename} is enabled"
         return 0
     else
@@ -1511,6 +1529,26 @@ install_ubuntu_deps() {
 
     # Minimal systems might not have upstart installed, install it
     __apt_get_install_noinput upstart
+
+    if [ $DISTRO_MAJOR_VERSION -gt 12 ] || ([ $DISTRO_MAJOR_VERSION -eq 12 ] && [ $DISTRO_MINOR_VERSION -gt 03 ]); then
+        __apt_get_install_noinput python-requests
+    else
+        check_pip_allowed "You need to allow pip based installations(-P) in order to install the python package 'requests'"
+        __apt_get_install_noinput python-pip
+        pip install requests
+    fi
+
+    check_pip_allowed "You need to allow pip based installations(-P) in order to install the python 'requests' package"
+    # Additionally install procps and pciutils which allows for Docker boostraps. See 366#issuecomment-39666813
+    __apt_get_install_noinput python-pip procps pciutils
+
+    __PIP_PACKAGES="requests"
+
+    if [ $_INSTALL_CLOUD -eq $BS_TRUE ]; then
+        __PIP_PACKAGES="${__PIP_PACKAGES} 'apache-libcloud>=$_LIBCLOUD_MIN_VERSION'"
+    fi
+    pip install -U ${__PIP_PACKAGES}
+
 
     if [ $_INSTALL_CLOUD -eq $BS_TRUE ]; then
         check_pip_allowed "You need to allow pip based installations(-P) in order to install apache-libcloud"
@@ -1706,11 +1744,18 @@ install_debian_deps() {
     # Install Keys
     __apt_get_install_noinput debian-archive-keyring && apt-get update
 
+    # Both python-requests which is a hard dependency and apache-libcloud which is a soft dependency, under debian < 7
+    # need to be installed using pip
+    check_pip_allowed "You need to allow pip based installations(-P) in order to install the python 'requests' package"
+    # Additionally install procps and pciutils which allows for Docker boostraps. See 366#issuecomment-39666813
+    __apt_get_install_noinput python-pip procps pciutils
+
+    __PIP_PACKAGES="requests"
+
     if [ $_INSTALL_CLOUD -eq $BS_TRUE ]; then
-        check_pip_allowed "You need to allow pip based installations(-P) in order to install apache-libcloud"
-        __apt_get_install_noinput python-pip
-        pip install -U "apache-libcloud>=$_LIBCLOUD_MIN_VERSION"
+        __PIP_PACKAGES="${__PIP_PACKAGES} 'apache-libcloud>=$_LIBCLOUD_MIN_VERSION'"
     fi
+    pip install -U ${__PIP_PACKAGES}
 
     if [ $_UPGRADE_SYS -eq $BS_TRUE ]; then
         __apt_get_upgrade_noinput || return 1
@@ -1793,8 +1838,13 @@ _eof
     fi
     apt-get update || return 1
 
+    # Python requests is available through Squeeze backports
+    # Additionally install procps and pciutils which allows for Docker boostraps. See 366#issuecomment-39666813
+    __apt_get_install_noinput python-requests python-pip procps pciutils
+
     if [ $_INSTALL_CLOUD -eq $BS_TRUE ]; then
         check_pip_allowed "You need to allow pip based installations(-P) in order to install apache-libcloud"
+        __apt_get_install_noinput python-pip
         pip install -U "apache-libcloud>=$_LIBCLOUD_MIN_VERSION"
     fi
 
@@ -1857,10 +1907,17 @@ _eof
 
         apt-get update
         __apt_get_install_noinput -t unstable libzmq3 libzmq3-dev || return 1
-        __apt_get_install_noinput build-essential python-dev python-pip || return 1
+        __PACKAGES="build-essential python-dev python-pip python-requests"
+        # Additionally install procps and pciutils which allows for Docker boostraps. See 366#issuecomment-39666813
+        __PACKAGES="${__PACKAGES} procps pciutils"
+        __apt_get_install_noinput ${__PACKAGES} || return 1
     else
         apt-get update || return 1
-        __apt_get_install_noinput python-zmq || return 1
+        __PACKAGES="python-zmq python-requests"
+        # Additionally install procps and pciutils which allows for Docker boostraps. See 366#issuecomment-39666813
+        __PACKAGES="${__PACKAGES} procps pciutils"
+        __apt_get_install_noinput ${__PACKAGES} || return 1
+
     fi
 
     if [ $_INSTALL_CLOUD -eq $BS_TRUE ]; then
@@ -2084,7 +2141,7 @@ install_debian_check_services() {
 #   Fedora Install Functions
 #
 install_fedora_deps() {
-    packages="yum-utils PyYAML libyaml m2crypto python-crypto python-jinja2 python-msgpack python-zmq"
+    packages="yum-utils PyYAML libyaml m2crypto python-crypto python-jinja2 python-msgpack python-zmq python-requests"
 
     if [ $_INSTALL_CLOUD -eq $BS_TRUE ]; then
         packages="${packages} python-libcloud"
@@ -2226,14 +2283,14 @@ install_centos_stable_deps() {
     packages="yum-utils"
 
     if [ $DISTRO_MAJOR_VERSION -eq 5 ]; then
-        packages="${packages} python26-PyYAML python26-m2crypto m2crypto python26 "
+        packages="${packages} python26-PyYAML python26-m2crypto m2crypto python26 python26-requests"
         packages="${packages} python26-crypto python26-msgpack python26-zmq python26-jinja2"
         if [ $_INSTALL_CLOUD -eq $BS_TRUE ]; then
             check_pip_allowed "You need to allow pip based installations(-P) in order to install apache-libcloud"
             packages="${packages} python26-setuptools"
         fi
     else
-        packages="${packages} PyYAML m2crypto python-crypto python-msgpack python-zmq python-jinja2"
+        packages="${packages} PyYAML m2crypto python-crypto python-msgpack python-zmq python-jinja2 python-requests"
         if [ $_INSTALL_CLOUD -eq $BS_TRUE ]; then
             check_pip_allowed "You need to allow pip based installations(-P) in order to install apache-libcloud"
             packages="${packages} python-pip"
@@ -2767,7 +2824,7 @@ install_amazon_linux_ami_deps() {
         yum -y update || return 1
     fi
 
-    packages="PyYAML m2crypto python-crypto python-msgpack python-zmq python-ordereddict python-jinja2"
+    packages="PyYAML m2crypto python-crypto python-msgpack python-zmq python-ordereddict python-jinja2 python-requests"
 
     if [ $_INSTALL_CLOUD -eq $BS_TRUE ]; then
         check_pip_allowed "You need to allow pip based installations(-P) in order to install apache-libcloud"
@@ -2870,9 +2927,9 @@ install_arch_linux_git_deps() {
     pacman -Sy --noconfirm --needed pacman || return 1
     # Don't fail if un-installing python2-distribute threw an error
     pacman -R --noconfirm --needed python2-distribute
-    pacman -Sy --noconfirm --needed git python2-crypto python2-setuptools \
-        python2-jinja python2-m2crypto python2-markupsafe python2-msgpack \
-        python2-psutil python2-yaml python2-pyzmq zeromq || return 1
+    pacman -Sy --noconfirm --needed git python2-crypto python2-setuptools python2-jinja \
+        python2-m2crypto python2-markupsafe python2-msgpack python2-psutil python2-yaml \
+        python2-pyzmq zeromq python2-requests || return 1
 
     __git_clone_and_checkout || return 1
 
@@ -3100,7 +3157,7 @@ config_freebsd_salt() {
 install_freebsd_git_deps() {
     install_freebsd_9_stable_deps || return 1
 
-    /usr/local/sbin/pkg install -y git || return 1
+    /usr/local/sbin/pkg install -y git www/py-requests || return 1
 
     __git_clone_and_checkout || return 1
 
@@ -3245,8 +3302,7 @@ install_freebsd_restart_daemons() {
 #
 install_smartos_deps() {
     pkgin -y install \
-        zeromq py27-m2crypto py27-crypto py27-msgpack py27-yaml \
-        py27-jinja2 py27-zmq || return 1
+        zeromq py27-m2crypto py27-crypto py27-msgpack py27-yaml py27-jinja2 py27-zmq py27-requests || return 1
 
     # Let's trigger config_salt()
     if [ "$_TEMP_CONFIG_DIR" = "null" ]; then
@@ -3405,7 +3461,7 @@ install_opensuse_stable_deps() {
         zypper --gpg-auto-import-keys --non-interactive update || return 1
     fi
 
-    packages="libzmq3 python python-Jinja2 python-M2Crypto python-PyYAML "
+    packages="libzmq3 python python-Jinja2 python-M2Crypto python-PyYAML python-requests"
     packages="${packages} python-msgpack-python python-pycrypto python-pyzmq python-xml"
 
     if [ $_INSTALL_CLOUD -eq $BS_TRUE ]; then
@@ -3568,7 +3624,7 @@ install_suse_11_stable_deps() {
     fi
 
     packages="libzmq3 python python-Jinja2 'python-M2Crypto>=0.21' python-msgpack-python"
-    packages="${packages} python-pycrypto python-pyzmq python-pip python-xml"
+    packages="${packages} python-pycrypto python-pyzmq python-pip python-xml python-requests"
 
     if [ $SUSE_PATCHLEVEL -eq 1 ]; then
         check_pip_allowed
@@ -3760,6 +3816,7 @@ __gentoo_post_dep() {
         pip install -U "apache-libcloud>=$_LIBCLOUD_MIN_VERSION"
     fi
 
+    __emerge -vo 'dev-python/requests'
     __emerge -vo 'app-admin/salt'
 
     if [ "x${_EXTRA_PACKAGES}" != "x" ]; then

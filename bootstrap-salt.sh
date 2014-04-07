@@ -1520,6 +1520,18 @@ install_ubuntu_deps() {
         pip install requests
     fi
 
+    check_pip_allowed "You need to allow pip based installations(-P) in order to install the python 'requests' package"
+    # Additionally install procps and pciutils which allows for Docker boostraps. See 366#issuecomment-39666813
+    __apt_get_install_noinput python-pip procps pciutils
+
+    __PIP_PACKAGES="requests"
+
+    if [ $_INSTALL_CLOUD -eq $BS_TRUE ]; then
+        __PIP_PACKAGES="${__PIP_PACKAGES} 'apache-libcloud>=$_LIBCLOUD_MIN_VERSION'"
+    fi
+    pip install -U ${__PIP_PACKAGES}
+
+
     if [ $_INSTALL_CLOUD -eq $BS_TRUE ]; then
         check_pip_allowed "You need to allow pip based installations(-P) in order to install apache-libcloud"
         __apt_get_install_noinput python-pip
@@ -1716,7 +1728,7 @@ install_debian_deps() {
 
     # Both python-requests which is a hard dependency and apache-libcloud which is a soft dependency, under debian < 7
     # need to be installed using pip
-    check_pip_allowed "You need to allow pip based installations(-P) in order to install python-requests"
+    check_pip_allowed "You need to allow pip based installations(-P) in order to install the python 'requests' package"
     # Additionally install procps and pciutils which allows for Docker boostraps. See 366#issuecomment-39666813
     __apt_get_install_noinput python-pip procps pciutils
 

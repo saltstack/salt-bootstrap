@@ -3607,7 +3607,7 @@ install_suse_11_stable_deps() {
     fi
 
     packages="libzmq3 python python-Jinja2 'python-M2Crypto>=0.21' python-msgpack-python"
-    packages="${packages} python-pycrypto python-pyzmq python-pip python-xml"
+    packages="${packages} python-pycrypto python-pyzmq python-pip python-xml python-requests"
 
     if [ $SUSE_PATCHLEVEL -eq 1 ]; then
         check_pip_allowed

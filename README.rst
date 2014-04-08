@@ -34,7 +34,7 @@ The URL used is just an HTTP redirect and as such it **will**, most likely, make
 ``wget`` or ``fetch`` (in FreeBSD >= 10), to complain about certificate issues. If this worries 
 you, you **should not** use this URL. Use instead::
 
-  https://github.com/saltstack/salt-bootstrap/raw/develop/bootstrap-salt.sh
+  https://github.com/saltstack/salt-bootstrap/raw/stable/bootstrap-salt.sh
 
 
 Examples

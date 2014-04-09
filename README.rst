@@ -397,7 +397,7 @@ If after trying this, you still see the same problems, then, please `file an iss
 Unsupported Distro
 ------------------
 
-You found out a Linux distribution which we still do not support or we do not correctly identify?
+You found a Linux distribution which we still do not support or we do not correctly identify?
 Please run the following commands and report their output when creating a ticket:
 
 .. code:: console

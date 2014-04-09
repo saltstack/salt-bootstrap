@@ -1532,28 +1532,27 @@ install_ubuntu_deps() {
 
     if [ $DISTRO_MAJOR_VERSION -gt 12 ] || ([ $DISTRO_MAJOR_VERSION -eq 12 ] && [ $DISTRO_MINOR_VERSION -gt 03 ]); then
         __apt_get_install_noinput python-requests
+        __PIP_PACKAGES=""
     else
-        check_pip_allowed "You need to allow pip based installations(-P) in order to install the python package 'requests'"
+        check_pip_allowed "You need to allow pip based installations (-P) in order to install the python package 'requests'"
         __apt_get_install_noinput python-pip
+        __PIP_PACKAGES="${__PIP_PACKAGES} requests"
         pip install requests
     fi
 
-    check_pip_allowed "You need to allow pip based installations(-P) in order to install the python 'requests' package"
     # Additionally install procps and pciutils which allows for Docker boostraps. See 366#issuecomment-39666813
-    __apt_get_install_noinput python-pip procps pciutils
-
-    __PIP_PACKAGES="requests"
+    __apt_get_install_noinput procps pciutils
 
     if [ $_INSTALL_CLOUD -eq $BS_TRUE ]; then
+        check_pip_allowed "You need to allow pip based installations (-P) in order to install 'apache-libcloud'"
+        if [ "x${__PIP_PACKAGES}" == "x" ]; then
+            __apt_get_install_noinput python-pip
+        fi
         __PIP_PACKAGES="${__PIP_PACKAGES} 'apache-libcloud>=$_LIBCLOUD_MIN_VERSION'"
     fi
-    pip install -U ${__PIP_PACKAGES}
 
-
-    if [ $_INSTALL_CLOUD -eq $BS_TRUE ]; then
-        check_pip_allowed "You need to allow pip based installations(-P) in order to install apache-libcloud"
-        __apt_get_install_noinput python-pip
-        pip install -U "apache-libcloud>=$_LIBCLOUD_MIN_VERSION"
+    if [ "x${__PIP_PACKAGES}" != "x" ]; then
+        pip install -U ${__PIP_PACKAGES}
     fi
 
     if [ $_UPGRADE_SYS -eq $BS_TRUE ]; then
@@ -1746,7 +1745,7 @@ install_debian_deps() {
 
     # Both python-requests which is a hard dependency and apache-libcloud which is a soft dependency, under debian < 7
     # need to be installed using pip
-    check_pip_allowed "You need to allow pip based installations(-P) in order to install the python 'requests' package"
+    check_pip_allowed "You need to allow pip based installations (-P) in order to install the python 'requests' package"
     # Additionally install procps and pciutils which allows for Docker boostraps. See 366#issuecomment-39666813
     __apt_get_install_noinput python-pip procps pciutils
 
@@ -1843,7 +1842,7 @@ _eof
     __apt_get_install_noinput python-requests python-pip procps pciutils
 
     if [ $_INSTALL_CLOUD -eq $BS_TRUE ]; then
-        check_pip_allowed "You need to allow pip based installations(-P) in order to install apache-libcloud"
+        check_pip_allowed "You need to allow pip based installations (-P) in order to install apache-libcloud"
         __apt_get_install_noinput python-pip
         pip install -U "apache-libcloud>=$_LIBCLOUD_MIN_VERSION"
     fi
@@ -1921,7 +1920,7 @@ _eof
     fi
 
     if [ $_INSTALL_CLOUD -eq $BS_TRUE ]; then
-        check_pip_allowed "You need to allow pip based installations(-P) in order to install apache-libcloud"
+        check_pip_allowed "You need to allow pip based installations (-P) in order to install apache-libcloud"
         pip install -U "apache-libcloud>=$_LIBCLOUD_MIN_VERSION"
     fi
 
@@ -1967,7 +1966,7 @@ install_debian_git_deps() {
     fi
 
     if [ $_INSTALL_CLOUD -eq $BS_TRUE ]; then
-        check_pip_allowed "You need to allow pip based installations(-P) in order to install apache-libcloud"
+        check_pip_allowed "You need to allow pip based installations (-P) in order to install apache-libcloud"
         pip install -U "apache-libcloud>=$_LIBCLOUD_MIN_VERSION"
     fi
 
@@ -2286,13 +2285,13 @@ install_centos_stable_deps() {
         packages="${packages} python26-PyYAML python26-m2crypto m2crypto python26 python26-requests"
         packages="${packages} python26-crypto python26-msgpack python26-zmq python26-jinja2"
         if [ $_INSTALL_CLOUD -eq $BS_TRUE ]; then
-            check_pip_allowed "You need to allow pip based installations(-P) in order to install apache-libcloud"
+            check_pip_allowed "You need to allow pip based installations (-P) in order to install apache-libcloud"
             packages="${packages} python26-setuptools"
         fi
     else
         packages="${packages} PyYAML m2crypto python-crypto python-msgpack python-zmq python-jinja2 python-requests"
         if [ $_INSTALL_CLOUD -eq $BS_TRUE ]; then
-            check_pip_allowed "You need to allow pip based installations(-P) in order to install apache-libcloud"
+            check_pip_allowed "You need to allow pip based installations (-P) in order to install apache-libcloud"
             packages="${packages} python-pip"
         fi
     fi
@@ -2300,7 +2299,7 @@ install_centos_stable_deps() {
     yum -y install ${packages} --enablerepo=${_EPEL_REPO} || return 1
 
     if [ $_INSTALL_CLOUD -eq $BS_TRUE ]; then
-        check_pip_allowed "You need to allow pip based installations(-P) in order to install apache-libcloud"
+        check_pip_allowed "You need to allow pip based installations (-P) in order to install apache-libcloud"
         if [ $DISTRO_MAJOR_VERSION -eq 5 ]; then
             easy_install-2.6 "apache-libcloud>=$_LIBCLOUD_MIN_VERSION"
         else
@@ -2827,14 +2826,14 @@ install_amazon_linux_ami_deps() {
     packages="PyYAML m2crypto python-crypto python-msgpack python-zmq python-ordereddict python-jinja2 python-requests"
 
     if [ $_INSTALL_CLOUD -eq $BS_TRUE ]; then
-        check_pip_allowed "You need to allow pip based installations(-P) in order to install apache-libcloud"
+        check_pip_allowed "You need to allow pip based installations (-P) in order to install apache-libcloud"
         packages="${packages} python-pip"
     fi
 
     yum -y install ${packages} --enablerepo=${_EPEL_REPO} || return 1
 
     if [ $_INSTALL_CLOUD -eq $BS_TRUE ]; then
-        check_pip_allowed "You need to allow pip based installations(-P) in order to install apache-libcloud"
+        check_pip_allowed "You need to allow pip based installations (-P) in order to install apache-libcloud"
         pip-python install "apache-libcloud>=$_LIBCLOUD_MIN_VERSION"
     fi
 
@@ -3811,7 +3810,7 @@ __gentoo_post_dep() {
     __gentoo_config_protection
 
     if [ $_INSTALL_CLOUD -eq $BS_TRUE ]; then
-        check_pip_allowed "You need to allow pip based installations(-P) in order to install apache-libcloud"
+        check_pip_allowed "You need to allow pip based installations (-P) in order to install apache-libcloud"
         __emerge -v 'dev-python/pip'
         pip install -U "apache-libcloud>=$_LIBCLOUD_MIN_VERSION"
     fi

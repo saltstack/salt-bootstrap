@@ -1536,7 +1536,7 @@ install_ubuntu_deps() {
     else
         check_pip_allowed "You need to allow pip based installations (-P) in order to install the python package 'requests'"
         __apt_get_install_noinput python-pip
-        __PIP_PACKAGES="${__PIP_PACKAGES} requests"
+        __PIP_PACKAGES="requests"
         pip install requests
     fi
 
@@ -1545,7 +1545,7 @@ install_ubuntu_deps() {
 
     if [ $_INSTALL_CLOUD -eq $BS_TRUE ]; then
         check_pip_allowed "You need to allow pip based installations (-P) in order to install 'apache-libcloud'"
-        if [ "x${__PIP_PACKAGES}" == "x" ]; then
+        if [ "x${__PIP_PACKAGES}" = "x" ]; then
             __apt_get_install_noinput python-pip
         fi
         __PIP_PACKAGES="${__PIP_PACKAGES} 'apache-libcloud>=$_LIBCLOUD_MIN_VERSION'"

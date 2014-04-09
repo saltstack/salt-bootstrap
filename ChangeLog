@@ -5,7 +5,7 @@ Version 2014.XX.XX:
 	handling.
 	* Install the python 'requests' package which is now a hard dependency in Salt.
 	* When installing from a user defined repository add the official one as a remote and fetch 
-	it's tags for proper versioning.
+	its tags for proper versioning.
 	* Distro Support Addded:
 		* Oracle Linux
 		* Scientific Linux

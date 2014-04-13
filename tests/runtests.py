@@ -68,7 +68,8 @@ def main():
     parser = BootstrapSuiteParser(
         TEST_DIR,
         xml_output_dir=XML_OUTPUT_DIR,
-        html_output_dir=HTML_OUTPUT_DIR
+        html_output_dir=HTML_OUTPUT_DIR,
+        tests_logfile=os.path.join(tempfile.gettempdir(), 'bootstrap-runtests.log')
     )
 
     options, _ = parser.parse_args()

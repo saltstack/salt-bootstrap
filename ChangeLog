@@ -6,7 +6,9 @@ Version 2014.XX.XX:
 	* Install the python 'requests' package which is now a hard dependency in Salt.
 	* When installing from a user defined repository add the official one as a remote and fetch 
 	its tags for proper versioning.
-	* Distro Support Addded:
+	* Distro Support Fixed:
+		* CentOS minimal ISO's didn't install `chkconfig`
+	* Distro Support Added:
 		* Oracle Linux
 		* Scientific Linux
 

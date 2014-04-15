@@ -2279,7 +2279,7 @@ install_centos_stable_deps() {
         yum -y update || return 1
     fi
 
-    packages="yum-utils"
+    packages="yum-utils chkconfig"
 
     if [ $DISTRO_MAJOR_VERSION -eq 5 ]; then
         packages="${packages} python26-PyYAML python26-m2crypto m2crypto python26 python26-requests"

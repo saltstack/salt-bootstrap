@@ -879,7 +879,7 @@ __gather_system_info() {
 #                 functions by pretending to be Ubuntu (i.e. change global vars)
 #----------------------------------------------------------------------------------------------------------------------
 __ubuntu_derivatives_translation() {
-    UBUNTU_DERIVATIVES="(trisquel|linuxmint|linaro)"
+    UBUNTU_DERIVATIVES="(trisquel|linuxmint|linaro|elementary_os)"
     # Mappings
     trisquel_6_ubuntu_base="12.04"
     linuxmint_13_ubuntu_base="12.04"
@@ -889,15 +889,25 @@ __ubuntu_derivatives_translation() {
     # https://bugs.launchpad.net/linuxmint/+bug/1198751
 
     linuxmint_16_ubuntu_base="13.10"
-
     linaro_12_ubuntu_base="12.04"
+    elementary_os_02_ubuntu_base="12.04"
 
     # Translate Ubuntu derivatives to their base Ubuntu version
     match=$(echo $DISTRO_NAME_L | egrep ${UBUNTU_DERIVATIVES})
+
     if [ "x${match}" != "x" ]; then
-        _major="$(echo $DISTRO_VERSION | sed 's/^\([0-9]*\).*/\1/g')"
-        _ubuntu_version="$(eval echo \$${1}_${_major}_ubuntu_base)"
-        if [ "x$_ubuntu_version" != "x" ]; then
+        case $match in
+	"elementary_os")
+		_major="$(echo $DISTRO_VERSION | sed 's/\.//g')"
+		;;
+	*)
+		_major="$(echo $DISTRO_VERSION | sed 's/^\([0-9]*\).*/\1/g')"
+		;;
+	esac
+
+	_ubuntu_version="$(eval echo \$${1}_${_major}_ubuntu_base)"
+	
+	if [ "x$_ubuntu_version" != "x" ]; then
             echodebug "Detected Ubuntu $_ubuntu_version derivative"
             DISTRO_NAME_L="ubuntu"
             DISTRO_VERSION="$_ubuntu_version"

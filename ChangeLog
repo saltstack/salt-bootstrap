@@ -1,4 +1,7 @@
-Version 2014.04:16
+Version 2014.XX.XX:
+	* Allow passing the master address as an environment variable, `BS_SALT_MASTER_ADDRESS`
+
+Version 2014.04.16:
 	* Fixed a bug for RHEL 6 based distributions where yum-utils was not getting installed.
 	* Added minor version check for RHEL 6 optional channel.
 	* Added quotes around "apache-libcloud>=$_LIBCLOUD_MIN_VERSION" for proper version requirements 

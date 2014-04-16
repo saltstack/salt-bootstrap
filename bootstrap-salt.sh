@@ -23,14 +23,15 @@ __ScriptName="bootstrap-salt.sh"
 #======================================================================================================================
 #  Environment variables taken into account.
 #----------------------------------------------------------------------------------------------------------------------
-#   * BS_COLORS:              If 0 disables colour support
-#   * BS_PIP_ALLOWED:         If 1 enable pip based installations(if needed)
-#   * BS_ECHO_DEBUG:          If 1 enable debug echo which can also be set by -D
-#   * BS_SALT_ETC_DIR:        Defaults to /etc/salt (Only tweak'able on git based installations)
-#   * BS_KEEP_TEMP_FILES:     If 1, don't move temporary files, instead copy them
-#   * BS_FORCE_OVERWRITE:     Force overriding copied files(config, init.d, etc)
-#   * BS_UPGRADE_SYS:         If 1 and an option, upgrade system. Default 0.
-#   * BS_GENTOO_USE_BINHOST:  If 1 add `--getbinpkg` to gentoo's emerge
+#   * BS_COLORS:                If 0 disables colour support
+#   * BS_PIP_ALLOWED:           If 1 enable pip based installations(if needed)
+#   * BS_ECHO_DEBUG:            If 1 enable debug echo which can also be set by -D
+#   * BS_SALT_ETC_DIR:          Defaults to /etc/salt (Only tweak'able on git based installations)
+#   * BS_KEEP_TEMP_FILES:       If 1, don't move temporary files, instead copy them
+#   * BS_FORCE_OVERWRITE:       Force overriding copied files(config, init.d, etc)
+#   * BS_UPGRADE_SYS:           If 1 and an option, upgrade system. Default 0.
+#   * BS_GENTOO_USE_BINHOST:    If 1 add `--getbinpkg` to gentoo's emerge
+#   * BS__SALT_MASTER_ADDRESS:  The IP or DNS name of the salt-master the minion should connect to
 #======================================================================================================================
 
 
@@ -257,7 +258,7 @@ _INSECURE_DL=${BS_INSECURE_DL:-$BS_FALSE}
 _WGET_ARGS=${BS_WGET_ARGS:-}
 _CURL_ARGS=${BS_CURL_ARGS:-}
 _FETCH_ARGS=${BS_FETCH_ARGS:-}
-_SALT_MASTER_ADDRESS="null"
+_SALT_MASTER_ADDRESS=${BS_SALT_MASTER_ADDRESS:-null}
 _SALT_MINION_ID="null"
 # __SIMPLIFY_VERSION is mostly used in Solaris based distributions
 __SIMPLIFY_VERSION=$BS_TRUE

@@ -22,6 +22,8 @@ class LintTestCase(BootstrapTestCase):
             0,
             self.run_script(
                 script=os.path.join(EXT_DIR, 'checkbashisms'),
-                args=('-pxfn', BOOTSTRAP_SCRIPT_PATH)
+                args=('-pxfn', BOOTSTRAP_SCRIPT_PATH),
+                timeout=120,
+                stream_stds=True
             )
         )

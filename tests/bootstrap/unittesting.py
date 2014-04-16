@@ -15,10 +15,11 @@ import os
 import sys
 import fcntl
 import signal
+import logging
 import subprocess
 from datetime import datetime, timedelta
 
-# Import salt bootstrap libs
+# Import salt testing libs
 from salttesting import *
 from salttesting.ext.os_data import GRAINS
 
@@ -30,8 +31,12 @@ BOOTSTRAP_SCRIPT_PATH = os.path.join(PARENT_DIR, 'bootstrap-salt.sh')
 
 class NonBlockingPopen(subprocess.Popen):
 
+    _stdout_logger_name_ = 'salt-bootstrap.NonBlockingPopen.STDOUT.PID-{pid}'
+    _stderr_logger_name_ = 'salt-bootstrap.NonBlockingPopen.STDERR.PID-{pid}'
+
     def __init__(self, *args, **kwargs):
         self.stream_stds = kwargs.pop('stream_stds', False)
+        self._stdout_logger = self._stderr_logger = None
         super(NonBlockingPopen, self).__init__(*args, **kwargs)
         if self.stdout is not None and self.stream_stds:
             fod = self.stdout.fileno()
@@ -46,12 +51,22 @@ class NonBlockingPopen(subprocess.Popen):
             self.ebuff = ''
 
     def poll(self):
+        if self._stdout_logger is None:
+            self._stdout_logger = logging.getLogger(
+                self._stdout_logger_name_.format(pid=self.pid)
+            )
+        if self._stderr_logger is None:
+            self._stderr_logger = logging.getLogger(
+                self._stderr_logger_name_.format(pid=self.pid)
+            )
         poll = super(NonBlockingPopen, self).poll()
 
         if self.stdout is not None and self.stream_stds:
             try:
                 obuff = self.stdout.read()
                 self.obuff += obuff
+                if obuff.strip():
+                    self._stdout_logger.info(obuff.strip())
                 sys.stdout.write(obuff)
             except IOError, err:
                 if err.errno not in (11, 35):
@@ -62,6 +77,8 @@ class NonBlockingPopen(subprocess.Popen):
             try:
                 ebuff = self.stderr.read()
                 self.ebuff += ebuff
+                if ebuff.strip():
+                    self._stderr_logger.info(ebuff.strip())
                 sys.stderr.write(ebuff)
             except IOError, err:
                 if err.errno not in (11, 35):
@@ -102,8 +119,6 @@ class BootstrapTestCase(TestCase):
                    stream_stds=False):
 
         cmd = [script] + list(args)
-
-        outbuff = errbuff = ''
 
         popen_kwargs = {
             'cwd': cwd,

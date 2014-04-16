@@ -1,3 +1,17 @@
+Version 2014.04:16
+	* Fixed a bug for RHEL 6 based distributions where yum-utils was not getting installed.
+	* Added minor version check for RHEL 6 optional channel.
+	* Added quotes around "apache-libcloud>=$_LIBCLOUD_MIN_VERSION" for proper version requirements 
+	handling.
+	* Install the python 'requests' package which is now a hard dependency in Salt.
+	* When installing from a user defined repository add the official one as a remote and fetch 
+	its tags for proper versioning.
+	* Distro Support Fixed:
+		* CentOS netinstall ISO's don't install `chkconfig`
+	* Distro Support Added:
+		* Oracle Linux
+		* Scientific Linux
+
 Version 2014.03.10-1:
 	* Distro Support Fixed:
 		* Fix the Debian services running function

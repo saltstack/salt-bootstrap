@@ -25,6 +25,7 @@ Jeff Hui                    jeffh                  jeff@jeffhui.net
 Jeff Strunk                 jstrunk
 Karl Grzeszczak             karlgrz
 Kenneth Wilke               KennethWilke
+Liu Xiaohui                 oreh                   herolxh@gmail.com
 Matthew Willson             ixela
 Matthieu Guegan             mguegan
 Mike Carlson                m87carlson             mike@bayphoto.com

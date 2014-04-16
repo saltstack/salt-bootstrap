@@ -34,7 +34,7 @@ The URL used is just an HTTP redirect and as such it **will**, most likely, make
 ``wget`` or ``fetch`` (in FreeBSD >= 10), to complain about certificate issues. If this worries 
 you, you **should not** use this URL. Use instead::
 
-  https://github.com/saltstack/salt-bootstrap/raw/develop/bootstrap-salt.sh
+  https://github.com/saltstack/salt-bootstrap/raw/stable/bootstrap-salt.sh
 
 
 Examples
@@ -362,8 +362,10 @@ Supported Operating Systems
 - Linaro
 - Linux Mint 13/14
 - OpenSUSE 12.x
+- Oracle Linux 5/5
 - Red Hat 5/6
 - Red Hat Enterprise 5/6
+- Scientific Linux 5/6
 - SmartOS
 - SuSE 11 SP1/11 SP2
 - Ubuntu 10.x/11.x/12.x/13.04/13.10
@@ -391,4 +393,28 @@ If after trying this, you still see the same problems, then, please `file an iss
 .. _`Salt`: http://saltstack.org/
 .. _`file an issue`: https://github.com/saltstack/salt-bootstrap/issues/new
 
+
+Unsupported Distro
+------------------
+
+You found a Linux distribution which we still do not support or we do not correctly identify?
+Please run the following commands and report their output when creating a ticket:
+
+.. code:: console
+
+  sudo find /etc/ -name '*-release' -print -exec cat {} \;
+  which lsb_release && lsb_release -a
+
+
+Testing in Vagrant
+------------------
+You can use Vagrant_ to easily test changes on a clean machine. The ``Vagrantfile`` defaults to an 
+Ubuntu box. First, install Vagrant, then::
+
+    $ vagrant up
+    $ vagrant ssh
+    <vm> $ cd /salt_bootstrap
+    <vm> $ sudo sh salt-bootstrap.sh
+
+.. _Vagrant: http://www.vagrantup.com
 .. vim: fenc=utf-8 spell spl=en cc=100 tw=99 fo=want sts=2 sw=2 et

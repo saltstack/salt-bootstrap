@@ -4006,6 +4006,7 @@ preseed_master() {
     [ -d $SEED_DEST ] || mkdir -p $SEED_DEST && chmod 700 $SEED_DEST || return 1
 
     for keyfile in $_TEMP_KEYS_DIR/*; do
+        keyfile=$(basename "${keyfile}")
         src_keyfile="${_TEMP_KEYS_DIR}/${keyfile}"
         dst_keyfile="${SEED_DEST}/${keyfile}"
 

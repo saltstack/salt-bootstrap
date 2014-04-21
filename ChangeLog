@@ -1,5 +1,8 @@
 Version 2014.XX.XX:
 	* Allow passing the master address as an environment variable, `BS_SALT_MASTER_ADDRESS`
+	* Fixed an issue with the keys pre-seed. We were passing absolute paths where we only needed 
+	basenames.
+
 
 Version 2014.04.16:
 	* Fixed a bug for RHEL 6 based distributions where yum-utils was not getting installed.

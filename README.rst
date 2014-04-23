@@ -147,22 +147,22 @@ If all you want is to install a ``salt-master`` using latest git:
 
 .. code:: console
 
-  curl -o salt_install.sh -L http://bootstrap.saltstack.org
-  sudo sh salt_install.sh -M -N git develop
+  curl -o install_salt.sh.sh -L http://bootstrap.saltstack.org
+  sudo sh install_salt.sh.sh -M -N git develop
 
 If you want to install a specific release version (based on the git tags):
 
 .. code:: console
 
-  curl -o salt_install.sh -L http://bootstrap.saltstack.org
-  sudo sh salt_install.sh git v0.16.4
+  curl -o install_salt.sh.sh -L http://bootstrap.saltstack.org
+  sudo sh install_salt.sh.sh git v0.16.4
 
 To install a specific branch from a git fork:
 
 .. code:: console
 
-  curl -o salt_install.sh -L http://bootstrap.saltstack.org
-  sudo sh salt_install.sh -g https://github.com/myuser/salt.git git mybranch
+  curl -o install_salt.sh.sh -L http://bootstrap.saltstack.org
+  sudo sh install_salt.sh.sh -g https://github.com/myuser/salt.git git mybranch
 
 
 Installing via an Insecure One-Liner

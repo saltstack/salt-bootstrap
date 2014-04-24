@@ -369,7 +369,7 @@ Supported Operating Systems
 - SmartOS
 - SuSE 11 SP1/11 SP2
 - Ubuntu 10.x/11.x/12.x/13.04/13.10
-
+- Elementary OS 0.2
 
 
 

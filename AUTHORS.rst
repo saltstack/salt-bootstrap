@@ -24,6 +24,7 @@ Geoff Garside               geoffgarside           geoff@geoffgarside.co.uk
 Henrik Holmboe              holmboe
 Jeff Hui                    jeffh                  jeff@jeffhui.net
 Jeff Strunk                 jstrunk
+Juan A. Moyano              wincus                 wincus.public@gmail.com
 Karl Grzeszczak             karlgrz
 Kenneth Wilke               KennethWilke
 Liu Xiaohui                 oreh                   herolxh@gmail.com

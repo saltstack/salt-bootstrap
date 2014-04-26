@@ -32,7 +32,7 @@ instructions for `Installing via an Insecure One-Liner`_
 .. Attention:: The following examples are provided as an helpful and short way to install Salt.  
 The URL *http://bootstrap.saltstack.org* is just an HTTP redirect and as such it **will**, most likely, make either ``curl`` or 
 ``wget`` or ``fetch`` (in FreeBSD >= 10 and Centos 6), to complain about certificate issues or not work at all.
-If this worries you, you **should not** use this URL. Use instead::
+If this worries you or experience issues use this URL instead::
 
   https://github.com/saltstack/salt-bootstrap/raw/stable/bootstrap-salt.sh
 

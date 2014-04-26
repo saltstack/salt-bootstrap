@@ -27,12 +27,12 @@ Bootstrap
 ---------
 
 If you're looking for the *one-liner* to install salt, please scroll to the bottom and use the
-instructions for *Installing via an Insecure One-Liner*.
+instructions for `Installing via an Insecure One-Liner`_
 
 .. Attention:: The following examples are provided as an helpful and short way to install Salt.  
-The URL used is just an HTTP redirect and as such it **will**, most likely, make either ``curl`` or 
-``wget`` or ``fetch`` (in FreeBSD >= 10), to complain about certificate issues. If this worries 
-you, you **should not** use this URL. Use instead::
+The URL *http://bootstrap.saltstack.org* is just an HTTP redirect and as such it **will**, most likely, make either ``curl`` or 
+``wget`` or ``fetch`` (in FreeBSD >= 10 and Centos 6), to complain about certificate issues or not work at all.
+If this worries you, you **should not** use this URL. Use instead::
 
   https://github.com/saltstack/salt-bootstrap/raw/stable/bootstrap-salt.sh
 
@@ -417,4 +417,5 @@ Ubuntu box. First, install Vagrant, then::
     <vm> $ sudo sh salt-bootstrap.sh
 
 .. _Vagrant: http://www.vagrantup.com
+.. _Installing via an Insecure One-Liner: #installing-via-an-insecure-one-liner
 .. vim: fenc=utf-8 spell spl=en cc=100 tw=99 fo=want sts=2 sw=2 et

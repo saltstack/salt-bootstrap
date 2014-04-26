@@ -631,7 +631,7 @@ __sort_release_files() {
     done
     # Now, least important goes last in the min_prio list
     min_prio="lsb-release"
-    for entry in $max_prio; do
+    for entry in $min_prio; do
         if [ "x$(echo ${primary_release_files} | grep $entry)" != "x" ]; then
             primary_release_files=$(echo ${primary_release_files} | sed -e "s:\(.*\)\($entry\)\(.*\):\1 \3 \2:g")
         fi

@@ -2284,6 +2284,8 @@ install_centos_stable_deps() {
         rpm -Uvh --force http://mirrors.kernel.org/fedora-epel/5/${EPEL_ARCH}/epel-release-5-4.noarch.rpm || return 1
     elif [ $DISTRO_MAJOR_VERSION -eq 6 ]; then
         rpm -Uvh --force http://mirrors.kernel.org/fedora-epel/6/${EPEL_ARCH}/epel-release-6-8.noarch.rpm || return 1
+    elif [ $DISTRO_MAJOR_VERSION -eq 7 ]; then
+        rpm -Uvh --force http://mirrors.kernel.org/fedora-epel/beta/7/${EPEL_ARCH}/epel-release-7-0.1.noarch.rpm || return 1
     else
         echoerror "Failed add EPEL repository support."
         return 1
@@ -2505,6 +2507,11 @@ install_red_hat_linux_stable_deps() {
 install_red_hat_linux_git_deps() {
     install_centos_git_deps || return 1
     return 0
+}
+
+install_red_hat_enterprise_linux_7_stable_deps() {
+    echoerror "Stable version is not available on RHEL 7 Beta/RC. Please set installation type to git."
+    return 1
 }
 
 install_red_hat_enterprise_linux_stable_deps() {

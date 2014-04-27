@@ -33,7 +33,7 @@ instructions for `Installing via an Insecure One-Liner`_
 The URL *http://bootstrap.saltstack.org* is just an HTTP redirect and as such it **will**, most 
 likely, make either ``curl`` or ``wget`` or ``fetch`` (in FreeBSD >= 10), to complain about 
 certificate issues or not work at all.
-If this worries you or experience issues use this URL instead::
+If this worries you, you **should not** use this URL. Use instead::
 
   https://raw.githubusercontent.com/saltstack/salt-bootstrap/stable/bootstrap-salt.sh
 

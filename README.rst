@@ -30,11 +30,12 @@ If you're looking for the *one-liner* to install salt, please scroll to the bott
 instructions for `Installing via an Insecure One-Liner`_
 
 .. Attention:: The following examples are provided as an helpful and short way to install Salt.  
-The URL *http://bootstrap.saltstack.org* is just an HTTP redirect and as such it **will**, most likely, make either ``curl`` or 
-``wget`` or ``fetch`` (in FreeBSD >= 10 and Centos 6), to complain about certificate issues or not work at all.
+The URL *http://bootstrap.saltstack.org* is just an HTTP redirect and as such it **will**, most 
+likely, make either ``curl`` or ``wget`` or ``fetch`` (in FreeBSD >= 10), to complain about 
+certificate issues or not work at all.
 If this worries you or experience issues use this URL instead::
 
-  https://github.com/saltstack/salt-bootstrap/raw/stable/bootstrap-salt.sh
+  https://raw.githubusercontent.com/saltstack/salt-bootstrap/stable/bootstrap-salt.sh
 
 
 Examples
@@ -67,7 +68,7 @@ If you have certificate issues using ``curl``, try the following:
 
 .. code:: console
 
-    curl -L https://raw.github.com/saltstack/salt-bootstrap/stable/bootstrap-salt.sh -o install_salt.sh
+    curl -L https://raw.githubusercontent.com/saltstack/salt-bootstrap/stable/bootstrap-salt.sh -o install_salt.sh
 
 
 Using ``wget`` to install your distribution's stable packages:
@@ -90,7 +91,7 @@ you may download the script without a redirect:
 
 .. code:: console
 
-  wget -O install_salt.sh https://raw.github.com/saltstack/salt-bootstrap/stable/bootstrap-salt.sh
+  wget -O install_salt.sh https://raw.githubusercontent.com/saltstack/salt-bootstrap/stable/bootstrap-salt.sh
   sudo sh install_salt.sh
 
 Install a specific version from git using ``wget``:
@@ -139,7 +140,7 @@ For FreeBSD >= 10 you might need to make fetch ignore the certificate issue:
 
 .. code:: console
 
-  fetch -o install_salt.sh install_salt.sh https://raw.github.com/saltstack/salt-bootstrap/stable/bootstrap-salt.sh
+  fetch -o install_salt.sh install_salt.sh https://raw.githubusercontent.com/saltstack/salt-bootstrap/stable/bootstrap-salt.sh
   sudo sh install_salt.sh
 
 
@@ -173,6 +174,7 @@ The following examples illustrate how to install Salt via a one-liner.
 .. Note::
     Warning! These methods do not involve a verification step and assume that the delivered file
     is trustworthy.
+
 
 Examples
 ~~~~~~~~
@@ -415,6 +417,7 @@ Ubuntu box. First, install Vagrant, then::
     $ vagrant ssh
     <vm> $ cd /salt_bootstrap
     <vm> $ sudo sh salt-bootstrap.sh
+
 
 .. _Vagrant: http://www.vagrantup.com
 .. _Installing via an Insecure One-Liner: #installing-via-an-insecure-one-liner

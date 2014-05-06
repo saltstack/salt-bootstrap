@@ -412,13 +412,14 @@ if [ "$(${whoami})" != "root" ]; then
 fi
 
 # Let's discover how we're being called
-CALLER="$(echo `ps -a -o pid,args | grep $$ | grep -v grep | tr -s ' '` | cut -d ' ' -f 2)"
+# shellcheck disable=SC2009
+CALLER=$(ps -a -o pid,args | grep $$ | grep -v grep | tr -s ' ' | cut -d ' ' -f 3)
+
 if [ "${CALLER}x" = "${0}x" ]; then
     CALLER="PIPED THROUGH"
 fi
 echoinfo "${CALLER} ${0} -- Version ${__ScriptVersion}"
 echowarn "Running the unstable version of ${__ScriptName}"
-
 
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #          NAME:  __exit_cleanup

@@ -412,7 +412,6 @@ if [ "$(${whoami})" != "root" ]; then
 fi
 
 # Let's discover how we're being called
-# shellcheck disable=SC2009
 CALLER=$(ps -a -o pid,args | grep $$ | grep -v grep | tr -s ' ' | cut -d ' ' -f 3)
 
 if [ "${CALLER}x" = "${0}x" ]; then

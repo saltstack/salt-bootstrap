@@ -412,6 +412,7 @@ if [ "$(${whoami})" != "root" ]; then
 fi
 
 # Let's discover how we're being called
+# shellcheck disable=SC2009
 CALLER=$(ps -a -o pid,args | grep $$ | grep -v grep | tr -s ' ' | cut -d ' ' -f 3)
 
 if [ "${CALLER}x" = "${0}x" ]; then
@@ -455,6 +456,7 @@ __exit_cleanup() {
     rm -f $LOGPIPE
 
     # Kill tee when exiting, CentOS, at least requires this
+    # shellcheck disable=SC2009
     TEE_PID=$(ps ax | grep tee | grep $LOGFILE | awk '{print $1}')
 
     [ "x$TEE_PID" = "x" ] && exit $EXIT_CODE
@@ -4100,6 +4102,7 @@ daemons_running() {
         [ $fname = "master" ] && [ $_INSTALL_MASTER -eq $BS_FALSE ] && continue
         [ $fname = "syndic" ] && [ $_INSTALL_SYNDIC -eq $BS_FALSE ] && continue
 
+        # shellcheck disable=SC2009
         if [ "${DISTRO_NAME}" = "SmartOS" ]; then
             if [ "$(svcs -Ho STA salt-$fname)" != "ON" ]; then
                 echoerror "salt-$fname was not found running"

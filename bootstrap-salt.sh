@@ -1004,7 +1004,7 @@ fi
 DISTRO_NAME_L=$(echo $DISTRO_NAME | tr '[:upper:]' '[:lower:]' | sed 's/[^a-zA-Z0-9_ ]//g' | sed -re 's/([[:space:]])+/_/g')
 
 # For Ubuntu derivatives, pretend to be their Ubuntu base version
-__ubuntu_derivatives_translation "$DISTRO_NAME_L"
+__ubuntu_derivatives_translation
 
 # For Debian derivates, pretend to be their Debian base version
 __debian_derivatives_translation

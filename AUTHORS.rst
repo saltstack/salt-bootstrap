@@ -40,6 +40,7 @@ Raymond Barbiero            visualphoenix
 Roberto Aguilar             rca                    roberto@baremetal.io
 Tate Eskew                  tateeskew
 Thomas S. Hatch             thatch45               thatch45@saltstack.com
+Valentin Bud                valentinbud            valentin@databus.pro
 Vladimir Kozhukalov         kozhukalov
 Whit Morriss                whitmo                 whit@nocoast.us
 ==========================  =====================  ============================

@@ -903,17 +903,17 @@ __ubuntu_derivatives_translation() {
 
     if [ "x${match}" != "x" ]; then
         case $match in
-	"elementary_os")
-		_major="$(echo $DISTRO_VERSION | sed 's/\.//g')"
-		;;
-	*)
-		_major="$(echo $DISTRO_VERSION | sed 's/^\([0-9]*\).*/\1/g')"
-		;;
-	esac
+            "elementary_os")
+                _major="$(echo $DISTRO_VERSION | sed 's/\.//g')"
+                ;;
+            *)
+                _major="$(echo $DISTRO_VERSION | sed 's/^\([0-9]*\).*/\1/g')"
+                ;;
+        esac
 
-	_ubuntu_version="$(eval echo \$${1}_${_major}_ubuntu_base)"
-	
-	if [ "x$_ubuntu_version" != "x" ]; then
+        _ubuntu_version="$(eval echo \$${1}_${_major}_ubuntu_base)"
+
+        if [ "x$_ubuntu_version" != "x" ]; then
             echodebug "Detected Ubuntu $_ubuntu_version derivative"
             DISTRO_NAME_L="ubuntu"
             DISTRO_VERSION="$_ubuntu_version"
@@ -940,15 +940,15 @@ __debian_derivatives_translation() {
 
     if [ "x${match}" != "x" ]; then
         case $match in
-	kali)
-		_major="$(echo $DISTRO_VERSION | sed 's/^\([0-9]*\).*/\1/g')"
-    _debian_derivative="kali"
-		;;
-	esac
+            kali)
+                _major="$(echo $DISTRO_VERSION | sed 's/^\([0-9]*\).*/\1/g')"
+                _debian_derivative="kali"
+                ;;
+        esac
 
-	_debian_version="$(eval echo \$${_debian_derivative}_${_major}_debian_base)"
-	
-	if [ "x$_debian_version" != "x" ]; then
+        _debian_version="$(eval echo \$${_debian_derivative}_${_major}_debian_base)"
+
+        if [ "x$_debian_version" != "x" ]; then
             echodebug "Detected Debian $_debian_version derivative"
             DISTRO_NAME_L="debian"
             DISTRO_VERSION="$_debian_version"

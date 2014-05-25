@@ -919,6 +919,41 @@ __ubuntu_derivatives_translation() {
     fi
 }
 
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  __debian_derivatives_translation
+#   DESCRIPTION:  Map Debian derivatives to their Debian base versions.
+#                 If distro has a known Debian base version, use those install
+#                 functions by pretending to be Debian (i.e. change global vars)
+#----------------------------------------------------------------------------------------------------------------------
+__debian_derivatives_translation() {
+    DEBIAN_DERIVATIVES="(kali)"
+    # Mappings
+    kali_1_debian_base="7.0"
+
+    # Detect derivates, Kali *only* for now
+    rv=$(grep ^ID= /etc/os-release | sed -e 's/.*=//')
+
+    # Translate Debian derivatives to their base Debian version
+    match=$(echo $rv | egrep ${DEBIAN_DERIVATIVES})
+
+    if [ "x${match}" != "x" ]; then
+        case $match in
+	kali)
+		_major="$(echo $DISTRO_VERSION | sed 's/^\([0-9]*\).*/\1/g')"
+    _debian_derivative="kali"
+		;;
+	esac
+
+	_debian_version="$(eval echo \$${_debian_derivative}_${_major}_debian_base)"
+	
+	if [ "x$_debian_version" != "x" ]; then
+            echodebug "Detected Debian $_debian_version derivative"
+            DISTRO_NAME_L="debian"
+            DISTRO_VERSION="$_debian_version"
+        fi
+    fi
+}
+
 __gather_system_info
 
 echo
@@ -968,6 +1003,9 @@ DISTRO_NAME_L=$(echo $DISTRO_NAME | tr '[:upper:]' '[:lower:]' | sed 's/[^a-zA-Z
 
 # For Ubuntu derivatives, pretend to be their Ubuntu base version
 __ubuntu_derivatives_translation "$DISTRO_NAME_L"
+
+# For Debian derivates, pretend to be their Debian base version
+__debian_derivatives_translation
 
 # Simplify version naming on functions
 if [ "x${DISTRO_VERSION}" = "x" ] || [ $__SIMPLIFY_VERSION -eq $BS_FALSE ]; then

@@ -30,7 +30,7 @@ If you're looking for the *one-liner* to install salt, please scroll to the bott
 instructions for `Installing via an Insecure One-Liner`_
 
 
-  https://raw.githubusercontent.com/saltstack/salt-bootstrap/stable/bootstrap-salt.sh
+  https://bootstrap.saltstack.com
 
 
 Examples
@@ -45,7 +45,7 @@ Using ``curl`` to install latest git:
 
 .. code:: console
 
-  curl -L http://raw.githubusercontent.com/saltstack/salt-bootstrap/stable/bootstrap-salt.sh -o install_salt.sh
+  curl -L https://bootstrap.saltstack.com -o install_salt.sh
   sudo sh install_salt.sh git develop
 
 
@@ -53,7 +53,7 @@ If you have certificate issues using ``curl``, try the following:
 
 .. code:: console 
 
-  curl -L http://raw.githubusercontent.com/saltstack/salt-bootstrap/stable/bootstrap-salt.sh -o install_salt.sh
+  curl -L https://bootstrap.saltstack.com -o install_salt.sh
   sudo sh install_salt.sh git develop
 
 
@@ -61,7 +61,7 @@ Using ``wget`` to install your distribution's stable packages:
 
 .. code:: console
 
-  wget -O install_salt.sh http://raw.githubusercontent.com/saltstack/salt-bootstrap/stable/bootstrap-salt.sh
+  wget -O install_salt.sh https://bootstrap.saltstack.com
   sudo sh install_salt.sh
 
 
@@ -69,7 +69,7 @@ Install a specific version from git using ``wget``:
 
 .. code:: console
 
-  wget -O install_salt.sh http://raw.githubusercontent.com/saltstack/salt-bootstrap/stable/bootstrap-salt.sh
+  wget -O install_salt.sh https://bootstrap.saltstack.com
   sudo sh install_salt.sh -P git v0.16.4
 
 
@@ -77,7 +77,7 @@ If you already have python installed, ``python 2.6``, then it's as easy as:
 
 .. code:: console
 
-  python -m urllib "http://raw.githubusercontent.com/saltstack/salt-bootstrap/stable/bootstrap-salt.sh" > install_salt.sh
+  python -m urllib "https://bootstrap.saltstack.com" > install_salt.sh
   sudo sh install_salt.sh git develop
 
 
@@ -85,7 +85,7 @@ All python versions should support the following one liner:
 
 .. code:: console
 
-  python -c 'import urllib; print urllib.urlopen("http://raw.githubusercontent.com/saltstack/salt-bootstrap/stable/bootstrap-salt.sh").read()' > install_salt.sh
+  python -c 'import urllib; print urllib.urlopen("https://bootstrap.saltstack.com").read()' > install_salt.sh
   sudo sh install_salt.sh git develop
 
 
@@ -94,7 +94,7 @@ have ``fetch`` available though:
 
 .. code:: console
 
-  fetch -o install_salt.sh http://raw.githubusercontent.com/saltstack/salt-bootstrap/stable/bootstrap-salt.sh
+  fetch -o install_salt.sh https://bootstrap.saltstack.com
   sudo sh install_salt.sh
 
 
@@ -102,7 +102,7 @@ If all you want is to install a ``salt-master`` using latest git:
 
 .. code:: console
 
-  curl -o install_salt.sh -L http://raw.githubusercontent.com/saltstack/salt-bootstrap/stable/bootstrap-salt.sh
+  curl -o install_salt.sh -L https://bootstrap.saltstack.com
   sudo sh install_salt.sh -M -N git develop
 
 
@@ -110,7 +110,7 @@ If you want to install a specific release version (based on the git tags):
 
 .. code:: console
 
-  curl -o install_salt.sh -L http://raw.githubusercontent.com/saltstack/salt-bootstrap/stable/bootstrap-salt.sh
+  curl -o install_salt.sh -L https://bootstrap.saltstack.com
   sudo sh install_salt.sh git v0.16.4
 
 
@@ -118,7 +118,7 @@ To install a specific branch from a git fork:
 
 .. code:: console
 
-  curl -o install_salt.sh.sh -L http://raw.githubusercontent.com/saltstack/salt-bootstrap/stable/bootstrap-salt.sh
+  curl -o install_salt.sh.sh -L https://bootstrap.saltstack.com
   sudo sh install_salt.sh.sh -g https://github.com/myuser/salt.git git mybranch
 
 
@@ -139,7 +139,7 @@ Installing the latest develop branch of Salt:
 
 .. code:: console
 
-  curl -L http://raw.githubusercontent.com/saltstack/salt-bootstrap/stable/bootstrap-salt.sh | sudo sh -s -- git develop
+  curl -L https://bootstrap.saltstack.com | sudo sh -s -- git develop
 
 Any of the example above which use two-lines can be made to run in a single-line
 configuration with minor modifications.

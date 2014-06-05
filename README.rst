@@ -337,8 +337,15 @@ version.
 
 .. code:: console
 
-  curl -L https://raw.github.com/saltstack/salt-bootstrap/develop/bootstrap-salt.sh | \
-      sudo sh -s -- git develop
+  curl -o install_salt.sh -L https://bootstrap.saltstack.com/develop
+  sudo sh install_salt.sh git develop
+
+
+Or the insecure one liner:
+
+.. code:: console
+
+  curl -L https://bootstrap.saltstack.com/develop | sudo sh -s -- git develop
 
 
 If after trying this, you still see the same problems, then, please `file an issue`_.

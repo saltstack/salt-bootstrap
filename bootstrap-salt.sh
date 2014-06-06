@@ -928,6 +928,10 @@ __ubuntu_derivatives_translation() {
 #                 functions by pretending to be Debian (i.e. change global vars)
 #----------------------------------------------------------------------------------------------------------------------
 __debian_derivatives_translation() {
+
+    # If the file does not exist, return
+    [ ! -f /etc/os-release ] && return
+
     DEBIAN_DERIVATIVES="(kali)"
     # Mappings
     kali_1_debian_base="7.0"

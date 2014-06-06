@@ -4230,8 +4230,6 @@ STARTDAEMONS_FUNC_NAMES="$STARTDAEMONS_FUNC_NAMES install_${DISTRO_NAME_L}_resta
 STARTDAEMONS_INSTALL_FUNC="null"
 for FUNC_NAME in $(__strip_duplicates $STARTDAEMONS_FUNC_NAMES); do
     if __function_defined $FUNC_NAME; then
-        echodebug "Waiting 3 seconds for processes to settle before checking for them"
-        sleep 3
         STARTDAEMONS_INSTALL_FUNC=$FUNC_NAME
         break
     fi
@@ -4251,8 +4249,6 @@ DAEMONS_RUNNING_FUNC_NAMES="$DAEMONS_RUNNING_FUNC_NAMES daemons_running"
 
 for FUNC_NAME in $(__strip_duplicates $DAEMONS_RUNNING_FUNC_NAMES); do
     if __function_defined $FUNC_NAME; then
-        echodebug "Waiting 3 seconds for processes to settle before checking for them"
-        sleep 3
         DAEMONS_RUNNING_FUNC=$FUNC_NAME
         break
     fi
@@ -4380,6 +4376,8 @@ fi
 # Run any start daemons function
 if [ "$STARTDAEMONS_INSTALL_FUNC" != "null" ]; then
     echoinfo "Running ${STARTDAEMONS_INSTALL_FUNC}()"
+    echodebug "Waiting 3 seconds for processes to settle before checking for them"
+    sleep 3
     $STARTDAEMONS_INSTALL_FUNC
     if [ $? -ne 0 ]; then
         echoerror "Failed to run ${STARTDAEMONS_INSTALL_FUNC}()!!!"
@@ -4389,8 +4387,9 @@ fi
 
 # Check if the installed daemons are running or not
 if [ "$DAEMONS_RUNNING_FUNC" != "null" ] && [ $_START_DAEMONS -eq $BS_TRUE ]; then
-    sleep 3  # Sleep a little bit to let daemons start
     echoinfo "Running ${DAEMONS_RUNNING_FUNC}()"
+    echodebug "Waiting 3 seconds for processes to settle before checking for them"
+    sleep 3  # Sleep a little bit to let daemons start
     $DAEMONS_RUNNING_FUNC
     if [ $? -ne 0 ]; then
         echoerror "Failed to run ${DAEMONS_RUNNING_FUNC}()!!!"

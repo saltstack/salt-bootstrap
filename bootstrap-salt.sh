@@ -2542,11 +2542,9 @@ install_red_hat_linux_stable_deps() {
     fi
     if [ $DISTRO_MAJOR_VERSION -eq 6 ]; then
       if rhn-channel -b >/dev/null 2>&1 && case "X$(rhn-channel -l | grep optional)" in Xrhel-${OPTIONAL_ARCH}-server-optional-${DISTRO_MAJOR_VERSION}* ) false ;; * ) true ;; esac ; then
-        echoerror "Failed to find RHN optional repo, please enable it using the GUI or rhn-channel command."
-        return 1
+        echowarn "Failed to find RHN optional repo, please enable it using the GUI or rhn-channel command."
       elif ! (yum repolist | grep -s -q server-optional-rpms); then
-        echoerror "Failed to find server-optional-rpms repo, please enable it using yum-config-manager."
-        return 1
+        echowarn "Failed to find server-optional-rpms repo, please enable it using yum-config-manager."
       fi
     fi
     install_centos_stable_deps || return 1

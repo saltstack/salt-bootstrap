@@ -6,6 +6,8 @@ Version 2014.XX.XX:
 		* Elementary OS
 		* RHEL 7 Beta/RC
 		* Kali Linux. Thanks Valentin Bud(valentinbud)
+	* Distro Support Fixed:
+		* Improved RHEL optionals repository detection
 
 
 Version 2014.04.16:

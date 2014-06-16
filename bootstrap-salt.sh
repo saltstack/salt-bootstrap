@@ -253,6 +253,7 @@ _PKI_DIR=${_SALT_ETC_DIR}/pki
 _FORCE_OVERWRITE=${BS_FORCE_OVERWRITE:-$BS_FALSE}
 _GENTOO_USE_BINHOST=${BS_GENTOO_USE_BINHOST:-$BS_FALSE}
 _EPEL_REPO=${BS_EPEL_REPO:-epel}
+__EPEL_REPOS_INSTALLED=${BS_FALSE}
 _UPGRADE_SYS=${BS_UPGRADE_SYS:-$BS_FALSE}
 _INSECURE_DL=${BS_INSECURE_DL:-$BS_FALSE}
 _WGET_ARGS=${BS_WGET_ARGS:-}
@@ -2318,11 +2319,9 @@ install_fedora_check_services() {
 #
 #   CentOS Install Functions
 #
-install_centos_stable_deps() {
-    if [ $CPU_ARCH_L = "i686" ]; then
-        EPEL_ARCH="i386"
-    else
-        EPEL_ARCH=$CPU_ARCH_L
+__install_epel_repository() {
+    if [ ${__EPEL_REPOS_INSTALLED} -eq $BS_FALSE ]; then
+        return 0
     fi
     if [ $DISTRO_MAJOR_VERSION -eq 5 ]; then
         rpm -Uvh --force http://mirrors.kernel.org/fedora-epel/5/${EPEL_ARCH}/epel-release-5-4.noarch.rpm || return 1
@@ -2334,6 +2333,12 @@ install_centos_stable_deps() {
         echoerror "Failed add EPEL repository support."
         return 1
     fi
+    __EPEL_REPOS_INSTALLED=${BS_TRUE}
+    return 0
+}
+
+install_centos_stable_deps() {
+    __install_epel_repository
 
     if [ $_UPGRADE_SYS -eq $BS_TRUE ]; then
         yum -y update || return 1
@@ -2535,20 +2540,23 @@ install_centos_check_services() {
 #   RedHat Install Functions
 #
 install_red_hat_linux_stable_deps() {
-    if [ $CPU_ARCH_L = "i686" ]; then
-        OPTIONAL_ARCH="i386"
-    else
-        OPTIONAL_ARCH=$CPU_ARCH_L
+    __install_epel_repository
+
+    if [ $DISTRO_MAJOR_VERSION -eq 6 ] || [ $DISTRO_MAJOR_VERSION -gt 6 ]; then
+        # Let's enable package installation testing, kind of, --dry-run
+        echoinfo "Installing 'yum-tsflags' to test for package installation success"
+        yum install -y yum-tsflags --enablerepo=${_EPEL_REPO} || return 1
+
+        # Let's try installing the packages that usually require the optional repository
+        for package in python-jinja2; do
+            yum install -y --tsflags='test' ${package} --enablerepo=${_EPEL_REPO} >/dev/null 2>&1
+            if [ $? -ne 0 ]; then
+                echoerror "Failed to install '${package}'. The optional repository or it's subscription might be missing."
+                return 1
+            fi
+        done
     fi
-    if [ $DISTRO_MAJOR_VERSION -eq 6 ]; then
-        if rhn-channel -b >/dev/null 2>&1 && case "X$(rhn-channel -l | grep optional)" in Xrhel-${OPTIONAL_ARCH}-server-optional-${DISTRO_MAJOR_VERSION}* ) false ;; * ) true ;; esac ; then
-            echoerror "Failed to find RHN optional repo, please enable it using the GUI or rhn-channel command."
-            return 1
-        elif ! (yum repolist | grep -q -s -e 'rhel.*server.*optional'); then
-            echoerror "Failed to find the server optional repo, please enable it using yum-config-manager."
-            return 1
-        fi
-    fi
+
     install_centos_stable_deps || return 1
     return 0
 }

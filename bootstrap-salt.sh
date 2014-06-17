@@ -2320,8 +2320,13 @@ install_fedora_check_services() {
 #   CentOS Install Functions
 #
 __install_epel_repository() {
-    if [ ${__EPEL_REPOS_INSTALLED} -eq $BS_FALSE ]; then
+    if [ ${__EPEL_REPOS_INSTALLED} -eq $BS_TRUE ]; then
         return 0
+    fi
+    if [ $CPU_ARCH_L = "i686" ]; then
+        EPEL_ARCH="i386"
+    else
+        EPEL_ARCH=$CPU_ARCH_L
     fi
     if [ $DISTRO_MAJOR_VERSION -eq 5 ]; then
         rpm -Uvh --force http://mirrors.kernel.org/fedora-epel/5/${EPEL_ARCH}/epel-release-5-4.noarch.rpm || return 1

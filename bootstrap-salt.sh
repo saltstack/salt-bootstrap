@@ -418,6 +418,7 @@ fi
 # Export the http_proxy configuration to our current environment
 if [ "x${_HTTP_PROXY}" != "x" ]; then
     export http_proxy="$_HTTP_PROXY"
+    export https_proxy="$_HTTP_PROXY"
 fi
 
 # Let's discover how we're being called

@@ -2,6 +2,7 @@ Version 2014.XX.XX:
 	* Allow passing the master address as an environment variable, `BS_SALT_MASTER_ADDRESS`
 	* Fixed an issue with the keys pre-seed. We were passing absolute paths where we only needed 
 	basenames.
+	* Added HTTP proxy configuration support. Thanks @gianello
 	* Distro Support Added:
 		* Elementary OS
 		* RHEL 7 Beta/RC

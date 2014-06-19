@@ -20,9 +20,13 @@ Elias Probst                eliasp
 Erik Johnson                terminalmage           erik@saltstack.com
 Forrest Alvarez             gravyboat
 Geoff Garside               geoffgarside           geoff@geoffgarside.co.uk
+                            giannello
+Guillaume Derval            GuillaumeDerval        guillaume@guillaumederval.be
+                            gweis
 Henrik Holmboe              holmboe
 Jeff Hui                    jeffh                  jeff@jeffhui.net
 Jeff Strunk                 jstrunk
+Juan A. Moyano              wincus                 wincus.public@gmail.com
 Karl Grzeszczak             karlgrz
 Kenneth Wilke               KennethWilke
 Liu Xiaohui                 oreh                   herolxh@gmail.com
@@ -37,6 +41,7 @@ Raymond Barbiero            visualphoenix
 Roberto Aguilar             rca                    roberto@baremetal.io
 Tate Eskew                  tateeskew
 Thomas S. Hatch             thatch45               thatch45@saltstack.com
+Valentin Bud                valentinbud            valentin@databus.pro
 Vladimir Kozhukalov         kozhukalov
 Whit Morriss                whitmo                 whit@nocoast.us
 ==========================  =====================  ============================

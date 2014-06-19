@@ -226,6 +226,7 @@ usage() {
   -L  Install the Apache Libcloud package if possible(required for salt-cloud)
   -p  Extra-package to install while installing salt dependencies. One package
       per -p flag. You're responsible for providing the proper package name.
+  -H  Use the specified http proxy for the installation
 
 EOT
 }   # ----------  end of function usage  ----------
@@ -265,8 +266,9 @@ _SALT_MINION_ID="null"
 __SIMPLIFY_VERSION=$BS_TRUE
 _LIBCLOUD_MIN_VERSION="0.14.0"
 _EXTRA_PACKAGES=""
+_HTTP_PROXY=""
 
-while getopts ":hvnDc:g:k:MSNXCPFUKIA:i:Lp:" opt
+while getopts ":hvnDc:g:k:MSNXCPFUKIA:i:Lp:H:" opt
 do
   case "${opt}" in
 
@@ -308,6 +310,7 @@ do
     i )  _SALT_MINION_ID=$OPTARG                        ;;
     L )  _INSTALL_CLOUD=$BS_TRUE                        ;;
     p )  _EXTRA_PACKAGES="$_EXTRA_PACKAGES $OPTARG"     ;;
+    H )  _HTTP_PROXY="$OPTARG"                          ;;
 
 
     \?)  echo
@@ -410,6 +413,11 @@ fi
 if [ "$(${whoami})" != "root" ]; then
     echoerror "Salt requires root privileges to install. Please re-run this script as root."
     exit 1
+fi
+
+# Export the http_proxy configuration to our current environment
+if [ "x${_HTTP_PROXY}" != "x" ]; then
+    export http_proxy="$_HTTP_PROXY"
 fi
 
 # Let's discover how we're being called
@@ -971,6 +979,11 @@ echoinfo "  OS Name:      ${OS_NAME}"
 echoinfo "  OS Version:   ${OS_VERSION}"
 echoinfo "  Distribution: ${DISTRO_NAME} ${DISTRO_VERSION}"
 echo
+
+# Let users know that we'll use a proxy
+if [ "x${_HTTP_PROXY}" != "x" ]; then
+    echoinfo "Using http proxy $_HTTP_PROXY"
+fi
 
 # Let users know what's going to be installed/configured
 if [ $_INSTALL_MINION -eq $BS_TRUE ]; then

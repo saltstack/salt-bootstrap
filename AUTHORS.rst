@@ -20,6 +20,7 @@ Elias Probst                eliasp
 Erik Johnson                terminalmage           erik@saltstack.com
 Forrest Alvarez             gravyboat
 Geoff Garside               geoffgarside           geoff@geoffgarside.co.uk
+                            giannello
 Guillaume Derval            GuillaumeDerval        guillaume@guillaumederval.be
                             gweis
 Henrik Holmboe              holmboe

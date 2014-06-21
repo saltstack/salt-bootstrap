@@ -953,12 +953,12 @@ __debian_derivatives_translation() {
     rv=$(grep ^ID= /etc/os-release | sed -e 's/.*=//')
 
     # Translate Debian derivatives to their base Debian version
-    match=$(echo $rv | egrep ${DEBIAN_DERIVATIVES})
+    match=$(echo "$rv" | egrep ${DEBIAN_DERIVATIVES})
 
     if [ "x${match}" != "x" ]; then
         case $match in
             kali)
-                _major="$(echo $DISTRO_VERSION | sed 's/^\([0-9]*\).*/\1/g')"
+                _major=$(echo "$DISTRO_VERSION" | sed 's/^\([0-9]*\).*/\1/g')
                 _debian_derivative="kali"
                 ;;
         esac

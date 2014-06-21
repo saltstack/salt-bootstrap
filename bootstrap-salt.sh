@@ -2383,7 +2383,14 @@ install_centos_stable_deps() {
         fi
     fi
 
-    yum -y install ${packages} --enablerepo=${_EPEL_REPO} || return 1
+    if [ $DISTRO_NAME_L = "oracle_linux" ]; then
+        # We need to install one package at a time because --enablerepo=X disables ALL OTHER REPOS!!!!
+        for package in ${packages}; do
+            yum -y install ${package} || yum -y install ${package} --enablerepo=${_EPEL_REPO} || return 1
+        done
+    else
+        yum -y install ${packages} --enablerepo=${_EPEL_REPO} || return 1
+    fi
 
     if [ $_INSTALL_CLOUD -eq $BS_TRUE ]; then
         check_pip_allowed "You need to allow pip based installations (-P) in order to install apache-libcloud"
@@ -2396,7 +2403,14 @@ install_centos_stable_deps() {
 
     if [ "x${_EXTRA_PACKAGES}" != "x" ]; then
         echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
-        yum install -y ${_EXTRA_PACKAGES} --enablerepo=${_EPEL_REPO} || return 1
+        if [ $DISTRO_NAME_L = "oracle_linux" ]; then
+            # We need to install one package at a time because --enablerepo=X disables ALL OTHER REPOS!!!!
+            for package in ${_EXTRA_PACKAGES}; do
+                yum -y install ${package} || yum -y install ${package} --enablerepo=${_EPEL_REPO} || return 1
+            done
+        else
+            yum install -y ${_EXTRA_PACKAGES} --enablerepo=${_EPEL_REPO} || return 1
+        fi
     fi
 
     return 0
@@ -2410,7 +2424,14 @@ install_centos_stable() {
     if [ $_INSTALL_MASTER -eq $BS_TRUE ] || [ $_INSTALL_SYNDIC -eq $BS_TRUE ]; then
         packages="${packages} salt-master"
     fi
-    yum -y install ${packages} --enablerepo=${_EPEL_REPO} || return 1
+    if [ $DISTRO_NAME_L = "oracle_linux" ]; then
+        # We need to install one package at a time because --enablerepo=X disables ALL OTHER REPOS!!!!
+        for package in ${packages}; do
+            yum -y install ${package} || yum -y install ${package} --enablerepo=${_EPEL_REPO} || return 1
+        done
+    else
+        yum -y install ${packages} --enablerepo=${_EPEL_REPO} || return 1
+    fi
     return 0
 }
 
@@ -2430,7 +2451,12 @@ install_centos_stable_post() {
 
 install_centos_git_deps() {
     install_centos_stable_deps || return 1
-    yum -y install git --enablerepo=${_EPEL_REPO} || return 1
+    if [ $DISTRO_NAME_L = "oracle_linux" ]; then
+        # try both ways --enablerepo=X disables ALL OTHER REPOS!!!!
+        yum -y install ${package} || yum -y install ${package} --enablerepo=${_EPEL_REPO} || return 1
+    else
+        yum -y install git --enablerepo=${_EPEL_REPO} || return 1
+    fi
 
     __git_clone_and_checkout || return 1
 

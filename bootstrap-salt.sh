@@ -1059,7 +1059,7 @@ fi
 
 # Only RedHat based distros have testing support
 if [ ${ITYPE} = "testing" ]; then
-    if [ "$(echo ${DISTRO_NAME_L} | egrep '(centos|red_hat|amazon)')x" = "x" ]; then
+    if [ "$(echo ${DISTRO_NAME_L} | egrep '(centos|red_hat|amazon|oracle)')x" = "x" ]; then
         echoerror "${DISTRO_NAME} does not have testing packages support"
         exit 1
     fi
@@ -2454,7 +2454,7 @@ install_centos_git_deps() {
     install_centos_stable_deps || return 1
     if [ $DISTRO_NAME_L = "oracle_linux" ]; then
         # try both ways --enablerepo=X disables ALL OTHER REPOS!!!!
-        yum -y install ${package} || yum -y install ${package} --enablerepo=${_EPEL_REPO} || return 1
+        yum -y install git || yum -y install git --enablerepo=${_EPEL_REPO} || return 1
     else
         yum -y install git --enablerepo=${_EPEL_REPO} || return 1
     fi

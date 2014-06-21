@@ -2954,7 +2954,7 @@ install_amazon_linux_ami_deps() {
     else
         EPEL_ARCH=$CPU_ARCH_L
     fi
-    rpm -Uvh --force http://mirrors.kernel.org/fedora-epel/6/${EPEL_ARCH}/epel-release-6-8.noarch.rpm || return 1
+    rpm -Uvh --force "http://mirrors.kernel.org/fedora-epel/6/${EPEL_ARCH}/epel-release-6-8.noarch.rpm" || return 1
 
     if [ "$_UPGRADE_SYS" -eq $BS_TRUE ]; then
         yum -y update || return 1
@@ -2967,7 +2967,7 @@ install_amazon_linux_ami_deps() {
         packages="${packages} python-pip"
     fi
 
-    yum -y install ${packages} --enablerepo=${_EPEL_REPO} || return 1
+    yum -y install ${packages} --enablerepo=${_EPEL_REPO}"" || return 1
 
     if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
         check_pip_allowed "You need to allow pip based installations (-P) in order to install apache-libcloud"
@@ -3451,7 +3451,7 @@ install_smartos_deps() {
             curl $_CURL_ARGS -s -o "$_TEMP_CONFIG_DIR/minion" -L \
                 https://raw.githubusercontent.com/saltstack/salt/develop/conf/minion || return 1
         fi
-        if [ ! -f $_SALT_ETC_DIR/master ] && [ ! -f $_TEMP_CONFIG_DIR/master ]; then
+        if [ ! -f "$_SALT_ETC_DIR/master" ] && [ ! -f $_TEMP_CONFIG_DIR/master ]; then
             curl $_CURL_ARGS -s -o "$_TEMP_CONFIG_DIR/master" -L \
                 https://raw.githubusercontent.com/saltstack/salt/develop/conf/master || return 1
         fi
@@ -3507,7 +3507,7 @@ install_smartos_post() {
                 curl $_CURL_ARGS -s -o "$_TEMP_CONFIG_DIR/salt-$fname.xml" -L \
                     "https://raw.githubusercontent.com/saltstack/salt/develop/pkg/smartos/salt-$fname.xml"
             fi
-            svccfg import $_TEMP_CONFIG_DIR/salt-$fname.xml
+            svccfg import "$_TEMP_CONFIG_DIR/salt-$fname.xml"
             if [ "${VIRTUAL_TYPE}" = "global" ]; then
                 if [ ! -d "$smf_dir" ]; then
                     mkdir -p "$smf_dir" || return 1
@@ -4130,7 +4130,7 @@ config_salt() {
 preseed_master() {
     # Create the PKI directory
 
-    if [ $(ls $_TEMP_KEYS_DIR | wc -l) -lt 1 ]; then
+    if [ $(ls "$_TEMP_KEYS_DIR" | wc -l) -lt 1 ]; then
         echoerror "No minion keys were uploaded. Unable to pre-seed master"
         return 1
     fi
@@ -4163,7 +4163,7 @@ preseed_master() {
 #   This function checks if all of the installed daemons are running or not.
 #
 daemons_running() {
-    [ $_START_DAEMONS -eq $BS_FALSE ] && return
+    [ "$_START_DAEMONS" -eq $BS_FALSE ] && return
 
     FAILED_DAEMONS=0
     for fname in minion master syndic; do

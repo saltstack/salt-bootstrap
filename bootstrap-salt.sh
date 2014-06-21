@@ -2593,11 +2593,22 @@ install_red_hat_linux_stable_deps() {
     if [ $DISTRO_MAJOR_VERSION -eq 6 ] || [ $DISTRO_MAJOR_VERSION -gt 6 ]; then
         # Let's enable package installation testing, kind of, --dry-run
         echoinfo "Installing 'yum-tsflags' to test for package installation success"
-        yum install -y yum-tsflags --enablerepo=${_EPEL_REPO} || return 1
+
+        if [ "$DISTRO_NAME_L" = "oracle_linux" ]; then
+            # try both ways --enablerepo=X disables ALL OTHER REPOS!!!!
+            yum -y install yum-tsflags || yum -y install yum-tsflags --enablerepo=${_EPEL_REPO} || return 1
+        else
+            yum -y install yum-tsflags --enablerepo=${_EPEL_REPO} || return 1
+        fi
 
         # Let's try installing the packages that usually require the optional repository
         for package in python-jinja2; do
-            yum install -y --tsflags='test' ${package} --enablerepo=${_EPEL_REPO} >/dev/null 2>&1
+            if [ "$DISTRO_NAME_L" = "oracle_linux" ]; then
+                yum install -y --tsflags='test' ${package} >/dev/null 2>&1 || \
+                    yum install -y --tsflags='test' ${package} --enablerepo=${_EPEL_REPO} >/dev/null 2>&1
+            else
+                yum install -y --tsflags='test' ${package} --enablerepo=${_EPEL_REPO} >/dev/null 2>&1
+            fi
             if [ $? -ne 0 ]; then
                 echoerror "Failed to install '${package}'. The optional repository or it's subscription might be missing."
                 return 1

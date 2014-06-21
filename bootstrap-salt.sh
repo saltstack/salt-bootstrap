@@ -963,7 +963,7 @@ __debian_derivatives_translation() {
                 ;;
         esac
 
-        _debian_version="$(eval echo \$${_debian_derivative}_${_major}_debian_base)"
+        _debian_version=$(eval echo "\$${_debian_derivative}_${_major}_debian_base")
 
         if [ "x$_debian_version" != "x" ]; then
             echodebug "Detected Debian $_debian_version derivative"

@@ -924,7 +924,7 @@ __ubuntu_derivatives_translation() {
                 ;;
         esac
 
-        _ubuntu_version="$(eval echo \$${1}_${_major}_ubuntu_base)"
+        _ubuntu_version=$(eval echo "\$${1}_${_major}_ubuntu_base")
 
         if [ "x$_ubuntu_version" != "x" ]; then
             echodebug "Detected Ubuntu $_ubuntu_version derivative"

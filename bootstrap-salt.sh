@@ -4054,7 +4054,7 @@ config_salt() {
 
     # Let's create the necessary directories
     [ -d "$_SALT_ETC_DIR" ] || mkdir "$_SALT_ETC_DIR" || return 1
-    [ -d "$_PKI_DIR" ] || mkdir -p "$_PKI_DIR" && chmod 700 "$_PKI_DIR" || return 1
+    [ -d "$_PKI_DIR" ] || (mkdir -p "$_PKI_DIR" && chmod 700 "$_PKI_DIR") || return 1
 
     # Copy the grains file if found
     if [ -f "$_TEMP_CONFIG_DIR/grains" ]; then
@@ -4065,7 +4065,7 @@ config_salt() {
 
     if [ "$_INSTALL_MINION" -eq $BS_TRUE ]; then
         # Create the PKI directory
-        [ -d "$_PKI_DIR/minion" ] || mkdir -p "$_PKI_DIR/minion" && chmod 700 "$_PKI_DIR/minion" || return 1
+        [ -d "$_PKI_DIR/minion" ] || (mkdir -p "$_PKI_DIR/minion" && chmod 700 "$_PKI_DIR/minion") || return 1
 
         # Copy the minions configuration if found
         if [ -f "$_TEMP_CONFIG_DIR/minion" ]; then
@@ -4136,7 +4136,7 @@ preseed_master() {
     fi
 
     SEED_DEST="$_PKI_DIR/master/minions"
-    [ -d "$SEED_DEST" ] || mkdir -p "$SEED_DEST" && chmod 700 "$SEED_DEST" || return 1
+    [ -d "$SEED_DEST" ] || (mkdir -p "$SEED_DEST" && chmod 700 "$SEED_DEST") || return 1
 
     for keyfile in $_TEMP_KEYS_DIR/*; do
         keyfile=$(basename "${keyfile}")

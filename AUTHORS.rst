@@ -20,7 +20,7 @@ Elias Probst                eliasp
 Erik Johnson                terminalmage           erik@saltstack.com
 Forrest Alvarez             gravyboat
 Geoff Garside               geoffgarside           geoff@geoffgarside.co.uk
-                            giannello
+Giuseppe Iannello           giannello              giuseppe.iannello@brokenloop.net
 Guillaume Derval            GuillaumeDerval        guillaume@guillaumederval.be
                             gweis
 Henrik Holmboe              holmboe

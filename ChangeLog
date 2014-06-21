@@ -1,15 +1,20 @@
+Version 2014.06.21:
+	* Also export the HTTPS proxy environment variable. Thanks Giuseppe Iannello(gianello).
+	* Distro Support Fixed:
+		* Improve Oracle Linux Server detection
+		* Overcome the Oracle Linux awkwardness. `--enablerepo=XYX` disables ALL OTHER REPOS!!!!
+
 Version 2014.06.19:
 	* Allow passing the master address as an environment variable, `BS_SALT_MASTER_ADDRESS`
 	* Fixed an issue with the keys pre-seed. We were passing absolute paths where we only needed 
 	basenames.
-	* Added HTTP proxy configuration support. Thanks @gianello
+	* Added HTTP proxy configuration support. Thanks Giuseppe Iannello(gianello),
 	* Distro Support Added:
 		* Elementary OS
 		* RHEL 7 Beta/RC
 		* Kali Linux. Thanks Valentin Bud(valentinbud)
 	* Distro Support Fixed:
 		* Improved RHEL optionals repository detection
-
 
 Version 2014.04.16:
 	* Fixed a bug for RHEL 6 based distributions where yum-utils was not getting installed.

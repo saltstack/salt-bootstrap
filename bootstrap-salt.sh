@@ -578,14 +578,14 @@ __gather_os_info
 __parse_version_string() {
     VERSION_STRING="$1"
     PARSED_VERSION=$(
-        echo $VERSION_STRING |
+        echo "$VERSION_STRING" |
         sed -e 's/^/#/' \
             -e 's/^#[^0-9]*\([0-9][0-9]*\.[0-9][0-9]*\)\(\.[0-9][0-9]*\).*$/\1/' \
             -e 's/^#[^0-9]*\([0-9][0-9]*\.[0-9][0-9]*\).*$/\1/' \
             -e 's/^#[^0-9]*\([0-9][0-9]*\).*$/\1/' \
             -e 's/^#.*$//'
     )
-    echo $PARSED_VERSION
+    echo "$PARSED_VERSION"
 }
 
 
@@ -917,10 +917,10 @@ __ubuntu_derivatives_translation() {
     if [ "x${match}" != "x" ]; then
         case $match in
             "elementary_os")
-                _major="$(echo $DISTRO_VERSION | sed 's/\.//g')"
+                _major=$(echo "$DISTRO_VERSION" | sed 's/\.//g')
                 ;;
             *)
-                _major="$(echo $DISTRO_VERSION | sed 's/^\([0-9]*\).*/\1/g')"
+                _major=$(echo "$DISTRO_VERSION" | sed 's/^\([0-9]*\).*/\1/g')
                 ;;
         esac
 

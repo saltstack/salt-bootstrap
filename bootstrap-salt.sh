@@ -1058,7 +1058,7 @@ fi
 
 # Only RedHat based distros have testing support
 if [ ${ITYPE} = "testing" ]; then
-    if [ "$(echo ${DISTRO_NAME_L} | egrep '(centos|red_hat|amazon)')x" = "x" ]; then
+    if [ "$(echo ${DISTRO_NAME_L} | egrep '(centos|red_hat|amazon|oracle)')x" = "x" ]; then
         echoerror "${DISTRO_NAME} does not have testing packages support"
         exit 1
     fi

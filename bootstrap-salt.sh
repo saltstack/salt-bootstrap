@@ -467,7 +467,7 @@ __exit_cleanup() {
 
     # Kill tee when exiting, CentOS, at least requires this
     # shellcheck disable=SC2009
-    TEE_PID=$(ps ax | grep tee | grep $LOGFILE | awk '{print $1}')
+    TEE_PID=$(ps ax | grep tee | grep "$LOGFILE" | awk '{print $1}')
 
     [ "x$TEE_PID" = "x" ] && exit $EXIT_CODE
 

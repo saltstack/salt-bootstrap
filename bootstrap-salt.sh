@@ -2453,7 +2453,7 @@ install_centos_git_deps() {
     install_centos_stable_deps || return 1
     if [ $DISTRO_NAME_L = "oracle_linux" ]; then
         # try both ways --enablerepo=X disables ALL OTHER REPOS!!!!
-        yum -y install ${package} || yum -y install ${package} --enablerepo=${_EPEL_REPO} || return 1
+        yum -y install git || yum -y install git --enablerepo=${_EPEL_REPO} || return 1
     else
         yum -y install git --enablerepo=${_EPEL_REPO} || return 1
     fi

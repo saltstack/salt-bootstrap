@@ -680,6 +680,9 @@ __gather_linux_system_info() {
         elif [ "${DISTRO_NAME}" = "EnterpriseEnterpriseServer" ]; then
             # This the Oracle Linux Enterprise ID before ORACLE LINUX 5 UPDATE 3
             DISTRO_NAME="Oracle Linux"
+        elif [ "${DISTRO_NAME}" = "OracleServer" ]; then
+            # This the Oracle Linux Server 6.5
+            DISTRO_NAME="Oracle Linux"
         fi
         rv=$(lsb_release -sr)
         [ "${rv}x" != "x" ] && DISTRO_VERSION=$(__parse_version_string "$rv")

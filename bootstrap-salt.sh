@@ -3270,11 +3270,13 @@ __configure_freebsd_pkg_details() {
 
     ## Use new JSON-like format for pkg repo configs
     conf_file=/usr/local/etc/pkg/repos/freebsd.conf
-    echo "FreeBSD:{" > $conf_file
-    echo "    url: \"${PKGCONFURL}\"," >> $conf_file
-    echo "    mirror_type: \"SRV\"," >> $conf_file
-    echo "    enabled: true" >> $conf_file
-    echo "}" >> $conf_file
+    {
+        echo "FreeBSD:{"
+        echo "    url: \"${PKGCONFURL}\","
+        echo "    mirror_type: \"SRV\","
+        echo "    enabled: true"
+        echo "}"
+    } > $conf_file
     copyfile $conf_file /etc/pkg/FreeBSD.conf
     SALT_PKG_FLAGS="-r FreeBSD"
     ## ensure future ports builds use pkgng

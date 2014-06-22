@@ -377,7 +377,7 @@ else
 fi
 
 # Check installation type
-if [ "$(echo $ITYPE | egrep '(stable|testing|daily|git)')x" = "x" ]; then
+if [ "$(echo "$ITYPE" | egrep '(stable|testing|daily|git)')" = "" ]; then
     echoerror "Installation type \"$ITYPE\" is not known..."
     exit 1
 fi
@@ -526,6 +526,7 @@ fi
 #  DESCRIPTION:  Retrieves a URL and writes it to a given path
 #----------------------------------------------------------------------------------------------------------------------
 __fetch_url() {
+    # shellcheck disable=SC2086
     curl $_CURL_ARGS -s -o "$1" "$2" >/dev/null 2>&1 ||
         wget $_WGET_ARGS -q -O "$1" "$2" >/dev/null 2>&1 ||
             fetch $_FETCH_ARGS -q -o "$1" "$2" >/dev/null 2>&1 ||
@@ -637,14 +638,14 @@ __sort_release_files() {
     # Now let's sort by know files importance, max important goes last in the max_prio list
     max_prio="redhat-release centos-release"
     for entry in $max_prio; do
-        if [ "x$(echo ${primary_release_files} | grep $entry)" != "x" ]; then
+        if [ "$(echo "${primary_release_files}" | grep "$entry")" != "" ]; then
             primary_release_files=$(echo "${primary_release_files}" | sed -e "s:\(.*\)\($entry\)\(.*\):\2 \1 \3:g")
         fi
     done
     # Now, least important goes last in the min_prio list
     min_prio="lsb-release"
     for entry in $min_prio; do
-        if [ "x$(echo ${primary_release_files} | grep $entry)" != "x" ]; then
+        if [ "$(echo "${primary_release_files}" | grep "$entry")" != "" ]; then
             primary_release_files=$(echo "${primary_release_files}" | sed -e "s:\(.*\)\($entry\)\(.*\):\1 \3 \2:g")
         fi
     done
@@ -698,6 +699,7 @@ __gather_linux_system_info() {
         return
     fi
 
+    # shellcheck disable=SC2086
     for rsource in $(__sort_release_files $(
             cd /etc && /bin/ls *[_-]release *[_-]version 2>/dev/null | env -i sort | \
             sed -e '/^redhat-release$/d' -e '/^lsb-release$/d'; \
@@ -1058,7 +1060,7 @@ fi
 
 # Only RedHat based distros have testing support
 if [ "${ITYPE}" = "testing" ]; then
-    if [ "$(echo ${DISTRO_NAME_L} | egrep '(centos|red_hat|amazon|oracle)')x" = "x" ]; then
+    if [ "$(echo "${DISTRO_NAME_L}" | egrep '(centos|red_hat|amazon|oracle)')x" = "x" ]; then
         echoerror "${DISTRO_NAME} does not have testing packages support"
         exit 1
     fi
@@ -1073,7 +1075,7 @@ fi
 #----------------------------------------------------------------------------------------------------------------------
 __function_defined() {
     FUNC_NAME=$1
-    if [ "$(command -v $FUNC_NAME)x" != "x" ]; then
+    if [ "$(command -v "$FUNC_NAME")" != "" ]; then
         echoinfo "Found function $FUNC_NAME"
         return 0
     fi
@@ -1288,7 +1290,7 @@ copyfile() {
     # below works as expected
     if [ -d "$dfile" ]; then
         echodebug "The passed destination($dfile) is a directory"
-        dfile="${dfile}/$(basename $sfile)"
+        dfile="${dfile}/$(basename "$sfile")"
         echodebug "Full destination path is now: $dfile"
     fi
 
@@ -1344,7 +1346,7 @@ movefile() {
     # below works as expected
     if [ -d "$dfile" ]; then
         echodebug "The passed destination($dfile) is a directory"
-        dfile="${dfile}/$(basename $sfile)"
+        dfile="${dfile}/$(basename "$sfile")"
         echodebug "Full destination path is now: $dfile"
     fi
 
@@ -1381,7 +1383,7 @@ __check_services_systemd() {
     servicename=$1
     echodebug "Checking if service ${servicename} is enabled"
 
-    if [ "$(systemctl is-enabled ${servicename})" = "enabled" ]; then
+    if [ "$(systemctl is-enabled "${servicename}")" = "enabled" ]; then
         echodebug "Service ${servicename} is enabled"
         return 0
     else
@@ -1436,7 +1438,7 @@ __check_services_sysvinit() {
     servicename=$1
     echodebug "Checking if service ${servicename} is enabled"
 
-    if [ "$(chkconfig --list  | grep salt-$fname | grep '[2-5]:on')" != "" ]; then
+    if [ "$(chkconfig --list  | grep salt-"$fname" | grep '[2-5]:on')" != "" ]; then
         echodebug "Service ${servicename} is enabled"
         return 0
     else
@@ -1462,6 +1464,7 @@ __check_services_debian() {
     servicename=$1
     echodebug "Checking if service ${servicename} is enabled"
 
+    # shellcheck disable=SC2086
     if [ -f /etc/rc$(runlevel | awk '{ print $2 }').d/S*${servicename} ]; then
         echodebug "Service ${servicename} is enabled"
         return 0
@@ -1628,6 +1631,7 @@ install_ubuntu_deps() {
     fi
 
     if [ "x${__PIP_PACKAGES}" != "x" ]; then
+        # shellcheck disable=SC2086
         pip install -U ${__PIP_PACKAGES}
     fi
 
@@ -1637,6 +1641,7 @@ install_ubuntu_deps() {
 
     if [ "x${_EXTRA_PACKAGES}" != "x" ]; then
         echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
+        # shellcheck disable=SC2086
         __apt_get_install_noinput ${_EXTRA_PACKAGES} || return 1
     fi
 
@@ -1698,6 +1703,7 @@ install_ubuntu_stable() {
     if [ "$_INSTALL_SYNDIC" -eq $BS_TRUE ]; then
         packages="${packages} salt-syndic"
     fi
+    # shellcheck disable=SC2086
     __apt_get_install_noinput ${packages} || return 1
     return 0
 }
@@ -1830,6 +1836,7 @@ install_debian_deps() {
     if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
         __PIP_PACKAGES="${__PIP_PACKAGES} 'apache-libcloud>=$_LIBCLOUD_MIN_VERSION'"
     fi
+    # shellcheck disable=SC2086
     pip install -U ${__PIP_PACKAGES}
 
     if [ "$_UPGRADE_SYS" -eq $BS_TRUE ]; then
@@ -1838,6 +1845,7 @@ install_debian_deps() {
 
     if [ "x${_EXTRA_PACKAGES}" != "x" ]; then
         echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
+        # shellcheck disable=SC2086
         __apt_get_install_noinput ${_EXTRA_PACKAGES} || return 1
     fi
 
@@ -1856,6 +1864,7 @@ install_debian_6_deps() {
     # Install Keys
     __apt_get_install_noinput debian-archive-keyring && apt-get update
 
+    # shellcheck disable=SC2086
     wget $_WGET_ARGS -q http://debian.saltstack.com/debian-salt-team-joehealy.gpg.key -O - | apt-key add - || return 1
 
     if [ "$_PIP_ALLOWED" -eq $BS_TRUE ]; then
@@ -1931,7 +1940,8 @@ _eof
 
     if [ "x${_EXTRA_PACKAGES}" != "x" ]; then
         echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
-        __apt_get_install_noinput ${_EXTRA_PACKAGES} || return 1
+        # shellcheck disable=SC2086
+        __apt_get_install_noinput ${_EXTRA_PACKAGES} || return 1 
     fi
 
     return 0
@@ -1954,6 +1964,7 @@ install_debian_7_deps() {
             /etc/apt/sources.list.d/saltstack.list
     fi
 
+    # shellcheck disable=SC2086
     wget $_WGET_ARGS -q http://debian.saltstack.com/debian-salt-team-joehealy.gpg.key -O - | apt-key add - || return 1
 
     if [ "$_PIP_ALLOWED" -eq $BS_TRUE ]; then
@@ -1985,12 +1996,14 @@ _eof
         __PACKAGES="build-essential python-dev python-pip python-requests"
         # Additionally install procps and pciutils which allows for Docker boostraps. See 366#issuecomment-39666813
         __PACKAGES="${__PACKAGES} procps pciutils"
+        # shellcheck disable=SC2086
         __apt_get_install_noinput ${__PACKAGES} || return 1
     else
         apt-get update || return 1
         __PACKAGES="python-zmq python-requests"
         # Additionally install procps and pciutils which allows for Docker boostraps. See 366#issuecomment-39666813
         __PACKAGES="${__PACKAGES} procps pciutils"
+        # shellcheck disable=SC2086
         __apt_get_install_noinput ${__PACKAGES} || return 1
 
     fi
@@ -2006,6 +2019,7 @@ _eof
 
     if [ "x${_EXTRA_PACKAGES}" != "x" ]; then
         echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
+        # shellcheck disable=SC2086
         __apt_get_install_noinput ${_EXTRA_PACKAGES} || return 1
     fi
 
@@ -2052,6 +2066,7 @@ install_debian_git_deps() {
 
     if [ "x${_EXTRA_PACKAGES}" != "x" ]; then
         echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
+        # shellcheck disable=SC2086
         __apt_get_install_noinput ${_EXTRA_PACKAGES} || return 1
     fi
 
@@ -2105,6 +2120,7 @@ __install_debian_stable() {
     if [ "$_INSTALL_SYNDIC" -eq $BS_TRUE ]; then
         packages="${packages} salt-syndic"
     fi
+    # shellcheck disable=SC2086
     __apt_get_install_noinput ${packages} || return 1
 
     if [ "$_PIP_ALLOWED" -eq $BS_TRUE ]; then
@@ -2222,6 +2238,7 @@ install_fedora_deps() {
         packages="${packages} python-libcloud"
     fi
 
+    # shellcheck disable=SC2086
     yum install -y ${packages} || return 1
 
     if [ "$_UPGRADE_SYS" -eq $BS_TRUE ]; then
@@ -2230,6 +2247,7 @@ install_fedora_deps() {
 
     if [ "x${_EXTRA_PACKAGES}" != "x" ]; then
         echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
+        # shellcheck disable=SC2086
         yum install -y ${_EXTRA_PACKAGES} || return 1
     fi
 
@@ -2244,6 +2262,7 @@ install_fedora_stable() {
     if [ "$_INSTALL_MASTER" -eq $BS_TRUE ] || [ "$_INSTALL_SYNDIC" -eq $BS_TRUE ]; then
         packages="${packages} salt-master"
     fi
+    # shellcheck disable=SC2086
     yum install -y ${packages} || return 1
     return 0
 }
@@ -2386,9 +2405,11 @@ install_centos_stable_deps() {
     if [ "$DISTRO_NAME_L" = "oracle_linux" ]; then
         # We need to install one package at a time because --enablerepo=X disables ALL OTHER REPOS!!!!
         for package in ${packages}; do
+            # shellcheck disable=SC2086
             yum -y install ${package} || yum -y install ${package} --enablerepo=${_EPEL_REPO} || return 1
         done
     else
+        # shellcheck disable=SC2086
         yum -y install ${packages} --enablerepo=${_EPEL_REPO} || return 1
     fi
 
@@ -2406,9 +2427,11 @@ install_centos_stable_deps() {
         if [ "$DISTRO_NAME_L" = "oracle_linux" ]; then
             # We need to install one package at a time because --enablerepo=X disables ALL OTHER REPOS!!!!
             for package in ${_EXTRA_PACKAGES}; do
+                # shellcheck disable=SC2086
                 yum -y install ${package} || yum -y install ${package} --enablerepo=${_EPEL_REPO} || return 1
             done
         else
+            # shellcheck disable=SC2086
             yum install -y ${_EXTRA_PACKAGES} --enablerepo=${_EPEL_REPO} || return 1
         fi
     fi
@@ -2427,9 +2450,11 @@ install_centos_stable() {
     if [ "$DISTRO_NAME_L" = "oracle_linux" ]; then
         # We need to install one package at a time because --enablerepo=X disables ALL OTHER REPOS!!!!
         for package in ${packages}; do
+            # shellcheck disable=SC2086
             yum -y install ${package} || yum -y install ${package} --enablerepo=${_EPEL_REPO} || return 1
         done
     else
+        # shellcheck disable=SC2086
         yum -y install ${packages} --enablerepo=${_EPEL_REPO} || return 1
     fi
     return 0
@@ -2967,6 +2992,7 @@ install_amazon_linux_ami_deps() {
         packages="${packages} python-pip"
     fi
 
+    # shellcheck disable=SC2086
     yum -y install ${packages} --enablerepo=${_EPEL_REPO}"" || return 1
 
     if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
@@ -2976,6 +3002,7 @@ install_amazon_linux_ami_deps() {
 
     if [ "x${_EXTRA_PACKAGES}" != "x" ]; then
         echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
+        # shellcheck disable=SC2086
         yum install -y ${_EXTRA_PACKAGES} --enablerepo=${_EPEL_REPO} || return 1
     fi
 
@@ -3052,6 +3079,7 @@ install_arch_linux_stable_deps() {
 
     if [ "x${_EXTRA_PACKAGES}" != "x" ]; then
         echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
+        # shellcheck disable=SC2086
         pacman -Sy --noconfirm --needed ${_EXTRA_PACKAGES} || return 1
     fi
 
@@ -3265,10 +3293,12 @@ install_freebsd_9_stable_deps() {
     __configure_freebsd_pkg_details || return 1
 
     # Now install swig
+    # shellcheck disable=SC2086
     /usr/local/sbin/pkg install ${SALT_PKG_FLAGS} -y swig || return 1
 
     if [ "x${_EXTRA_PACKAGES}" != "x" ]; then
         echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
+        # shellcheck disable=SC2086
         /usr/local/sbin/pkg install ${SALT_PKG_FLAGS} -y ${_EXTRA_PACKAGES} || return 1
     fi
 
@@ -3335,6 +3365,7 @@ install_freebsd_git_deps() {
 }
 
 install_freebsd_9_stable() {
+    # shellcheck disable=SC2086
     /usr/local/sbin/pkg install ${SALT_PKG_FLAGS} -y sysutils/py-salt || return 1
     return 0
 }
@@ -3344,6 +3375,7 @@ install_freebsd_10_stable() {
 }
 
 install_freebsd_git() {
+    # shellcheck disable=SC2086
     /usr/local/sbin/pkg install ${SALT_PKG_FLAGS} -y sysutils/py-salt || return 1
 
     # Let's keep the rc.d files before deleting the package
@@ -3448,10 +3480,12 @@ install_smartos_deps() {
 
         # Let's download, since they were not provided, the default configuration files
         if [ ! -f "$_SALT_ETC_DIR/minion" ] && [ ! -f "$_TEMP_CONFIG_DIR/minion" ]; then
+            # shellcheck disable=SC2086
             curl $_CURL_ARGS -s -o "$_TEMP_CONFIG_DIR/minion" -L \
                 https://raw.githubusercontent.com/saltstack/salt/develop/conf/minion || return 1
         fi
         if [ ! -f "$_SALT_ETC_DIR/master" ] && [ ! -f $_TEMP_CONFIG_DIR/master ]; then
+            # shellcheck disable=SC2086
             curl $_CURL_ARGS -s -o "$_TEMP_CONFIG_DIR/master" -L \
                 https://raw.githubusercontent.com/saltstack/salt/develop/conf/master || return 1
         fi
@@ -3459,6 +3493,7 @@ install_smartos_deps() {
 
     if [ "x${_EXTRA_PACKAGES}" != "x" ]; then
         echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
+        # shellcheck disable=SC2086
         pkgin -y install ${_EXTRA_PACKAGES} || return 1
     fi
 
@@ -3504,6 +3539,7 @@ install_smartos_post() {
         svcs network/salt-$fname > /dev/null 2>&1
         if [ $? -eq 1 ]; then
             if [ ! -f "$_TEMP_CONFIG_DIR/salt-$fname.xml" ]; then
+                # shellcheck disable=SC2086
                 curl $_CURL_ARGS -s -o "$_TEMP_CONFIG_DIR/salt-$fname.xml" -L \
                     "https://raw.githubusercontent.com/saltstack/salt/develop/pkg/smartos/salt-$fname.xml"
             fi
@@ -3604,10 +3640,12 @@ install_opensuse_stable_deps() {
         packages="${packages} python-apache-libcloud"
     fi
 
+    # shellcheck disable=SC2086
     zypper --non-interactive install --auto-agree-with-licenses ${packages} || return 1
 
     if [ "x${_EXTRA_PACKAGES}" != "x" ]; then
         echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
+        # shellcheck disable=SC2086
         zypper --non-interactive install --auto-agree-with-licenses ${_EXTRA_PACKAGES} || return 1
     fi
 
@@ -3640,6 +3678,7 @@ install_opensuse_stable() {
     if [ "$_INSTALL_SYNDIC" -eq $BS_TRUE ]; then
         packages="${packages} salt-syndic"
     fi
+    # shellcheck disable=SC2086
     zypper --non-interactive install --auto-agree-with-licenses $packages || return 1
     return 0
 }
@@ -3773,6 +3812,7 @@ install_suse_11_stable_deps() {
         packages="${packages} python-apache-libcloud"
     fi
 
+    # shellcheck disable=SC2086
     zypper --non-interactive install --auto-agree-with-licenses ${packages} || return 1
 
     if [ "$SUSE_PATCHLEVEL" -eq 1 ]; then
@@ -3800,6 +3840,7 @@ install_suse_11_stable_deps() {
 
                 # Let's download, since they were not provided, the default configuration files
                 if [ ! -f "$_SALT_ETC_DIR/$fname" ] && [ ! -f "$_TEMP_CONFIG_DIR/$fname" ]; then
+                    # shellcheck disable=SC2086
                     curl $_CURL_ARGS -s -o "$_TEMP_CONFIG_DIR/$fname" -L \
                         "https://raw.githubusercontent.com/saltstack/salt/develop/conf/$fname" || return 1
                 fi
@@ -3809,6 +3850,7 @@ install_suse_11_stable_deps() {
 
     if [ "x${_EXTRA_PACKAGES}" != "x" ]; then
         echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
+        # shellcheck disable=SC2086
         zypper --non-interactive install --auto-agree-with-licenses ${_EXTRA_PACKAGES} || return 1
     fi
 
@@ -3858,11 +3900,13 @@ install_suse_11_stable_post() {
             [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
 
             if [ -f /bin/systemctl ]; then
+                # shellcheck disable=SC2086
                 curl $_CURL_ARGS -L "https://github.com/saltstack/salt/raw/develop/pkg/salt-$fname.service" \
                     -o "/lib/systemd/system/salt-$fname.service" || return 1
                 continue
             fi
 
+            # shellcheck disable=SC2086
             curl $_CURL_ARGS -L "https://github.com/saltstack/salt/raw/develop/pkg/rpm/salt-$fname" \
                 -o "/etc/init.d/salt-$fname" || return 1
             chmod +x "/etc/init.d/salt-$fname"
@@ -3957,6 +4001,7 @@ __gentoo_post_dep() {
 
     if [ "x${_EXTRA_PACKAGES}" != "x" ]; then
         echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
+        # shellcheck disable=SC2086
         __emerge -v ${_EXTRA_PACKAGES} || return 1
     fi
 
@@ -4204,9 +4249,9 @@ DEP_FUNC_NAMES="$DEP_FUNC_NAMES install_${DISTRO_NAME_L}_${ITYPE}_deps"
 DEP_FUNC_NAMES="$DEP_FUNC_NAMES install_${DISTRO_NAME_L}_deps"
 
 DEPS_INSTALL_FUNC="null"
-for DEP_FUNC_NAME in $(__strip_duplicates $DEP_FUNC_NAMES); do
-    if __function_defined $DEP_FUNC_NAME; then
-        DEPS_INSTALL_FUNC=$DEP_FUNC_NAME
+for FUNC_NAME in $(__strip_duplicates "$DEP_FUNC_NAMES"); do
+    if __function_defined "$FUNC_NAME"; then
+        DEPS_INSTALL_FUNC="$FUNC_NAME"
         break
     fi
 done
@@ -4224,9 +4269,9 @@ if [ "$_TEMP_CONFIG_DIR" != "null" ]; then
     CONFIG_FUNC_NAMES="$CONFIG_FUNC_NAMES config_${DISTRO_NAME_L}_salt"
     CONFIG_FUNC_NAMES="$CONFIG_FUNC_NAMES config_salt"
 
-    for FUNC_NAME in $(__strip_duplicates $CONFIG_FUNC_NAMES); do
-        if __function_defined $FUNC_NAME; then
-            CONFIG_SALT_FUNC=$FUNC_NAME
+    for FUNC_NAME in $(__strip_duplicates "$CONFIG_FUNC_NAMES"); do
+        if __function_defined "$FUNC_NAME"; then
+            CONFIG_SALT_FUNC="$FUNC_NAME"
             break
         fi
     done
@@ -4245,9 +4290,9 @@ if [ "$_TEMP_KEYS_DIR" != "null" ]; then
     PRESEED_FUNC_NAMES="$PRESEED_FUNC_NAMES preseed_${DISTRO_NAME_L}_master"
     PRESEED_FUNC_NAMES="$PRESEED_FUNC_NAMES preseed_master"
 
-    for FUNC_NAME in $(__strip_duplicates $PRESEED_FUNC_NAMES); do
-        if __function_defined $FUNC_NAME; then
-            PRESEED_MASTER_FUNC=$FUNC_NAME
+    for FUNC_NAME in $(__strip_duplicates "$PRESEED_FUNC_NAMES"); do
+        if __function_defined "$FUNC_NAME"; then
+            PRESEED_MASTER_FUNC="$FUNC_NAME"
             break
         fi
     done
@@ -4260,9 +4305,9 @@ INSTALL_FUNC_NAMES="$INSTALL_FUNC_NAMES install_${DISTRO_NAME_L}${PREFIXED_DISTR
 INSTALL_FUNC_NAMES="$INSTALL_FUNC_NAMES install_${DISTRO_NAME_L}_${ITYPE}"
 
 INSTALL_FUNC="null"
-for FUNC_NAME in $(__strip_duplicates $INSTALL_FUNC_NAMES); do
-    if __function_defined $FUNC_NAME; then
-        INSTALL_FUNC=$FUNC_NAME
+for FUNC_NAME in $(__strip_duplicates "$INSTALL_FUNC_NAMES"); do
+    if __function_defined "$FUNC_NAME"; then
+        INSTALL_FUNC="$FUNC_NAME"
         break
     fi
 done
@@ -4277,9 +4322,9 @@ POST_FUNC_NAMES="$POST_FUNC_NAMES install_${DISTRO_NAME_L}_${ITYPE}_post"
 POST_FUNC_NAMES="$POST_FUNC_NAMES install_${DISTRO_NAME_L}_post"
 
 POST_INSTALL_FUNC="null"
-for FUNC_NAME in $(__strip_duplicates $POST_FUNC_NAMES); do
-    if __function_defined $FUNC_NAME; then
-        POST_INSTALL_FUNC=$FUNC_NAME
+for FUNC_NAME in $(__strip_duplicates "$POST_FUNC_NAMES"); do
+    if __function_defined "$FUNC_NAME"; then
+        POST_INSTALL_FUNC="$FUNC_NAME"
         break
     fi
 done
@@ -4295,9 +4340,9 @@ STARTDAEMONS_FUNC_NAMES="$STARTDAEMONS_FUNC_NAMES install_${DISTRO_NAME_L}_${ITY
 STARTDAEMONS_FUNC_NAMES="$STARTDAEMONS_FUNC_NAMES install_${DISTRO_NAME_L}_restart_daemons"
 
 STARTDAEMONS_INSTALL_FUNC="null"
-for FUNC_NAME in $(__strip_duplicates $STARTDAEMONS_FUNC_NAMES); do
-    if __function_defined $FUNC_NAME; then
-        STARTDAEMONS_INSTALL_FUNC=$FUNC_NAME
+for FUNC_NAME in $(__strip_duplicates "$STARTDAEMONS_FUNC_NAMES"); do
+    if __function_defined "$FUNC_NAME"; then
+        STARTDAEMONS_INSTALL_FUNC="$FUNC_NAME"
         break
     fi
 done
@@ -4314,9 +4359,9 @@ DAEMONS_RUNNING_FUNC_NAMES="$DAEMONS_RUNNING_FUNC_NAMES daemons_running_${DISTRO
 DAEMONS_RUNNING_FUNC_NAMES="$DAEMONS_RUNNING_FUNC_NAMES daemons_running_${DISTRO_NAME_L}"
 DAEMONS_RUNNING_FUNC_NAMES="$DAEMONS_RUNNING_FUNC_NAMES daemons_running"
 
-for FUNC_NAME in $(__strip_duplicates $DAEMONS_RUNNING_FUNC_NAMES); do
-    if __function_defined $FUNC_NAME; then
-        DAEMONS_RUNNING_FUNC=$FUNC_NAME
+for FUNC_NAME in $(__strip_duplicates "$DAEMONS_RUNNING_FUNC_NAMES"); do
+    if __function_defined "$FUNC_NAME"; then
+        DAEMONS_RUNNING_FUNC="$FUNC_NAME"
         break
     fi
 done
@@ -4331,9 +4376,9 @@ CHECK_SERVICES_FUNC_NAMES="$CHECK_SERVICES_FUNC_NAMES install_${DISTRO_NAME_L}_$
 CHECK_SERVICES_FUNC_NAMES="$CHECK_SERVICES_FUNC_NAMES install_${DISTRO_NAME_L}_check_services"
 
 CHECK_SERVICES_FUNC="null"
-for FUNC_NAME in $(__strip_duplicates $CHECK_SERVICES_FUNC_NAMES); do
-    if __function_defined $FUNC_NAME; then
-        CHECK_SERVICES_FUNC=$FUNC_NAME
+for FUNC_NAME in $(__strip_duplicates "$CHECK_SERVICES_FUNC_NAMES"); do
+    if __function_defined "$FUNC_NAME"; then
+        CHECK_SERVICES_FUNC="$FUNC_NAME"
         break
     fi
 done

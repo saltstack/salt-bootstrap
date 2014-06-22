@@ -2633,6 +2633,7 @@ install_red_hat_linux_stable_deps() {
         fi
 
         # Let's try installing the packages that usually require the optional repository
+        # shellcheck disable=SC2043
         for package in python-jinja2; do
             if [ "$DISTRO_NAME_L" = "oracle_linux" ]; then
                 yum install -y --tsflags='test' ${package} >/dev/null 2>&1 || \

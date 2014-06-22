@@ -333,7 +333,7 @@ __check_unparsed_options() {
         grep='grep'
     fi
     unparsed_options=$( echo "$shellopts" | ${grep} -E '(^|[[:space:]])[-]+[[:alnum:]]' )
-    if [ "x$unparsed_options" != "x" ]; then
+    if [ "$unparsed_options" != "" ]; then
         usage
         echo
         echoerror "options are only allowed before install arguments"
@@ -416,7 +416,7 @@ if [ "$(${whoami})" != "root" ]; then
 fi
 
 # Export the http_proxy configuration to our current environment
-if [ "x${_HTTP_PROXY}" != "x" ]; then
+if [ "${_HTTP_PROXY}" != "" ]; then
     export http_proxy="$_HTTP_PROXY"
     export https_proxy="$_HTTP_PROXY"
 fi
@@ -469,7 +469,7 @@ __exit_cleanup() {
     # shellcheck disable=SC2009
     TEE_PID=$(ps ax | grep tee | grep "$LOGFILE" | awk '{print $1}')
 
-    [ "x$TEE_PID" = "x" ] && exit $EXIT_CODE
+    [ "$TEE_PID" = "" ] && exit $EXIT_CODE
 
     echodebug "Killing logging pipe tee's with pid(s): $TEE_PID"
 
@@ -628,7 +628,7 @@ __sort_release_files() {
     # Sort know VS un-known files first
     for release_file in $(echo "${@}" | sed -r 's:[[:space:]]:\n:g' | sort --unique --ignore-case); do
         match=$(echo "$release_file" | egrep -i "${KNOWN_RELEASE_FILES}")
-        if [ "x${match}" != "x" ]; then
+        if [ "${match}" != "" ]; then
             primary_release_files="${primary_release_files} ${release_file}"
         else
             secondary_release_files="${secondary_release_files} ${release_file}"
@@ -669,7 +669,7 @@ __gather_linux_system_info() {
         DISTRO_NAME=$(lsb_release -si)
         if [ "${DISTRO_NAME}" = "Scientific" ]; then
             DISTRO_NAME="Scientific Linux"
-        elif [ "x$(echo "$DISTRO_NAME" | grep RedHat)" != "x" ]; then
+        elif [ "$(echo "$DISTRO_NAME" | grep RedHat)" != "" ]; then
             # Let's convert CamelCase to Camel Case
             DISTRO_NAME=$(__camelcase_split "$DISTRO_NAME")
         elif [ "${DISTRO_NAME}" = "openSUSE project" ]; then
@@ -686,15 +686,15 @@ __gather_linux_system_info() {
             DISTRO_NAME="Oracle Linux"
         fi
         rv=$(lsb_release -sr)
-        [ "${rv}x" != "x" ] && DISTRO_VERSION=$(__parse_version_string "$rv")
+        [ "${rv}" != "" ] && DISTRO_VERSION=$(__parse_version_string "$rv")
     elif [ -f /etc/lsb-release ]; then
         # We don't have the lsb_release binary, though, we do have the file it parses
         DISTRO_NAME=$(grep DISTRIB_ID /etc/lsb-release | sed -e 's/.*=//')
         rv=$(grep DISTRIB_RELEASE /etc/lsb-release | sed -e 's/.*=//')
-        [ "${rv}x" != "x" ] && DISTRO_VERSION=$(__parse_version_string "$rv")
+        [ "${rv}" != "" ] && DISTRO_VERSION=$(__parse_version_string "$rv")
     fi
 
-    if [ "x$DISTRO_NAME" != "x" ] && [ "x$DISTRO_VERSION" != "x" ]; then
+    if [ "$DISTRO_NAME" != "" ] && [ "$DISTRO_VERSION" != "" ]; then
         # We already have the distribution name and version
         return
     fi
@@ -711,15 +711,15 @@ __gather_linux_system_info() {
 
         n=$(echo "${rsource}" | sed -e 's/[_-]release$//' -e 's/[_-]version$//')
         rv=$( (grep VERSION "/etc/${rsource}"; cat "/etc/${rsource}") | grep '[0-9]' | sed -e 'q' )
-        [ "${rv}x" = "x" ] && continue  # There's no version information. Continue to next rsource
+        [ "${rv}" = "" ] && continue  # There's no version information. Continue to next rsource
         v=$(__parse_version_string "$rv")
         case $(echo "${n}" | tr '[:upper:]' '[:lower:]') in
             redhat             )
-                if [ ".$(egrep 'CentOS' /etc/${rsource})" != . ]; then
+                if [ "$(egrep 'CentOS' /etc/${rsource})" != "" ]; then
                     n="CentOS"
-                elif [ ".$(egrep 'Scientific' /etc/${rsource})" != . ]; then
+                elif [ "$(egrep 'Scientific' /etc/${rsource})" != "" ]; then
                     n="Scientific Linux"
-                elif [ ".$(egrep 'Red Hat Enterprise Linux' /etc/${rsource})" != . ]; then
+                elif [ "$(egrep 'Red Hat Enterprise Linux' /etc/${rsource})" != "" ]; then
                     n="<R>ed <H>at <E>nterprise <L>inux"
                 else
                     n="<R>ed <H>at <L>inux"
@@ -750,7 +750,7 @@ __gather_linux_system_info() {
             os                 )
                 nn="$(__unquote_string $(grep '^ID=' /etc/os-release | sed -e 's/^ID=\(.*\)$/\1/g'))"
                 rv="$(__unquote_string $(grep '^VERSION_ID=' /etc/os-release | sed -e 's/^VERSION_ID=\(.*\)$/\1/g'))"
-                [ "${rv}x" != "x" ] && v=$(__parse_version_string "$rv") || v=""
+                [ "${rv}" != "" ] && v=$(__parse_version_string "$rv") || v=""
                 case $(echo "${nn}" | tr '[:upper:]' '[:lower:]') in
                     arch        )
                         n="Arch Linux"
@@ -758,7 +758,7 @@ __gather_linux_system_info() {
                         ;;
                     debian      )
                         n="Debian"
-                        if [ "${v}x" = "x" ]; then
+                        if [ "${v}" = "" ]; then
                             if [ "$(cat /etc/debian_version)" = "wheezy/sid" ]; then
                                 # I've found an EC2 wheezy image which did not tell its version
                                 v=$(__parse_version_string "7.0")
@@ -796,7 +796,7 @@ __gather_sunos_system_info() {
     DISTRO_NAME=""
     if [ -f /etc/release ]; then
         while read -r line; do
-            [ "${DISTRO_NAME}x" != "x" ] && break
+            [ "${DISTRO_NAME}" != "" ] && break
             case "$line" in
                 *OpenIndiana*oi_[0-9]*)
                     DISTRO_NAME="OpenIndiana"
@@ -841,7 +841,7 @@ __gather_sunos_system_info() {
         done < /etc/release
     fi
 
-    if [ "${DISTRO_NAME}x" = "x" ]; then
+    if [ "${DISTRO_NAME}" = "" ]; then
         DISTRO_NAME="Solaris"
         DISTRO_VERSION=$(
             echo "${OS_VERSION}" |
@@ -916,7 +916,7 @@ __ubuntu_derivatives_translation() {
     # Translate Ubuntu derivatives to their base Ubuntu version
     match=$(echo "$DISTRO_NAME_L" | egrep ${UBUNTU_DERIVATIVES})
 
-    if [ "x${match}" != "x" ]; then
+    if [ "${match}" != "" ]; then
         case $match in
             "elementary_os")
                 _major=$(echo "$DISTRO_VERSION" | sed 's/\.//g')
@@ -928,7 +928,7 @@ __ubuntu_derivatives_translation() {
 
         _ubuntu_version=$(eval echo "\$${1}_${_major}_ubuntu_base")
 
-        if [ "x$_ubuntu_version" != "x" ]; then
+        if [ "$_ubuntu_version" != "" ]; then
             echodebug "Detected Ubuntu $_ubuntu_version derivative"
             DISTRO_NAME_L="ubuntu"
             DISTRO_VERSION="$_ubuntu_version"
@@ -957,7 +957,7 @@ __debian_derivatives_translation() {
     # Translate Debian derivatives to their base Debian version
     match=$(echo "$rv" | egrep ${DEBIAN_DERIVATIVES})
 
-    if [ "x${match}" != "x" ]; then
+    if [ "${match}" != "" ]; then
         case $match in
             kali)
                 _major=$(echo "$DISTRO_VERSION" | sed 's/^\([0-9]*\).*/\1/g')
@@ -967,7 +967,7 @@ __debian_derivatives_translation() {
 
         _debian_version=$(eval echo "\$${_debian_derivative}_${_major}_debian_base")
 
-        if [ "x$_debian_version" != "x" ]; then
+        if [ "$_debian_version" != "" ]; then
             echodebug "Detected Debian $_debian_version derivative"
             DISTRO_NAME_L="debian"
             DISTRO_VERSION="$_debian_version"
@@ -987,7 +987,7 @@ echoinfo "  Distribution: ${DISTRO_NAME} ${DISTRO_VERSION}"
 echo
 
 # Let users know that we'll use a proxy
-if [ "x${_HTTP_PROXY}" != "x" ]; then
+if [ "${_HTTP_PROXY}" != "" ]; then
     echoinfo "Using http proxy $_HTTP_PROXY"
 fi
 
@@ -1034,7 +1034,7 @@ __ubuntu_derivatives_translation
 __debian_derivatives_translation
 
 # Simplify version naming on functions
-if [ "x${DISTRO_VERSION}" = "x" ] || [ $__SIMPLIFY_VERSION -eq $BS_FALSE ]; then
+if [ "${DISTRO_VERSION}" = "" ] || [ $__SIMPLIFY_VERSION -eq $BS_FALSE ]; then
     DISTRO_MAJOR_VERSION=""
     DISTRO_MINOR_VERSION=""
     PREFIXED_DISTRO_MAJOR_VERSION=""
@@ -1060,7 +1060,7 @@ fi
 
 # Only RedHat based distros have testing support
 if [ "${ITYPE}" = "testing" ]; then
-    if [ "$(echo "${DISTRO_NAME_L}" | egrep '(centos|red_hat|amazon|oracle)')x" = "x" ]; then
+    if [ "$(echo "${DISTRO_NAME_L}" | egrep '(centos|red_hat|amazon|oracle)')" = "" ]; then
         echoerror "${DISTRO_NAME} does not have testing packages support"
         exit 1
     fi
@@ -1100,7 +1100,7 @@ __git_clone_and_checkout() {
         git fetch --tags || return 1
 
         # If we have the SaltStack remote set as upstream, we also need to fetch the tags from there
-        if [ "x$(git remote -v | grep $_SALTSTACK_REPO_URL)" != "x" ]; then
+        if [ "$(git remote -v | grep $_SALTSTACK_REPO_URL)" != "" ]; then
             git fetch --tags upstream
         else
             git remote add upstream "$_SALTSTACK_REPO_URL"
@@ -1205,7 +1205,7 @@ __check_end_of_life_versions() {
             #
             # < 11 SP2
             SUSE_PATCHLEVEL=$(awk '/PATCHLEVEL/ {print $3}' /etc/SuSE-release )
-            if [ "x${SUSE_PATCHLEVEL}" = "x" ]; then
+            if [ "${SUSE_PATCHLEVEL}" = "" ]; then
                 SUSE_PATCHLEVEL="00"
             fi
             if ([ "$DISTRO_MAJOR_VERSION" -eq 11 ] && [ "$SUSE_PATCHLEVEL" -lt 02 ]) || [ "$DISTRO_MAJOR_VERSION" -lt 11 ]; then
@@ -1558,7 +1558,7 @@ __check_services_debian() {
 #   Ubuntu Install Functions
 #
 __enable_universe_repository() {
-    if [ "x$(grep -R universe /etc/apt/sources.list /etc/apt/sources.list.d/ | grep -v '#')" != "x" ]; then
+    if [ "$(grep -R universe /etc/apt/sources.list /etc/apt/sources.list.d/ | grep -v '#')" != "" ]; then
         # The universe repository is already enabled
         return 0
     fi
@@ -1624,13 +1624,13 @@ install_ubuntu_deps() {
 
     if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
         check_pip_allowed "You need to allow pip based installations (-P) in order to install 'apache-libcloud'"
-        if [ "x${__PIP_PACKAGES}" = "x" ]; then
+        if [ "${__PIP_PACKAGES}" = "" ]; then
             __apt_get_install_noinput python-pip
         fi
         __PIP_PACKAGES="${__PIP_PACKAGES} 'apache-libcloud>=$_LIBCLOUD_MIN_VERSION'"
     fi
 
-    if [ "x${__PIP_PACKAGES}" != "x" ]; then
+    if [ "${__PIP_PACKAGES}" != "" ]; then
         # shellcheck disable=SC2086
         pip install -U ${__PIP_PACKAGES}
     fi
@@ -1639,7 +1639,7 @@ install_ubuntu_deps() {
         __apt_get_upgrade_noinput || return 1
     fi
 
-    if [ "x${_EXTRA_PACKAGES}" != "x" ]; then
+    if [ "${_EXTRA_PACKAGES}" != "" ]; then
         echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
         # shellcheck disable=SC2086
         __apt_get_install_noinput ${_EXTRA_PACKAGES} || return 1
@@ -1843,7 +1843,7 @@ install_debian_deps() {
         __apt_get_upgrade_noinput || return 1
     fi
 
-    if [ "x${_EXTRA_PACKAGES}" != "x" ]; then
+    if [ "${_EXTRA_PACKAGES}" != "" ]; then
         echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
         # shellcheck disable=SC2086
         __apt_get_install_noinput ${_EXTRA_PACKAGES} || return 1
@@ -1898,7 +1898,7 @@ _eof
         __apt_get_install_noinput build-essential python-dev python-pip || return 1
 
         # Saltstack's Unstable Debian repository
-        if [ "x$(grep -R 'debian.saltstack.com' /etc/apt)" = "x" ]; then
+        if [ "$(grep -R 'debian.saltstack.com' /etc/apt)" = "" ]; then
             echo "deb http://debian.saltstack.com/debian unstable main" >> \
                 /etc/apt/sources.list.d/saltstack.list
         fi
@@ -1906,7 +1906,7 @@ _eof
     fi
 
     # Debian Backports
-    if [ "x$(grep -R 'backports.debian.org' /etc/apt)" = "x" ]; then
+    if [ "$(grep -R 'backports.debian.org' /etc/apt)" = "" ]; then
         echo "deb http://backports.debian.org/debian-backports squeeze-backports main" >> \
             /etc/apt/sources.list.d/backports.list
 
@@ -1916,7 +1916,7 @@ _eof
     fi
 
     # Saltstack's Stable Debian repository
-    if [ "x$(grep -R 'squeeze-saltstack' /etc/apt)" = "x" ]; then
+    if [ "$(grep -R 'squeeze-saltstack' /etc/apt)" = "" ]; then
         echo "deb http://debian.saltstack.com/debian squeeze-saltstack main" >> \
             /etc/apt/sources.list.d/saltstack.list
     fi
@@ -1938,7 +1938,7 @@ _eof
 
     __apt_get_install_noinput python-zmq || return 1
 
-    if [ "x${_EXTRA_PACKAGES}" != "x" ]; then
+    if [ "${_EXTRA_PACKAGES}" != "" ]; then
         echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
         # shellcheck disable=SC2086
         __apt_get_install_noinput ${_EXTRA_PACKAGES} || return 1 
@@ -1959,7 +1959,7 @@ install_debian_7_deps() {
     __apt_get_install_noinput debian-archive-keyring && apt-get update
 
     # Saltstack's Stable Debian repository
-    if [ "x$(grep -R 'wheezy-saltstack' /etc/apt)" = "x" ]; then
+    if [ "$(grep -R 'wheezy-saltstack' /etc/apt)" = "" ]; then
         echo "deb http://debian.saltstack.com/debian wheezy-saltstack main" >> \
             /etc/apt/sources.list.d/saltstack.list
     fi
@@ -2017,7 +2017,7 @@ _eof
         __apt_get_upgrade_noinput || return 1
     fi
 
-    if [ "x${_EXTRA_PACKAGES}" != "x" ]; then
+    if [ "${_EXTRA_PACKAGES}" != "" ]; then
         echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
         # shellcheck disable=SC2086
         __apt_get_install_noinput ${_EXTRA_PACKAGES} || return 1
@@ -2064,7 +2064,7 @@ install_debian_git_deps() {
         __apt_get_upgrade_noinput || return 1
     fi
 
-    if [ "x${_EXTRA_PACKAGES}" != "x" ]; then
+    if [ "${_EXTRA_PACKAGES}" != "" ]; then
         echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
         # shellcheck disable=SC2086
         __apt_get_install_noinput ${_EXTRA_PACKAGES} || return 1
@@ -2245,7 +2245,7 @@ install_fedora_deps() {
         yum -y update || return 1
     fi
 
-    if [ "x${_EXTRA_PACKAGES}" != "x" ]; then
+    if [ "${_EXTRA_PACKAGES}" != "" ]; then
         echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
         # shellcheck disable=SC2086
         yum install -y ${_EXTRA_PACKAGES} || return 1
@@ -2422,7 +2422,7 @@ install_centos_stable_deps() {
         fi
     fi
 
-    if [ "x${_EXTRA_PACKAGES}" != "x" ]; then
+    if [ "${_EXTRA_PACKAGES}" != "" ]; then
         echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
         if [ "$DISTRO_NAME_L" = "oracle_linux" ]; then
             # We need to install one package at a time because --enablerepo=X disables ALL OTHER REPOS!!!!
@@ -3000,7 +3000,7 @@ install_amazon_linux_ami_deps() {
         pip-python install "apache-libcloud>=$_LIBCLOUD_MIN_VERSION"
     fi
 
-    if [ "x${_EXTRA_PACKAGES}" != "x" ]; then
+    if [ "${_EXTRA_PACKAGES}" != "" ]; then
         echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
         # shellcheck disable=SC2086
         yum install -y ${_EXTRA_PACKAGES} --enablerepo=${_EPEL_REPO} || return 1
@@ -3077,7 +3077,7 @@ install_arch_linux_stable_deps() {
         pacman -Sy --noconfirm --needed apache-libcloud || return 1
     fi
 
-    if [ "x${_EXTRA_PACKAGES}" != "x" ]; then
+    if [ "${_EXTRA_PACKAGES}" != "" ]; then
         echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
         # shellcheck disable=SC2086
         pacman -Sy --noconfirm --needed ${_EXTRA_PACKAGES} || return 1
@@ -3296,7 +3296,7 @@ install_freebsd_9_stable_deps() {
     # shellcheck disable=SC2086
     /usr/local/sbin/pkg install ${SALT_PKG_FLAGS} -y swig || return 1
 
-    if [ "x${_EXTRA_PACKAGES}" != "x" ]; then
+    if [ "${_EXTRA_PACKAGES}" != "" ]; then
         echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
         # shellcheck disable=SC2086
         /usr/local/sbin/pkg install ${SALT_PKG_FLAGS} -y ${_EXTRA_PACKAGES} || return 1
@@ -3491,7 +3491,7 @@ install_smartos_deps() {
         fi
     fi
 
-    if [ "x${_EXTRA_PACKAGES}" != "x" ]; then
+    if [ "${_EXTRA_PACKAGES}" != "" ]; then
         echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
         # shellcheck disable=SC2086
         pkgin -y install ${_EXTRA_PACKAGES} || return 1
@@ -3643,7 +3643,7 @@ install_opensuse_stable_deps() {
     # shellcheck disable=SC2086
     zypper --non-interactive install --auto-agree-with-licenses ${packages} || return 1
 
-    if [ "x${_EXTRA_PACKAGES}" != "x" ]; then
+    if [ "${_EXTRA_PACKAGES}" != "" ]; then
         echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
         # shellcheck disable=SC2086
         zypper --non-interactive install --auto-agree-with-licenses ${_EXTRA_PACKAGES} || return 1
@@ -3779,7 +3779,7 @@ install_opensuse_check_services() {
 #
 install_suse_11_stable_deps() {
     SUSE_PATCHLEVEL=$(awk '/PATCHLEVEL/ {print $3}' /etc/SuSE-release )
-    if [ "x${SUSE_PATCHLEVEL}" != "x" ]; then
+    if [ "${SUSE_PATCHLEVEL}" != "" ]; then
         DISTRO_PATCHLEVEL="_SP${SUSE_PATCHLEVEL}"
     fi
     DISTRO_REPO="SLE_${DISTRO_MAJOR_VERSION}${DISTRO_PATCHLEVEL}"
@@ -3848,7 +3848,7 @@ install_suse_11_stable_deps() {
         fi
     fi
 
-    if [ "x${_EXTRA_PACKAGES}" != "x" ]; then
+    if [ "${_EXTRA_PACKAGES}" != "" ]; then
         echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
         # shellcheck disable=SC2086
         zypper --non-interactive install --auto-agree-with-licenses ${_EXTRA_PACKAGES} || return 1
@@ -3968,13 +3968,13 @@ __gentoo_config_protection() {
 
 __gentoo_pre_dep() {
     if [ "$_ECHO_DEBUG" -eq $BS_TRUE ]; then
-        if [ "x$(which eix)" != "x" ]; then
+        if [ "$(which eix)" != "" ]; then
             eix-sync
         else
             emerge --sync
         fi
     else
-        if [ "x$(which eix)" != "x" ]; then
+        if [ "$(which eix)" != "" ]; then
             eix-sync -q
         else
             emerge --sync --quiet
@@ -3999,7 +3999,7 @@ __gentoo_post_dep() {
     __emerge -vo 'dev-python/requests'
     __emerge -vo 'app-admin/salt'
 
-    if [ "x${_EXTRA_PACKAGES}" != "x" ]; then
+    if [ "${_EXTRA_PACKAGES}" != "" ]; then
         echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
         # shellcheck disable=SC2086
         __emerge -v ${_EXTRA_PACKAGES} || return 1
@@ -4224,7 +4224,7 @@ daemons_running() {
                 echoerror "salt-$fname was not found running"
                 FAILED_DAEMONS=$((FAILED_DAEMONS + 1))
             fi
-        elif [ "x$(ps wwwaux | grep -v grep | grep salt-$fname)" = "x" ]; then
+        elif [ "$(ps wwwaux | grep -v grep | grep salt-$fname)" = "" ]; then
             echoerror "salt-$fname was not found running"
             FAILED_DAEMONS=$((FAILED_DAEMONS + 1))
         fi

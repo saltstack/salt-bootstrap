@@ -47,14 +47,6 @@ Using ``curl`` to install latest git:
   sudo sh install_salt.sh git develop
 
 
-If you have certificate issues using ``curl``, try the following:
-
-.. code:: console 
-
-  curl -L https://bootstrap.saltstack.com -o install_salt.sh
-  sudo sh install_salt.sh git develop
-
-
 Using ``wget`` to install your distribution's stable packages:
 
 .. code:: console

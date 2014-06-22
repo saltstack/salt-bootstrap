@@ -3625,7 +3625,6 @@ install_opensuse_stable_deps() {
     fi
 
     zypper --gpg-auto-import-keys --non-interactive refresh
-    exitcode=$?
     if [ $? -ne 0 ] && [ $? -ne 4 ]; then
         # If the exit code is not 0, and it's not 4(failed to update a
         # repository) return a failure. Otherwise continue.

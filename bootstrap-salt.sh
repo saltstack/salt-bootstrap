@@ -1636,7 +1636,7 @@ install_ubuntu_deps() {
     fi
 
     if [ "${__PIP_PACKAGES}" != "" ]; then
-        # shellcheck disable=SC2086
+        # shellcheck disable=SC2086,SC2090
         pip install -U ${__PIP_PACKAGES}
     fi
 
@@ -1842,7 +1842,7 @@ install_debian_deps() {
         # shellcheck disable=SC2089
         __PIP_PACKAGES="${__PIP_PACKAGES} 'apache-libcloud>=$_LIBCLOUD_MIN_VERSION'"
     fi
-    # shellcheck disable=SC2086
+    # shellcheck disable=SC2086,SC2090
     pip install -U ${__PIP_PACKAGES}
 
     if [ "$_UPGRADE_SYS" -eq $BS_TRUE ]; then
@@ -3819,7 +3819,7 @@ install_suse_11_stable_deps() {
         packages="${packages} python-apache-libcloud"
     fi
 
-    # shellcheck disable=SC2086
+    # shellcheck disable=SC2086,SC2090
     zypper --non-interactive install --auto-agree-with-licenses ${packages} || return 1
 
     if [ "$SUSE_PATCHLEVEL" -eq 1 ]; then

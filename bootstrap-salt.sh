@@ -550,6 +550,7 @@ __gather_hardware_info() {
     else
         CPU_VENDOR_ID=$( sysctl -n hw.model )
     fi
+    # shellcheck disable=SC2034
     CPU_VENDOR_ID_L=$( echo "$CPU_VENDOR_ID" | tr '[:upper:]' '[:lower:]' )
     CPU_ARCH=$(uname -m 2>/dev/null || uname -p 2>/dev/null || echo "unknown")
     CPU_ARCH_L=$( echo "$CPU_ARCH" | tr '[:upper:]' '[:lower:]' )
@@ -566,6 +567,7 @@ __gather_os_info() {
     OS_NAME=$(uname -s 2>/dev/null)
     OS_NAME_L=$( echo "$OS_NAME" | tr '[:upper:]' '[:lower:]' )
     OS_VERSION=$(uname -r)
+    # shellcheck disable=SC2034
     OS_VERSION_L=$( echo "$OS_VERSION" | tr '[:upper:]' '[:lower:]' )
 }
 __gather_os_info
@@ -899,6 +901,7 @@ __gather_system_info() {
 #                 If distro has a known Ubuntu base version, use those install
 #                 functions by pretending to be Ubuntu (i.e. change global vars)
 #----------------------------------------------------------------------------------------------------------------------
+# shellcheck disable=SC2034
 __ubuntu_derivatives_translation() {
     UBUNTU_DERIVATIVES="(trisquel|linuxmint|linaro|elementary_os)"
     # Mappings
@@ -942,6 +945,7 @@ __ubuntu_derivatives_translation() {
 #                 If distro has a known Debian base version, use those install
 #                 functions by pretending to be Debian (i.e. change global vars)
 #----------------------------------------------------------------------------------------------------------------------
+# shellcheck disable=SC2034
 __debian_derivatives_translation() {
 
     # If the file does not exist, return

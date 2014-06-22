@@ -1631,6 +1631,7 @@ install_ubuntu_deps() {
         if [ "${__PIP_PACKAGES}" = "" ]; then
             __apt_get_install_noinput python-pip
         fi
+        # shellcheck disable=SC2089
         __PIP_PACKAGES="${__PIP_PACKAGES} 'apache-libcloud>=$_LIBCLOUD_MIN_VERSION'"
     fi
 
@@ -1838,6 +1839,7 @@ install_debian_deps() {
     __PIP_PACKAGES="requests"
 
     if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
+        # shellcheck disable=SC2089
         __PIP_PACKAGES="${__PIP_PACKAGES} 'apache-libcloud>=$_LIBCLOUD_MIN_VERSION'"
     fi
     # shellcheck disable=SC2086
@@ -3802,6 +3804,7 @@ install_suse_11_stable_deps() {
         zypper --gpg-auto-import-keys --non-interactive update || return 1
     fi
 
+    # shellcheck disable=SC2089
     packages="libzmq3 python python-Jinja2 'python-M2Crypto>=0.21' python-msgpack-python"
     packages="${packages} python-pycrypto python-pyzmq python-pip python-xml python-requests"
 

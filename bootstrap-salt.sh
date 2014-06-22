@@ -702,11 +702,11 @@ __gather_linux_system_info() {
     fi
 
     # shellcheck disable=SC2086
-    for rsource in $(__sort_release_files $(
+    for rsource in $(__sort_release_files "$(
             cd /etc && /bin/ls *[_-]release *[_-]version 2>/dev/null | env -i sort | \
             sed -e '/^redhat-release$/d' -e '/^lsb-release$/d'; \
             echo redhat-release lsb-release
-            )); do
+            )"); do
 
         [ -L "/etc/${rsource}" ] && continue        # Don't follow symlinks
         [ ! -f "/etc/${rsource}" ] && continue      # Does not exist
@@ -750,8 +750,8 @@ __gather_linux_system_info() {
                 done < "/etc/${rsource}"
                 ;;
             os                 )
-                nn="$(__unquote_string $(grep '^ID=' /etc/os-release | sed -e 's/^ID=\(.*\)$/\1/g'))"
-                rv="$(__unquote_string $(grep '^VERSION_ID=' /etc/os-release | sed -e 's/^VERSION_ID=\(.*\)$/\1/g'))"
+                nn="$(__unquote_string "$(grep '^ID=' /etc/os-release | sed -e 's/^ID=\(.*\)$/\1/g')")"
+                rv="$(__unquote_string "$(grep '^VERSION_ID=' /etc/os-release | sed -e 's/^VERSION_ID=\(.*\)$/\1/g')")"
                 [ "${rv}" != "" ] && v=$(__parse_version_string "$rv") || v=""
                 case $(echo "${nn}" | tr '[:upper:]' '[:lower:]') in
                     arch        )
@@ -1468,7 +1468,7 @@ __check_services_debian() {
     servicename=$1
     echodebug "Checking if service ${servicename} is enabled"
 
-    # shellcheck disable=SC2086
+    # shellcheck disable=SC2086,SC2046
     if [ -f /etc/rc$(runlevel | awk '{ print $2 }').d/S*${servicename} ]; then
         echodebug "Service ${servicename} is enabled"
         return 0
@@ -4179,7 +4179,7 @@ config_salt() {
 preseed_master() {
     # Create the PKI directory
 
-    if [ $(ls "$_TEMP_KEYS_DIR" | wc -l) -lt 1 ]; then
+    if [ "$(find "$_TEMP_KEYS_DIR" -maxdepth 1 -type f | wc -l)" -lt 1 ]; then
         echoerror "No minion keys were uploaded. Unable to pre-seed master"
         return 1
     fi

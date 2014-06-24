@@ -2618,7 +2618,7 @@ install_centos_check_services() {
 #
 #   RedHat Install Functions
 #
-install_red_hat_linux_stable_deps() {
+__test_rhel_optionals_packages() {
     __install_epel_repository
 
     if [ "$DISTRO_MAJOR_VERSION" -eq 6 ] || [ "$DISTRO_MAJOR_VERSION" -gt 6 ]; then
@@ -2627,9 +2627,15 @@ install_red_hat_linux_stable_deps() {
 
         if [ "$DISTRO_NAME_L" = "oracle_linux" ]; then
             # try both ways --enablerepo=X disables ALL OTHER REPOS!!!!
-            yum -y install yum-tsflags || yum -y install yum-tsflags --enablerepo=${_EPEL_REPO} || return 1
+            yum -y install yum-tsflags || \
+                yum -y install yum-tsflags --enablerepo=${_EPEL_REPO} || \
+                yum -y install yum-plugin-tsflags || \
+                yum -y install yum-plugin-tsflags --enablerepo=${_EPEL_REPO} || \
+                return 1
         else
-            yum -y install yum-tsflags --enablerepo=${_EPEL_REPO} || return 1
+            yum -y install yum-tsflags --enablerepo=${_EPEL_REPO} \
+                yum -y install yum-tsflags --enablerepo=${_EPEL_REPO} || \
+                return 1
         fi
 
         # Let's try installing the packages that usually require the optional repository
@@ -2647,12 +2653,18 @@ install_red_hat_linux_stable_deps() {
             fi
         done
     fi
+    return 0
+}
 
+
+install_red_hat_linux_stable_deps() {
+    __test_rhel_optionals_packages || return 1
     install_centos_stable_deps || return 1
     return 0
 }
 
 install_red_hat_linux_git_deps() {
+    __test_rhel_optionals_packages || return 1
     install_centos_git_deps || return 1
     return 0
 }
@@ -2849,11 +2861,13 @@ install_red_hat_enterprise_workstation_testing_post() {
 #   Oracle Linux Install Functions
 #
 install_oracle_linux_stable_deps() {
+    __test_rhel_optionals_packages()
     install_centos_stable_deps || return 1
     return 0
 }
 
 install_oracle_linux_git_deps() {
+    __test_rhel_optionals_packages()
     install_centos_git_deps || return 1
     return 0
 }

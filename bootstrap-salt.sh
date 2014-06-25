@@ -2861,13 +2861,13 @@ install_red_hat_enterprise_workstation_testing_post() {
 #   Oracle Linux Install Functions
 #
 install_oracle_linux_stable_deps() {
-    __test_rhel_optionals_packages()
+    __test_rhel_optionals_packages || return 1
     install_centos_stable_deps || return 1
     return 0
 }
 
 install_oracle_linux_git_deps() {
-    __test_rhel_optionals_packages()
+    __test_rhel_optionals_packages || return 1
     install_centos_git_deps || return 1
     return 0
 }

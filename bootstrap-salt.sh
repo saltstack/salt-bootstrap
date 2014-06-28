@@ -2646,8 +2646,8 @@ __test_rhel_optionals_packages() {
                 yum -y install yum-plugin-tsflags --enablerepo=${_EPEL_REPO} || \
                 return 1
         else
-            yum -y install yum-tsflags --enablerepo=${_EPEL_REPO} \
-                yum -y install yum-tsflags --enablerepo=${_EPEL_REPO} || \
+            yum -y install yum-tsflags --enablerepo=${_EPEL_REPO} || \
+                yum -y install yum-plugin-tsflags --enablerepo=${_EPEL_REPO} || \
                 return 1
         fi
 

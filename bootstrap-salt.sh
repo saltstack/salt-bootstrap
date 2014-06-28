@@ -703,7 +703,7 @@ __gather_linux_system_info() {
 
     # shellcheck disable=SC2086
     for rsource in $(__sort_release_files "$(
-            cd /etc && /bin/ls ./*[_-]release ./*[_-]version 2>/dev/null | env -i sort | \
+            cd /etc && /bin/ls *[_-]release *[_-]version 2>/dev/null | env -i sort | \
             sed -e '/^redhat-release$/d' -e '/^lsb-release$/d'; \
             echo redhat-release lsb-release
             )"); do

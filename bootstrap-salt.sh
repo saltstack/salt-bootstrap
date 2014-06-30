@@ -2626,9 +2626,9 @@ __test_rhel_optionals_packages() {
     # wait for userdata script to finish registering the machine.  Wait up to 1 minute for RHEL-ish 6+.
     waitForUserScript=6
     while [ $waitForUserScript -gt 0  -a "$DISTRO_MAJOR_VERSION" -ge 6 ]; do
-        if [ "$(yum repolist enabled 2> /dev/null | grep -c rhel-${DISTRO_MAJOR_VERSION}-server-optional-rpms)" -gt 0 ] || [ "$(yum repolist enabled 2> /dev/null | grep -c rhel-${CPU_ARCH}-server-optional-${DISTRO_MAJOR_VERSION})" -gt 0 ] ; then
+        if [ "$(yum search python-jinja2 2> /dev/null | grep -c 'No Matches found')" -eq 0 ]; then
             break
-        fi
+        fi 
         echoinfo "Sleeping 10 seconds waiting on userdata to finish"
         sleep 10
         waitForUserScript=$(( $waitForUserScript -1 ))

@@ -1700,18 +1700,18 @@ install_ubuntu_git_deps() {
 }
 
 install_ubuntu_stable() {
-    packages=""
+    __PACKAGES=""
     if [ "$_INSTALL_MINION" -eq $BS_TRUE ]; then
-        packages="${packages} salt-minion"
+        __PACKAGES="${__PACKAGES} salt-minion"
     fi
     if [ "$_INSTALL_MASTER" -eq $BS_TRUE ]; then
-        packages="${packages} salt-master"
+        __PACKAGES="${__PACKAGES} salt-master"
     fi
     if [ "$_INSTALL_SYNDIC" -eq $BS_TRUE ]; then
-        packages="${packages} salt-syndic"
+        __PACKAGES="${__PACKAGES} salt-syndic"
     fi
     # shellcheck disable=SC2086
-    __apt_get_install_noinput ${packages} || return 1
+    __apt_get_install_noinput ${__PACKAGES} || return 1
     return 0
 }
 
@@ -1833,7 +1833,7 @@ install_debian_deps() {
     __apt_get_install_noinput debian-archive-keyring && apt-get update
 
     # Install procps and pciutils which allows for Docker bootstraps. See #366#issuecomment-39666813
-    packages="procps pciutils"
+    __PACKAGES="procps pciutils"
     __PIP_PACKAGES=""
 
     if [ "$DISTRO_MAJOR_VERSION" -lt 7 ]; then
@@ -2128,18 +2128,18 @@ install_debian_8_git_deps() {
 }
 
 __install_debian_stable() {
-    packages=""
+    __PACKAGES=""
     if [ "$_INSTALL_MINION" -eq $BS_TRUE ]; then
-        packages="${packages} salt-minion"
+        __PACKAGES="${__PACKAGES} salt-minion"
     fi
     if [ "$_INSTALL_MASTER" -eq $BS_TRUE ]; then
-        packages="${packages} salt-master"
+        __PACKAGES="${__PACKAGES} salt-master"
     fi
     if [ "$_INSTALL_SYNDIC" -eq $BS_TRUE ]; then
-        packages="${packages} salt-syndic"
+        __PACKAGES="${__PACKAGES} salt-syndic"
     fi
     # shellcheck disable=SC2086
-    __apt_get_install_noinput ${packages} || return 1
+    __apt_get_install_noinput ${__PACKAGES} || return 1
 
     if [ "$_PIP_ALLOWED" -eq $BS_TRUE ]; then
         # Building pyzmq from source to build it against libzmq3.
@@ -2250,14 +2250,14 @@ install_debian_check_services() {
 #   Fedora Install Functions
 #
 install_fedora_deps() {
-    packages="yum-utils PyYAML libyaml m2crypto python-crypto python-jinja2 python-msgpack python-zmq python-requests"
+    __PACKAGES="yum-utils PyYAML libyaml m2crypto python-crypto python-jinja2 python-msgpack python-zmq python-requests"
 
     if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
-        packages="${packages} python-libcloud"
+        __PACKAGES="${__PACKAGES} python-libcloud"
     fi
 
     # shellcheck disable=SC2086
-    yum install -y ${packages} || return 1
+    yum install -y ${__PACKAGES} || return 1
 
     if [ "$_UPGRADE_SYS" -eq $BS_TRUE ]; then
         yum -y update || return 1
@@ -2273,15 +2273,15 @@ install_fedora_deps() {
 }
 
 install_fedora_stable() {
-    packages=""
+    __PACKAGES=""
     if [ "$_INSTALL_MINION" -eq $BS_TRUE ]; then
-        packages="${packages} salt-minion"
+        __PACKAGES="${__PACKAGES} salt-minion"
     fi
     if [ "$_INSTALL_MASTER" -eq $BS_TRUE ] || [ "$_INSTALL_SYNDIC" -eq $BS_TRUE ]; then
-        packages="${packages} salt-master"
+        __PACKAGES="${__PACKAGES} salt-master"
     fi
     # shellcheck disable=SC2086
-    yum install -y ${packages} || return 1
+    yum install -y ${__PACKAGES} || return 1
     return 0
 }
 
@@ -2403,32 +2403,32 @@ install_centos_stable_deps() {
         yum -y update || return 1
     fi
 
-    packages="yum-utils chkconfig"
+    __PACKAGES="yum-utils chkconfig"
 
     if [ "$DISTRO_MAJOR_VERSION" -eq 5 ]; then
-        packages="${packages} python26-PyYAML python26-m2crypto m2crypto python26 python26-requests"
-        packages="${packages} python26-crypto python26-msgpack python26-zmq python26-jinja2"
+        __PACKAGES="${__PACKAGES} python26-PyYAML python26-m2crypto m2crypto python26 python26-requests"
+        __PACKAGES="${__PACKAGES} python26-crypto python26-msgpack python26-zmq python26-jinja2"
         if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
             check_pip_allowed "You need to allow pip based installations (-P) in order to install apache-libcloud"
-            packages="${packages} python26-setuptools"
+            __PACKAGES="${__PACKAGES} python26-setuptools"
         fi
     else
-        packages="${packages} PyYAML m2crypto python-crypto python-msgpack python-zmq python-jinja2 python-requests"
+        __PACKAGES="${__PACKAGES} PyYAML m2crypto python-crypto python-msgpack python-zmq python-jinja2 python-requests"
         if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
             check_pip_allowed "You need to allow pip based installations (-P) in order to install apache-libcloud"
-            packages="${packages} python-pip"
+            __PACKAGES="${__PACKAGES} python-pip"
         fi
     fi
 
     if [ "$DISTRO_NAME_L" = "oracle_linux" ]; then
         # We need to install one package at a time because --enablerepo=X disables ALL OTHER REPOS!!!!
-        for package in ${packages}; do
+        for package in ${__PACKAGES}; do
             # shellcheck disable=SC2086
             yum -y install ${package} || yum -y install ${package} --enablerepo=${_EPEL_REPO} || return 1
         done
     else
         # shellcheck disable=SC2086
-        yum -y install ${packages} --enablerepo=${_EPEL_REPO} || return 1
+        yum -y install ${__PACKAGES} --enablerepo=${_EPEL_REPO} || return 1
     fi
 
     if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
@@ -2458,22 +2458,22 @@ install_centos_stable_deps() {
 }
 
 install_centos_stable() {
-    packages=""
+    __PACKAGES=""
     if [ "$_INSTALL_MINION" -eq $BS_TRUE ]; then
-        packages="${packages} salt-minion"
+        __PACKAGES="${__PACKAGES} salt-minion"
     fi
     if [ "$_INSTALL_MASTER" -eq $BS_TRUE ] || [ "$_INSTALL_SYNDIC" -eq $BS_TRUE ]; then
-        packages="${packages} salt-master"
+        __PACKAGES="${__PACKAGES} salt-master"
     fi
     if [ "$DISTRO_NAME_L" = "oracle_linux" ]; then
         # We need to install one package at a time because --enablerepo=X disables ALL OTHER REPOS!!!!
-        for package in ${packages}; do
+        for package in ${__PACKAGES}; do
             # shellcheck disable=SC2086
             yum -y install ${package} || yum -y install ${package} --enablerepo=${_EPEL_REPO} || return 1
         done
     else
         # shellcheck disable=SC2086
-        yum -y install ${packages} --enablerepo=${_EPEL_REPO} || return 1
+        yum -y install ${__PACKAGES} --enablerepo=${_EPEL_REPO} || return 1
     fi
     return 0
 }
@@ -3018,15 +3018,15 @@ install_amazon_linux_ami_deps() {
         yum -y update || return 1
     fi
 
-    packages="PyYAML m2crypto python-crypto python-msgpack python-zmq python-ordereddict python-jinja2 python-requests"
+    __PACKAGES="PyYAML m2crypto python-crypto python-msgpack python-zmq python-ordereddict python-jinja2 python-requests"
 
     if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
         check_pip_allowed "You need to allow pip based installations (-P) in order to install apache-libcloud"
-        packages="${packages} python-pip"
+        __PACKAGES="${__PACKAGES} python-pip"
     fi
 
     # shellcheck disable=SC2086
-    yum -y install ${packages} --enablerepo=${_EPEL_REPO}"" || return 1
+    yum -y install ${__PACKAGES} --enablerepo=${_EPEL_REPO}"" || return 1
 
     if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
         check_pip_allowed "You need to allow pip based installations (-P) in order to install apache-libcloud"
@@ -3667,15 +3667,15 @@ install_opensuse_stable_deps() {
         zypper --gpg-auto-import-keys --non-interactive update || return 1
     fi
 
-    packages="libzmq3 python python-Jinja2 python-M2Crypto python-PyYAML python-requests"
-    packages="${packages} python-msgpack-python python-pycrypto python-pyzmq python-xml"
+    __PACKAGES="libzmq3 python python-Jinja2 python-M2Crypto python-PyYAML python-requests"
+    __PACKAGES="${__PACKAGES} python-msgpack-python python-pycrypto python-pyzmq python-xml"
 
     if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
-        packages="${packages} python-apache-libcloud"
+        __PACKAGES="${__PACKAGES} python-apache-libcloud"
     fi
 
     # shellcheck disable=SC2086
-    zypper --non-interactive install --auto-agree-with-licenses ${packages} || return 1
+    zypper --non-interactive install --auto-agree-with-licenses ${__PACKAGES} || return 1
 
     if [ "${_EXTRA_PACKAGES}" != "" ]; then
         echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
@@ -3702,18 +3702,18 @@ install_opensuse_git_deps() {
 }
 
 install_opensuse_stable() {
-    packages=""
+    __PACKAGES=""
     if [ "$_INSTALL_MINION" -eq $BS_TRUE ]; then
-        packages="${packages} salt-minion"
+        __PACKAGES="${__PACKAGES} salt-minion"
     fi
     if [ "$_INSTALL_MASTER" -eq $BS_TRUE ]; then
-        packages="${packages} salt-master"
+        __PACKAGES="${__PACKAGES} salt-master"
     fi
     if [ "$_INSTALL_SYNDIC" -eq $BS_TRUE ]; then
-        packages="${packages} salt-syndic"
+        __PACKAGES="${__PACKAGES} salt-syndic"
     fi
     # shellcheck disable=SC2086
-    zypper --non-interactive install --auto-agree-with-licenses $packages || return 1
+    zypper --non-interactive install --auto-agree-with-licenses $__PACKAGES || return 1
     return 0
 }
 
@@ -3833,22 +3833,22 @@ install_suse_11_stable_deps() {
     fi
 
     # shellcheck disable=SC2089
-    packages="libzmq3 python python-Jinja2 'python-M2Crypto>=0.21' python-msgpack-python"
-    packages="${packages} python-pycrypto python-pyzmq python-pip python-xml python-requests"
+    __PACKAGES="libzmq3 python python-Jinja2 'python-M2Crypto>=0.21' python-msgpack-python"
+    __PACKAGES="${__PACKAGES} python-pycrypto python-pyzmq python-pip python-xml python-requests"
 
     if [ "$SUSE_PATCHLEVEL" -eq 1 ]; then
         check_pip_allowed
         echowarn "PyYaml will be installed using pip"
     else
-        packages="${packages} python-PyYAML"
+        __PACKAGES="${__PACKAGES} python-PyYAML"
     fi
 
     if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
-        packages="${packages} python-apache-libcloud"
+        __PACKAGES="${__PACKAGES} python-apache-libcloud"
     fi
 
     # shellcheck disable=SC2086,SC2090
-    zypper --non-interactive install --auto-agree-with-licenses ${packages} || return 1
+    zypper --non-interactive install --auto-agree-with-licenses ${__PACKAGES} || return 1
 
     if [ "$SUSE_PATCHLEVEL" -eq 1 ]; then
         # There's no python-PyYaml in SP1, let's install it using pip

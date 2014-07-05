@@ -1832,13 +1832,23 @@ install_debian_deps() {
     # Install Keys
     __apt_get_install_noinput debian-archive-keyring && apt-get update
 
-    # Both python-requests which is a hard dependency and apache-libcloud which is a soft dependency, under debian < 7
-    # need to be installed using pip
-    check_pip_allowed "You need to allow pip based installations (-P) in order to install the python 'requests' package"
-    # Additionally install procps and pciutils which allows for Docker boostraps. See 366#issuecomment-39666813
-    __apt_get_install_noinput python-pip procps pciutils
+    # Install procps and pciutils which allows for Docker bootstraps. See #366#issuecomment-39666813
+    packages="procps pciutils"
+    __PIP_PACKAGES=""
 
-    __PIP_PACKAGES="requests"
+    if [ "$DISTRO_MAJOR_VERSION" -lt 7 ]; then
+        # Both python-requests which is a hard dependency and apache-libcloud which is a soft dependency, under debian < 7
+        # need to be installed using pip
+        check_pip_allowed "You need to allow pip based installations (-P) in order to install the python 'requests' package"
+        # Additionally install procps and pciutils which allows for Docker boostraps. See 366#issuecomment-39666813
+        __PACKAGES="${__PACKAGES} python-pip"
+        __PIP_PACKAGES="${__PIP_PACKAGES} requests"
+    else
+        __PACKAGES="${__PACKAGES} python-requests"
+    fi
+
+    # shellcheck disable=SC2086
+    __apt_get_install_noinput ${__PACKAGES}
 
     if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
         # shellcheck disable=SC2089

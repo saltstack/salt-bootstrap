@@ -1,4 +1,5 @@
 Version 2014.xx.xx:
+	* Amazon Linux AMI 2010.xx is not explicitly not supported.
 	* Distro Support Fixed:
 		* Debian >= 7 uses system's python-requests package, not PIP
 		* Install 'python-zypp' in SuSE and openSUSE(required by Salt's zypper module)

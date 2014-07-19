@@ -3017,6 +3017,21 @@ install_scientific_linux_check_services() {
 #
 #   Amazon Linux AMI Install Functions
 #
+
+install_amazon_linux_ami_2010_deps() {
+    # Linux Amazon AMI 2010.xx seems to use EPEL5 but the system is based on CentOS6.
+    # Supporting this would be quite troublesome and we need to workaround some serious package conflicts
+    echoerror "Amazon Linux AMI 2010 is not supported. Please use a more recent image (Amazon Linux AMI >= 2011.xx)"
+    exit 1
+}
+
+install_amazon_linux_ami_2010_git_deps() {
+    # Linux Amazon AMI 2010.xx seems to use EPEL5 but the system is based on CentOS6.
+    # Supporting this would be quite troublesome and we need to workaround some serious package conflicts
+    echoerror "Amazon Linux AMI 2010 is not supported. Please use a more recent image (Amazon Linux AMI >= 2011.xx)"
+    exit 1
+}
+
 install_amazon_linux_ami_deps() {
     # According to http://aws.amazon.com/amazon-linux-ami/faqs/#epel we should
     # enable the EPEL 6 repo

@@ -1,7 +1,7 @@
 Version 2014.xx.xx:
 	* Distro Support Fixed:
 		* Debian >= 7 uses system's python-requests package, not PIP
-
+		* Install 'python-zypp' in SuSE and openSUSE(required by Salt's zypper module)
 
 Version 2014.06.30:
 	* Distro Support Fixed:

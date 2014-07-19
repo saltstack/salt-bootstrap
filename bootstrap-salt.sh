@@ -3667,7 +3667,9 @@ install_opensuse_stable_deps() {
         zypper --gpg-auto-import-keys --non-interactive update || return 1
     fi
 
-    __PACKAGES="libzmq3 python python-Jinja2 python-M2Crypto python-PyYAML python-requests"
+    # Salt needs python-zypp installed in order to use the zypper module
+    __PACKAGES="python-zypp"
+    __PACKAGES="${__PACKAGES} libzmq3 python python-Jinja2 python-M2Crypto python-PyYAML python-requests"
     __PACKAGES="${__PACKAGES} python-msgpack-python python-pycrypto python-pyzmq python-xml"
 
     if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
@@ -3833,7 +3835,9 @@ install_suse_11_stable_deps() {
     fi
 
     # shellcheck disable=SC2089
-    __PACKAGES="libzmq3 python python-Jinja2 'python-M2Crypto>=0.21' python-msgpack-python"
+    # Salt needs python-zypp installed in order to use the zypper module
+    __PACKAGES="python-zypp"
+    __PACKAGES="${__PACKAGES} libzmq3 python python-Jinja2 'python-M2Crypto>=0.21' python-msgpack-python"
     __PACKAGES="${__PACKAGES} python-pycrypto python-pyzmq python-pip python-xml python-requests"
 
     if [ "$SUSE_PATCHLEVEL" -eq 1 ]; then

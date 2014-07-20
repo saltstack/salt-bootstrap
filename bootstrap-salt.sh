@@ -643,7 +643,7 @@ __sort_release_files() {
     done
 
     # Now let's sort by know files importance, max important goes last in the max_prio list
-    max_prio="redhat-release centos-release"
+    max_prio="redhat-release centos-release oracle-release"
     for entry in $max_prio; do
         if [ "$(echo "${primary_release_files}" | grep "$entry")" != "" ]; then
             primary_release_files=$(echo "${primary_release_files}" | sed -e "s:\(.*\)\($entry\)\(.*\):\2 \1 \3:g")

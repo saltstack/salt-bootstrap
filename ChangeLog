@@ -1,9 +1,12 @@
 Version 2014.xx.xx:
 	* Amazon Linux AMI 2010.xx is not explicitly not supported.
+	* Install the `salt-api` scripts if available when the `salt-master` is also installed.
 	* Distro Support Fixed:
 		* Debian >= 7 uses system's python-requests package, not PIP
 		* Install 'python-zypp' in SuSE and openSUSE(required by Salt's zypper module)
 		* Only install EPEL on requiring distributions if not already installed
+		* CentOS 7 now uses systemd and the script now properly handles it
+
 
 Version 2014.06.30:
 	* Distro Support Fixed:

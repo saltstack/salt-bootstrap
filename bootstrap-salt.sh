@@ -1892,8 +1892,8 @@ install_debian_6_deps() {
         echowarn "PyZMQ will be installed from PyPI in order to compile it against ZMQ3"
         echowarn "This is required for long term stable minion connections to the master."
         echowarn "YOU WILL END UP WITH QUITE A FEW PACKAGES FROM DEBIAN UNSTABLE"
-        echowarn "Sleeping for 3 seconds so you can cancel..."
-        sleep 3
+        echowarn "Sleeping for 5 seconds so you can cancel..."
+        sleep 5
 
         if [ ! -f /etc/apt/sources.list.d/debian-unstable.list ]; then
            cat <<_eof > /etc/apt/sources.list.d/debian-unstable.list
@@ -1992,8 +1992,8 @@ install_debian_7_deps() {
         echowarn "PyZMQ will be installed from PyPI in order to compile it against ZMQ3"
         echowarn "This is required for long term stable minion connections to the master."
         echowarn "YOU WILL END UP WITH QUITE A FEW PACKAGES FROM DEBIAN UNSTABLE"
-        echowarn "Sleeping for 3 seconds so you can cancel..."
-        sleep 3
+        echowarn "Sleeping for 5 seconds so you can cancel..."
+        sleep 5
 
         if [ ! -f /etc/apt/sources.list.d/debian-unstable.list ]; then
            cat <<_eof > /etc/apt/sources.list.d/debian-unstable.list

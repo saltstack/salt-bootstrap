@@ -2377,6 +2377,14 @@ __install_epel_repository() {
     if [ ${__EPEL_REPOS_INSTALLED} -eq $BS_TRUE ]; then
         return 0
     fi
+
+    # Check if epel-release is already installed and flag it accordingly
+    rpm -q epel-release > /dev/null 2>&1
+    if [ $? -eq 0 ]; then
+        __EPEL_REPOS_INSTALLED=${BS_TRUE}
+        return 0
+    fi
+
     if [ "$CPU_ARCH_L" = "i686" ]; then
         EPEL_ARCH="i386"
     else

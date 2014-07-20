@@ -44,6 +44,9 @@ __ScriptName="bootstrap-salt.sh"
 BS_TRUE=1
 BS_FALSE=0
 
+# Default sleep time used when waiting for daemons to start, restart and checking for these running
+__DEFAULT_SLEEP=3
+
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #          NAME:  __detect_color_support
 #   DESCRIPTION:  Try to detect color support.
@@ -202,6 +205,8 @@ usage() {
   -g  Salt repository URL. (default: git://github.com/saltstack/salt.git)
   -k  Temporary directory holding the minion keys which will pre-seed
       the master.
+  -s  Sleep time used when waiting for daemons to start, restart and when checking
+      for the services running. Default: ${__DEFAULT_SLEEP}
   -M  Also install salt-master
   -S  Also install salt-syndic
   -N  Do not install salt-minion
@@ -4604,8 +4609,8 @@ fi
 # Run any start daemons function
 if [ "$STARTDAEMONS_INSTALL_FUNC" != "null" ]; then
     echoinfo "Running ${STARTDAEMONS_INSTALL_FUNC}()"
-    echodebug "Waiting 3 seconds for processes to settle before checking for them"
-    sleep 3
+    echodebug "Waiting ${__DEFAULT_SLEEP} seconds for processes to settle before checking for them"
+    sleep ${__DEFAULT_SLEEP}
     $STARTDAEMONS_INSTALL_FUNC
     if [ $? -ne 0 ]; then
         echoerror "Failed to run ${STARTDAEMONS_INSTALL_FUNC}()!!!"
@@ -4616,8 +4621,8 @@ fi
 # Check if the installed daemons are running or not
 if [ "$DAEMONS_RUNNING_FUNC" != "null" ] && [ $_START_DAEMONS -eq $BS_TRUE ]; then
     echoinfo "Running ${DAEMONS_RUNNING_FUNC}()"
-    echodebug "Waiting 3 seconds for processes to settle before checking for them"
-    sleep 3  # Sleep a little bit to let daemons start
+    echodebug "Waiting ${__DEFAULT_SLEEP} seconds for processes to settle before checking for them"
+    sleep ${__DEFAULT_SLEEP}  # Sleep a little bit to let daemons start
     $DAEMONS_RUNNING_FUNC
     if [ $? -ne 0 ]; then
         echoerror "Failed to run ${DAEMONS_RUNNING_FUNC}()!!!"

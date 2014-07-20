@@ -658,7 +658,7 @@ __sort_release_files() {
     done
 
     # Echo the results collapsing multiple white-space into a single white-space
-    echo "${primary_release_files} ${secondary_release_files}" | sed -r 's:[[:space:]]:\n:g'
+    echo "${primary_release_files} ${secondary_release_files}" | sed -r 's:[[:space:]]+:\n:g'
 }
 
 

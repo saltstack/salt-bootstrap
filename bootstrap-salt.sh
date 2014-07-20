@@ -2496,6 +2496,14 @@ install_centos_stable_post() {
         if [ -f /etc/init.d/salt-$fname ]; then
             # Still in SysV init!?
             /sbin/chkconfig salt-$fname on
+        elif [ -f /usr/bin/systemctl ]; then
+            # Using systemd
+            /usr/bin/systemctl is-enabled salt-$fname.service > /dev/null 2>&1 || (
+                /usr/bin/systemctl preset salt-$fname.service > /dev/null 2>&1 &&
+                /usr/bin/systemctl enable salt-$fname.service > /dev/null 2>&1
+            )
+            sleep 0.1
+            /usr/bin/systemctl daemon-reload
         fi
     done
 }

@@ -3004,6 +3004,21 @@ install_scientific_linux_check_services() {
 #
 #   Amazon Linux AMI Install Functions
 #
+
+install_amazon_linux_ami_2010_deps() {
+    # Linux Amazon AMI 2010.xx seems to use EPEL5 but the system is based on CentOS6.
+    # Supporting this would be quite troublesome and we need to workaround some serious package conflicts
+    echoerror "Amazon Linux AMI 2010 is not supported. Please use a more recent image (Amazon Linux AMI >= 2011.xx)"
+    exit 1
+}
+
+install_amazon_linux_ami_2010_git_deps() {
+    # Linux Amazon AMI 2010.xx seems to use EPEL5 but the system is based on CentOS6.
+    # Supporting this would be quite troublesome and we need to workaround some serious package conflicts
+    echoerror "Amazon Linux AMI 2010 is not supported. Please use a more recent image (Amazon Linux AMI >= 2011.xx)"
+    exit 1
+}
+
 install_amazon_linux_ami_deps() {
     # According to http://aws.amazon.com/amazon-linux-ami/faqs/#epel we should
     # enable the EPEL 6 repo
@@ -3667,7 +3682,9 @@ install_opensuse_stable_deps() {
         zypper --gpg-auto-import-keys --non-interactive update || return 1
     fi
 
-    __PACKAGES="libzmq3 python python-Jinja2 python-M2Crypto python-PyYAML python-requests"
+    # Salt needs python-zypp installed in order to use the zypper module
+    __PACKAGES="python-zypp"
+    __PACKAGES="${__PACKAGES} libzmq3 python python-Jinja2 python-M2Crypto python-PyYAML python-requests"
     __PACKAGES="${__PACKAGES} python-msgpack-python python-pycrypto python-pyzmq python-xml"
 
     if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
@@ -3832,8 +3849,10 @@ install_suse_11_stable_deps() {
         zypper --gpg-auto-import-keys --non-interactive update || return 1
     fi
 
+    # Salt needs python-zypp installed in order to use the zypper module
+    __PACKAGES="python-zypp"
     # shellcheck disable=SC2089
-    __PACKAGES="libzmq3 python python-Jinja2 'python-M2Crypto>=0.21' python-msgpack-python"
+    __PACKAGES="${__PACKAGES} libzmq3 python python-Jinja2 'python-M2Crypto>=0.21' python-msgpack-python"
     __PACKAGES="${__PACKAGES} python-pycrypto python-pyzmq python-pip python-xml python-requests"
 
     if [ "$SUSE_PATCHLEVEL" -eq 1 ]; then

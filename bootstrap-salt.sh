@@ -3862,9 +3862,9 @@ install_suse_11_stable_deps() {
         zypper --gpg-auto-import-keys --non-interactive update || return 1
     fi
 
-    # shellcheck disable=SC2089
     # Salt needs python-zypp installed in order to use the zypper module
     __PACKAGES="python-zypp"
+    # shellcheck disable=SC2089
     __PACKAGES="${__PACKAGES} libzmq3 python python-Jinja2 'python-M2Crypto>=0.21' python-msgpack-python"
     __PACKAGES="${__PACKAGES} python-pycrypto python-pyzmq python-pip python-xml python-requests"
 

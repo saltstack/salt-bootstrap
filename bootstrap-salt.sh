@@ -2591,6 +2591,10 @@ install_centos_restart_daemons() {
             # Still in SysV init!?
             /etc/init.d/salt-$fname stop > /dev/null 2>&1
             /etc/init.d/salt-$fname start
+        elif [ -f /usr/bin/systemctl ]; then
+            # CentOS 7 uses systemd
+            /usr/bin/systemctl stop salt-$fname > /dev/null 2>&1
+            /usr/bin/systemctl start salt-$fname.service
         fi
     done
 }
@@ -2620,6 +2624,8 @@ install_centos_check_services() {
             __check_services_upstart salt-$fname || return 1
         elif [ -f /etc/init.d/salt-$fname ]; then
             __check_services_sysvinit salt-$fname || return 1
+        elif [ -f /usr/bin/systemctl ]; then
+            __check_services_systemd salt-$fname || return 1
         fi
     done
     return 0

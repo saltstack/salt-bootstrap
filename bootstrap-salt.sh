@@ -2419,7 +2419,7 @@ __install_epel_repository() {
 }
 
 install_centos_stable_deps() {
-    __install_epel_repository
+    __install_epel_repository || return 1
 
     if [ "$_UPGRADE_SYS" -eq $BS_TRUE ]; then
         yum -y update || return 1
@@ -2670,18 +2670,9 @@ install_centos_check_services() {
 #   RedHat Install Functions
 #
 __test_rhel_optionals_packages() {
-    # wait for userdata script to finish registering the machine.  Wait up to 1 minute for RHEL-ish 6+.
-    waitForUserScript=6
-    while [ $waitForUserScript -gt 0  -a "$DISTRO_MAJOR_VERSION" -ge 6 ]; do
-        if [ "$(yum search python-jinja2 2> /dev/null | grep -c 'No Matches found')" -eq 0 ]; then
-            break
-        fi 
-        echoinfo "Sleeping 10 seconds waiting on userdata to finish"
-        sleep 10
-        waitForUserScript=$(( $waitForUserScript -1 ))
-    done
-    __install_epel_repository
-    if [ "$DISTRO_MAJOR_VERSION" -ge 6 ]; then
+    __install_epel_repository || return 1
+
+    if [ "$DISTRO_MAJOR_VERSION" -eq 6 ] || [ "$DISTRO_MAJOR_VERSION" -gt 6 ]; then
         # Let's enable package installation testing, kind of, --dry-run
         echoinfo "Installing 'yum-tsflags' to test for package installation success"
 

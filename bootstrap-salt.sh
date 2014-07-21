@@ -2419,7 +2419,7 @@ __install_epel_repository() {
 }
 
 install_centos_stable_deps() {
-    __install_epel_repository
+    __install_epel_repository || return 1
 
     if [ "$_UPGRADE_SYS" -eq $BS_TRUE ]; then
         yum -y update || return 1
@@ -2670,7 +2670,7 @@ install_centos_check_services() {
 #   RedHat Install Functions
 #
 __test_rhel_optionals_packages() {
-    __install_epel_repository
+    __install_epel_repository || return 1
 
     if [ "$DISTRO_MAJOR_VERSION" -eq 6 ] || [ "$DISTRO_MAJOR_VERSION" -gt 6 ]; then
         # Let's enable package installation testing, kind of, --dry-run

@@ -10,6 +10,7 @@ Version 2014.xx.xx:
 		* Only install EPEL on requiring distributions if not already installed
 		* CentOS 7 now uses systemd and the script now properly handles it
 		* systemd in openSUSE 12.2 complains if service does not contain `.service``
+		* Properly detect openSUSE using `lsb_release
 
 
 Version 2014.06.30:

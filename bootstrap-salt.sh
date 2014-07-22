@@ -1667,7 +1667,7 @@ install_ubuntu_deps() {
 
 install_ubuntu_daily_deps() {
     install_ubuntu_deps
-    if [ "$DISTRO_MAJOR_VERSION" -eq 12 ] || [ "$DISTRO_MAJOR_VERSION" -gt 12 ]; then
+    if [ "$DISTRO_MAJOR_VERSION" -ge 12 ]; then
         # Above Ubuntu 11.10 add-apt-repository is in a different package
         __apt_get_install_noinput software-properties-common || return 1
     else
@@ -2677,7 +2677,7 @@ install_centos_check_services() {
 __test_rhel_optionals_packages() {
     __install_epel_repository || return 1
 
-    if [ "$DISTRO_MAJOR_VERSION" -eq 6 ] || [ "$DISTRO_MAJOR_VERSION" -gt 6 ]; then
+    if [ "$DISTRO_MAJOR_VERSION" -ge 6 ]; then
         # Let's enable package installation testing, kind of, --dry-run
         echoinfo "Installing 'yum-tsflags' to test for package installation success"
 

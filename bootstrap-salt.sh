@@ -683,8 +683,13 @@ __gather_linux_system_info() {
             # lsb_release -si returns "openSUSE project" on openSUSE 12.3
             DISTRO_NAME="opensuse"
         elif [ "${DISTRO_NAME}" = "SUSE LINUX" ]; then
-            # lsb_release -si returns "SUSE LINUX" on SLES 11 SP3
-            DISTRO_NAME="suse"
+            if [ "$(lsb_release -sd | grep -i opensuse)" != "" ]; then
+                # openSUSE 12.2 reports SUSE LINUX on lsb_release -si
+                DISTRO_NAME="opensuse"
+            else
+                # lsb_release -si returns "SUSE LINUX" on SLES 11 SP3
+                DISTRO_NAME="suse"
+            fi
         elif [ "${DISTRO_NAME}" = "EnterpriseEnterpriseServer" ]; then
             # This the Oracle Linux Enterprise ID before ORACLE LINUX 5 UPDATE 3
             DISTRO_NAME="Oracle Linux"

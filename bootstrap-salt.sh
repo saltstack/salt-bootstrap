@@ -2696,7 +2696,7 @@ __test_rhel_optionals_packages() {
                 yum --config "${__YUM_CONF_FILE}" install -y ${package} --enablerepo=${_EPEL_REPO} >/dev/null 2>&1
             fi
             if [ $? -ne 0 ]; then
-                echoerror "Failed to install '${package}'. The optional repository or it's subscription might be missing."
+                echoerror "Failed to find an installable '${package}' package. The optional repository or it's subscription might be missing."
                 rm -rf "${__YUM_CONF_DIR}"
                 return 1
             fi

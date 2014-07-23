@@ -3,6 +3,7 @@ Version 2014.xx.xx:
 	* Install the `salt-api` scripts if available when the `salt-master` is also installed.
 	* Added support for a configurable sleep time when starting, restarting and checking for 
 	enabled services.
+	* Drop the `tsflags` requirement for RHEL and RHEL based distributions.
 	* When sorting release files, oracle-release has higher priority than redhat-release.
 	* Distro Support Fixed:
 		* Debian >= 7 uses system's python-requests package, not PIP

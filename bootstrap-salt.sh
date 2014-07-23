@@ -2679,35 +2679,29 @@ __test_rhel_optionals_packages() {
 
     if [ "$DISTRO_MAJOR_VERSION" -ge 6 ]; then
         # Let's enable package installation testing, kind of, --dry-run
-        echoinfo "Installing 'yum-tsflags' to test for package installation success"
-
-        if [ "$DISTRO_NAME_L" = "oracle_linux" ]; then
-            # try both ways --enablerepo=X disables ALL OTHER REPOS!!!!
-            yum -y install yum-tsflags || \
-                yum -y install yum-tsflags --enablerepo=${_EPEL_REPO} || \
-                yum -y install yum-plugin-tsflags || \
-                yum -y install yum-plugin-tsflags --enablerepo=${_EPEL_REPO} || \
-                return 1
-        else
-            yum -y install yum-tsflags --enablerepo=${_EPEL_REPO} || \
-                yum -y install yum-plugin-tsflags --enablerepo=${_EPEL_REPO} || \
-                return 1
-        fi
+        echoinfo "Testing if packages usually on the optionals repository are available:"
+        __YUM_CONF_DIR="$(mktemp -d)"
+        __YUM_CONF_FILE="${__YUM_CONF_DIR}/yum.conf"
+        cp /etc/yum.conf "${__YUM_CONF_FILE}"
+        echo 'tsflags=test' >> "${__YUM_CONF_FILE}"
 
         # Let's try installing the packages that usually require the optional repository
         # shellcheck disable=SC2043
         for package in python-jinja2; do
+            echoinfo "  - ${package}"
             if [ "$DISTRO_NAME_L" = "oracle_linux" ]; then
-                yum install -y --tsflags='test' ${package} >/dev/null 2>&1 || \
-                    yum install -y --tsflags='test' ${package} --enablerepo=${_EPEL_REPO} >/dev/null 2>&1
+                yum --config "${__YUM_CONF_FILE}" install -y ${package} >/dev/null 2>&1 || \
+                    yum --config "${__YUM_CONF_FILE}" install -y ${package} --enablerepo=${_EPEL_REPO} >/dev/null 2>&1
             else
-                yum install -y --tsflags='test' ${package} --enablerepo=${_EPEL_REPO} >/dev/null 2>&1
+                yum --config "${__YUM_CONF_FILE}" install -y ${package} --enablerepo=${_EPEL_REPO} >/dev/null 2>&1
             fi
             if [ $? -ne 0 ]; then
                 echoerror "Failed to install '${package}'. The optional repository or it's subscription might be missing."
+                rm -rf "${__YUM_CONF_DIR}"
                 return 1
             fi
         done
+        rm -rf "${__YUM_CONF_DIR}"
     fi
     return 0
 }

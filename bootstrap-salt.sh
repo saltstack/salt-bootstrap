@@ -3902,7 +3902,7 @@ install_suse_11_stable_deps() {
     # Salt needs python-zypp installed in order to use the zypper module
     __PACKAGES="python-zypp"
     # shellcheck disable=SC2089
-    __PACKAGES="${__PACKAGES} libzmq3 python python-Jinja2 'python-M2Crypto>=0.21' python-msgpack-python"
+    __PACKAGES="${__PACKAGES} libzmq3 python python-Jinja2 python-msgpack-python"
     __PACKAGES="${__PACKAGES} python-pycrypto python-pyzmq python-pip python-xml python-requests"
 
     if [ "$SUSE_PATCHLEVEL" -eq 1 ]; then
@@ -3916,6 +3916,11 @@ install_suse_11_stable_deps() {
         __PACKAGES="${__PACKAGES} python-apache-libcloud"
     fi
 
+    # SLES 11 SP3 ships with both python-M2Crypto-0.22.* and python-m2crypto-0.21 and we will be asked which
+    # we want to install, even with --non-interactive.
+    # Let's try to install the higher version first and then the lower one in case of failure
+    zypper --non-interactive install --auto-agree-with-licenses 'python-M2Crypto>=0.22' || \
+        zypper --non-interactive install --auto-agree-with-licenses 'python-M2Crypto>=0.21' || return 1
     # shellcheck disable=SC2086,SC2090
     zypper --non-interactive install --auto-agree-with-licenses ${__PACKAGES} || return 1
 

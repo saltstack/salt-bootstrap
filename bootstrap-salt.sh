@@ -2708,13 +2708,48 @@ __test_rhel_optionals_packages() {
 
 
 install_red_hat_linux_stable_deps() {
-    __test_rhel_optionals_packages || return 1
+    if [ "${DISTRO_MAJOR_VERSION}" -ge 6 ]; then
+        # Wait at most 60 seconds for the repository subscriptions to register
+        __ATTEMPTS=6
+        while [ "${__ATTEMPTS}" -gt 0 ]; do
+            __test_rhel_optionals_packages
+            if [ $? -eq 1 ]; then
+                __ATTEMPTS=$(( __ATTEMPTS -1 ))
+                if [ ${__ATTEMPTS} -lt 1 ]; then
+                    return 1
+                fi
+                echoinfo "Sleeping 10 seconds while waiting for the optional repository subscription to be externally configured"
+                sleep 10
+                continue
+            fi
+        done
+    else
+         __test_rhel_optionals_packages || return 1
+    fi
+
     install_centos_stable_deps || return 1
     return 0
 }
 
 install_red_hat_linux_git_deps() {
-    __test_rhel_optionals_packages || return 1
+    if [ "${DISTRO_MAJOR_VERSION}" -ge 6 ]; then
+        # Wait at most 60 seconds for the repository subscriptions to register
+        __ATTEMPTS=6
+        while [ "${__ATTEMPTS}" -gt 0 ]; do
+            __test_rhel_optionals_packages
+            if [ $? -eq 1 ]; then
+                __ATTEMPTS=$(( __ATTEMPTS -1 ))
+                if [ ${__ATTEMPTS} -lt 1 ]; then
+                    return 1
+                fi
+                echoinfo "Sleeping 10 seconds while waiting for the optional repository subscription to be externally configured"
+                sleep 10
+                continue
+            fi
+        done
+    else
+         __test_rhel_optionals_packages || return 1
+    fi
     install_centos_git_deps || return 1
     return 0
 }

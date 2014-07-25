@@ -12,7 +12,6 @@ Alex Van't Hof              alexvh
 Angelo Gründler             plueschopath           angelo.gruendler@w1r3.net
 Boris Feld                  Lothiraldan
 bruce-one                   bruce-one
-                            cingeyedog
 Chris Rebert                cvrebert               chris.rebert@hulu.com
 Christer Edwards            cedwards
 deployboy                   deployboy
@@ -32,6 +31,7 @@ Juan A. Moyano              wincus                 wincus.public@gmail.com
 Karl Grzeszczak             karlgrz
 Kenneth Wilke               KennethWilke
 Liu Xiaohui                 oreh                   herolxh@gmail.com
+Matthew Garrett             cingeyedog             matt@clemson.edu
 Matthew Willson             ixela
 Matthieu Guegan             mguegan
 Mike Carlson                m87carlson             mike@bayphoto.com

@@ -2398,7 +2398,7 @@ __install_epel_repository() {
     fi
 
     # Check if epel-release is already installed and flag it accordingly
-    rpm -q epel-release > /dev/null 2>&1
+    rpm --nodigest --nosignature -q epel-release > /dev/null 2>&1
     if [ $? -eq 0 ]; then
         __EPEL_REPOS_INSTALLED=${BS_TRUE}
         return 0

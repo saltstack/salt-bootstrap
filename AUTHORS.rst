@@ -14,6 +14,7 @@ Boris Feld                  Lothiraldan
 bruce-one                   bruce-one
 Chris Rebert                cvrebert               chris.rebert@hulu.com
 Christer Edwards            cedwards
+Dan Mick                    dmick                  dan.mick@inktank.com
 deployboy                   deployboy
 Diego Woitasen              diegows                diego.woitasen@vhgroup.net
 Elias Probst                eliasp

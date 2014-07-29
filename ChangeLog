@@ -1,5 +1,7 @@
 Version 2014.07.29:
 	* Fixed bug introduced in 0577622 when salt-api service install and checks were added
+	* Distro Support Fixed:
+		* Fixed infinite loop when handling RHEL dependencies. Thanks Dan Mick(@dmick).
 
 Version 2014.07.27:
 	* Amazon Linux AMI 2010.xx is not explicitly not supported.

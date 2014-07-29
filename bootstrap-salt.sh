@@ -1111,19 +1111,26 @@ __git_clone_and_checkout() {
     [ -d /tmp/git ] || mkdir /tmp/git
     cd /tmp/git
     if [ -d $SALT_GIT_CHECKOUT_DIR ]; then
+        echodebug "Found a checked out Salt repository"
         cd $SALT_GIT_CHECKOUT_DIR
+        echodebug "Fetching git changes"
         git fetch || return 1
         # Tags are needed because of salt's versioning, also fetch that
+        echodebug "Fetching git tags"
         git fetch --tags || return 1
 
         # If we have the SaltStack remote set as upstream, we also need to fetch the tags from there
         if [ "$(git remote -v | grep $_SALTSTACK_REPO_URL)" != "" ]; then
+            echodebug "Fetching upstream(SaltStack's Salt repository) git tags"
             git fetch --tags upstream
         else
+            echoinfo "Adding SaltStack's Salt repository as a remote"
             git remote add upstream "$_SALTSTACK_REPO_URL"
+            echodebug "Fetching upstream(SaltStack's Salt repository) git tags"
             git fetch --tags upstream
         fi
 
+        echodebug "Hard reseting the cloned repository to ${GIT_REV}"
         git reset --hard "$GIT_REV" || return 1
 
         # Just calling `git reset --hard $GIT_REV` on a branch name that has
@@ -1133,21 +1140,37 @@ __git_clone_and_checkout() {
         # changes.
         git branch -a | grep -q "${GIT_REV}"
         if [ $? -eq 0 ]; then
+            echodebug "Rebasing the cloned repository branch"
             git pull --rebase || return 1
         fi
     else
+        # Let's try shallow cloning to speed up
+        echoinfo "Attempting to shallow clone Salt's repository from ${_SALT_REPO_URL}"
+        git clone --depth 1 --branch "$GIT_REV" "$_SALT_REPO_URL"
+        if [ $? -eq 0 ]; then
+            cd "$SALT_GIT_CHECKOUT_DIR"
+            return 0
+        fi
+
+        # Shallow clone above failed(missing upstream tags???), let's resume the old behaviour.
+        echowarn "Failed to shallow clone."
+        echoinfo "Resuming regular git clone and remote SaltStack repository addition procedure"
         git clone "$_SALT_REPO_URL" || return 1
         cd "$SALT_GIT_CHECKOUT_DIR"
 
         if [ "$_SALT_REPO_URL" != "$_SALTSTACK_REPO_URL" ]; then
             # We need to add the saltstack repository as a remote and fetch tags for proper versioning
+            echoinfo "Adding SaltStack's Salt repository as a remote"
             git remote add upstream "$_SALTSTACK_REPO_URL"
+            echodebug "Fetching upstream(SaltStack's Salt repository) git tags"
             git fetch --tags upstream
         fi
 
+        echodebug "Checking out $GIT_REV"
         git checkout "$GIT_REV" || return 1
 
     fi
+    echoinfo "Cloning Salt's git repository succeeded"
     return 0
 }
 

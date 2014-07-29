@@ -2247,9 +2247,9 @@ install_debian_git_post() {
 
         if [ -f "${SALT_GIT_CHECKOUT_DIR}/debian/salt-$fname.init" ]; then
             copyfile "${SALT_GIT_CHECKOUT_DIR}/debian/salt-$fname.init" "/etc/init.d/salt-$fname"
+            chmod +x "/etc/init.d/salt-$fname"
+            update-rc.d "salt-$fname" defaults
         fi
-        chmod +x "/etc/init.d/salt-$fname"
-        update-rc.d "salt-$fname" defaults
     done
 }
 

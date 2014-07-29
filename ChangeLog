@@ -1,3 +1,7 @@
+Version 2014.xx.xx:
+	* Avoid redirect breakage when installing EPEL with rpm on RHEL 5
+
+
 Version 2014.07.29:
 	* Shallow clone Salt's repository for speed improvements. In case of failure, resume old 
 	behaviour.
@@ -24,7 +28,6 @@ Version 2014.07.27:
 		higher version first and then the lower one in case of failure.
 		* Allow some extra time on RHEL for the optionals repo check in case the repository 
 		subscription is being managed externally.
-
 
 Version 2014.06.30:
 	* Distro Support Fixed:

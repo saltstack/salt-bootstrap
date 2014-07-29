@@ -2721,6 +2721,8 @@ install_red_hat_linux_stable_deps() {
                 echoinfo "Sleeping 10 seconds while waiting for the optional repository subscription to be externally configured"
                 sleep 10
                 continue
+            else
+                break
             fi
         done
     else
@@ -2745,6 +2747,8 @@ install_red_hat_linux_git_deps() {
                 echoinfo "Sleeping 10 seconds while waiting for the optional repository subscription to be externally configured"
                 sleep 10
                 continue
+            else
+                break
             fi
         done
     else

@@ -462,8 +462,8 @@ __exit_cleanup() {
             echodebug "Cleaning up the Salt Temporary Git Repository"
             rm -rf /tmp/git/salt
         else
-            echoinfo "Not cleaning up the Salt Temporary git repository on request"
-            echoinfo "Note that if you intend to re-run this script using the git approach, you might encounter some issues"
+            echowarn "Not cleaning up the Salt Temporary git repository on request"
+            echowarn "Note that if you intend to re-run this script using the git approach, you might encounter some issues"
         fi
     fi
 

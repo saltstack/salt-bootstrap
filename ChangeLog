@@ -2,6 +2,8 @@ Version 2014.xx.xx:
 	* Avoid redirect breakage when installing EPEL with rpm on RHEL 5
 	* Ensure python-apt is installed by the bootstrap script for Debian & Ubuntu minions. Thanks 
 	@garethgreenaway.
+	* Distro Support Fixed:
+		* Fixed the URL to download EPEL for Cent 5
 
 
 Version 2014.07.29:

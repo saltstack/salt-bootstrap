@@ -45,7 +45,7 @@ BS_TRUE=1
 BS_FALSE=0
 
 # Default sleep time used when waiting for daemons to start, restart and checking for these running
-__DEFAULT_SLEEP=3
+__DEFAULT_SLEEP=10
 
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #          NAME:  __detect_color_support

@@ -1003,6 +1003,8 @@ echoinfo "  OS Version:   ${OS_VERSION}"
 echoinfo "  Distribution: ${DISTRO_NAME} ${DISTRO_VERSION}"
 echo
 
+echodebug "Binaries will be searched using the following \$PATH: ${PATH}"
+
 # Let users know that we'll use a proxy
 if [ "${_HTTP_PROXY}" != "" ]; then
     echoinfo "Using http proxy $_HTTP_PROXY"

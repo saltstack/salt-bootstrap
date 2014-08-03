@@ -45,7 +45,8 @@ BS_TRUE=1
 BS_FALSE=0
 
 # Default sleep time used when waiting for daemons to start, restart and checking for these running
-__DEFAULT_SLEEP=10
+__DEFAULT_SLEEP=3
+__DEFAULT_SLEEP_ORIGINAL="${__DEFAULT_SLEEP}"
 
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #          NAME:  __detect_color_support
@@ -1621,6 +1622,12 @@ __enable_universe_repository() {
 }
 
 install_ubuntu_deps() {
+    if [ "${__DEFAULT_SLEEP}" -eq "${__DEFAULT_SLEEP_ORIGINAL}" ]; then
+        # The user did not pass a custom sleep value as an argument, let's increase the default value
+        echodebug "On Ubuntu systems we increase the default sleep value to 10."
+        echodebug "See https://github.com/saltstack/salt/issues/12248 for more info."
+        __DEFAULT_SLEEP=10
+    fi
     if [ $_START_DAEMONS -eq $BS_FALSE ]; then
         echowarn "Not starting daemons on Debian based distributions is not working mostly because starting them is the default behaviour."
     fi
@@ -1695,7 +1702,7 @@ install_ubuntu_deps() {
 }
 
 install_ubuntu_daily_deps() {
-    install_ubuntu_deps
+    install_ubuntu_deps || return 1
     if [ "$DISTRO_MAJOR_VERSION" -ge 12 ]; then
         # Above Ubuntu 11.10 add-apt-repository is in a different package
         __apt_get_install_noinput software-properties-common || return 1

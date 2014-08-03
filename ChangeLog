@@ -6,6 +6,11 @@ Version 2014.xx.xx:
 		* Fixed the URL to download EPEL for Cent 5
 		* Use the full path to the `chkconfig` binary when checking for services in SysV init 
 		systems.
+		* Fixed an issue where the default sleep period(3 secs) on Ubuntu would cause a race 
+		condition with upstart wherein the package installation would call an upstart start and 
+		before it could complete, bootstrap would call another. The result was *two* copies of salt 
+		running which ended up causing a most stubborn bug that's documented in 
+		https://github.com/saltstack/salt/issues/12248
 
 
 Version 2014.07.29:

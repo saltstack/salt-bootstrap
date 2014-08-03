@@ -4,6 +4,8 @@ Version 2014.xx.xx:
 	@garethgreenaway.
 	* Distro Support Fixed:
 		* Fixed the URL to download EPEL for Cent 5
+		* Use the full path to the `chkconfig` binary when checking for services in SysV init 
+		systems.
 
 
 Version 2014.07.29:

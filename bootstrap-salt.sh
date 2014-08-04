@@ -1152,17 +1152,25 @@ __git_clone_and_checkout() {
     else
         __SHALLOW_CLONE="${BS_FALSE}"
         # Let's try shallow cloning to speed up.
-        # Although unnecessary since "--depth 1" is passed, "--single-branch" is also passed because that option was
-        # introduced in git 1.7.10, the minimal version of git where the shallow cloning we need actually works
-        echoinfo "Attempting to shallow clone $GIT_REV from Salt's repository ${_SALT_REPO_URL}"
-        git clone --depth 1 --branch "$GIT_REV" --single-branch "$_SALT_REPO_URL" 2> /dev/null
+        # Test for "--single-branch" option introduced in git 1.7.10, the minimal version of git where the shallow
+        # cloning we need actually works
+        git clone --single-branch 2>&1 /dev/null
         if [ $? -eq 0 ]; then
-            cd "$SALT_GIT_CHECKOUT_DIR"
-            __SHALLOW_CLONE="${BS_TRUE}"
+            # The "--single-branch" option is supported, attempt shallow cloning
+            echoinfo "Attempting to shallow clone $GIT_REV from Salt's repository ${_SALT_REPO_URL}"
+            git clone --depth 1 --branch "$GIT_REV" "$_SALT_REPO_URL"
+            if [ $? -eq 0 ]; then
+                cd "$SALT_GIT_CHECKOUT_DIR"
+                __SHALLOW_CLONE="${BS_TRUE}"
+            else
+                # Shallow clone above failed(missing upstream tags???), let's resume the old behaviour.
+                echowarn "Failed to shallow clone."
+                echoinfo "Resuming regular git clone and remote SaltStack repository addition procedure"
+                git clone "$_SALT_REPO_URL" || return 1
+                cd "$SALT_GIT_CHECKOUT_DIR"
+            fi
         else
-            # Shallow clone above failed(missing upstream tags???), let's resume the old behaviour.
-            echowarn "Failed to shallow clone."
-            echoinfo "Resuming regular git clone and remote SaltStack repository addition procedure"
+            echodebug "Shallow cloning not possible. Required git version not met."
             git clone "$_SALT_REPO_URL" || return 1
             cd "$SALT_GIT_CHECKOUT_DIR"
         fi

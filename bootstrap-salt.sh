@@ -1110,6 +1110,9 @@ __function_defined() {
 #                 specific revision.
 #----------------------------------------------------------------------------------------------------------------------
 __git_clone_and_checkout() {
+
+    echodebug "Installed git version: $(git --version | awk '{ print $3 }')"
+
     SALT_GIT_CHECKOUT_DIR=/tmp/git/salt
     [ -d /tmp/git ] || mkdir /tmp/git
     cd /tmp/git
@@ -1147,19 +1150,22 @@ __git_clone_and_checkout() {
             git pull --rebase || return 1
         fi
     else
-        # Let's try shallow cloning to speed up
-        echoinfo "Attempting to shallow clone Salt's repository from ${_SALT_REPO_URL}"
-        git clone --depth 1 --branch "$GIT_REV" "$_SALT_REPO_URL"
+        __SHALLOW_CLONE="${BS_FALSE}"
+        # Let's try shallow cloning to speed up.
+        # Although unnecessary since "--depth 1" is passed, "--single-branch" is also passed because that option was
+        # introduced in git 1.7.10, the minimal version of git where the shallow cloning we need actually works
+        echoinfo "Attempting to shallow clone $GIT_REV from Salt's repository ${_SALT_REPO_URL}"
+        git clone --depth 1 --branch "$GIT_REV" --single-branch "$_SALT_REPO_URL" 2> /dev/null
         if [ $? -eq 0 ]; then
             cd "$SALT_GIT_CHECKOUT_DIR"
-            return 0
+            __SHALLOW_CLONE="${BS_TRUE}"
+        else
+            # Shallow clone above failed(missing upstream tags???), let's resume the old behaviour.
+            echowarn "Failed to shallow clone."
+            echoinfo "Resuming regular git clone and remote SaltStack repository addition procedure"
+            git clone "$_SALT_REPO_URL" || return 1
+            cd "$SALT_GIT_CHECKOUT_DIR"
         fi
-
-        # Shallow clone above failed(missing upstream tags???), let's resume the old behaviour.
-        echowarn "Failed to shallow clone."
-        echoinfo "Resuming regular git clone and remote SaltStack repository addition procedure"
-        git clone "$_SALT_REPO_URL" || return 1
-        cd "$SALT_GIT_CHECKOUT_DIR"
 
         if [ "$_SALT_REPO_URL" != "$_SALTSTACK_REPO_URL" ]; then
             # We need to add the saltstack repository as a remote and fetch tags for proper versioning
@@ -1169,8 +1175,10 @@ __git_clone_and_checkout() {
             git fetch --tags upstream
         fi
 
-        echodebug "Checking out $GIT_REV"
-        git checkout "$GIT_REV" || return 1
+        if [ "$__SHALLOW_CLONE" -eq "${BS_FALSE}" ]; then
+            echodebug "Checking out $GIT_REV"
+            git checkout "$GIT_REV" || return 1
+        fi
 
     fi
     echoinfo "Cloning Salt's git repository succeeded"

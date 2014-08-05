@@ -1990,7 +1990,7 @@ _eof
 
     # Debian Backports
     if [ "$(grep -R 'backports.debian.org' /etc/apt)" = "" ]; then
-        echo "deb http://backports.debian.org/debian-backports squeeze-backports main" >> \
+        echo "deb http://backports.debian.org/debian-backports squeeze-backports main contrib non-free" >> \
             /etc/apt/sources.list.d/backports.list
 
         # Add the backports key

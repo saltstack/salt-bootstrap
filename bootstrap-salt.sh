@@ -4741,7 +4741,7 @@ if [ "$DAEMONS_RUNNING_FUNC" != "null" ] && [ $_START_DAEMONS -eq $BS_TRUE ]; th
 
             [ ! -f /var/log/salt/$fname ] && echodebug "/var/log/salt/$fname does not exist. Can't cat its contents!" && continue
 
-            echodebug "DEAMON LOGS for $fname:"
+            echodebug "DAEMON LOGS for $fname:"
             echodebug "$(cat /var/log/salt/$fname)"
             echo
         done

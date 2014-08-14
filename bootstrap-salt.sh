@@ -32,6 +32,7 @@ __ScriptName="bootstrap-salt.sh"
 #   * BS_UPGRADE_SYS:           If 1 and an option, upgrade system. Default 0.
 #   * BS_GENTOO_USE_BINHOST:    If 1 add `--getbinpkg` to gentoo's emerge
 #   * BS__SALT_MASTER_ADDRESS:  The IP or DNS name of the salt-master the minion should connect to
+#   * BS_SALT_GIT_CHECKOUT_DIR: The directory where to clone Salt on git installations
 #======================================================================================================================
 
 
@@ -273,6 +274,7 @@ __SIMPLIFY_VERSION=$BS_TRUE
 _LIBCLOUD_MIN_VERSION="0.14.0"
 _EXTRA_PACKAGES=""
 _HTTP_PROXY=""
+__SALT_GIT_CHECKOUT_DIR=${BS_SALT_GIT_CHECKOUT_DIR:-/tmp/git/salt}
 
 while getopts ":hvnDc:g:k:MSNXCPFUKIA:i:Lp:H:" opt
 do
@@ -457,11 +459,11 @@ echowarn "Running the unstable version of ${__ScriptName}"
 __exit_cleanup() {
     EXIT_CODE=$?
 
-    if [ "$ITYPE" = "git" ] && [ -d /tmp/git/salt ]; then
+    if [ "$ITYPE" = "git" ] && [ -d "${__SALT_GIT_CHECKOUT_DIR}" ]; then
         if [ $_KEEP_TEMP_FILES -eq $BS_FALSE ]; then
-            # Clean up the checked out repositry
+            # Clean up the checked out repository
             echodebug "Cleaning up the Salt Temporary Git Repository"
-            rm -rf /tmp/git/salt
+            rm -rf "${__SALT_GIT_CHECKOUT_DIR}"
         else
             echowarn "Not cleaning up the Salt Temporary git repository on request"
             echowarn "Note that if you intend to re-run this script using the git approach, you might encounter some issues"
@@ -1113,12 +1115,12 @@ __git_clone_and_checkout() {
 
     echodebug "Installed git version: $(git --version | awk '{ print $3 }')"
 
-    SALT_GIT_CHECKOUT_DIR=/tmp/git/salt
-    [ -d /tmp/git ] || mkdir /tmp/git
-    cd /tmp/git
-    if [ -d $SALT_GIT_CHECKOUT_DIR ]; then
+    __SALT_GIT_CHECKOUT_PARENT_DIR=$(dirname "${__SALT_GIT_CHECKOUT_DIR}")
+    [ -d "${__SALT_GIT_CHECKOUT_PARENT_DIR}" ] || mkdir "${__SALT_GIT_CHECKOUT_PARENT_DIR}"
+    cd "${__SALT_GIT_CHECKOUT_PARENT_DIR}"
+    if [ -d "${SALT_GIT_CHECKOUT_DIR}" ]; then
         echodebug "Found a checked out Salt repository"
-        cd $SALT_GIT_CHECKOUT_DIR
+        cd "${SALT_GIT_CHECKOUT_DIR}"
         echodebug "Fetching git changes"
         git fetch || return 1
         # Tags are needed because of salt's versioning, also fetch that

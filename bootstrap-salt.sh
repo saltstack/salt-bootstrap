@@ -1154,7 +1154,7 @@ __git_clone_and_checkout() {
         # Let's try shallow cloning to speed up.
         # Test for "--single-branch" option introduced in git 1.7.10, the minimal version of git where the shallow
         # cloning we need actually works
-        git clone --single-branch 2>&1 /dev/null
+        git clone --single-branch > /dev/null 2>&1
         if [ $? -eq 0 ]; then
             # The "--single-branch" option is supported, attempt shallow cloning
             echoinfo "Attempting to shallow clone $GIT_REV from Salt's repository ${_SALT_REPO_URL}"

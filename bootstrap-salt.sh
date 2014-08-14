@@ -1784,7 +1784,7 @@ install_ubuntu_daily() {
 }
 
 install_ubuntu_git() {
-    if [ -f ${SALT_GIT_CHECKOUT_DIR}/salt/syspaths.py ]; then
+    if [ -f "${SALT_GIT_CHECKOUT_DIR}/salt/syspaths.py" ]; then
         python setup.py install --install-layout=deb --salt-config-dir="$_SALT_ETC_DIR" || return 1
     else
         python setup.py install --install-layout=deb || return 1
@@ -1809,13 +1809,13 @@ install_ubuntu_git_post() {
                 # upstart does not know about our service, let's copy the proper file
                 echowarn "Upstart does not appear to know about salt-$fname"
                 echodebug "Copying ${SALT_GIT_CHECKOUT_DIR}/pkg/salt-$fname.upstart to $_upstart_conf"
-                copyfile ${SALT_GIT_CHECKOUT_DIR}/pkg/salt-$fname.upstart $_upstart_conf
+                copyfile "${SALT_GIT_CHECKOUT_DIR}/pkg/salt-${fname}.upstart" $_upstart_conf
             fi
         # No upstart support in Ubuntu!?
-        elif [ -f ${SALT_GIT_CHECKOUT_DIR}/debian/salt-$fname.init ]; then
+        elif [ -f "${SALT_GIT_CHECKOUT_DIR}/debian/salt-${fname}.init" ]; then
             echodebug "There's NO upstart support!?"
-            echodebug "Copying ${SALT_GIT_CHECKOUT_DIR}/debian/salt-$fname.init to /etc/init.d/salt-$fname"
-            copyfile ${SALT_GIT_CHECKOUT_DIR}/debian/salt-$fname.init /etc/init.d/salt-$fname
+            echodebug "Copying ${SALT_GIT_CHECKOUT_DIR}/debian/salt-${fname}.init to /etc/init.d/salt-$fname"
+            copyfile "${SALT_GIT_CHECKOUT_DIR}/debian/salt-${fname}.init" "/etc/init.d/salt-$fname"
             chmod +x /etc/init.d/salt-$fname
             update-rc.d salt-$fname defaults
         else
@@ -2246,7 +2246,7 @@ install_debian_git() {
         easy_install -U pyzmq || return 1
     fi
 
-    if [ -f ${SALT_GIT_CHECKOUT_DIR}/salt/syspaths.py ]; then
+    if [ -f "${SALT_GIT_CHECKOUT_DIR}/salt/syspaths.py" ]; then
         python setup.py install --install-layout=deb --salt-config-dir="$_SALT_ETC_DIR" || return 1
     else
         python setup.py install --install-layout=deb || return 1
@@ -2409,7 +2409,7 @@ install_fedora_git_post() {
         [ $fname = "api" ] && ([ "$_INSTALL_MASTER" -eq $BS_FALSE ] || [ "$(which salt-${fname} 2>/dev/null)" = "" ]) && continue
         [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
 
-        copyfile ${SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-$fname.service /lib/systemd/system/salt-$fname.service
+        copyfile "${SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-${fname}.service" "/lib/systemd/system/salt-${fname}.service"
 
         systemctl is-enabled salt-$fname.service || (systemctl preset salt-$fname.service && systemctl enable salt-$fname.service)
         sleep 0.1
@@ -2616,7 +2616,7 @@ install_centos_git() {
     else
         _PYEXE=python2
     fi
-    if [ -f ${SALT_GIT_CHECKOUT_DIR}/salt/syspaths.py ]; then
+    if [ -f "${SALT_GIT_CHECKOUT_DIR}/salt/syspaths.py" ]; then
         $_PYEXE setup.py install --salt-config-dir="$_SALT_ETC_DIR" || return 1
     else
         $_PYEXE setup.py install || return 1
@@ -2634,7 +2634,7 @@ install_centos_git_post() {
 
         # While the RPM's use init.d, so will we.
         if [ ! -f /etc/init.d/salt-$fname ] || ([ -f /etc/init.d/salt-$fname ] && [ $_FORCE_OVERWRITE -eq $BS_TRUE ]); then
-            copyfile ${SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-${fname} /etc/init.d/
+            copyfile "${SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-${fname}" /etc/init.d/
             chmod +x /etc/init.d/salt-${fname}
             /sbin/chkconfig salt-${fname} on
         fi
@@ -3306,7 +3306,7 @@ install_arch_linux_stable() {
 }
 
 install_arch_linux_git() {
-    if [ -f ${SALT_GIT_CHECKOUT_DIR}/salt/syspaths.py ]; then
+    if [ -f "${SALT_GIT_CHECKOUT_DIR}/salt/syspaths.py" ]; then
         python2 setup.py install --salt-config-dir="$_SALT_ETC_DIR" || return 1
     else
         python2 setup.py install || return 1
@@ -3357,11 +3357,11 @@ install_arch_linux_git_post() {
         [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
 
         if [ -f /usr/bin/systemctl ]; then
-            copyfile ${SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-$fname.service /lib/systemd/system/salt-$fname.service
+            copyfile "${SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-${fname}.service" "/lib/systemd/system/salt-${fname}.service"
 
-            /usr/bin/systemctl is-enabled salt-$fname.service > /dev/null 2>&1 || (
-                /usr/bin/systemctl preset salt-$fname.service > /dev/null 2>&1 &&
-                /usr/bin/systemctl enable salt-$fname.service > /dev/null 2>&1
+            /usr/bin/systemctl is-enabled salt-${fname}.service > /dev/null 2>&1 || (
+                /usr/bin/systemctl preset salt-${fname}.service > /dev/null 2>&1 &&
+                /usr/bin/systemctl enable salt-${fname}.service > /dev/null 2>&1
             )
             sleep 0.1
             /usr/bin/systemctl daemon-reload
@@ -3369,7 +3369,7 @@ install_arch_linux_git_post() {
         fi
 
         # SysV init!?
-        copyfile ${SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-$fname /etc/rc.d/init.d/salt-$fname
+        copyfile "${SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-$fname" "/etc/rc.d/init.d/salt-$fname"
         chmod +x /etc/rc.d/init.d/salt-$fname
     done
 }
@@ -3918,11 +3918,11 @@ install_opensuse_git_post() {
         [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
 
         if [ -f /bin/systemctl ]; then
-            copyfile ${SALT_GIT_CHECKOUT_DIR}/pkg/salt-$fname.service /lib/systemd/system/salt-$fname.service
+            copyfile "${SALT_GIT_CHECKOUT_DIR}/pkg/salt-${fname}.service" "/lib/systemd/system/salt-${fname}.service"
             continue
         fi
 
-        copyfile ${SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-$fname /etc/init.d/salt-$fname
+        copyfile "${SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-$fname" "/etc/init.d/salt-$fname"
         chmod +x /etc/init.d/salt-$fname
 
     done

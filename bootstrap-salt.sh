@@ -1118,9 +1118,9 @@ __git_clone_and_checkout() {
     __SALT_GIT_CHECKOUT_PARENT_DIR=$(dirname "${__SALT_GIT_CHECKOUT_DIR}")
     [ -d "${__SALT_GIT_CHECKOUT_PARENT_DIR}" ] || mkdir "${__SALT_GIT_CHECKOUT_PARENT_DIR}"
     cd "${__SALT_GIT_CHECKOUT_PARENT_DIR}"
-    if [ -d "${SALT_GIT_CHECKOUT_DIR}" ]; then
+    if [ -d "${__SALT_GIT_CHECKOUT_DIR}" ]; then
         echodebug "Found a checked out Salt repository"
-        cd "${SALT_GIT_CHECKOUT_DIR}"
+        cd "${__SALT_GIT_CHECKOUT_DIR}"
         echodebug "Fetching git changes"
         git fetch || return 1
         # Tags are needed because of salt's versioning, also fetch that
@@ -1153,27 +1153,34 @@ __git_clone_and_checkout() {
         fi
     else
         __SHALLOW_CLONE="${BS_FALSE}"
-        # Let's try shallow cloning to speed up.
-        # Test for "--single-branch" option introduced in git 1.7.10, the minimal version of git where the shallow
-        # cloning we need actually works
-        if [ "$(git clone --help | grep 'single-branch')" != "" ]; then
-            # The "--single-branch" option is supported, attempt shallow cloning
-            echoinfo "Attempting to shallow clone $GIT_REV from Salt's repository ${_SALT_REPO_URL}"
-            git clone --depth 1 --branch "$GIT_REV" "$_SALT_REPO_URL"
-            if [ $? -eq 0 ]; then
-                cd "$SALT_GIT_CHECKOUT_DIR"
-                __SHALLOW_CLONE="${BS_TRUE}"
+        if [ "$(echo "$GIT_REV" | sed 's/^.*\(v[[:digit:]]\{1,4\}\.[[:digit:]]\{1,2\}\.[[:digit:]]\{1,2\}\).*$/MATCH/')" = "MATCH" ]; then
+            echoinfo "Git revision matches a Salt version tag"
+            # Let's try shallow cloning to speed up.
+            # Test for "--single-branch" option introduced in git 1.7.10, the minimal version of git where the shallow
+            # cloning we need actually works
+            if [ "$(git clone --help | grep 'single-branch')" != "" ]; then
+                # The "--single-branch" option is supported, attempt shallow cloning
+                echoinfo "Attempting to shallow clone $GIT_REV from Salt's repository ${_SALT_REPO_URL}"
+                git clone --depth 1 --branch "$GIT_REV" "$_SALT_REPO_URL" || return 1
+                if [ $? -eq 0 ]; then
+                    cd "${__SALT_GIT_CHECKOUT_DIR}"
+                    __SHALLOW_CLONE="${BS_TRUE}"
+                else
+                    # Shallow clone above failed(missing upstream tags???), let's resume the old behaviour.
+                    echowarn "Failed to shallow clone."
+                    echoinfo "Resuming regular git clone and remote SaltStack repository addition procedure"
+                    git clone "$_SALT_REPO_URL" || return 1
+                    cd "${__SALT_GIT_CHECKOUT_DIR}"
+                fi
             else
-                # Shallow clone above failed(missing upstream tags???), let's resume the old behaviour.
-                echowarn "Failed to shallow clone."
-                echoinfo "Resuming regular git clone and remote SaltStack repository addition procedure"
+                echodebug "Shallow cloning not possible. Required git version not met."
                 git clone "$_SALT_REPO_URL" || return 1
-                cd "$SALT_GIT_CHECKOUT_DIR"
+                cd "${__SALT_GIT_CHECKOUT_DIR}"
             fi
         else
-            echodebug "Shallow cloning not possible. Required git version not met."
+            echowarn "The git revision being installed does not match a Salt version tag. Shallow cloning disabled"
             git clone "$_SALT_REPO_URL" || return 1
-            cd "$SALT_GIT_CHECKOUT_DIR"
+            cd "${__SALT_GIT_CHECKOUT_DIR}"
         fi
 
         if [ "$_SALT_REPO_URL" != "$_SALTSTACK_REPO_URL" ]; then
@@ -1755,7 +1762,7 @@ install_ubuntu_git_deps() {
 
     # Let's trigger config_salt()
     if [ "$_TEMP_CONFIG_DIR" = "null" ]; then
-        _TEMP_CONFIG_DIR="${SALT_GIT_CHECKOUT_DIR}/conf/"
+        _TEMP_CONFIG_DIR="${__SALT_GIT_CHECKOUT_DIR}/conf/"
         CONFIG_SALT_FUNC="config_salt"
     fi
 
@@ -1784,7 +1791,7 @@ install_ubuntu_daily() {
 }
 
 install_ubuntu_git() {
-    if [ -f "${SALT_GIT_CHECKOUT_DIR}/salt/syspaths.py" ]; then
+    if [ -f "${__SALT_GIT_CHECKOUT_DIR}/salt/syspaths.py" ]; then
         python setup.py install --install-layout=deb --salt-config-dir="$_SALT_ETC_DIR" || return 1
     else
         python setup.py install --install-layout=deb || return 1
@@ -1808,14 +1815,14 @@ install_ubuntu_git_post() {
             if [ ! -f $_upstart_conf ]; then
                 # upstart does not know about our service, let's copy the proper file
                 echowarn "Upstart does not appear to know about salt-$fname"
-                echodebug "Copying ${SALT_GIT_CHECKOUT_DIR}/pkg/salt-$fname.upstart to $_upstart_conf"
-                copyfile "${SALT_GIT_CHECKOUT_DIR}/pkg/salt-${fname}.upstart" $_upstart_conf
+                echodebug "Copying ${__SALT_GIT_CHECKOUT_DIR}/pkg/salt-$fname.upstart to $_upstart_conf"
+                copyfile "${__SALT_GIT_CHECKOUT_DIR}/pkg/salt-${fname}.upstart" $_upstart_conf
             fi
         # No upstart support in Ubuntu!?
-        elif [ -f "${SALT_GIT_CHECKOUT_DIR}/debian/salt-${fname}.init" ]; then
+        elif [ -f "${__SALT_GIT_CHECKOUT_DIR}/debian/salt-${fname}.init" ]; then
             echodebug "There's NO upstart support!?"
-            echodebug "Copying ${SALT_GIT_CHECKOUT_DIR}/debian/salt-${fname}.init to /etc/init.d/salt-$fname"
-            copyfile "${SALT_GIT_CHECKOUT_DIR}/debian/salt-${fname}.init" "/etc/init.d/salt-$fname"
+            echodebug "Copying ${__SALT_GIT_CHECKOUT_DIR}/debian/salt-${fname}.init to /etc/init.d/salt-$fname"
+            copyfile "${__SALT_GIT_CHECKOUT_DIR}/debian/salt-${fname}.init" "/etc/init.d/salt-$fname"
             chmod +x /etc/init.d/salt-$fname
             update-rc.d salt-$fname defaults
         else
@@ -2138,7 +2145,7 @@ install_debian_git_deps() {
 
     # Let's trigger config_salt()
     if [ "$_TEMP_CONFIG_DIR" = "null" ]; then
-        _TEMP_CONFIG_DIR="${SALT_GIT_CHECKOUT_DIR}/conf/"
+        _TEMP_CONFIG_DIR="${__SALT_GIT_CHECKOUT_DIR}/conf/"
         CONFIG_SALT_FUNC="config_salt"
     fi
 
@@ -2171,7 +2178,7 @@ install_debian_6_git_deps() {
 
         # Let's trigger config_salt()
         if [ "$_TEMP_CONFIG_DIR" = "null" ]; then
-            _TEMP_CONFIG_DIR="${SALT_GIT_CHECKOUT_DIR}/conf/"
+            _TEMP_CONFIG_DIR="${__SALT_GIT_CHECKOUT_DIR}/conf/"
             CONFIG_SALT_FUNC="config_salt"
         fi
     else
@@ -2246,7 +2253,7 @@ install_debian_git() {
         easy_install -U pyzmq || return 1
     fi
 
-    if [ -f "${SALT_GIT_CHECKOUT_DIR}/salt/syspaths.py" ]; then
+    if [ -f "${__SALT_GIT_CHECKOUT_DIR}/salt/syspaths.py" ]; then
         python setup.py install --install-layout=deb --salt-config-dir="$_SALT_ETC_DIR" || return 1
     else
         python setup.py install --install-layout=deb || return 1
@@ -2277,8 +2284,8 @@ install_debian_git_post() {
         [ $fname = "api" ] && ([ "$_INSTALL_MASTER" -eq $BS_FALSE ] || [ "$(which salt-${fname} 2>/dev/null)" = "" ]) && continue
         [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
 
-        if [ -f "${SALT_GIT_CHECKOUT_DIR}/debian/salt-$fname.init" ]; then
-            copyfile "${SALT_GIT_CHECKOUT_DIR}/debian/salt-$fname.init" "/etc/init.d/salt-$fname"
+        if [ -f "${__SALT_GIT_CHECKOUT_DIR}/debian/salt-$fname.init" ]; then
+            copyfile "${__SALT_GIT_CHECKOUT_DIR}/debian/salt-$fname.init" "/etc/init.d/salt-$fname"
         fi
         if [ ! -f "/etc/init.d/salt-$fname" ]; then
             echowarn "The init script for salt-$fname was not found, skipping it..."
@@ -2384,7 +2391,7 @@ install_fedora_git_deps() {
 
     # Let's trigger config_salt()
     if [ "$_TEMP_CONFIG_DIR" = "null" ]; then
-        _TEMP_CONFIG_DIR="${SALT_GIT_CHECKOUT_DIR}/conf/"
+        _TEMP_CONFIG_DIR="${__SALT_GIT_CHECKOUT_DIR}/conf/"
         CONFIG_SALT_FUNC="config_salt"
     fi
 
@@ -2392,7 +2399,7 @@ install_fedora_git_deps() {
 }
 
 install_fedora_git() {
-    if [ -f "${SALT_GIT_CHECKOUT_DIR}/salt/syspaths.py" ]; then
+    if [ -f "${__SALT_GIT_CHECKOUT_DIR}/salt/syspaths.py" ]; then
         python setup.py install --salt-config-dir="$_SALT_ETC_DIR" || return 1
     else
         python setup.py install || return 1
@@ -2409,7 +2416,7 @@ install_fedora_git_post() {
         [ $fname = "api" ] && ([ "$_INSTALL_MASTER" -eq $BS_FALSE ] || [ "$(which salt-${fname} 2>/dev/null)" = "" ]) && continue
         [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
 
-        copyfile "${SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-${fname}.service" "/lib/systemd/system/salt-${fname}.service"
+        copyfile "${__SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-${fname}.service" "/lib/systemd/system/salt-${fname}.service"
 
         systemctl is-enabled salt-$fname.service || (systemctl preset salt-$fname.service && systemctl enable salt-$fname.service)
         sleep 0.1
@@ -2603,7 +2610,7 @@ install_centos_git_deps() {
 
     # Let's trigger config_salt()
     if [ "$_TEMP_CONFIG_DIR" = "null" ]; then
-        _TEMP_CONFIG_DIR="${SALT_GIT_CHECKOUT_DIR}/conf/"
+        _TEMP_CONFIG_DIR="${__SALT_GIT_CHECKOUT_DIR}/conf/"
         CONFIG_SALT_FUNC="config_salt"
     fi
 
@@ -2616,7 +2623,7 @@ install_centos_git() {
     else
         _PYEXE=python2
     fi
-    if [ -f "${SALT_GIT_CHECKOUT_DIR}/salt/syspaths.py" ]; then
+    if [ -f "${__SALT_GIT_CHECKOUT_DIR}/salt/syspaths.py" ]; then
         $_PYEXE setup.py install --salt-config-dir="$_SALT_ETC_DIR" || return 1
     else
         $_PYEXE setup.py install || return 1
@@ -2634,7 +2641,7 @@ install_centos_git_post() {
 
         # While the RPM's use init.d, so will we.
         if [ ! -f /etc/init.d/salt-$fname ] || ([ -f /etc/init.d/salt-$fname ] && [ $_FORCE_OVERWRITE -eq $BS_TRUE ]); then
-            copyfile "${SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-${fname}" /etc/init.d/
+            copyfile "${__SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-${fname}" /etc/init.d/
             chmod +x /etc/init.d/salt-${fname}
             /sbin/chkconfig salt-${fname} on
         fi
@@ -2644,11 +2651,11 @@ install_centos_git_post() {
         #    /sbin/initctl status salt-$fname > /dev/null 2>&1
         #    if [ $? -eq 1 ]; then
         #        # upstart does not know about our service, let's copy the proper file
-        #        copyfile ${SALT_GIT_CHECKOUT_DIR}/pkg/salt-$fname.upstart /etc/init/salt-$fname.conf
+        #        copyfile ${__SALT_GIT_CHECKOUT_DIR}/pkg/salt-$fname.upstart /etc/init/salt-$fname.conf
         #    fi
         ## Still in SysV init?!
         #elif [ ! -f /etc/init.d/salt-$fname ] || ([ -f /etc/init.d/salt-$fname ] && [ $_FORCE_OVERWRITE -eq $BS_TRUE ]); then
-        #    copyfile ${SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-${fname} /etc/init.d/
+        #    copyfile ${__SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-${fname} /etc/init.d/
         #    chmod +x /etc/init.d/salt-${fname}
         #    /sbin/chkconfig salt-${fname} on
         #fi
@@ -3203,7 +3210,7 @@ install_amazon_linux_ami_git_deps() {
 
     # Let's trigger config_salt()
     if [ "$_TEMP_CONFIG_DIR" = "null" ]; then
-        _TEMP_CONFIG_DIR="${SALT_GIT_CHECKOUT_DIR}/conf/"
+        _TEMP_CONFIG_DIR="${__SALT_GIT_CHECKOUT_DIR}/conf/"
         CONFIG_SALT_FUNC="config_salt"
     fi
 
@@ -3286,7 +3293,7 @@ install_arch_linux_git_deps() {
 
     # Let's trigger config_salt()
     if [ "$_TEMP_CONFIG_DIR" = "null" ]; then
-        _TEMP_CONFIG_DIR="${SALT_GIT_CHECKOUT_DIR}/conf/"
+        _TEMP_CONFIG_DIR="${__SALT_GIT_CHECKOUT_DIR}/conf/"
         CONFIG_SALT_FUNC="config_salt"
     fi
 
@@ -3306,7 +3313,7 @@ install_arch_linux_stable() {
 }
 
 install_arch_linux_git() {
-    if [ -f "${SALT_GIT_CHECKOUT_DIR}/salt/syspaths.py" ]; then
+    if [ -f "${__SALT_GIT_CHECKOUT_DIR}/salt/syspaths.py" ]; then
         python2 setup.py install --salt-config-dir="$_SALT_ETC_DIR" || return 1
     else
         python2 setup.py install || return 1
@@ -3357,7 +3364,7 @@ install_arch_linux_git_post() {
         [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
 
         if [ -f /usr/bin/systemctl ]; then
-            copyfile "${SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-${fname}.service" "/lib/systemd/system/salt-${fname}.service"
+            copyfile "${__SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-${fname}.service" "/lib/systemd/system/salt-${fname}.service"
 
             /usr/bin/systemctl is-enabled salt-${fname}.service > /dev/null 2>&1 || (
                 /usr/bin/systemctl preset salt-${fname}.service > /dev/null 2>&1 &&
@@ -3369,7 +3376,7 @@ install_arch_linux_git_post() {
         fi
 
         # SysV init!?
-        copyfile "${SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-$fname" "/etc/rc.d/init.d/salt-$fname"
+        copyfile "${__SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-$fname" "/etc/rc.d/init.d/salt-$fname"
         chmod +x /etc/rc.d/init.d/salt-$fname
     done
 }
@@ -3550,7 +3557,7 @@ install_freebsd_git_deps() {
 
     # Let's trigger config_salt()
     if [ "$_TEMP_CONFIG_DIR" = "null" ]; then
-        _TEMP_CONFIG_DIR="${SALT_GIT_CHECKOUT_DIR}/conf/"
+        _TEMP_CONFIG_DIR="${__SALT_GIT_CHECKOUT_DIR}/conf/"
         CONFIG_SALT_FUNC="config_salt"
     fi
 
@@ -3702,7 +3709,7 @@ install_smartos_git_deps() {
     __git_clone_and_checkout || return 1
     # Let's trigger config_salt()
     if [ "$_TEMP_CONFIG_DIR" = "null" ]; then
-        _TEMP_CONFIG_DIR="${SALT_GIT_CHECKOUT_DIR}/conf/"
+        _TEMP_CONFIG_DIR="${__SALT_GIT_CHECKOUT_DIR}/conf/"
         CONFIG_SALT_FUNC="config_salt"
     fi
 
@@ -3764,13 +3771,13 @@ install_smartos_git_post() {
 
         svcs "network/salt-$fname" > /dev/null 2>&1
         if [ $? -eq 1 ]; then
-            svccfg import "${SALT_GIT_CHECKOUT_DIR}/pkg/smartos/salt-$fname.xml"
+            svccfg import "${__SALT_GIT_CHECKOUT_DIR}/pkg/smartos/salt-$fname.xml"
             if [ "${VIRTUAL_TYPE}" = "global" ]; then
                 if [ ! -d $smf_dir ]; then
                     mkdir -p "$smf_dir"
                 fi
                 if [ ! -f "$smf_dir/salt-$fname.xml" ]; then
-                    copyfile "${SALT_GIT_CHECKOUT_DIR}/pkg/smartos/salt-$fname.xml" "$smf_dir/"
+                    copyfile "${__SALT_GIT_CHECKOUT_DIR}/pkg/smartos/salt-$fname.xml" "$smf_dir/"
                 fi
             fi
         fi
@@ -3858,7 +3865,7 @@ install_opensuse_git_deps() {
 
     # Let's trigger config_salt()
     if [ "$_TEMP_CONFIG_DIR" = "null" ]; then
-        _TEMP_CONFIG_DIR="${SALT_GIT_CHECKOUT_DIR}/conf/"
+        _TEMP_CONFIG_DIR="${__SALT_GIT_CHECKOUT_DIR}/conf/"
         CONFIG_SALT_FUNC="config_salt"
     fi
 
@@ -3918,11 +3925,11 @@ install_opensuse_git_post() {
         [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
 
         if [ -f /bin/systemctl ]; then
-            copyfile "${SALT_GIT_CHECKOUT_DIR}/pkg/salt-${fname}.service" "/lib/systemd/system/salt-${fname}.service"
+            copyfile "${__SALT_GIT_CHECKOUT_DIR}/pkg/salt-${fname}.service" "/lib/systemd/system/salt-${fname}.service"
             continue
         fi
 
-        copyfile "${SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-$fname" "/etc/init.d/salt-$fname"
+        copyfile "${__SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-$fname" "/etc/init.d/salt-$fname"
         chmod +x /etc/init.d/salt-$fname
 
     done
@@ -4076,7 +4083,7 @@ install_suse_11_git_deps() {
 
     # Let's trigger config_salt()
     if [ "$_TEMP_CONFIG_DIR" = "null" ]; then
-        _TEMP_CONFIG_DIR="${SALT_GIT_CHECKOUT_DIR}/conf/"
+        _TEMP_CONFIG_DIR="${__SALT_GIT_CHECKOUT_DIR}/conf/"
         CONFIG_SALT_FUNC="config_salt"
     fi
 

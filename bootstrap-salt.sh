@@ -1183,12 +1183,12 @@ __git_clone_and_checkout() {
             cd "${__SALT_GIT_CHECKOUT_DIR}"
         fi
 
-        if [ "$_SALT_REPO_URL" != "$_SALTSTACK_REPO_URL" ]; then
+        if [ "$(echo "$_SALT_REPO_URL" | sed 's/^\(\(git\|https\)\:\/\/github\.com\/saltstack\/salt\.git\|git@github.com\:saltstack\/salt\.git\)$/MATCH/')" != "MATCH" ]; then
             # We need to add the saltstack repository as a remote and fetch tags for proper versioning
             echoinfo "Adding SaltStack's Salt repository as a remote"
-            git remote add upstream "$_SALTSTACK_REPO_URL"
+            git remote add upstream "$_SALTSTACK_REPO_URL" || return 1
             echodebug "Fetching upstream(SaltStack's Salt repository) git tags"
-            git fetch --tags upstream
+            git fetch --tags upstream || return 1
         fi
 
         if [ "$__SHALLOW_CLONE" -eq "${BS_FALSE}" ]; then

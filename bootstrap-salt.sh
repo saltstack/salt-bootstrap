@@ -175,6 +175,43 @@ __check_config_dir() {
 }
 
 
+#----------------------------------------------------------------------------------------------------------------------
+#  Handle command line arguments
+#----------------------------------------------------------------------------------------------------------------------
+_KEEP_TEMP_FILES=${BS_KEEP_TEMP_FILES:-$BS_FALSE}
+_TEMP_CONFIG_DIR="null"
+_SALTSTACK_REPO_URL="git://github.com/saltstack/salt.git"
+_SALT_REPO_URL=${_SALTSTACK_REPO_URL}
+_TEMP_KEYS_DIR="null"
+_INSTALL_MASTER=$BS_FALSE
+_INSTALL_SYNDIC=$BS_FALSE
+_INSTALL_MINION=$BS_TRUE
+_INSTALL_CLOUD=$BS_FALSE
+_START_DAEMONS=$BS_TRUE
+_ECHO_DEBUG=${BS_ECHO_DEBUG:-$BS_FALSE}
+_CONFIG_ONLY=$BS_FALSE
+_PIP_ALLOWED=${BS_PIP_ALLOWED:-$BS_FALSE}
+_SALT_ETC_DIR=${BS_SALT_ETC_DIR:-/etc/salt}
+_PKI_DIR=${_SALT_ETC_DIR}/pki
+_FORCE_OVERWRITE=${BS_FORCE_OVERWRITE:-$BS_FALSE}
+_GENTOO_USE_BINHOST=${BS_GENTOO_USE_BINHOST:-$BS_FALSE}
+_EPEL_REPO=${BS_EPEL_REPO:-epel}
+__EPEL_REPOS_INSTALLED=${BS_FALSE}
+_UPGRADE_SYS=${BS_UPGRADE_SYS:-$BS_FALSE}
+_INSECURE_DL=${BS_INSECURE_DL:-$BS_FALSE}
+_WGET_ARGS=${BS_WGET_ARGS:-}
+_CURL_ARGS=${BS_CURL_ARGS:-}
+_FETCH_ARGS=${BS_FETCH_ARGS:-}
+_SALT_MASTER_ADDRESS=${BS_SALT_MASTER_ADDRESS:-null}
+_SALT_MINION_ID="null"
+# __SIMPLIFY_VERSION is mostly used in Solaris based distributions
+__SIMPLIFY_VERSION=$BS_TRUE
+_LIBCLOUD_MIN_VERSION="0.14.0"
+_EXTRA_PACKAGES=""
+_HTTP_PROXY=""
+__SALT_GIT_CHECKOUT_DIR=${BS_SALT_GIT_CHECKOUT_DIR:-/tmp/git/salt}
+
+
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #         NAME:  usage
 #  DESCRIPTION:  Display usage information.
@@ -227,9 +264,9 @@ usage() {
   -I  If set, allow insecure connections while downloading any files. For
       example, pass '--no-check-certificate' to 'wget' or '--insecure' to 'curl'
   -A  Pass the salt-master DNS name or IP. This will be stored under
-      \${BS_SALT_ETC_DIR}/minion.d/99-master-address.conf
+      \${_SALT_ETC_DIR}/minion.d/99-master-address.conf
   -i  Pass the salt-minion id. This will be stored under
-      \${BS_SALT_ETC_DIR}/minion_id
+      \${_SALT_ETC_DIR}/minion_id
   -L  Install the Apache Libcloud package if possible(required for salt-cloud)
   -p  Extra-package to install while installing salt dependencies. One package
       per -p flag. You're responsible for providing the proper package name.
@@ -238,43 +275,6 @@ usage() {
 EOT
 }   # ----------  end of function usage  ----------
 
-
-
-#----------------------------------------------------------------------------------------------------------------------
-#  Handle command line arguments
-#----------------------------------------------------------------------------------------------------------------------
-_KEEP_TEMP_FILES=${BS_KEEP_TEMP_FILES:-$BS_FALSE}
-_TEMP_CONFIG_DIR="null"
-_SALTSTACK_REPO_URL="git://github.com/saltstack/salt.git"
-_SALT_REPO_URL=${_SALTSTACK_REPO_URL}
-_TEMP_KEYS_DIR="null"
-_INSTALL_MASTER=$BS_FALSE
-_INSTALL_SYNDIC=$BS_FALSE
-_INSTALL_MINION=$BS_TRUE
-_INSTALL_CLOUD=$BS_FALSE
-_START_DAEMONS=$BS_TRUE
-_ECHO_DEBUG=${BS_ECHO_DEBUG:-$BS_FALSE}
-_CONFIG_ONLY=$BS_FALSE
-_PIP_ALLOWED=${BS_PIP_ALLOWED:-$BS_FALSE}
-_SALT_ETC_DIR=${BS_SALT_ETC_DIR:-/etc/salt}
-_PKI_DIR=${_SALT_ETC_DIR}/pki
-_FORCE_OVERWRITE=${BS_FORCE_OVERWRITE:-$BS_FALSE}
-_GENTOO_USE_BINHOST=${BS_GENTOO_USE_BINHOST:-$BS_FALSE}
-_EPEL_REPO=${BS_EPEL_REPO:-epel}
-__EPEL_REPOS_INSTALLED=${BS_FALSE}
-_UPGRADE_SYS=${BS_UPGRADE_SYS:-$BS_FALSE}
-_INSECURE_DL=${BS_INSECURE_DL:-$BS_FALSE}
-_WGET_ARGS=${BS_WGET_ARGS:-}
-_CURL_ARGS=${BS_CURL_ARGS:-}
-_FETCH_ARGS=${BS_FETCH_ARGS:-}
-_SALT_MASTER_ADDRESS=${BS_SALT_MASTER_ADDRESS:-null}
-_SALT_MINION_ID="null"
-# __SIMPLIFY_VERSION is mostly used in Solaris based distributions
-__SIMPLIFY_VERSION=$BS_TRUE
-_LIBCLOUD_MIN_VERSION="0.14.0"
-_EXTRA_PACKAGES=""
-_HTTP_PROXY=""
-__SALT_GIT_CHECKOUT_DIR=${BS_SALT_GIT_CHECKOUT_DIR:-/tmp/git/salt}
 
 while getopts ":hvnDc:g:k:MSNXCPFUKIA:i:Lp:H:" opt
 do

@@ -2,6 +2,9 @@ Version 2014.xx.xx:
 	* Avoid redirect breakage when installing EPEL with rpm on RHEL 5
 	* Ensure python-apt is installed by the bootstrap script for Debian & Ubuntu minions. Thanks 
 	@garethgreenaway.
+	* Don't shallow clone on git versions lower than 1.7.10
+	* Only shallow clone on git tag based installations
+	* Configurable Salt repository clone directory for git based installations
 	* Distro Support Fixed:
 		* Fixed the URL to download EPEL for Cent 5
 		* Use the full path to the `chkconfig` binary when checking for services in SysV init 

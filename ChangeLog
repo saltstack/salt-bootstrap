@@ -1,3 +1,11 @@
+Version 2014.xx.xx:
+	* Skip service checks for `salt-api`, since this should be an opt-in service not necessarily 
+	meant to start at boot time.
+	* Distro Support Fixes:
+		* Also install the salt-api service on RHEL based distributions for git based 
+		installations.
+
+
 Version 2014.08.23:
 	* Avoid redirect breakage when installing EPEL with rpm on RHEL 5
 	* Ensure python-apt is installed by the bootstrap script for Debian & Ubuntu minions. Thanks 
@@ -14,7 +22,6 @@ Version 2014.08.23:
 		before it could complete, bootstrap would call another. The result was *two* copies of salt 
 		running which ended up causing a most stubborn bug that's documented in 
 		https://github.com/saltstack/salt/issues/12248
-
 
 Version 2014.07.29:
 	* Shallow clone Salt's repository for speed improvements. In case of failure, resume old 

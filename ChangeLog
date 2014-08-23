@@ -1,4 +1,4 @@
-Version 2014.xx.xx:
+Version 2014.08.23:
 	* Avoid redirect breakage when installing EPEL with rpm on RHEL 5
 	* Ensure python-apt is installed by the bootstrap script for Debian & Ubuntu minions. Thanks 
 	@garethgreenaway.

@@ -2632,11 +2632,12 @@ install_centos_git() {
 }
 
 install_centos_git_post() {
-    for fname in master minion syndic; do
+    for fname in minion master minion api; do
 
         # Skip if not meant to be installed
         [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
         [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
+        [ $fname = "api" ] && ([ "$_INSTALL_MASTER" -eq $BS_FALSE ] || [ "$(which salt-${fname} 2>/dev/null)" = "" ]) && continue
         [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
 
         # While the RPM's use init.d, so will we.

@@ -2765,7 +2765,7 @@ __test_rhel_optionals_packages() {
                 yum --config "${__YUM_CONF_FILE}" install -y ${package} --enablerepo=${_EPEL_REPO} >/dev/null 2>&1
             fi
             if [ $? -ne 0 ]; then
-                echoerror "Failed to find an installable '${package}' package. The optional repository or it's subscription might be missing."
+                echoerror "Failed to find an installable '${package}' package. The optional repository or its subscription might be missing."
                 rm -rf "${__YUM_CONF_DIR}"
                 return 1
             fi
@@ -3822,7 +3822,7 @@ install_opensuse_stable_deps() {
 
     zypper --gpg-auto-import-keys --non-interactive refresh
     if [ $? -ne 0 ] && [ $? -ne 4 ]; then
-        # If the exit code is not 0, and it's not 4(failed to update a
+        # If the exit code is not 0, and it's not 4 (failed to update a
         # repository) return a failure. Otherwise continue.
         return 1
     fi

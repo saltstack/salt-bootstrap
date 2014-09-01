@@ -211,6 +211,7 @@ _LIBCLOUD_MIN_VERSION="0.14.0"
 _PY_REQUESTS_MIN_VERSION="2.0"
 _EXTRA_PACKAGES=""
 _HTTP_PROXY=""
+_DISABLE_SALT_CHECKS=$BS_FALSE
 __SALT_GIT_CHECKOUT_DIR=${BS_SALT_GIT_CHECKOUT_DIR:-/tmp/git/salt}
 
 
@@ -277,6 +278,9 @@ usage() {
   -L  Install the Apache Libcloud package if possible(required for salt-cloud)
   -p  Extra-package to install while installing salt dependencies. One package
       per -p flag. You're responsible for providing the proper package name.
+  -d  Disable check_service functions. Setting this flag disables the
+      'install_<distro>_check_services' checks. You can also do this by
+      touching /tmp/disable_salt_checks on the target host. Defaults \${BS_FALSE}
   -H  Use the specified http proxy for the installation
   -Z  Enable external software source for newer ZeroMQ(Only available for RHEL/CentOS/Fedora based distributions)
 
@@ -284,7 +288,7 @@ EOT
 }   # ----------  end of function usage  ----------
 
 
-while getopts ":hvnDc:Gg:k:MSNXCPFUKIA:i:Lp:H:Z" opt
+while getopts ":hvnDc:Gg:k:MSNXCPFUKIA:i:Lp:dH:Z" opt
 do
   case "${opt}" in
 
@@ -333,6 +337,7 @@ do
     i )  _SALT_MINION_ID=$OPTARG                        ;;
     L )  _INSTALL_CLOUD=$BS_TRUE                        ;;
     p )  _EXTRA_PACKAGES="$_EXTRA_PACKAGES $OPTARG"     ;;
+    d )  _DISABLE_SALT_CHECKS=$BS_TRUE                  ;;
     H )  _HTTP_PROXY="$OPTARG"                          ;;
     Z)   _ENABLE_EXTERNAL_ZMQ_REPOS=$BS_TRUE            ;;
 
@@ -465,6 +470,12 @@ CALLER=$(ps -a -o pid,args | grep $$ | grep -v grep | tr -s ' ' | cut -d ' ' -f 
 
 if [ "${CALLER}x" = "${0}x" ]; then
     CALLER="PIPED THROUGH"
+fi
+
+# Work around for 'Docker + salt-bootstrap failure' https://github.com/saltstack/salt-bootstrap/issues/394
+if [ ${_DISABLE_SALT_CHECKS} -eq 0 ]; then
+    [ -f /tmp/disable_salt_checks ] && _DISABLE_SALT_CHECKS=$BS_TRUE && \
+        echowarn "Found file: /tmp/disable_salt_checks, setting \$_DISABLE_SALT_CHECKS=true"
 fi
 
 echoinfo "${CALLER} ${0} -- Version ${__ScriptVersion}"
@@ -5166,12 +5177,17 @@ done
 echodebug "DAEMONS_RUNNING_FUNC=${DAEMONS_RUNNING_FUNC}"
 
 # Let's get the check services function
-CHECK_SERVICES_FUNC_NAMES="install_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}_${ITYPE}_check_services"
-CHECK_SERVICES_FUNC_NAMES="$CHECK_SERVICES_FUNC_NAMES install_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}${PREFIXED_DISTRO_MINOR_VERSION}_${ITYPE}_check_services"
-CHECK_SERVICES_FUNC_NAMES="$CHECK_SERVICES_FUNC_NAMES install_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}_check_services"
-CHECK_SERVICES_FUNC_NAMES="$CHECK_SERVICES_FUNC_NAMES install_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}${PREFIXED_DISTRO_MINOR_VERSION}_check_services"
-CHECK_SERVICES_FUNC_NAMES="$CHECK_SERVICES_FUNC_NAMES install_${DISTRO_NAME_L}_${ITYPE}_check_services"
-CHECK_SERVICES_FUNC_NAMES="$CHECK_SERVICES_FUNC_NAMES install_${DISTRO_NAME_L}_check_services"
+if [ ${_DISABLE_SALT_CHECKS} -eq $BS_FALSE ]; then
+    CHECK_SERVICES_FUNC_NAMES="install_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}_${ITYPE}_check_services"
+    CHECK_SERVICES_FUNC_NAMES="$CHECK_SERVICES_FUNC_NAMES install_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}${PREFIXED_DISTRO_MINOR_VERSION}_${ITYPE}_check_services"
+    CHECK_SERVICES_FUNC_NAMES="$CHECK_SERVICES_FUNC_NAMES install_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}_check_services"
+    CHECK_SERVICES_FUNC_NAMES="$CHECK_SERVICES_FUNC_NAMES install_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}${PREFIXED_DISTRO_MINOR_VERSION}_check_services"
+    CHECK_SERVICES_FUNC_NAMES="$CHECK_SERVICES_FUNC_NAMES install_${DISTRO_NAME_L}_${ITYPE}_check_services"
+    CHECK_SERVICES_FUNC_NAMES="$CHECK_SERVICES_FUNC_NAMES install_${DISTRO_NAME_L}_check_services"
+else
+    CHECK_SERVICES_FUNC_NAMES=False
+    echowarn "DISABLE_SALT_CHECKS set, not setting \$CHECK_SERVICES_FUNC_NAMES"
+fi
 
 CHECK_SERVICES_FUNC="null"
 for FUNC_NAME in $(__strip_duplicates "$CHECK_SERVICES_FUNC_NAMES"); do

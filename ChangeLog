@@ -2,6 +2,7 @@ Version 2014.xx.xx:
 	* Distro Support Fixes:
 		* Updated the URL for EPEL 7
 		* PIP based installations on Ubuntu 10.04 need setuptools installed
+		* Arch stopped providing the version information on `/etc/arch-release`
 
 Version 2014.08.30:
 	* Skip service checks for `salt-api`, since this should be an opt-in service not necessarily 

@@ -731,10 +731,11 @@ __gather_linux_system_info() {
         [ ! -f "/etc/${rsource}" ] && continue      # Does not exist
 
         n=$(echo "${rsource}" | sed -e 's/[_-]release$//' -e 's/[_-]version$//')
+        shortname=$(echo "${n}" | tr '[:upper:]' '[:lower:]')
         rv=$( (grep VERSION "/etc/${rsource}"; cat "/etc/${rsource}") | grep '[0-9]' | sed -e 'q' )
-        [ "${rv}" = "" ] && continue  # There's no version information. Continue to next rsource
+        [ "${rv}" = "" ] && [ "$shortname" != "arch" ] && continue  # There's no version information. Continue to next rsource
         v=$(__parse_version_string "$rv")
-        case $(echo "${n}" | tr '[:upper:]' '[:lower:]') in
+        case $shortname in
             redhat             )
                 if [ "$(egrep 'CentOS' /etc/${rsource})" != "" ]; then
                     n="CentOS"

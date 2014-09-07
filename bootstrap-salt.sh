@@ -1693,7 +1693,7 @@ install_ubuntu_deps() {
         __PIP_PACKAGES=""
     else
         check_pip_allowed "You need to allow pip based installations (-P) in order to install the python package 'requests'"
-        __apt_get_install_noinput python-pip
+        __apt_get_install_noinput python-setuptools python-pip
         __PIP_PACKAGES="requests"
         pip install requests
     fi

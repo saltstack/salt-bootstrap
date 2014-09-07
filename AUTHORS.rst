@@ -41,6 +41,7 @@ nevins-b                    nevins-b
 Niels Abspoel               aboe76
 Paul Brian                  lifeisstillgood        paul@mikadosoftware.com
 Pedro Algarvio              s0undt3ch              pedro@algarvio.me
+Pedro Paulo                 pedropaulovc
 Raymond Barbiero            visualphoenix
 Roberto Aguilar             rca                    roberto@baremetal.io
 Tate Eskew                  tateeskew

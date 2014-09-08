@@ -31,7 +31,7 @@ __ScriptName="bootstrap-salt.sh"
 #   * BS_FORCE_OVERWRITE:       Force overriding copied files(config, init.d, etc)
 #   * BS_UPGRADE_SYS:           If 1 and an option, upgrade system. Default 0.
 #   * BS_GENTOO_USE_BINHOST:    If 1 add `--getbinpkg` to gentoo's emerge
-#   * BS__SALT_MASTER_ADDRESS:  The IP or DNS name of the salt-master the minion should connect to
+#   * BS_SALT_MASTER_ADDRESS:   The IP or DNS name of the salt-master the minion should connect to
 #   * BS_SALT_GIT_CHECKOUT_DIR: The directory where to clone Salt on git installations
 #======================================================================================================================
 

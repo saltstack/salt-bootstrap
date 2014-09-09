@@ -25,7 +25,7 @@ Geoff Garside               geoffgarside           geoff@geoffgarside.co.uk
 Giuseppe Iannello           giannello              giuseppe.iannello@brokenloop.net
 Gregory Meno                GregMeno               gregory.meno@inktank.com
 Guillaume Derval            GuillaumeDerval        guillaume@guillaumederval.be
-                            gweis
+gweis                       gweis
 Henrik Holmboe              holmboe
 Jeff Hui                    jeffh                  jeff@jeffhui.net
 Jeff Strunk                 jstrunk
@@ -34,6 +34,7 @@ Karl Grzeszczak             karlgrz
 Kenneth Wilke               KennethWilke
 Liu Xiaohui                 oreh                   herolxh@gmail.com
 Matthew Garrett             cingeyedog             matt@clemson.edu
+Matthew Mead-Briggs         mattmb
 Matthew Willson             ixela
 Matthieu Guegan             mguegan
 Mike Carlson                m87carlson             mike@bayphoto.com

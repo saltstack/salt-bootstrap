@@ -1828,6 +1828,10 @@ install_ubuntu_git_post() {
             echodebug "Copying ${__SALT_GIT_CHECKOUT_DIR}/debian/salt-${fname}.init to /etc/init.d/salt-$fname"
             copyfile "${__SALT_GIT_CHECKOUT_DIR}/debian/salt-${fname}.init" "/etc/init.d/salt-$fname"
             chmod +x /etc/init.d/salt-$fname
+
+            # Skip salt-api since the service should be opt-in and not necessarily started on boot
+            [ $fname = "api" ] && continue
+
             update-rc.d salt-$fname defaults
         else
             echoerror "Neither upstart not init.d was setup for salt-$fname"
@@ -1841,11 +1845,13 @@ install_ubuntu_restart_daemons() {
     # Ensure upstart configs are loaded
     [ -f /sbin/initctl ] && /sbin/initctl reload-configuration
     for fname in minion master syndic api; do
+        # Skip salt-api since the service should be opt-in and not necessarily started on boot
+        [ $fname = "api" ] && continue
 
         # Skip if not meant to be installed
         [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
         [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
-        [ $fname = "api" ] && ([ "$_INSTALL_MASTER" -eq $BS_FALSE ] || [ "$(which salt-${fname} 2>/dev/null)" = "" ]) && continue
+        #[ $fname = "api" ] && ([ "$_INSTALL_MASTER" -eq $BS_FALSE ] || [ "$(which salt-${fname} 2>/dev/null)" = "" ]) && continue
         [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
 
         if [ -f /sbin/initctl ]; then
@@ -2299,6 +2305,10 @@ install_debian_git_post() {
             continue
         fi
         chmod +x "/etc/init.d/salt-$fname"
+
+        # Skip salt-api since the service should be opt-in and not necessarily started on boot
+        [ $fname = "api" ] && continue
+
         update-rc.d "salt-$fname" defaults
     done
 }
@@ -2307,11 +2317,13 @@ install_debian_restart_daemons() {
     [ "$_START_DAEMONS" -eq $BS_FALSE ] && return
 
     for fname in minion master syndic api; do
+        # Skip salt-api since the service should be opt-in and not necessarily started on boot
+        [ $fname = "api" ] && continue
 
         # Skip if not meant to be installed
         [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
         [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
-        [ $fname = "api" ] && ([ "$_INSTALL_MASTER" -eq $BS_FALSE ] || [ ! -f "/etc/init.d/salt-$fname" ]) && continue
+        #[ $fname = "api" ] && ([ "$_INSTALL_MASTER" -eq $BS_FALSE ] || [ ! -f "/etc/init.d/salt-$fname" ]) && continue
         [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
 
         /etc/init.d/salt-$fname stop > /dev/null 2>&1
@@ -2386,6 +2398,9 @@ install_fedora_stable_post() {
         [ $fname = "api" ] && ([ "$_INSTALL_MASTER" -eq $BS_FALSE ] || [ "$(which salt-${fname} 2>/dev/null)" = "" ]) && continue
         [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
 
+        # Skip salt-api since the service should be opt-in and not necessarily started on boot
+        [ $fname = "api" ] && continue
+
         systemctl is-enabled salt-$fname.service || (systemctl preset salt-$fname.service && systemctl enable salt-$fname.service)
         sleep 0.1
         systemctl daemon-reload
@@ -2428,6 +2443,9 @@ install_fedora_git_post() {
 
         copyfile "${__SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-${fname}.service" "/lib/systemd/system/salt-${fname}.service"
 
+        # Skip salt-api since the service should be opt-in and not necessarily started on boot
+        [ $fname = "api" ] && continue
+
         systemctl is-enabled salt-$fname.service || (systemctl preset salt-$fname.service && systemctl enable salt-$fname.service)
         sleep 0.1
         systemctl daemon-reload
@@ -2438,10 +2456,13 @@ install_fedora_restart_daemons() {
     [ $_START_DAEMONS -eq $BS_FALSE ] && return
 
     for fname in minion master syndic api; do
+        # Skip salt-api since the service should be opt-in and not necessarily started on boot
+        [ $fname = "api" ] && continue
+
         # Skip if not meant to be installed
         [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
         [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
-        [ $fname = "api" ] && ([ "$_INSTALL_MASTER" -eq $BS_FALSE ] || [ "$(which salt-${fname} 2>/dev/null)" = "" ]) && continue
+        #[ $fname = "api" ] && ([ "$_INSTALL_MASTER" -eq $BS_FALSE ] || [ "$(which salt-${fname} 2>/dev/null)" = "" ]) && continue
         [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
 
         systemctl stop salt-$fname > /dev/null 2>&1
@@ -2590,9 +2611,12 @@ install_centos_stable() {
 install_centos_stable_post() {
     for fname in minion master syndic api; do
         # Skip if not meant to be installed
+        # Skip salt-api since the service should be opt-in and not necessarily started on boot
+        [ $fname = "api" ] && continue
+
         [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
         [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
-        [ $fname = "api" ] && ([ "$_INSTALL_MASTER" -eq $BS_FALSE ] || [ "$(which salt-${fname} 2>/dev/null)" = "" ]) && continue
+        #[ $fname = "api" ] && ([ "$_INSTALL_MASTER" -eq $BS_FALSE ] || [ "$(which salt-${fname} 2>/dev/null)" = "" ]) && continue
         [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
 
         if [ -f /etc/init.d/salt-$fname ]; then
@@ -2657,6 +2681,10 @@ install_centos_git_post() {
         if [ ! -f /etc/init.d/salt-$fname ] || ([ -f /etc/init.d/salt-$fname ] && [ $_FORCE_OVERWRITE -eq $BS_TRUE ]); then
             copyfile "${__SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-${fname}" /etc/init.d/
             chmod +x /etc/init.d/salt-${fname}
+
+            # Skip salt-api since the service should be opt-in and not necessarily started on boot
+            [ $fname = "api" ] && continue
+
             /sbin/chkconfig salt-${fname} on
         fi
 
@@ -2681,9 +2709,12 @@ install_centos_restart_daemons() {
 
     for fname in minion master syndic api; do
         # Skip if not meant to be installed
+        # Skip salt-api since the service should be opt-in and not necessarily started on boot
+        [ $fname = "api" ] && continue
+
         [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
         [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
-        [ $fname = "api" ] && ([ "$_INSTALL_MASTER" -eq $BS_FALSE ] || [ "$(which salt-${fname} 2>/dev/null)" = "" ]) && continue
+        #[ $fname = "api" ] && ([ "$_INSTALL_MASTER" -eq $BS_FALSE ] || [ "$(which salt-${fname} 2>/dev/null)" = "" ]) && continue
         [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
 
         if [ -f /sbin/initctl ] && [ -f /etc/init/salt-${fname}.conf ]; then
@@ -3356,6 +3387,9 @@ install_arch_linux_post() {
             copyfile "$_SALT_ETC_DIR/$fname.pacorig" "$_SALT_ETC_DIR/$fname" $BS_TRUE
         fi
 
+        # Skip salt-api since the service should be opt-in and not necessarily started on boot
+        [ $fname = "api" ] && continue
+
         if [ -f /usr/bin/systemctl ]; then
             # Using systemd
             /usr/bin/systemctl is-enabled salt-$fname.service > /dev/null 2>&1 || (
@@ -3383,6 +3417,9 @@ install_arch_linux_git_post() {
         if [ -f /usr/bin/systemctl ]; then
             copyfile "${__SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-${fname}.service" "/lib/systemd/system/salt-${fname}.service"
 
+            # Skip salt-api since the service should be opt-in and not necessarily started on boot
+            [ $fname = "api" ] && continue
+
             /usr/bin/systemctl is-enabled salt-${fname}.service > /dev/null 2>&1 || (
                 /usr/bin/systemctl preset salt-${fname}.service > /dev/null 2>&1 &&
                 /usr/bin/systemctl enable salt-${fname}.service > /dev/null 2>&1
@@ -3402,11 +3439,13 @@ install_arch_linux_restart_daemons() {
     [ $_START_DAEMONS -eq $BS_FALSE ] && return
 
     for fname in minion master syndic api; do
+        # Skip salt-api since the service should be opt-in and not necessarily started on boot
+        [ $fname = "api" ] && continue
 
         # Skip if not meant to be installed
         [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
         [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
-        [ $fname = "api" ] && ([ "$_INSTALL_MASTER" -eq $BS_FALSE ] || [ "$(which salt-${fname} 2>/dev/null)" = "" ]) && continue
+        #[ $fname = "api" ] && ([ "$_INSTALL_MASTER" -eq $BS_FALSE ] || [ "$(which salt-${fname} 2>/dev/null)" = "" ]) && continue
         [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
 
         if [ -f /usr/bin/systemctl ]; then
@@ -3637,6 +3676,9 @@ install_freebsd_git() {
 install_freebsd_9_stable_post() {
     for fname in minion master syndic api; do
 
+        # Skip salt-api since the service should be opt-in and not necessarily started on boot
+        [ $fname = "api" ] && continue
+
         # Skip if not meant to be installed
         [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
         [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
@@ -3670,11 +3712,13 @@ install_freebsd_restart_daemons() {
     [ $_START_DAEMONS -eq $BS_FALSE ] && return
 
     for fname in minion master syndic api; do
+        # Skip salt-api since the service should be opt-in and not necessarily started on boot
+        [ $fname = "api" ] && continue
 
         # Skip if not meant to be installed
         [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
         [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
-        [ $fname = "api" ] && ([ "$_INSTALL_MASTER" -eq $BS_FALSE ] || [ "$(which salt-${fname} 2>/dev/null)" = "" ]) && continue
+        #[ $fname = "api" ] && ([ "$_INSTALL_MASTER" -eq $BS_FALSE ] || [ "$(which salt-${fname} 2>/dev/null)" = "" ]) && continue
         [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
 
         service salt_$fname stop > /dev/null 2>&1
@@ -3808,11 +3852,13 @@ install_smartos_restart_daemons() {
     [ $_START_DAEMONS -eq $BS_FALSE ] && return
 
     for fname in minion master syndic api; do
+        # Skip salt-api since the service should be opt-in and not necessarily started on boot
+        [ $fname = "api" ] && continue
 
         # Skip if not meant to be installed
         [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
         [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
-        [ $fname = "api" ] && ([ "$_INSTALL_MASTER" -eq $BS_FALSE ] || [ "$(which salt-${fname} 2>/dev/null)" = "" ]) && continue
+        #[ $fname = "api" ] && ([ "$_INSTALL_MASTER" -eq $BS_FALSE ] || [ "$(which salt-${fname} 2>/dev/null)" = "" ]) && continue
         [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
 
         # Stop if running && Start service
@@ -3915,11 +3961,13 @@ install_opensuse_git() {
 
 install_opensuse_stable_post() {
     for fname in minion master syndic api; do
+        # Skip salt-api since the service should be opt-in and not necessarily started on boot
+        [ $fname = "api" ] && continue
 
         # Skip if not meant to be installed
         [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
         [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
-        [ $fname = "api" ] && ([ "$_INSTALL_MASTER" -eq $BS_FALSE ] || [ "$(which salt-${fname} 2>/dev/null)" = "" ]) && continue
+        #[ $fname = "api" ] && ([ "$_INSTALL_MASTER" -eq $BS_FALSE ] || [ "$(which salt-${fname} 2>/dev/null)" = "" ]) && continue
         [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
 
         if [ -f /bin/systemctl ]; then
@@ -3961,11 +4009,13 @@ install_opensuse_restart_daemons() {
     [ $_START_DAEMONS -eq $BS_FALSE ] && return
 
     for fname in minion master syndic api; do
+        # Skip salt-api since the service should be opt-in and not necessarily started on boot
+        [ $fname = "api" ] && continue
 
         # Skip if not meant to be installed
         [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
         [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
-        [ $fname = "api" ] && ([ "$_INSTALL_MASTER" -eq $BS_FALSE ] || [ "$(which salt-${fname} 2>/dev/null)" = "" ]) && continue
+        #[ $fname = "api" ] && ([ "$_INSTALL_MASTER" -eq $BS_FALSE ] || [ "$(which salt-${fname} 2>/dev/null)" = "" ]) && continue
         [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
 
         if [ -f /bin/systemctl ]; then
@@ -4275,11 +4325,13 @@ install_gentoo_git() {
 
 install_gentoo_post() {
     for fname in minion master syndic api; do
+        # Skip salt-api since the service should be opt-in and not necessarily started on boot
+        [ $fname = "api" ] && continue
 
         # Skip if not meant to be installed
         [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
         [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
-        [ $fname = "api" ] && ([ "$_INSTALL_MASTER" -eq $BS_FALSE ] || [ "$(which salt-${fname} 2>/dev/null)" = "" ]) && continue
+        #[ $fname = "api" ] && ([ "$_INSTALL_MASTER" -eq $BS_FALSE ] || [ "$(which salt-${fname} 2>/dev/null)" = "" ]) && continue
         [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
 
         if [ -d "/run/systemd/system" ]; then
@@ -4296,11 +4348,13 @@ install_gentoo_restart_daemons() {
     [ $_START_DAEMONS -eq $BS_FALSE ] && return
 
     for fname in minion master syndic api; do
+        # Skip salt-api since the service should be opt-in and not necessarily started on boot
+        [ $fname = "api" ] && continue
 
         # Skip if not meant to be installed
         [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
         [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
-        [ $fname = "api" ] && ([ "$_INSTALL_MASTER" -eq $BS_FALSE ] || [ "$(which salt-${fname} 2>/dev/null)" = "" ]) && continue
+        #[ $fname = "api" ] && ([ "$_INSTALL_MASTER" -eq $BS_FALSE ] || [ "$(which salt-${fname} 2>/dev/null)" = "" ]) && continue
         [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
 
         if [ -d "/run/systemd/system" ]; then
@@ -4464,12 +4518,13 @@ daemons_running() {
 
     FAILED_DAEMONS=0
     for fname in minion master syndic api; do
+        # Skip salt-api since the service should be opt-in and not necessarily started on boot
+        [ $fname = "api" ] && continue
 
         # Skip if not meant to be installed
         [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
         [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
         #[ $fname = "api" ] && ([ "$_INSTALL_MASTER" -eq $BS_FALSE ] || [ "$(which salt-${fname} 2>/dev/null)" = "" ]) && continue
-        [ $fname = "api" ] && continue
         [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
 
         # shellcheck disable=SC2009
@@ -4761,10 +4816,13 @@ if [ "$DAEMONS_RUNNING_FUNC" != "null" ] && [ $_START_DAEMONS -eq $BS_TRUE ]; th
         echoerror "Failed to run ${DAEMONS_RUNNING_FUNC}()!!!"
 
         for fname in minion master syndic api; do
+            # Skip salt-api since the service should be opt-in and not necessarily started on boot
+            [ $fname = "api" ] && continue
+
             # Skip if not meant to be installed
             [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
             [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
-            [ $fname = "api" ] && ([ "$_INSTALL_MASTER" -eq $BS_FALSE ] || [ "$(which salt-${fname} 2>/dev/null)" = "" ]) && continue
+            #[ $fname = "api" ] && ([ "$_INSTALL_MASTER" -eq $BS_FALSE ] || [ "$(which salt-${fname} 2>/dev/null)" = "" ]) && continue
             [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
 
             if [ "$_ECHO_DEBUG" -eq $BS_FALSE ]; then

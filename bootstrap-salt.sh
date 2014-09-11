@@ -1157,7 +1157,7 @@ __git_clone_and_checkout() {
         fi
     else
         __SHALLOW_CLONE="${BS_FALSE}"
-        if [ "$(echo "$GIT_REV" | sed 's/^.*\(v[[:digit:]]\{1,4\}\.[[:digit:]]\{1,2\}\.[[:digit:]]\{1,2\}\).*$/MATCH/')" = "MATCH" ]; then
+        if [ "$(echo "$GIT_REV" | sed 's/^.*\(v[[:digit:]]\{1,4\}\.[[:digit:]]\{1,2\}\.[[:digit:]]\{1,2\}\)\?.*$/MATCH/')" = "MATCH" ]; then
             echoinfo "Git revision matches a Salt version tag"
             # Let's try shallow cloning to speed up.
             # Test for "--single-branch" option introduced in git 1.7.10, the minimal version of git where the shallow

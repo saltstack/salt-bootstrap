@@ -1,3 +1,7 @@
+Version 2014.09.24:
+	* Fixed salt tag version matching to also accept, for example, v2014.7. #464
+	* Fix the EPEL 7 URL since epel-release is now 7.2
+
 Version 2014.09.09:
 	* Distro Support Fixes:
 		* Updated the URL for EPEL 7

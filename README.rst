@@ -107,8 +107,8 @@ To install a specific branch from a git fork:
 
 .. code:: console
 
-  curl -o install_salt.sh.sh -L https://bootstrap.saltstack.com
-  sudo sh install_salt.sh.sh -g https://github.com/myuser/salt.git git mybranch
+  curl -o install_salt.sh -L https://bootstrap.saltstack.com
+  sudo sh install_salt.sh -g https://github.com/myuser/salt.git git mybranch
 
 
 Installing via an Insecure One-Liner

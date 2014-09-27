@@ -937,6 +937,7 @@ __ubuntu_derivatives_translation() {
     # https://bugs.launchpad.net/linuxmint/+bug/1198751
 
     linuxmint_16_ubuntu_base="13.10"
+    linuxmint_17_ubuntu_base="14.04"
     linaro_12_ubuntu_base="12.04"
     elementary_os_02_ubuntu_base="12.04"
 

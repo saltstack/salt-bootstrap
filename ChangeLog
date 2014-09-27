@@ -1,6 +1,8 @@
 Version 2014.xx.xx:
 	* Distro Support Added:
 		* Added Linux Mint 17 support(Thanks Skyler Berg)
+	* Disrto Suuport Fixed:
+		* Init pacman keys if not done so previously
 
 Version 2014.09.25:
 	* Properly detect Amazon AMI's >= 2014.9. #468

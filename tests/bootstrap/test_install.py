@@ -16,7 +16,7 @@ import glob
 import shutil
 from bootstrap.unittesting import *
 
-CURRENT_SALT_STABLE_VERSION = os.environ.get(CURRENT_SALT_STABLE_VERSION, 'v2014.1.10')
+CURRENT_SALT_STABLE_VERSION = os.environ.get('CURRENT_SALT_STABLE_VERSION', 'v2014.1.10')
 
 
 CLEANUP_COMMANDS_BY_OS_FAMILY = {

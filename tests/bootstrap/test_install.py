@@ -10,12 +10,13 @@
     :license: Apache 2.0, see LICENSE for more details.
 '''
 
+import os
 import re
 import glob
 import shutil
 from bootstrap.unittesting import *
 
-CURRENT_SALT_STABLE_VERSION = 'v0.15.1'
+CURRENT_SALT_STABLE_VERSION = os.environ.get(CURRENT_SALT_STABLE_VERSION, 'v2014.1.10')
 
 
 CLEANUP_COMMANDS_BY_OS_FAMILY = {

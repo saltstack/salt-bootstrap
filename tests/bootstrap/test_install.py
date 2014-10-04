@@ -29,6 +29,8 @@ CLEANUP_COMMANDS_BY_OS_FAMILY = {
         'pacman -Qs python2-psutil && pacman -Rsc --noconfirm python2-psutil && exit $? || exit 0',
         'pacman -Qs python2-pyzmq && pacman -Rsc --noconfirm python2-pyzmq && exit $? || exit 0',
         'pacman -Qs zeromq && pacman -Rsc --noconfirm zeromq && exit $? || exit 0',
+        'pacman -Qs apache-libcloud && pacman -Rsc --noconfirm apache-libcloud && exit $? || exit 0',
+        'pacman -Qs python2-requests && pacman -Rsc --noconfirm python2-requests && exit $? || exit 0',
     ],
     'Debian': [
         'apt-get remove -y -o DPkg::Options::=--force-confold '

@@ -167,6 +167,8 @@ class InstallationTestCase(BootstrapTestCase):
                           '/var/*/salt*',
                           ):
             for entry in glob.glob(glob_rule):
+                if 'salttesting' in glob_rule:
+                    continue
                 if os.path.isfile(entry):
                     print 'Removing file {0!r}'.format(entry)
                     os.remove(entry)

@@ -45,6 +45,7 @@ Pedro Algarvio              s0undt3ch              pedro@algarvio.me
 Pedro Paulo                 pedropaulovc
 Raymond Barbiero            visualphoenix
 Roberto Aguilar             rca                    roberto@baremetal.io
+Skyler Berg                 skylerberg             skylertheberg@gmail.com
 Tate Eskew                  tateeskew
 Thomas S. Hatch             thatch45               thatch45@saltstack.com
 Valentin Bud                valentinbud            valentin@databus.pro

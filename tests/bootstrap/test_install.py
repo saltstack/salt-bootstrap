@@ -10,12 +10,13 @@
     :license: Apache 2.0, see LICENSE for more details.
 '''
 
+import os
 import re
 import glob
 import shutil
 from bootstrap.unittesting import *
 
-CURRENT_SALT_STABLE_VERSION = 'v0.15.1'
+CURRENT_SALT_STABLE_VERSION = os.environ.get('CURRENT_SALT_STABLE_VERSION', 'v2014.1.10')
 
 
 CLEANUP_COMMANDS_BY_OS_FAMILY = {
@@ -29,6 +30,8 @@ CLEANUP_COMMANDS_BY_OS_FAMILY = {
         'pacman -Qs python2-psutil && pacman -Rsc --noconfirm python2-psutil && exit $? || exit 0',
         'pacman -Qs python2-pyzmq && pacman -Rsc --noconfirm python2-pyzmq && exit $? || exit 0',
         'pacman -Qs zeromq && pacman -Rsc --noconfirm zeromq && exit $? || exit 0',
+        'pacman -Qs apache-libcloud && pacman -Rsc --noconfirm apache-libcloud && exit $? || exit 0',
+        'pacman -Qs python2-requests && pacman -Rsc --noconfirm python2-requests && exit $? || exit 0',
     ],
     'Debian': [
         'apt-get remove -y -o DPkg::Options::=--force-confold '
@@ -167,6 +170,8 @@ class InstallationTestCase(BootstrapTestCase):
                           '/var/*/salt*',
                           ):
             for entry in glob.glob(glob_rule):
+                if 'salttesting' in glob_rule:
+                    continue
                 if os.path.isfile(entry):
                     print 'Removing file {0!r}'.format(entry)
                     os.remove(entry)

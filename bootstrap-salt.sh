@@ -1124,7 +1124,10 @@ __git_clone_and_checkout() {
 
     echodebug "Installed git version: $(git --version | awk '{ print $3 }')"
 
-    __SALT_GIT_CHECKOUT_PARENT_DIR=$(dirname "${__SALT_GIT_CHECKOUT_DIR}")
+    local __SALT_GIT_CHECKOUT_PARENT_DIR=$(dirname "${__SALT_GIT_CHECKOUT_DIR}" 2>/dev/null)
+    __SALT_GIT_CHECKOUT_PARENT_DIR="${__SALT_GIT_CHECKOUT_PARENT_DIR:-/tmp/git}"
+    local __SALT_CHECKOUT_REPONAME="$(basename "${__SALT_GIT_CHECKOUT_DIR}" 2>/dev/null)"
+	__SALT_CHECKOUT_REPONAME="${__SALT_CHECKOUT_REPONAME:-salt}"
     [ -d "${__SALT_GIT_CHECKOUT_PARENT_DIR}" ] || mkdir "${__SALT_GIT_CHECKOUT_PARENT_DIR}"
     cd "${__SALT_GIT_CHECKOUT_PARENT_DIR}"
     if [ -d "${__SALT_GIT_CHECKOUT_DIR}" ]; then
@@ -1170,7 +1173,7 @@ __git_clone_and_checkout() {
             if [ "$(git clone --help | grep 'single-branch')" != "" ]; then
                 # The "--single-branch" option is supported, attempt shallow cloning
                 echoinfo "Attempting to shallow clone $GIT_REV from Salt's repository ${_SALT_REPO_URL}"
-                git clone --depth 1 --branch "$GIT_REV" "$_SALT_REPO_URL"
+                git clone --depth 1 --branch "$GIT_REV" "$_SALT_REPO_URL" "$__SALT_CHECKOUT_REPONAME"
                 if [ $? -eq 0 ]; then
                     cd "${__SALT_GIT_CHECKOUT_DIR}"
                     __SHALLOW_CLONE="${BS_TRUE}"
@@ -1178,17 +1181,17 @@ __git_clone_and_checkout() {
                     # Shallow clone above failed(missing upstream tags???), let's resume the old behaviour.
                     echowarn "Failed to shallow clone."
                     echoinfo "Resuming regular git clone and remote SaltStack repository addition procedure"
-                    git clone "$_SALT_REPO_URL" || return 1
+                    git clone "$_SALT_REPO_URL" "$__SALT_CHECKOUT_REPONAME" || return 1
                     cd "${__SALT_GIT_CHECKOUT_DIR}"
                 fi
             else
                 echodebug "Shallow cloning not possible. Required git version not met."
-                git clone "$_SALT_REPO_URL" || return 1
+                git clone "$_SALT_REPO_URL" "$__SALT_CHECKOUT_REPONAME" || return 1
                 cd "${__SALT_GIT_CHECKOUT_DIR}"
             fi
         else
             echowarn "The git revision being installed does not match a Salt version tag. Shallow cloning disabled"
-            git clone "$_SALT_REPO_URL" || return 1
+            git clone "$_SALT_REPO_URL" "$__SALT_CHECKOUT_REPONAME" || return 1
             cd "${__SALT_GIT_CHECKOUT_DIR}"
         fi
 

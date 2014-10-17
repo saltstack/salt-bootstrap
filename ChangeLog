@@ -1,5 +1,6 @@
 Version 2014.xx.xx:
 	* Fix path to python on FreeBSD. Thanks Pavel Snagovsky(paha)
+	* Fix syndic installation on RHEL based installations. Thanks markgaylard
 
 Version 2014.10.14:
 	* Fixed a regex issue with matching Salt's tags. Match v2014.7 but not 2014.7 as a valid tag

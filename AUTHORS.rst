@@ -41,6 +41,7 @@ Mike Carlson                m87carlson             mike@bayphoto.com
 nevins-b                    nevins-b
 Niels Abspoel               aboe76
 Paul Brian                  lifeisstillgood        paul@mikadosoftware.com
+Pavel Snagovsky             paha
 Pedro Algarvio              s0undt3ch              pedro@algarvio.me
 Pedro Paulo                 pedropaulovc
 Raymond Barbiero            visualphoenix

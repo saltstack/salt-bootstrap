@@ -2674,7 +2674,7 @@ install_centos_git() {
 }
 
 install_centos_git_post() {
-    for fname in minion master minion api; do
+    for fname in minion master syndic api; do
 
         # Skip if not meant to be installed
         [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue

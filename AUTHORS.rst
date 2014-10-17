@@ -27,6 +27,7 @@ Gregory Meno                GregMeno               gregory.meno@inktank.com
 Guillaume Derval            GuillaumeDerval        guillaume@guillaumederval.be
 gweis                       gweis
 Henrik Holmboe              holmboe
+Howard Mei                  HowardMei              howardleomei@gmail.com
 Jeff Hui                    jeffh                  jeff@jeffhui.net
 Jeff Strunk                 jstrunk
 Juan A. Moyano              wincus                 wincus.public@gmail.com

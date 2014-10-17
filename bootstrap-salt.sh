@@ -3656,9 +3656,9 @@ install_freebsd_git() {
     # Install from git
     if [ ! -f salt/syspaths.py ]; then
         # We still can't provide the system paths, salt 0.16.x
-        /usr/local/bin/python setup.py install || return 1
+        /usr/local/bin/python2 setup.py install || return 1
     else
-        /usr/local/bin/python setup.py install \
+        /usr/local/bin/python2 setup.py install \
             --salt-root-dir=/usr/local \
             --salt-config-dir="${_SALT_ETC_DIR}" \
             --salt-cache-dir=/var/cache/salt \

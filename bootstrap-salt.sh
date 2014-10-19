@@ -1544,7 +1544,7 @@ __check_services_debian() {
     echodebug "Checking if service ${servicename} is enabled"
 
     # shellcheck disable=SC2086,SC2046
-    if [ -f /etc/rc$(runlevel | awk '{ print $2 }').d/S*${servicename} ]; then
+    if [ $(ls /etc/rc[2345].d/S*${servicename} | wc -l) -eq 4 ]; then
         echodebug "Service ${servicename} is enabled"
         return 0
     else

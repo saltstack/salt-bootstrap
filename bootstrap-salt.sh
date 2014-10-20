@@ -2542,7 +2542,7 @@ __install_epel_repository() {
 }
 
 __install_saltstack_copr_zeromq_repository() {
-    if [ ! /etc/yum.repos.d/saltstack-zeromq4.repo ]; then
+    if [ ! -f /etc/yum.repos.d/saltstack-zeromq4.repo ]; then
         if [ "$CPU_ARCH_L" = "i686" ]; then
             __COPR_ARCH="i386"
         else
@@ -2554,7 +2554,7 @@ __install_saltstack_copr_zeromq_repository() {
             __REPOTYPE="epel"
         fi
         wget -O /etc/yum.repos.d/saltstack-zeromq4.repo \
-            htitp://copr-be.cloud.fedoraproject.org/results/saltstack/zeromq4/${__REPOTYPE}-${DISTRO_MAJOR_VERSION}-${__COPR_ARCH}/ || return 1
+                         https://copr.fedoraproject.org/coprs/saltstack/zeromq4/repo/${__REPOTYPE}-${DISTRO_MAJOR_VERSION}/saltstack-zeromq4-${__REPOTYPE}-${DISTRO_MAJOR_VERSION}.repo || return 1i
     fi
     return 0
 }

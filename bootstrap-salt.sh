@@ -202,6 +202,7 @@ _INSECURE_DL=${BS_INSECURE_DL:-$BS_FALSE}
 _WGET_ARGS=${BS_WGET_ARGS:-}
 _CURL_ARGS=${BS_CURL_ARGS:-}
 _FETCH_ARGS=${BS_FETCH_ARGS:-}
+_ENABLE_EXTERNAL_ZMQ_REPOS=${BS_ENABLE_EXTERNAL_ZMQ_REPOS:-$BS_FALSE}
 _SALT_MASTER_ADDRESS=${BS_SALT_MASTER_ADDRESS:-null}
 _SALT_MINION_ID="null"
 # __SIMPLIFY_VERSION is mostly used in Solaris based distributions
@@ -271,12 +272,13 @@ usage() {
   -p  Extra-package to install while installing salt dependencies. One package
       per -p flag. You're responsible for providing the proper package name.
   -H  Use the specified http proxy for the installation
+  -Z  Enable external software source for newer ZeroMQ(Only available for RHEL/CentOS/Fedora based distributions)
 
 EOT
 }   # ----------  end of function usage  ----------
 
 
-while getopts ":hvnDc:g:k:MSNXCPFUKIA:i:Lp:H:" opt
+while getopts ":hvnDc:g:k:MSNXCPFUKIA:i:Lp:H:Z" opt
 do
   case "${opt}" in
 
@@ -319,6 +321,7 @@ do
     L )  _INSTALL_CLOUD=$BS_TRUE                        ;;
     p )  _EXTRA_PACKAGES="$_EXTRA_PACKAGES $OPTARG"     ;;
     H )  _HTTP_PROXY="$OPTARG"                          ;;
+    Z)   _ENABLE_EXTERNAL_ZMQ_REPOS=$BS_TRUE            ;;
 
 
     \?)  echo
@@ -2363,6 +2366,10 @@ install_debian_check_services() {
 #   Fedora Install Functions
 #
 install_fedora_deps() {
+    if [ "$_ENABLE_EXTERNAL_ZMQ_REPOS" -eq $BS_TRUE ]; then
+        __install_saltstack_copr_zeromq_repository || return 1
+    fi
+
     __PACKAGES="yum-utils PyYAML libyaml m2crypto python-crypto python-jinja2 python-msgpack python-zmq python-requests"
 
     if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
@@ -2534,8 +2541,31 @@ __install_epel_repository() {
     return 0
 }
 
+__install_saltstack_copr_zeromq_repository() {
+    if [ ! /etc/yum.repos.d/saltstack-zeromq4.repo ]; then
+        if [ "$CPU_ARCH_L" = "i686" ]; then
+            __COPR_ARCH="i386"
+        else
+            __COPR_ARCH=$CPU_ARCH_L
+        fi
+        if [ "${DISTRO_NAME_L}" = "fedora" ]; then
+            __REPOTYPE="${DISTRO_NAME_L}"
+        else
+            __REPOTYPE="epel"
+        fi
+        wget -O /etc/yum.repos.d/saltstack-zeromq4.repo \
+            htitp://copr-be.cloud.fedoraproject.org/results/saltstack/zeromq4/${__REPOTYPE}-${DISTRO_MAJOR_VERSION}-${__COPR_ARCH}/ || return 1
+    fi
+    return 0
+}
+
+
 install_centos_stable_deps() {
     __install_epel_repository || return 1
+
+    if [ "$_ENABLE_EXTERNAL_ZMQ_REPOS" -eq $BS_TRUE ]; then
+        __install_saltstack_copr_zeromq_repository || return 1
+    fi
 
     if [ "$_UPGRADE_SYS" -eq $BS_TRUE ]; then
         yum -y update || return 1

@@ -27,12 +27,14 @@ Gregory Meno                GregMeno               gregory.meno@inktank.com
 Guillaume Derval            GuillaumeDerval        guillaume@guillaumederval.be
 gweis                       gweis
 Henrik Holmboe              holmboe
+Howard Mei                  HowardMei              howardleomei@gmail.com
 Jeff Hui                    jeffh                  jeff@jeffhui.net
 Jeff Strunk                 jstrunk
 Juan A. Moyano              wincus                 wincus.public@gmail.com
 Karl Grzeszczak             karlgrz
 Kenneth Wilke               KennethWilke
 Liu Xiaohui                 oreh                   herolxh@gmail.com
+markgaylard                 markgaylard
 Matthew Garrett             cingeyedog             matt@clemson.edu
 Matthew Mead-Briggs         mattmb
 Matthew Willson             ixela
@@ -41,6 +43,7 @@ Mike Carlson                m87carlson             mike@bayphoto.com
 nevins-b                    nevins-b
 Niels Abspoel               aboe76
 Paul Brian                  lifeisstillgood        paul@mikadosoftware.com
+Pavel Snagovsky             paha
 Pedro Algarvio              s0undt3ch              pedro@algarvio.me
 Pedro Paulo                 pedropaulovc
 Raymond Barbiero            visualphoenix

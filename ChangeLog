@@ -1,4 +1,4 @@
-Version 2014.xx.xx:
+Version 2014.10.21:
 	* Fix path to python on FreeBSD. Thanks Pavel Snagovsky(paha)
 	* Fix syndic installation on RHEL based installations. Thanks markgaylard
 	* Properly detect the git checkout `basename` directory instead of hard coding it. Thanks

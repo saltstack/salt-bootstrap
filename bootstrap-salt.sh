@@ -2546,6 +2546,7 @@ __install_epel_repository() {
 }
 
 __install_saltstack_copr_zeromq_repository() {
+    echoinfo "Installing Zeromq >=4 and PyZMQ>=14 from SaltStack's COPR repository"
     if [ ! -f /etc/yum.repos.d/saltstack-zeromq4.repo ]; then
         if [ "${DISTRO_NAME_L}" = "fedora" ]; then
             __REPOTYPE="${DISTRO_NAME_L}"

@@ -2556,7 +2556,7 @@ __install_saltstack_copr_zeromq_repository() {
         wget -O /etc/yum.repos.d/saltstack-zeromq4.repo \
                          "https://copr.fedoraproject.org/coprs/saltstack/zeromq4/repo/${__REPOTYPE}-${DISTRO_MAJOR_VERSION}/saltstack-zeromq4-${__REPOTYPE}-${DISTRO_MAJOR_VERSION}.repo" || return 1
     fi
-    return 1
+    return 0
 }
 
 

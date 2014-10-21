@@ -1546,7 +1546,7 @@ __check_services_debian() {
     servicename=$1
     echodebug "Checking if service ${servicename} is enabled"
 
-    # shellcheck disable=SC2086,SC2046
+    # shellcheck disable=SC2086,SC2046,SC2144
     if [ -f /etc/rc$(runlevel | awk '{ print $2 }').d/S*${servicename} ]; then
         echodebug "Service ${servicename} is enabled"
         return 0
@@ -2543,20 +2543,15 @@ __install_epel_repository() {
 
 __install_saltstack_copr_zeromq_repository() {
     if [ ! -f /etc/yum.repos.d/saltstack-zeromq4.repo ]; then
-        if [ "$CPU_ARCH_L" = "i686" ]; then
-            __COPR_ARCH="i386"
-        else
-            __COPR_ARCH=$CPU_ARCH_L
-        fi
         if [ "${DISTRO_NAME_L}" = "fedora" ]; then
             __REPOTYPE="${DISTRO_NAME_L}"
         else
             __REPOTYPE="epel"
         fi
         wget -O /etc/yum.repos.d/saltstack-zeromq4.repo \
-                         https://copr.fedoraproject.org/coprs/saltstack/zeromq4/repo/${__REPOTYPE}-${DISTRO_MAJOR_VERSION}/saltstack-zeromq4-${__REPOTYPE}-${DISTRO_MAJOR_VERSION}.repo || return 1i
+                         "https://copr.fedoraproject.org/coprs/saltstack/zeromq4/repo/${__REPOTYPE}-${DISTRO_MAJOR_VERSION}/saltstack-zeromq4-${__REPOTYPE}-${DISTRO_MAJOR_VERSION}.repo" || return 1i
     fi
-    return 0
+    return 1
 }
 
 

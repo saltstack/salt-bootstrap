@@ -982,11 +982,12 @@ __debian_derivatives_translation() {
     # If the file does not exist, return
     [ ! -f /etc/os-release ] && return
 
-    DEBIAN_DERIVATIVES="(kali)"
+    DEBIAN_DERIVATIVES="(kali|linuxmint)"
     # Mappings
     kali_1_debian_base="7.0"
+    linuxmint_1_debian_base="8.0"
 
-    # Detect derivates, Kali *only* for now
+    # Detect derivates, Kali and LinuxMint *only* for now
     rv=$(grep ^ID= /etc/os-release | sed -e 's/.*=//')
 
     # Translate Debian derivatives to their base Debian version
@@ -997,6 +998,10 @@ __debian_derivatives_translation() {
             kali)
                 _major=$(echo "$DISTRO_VERSION" | sed 's/^\([0-9]*\).*/\1/g')
                 _debian_derivative="kali"
+                ;;
+            linuxmint)
+                _major=$(echo "$DISTRO_VERSION" | sed 's/^\([0-9]*\).*/\1/g')
+                _debian_derivative="linuxmint"
                 ;;
         esac
 
@@ -3576,7 +3581,7 @@ __configure_freebsd_pkg_details() {
     copyfile $conf_file /etc/pkg/FreeBSD.conf
     SALT_PKG_FLAGS="-r FreeBSD"
     ## ensure future ports builds use pkgng
-    echo "WITH_PKGNG=	yes" >> /etc/make.conf
+    echo "WITH_PKGNG=   yes" >> /etc/make.conf
 }
 
 install_freebsd_9_stable_deps() {

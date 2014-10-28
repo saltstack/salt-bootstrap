@@ -2429,7 +2429,7 @@ install_fedora_stable_post() {
 install_fedora_git_deps() {
     install_fedora_deps || return 1
 
-    yum install -y git || return 1
+    yum install -y git systemd-python || return 1
 
     __git_clone_and_checkout || return 1
 

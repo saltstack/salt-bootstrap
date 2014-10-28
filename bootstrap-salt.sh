@@ -3581,7 +3581,7 @@ __configure_freebsd_pkg_details() {
     copyfile $conf_file /etc/pkg/FreeBSD.conf
     SALT_PKG_FLAGS="-r FreeBSD"
     ## ensure future ports builds use pkgng
-    echo "WITH_PKGNG=   yes" >> /etc/make.conf
+    echo "WITH_PKGNG=	yes" >> /etc/make.conf
 }
 
 install_freebsd_9_stable_deps() {

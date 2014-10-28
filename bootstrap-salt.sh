@@ -243,7 +243,6 @@ usage() {
   -D  Show debug output.
   -c  Temporary configuration directory
   -g  Salt repository URL. (default: git://github.com/saltstack/salt.git)
-  -G  Insteady of cloning from git://github.com/saltstack/salt.git, clone from https://github.com/saltstack/salt.git (Usually necessary on systems which have the regular git protocol port blocked, where https usualy is not)
   -k  Temporary directory holding the minion keys which will pre-seed
       the master.
   -s  Sleep time used when waiting for daemons to start, restart and when checking
@@ -279,7 +278,7 @@ EOT
 }   # ----------  end of function usage  ----------
 
 
-while getopts ":hvnDc:Gg:k:MSNXCPFUKIA:i:Lp:H:Z" opt
+while getopts ":hvnDc:g:k:MSNXCPFUKIA:i:Lp:H:Z" opt
 do
   case "${opt}" in
 
@@ -300,8 +299,6 @@ do
          fi
          ;;
     g ) _SALT_REPO_URL=$OPTARG                          ;;
-    G ) _SALTSTACK_REPO_URL="https://github.com/saltstack/salt.git"
-         ;;
     k )  _TEMP_KEYS_DIR="$OPTARG"
          # If the configuration directory does not exist, error out
          if [ ! -d "$_TEMP_KEYS_DIR" ]; then
@@ -982,9 +979,10 @@ __debian_derivatives_translation() {
     # If the file does not exist, return
     [ ! -f /etc/os-release ] && return
 
-    DEBIAN_DERIVATIVES="(kali)"
+    DEBIAN_DERIVATIVES="(kali|linuxmint)"
     # Mappings
     kali_1_debian_base="7.0"
+    linuxmint_17_debian_base="8.0"
 
     # Detect derivates, Kali *only* for now
     rv=$(grep ^ID= /etc/os-release | sed -e 's/.*=//')
@@ -997,6 +995,10 @@ __debian_derivatives_translation() {
             kali)
                 _major=$(echo "$DISTRO_VERSION" | sed 's/^\([0-9]*\).*/\1/g')
                 _debian_derivative="kali"
+                ;;
+            linuxmint)
+                _major=17
+                _debian_derivative="linuxmint"
                 ;;
         esac
 
@@ -1133,7 +1135,7 @@ __git_clone_and_checkout() {
     local __SALT_GIT_CHECKOUT_PARENT_DIR=$(dirname "${__SALT_GIT_CHECKOUT_DIR}" 2>/dev/null)
     __SALT_GIT_CHECKOUT_PARENT_DIR="${__SALT_GIT_CHECKOUT_PARENT_DIR:-/tmp/git}"
     local __SALT_CHECKOUT_REPONAME="$(basename "${__SALT_GIT_CHECKOUT_DIR}" 2>/dev/null)"
-    __SALT_CHECKOUT_REPONAME="${__SALT_CHECKOUT_REPONAME:-salt}"
+        __SALT_CHECKOUT_REPONAME="${__SALT_CHECKOUT_REPONAME:-salt}"
     [ -d "${__SALT_GIT_CHECKOUT_PARENT_DIR}" ] || mkdir "${__SALT_GIT_CHECKOUT_PARENT_DIR}"
     cd "${__SALT_GIT_CHECKOUT_PARENT_DIR}"
     if [ -d "${__SALT_GIT_CHECKOUT_DIR}" ]; then
@@ -2432,7 +2434,7 @@ install_fedora_stable_post() {
 install_fedora_git_deps() {
     install_fedora_deps || return 1
 
-    yum install -y git systemd-python || return 1
+    yum install -y git || return 1
 
     __git_clone_and_checkout || return 1
 
@@ -3576,7 +3578,7 @@ __configure_freebsd_pkg_details() {
     copyfile $conf_file /etc/pkg/FreeBSD.conf
     SALT_PKG_FLAGS="-r FreeBSD"
     ## ensure future ports builds use pkgng
-    echo "WITH_PKGNG=	yes" >> /etc/make.conf
+    echo "WITH_PKGNG=   yes" >> /etc/make.conf
 }
 
 install_freebsd_9_stable_deps() {

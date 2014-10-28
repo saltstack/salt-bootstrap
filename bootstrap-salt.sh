@@ -982,9 +982,9 @@ __debian_derivatives_translation() {
     DEBIAN_DERIVATIVES="(kali|linuxmint)"
     # Mappings
     kali_1_debian_base="7.0"
-    linuxmint_17_debian_base="8.0"
+    linuxmint_1_debian_base="8.0"
 
-    # Detect derivates, Kali *only* for now
+    # Detect derivates, Kali and Linux Mint *only* for now
     rv=$(grep ^ID= /etc/os-release | sed -e 's/.*=//')
 
     # Translate Debian derivatives to their base Debian version
@@ -997,7 +997,7 @@ __debian_derivatives_translation() {
                 _debian_derivative="kali"
                 ;;
             linuxmint)
-                _major=17
+                _major=$(echo "$DISTRO_VERSION" | sed 's/^\([0-9]*\).*/\1/g')
                 _debian_derivative="linuxmint"
                 ;;
         esac

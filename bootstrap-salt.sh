@@ -3979,6 +3979,12 @@ install_opensuse_git_deps() {
 
     __git_clone_and_checkout || return 1
 
+    if [ -f "${__SALT_GIT_CHECKOUT_DIR}/pkg/suse/use-forking-daemon.patch" ]; then
+        cd "${__SALT_GIT_CHECKOUT_DIR}"
+        echowarn "Applying patch to systemd service unit file"
+        patch -p1 < pkg/suse/use-forking-daemon.patch || return 1
+    fi
+
     # Let's trigger config_salt()
     if [ "$_TEMP_CONFIG_DIR" = "null" ]; then
         _TEMP_CONFIG_DIR="${__SALT_GIT_CHECKOUT_DIR}/conf/"

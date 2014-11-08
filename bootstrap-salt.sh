@@ -2921,11 +2921,6 @@ install_red_hat_linux_git_deps() {
     return 0
 }
 
-install_red_hat_enterprise_linux_7_stable_deps() {
-    echoerror "Stable version is not available on RHEL 7 Beta/RC. Please set installation type to git."
-    return 1
-}
-
 install_red_hat_enterprise_linux_stable_deps() {
     install_red_hat_linux_stable_deps || return 1
     return 0

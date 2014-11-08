@@ -22,6 +22,7 @@ Elias Probst                eliasp
 Erik Johnson                terminalmage           erik@saltstack.com
 Forrest Alvarez             gravyboat
 Geoff Garside               geoffgarside           geoff@geoffgarside.co.uk
+ggillies                    ggillies
 Giuseppe Iannello           giannello              giuseppe.iannello@brokenloop.net
 Gregory Meno                GregMeno               gregory.meno@inktank.com
 Guillaume Derval            GuillaumeDerval        guillaume@guillaumederval.be

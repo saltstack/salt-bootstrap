@@ -718,6 +718,20 @@ __gather_linux_system_info() {
             return
         fi
         rv=$(lsb_release -sr)
+        # If lsb_release is installed on Debian testing, lsb_release -sr will return
+        # "Testing" and the actual version number never set
+        if [ "${DISTRO_NAME}" = "Debian" ] && ([ "${rv}" = "testing" ] ||  [ "${rv}" = "testing/unstable" ]); then
+            drv=$(lsb_release -sc)
+            if [ "${drv}" = "jessie" ]; then
+                rv="8.0"
+            else
+                echowarn "We have debian testing, but the codename (${drv}) is unknown to us."
+                echowarn "Attempting to detect without lsb_release"
+                rv=""
+            fi
+            DISTRO_NAME=""
+            rv=""
+        fi
         [ "${rv}" != "" ] && DISTRO_VERSION=$(__parse_version_string "$rv")
     elif [ -f /etc/lsb-release ]; then
         # We don't have the lsb_release binary, though, we do have the file it parses

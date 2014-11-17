@@ -208,6 +208,7 @@ _SALT_MINION_ID="null"
 # __SIMPLIFY_VERSION is mostly used in Solaris based distributions
 __SIMPLIFY_VERSION=$BS_TRUE
 _LIBCLOUD_MIN_VERSION="0.14.0"
+_PY_REQUESTS_MIN_VERSION="2.4.3"
 _EXTRA_PACKAGES=""
 _HTTP_PROXY=""
 __SALT_GIT_CHECKOUT_DIR=${BS_SALT_GIT_CHECKOUT_DIR:-/tmp/git/salt}
@@ -243,7 +244,7 @@ usage() {
   -D  Show debug output.
   -c  Temporary configuration directory
   -g  Salt repository URL. (default: git://github.com/saltstack/salt.git)
-  -G  Insteady of cloning from git://github.com/saltstack/salt.git, clone from https://github.com/saltstack/salt.git (Usually necessary on systems which have the regular git protocol port blocked, where https usualy is not)
+  -G  Instead of cloning from git://github.com/saltstack/salt.git, clone from https://github.com/saltstack/salt.git (Usually necessary on systems which have the regular git protocol port blocked, where https usually is not)
   -k  Temporary directory holding the minion keys which will pre-seed
       the master.
   -s  Sleep time used when waiting for daemons to start, restart and when checking
@@ -1132,6 +1133,34 @@ __function_defined() {
 
 
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  __version_gte
+#   DESCRIPTION:  Compares 2 version numbers to see if the first is >= the second
+#                 Note: This uses Python to do the number crunching; DO NOT use it until after Python is installed.
+#    PARAMETERS:  Two (2) version numbers
+#       RETURNS:  0 if $1 >= $2; 1 if $1 < $2
+#----------------------------------------------------------------------------------------------------------------------
+__version_gte() {
+
+    v1="$1"
+    v2="$2"
+
+    result=$(python -c "
+from distutils.version import LooseVersion
+if LooseVersion('$v1') >= LooseVersion('$v2'):
+    print '0'
+else:
+    print '1'
+")
+
+    # If python failed for some reason then this is absolutely not the result we expected,
+    # and we should not rely on $result
+    [ x$? = x0 ] || { echo "ERROR: __version_gte received unexpected result" 1>&2; exit 1; }
+
+    return $result
+}
+
+
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #          NAME:  __git_clone_and_checkout
 #   DESCRIPTION:  (DRY) Helper function to clone and checkout salt to a
 #                 specific revision.
@@ -1733,8 +1762,7 @@ install_ubuntu_deps() {
     else
         check_pip_allowed "You need to allow pip based installations (-P) in order to install the python package 'requests'"
         __apt_get_install_noinput python-setuptools python-pip
-        __PIP_PACKAGES="requests"
-        pip install requests
+        __PIP_PACKAGES="'requests>=$_PY_REQUESTS_MIN_VERSION'"
     fi
 
     # Additionally install procps and pciutils which allows for Docker boostraps. See 366#issuecomment-39666813
@@ -1966,7 +1994,7 @@ install_debian_deps() {
         check_pip_allowed "You need to allow pip based installations (-P) in order to install the python 'requests' package"
         # Additionally install procps and pciutils which allows for Docker boostraps. See 366#issuecomment-39666813
         __PACKAGES="${__PACKAGES} python-pip"
-        __PIP_PACKAGES="${__PIP_PACKAGES} requests"
+        __PIP_PACKAGES="${__PIP_PACKAGES} 'requests>=$_PY_REQUESTS_MIN_VERSION'"
     else
         __PACKAGES="${__PACKAGES} python-requests"
     fi
@@ -2143,6 +2171,15 @@ _eof
         __PACKAGES="${__PACKAGES} procps pciutils"
         # shellcheck disable=SC2086
         __apt_get_install_noinput ${__PACKAGES} || return 1
+
+        # Check to see what version of python-requests was installed
+        # On wheezy for example there is a REALLY old version and we must upgrade it via pip
+        version=$(pip freeze 2> /dev/null | awk -F== '$1 == "requests" {print $2}')
+        # if ! $version >= $_PY_REQUESTS_MIN_VERSION
+        if ! __version_gte "$version" "$_PY_REQUESTS_MIN_VERSION"; then
+            echodebug "Debian ports installed an old python-ports (version $version); upgrading via pip"
+            pip install -U "requests>=$_PY_REQUESTS_MIN_VERSION"
+        fi
     else
         apt-get update || return 1
         __PACKAGES="python-zmq python-requests python-apt"

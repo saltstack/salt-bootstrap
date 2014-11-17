@@ -243,7 +243,7 @@ usage() {
   -D  Show debug output.
   -c  Temporary configuration directory
   -g  Salt repository URL. (default: git://github.com/saltstack/salt.git)
-  -G  Insteady of cloning from git://github.com/saltstack/salt.git, clone from https://github.com/saltstack/salt.git (Usually necessary on systems which have the regular git protocol port blocked, where https usualy is not)
+  -G  Instead of cloning from git://github.com/saltstack/salt.git, clone from https://github.com/saltstack/salt.git (Usually necessary on systems which have the regular git protocol port blocked, where https usually is not)
   -k  Temporary directory holding the minion keys which will pre-seed
       the master.
   -s  Sleep time used when waiting for daemons to start, restart and when checking

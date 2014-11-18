@@ -2689,9 +2689,9 @@ install_centos_git_deps() {
     install_centos_stable_deps || return 1
     if [ "$DISTRO_NAME_L" = "oracle_linux" ]; then
         # try both ways --enablerepo=X disables ALL OTHER REPOS!!!!
-        yum -y install git || yum -y install git --enablerepo=${_EPEL_REPO} || return 1
+        yum install -y git systemd-python || yum install -y git systemd-python --enablerepo=${_EPEL_REPO} || return 1
     else
-        yum -y install git --enablerepo=${_EPEL_REPO} || return 1
+        yum install -y git systemd-python --enablerepo=${_EPEL_REPO} || return 1
     fi
 
     __git_clone_and_checkout || return 1
@@ -2720,6 +2720,7 @@ install_centos_git() {
 }
 
 install_centos_git_post() {
+    SYSTEMD_RELOAD=$BS_FALSE
     for fname in minion master syndic api; do
 
         # Skip if not meant to be installed
@@ -2728,8 +2729,15 @@ install_centos_git_post() {
         [ $fname = "api" ] && ([ "$_INSTALL_MASTER" -eq $BS_FALSE ] || [ "$(which salt-${fname} 2>/dev/null)" = "" ]) && continue
         [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
 
-        # While the RPM's use init.d, so will we.
-        if [ ! -f /etc/init.d/salt-$fname ] || ([ -f /etc/init.d/salt-$fname ] && [ $_FORCE_OVERWRITE -eq $BS_TRUE ]); then
+        if [ ! -f /usr/lib/systemd/system/salt-${fname}.service ] || ([ -f /usr/lib/systemd/system/salt-${fname}.service ] && [ $_FORCE_OVERWRITE -eq $BS_TRUE ]); then
+            copyfile "${__SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-${fname}.service" /usr/lib/systemd/system/
+
+            # Skip salt-api since the service should be opt-in and not necessarily started on boot
+            [ $fname = "api" ] && continue
+
+            /bin/systemctl enable salt-${fname}.service
+            SYSTEMD_RELOAD=$BS_TRUE
+        elif [ ! -f /usr/lib/systemd/system/salt-${fname}.service ] && [ ! -f /etc/init.d/salt-$fname ] || ([ -f /etc/init.d/salt-$fname ] && [ $_FORCE_OVERWRITE -eq $BS_TRUE ]); then
             copyfile "${__SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-${fname}" /etc/init.d/
             chmod +x /etc/init.d/salt-${fname}
 
@@ -2753,6 +2761,10 @@ install_centos_git_post() {
         #    /sbin/chkconfig salt-${fname} on
         #fi
     done
+
+    if [ "$SYSTEMD_RELOAD" -eq $BS_TRUE ]; then
+        /bin/systemctl daemon-reload
+    fi
 }
 
 install_centos_restart_daemons() {

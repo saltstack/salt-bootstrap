@@ -2720,7 +2720,7 @@ install_centos_git() {
 }
 
 install_centos_git_post() {
-    systemdreload = $BS_FALSE
+    SYSTEMD_RELOAD=$BS_FALSE
     for fname in minion master syndic api; do
 
         # Skip if not meant to be installed
@@ -2736,7 +2736,7 @@ install_centos_git_post() {
             [ $fname = "api" ] && continue
 
             /bin/systemctl enable salt-${fname}.service
-            systemdreload = $BS_TRUE
+            SYSTEMD_RELOAD=$BS_TRUE
         elif [ ! -f /etc/init.d/salt-$fname ] || ([ -f /etc/init.d/salt-$fname ] && [ $_FORCE_OVERWRITE -eq $BS_TRUE ]); then
             copyfile "${__SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-${fname}" /etc/init.d/
             chmod +x /etc/init.d/salt-${fname}
@@ -2762,7 +2762,7 @@ install_centos_git_post() {
         #fi
     done
 
-    if [ "$systemdreload" -eq $BS_TRUE ]; then
+    if [ "$SYSTEMD_RELOAD" -eq $BS_TRUE ]; then
         /bin/systemctl daemon-reload
     fi
 }

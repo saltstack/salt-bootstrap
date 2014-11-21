@@ -2736,7 +2736,7 @@ install_centos_git_post() {
             [ $fname = "api" ] && continue
 
             /bin/systemctl enable salt-${fname}.service
-            $systemdreload = $BS_TRUE
+            systemdreload = $BS_TRUE
         elif [ ! -f /etc/init.d/salt-$fname ] || ([ -f /etc/init.d/salt-$fname ] && [ $_FORCE_OVERWRITE -eq $BS_TRUE ]); then
             copyfile "${__SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-${fname}" /etc/init.d/
             chmod +x /etc/init.d/salt-${fname}

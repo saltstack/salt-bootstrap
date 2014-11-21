@@ -2728,16 +2728,25 @@ install_centos_git_post() {
         [ $fname = "api" ] && ([ "$_INSTALL_MASTER" -eq $BS_FALSE ] || [ "$(which salt-${fname} 2>/dev/null)" = "" ]) && continue
         [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
 
-        # While the RPM's use init.d, so will we.
-        if [ ! -f /etc/init.d/salt-$fname ] || ([ -f /etc/init.d/salt-$fname ] && [ $_FORCE_OVERWRITE -eq $BS_TRUE ]); then
-            copyfile "${__SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-${fname}" /etc/init.d/
-            chmod +x /etc/init.d/salt-${fname}
+        if [ ! -f /usr/lib/systemd/system/salt-${fname}.service ] || ([ -f /usr/lib/systemd/system/salt-${fname}.service ] && [ $_FORCE_OVERWRITE -eq $BS_TRUE ]); then
+            copyfile "${__SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-${fname}.service" /usr/lib/systemd/system/
 
             # Skip salt-api since the service should be opt-in and not necessarily started on boot
             [ $fname = "api" ] && continue
 
-            /sbin/chkconfig salt-${fname} on
+            /bin/systemctl enable salt-${fname}.service
         fi
+
+        # While the RPM's use init.d, so will we.
+        #if [ ! -f /etc/init.d/salt-$fname ] || ([ -f /etc/init.d/salt-$fname ] && [ $_FORCE_OVERWRITE -eq $BS_TRUE ]); then
+        #    copyfile "${__SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-${fname}" /etc/init.d/
+        #    chmod +x /etc/init.d/salt-${fname}
+
+        #    # Skip salt-api since the service should be opt-in and not necessarily started on boot
+        #    [ $fname = "api" ] && continue
+
+        #    /sbin/chkconfig salt-${fname} on
+        #fi
 
         #if [ -f /sbin/initctl ]; then
         #    # We have upstart support
@@ -2753,6 +2762,7 @@ install_centos_git_post() {
         #    /sbin/chkconfig salt-${fname} on
         #fi
     done
+    /bin/systemctl daemon-reload
 }
 
 install_centos_restart_daemons() {

@@ -697,7 +697,6 @@ __gather_linux_system_info() {
         elif [ "${DISTRO_NAME}" = "openSUSE project" ]; then
             # lsb_release -si returns "openSUSE project" on openSUSE 12.3
             DISTRO_NAME="opensuse"
-            install_opensuse_zypper_vars
         elif [ "${DISTRO_NAME}" = "SUSE LINUX" ]; then
             if [ "$(lsb_release -sd | grep -i opensuse)" != "" ]; then
                 # openSUSE 12.2 reports SUSE LINUX on lsb_release -si
@@ -706,7 +705,6 @@ __gather_linux_system_info() {
                 # lsb_release -si returns "SUSE LINUX" on SLES 11 SP3
                 DISTRO_NAME="suse"
             fi
-            install_opensuse_zypper_vars
         elif [ "${DISTRO_NAME}" = "EnterpriseEnterpriseServer" ]; then
             # This the Oracle Linux Enterprise ID before ORACLE LINUX 5 UPDATE 3
             DISTRO_NAME="Oracle Linux"
@@ -3954,6 +3952,7 @@ install_opensuse_zypper_vars() {
 }
 
 install_opensuse_stable_deps() {
+    install_opensuse_zypper_vars
     DISTRO_REPO="openSUSE_${DISTRO_MAJOR_VERSION}.${DISTRO_MINOR_VERSION}"
 
     # Is the repository already known
@@ -4002,6 +4001,7 @@ install_opensuse_stable_deps() {
 }
 
 install_opensuse_git_deps() {
+    install_opensuse_zypper_vars
     install_opensuse_stable_deps || return 1
     $ZYPPER_INSTALL git || return 1
 
@@ -4023,6 +4023,7 @@ install_opensuse_git_deps() {
 }
 
 install_opensuse_stable() {
+    install_opensuse_zypper_vars
     __PACKAGES=""
     if [ "$_INSTALL_MINION" -eq $BS_TRUE ]; then
         __PACKAGES="${__PACKAGES} salt-minion"
@@ -4144,6 +4145,7 @@ install_opensuse_check_services() {
 #    SuSE Install Functions.
 #
 install_suse_11_stable_deps() {
+    install_opensuse_zypper_vars
     SUSE_PATCHLEVEL=$(awk '/PATCHLEVEL/ {print $3}' /etc/SuSE-release )
     if [ "${SUSE_PATCHLEVEL}" != "" ]; then
         DISTRO_PATCHLEVEL="_SP${SUSE_PATCHLEVEL}"
@@ -4232,6 +4234,7 @@ install_suse_11_stable_deps() {
 }
 
 install_suse_11_git_deps() {
+    install_opensuse_zypper_vars
     install_suse_11_stable_deps || return 1
     $ZYPPER_INSTALL git || return 1
 

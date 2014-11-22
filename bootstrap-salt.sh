@@ -17,7 +17,7 @@
 #       CREATED: 10/15/2012 09:49:37 PM WEST
 #======================================================================================================================
 set -o nounset                              # Treat unset variables as an error
-__ScriptVersion="2014.10.30"
+__ScriptVersion="2014.11.22"
 __ScriptName="bootstrap-salt.sh"
 
 #======================================================================================================================
@@ -697,6 +697,7 @@ __gather_linux_system_info() {
         elif [ "${DISTRO_NAME}" = "openSUSE project" ]; then
             # lsb_release -si returns "openSUSE project" on openSUSE 12.3
             DISTRO_NAME="opensuse"
+            install_opensuse_zypper_vars
         elif [ "${DISTRO_NAME}" = "SUSE LINUX" ]; then
             if [ "$(lsb_release -sd | grep -i opensuse)" != "" ]; then
                 # openSUSE 12.2 reports SUSE LINUX on lsb_release -si
@@ -705,6 +706,7 @@ __gather_linux_system_info() {
                 # lsb_release -si returns "SUSE LINUX" on SLES 11 SP3
                 DISTRO_NAME="suse"
             fi
+            install_opensuse_zypper_vars
         elif [ "${DISTRO_NAME}" = "EnterpriseEnterpriseServer" ]; then
             # This the Oracle Linux Enterprise ID before ORACLE LINUX 5 UPDATE 3
             DISTRO_NAME="Oracle Linux"
@@ -3937,18 +3939,32 @@ install_smartos_restart_daemons() {
 #
 #    openSUSE Install Functions.
 #
+
+__version_lte() {
+    [ "$1" = "`echo -e "$1\n$2" | sort -V | head -n1`" ]
+}
+
+install_opensuse_zypper_vars() {
+    ZYPPER="zypper --non-interactive "
+    ZYPPER_INSTALL="$ZYPPER install --auto-agree-with-licenses "
+    # In case of file conflicts replace old files.
+    # Option present in zypper 1.10.4 and newer:
+    # https://github.com/openSUSE/zypper/blob/95655728d26d6d5aef7796b675f4cc69bc0c05c0/package/zypper.changes#L253
+    __version_lte 1.10.4 `zypper --version | sed 's/zypper //'` && ZYPPER_INSTALL="$ZYPPER_INSTALL --replacefiles "
+}
+
 install_opensuse_stable_deps() {
     DISTRO_REPO="openSUSE_${DISTRO_MAJOR_VERSION}.${DISTRO_MINOR_VERSION}"
 
     # Is the repository already known
-    zypper repos | grep devel_languages_python >/dev/null 2>&1
+    $ZYPPER repos | grep devel_languages_python >/dev/null 2>&1
     if [ $? -eq 1 ]; then
         # zypper does not yet know nothing about devel_languages_python
-        zypper --non-interactive addrepo --refresh \
+        $ZYPPER addrepo --refresh \
             "http://download.opensuse.org/repositories/devel:/languages:/python/${DISTRO_REPO}/devel:languages:python.repo" || return 1
     fi
 
-    zypper --gpg-auto-import-keys --non-interactive refresh
+    $ZYPPER --gpg-auto-import-keys refresh
     if [ $? -ne 0 ] && [ $? -ne 4 ]; then
         # If the exit code is not 0, and it's not 4 (failed to update a
         # repository) return a failure. Otherwise continue.
@@ -3957,11 +3973,11 @@ install_opensuse_stable_deps() {
 
     if [ "$DISTRO_MAJOR_VERSION" -eq 12 ] && [ "$DISTRO_MINOR_VERSION" -eq 3 ]; then
         # Because patterns-openSUSE-minimal_base-conflicts conflicts with python, lets remove the first one
-        zypper --non-interactive remove patterns-openSUSE-minimal_base-conflicts
+        $ZYPPER remove patterns-openSUSE-minimal_base-conflicts
     fi
 
     if [ "$_UPGRADE_SYS" -eq $BS_TRUE ]; then
-        zypper --gpg-auto-import-keys --non-interactive update || return 1
+        $ZYPPER --gpg-auto-import-keys update || return 1
     fi
 
     # Salt needs python-zypp installed in order to use the zypper module
@@ -3974,12 +3990,12 @@ install_opensuse_stable_deps() {
     fi
 
     # shellcheck disable=SC2086
-    zypper --non-interactive install --auto-agree-with-licenses ${__PACKAGES} || return 1
+    $ZYPPER_INSTALL ${__PACKAGES} || return 1
 
     if [ "${_EXTRA_PACKAGES}" != "" ]; then
         echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
         # shellcheck disable=SC2086
-        zypper --non-interactive install --auto-agree-with-licenses ${_EXTRA_PACKAGES} || return 1
+        $ZYPPER_INSTALL ${_EXTRA_PACKAGES} || return 1
     fi
 
     return 0
@@ -3987,7 +4003,7 @@ install_opensuse_stable_deps() {
 
 install_opensuse_git_deps() {
     install_opensuse_stable_deps || return 1
-    zypper --non-interactive install --auto-agree-with-licenses git || return 1
+    $ZYPPER_INSTALL git || return 1
 
     __git_clone_and_checkout || return 1
 
@@ -4018,7 +4034,7 @@ install_opensuse_stable() {
         __PACKAGES="${__PACKAGES} salt-syndic"
     fi
     # shellcheck disable=SC2086
-    zypper --non-interactive install --auto-agree-with-licenses $__PACKAGES || return 1
+    $ZYPPER_INSTALL $__PACKAGES || return 1
     return 0
 }
 
@@ -4135,17 +4151,17 @@ install_suse_11_stable_deps() {
     DISTRO_REPO="SLE_${DISTRO_MAJOR_VERSION}${DISTRO_PATCHLEVEL}"
 
     # Is the repository already known
-    zypper repos | grep devel_languages_python >/dev/null 2>&1
+    $ZYPPER repos | grep devel_languages_python >/dev/null 2>&1
     if [ $? -eq 1 ]; then
         # zypper does not yet know nothing about devel_languages_python
-        zypper --non-interactive addrepo --refresh \
+        $ZYPPER addrepo --refresh \
             "http://download.opensuse.org/repositories/devel:/languages:/python/${DISTRO_REPO}/devel:languages:python.repo" || return 1
     fi
 
-    zypper --gpg-auto-import-keys --non-interactive refresh || return 1
+    $ZYPPER --gpg-auto-import-keys refresh || return 1
 
     if [ "$_UPGRADE_SYS" -eq $BS_TRUE ]; then
-        zypper --gpg-auto-import-keys --non-interactive update || return 1
+        $ZYPPER --gpg-auto-import-keys update || return 1
     fi
 
     # Salt needs python-zypp installed in order to use the zypper module
@@ -4168,10 +4184,9 @@ install_suse_11_stable_deps() {
     # SLES 11 SP3 ships with both python-M2Crypto-0.22.* and python-m2crypto-0.21 and we will be asked which
     # we want to install, even with --non-interactive.
     # Let's try to install the higher version first and then the lower one in case of failure
-    zypper --non-interactive install --auto-agree-with-licenses 'python-M2Crypto>=0.22' || \
-        zypper --non-interactive install --auto-agree-with-licenses 'python-M2Crypto>=0.21' || return 1
+    $ZYPPER_INSTALL 'python-M2Crypto>=0.22' || $ZYPPER_INSTALL 'python-M2Crypto>=0.21' || return 1
     # shellcheck disable=SC2086,SC2090
-    zypper --non-interactive install --auto-agree-with-licenses ${__PACKAGES} || return 1
+    $ZYPPER_INSTALL ${__PACKAGES} || return 1
 
     if [ "$SUSE_PATCHLEVEL" -eq 1 ]; then
         # There's no python-PyYaml in SP1, let's install it using pip
@@ -4210,7 +4225,7 @@ install_suse_11_stable_deps() {
     if [ "${_EXTRA_PACKAGES}" != "" ]; then
         echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
         # shellcheck disable=SC2086
-        zypper --non-interactive install --auto-agree-with-licenses ${_EXTRA_PACKAGES} || return 1
+        $ZYPPER_INSTALL ${_EXTRA_PACKAGES} || return 1
     fi
 
     return 0
@@ -4218,7 +4233,7 @@ install_suse_11_stable_deps() {
 
 install_suse_11_git_deps() {
     install_suse_11_stable_deps || return 1
-    zypper --non-interactive install --auto-agree-with-licenses git || return 1
+    $ZYPPER_INSTALL git || return 1
 
     __git_clone_and_checkout || return 1
 

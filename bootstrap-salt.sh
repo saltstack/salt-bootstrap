@@ -1788,7 +1788,7 @@ install_ubuntu_daily_deps() {
 install_ubuntu_git_deps() {
     install_ubuntu_deps || return 1
     __apt_get_install_noinput git-core python-yaml python-m2crypto python-crypto \
-        msgpack-python python-zmq python-jinja2 || return 1
+        msgpack-python python-zmq python-jinja2 python-gnupg || return 1
 
     __git_clone_and_checkout || return 1
 

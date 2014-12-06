@@ -613,6 +613,33 @@ __parse_version_string() {
 
 
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  __derive_debian_numeric_version
+#   DESCRIPTION:  Derive the numeric version from a Debian version string.
+#----------------------------------------------------------------------------------------------------------------------
+__derive_debian_numeric_version() {
+    NUMERIC_VERSION=""
+    INPUT_VERSION="$1"
+    if echo "$INPUT_VERSION" | grep -q '^[0-9]'; then
+        NUMERIC_VERSION="$INPUT_VERSION"
+    elif [ -z "$INPUT_VERSION" -a -f "/etc/debian_version" ]; then
+        INPUT_VERSION="$(cat /etc/debian_version)"
+    fi
+    if [ -z "$NUMERIC_VERSION" ]; then
+        if [ "$INPUT_VERSION" = "wheezy/sid" ]; then
+            # I've found an EC2 wheezy image which did not tell its version
+            NUMERIC_VERSION=$(__parse_version_string "7.0")
+        elif [ "$INPUT_VERSION" = "jessie/sid" ]; then
+            # Let's start detecting the upcoming Debian 8 (Jessie)
+            NUMERIC_VERSION=$(__parse_version_string "8.0")
+        else
+            echowarn "Unable to parse the Debian Version (codename: '$INPUT_VERSION')"
+        fi
+    fi
+    echo "$NUMERIC_VERSION"
+}
+
+
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #          NAME:  __unquote_string
 #   DESCRIPTION:  Strip single or double quotes from the provided string.
 #----------------------------------------------------------------------------------------------------------------------
@@ -743,7 +770,11 @@ __gather_linux_system_info() {
 
         n=$(echo "${rsource}" | sed -e 's/[_-]release$//' -e 's/[_-]version$//')
         shortname=$(echo "${n}" | tr '[:upper:]' '[:lower:]')
-        rv=$( (grep VERSION "/etc/${rsource}"; cat "/etc/${rsource}") | grep '[0-9]' | sed -e 'q' )
+        if [ "$shortname" = "debian" ]; then
+            rv=$(__derive_debian_numeric_version `cat /etc/${rsource}`)
+        else
+            rv=$( (grep VERSION "/etc/${rsource}"; cat "/etc/${rsource}") | grep '[0-9]' | sed -e 'q' )
+        fi
         [ "${rv}" = "" ] && [ "$shortname" != "arch" ] && continue  # There's no version information. Continue to next rsource
         v=$(__parse_version_string "$rv")
         case $shortname in
@@ -795,17 +826,7 @@ __gather_linux_system_info() {
                         ;;
                     debian      )
                         n="Debian"
-                        if [ "${v}" = "" ]; then
-                            if [ "$(cat /etc/debian_version)" = "wheezy/sid" ]; then
-                                # I've found an EC2 wheezy image which did not tell its version
-                                v=$(__parse_version_string "7.0")
-                            elif [ "$(cat /etc/debian_version)" = "jessie/sid" ]; then
-                                # Let's start detecting the upcoming Debian 8 (Jessie)
-                                v=$(__parse_version_string "8.0")
-                            fi
-                        else
-                            echowarn "Unable to parse the Debian Version"
-                        fi
+                        v=$(__derive_debian_numeric_version "$v")
                         ;;
                     *           )
                         n=${nn}

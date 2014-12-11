@@ -12,6 +12,7 @@ Alex Van't Hof              alexvh
 Angelo Gründler             plueschopath           angelo.gruendler@w1r3.net
 Boris Feld                  Lothiraldan
 bruce-one                   bruce-one
+C. R. Oldham                cro                    cr@saltstack.com
 Chris Rebert                cvrebert               chris.rebert@hulu.com
 Christer Edwards            cedwards
 Dag Viggo Lokøen            dagvl                  dag.viggo@lokoen.org
@@ -22,6 +23,7 @@ Elias Probst                eliasp
 Erik Johnson                terminalmage           erik@saltstack.com
 Forrest Alvarez             gravyboat
 Geoff Garside               geoffgarside           geoff@geoffgarside.co.uk
+ggillies                    ggillies
 Giuseppe Iannello           giannello              giuseppe.iannello@brokenloop.net
 Gregory Meno                GregMeno               gregory.meno@inktank.com
 Guillaume Derval            GuillaumeDerval        guillaume@guillaumederval.be

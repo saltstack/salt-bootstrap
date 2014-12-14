@@ -3623,6 +3623,10 @@ install_freebsd_9_stable_deps() {
         /usr/local/sbin/pkg install ${SALT_PKG_FLAGS} -y ${_EXTRA_PACKAGES} || return 1
     fi
 
+    if [ "$_UPGRADE_SYS" -eq $BS_TRUE ]; then
+        pkg upgrade -y || return 1
+    fi
+
     return 0
 }
 

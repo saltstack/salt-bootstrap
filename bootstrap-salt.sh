@@ -2732,14 +2732,13 @@ install_centos_git_post() {
         if [ -f /bin/systemctl ]; then
             if [ ! -f /usr/lib/systemd/system/salt-${fname}.service ] || ([ -f /usr/lib/systemd/system/salt-${fname}.service ] && [ $_FORCE_OVERWRITE -eq $BS_TRUE ]); then
                 copyfile "${__SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-${fname}.service" /usr/lib/systemd/system/
-
-                # Skip salt-api since the service should be opt-in and not necessarily started on boot
-                [ $fname = "api" ] && continue
-
-                /bin/systemctl enable salt-${fname}.service
-                SYSTEMD_RELOAD=$BS_TRUE
             fi
-            continue
+
+            # Skip salt-api since the service should be opt-in and not necessarily started on boot
+            [ $fname = "api" ] && continue
+
+            /bin/systemctl enable salt-${fname}.service
+            SYSTEMD_RELOAD=$BS_TRUE
 
         elif [ ! -f /etc/init.d/salt-$fname ] || ([ -f /etc/init.d/salt-$fname ] && [ $_FORCE_OVERWRITE -eq $BS_TRUE ]); then
             copyfile "${__SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-${fname}" /etc/init.d/

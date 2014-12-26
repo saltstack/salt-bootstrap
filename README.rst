@@ -86,6 +86,12 @@ have ``fetch`` available though:
   fetch -o install_salt.sh https://bootstrap.saltstack.com
   sudo sh install_salt.sh
 
+If you have any SSL issues install ``ca_root_nssp``:
+
+..code:: console
+
+   pkg install ca_root_nssp
+
 
 If all you want is to install a ``salt-master`` using latest git:
 

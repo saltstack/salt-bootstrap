@@ -92,6 +92,18 @@ If you have any SSL issues install ``ca_root_nssp``:
 
    pkg install ca_root_nssp
 
+And either copy the certificates to the place where fetch can find them:
+
+..code:: console
+
+   cp /usr/local/share/certs/ca-root-nss.crt /etc/ssl/cert.pem
+
+Or link them to the right place:
+
+..code:: console
+
+   ln -s /usr/local/share/certs/ca-root-nss.crt /etc/ssl/cert.pem
+
 
 If all you want is to install a ``salt-master`` using latest git:
 

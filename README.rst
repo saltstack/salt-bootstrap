@@ -11,7 +11,7 @@ install the `Salt`_ binaries using the appropriate methods.
 
 .. Note::
 
-  This ``README`` file is not the absolute truth to what the bootstrap script is capable to do, for 
+  This ``README`` file is not the absolute truth to what the bootstrap script is capable of, for 
   that, please read the generated help by passing ``-h`` to the script or even better, `read the 
   source`_.
 

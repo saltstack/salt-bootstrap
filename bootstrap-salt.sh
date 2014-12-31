@@ -1993,6 +1993,9 @@ install_debian_6_deps() {
 
     apt-get update
 
+    # Make sure wget is available
+    __apt_get_install_noinput wget
+
     # Install Keys
     __apt_get_install_noinput debian-archive-keyring && apt-get update
 
@@ -2090,6 +2093,10 @@ install_debian_7_deps() {
     export DEBIAN_FRONTEND=noninteractive
 
     apt-get update
+
+    # Make sure wget is available
+    __apt_get_install_noinput wget
+
     # Install Keys
     __apt_get_install_noinput debian-archive-keyring && apt-get update
 

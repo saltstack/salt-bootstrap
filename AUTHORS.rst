@@ -48,6 +48,7 @@ Paul Brian                  lifeisstillgood        paul@mikadosoftware.com
 Pavel Snagovsky             paha
 Pedro Algarvio              s0undt3ch              pedro@algarvio.me
 Pedro Paulo                 pedropaulovc
+ptonelli                    ptonelli
 Raymond Barbiero            visualphoenix
 Roberto Aguilar             rca                    roberto@baremetal.io
 Skyler Berg                 skylerberg             skylertheberg@gmail.com

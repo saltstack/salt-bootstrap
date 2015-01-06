@@ -2584,6 +2584,7 @@ install_centos_stable_deps() {
     __install_epel_repository || return 1
 
     if [ "$_ENABLE_EXTERNAL_ZMQ_REPOS" -eq $BS_TRUE ]; then
+        yum -y install python-hashlib || return 1
         __install_saltstack_copr_zeromq_repository || return 1
     fi
 

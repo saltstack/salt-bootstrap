@@ -3384,11 +3384,11 @@ install_arch_linux_stable_deps() {
         pacman-key --init && pacman-key --populate archlinux || return 1
     fi
 
+    pacman -Sy --noconfirm --needed pacman || return 1
+
     if [ "$(which pacman-db-upgrade)" != "" ]; then
         pacman-db-upgrade || return 1
     fi
-
-    pacman -Sy --noconfirm --needed pacman || return 1
 
     if [ "$_UPGRADE_SYS" -eq $BS_TRUE ]; then
         pacman -Syyu --noconfirm --needed || return 1

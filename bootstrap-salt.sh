@@ -3388,6 +3388,8 @@ install_arch_linux_stable_deps() {
         pacman-db-upgrade || return 1
     fi
 
+    pacman -Sy --noconfirm --needed pacman || return 1
+
     if [ "$_UPGRADE_SYS" -eq $BS_TRUE ]; then
         pacman -Syyu --noconfirm --needed || return 1
     fi
@@ -3407,7 +3409,6 @@ install_arch_linux_stable_deps() {
 install_arch_linux_git_deps() {
     install_arch_linux_stable_deps
 
-    pacman -Sy --noconfirm --needed pacman || return 1
     # Don't fail if un-installing python2-distribute threw an error
     pacman -R --noconfirm python2-distribute
     pacman -Sy --noconfirm --needed git python2-crypto python2-setuptools python2-jinja \

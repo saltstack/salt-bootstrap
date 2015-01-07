@@ -3380,7 +3380,9 @@ install_amazon_linux_ami_testing_post() {
 #
 install_arch_linux_stable_deps() {
 
-    pacman-db-upgrade
+    if [ "$(which pacman-db-upgrade)" != "" ]; then
+        pacman-db-upgrade || return 1
+    fi
 
     if [ ! -f /etc/pacman.d/gnupg ]; then
         pacman-key --init && pacman-key --populate archlinux || return 1

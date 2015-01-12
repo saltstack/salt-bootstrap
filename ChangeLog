@@ -1,3 +1,9 @@
+Version 2014.xx.xx:
+	* Add package upgrades support to FreeBSD. Thanks William Eshagh(eshagl).
+	* Make sure wget is installed on debian bare systems.
+	* Make sure the Arch pacman database is up to date
+	* Install `python-hashlib` in CentOS 5 in order to use the COPR repository
+
 Version 2014.12.11:
 	* Enable binary installations on CentOS 7. Thanks ggillies
 	* Updated the URL for EPEL 7

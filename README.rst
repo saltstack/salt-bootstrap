@@ -11,7 +11,7 @@ install the `Salt`_ binaries using the appropriate methods.
 
 .. Note::
 
-  This ``README`` file is not the absolute truth to what the bootstrap script is capable to do, for 
+  This ``README`` file is not the absolute truth to what the bootstrap script is capable of, for 
   that, please read the generated help by passing ``-h`` to the script or even better, `read the 
   source`_.
 
@@ -85,6 +85,24 @@ have ``fetch`` available though:
 
   fetch -o install_salt.sh https://bootstrap.saltstack.com
   sudo sh install_salt.sh
+
+If you have any SSL issues install ``ca_root_nssp``:
+
+..code:: console
+
+   pkg install ca_root_nssp
+
+And either copy the certificates to the place where fetch can find them:
+
+..code:: console
+
+   cp /usr/local/share/certs/ca-root-nss.crt /etc/ssl/cert.pem
+
+Or link them to the right place:
+
+..code:: console
+
+   ln -s /usr/local/share/certs/ca-root-nss.crt /etc/ssl/cert.pem
 
 
 If all you want is to install a ``salt-master`` using latest git:

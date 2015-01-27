@@ -2573,7 +2573,7 @@ __install_saltstack_copr_zeromq_repository() {
         else
             __REPOTYPE="epel"
         fi
-        __fetch_url -O /etc/yum.repos.d/saltstack-zeromq4.repo \
+        __fetch_url /etc/yum.repos.d/saltstack-zeromq4.repo \
                          "http://copr.fedoraproject.org/coprs/saltstack/zeromq4/repo/${__REPOTYPE}-${DISTRO_MAJOR_VERSION}/saltstack-zeromq4-${__REPOTYPE}-${DISTRO_MAJOR_VERSION}.repo" || return 1
     fi
     return 0

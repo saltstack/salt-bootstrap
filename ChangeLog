@@ -1,3 +1,7 @@
+Version 2015.xx.xx:
+	* Try other tools besides wget when downloading the COPR repo file. Thanks Ronald van 
+	Zantvoort(The-Loeki)
+
 Version 2015.01.12:
 	* Add package upgrades support to FreeBSD. Thanks William Eshagh(eshagl).
 	* Make sure wget is installed on debian bare systems.

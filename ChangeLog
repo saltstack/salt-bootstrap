@@ -1,6 +1,8 @@
 Version 2015.xx.xx:
 	* Try other tools besides wget when downloading the COPR repo file. Thanks Ronald van 
 	Zantvoort(The-Loeki)
+	* No need to install packages from the Unstable repository for debian, use backports. Thanks 
+	Ari Aosved(devaos)
 
 Version 2015.01.12:
 	* Add package upgrades support to FreeBSD. Thanks William Eshagh(eshagl).

@@ -1957,8 +1957,6 @@ install_debian_deps() {
         # Additionally install procps and pciutils which allows for Docker boostraps. See 366#issuecomment-39666813
         __PACKAGES="${__PACKAGES} python-pip"
         __PIP_PACKAGES="${__PIP_PACKAGES} requests"
-    else
-        __PACKAGES="${__PACKAGES} python-requests"
     fi
 
     # shellcheck disable=SC2086
@@ -2109,49 +2107,17 @@ install_debian_7_deps() {
     # shellcheck disable=SC2086
     wget $_WGET_ARGS -q http://debian.saltstack.com/debian-salt-team-joehealy.gpg.key -O - | apt-key add - || return 1
 
-    if [ "$_PIP_ALLOWED" -eq $BS_TRUE ]; then
-        echowarn "PyZMQ will be installed from PyPI in order to compile it against ZMQ3"
-        echowarn "This is required for long term stable minion connections to the master."
-        echowarn "YOU WILL END UP WITH QUITE A FEW PACKAGES FROM DEBIAN UNSTABLE"
-        echowarn "Sleeping for 5 seconds so you can cancel..."
-        sleep 5
-
-        if [ ! -f /etc/apt/sources.list.d/debian-unstable.list ]; then
-           cat <<_eof > /etc/apt/sources.list.d/debian-unstable.list
-deb http://ftp.debian.org/debian unstable main
-deb-src http://ftp.debian.org/debian unstable main
-_eof
-
-           cat <<_eof > /etc/apt/preferences.d/libzmq3-debian-unstable.pref
-Package: libzmq3
-Pin: release a=unstable
-Pin-Priority: 800
-
-Package: libzmq3-dev
-Pin: release a=unstable
-Pin-Priority: 800
-_eof
-        fi
-
-        apt-get update
-        __apt_get_install_noinput -t unstable libzmq3 libzmq3-dev || return 1
-        __PACKAGES="build-essential python-dev python-pip python-requests python-apt"
-        # Additionally install procps and pciutils which allows for Docker boostraps. See 366#issuecomment-39666813
-        __PACKAGES="${__PACKAGES} procps pciutils"
-        # shellcheck disable=SC2086
-        __apt_get_install_noinput ${__PACKAGES} || return 1
-    else
-        apt-get update || return 1
-        __PACKAGES="python-zmq python-requests python-apt"
-        # Additionally install procps and pciutils which allows for Docker boostraps. See 366#issuecomment-39666813
-        __PACKAGES="${__PACKAGES} procps pciutils"
-        # shellcheck disable=SC2086
-        __apt_get_install_noinput ${__PACKAGES} || return 1
-
-    fi
+    apt-get update || return 1
+    __apt_get_install_noinput -t wheezy-backports libzmq3 libzmq3-dev python-zmq python-requests python-apt || return 1
+    # Additionally install procps and pciutils which allows for Docker boostraps. See 366#issuecomment-39666813
+    __PACKAGES="procps pciutils"
+    # shellcheck disable=SC2086
+    __apt_get_install_noinput ${__PACKAGES} || return 1
 
     if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
         check_pip_allowed "You need to allow pip based installations (-P) in order to install apache-libcloud"
+        __PACKAGES="build-essential python-dev python-pip"
+        __apt_get_install_noinput ${__PACKAGES} || return 1
         pip install -U "apache-libcloud>=$_LIBCLOUD_MIN_VERSION"
     fi
 

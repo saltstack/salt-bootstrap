@@ -2591,7 +2591,7 @@ install_centos_stable_deps() {
         if [ "$DISTRO_MAJOR_VERSION" -eq 5 ]; then
             easy_install-2.6 "apache-libcloud>=$_LIBCLOUD_MIN_VERSION"
         else
-            pip-python install "apache-libcloud>=$_LIBCLOUD_MIN_VERSION"
+            pip install "apache-libcloud>=$_LIBCLOUD_MIN_VERSION"
         fi
     fi
 

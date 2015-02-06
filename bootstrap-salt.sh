@@ -2591,7 +2591,7 @@ install_centos_stable_deps() {
         if [ "$DISTRO_MAJOR_VERSION" -eq 5 ]; then
             easy_install-2.6 "apache-libcloud>=$_LIBCLOUD_MIN_VERSION"
         else
-            pip-python install "apache-libcloud>=$_LIBCLOUD_MIN_VERSION"
+            pip install "apache-libcloud>=$_LIBCLOUD_MIN_VERSION"
         fi
     fi
 
@@ -2617,9 +2617,13 @@ install_centos_stable() {
     if [ "$_INSTALL_MINION" -eq $BS_TRUE ]; then
         __PACKAGES="${__PACKAGES} salt-minion"
     fi
-    if [ "$_INSTALL_MASTER" -eq $BS_TRUE ] || [ "$_INSTALL_SYNDIC" -eq $BS_TRUE ]; then
+    if [ "$_INSTALL_MASTER" -eq $BS_TRUE ];then
         __PACKAGES="${__PACKAGES} salt-master"
+    fi   
+    if [ "$_INSTALL_SYNDIC" -eq $BS_TRUE ];then
+        __PACKAGES="${__PACKAGES} salt-syndic"
     fi
+    
     if [ "$DISTRO_NAME_L" = "oracle_linux" ]; then
         # We need to install one package at a time because --enablerepo=X disables ALL OTHER REPOS!!!!
         for package in ${__PACKAGES}; do

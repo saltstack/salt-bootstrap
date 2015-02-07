@@ -3,6 +3,8 @@ Version 2015.xx.xx:
 	Zantvoort(The-Loeki)
 	* No need to install packages from the Unstable repository for debian, use backports. Thanks 
 	Ari Aosved(devaos)
+	* Fix an issue in CentOS where the syndic package wasn't being installed(since it's now a 
+	separate package). Thanks Ronald van Zantvoort(The-Loeki)
 
 Version 2015.01.12:
 	* Add package upgrades support to FreeBSD. Thanks William Eshagh(eshagl).

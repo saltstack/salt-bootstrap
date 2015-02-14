@@ -2869,6 +2869,9 @@ __test_rhel_optionals_packages() {
         # shellcheck disable=SC2043
         for package in python-jinja2; do
             echoinfo "  - ${package}"
+            if [ "$DISTRO_MAJOR_VERSION" -ge 6 ]; then
+                yum-config-manager --enable \*server-optional
+            fi
             if [ "$DISTRO_NAME_L" = "oracle_linux" ]; then
                 yum --config "${__YUM_CONF_FILE}" install -y ${package} >/dev/null 2>&1 || \
                     yum --config "${__YUM_CONF_FILE}" install -y ${package} --enablerepo=${_EPEL_REPO} >/dev/null 2>&1

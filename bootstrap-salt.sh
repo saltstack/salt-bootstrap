@@ -2869,7 +2869,7 @@ __test_rhel_optionals_packages() {
         # shellcheck disable=SC2043
         for package in python-jinja2; do
             echoinfo "  - ${package}"
-            if [ "$DISTRO_MAJOR_VERSION" -ge 6 ]; then
+            if [ "$DISTRO_MAJOR_VERSION" -ge 7 ]; then
                 yum-config-manager --enable \*server-optional
             fi
             if [ "$DISTRO_NAME_L" = "oracle_linux" ]; then

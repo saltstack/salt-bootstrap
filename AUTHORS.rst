@@ -23,6 +23,7 @@ Diego Woitasen              diegows                diego.woitasen@vhgroup.net
 Elias Probst                eliasp
 Erik Johnson                terminalmage           erik@saltstack.com
 Forrest Alvarez             gravyboat
+Fred Reimer                 freimer                freimer@freimer.org
 Geoff Garside               geoffgarside           geoff@geoffgarside.co.uk
 ggillies                    ggillies
 Giuseppe Iannello           giannello              giuseppe.iannello@brokenloop.net

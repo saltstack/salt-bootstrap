@@ -2098,10 +2098,6 @@ install_debian_7_deps() {
     if [ "$(grep -R 'wheezy-backports' /etc/apt | grep -v "^#")" = "" ]; then
         echo "deb http://http.debian.net/debian wheezy-backports main" >> \
             /etc/apt/sources.list.d/backports.list
-
-        # Add the backports key
-        gpg --keyserver pgpkeys.mit.edu --recv-key 8B48AD6246925553
-        gpg -a --export 8B48AD6246925553 | apt-key add -
     fi
 
     # Saltstack's Stable Debian repository

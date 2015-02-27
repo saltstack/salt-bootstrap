@@ -2039,13 +2039,9 @@ _eof
     fi
 
     # Debian Backports
-    if [ "$(grep -R 'backports.debian.org' /etc/apt | grep -v "^#")" = "" ]; then
-        echo "deb http://backports.debian.org/debian-backports squeeze-backports main" >> \
+    if [ "$(grep -R 'squeeze-backports' /etc/apt | grep -v "^#")" = "" ]; then
+        echo "deb http://http.debian.net/debian-backports squeeze-backports main" >> \
             /etc/apt/sources.list.d/backports.list
-
-        # Add the backports key
-        gpg --keyserver pgpkeys.mit.edu --recv-key 8B48AD6246925553
-        gpg -a --export 8B48AD6246925553 | apt-key add -
     fi
 
     # Saltstack's Stable Debian repository

@@ -2100,7 +2100,7 @@ install_debian_7_deps() {
 
     # Debian Backports
     if [ "$(grep -R 'backports.debian.org' /etc/apt | grep -v "^#")" = "" ]; then
-        echo "deb http://backports.debian.org/debian-backports wheezy-backports main" >> \
+        echo "deb http://http.debian.net/debian wheezy-backports main" >> \
             /etc/apt/sources.list.d/backports.list
 
         # Add the backports key

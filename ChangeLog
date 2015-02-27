@@ -1,4 +1,4 @@
-Version 2015.xx.xx:
+Version 2015.02.15:
 	* Try other tools besides wget when downloading the COPR repo file. Thanks Ronald van 
 	Zantvoort(The-Loeki)
 	* No need to install packages from the Unstable repository for debian, use backports. Thanks 

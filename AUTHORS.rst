@@ -10,6 +10,7 @@ Name                        Nick                   Email
 Alec Koumjian               akoumjian              akoumjian@gmail.com
 Alex Van't Hof              alexvh
 Angelo Gründler             plueschopath           angelo.gruendler@w1r3.net
+Ari Aosved                  devaos                 ari.aosved@gmail.com
 Boris Feld                  Lothiraldan
 bruce-one                   bruce-one
 C. R. Oldham                cro                    cr@saltstack.com
@@ -22,6 +23,7 @@ Diego Woitasen              diegows                diego.woitasen@vhgroup.net
 Elias Probst                eliasp
 Erik Johnson                terminalmage           erik@saltstack.com
 Forrest Alvarez             gravyboat
+Fred Reimer                 freimer                freimer@freimer.org
 Geoff Garside               geoffgarside           geoff@geoffgarside.co.uk
 ggillies                    ggillies
 Giuseppe Iannello           giannello              giuseppe.iannello@brokenloop.net
@@ -52,6 +54,7 @@ Pedro Paulo                 pedropaulovc
 ptonelli                    ptonelli
 Raymond Barbiero            visualphoenix
 Roberto Aguilar             rca                    roberto@baremetal.io
+Ronald van Zantvoort        The-Loeki              ronald@pcextreme.nl
 Skyler Berg                 skylerberg             skylertheberg@gmail.com
 Tate Eskew                  tateeskew
 Thomas S. Hatch             thatch45               thatch45@saltstack.com

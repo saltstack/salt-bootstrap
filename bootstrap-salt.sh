@@ -2555,10 +2555,9 @@ __install_saltstack_copr_salt_el5_repository() {
 }
 
 install_centos_stable_deps() {
+    __install_epel_repository || return 1
     if [ "$DISTRO_MAJOR_VERSION" -eq 5 ]; then
         __install_saltstack_copr_salt_el5_repository || return 1
-    else
-        __install_epel_repository || return 1
     fi
 
     if [ "$_ENABLE_EXTERNAL_ZMQ_REPOS" -eq $BS_TRUE ] && [ "$DISTRO_MAJOR_VERSION" -gt 5 ]; then

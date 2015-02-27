@@ -2039,7 +2039,7 @@ _eof
     fi
 
     # Debian Backports
-    if [ "$(grep -R 'backports.debian.org' /etc/apt)" = "" ]; then
+    if [ "$(grep -R 'backports.debian.org' /etc/apt | grep -v "^#")" = "" ]; then
         echo "deb http://backports.debian.org/debian-backports squeeze-backports main" >> \
             /etc/apt/sources.list.d/backports.list
 
@@ -2099,7 +2099,7 @@ install_debian_7_deps() {
     __apt_get_install_noinput debian-archive-keyring && apt-get update
 
     # Debian Backports
-    if [ "$(grep -R 'backports.debian.org' /etc/apt)" = "" ]; then
+    if [ "$(grep -R 'backports.debian.org' /etc/apt | grep -v "^#")" = "" ]; then
         echo "deb http://backports.debian.org/debian-backports wheezy-backports main" >> \
             /etc/apt/sources.list.d/backports.list
 

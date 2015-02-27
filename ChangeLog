@@ -6,6 +6,7 @@ Version 2015.xx.xx:
 	* Fix an issue in CentOS where the syndic package wasn't being installed(since it's now a 
 	separate package). Thanks Ronald van Zantvoort(The-Loeki)
 	* Enable the server-optionals repository for RHEL >= 7
+	* RHEL/CentOS 5 now uses the COPR repository. #533
 
 Version 2015.01.12:
 	* Add package upgrades support to FreeBSD. Thanks William Eshagh(eshagl).

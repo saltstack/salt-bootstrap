@@ -1,5 +1,5 @@
-Version 2015.xx.xx:
-
+Version 2015.02.28:
+	* Fix Debian backports repository.
 
 Version 2015.02.27:
 	* Try other tools besides wget when downloading the COPR repo file. Thanks Ronald van 

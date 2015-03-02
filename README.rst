@@ -385,8 +385,6 @@ Ubuntu box. First, install Vagrant, then::
 
     $ vagrant up
     $ vagrant ssh
-    <vm> $ cd /salt_bootstrap
-    <vm> $ sudo sh salt-bootstrap.sh
 
 
 .. _Vagrant: http://www.vagrantup.com

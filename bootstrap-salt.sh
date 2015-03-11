@@ -4510,6 +4510,12 @@ config_salt() {
             chmod 664 "$_PKI_DIR/minion/minion.pub" || return 1
             CONFIGURED_ANYTHING=$BS_TRUE
         fi
+        # For multi-master-pki, copy the master_sign public key if found
+        if [ -f "$_TEMP_CONFIG_DIR/master_sign.pub" ]; then
+            movefile "$_TEMP_CONFIG_DIR/master_sign.pub" "$_PKI_DIR/minion/" || return 1
+            chmod 664 "$_PKI_DIR/minion/master_sign.pub" || return 1
+            CONFIGURED_ANYTHING=$BS_TRUE
+        fi
     fi
 
 

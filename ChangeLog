@@ -1,3 +1,6 @@
+Version 2015.03.15:
+	* Add multi-master support. Thanks Fred Reimer(freimer). #555
+
 Version 2015.03.04:
 	* Fix the salt package selection on Arch stable installs.
 

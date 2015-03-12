@@ -226,6 +226,7 @@ usage() {
     - stable (default)
     - stable [version] (ubuntu specific)
     - daily  (ubuntu specific)
+    - testing (redhat specific)
     - git
 
   Examples:
@@ -233,6 +234,7 @@ usage() {
     - ${__ScriptName} stable
     - ${__ScriptName} stable 2014.7
     - ${__ScriptName} daily
+    - ${__ScriptName} testing
     - ${__ScriptName} git
     - ${__ScriptName} git develop
     - ${__ScriptName} git v0.17.0

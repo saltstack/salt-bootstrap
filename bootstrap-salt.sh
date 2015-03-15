@@ -2358,19 +2358,33 @@ install_debian_git_post() {
         [ $fname = "api" ] && ([ "$_INSTALL_MASTER" -eq $BS_FALSE ] || [ "$(which salt-${fname} 2>/dev/null)" = "" ]) && continue
         [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
 
-        if [ -f "${__SALT_GIT_CHECKOUT_DIR}/debian/salt-$fname.init" ]; then
-            copyfile "${__SALT_GIT_CHECKOUT_DIR}/debian/salt-$fname.init" "/etc/init.d/salt-$fname"
-        fi
-        if [ ! -f "/etc/init.d/salt-$fname" ]; then
-            echowarn "The init script for salt-$fname was not found, skipping it..."
-            continue
-        fi
-        chmod +x "/etc/init.d/salt-$fname"
+        if [ -f /bin/systemctl ]; then
+            if [ ! -f /etc/systemd/system/salt-${fname}.service ] || ([ -f /etc/systemd/system/salt-${fname}.service ] && [ $_FORCE_OVERWRITE -eq $BS_TRUE ]); then
+                copyfile "${__SALT_GIT_CHECKOUT_DIR}/pkg/salt-${fname}.service" /etc/systemd/system
+            fi
 
-        # Skip salt-api since the service should be opt-in and not necessarily started on boot
-        [ $fname = "api" ] && continue
+            # Skip salt-api since the service should be opt-in and not necessarily started on boot
+            [ $fname = "api" ] && continue
 
-        update-rc.d "salt-$fname" defaults
+            /bin/systemctl enable salt-${fname}.service
+            SYSTEMD_RELOAD=$BS_TRUE
+
+        elif [ ! -f /etc/init.d/salt-$fname ] || ([ -f /etc/init.d/salt-$fname ] && [ $_FORCE_OVERWRITE -eq $BS_TRUE ]); then
+            if [ -f "${__SALT_GIT_CHECKOUT_DIR}/debian/salt-$fname.init" ]; then
+                copyfile "${__SALT_GIT_CHECKOUT_DIR}/debian/salt-$fname.init" "/etc/init.d/salt-$fname"
+            fi
+            if [ ! -f "/etc/init.d/salt-$fname" ]; then
+                echowarn "The init script for salt-$fname was not found, skipping it..."
+                continue
+            fi
+            chmod +x "/etc/init.d/salt-$fname"
+
+            # Skip salt-api since the service should be opt-in and not necessarily started on boot
+            [ $fname = "api" ] && continue
+
+            update-rc.d "salt-$fname" defaults
+        fi
+
     done
 }
 
@@ -2386,9 +2400,15 @@ install_debian_restart_daemons() {
         [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
         #[ $fname = "api" ] && ([ "$_INSTALL_MASTER" -eq $BS_FALSE ] || [ ! -f "/etc/init.d/salt-$fname" ]) && continue
         [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
-
-        /etc/init.d/salt-$fname stop > /dev/null 2>&1
-        /etc/init.d/salt-$fname start
+        if [ -f /bin/systemctl ]; then
+            # Debian 8 uses systemd
+            /bin/systemctl stop salt-$fname > /dev/null 2>&1
+            /bin/systemctl start salt-$fname.service
+        elif [ -f /etc/init.d/salt-$fname ]; then
+            # Still in SysV init
+            /etc/init.d/salt-$fname stop > /dev/null 2>&1
+            /etc/init.d/salt-$fname start
+        fi
     done
 }
 
@@ -2402,7 +2422,11 @@ install_debian_check_services() {
         [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
         #[ $fname = "api" ] && ([ "$_INSTALL_MASTER" -eq $BS_FALSE ] || [ ! -f "/etc/init.d/salt-$fname" ]) && continue
         [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
-        __check_services_debian salt-$fname || return 1
+        if [ -f /bin/systemctl ]; then
+            __check_services_systemd salt-$fname || return 1
+        elif [ -f /etc/init.d/salt-$fname ]; then
+            __check_services_debian salt-$fname || return 1
+        fi
     done
     return 0
 }

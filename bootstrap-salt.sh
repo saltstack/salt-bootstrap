@@ -2137,8 +2137,64 @@ install_debian_7_deps() {
     return 0
 }
 
-install_debian_8_deps__DISABLED() {
-    install_debian_7_deps || return 1
+install_debian_8_deps() {
+    echodebug "install_debian_8_deps"
+
+    if [ $_START_DAEMONS -eq $BS_FALSE ]; then
+        echowarn "Not starting daemons on Debian based distributions is not working mostly because starting them is the default behaviour."
+    fi
+    # No user interaction, libc6 restart services for example
+    export DEBIAN_FRONTEND=noninteractive
+
+    apt-get update
+
+    # Make sure wget is available
+    __apt_get_install_noinput wget
+
+    # Install Keys
+    __apt_get_install_noinput debian-archive-keyring && apt-get update
+
+    # Debian Backports
+    if [ "$(grep -R 'jessie-backports' /etc/apt | grep -v "^#")" = "" ]; then
+        echo "deb http://http.debian.net/debian jessie-backports main" >> \
+            /etc/apt/sources.list.d/backports.list
+    fi
+
+    # Saltstack's Stable Debian repository
+    if [ "$(grep -R 'jessie-saltstack' /etc/apt)" = "" ]; then
+        echo "deb http://debian.saltstack.com/debian jessie-saltstack main" >> \
+            /etc/apt/sources.list.d/saltstack.list
+    fi
+
+    # shellcheck disable=SC2086
+    wget $_WGET_ARGS -q http://debian.saltstack.com/debian-salt-team-joehealy.gpg.key -O - | apt-key add - || return 1
+
+    apt-get update || return 1
+    __apt_get_install_noinput -t jessie-backports libzmq3 libzmq3-dev python-zmq python-requests python-apt || return 1
+
+    # Additionally install procps and pciutils which allows for Docker boostraps. See 366#issuecomment-39666813
+    __PACKAGES="procps pciutils"
+    # shellcheck disable=SC2086
+    __apt_get_install_noinput ${__PACKAGES} || return 1
+
+    if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
+        check_pip_allowed "You need to allow pip based installations (-P) in order to install apache-libcloud"
+        __PACKAGES="build-essential python-dev python-pip"
+        # shellcheck disable=SC2086
+        __apt_get_install_noinput ${__PACKAGES} || return 1
+        pip install -U "apache-libcloud>=$_LIBCLOUD_MIN_VERSION"
+    fi
+
+    if [ "$_UPGRADE_SYS" -eq $BS_TRUE ]; then
+        __apt_get_upgrade_noinput || return 1
+    fi
+
+    if [ "${_EXTRA_PACKAGES}" != "" ]; then
+        echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
+        # shellcheck disable=SC2086
+        __apt_get_install_noinput ${_EXTRA_PACKAGES} || return 1
+    fi
+
     return 0
 }
 
@@ -2216,7 +2272,8 @@ install_debian_7_git_deps() {
 }
 
 install_debian_8_git_deps() {
-    install_debian_7_git_deps || return 1
+    install_debian_8_deps || return 1
+    install_debian_git_deps || return 1  # Grab the actual deps
     return 0
 }
 

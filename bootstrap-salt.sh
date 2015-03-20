@@ -2073,7 +2073,7 @@ _eof
     if [ "${_EXTRA_PACKAGES}" != "" ]; then
         echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
         # shellcheck disable=SC2086
-        __apt_get_install_noinput ${_EXTRA_PACKAGES} || return 1 
+        __apt_get_install_noinput ${_EXTRA_PACKAGES} || return 1
     fi
 
     return 0
@@ -2632,11 +2632,11 @@ install_centos_stable() {
     fi
     if [ "$_INSTALL_MASTER" -eq $BS_TRUE ];then
         __PACKAGES="${__PACKAGES} salt-master"
-    fi   
+    fi
     if [ "$_INSTALL_SYNDIC" -eq $BS_TRUE ];then
         __PACKAGES="${__PACKAGES} salt-syndic"
     fi
-    
+
     if [ "$DISTRO_NAME_L" = "oracle_linux" ]; then
         # We need to install one package at a time because --enablerepo=X disables ALL OTHER REPOS!!!!
         for package in ${__PACKAGES}; do
@@ -3579,7 +3579,7 @@ __freebsd_get_packagesite() {
 # Using a separate conf step to head for idempotent install...
 __configure_freebsd_pkg_details() {
 
-    ## pkg.conf is deprecated.  
+    ## pkg.conf is deprecated.
     ## We use conf files in /usr/local or /etc instead
     mkdir -p /usr/local/etc/pkg/repos/
     mkdir -p /etc/pkg/

@@ -2678,16 +2678,16 @@ install_centos_stable_post() {
 
 install_centos_git_deps() {
     install_centos_stable_deps || return 1
-	if ! git --version 2>&1 >/dev/null ; then
-		# git not installed - need to install it
-		if [ "$DISTRO_NAME_L" = "oracle_linux" ]; then
-			# try both ways --enablerepo=X disables ALL OTHER REPOS!!!!
-			yum install -y git systemd-python || yum install -y git systemd-python --enablerepo=${_EPEL_REPO} || return 1
-		else
-			yum install -y git systemd-python --enablerepo=${_EPEL_REPO} || return 1
-		fi
-	fi
-	
+    if ! git --version 2>&1 >/dev/null ; then
+        # git not installed - need to install it
+        if [ "$DISTRO_NAME_L" = "oracle_linux" ]; then
+            # try both ways --enablerepo=X disables ALL OTHER REPOS!!!!
+            yum install -y git systemd-python || yum install -y git systemd-python --enablerepo=${_EPEL_REPO} || return 1
+        else
+            yum install -y git systemd-python --enablerepo=${_EPEL_REPO} || return 1
+        fi
+    fi
+
     __git_clone_and_checkout || return 1
 
     # Let's trigger config_salt()

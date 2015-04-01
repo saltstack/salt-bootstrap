@@ -3596,7 +3596,7 @@ __configure_freebsd_pkg_details() {
     copyfile $conf_file /etc/pkg/FreeBSD.conf
     SALT_PKG_FLAGS="-r FreeBSD"
     ## ensure future ports builds use pkgng
-    echo "WITH_PKGNG=	yes" >> /etc/make.conf
+    echo "WITH_PKGNG=   yes" >> /etc/make.conf
 }
 
 install_freebsd_9_stable_deps() {
@@ -3662,23 +3662,23 @@ install_freebsd_git_deps() {
                 doc/man/salt.7 doc/man/salt.1 doc/man/salt-call.1; do
         [ ! -f $file ] && continue
         echodebug "Patching ${file}"
-        sed -in -e "s|/etc/salt|/usr/local/etc/salt|" \
-                -e "s|/srv/salt|/usr/local/etc/salt/states|" \
-                -e "s|/srv/pillar|/usr/local/etc/salt/pillar|" ${file}
+        sed -in -e "s|/etc/salt|${_SALT_ETC_DIR}|" \
+                -e "s|/srv/salt|${_SALT_ETC_DIR}/states|" \
+                -e "s|/srv/pillar|${_SALT_ETC_DIR}/pillar|" ${file}
     done
     if [ ! -f salt/syspaths.py ]; then
         # We still can't provide the system paths, salt 0.16.x
         # Let's patch salt's source and adapt paths to what's expected on FreeBSD
-        echodebug "Replacing occurrences of '/etc/salt' with '/usr/local/etc/salt'"
+        echodebug "Replacing occurrences of '/etc/salt' with \'${_SALT_ETC_DIR}\'"
         # The list of files was taken from Salt's BSD port Makefile
         for file in conf/minion conf/master salt/config.py salt/client.py \
                     salt/modules/mysql.py salt/utils/parsers.py salt/modules/tls.py \
                     salt/modules/postgres.py salt/utils/migrations.py; do
             [ ! -f $file ] && continue
             echodebug "Patching ${file}"
-            sed -in -e "s|/etc/salt|/usr/local/etc/salt|" \
-                    -e "s|/srv/salt|/usr/local/etc/salt/states|" \
-                    -e "s|/srv/pillar|/usr/local/etc/salt/pillar|" ${file}
+            sed -in -e "s|/etc/salt|${_SALT_ETC_DIR}|" \
+                    -e "s|/srv/salt|${_SALT_ETC_DIR}/states|" \
+                    -e "s|/srv/pillar|${_SALT_ETC_DIR}/pillar|" ${file}
         done
     fi
     echodebug "Finished patching"
@@ -3686,7 +3686,7 @@ install_freebsd_git_deps() {
     # Let's trigger config_salt()
     if [ "$_TEMP_CONFIG_DIR" = "null" ]; then
         _TEMP_CONFIG_DIR="${__SALT_GIT_CHECKOUT_DIR}/conf/"
-        CONFIG_SALT_FUNC="config_salt"
+        CONFIG_SALT_FUNC="config_freebsd_salt"
     fi
 
     return 0
@@ -3724,9 +3724,9 @@ install_freebsd_git() {
             --salt-cache-dir=/var/cache/salt \
             --salt-sock-dir=/var/run/salt \
             --salt-srv-root-dir=/srv \
-            --salt-base-file-roots-dir=/usr/local/etc/salt/states \
-            --salt-base-pillar-roots-dir=/usr/local/etc/salt/pillar \
-            --salt-base-master-roots-dir=/usr/local/etc/salt/salt-master \
+            --salt-base-file-roots-dir=${_SALT_ETC_DIR}/states \
+            --salt-base-pillar-roots-dir=${_SALT_ETC_DIR}/pillar \
+            --salt-base-master-roots-dir=${_SALT_ETC_DIR}/salt-master \
             --salt-logs-dir=/var/log/salt \
             --salt-pidfile-dir=/var/run \
             || return 1
@@ -3758,7 +3758,7 @@ install_freebsd_9_stable_post() {
         grep "$enable_string" /etc/rc.conf >/dev/null 2>&1
         [ $? -eq 1 ] && echo "$enable_string" >> /etc/rc.conf
 
-        [ -f /usr/local/etc/salt/${fname}.sample ] && copyfile /usr/local/etc/salt/${fname}.sample /usr/local/etc/salt/${fname}
+        [ -f ${_SALT_ETC_DIR}/${fname}.sample ] && copyfile ${_SALT_ETC_DIR}/${fname}.sample ${_SALT_ETC_DIR}/${fname}
 
         if [ $fname = "minion" ] ; then
             grep "salt_minion_paths" /etc/rc.conf >/dev/null 2>&1

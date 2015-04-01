@@ -3724,9 +3724,9 @@ install_freebsd_git() {
             --salt-cache-dir=/var/cache/salt \
             --salt-sock-dir=/var/run/salt \
             --salt-srv-root-dir=/srv \
-            --salt-base-file-roots-dir=${_SALT_ETC_DIR}/states \
-            --salt-base-pillar-roots-dir=${_SALT_ETC_DIR}/pillar \
-            --salt-base-master-roots-dir=${_SALT_ETC_DIR}/salt-master \
+            --salt-base-file-roots-dir="${_SALT_ETC_DIR}/states" \
+            --salt-base-pillar-roots-dir="${_SALT_ETC_DIR}/pillar" \
+            --salt-base-master-roots-dir="${_SALT_ETC_DIR}/salt-master" \
             --salt-logs-dir=/var/log/salt \
             --salt-pidfile-dir=/var/run \
             || return 1
@@ -3758,7 +3758,7 @@ install_freebsd_9_stable_post() {
         grep "$enable_string" /etc/rc.conf >/dev/null 2>&1
         [ $? -eq 1 ] && echo "$enable_string" >> /etc/rc.conf
 
-        [ -f ${_SALT_ETC_DIR}/${fname}.sample ] && copyfile ${_SALT_ETC_DIR}/${fname}.sample ${_SALT_ETC_DIR}/${fname}
+        [ -f "${_SALT_ETC_DIR}/${fname}.sample" ] && copyfile "${_SALT_ETC_DIR}/${fname}.sample" "${_SALT_ETC_DIR}/${fname}"
 
         if [ $fname = "minion" ] ; then
             grep "salt_minion_paths" /etc/rc.conf >/dev/null 2>&1

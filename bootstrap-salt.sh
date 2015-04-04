@@ -2137,8 +2137,64 @@ install_debian_7_deps() {
     return 0
 }
 
-install_debian_8_deps__DISABLED() {
-    install_debian_7_deps || return 1
+install_debian_8_deps() {
+    echodebug "install_debian_8_deps"
+
+    if [ $_START_DAEMONS -eq $BS_FALSE ]; then
+        echowarn "Not starting daemons on Debian based distributions is not working mostly because starting them is the default behaviour."
+    fi
+    # No user interaction, libc6 restart services for example
+    export DEBIAN_FRONTEND=noninteractive
+
+    apt-get update
+
+    # Make sure wget is available
+    __apt_get_install_noinput wget
+
+    # Install Keys
+    __apt_get_install_noinput debian-archive-keyring && apt-get update
+
+    # Debian Backports
+    if [ "$(grep -R 'jessie-backports' /etc/apt | grep -v "^#")" = "" ]; then
+        echo "deb http://http.debian.net/debian jessie-backports main" >> \
+            /etc/apt/sources.list.d/backports.list
+    fi
+
+    # Saltstack's Stable Debian repository
+    if [ "$(grep -R 'jessie-saltstack' /etc/apt)" = "" ]; then
+        echo "deb http://debian.saltstack.com/debian jessie-saltstack main" >> \
+            /etc/apt/sources.list.d/saltstack.list
+    fi
+
+    # shellcheck disable=SC2086
+    wget $_WGET_ARGS -q http://debian.saltstack.com/debian-salt-team-joehealy.gpg.key -O - | apt-key add - || return 1
+
+    apt-get update || return 1
+    __apt_get_install_noinput -t jessie-backports libzmq3 libzmq3-dev python-zmq python-requests python-apt || return 1
+
+    # Additionally install procps and pciutils which allows for Docker boostraps. See 366#issuecomment-39666813
+    __PACKAGES="procps pciutils"
+    # shellcheck disable=SC2086
+    __apt_get_install_noinput ${__PACKAGES} || return 1
+
+    if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
+        check_pip_allowed "You need to allow pip based installations (-P) in order to install apache-libcloud"
+        __PACKAGES="build-essential python-dev python-pip"
+        # shellcheck disable=SC2086
+        __apt_get_install_noinput ${__PACKAGES} || return 1
+        pip install -U "apache-libcloud>=$_LIBCLOUD_MIN_VERSION"
+    fi
+
+    if [ "$_UPGRADE_SYS" -eq $BS_TRUE ]; then
+        __apt_get_upgrade_noinput || return 1
+    fi
+
+    if [ "${_EXTRA_PACKAGES}" != "" ]; then
+        echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
+        # shellcheck disable=SC2086
+        __apt_get_install_noinput ${_EXTRA_PACKAGES} || return 1
+    fi
+
     return 0
 }
 
@@ -2216,7 +2272,8 @@ install_debian_7_git_deps() {
 }
 
 install_debian_8_git_deps() {
-    install_debian_7_git_deps || return 1
+    install_debian_8_deps || return 1
+    install_debian_git_deps || return 1  # Grab the actual deps
     return 0
 }
 
@@ -2301,19 +2358,33 @@ install_debian_git_post() {
         [ $fname = "api" ] && ([ "$_INSTALL_MASTER" -eq $BS_FALSE ] || [ "$(which salt-${fname} 2>/dev/null)" = "" ]) && continue
         [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
 
-        if [ -f "${__SALT_GIT_CHECKOUT_DIR}/debian/salt-$fname.init" ]; then
-            copyfile "${__SALT_GIT_CHECKOUT_DIR}/debian/salt-$fname.init" "/etc/init.d/salt-$fname"
-        fi
-        if [ ! -f "/etc/init.d/salt-$fname" ]; then
-            echowarn "The init script for salt-$fname was not found, skipping it..."
-            continue
-        fi
-        chmod +x "/etc/init.d/salt-$fname"
+        if [ -f /bin/systemctl ]; then
+            if [ ! -f /etc/systemd/system/salt-${fname}.service ] || ([ -f /etc/systemd/system/salt-${fname}.service ] && [ $_FORCE_OVERWRITE -eq $BS_TRUE ]); then
+                copyfile "${__SALT_GIT_CHECKOUT_DIR}/pkg/salt-${fname}.service" /etc/systemd/system
+            fi
 
-        # Skip salt-api since the service should be opt-in and not necessarily started on boot
-        [ $fname = "api" ] && continue
+            # Skip salt-api since the service should be opt-in and not necessarily started on boot
+            [ $fname = "api" ] && continue
 
-        update-rc.d "salt-$fname" defaults
+            /bin/systemctl enable salt-${fname}.service
+            SYSTEMD_RELOAD=$BS_TRUE
+
+        elif [ ! -f /etc/init.d/salt-$fname ] || ([ -f /etc/init.d/salt-$fname ] && [ $_FORCE_OVERWRITE -eq $BS_TRUE ]); then
+            if [ -f "${__SALT_GIT_CHECKOUT_DIR}/debian/salt-$fname.init" ]; then
+                copyfile "${__SALT_GIT_CHECKOUT_DIR}/debian/salt-$fname.init" "/etc/init.d/salt-$fname"
+            fi
+            if [ ! -f "/etc/init.d/salt-$fname" ]; then
+                echowarn "The init script for salt-$fname was not found, skipping it..."
+                continue
+            fi
+            chmod +x "/etc/init.d/salt-$fname"
+
+            # Skip salt-api since the service should be opt-in and not necessarily started on boot
+            [ $fname = "api" ] && continue
+
+            update-rc.d "salt-$fname" defaults
+        fi
+
     done
 }
 
@@ -2329,9 +2400,15 @@ install_debian_restart_daemons() {
         [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
         #[ $fname = "api" ] && ([ "$_INSTALL_MASTER" -eq $BS_FALSE ] || [ ! -f "/etc/init.d/salt-$fname" ]) && continue
         [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
-
-        /etc/init.d/salt-$fname stop > /dev/null 2>&1
-        /etc/init.d/salt-$fname start
+        if [ -f /bin/systemctl ]; then
+            # Debian 8 uses systemd
+            /bin/systemctl stop salt-$fname > /dev/null 2>&1
+            /bin/systemctl start salt-$fname.service
+        elif [ -f /etc/init.d/salt-$fname ]; then
+            # Still in SysV init
+            /etc/init.d/salt-$fname stop > /dev/null 2>&1
+            /etc/init.d/salt-$fname start
+        fi
     done
 }
 
@@ -2345,7 +2422,11 @@ install_debian_check_services() {
         [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
         #[ $fname = "api" ] && ([ "$_INSTALL_MASTER" -eq $BS_FALSE ] || [ ! -f "/etc/init.d/salt-$fname" ]) && continue
         [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
-        __check_services_debian salt-$fname || return 1
+        if [ -f /bin/systemctl ]; then
+            __check_services_systemd salt-$fname || return 1
+        elif [ -f /etc/init.d/salt-$fname ]; then
+            __check_services_debian salt-$fname || return 1
+        fi
     done
     return 0
 }

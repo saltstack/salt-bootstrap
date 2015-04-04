@@ -39,6 +39,7 @@ Karl Grzeszczak             karlgrz
 Kenneth Wilke               KennethWilke
 Liu Xiaohui                 oreh                   herolxh@gmail.com
 markgaylard                 markgaylard
+Matt Black                  mafrosis
 Matthew Garrett             cingeyedog             matt@clemson.edu
 Matthew Mead-Briggs         mattmb
 Matthew Willson             ixela

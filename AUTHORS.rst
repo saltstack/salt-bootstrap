@@ -19,7 +19,7 @@ Christer Edwards            cedwards
 Dag Viggo Lokøen            dagvl                  dag.viggo@lokoen.org
 Dan Mick                    dmick                  dan.mick@inktank.com
 deployboy                   deployboy
-Diego Woitasen              diegows                diego.woitasen@vhgroup.net
+Diego Woitasen              diegows                diego@flugel.it
 Elias Probst                eliasp
 Erik Johnson                terminalmage           erik@saltstack.com
 Forrest Alvarez             gravyboat

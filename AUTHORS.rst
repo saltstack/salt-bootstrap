@@ -44,6 +44,7 @@ Matthew Garrett             cingeyedog             matt@clemson.edu
 Matthew Mead-Briggs         mattmb
 Matthew Willson             ixela
 Matthieu Guegan             mguegan
+Michael Scherer             mscherer
 Mike Carlson                m87carlson             mike@bayphoto.com
 Mike Place                  cachedout              mp@saltstack.com
 nevins-b                    nevins-b

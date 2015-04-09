@@ -1708,7 +1708,7 @@ install_ubuntu_deps() {
     apt-get update
 
     # Install Keys
-    __apt_get_install_noinput debian-keyring debian-archive-keyring && apt-get update
+    __apt_get_install_noinput debian-archive-keyring && apt-get update
 
     if [ "$DISTRO_MAJOR_VERSION" -gt 12 ] || ([ "$DISTRO_MAJOR_VERSION" -eq 12 ] && [ "$DISTRO_MINOR_VERSION" -eq 10 ]); then
         # Above Ubuntu 12.04 add-apt-repository is in a different package
@@ -1965,7 +1965,7 @@ install_debian_deps() {
     apt-get update
 
     # Install Keys
-    __apt_get_install_noinput debian-keyring debian-archive-keyring && apt-get update
+    __apt_get_install_noinput debian-archive-keyring && apt-get update
 
     # Install procps and pciutils which allows for Docker bootstraps. See #366#issuecomment-39666813
     __PACKAGES="procps pciutils"
@@ -2016,7 +2016,7 @@ install_debian_6_deps() {
     __apt_get_install_noinput wget
 
     # Install Keys
-    __apt_get_install_noinput debian-keyring debian-archive-keyring && apt-get update
+    __apt_get_install_noinput debian-archive-keyring && apt-get update
 
     # shellcheck disable=SC2086
     wget $_WGET_ARGS -q http://debian.saltstack.com/debian-salt-team-joehealy.gpg.key -O - | apt-key add - || return 1
@@ -2113,7 +2113,7 @@ install_debian_7_deps() {
     __apt_get_install_noinput wget
 
     # Install Keys
-    __apt_get_install_noinput debian-keyring debian-archive-keyring && apt-get update
+    __apt_get_install_noinput debian-archive-keyring && apt-get update
 
     # Debian Backports
     if [ "$(grep -R 'wheezy-backports' /etc/apt | grep -v "^#")" = "" ]; then
@@ -2173,7 +2173,7 @@ install_debian_8_deps() {
     __apt_get_install_noinput wget
 
     # Install Keys
-    __apt_get_install_noinput debian-keyring debian-archive-keyring && apt-get update
+    __apt_get_install_noinput debian-archive-keyring && apt-get update
 
     # Debian Backports
     if [ "$(grep -R 'jessie-backports' /etc/apt | grep -v "^#")" = "" ]; then
@@ -2229,7 +2229,7 @@ install_debian_git_deps() {
     apt-get update
 
     # Install Keys
-    __apt_get_install_noinput debian-keyring debian-archive-keyring && apt-get update
+    __apt_get_install_noinput debian-archive-keyring && apt-get update
 
     __apt_get_install_noinput lsb-release python python-pkg-resources python-crypto \
         python-jinja2 python-m2crypto python-yaml msgpack-python python-pip \

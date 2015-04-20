@@ -88,19 +88,19 @@ have ``fetch`` available though:
 
 If you have any SSL issues install ``ca_root_nssp``:
 
-..code:: console
+.. code:: console
 
    pkg install ca_root_nssp
 
 And either copy the certificates to the place where fetch can find them:
 
-..code:: console
+.. code:: console
 
    cp /usr/local/share/certs/ca-root-nss.crt /etc/ssl/cert.pem
 
 Or link them to the right place:
 
-..code:: console
+.. code:: console
 
    ln -s /usr/local/share/certs/ca-root-nss.crt /etc/ssl/cert.pem
 

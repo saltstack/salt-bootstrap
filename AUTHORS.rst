@@ -23,6 +23,7 @@ David J. Felix              DavidJFelix
 deployboy                   deployboy
 Diego Woitasen              diegows                diego@flugel.it
 Elias Probst                eliasp
+Erik Ankrom                 erikankrom
 Erik Johnson                terminalmage           erik@saltstack.com
 Forrest Alvarez             gravyboat
 Fred Reimer                 freimer                freimer@freimer.org

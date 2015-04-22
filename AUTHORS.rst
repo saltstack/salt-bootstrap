@@ -62,6 +62,7 @@ Ronald van Zantvoort        The-Loeki              ronald@pcextreme.nl
 Skyler Berg                 skylerberg             skylertheberg@gmail.com
 Tate Eskew                  tateeskew
 Thomas S. Hatch             thatch45               thatch45@saltstack.com
+Tony Narlock                tony
 Valentin Bud                valentinbud            valentin@databus.pro
 Vladimir Kozhukalov         kozhukalov
 Whit Morriss                whitmo                 whit@nocoast.us

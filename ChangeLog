@@ -8,6 +8,7 @@ Version 2015.xx.xx:
 	* Don't try to add the EPEL repo if it's already configured. Thanks Nitin Madhok(nmadhok).  
 	#576, #577
 	* Fix adding repositories in Linux Mint. Thanks Ronald van Zantvoort(The-Loeki). #532, #570.
+	* Add Debian Archive Automatic Signing Key. Thanks Erik Ankrom(erikankrom). #574
 
 Version 2015.03.15:
 	* Add multi-master support. Thanks Fred Reimer(freimer). #555

@@ -14,6 +14,7 @@ Ari Aosved                  devaos                 ari.aosved@gmail.com
 Boris Feld                  Lothiraldan
 bruce-one                   bruce-one
 C. R. Oldham                cro                    cr@saltstack.com
+Cam                         camereonsparr
 Chris Rebert                cvrebert               chris.rebert@hulu.com
 Christer Edwards            cedwards
 Dag Viggo Lokøen            dagvl                  dag.viggo@lokoen.org
@@ -39,8 +40,8 @@ Juan A. Moyano              wincus                 wincus.public@gmail.com
 Karl Grzeszczak             karlgrz
 Kenneth Wilke               KennethWilke
 Liu Xiaohui                 oreh                   herolxh@gmail.com
-markgaylard                 markgaylard
 Mark Lee                    malept
+markgaylard                 markgaylard
 Matt Black                  mafrosis
 Matthew Garrett             cingeyedog             matt@clemson.edu
 Matthew Mead-Briggs         mattmb

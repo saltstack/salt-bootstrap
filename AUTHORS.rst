@@ -52,6 +52,7 @@ Mike Carlson                m87carlson             mike@bayphoto.com
 Mike Place                  cachedout              mp@saltstack.com
 nevins-b                    nevins-b
 Niels Abspoel               aboe76
+Nitin Madhok                nmadhok                nmadhok@clemson.edu
 Paul Brian                  lifeisstillgood        paul@mikadosoftware.com
 Pavel Snagovsky             paha
 Pedro Algarvio              s0undt3ch              pedro@algarvio.me

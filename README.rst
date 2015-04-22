@@ -381,7 +381,9 @@ Please run the following commands and report their output when creating a ticket
 Testing in Vagrant
 ------------------
 You can use Vagrant_ to easily test changes on a clean machine. The ``Vagrantfile`` defaults to an 
-Ubuntu box. First, install Vagrant, then::
+Ubuntu box. First, install Vagrant, then:
+
+.. code:: console
 
     $ vagrant up
     $ vagrant ssh

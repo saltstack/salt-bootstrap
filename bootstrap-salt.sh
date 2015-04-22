@@ -1704,6 +1704,8 @@ install_ubuntu_deps() {
     if [ $_START_DAEMONS -eq $BS_FALSE ]; then
         echowarn "Not starting daemons on Debian based distributions is not working mostly because starting them is the default behaviour."
     fi
+    # No user interaction, libc6 restart services for example
+    export DEBIAN_FRONTEND=noninteractive
 
     apt-get update
 

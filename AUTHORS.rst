@@ -18,6 +18,7 @@ Chris Rebert                cvrebert               chris.rebert@hulu.com
 Christer Edwards            cedwards
 Dag Viggo Lokøen            dagvl                  dag.viggo@lokoen.org
 Dan Mick                    dmick                  dan.mick@inktank.com
+David J. Felix              DavidJFelix
 deployboy                   deployboy
 Diego Woitasen              diegows                diego@flugel.it
 Elias Probst                eliasp

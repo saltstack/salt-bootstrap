@@ -981,6 +981,10 @@ __ubuntu_derivatives_translation() {
             "elementary_os")
                 _major=$(echo "$DISTRO_VERSION" | sed 's/\.//g')
                 ;;
+            "linuxmint")
+                export LSB_ETC_LSB_RELEASE=/etc/upstream-release/lsb-release
+                _major=$(echo "$DISTRO_VERSION" | sed 's/^\([0-9]*\).*/\1/g')
+                ;;
             *)
                 _major=$(echo "$DISTRO_VERSION" | sed 's/^\([0-9]*\).*/\1/g')
                 ;;

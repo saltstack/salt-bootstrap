@@ -2024,6 +2024,11 @@ install_debian_6_deps() {
     # Install Keys
     __apt_get_install_noinput debian-archive-keyring && apt-get update
 
+    # Install Debian Archive Automatic Signing Key (6.0/squeeze), see #557
+    if [ -z "$(apt-key finger |grep '9FED 2BCB DCD2 9CDF 7626  78CB AED4 B06F 4730 41FA')"]; then
+        apt-key adv --keyserver keyserver.ubuntu.com --recv-keys AED4B06F473041FA || return 1
+    fi
+
     # shellcheck disable=SC2086
     wget $_WGET_ARGS -q http://debian.saltstack.com/debian-salt-team-joehealy.gpg.key -O - | apt-key add - || return 1
 
@@ -2121,6 +2126,11 @@ install_debian_7_deps() {
     # Install Keys
     __apt_get_install_noinput debian-archive-keyring && apt-get update
 
+    # Install Debian Archive Automatic Signing Key (7.0/wheezy), see #557
+    if [ -z "$(apt-key finger |grep 'A1BD 8E9D 78F7 FE5C 3E65  D8AF 8B48 AD62 4692 5553')"]; then
+        apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 8B48AD6246925553 || return 1
+    fi
+
     # Debian Backports
     if [ "$(grep -R 'wheezy-backports' /etc/apt | grep -v "^#")" = "" ]; then
         echo "deb http://http.debian.net/debian wheezy-backports main" >> \
@@ -2180,6 +2190,11 @@ install_debian_8_deps() {
 
     # Install Keys
     __apt_get_install_noinput debian-archive-keyring && apt-get update
+
+    # Debian Archive Automatic Signing Key (8/jessie), see #557
+    if [ -z "$(apt-key finger |grep '126C 0D24 BD8A 2942 CC7D  F8AC 7638 D044 2B90 D010')"]; then
+      apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 7638D0442B90D010 || return 1
+    fi
 
     # Debian Backports
     if [ "$(grep -R 'jessie-backports' /etc/apt | grep -v "^#")" = "" ]; then

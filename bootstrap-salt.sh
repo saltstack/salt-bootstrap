@@ -2680,10 +2680,8 @@ __install_saltstack_copr_zeromq_repository() {
 
 __install_saltstack_copr_salt_el5_repository() {
     if [ ! -s /etc/yum.repos.d/saltstack-salt-el5-epel-5.repo ]; then
-        yum -y install yum-priorities || return 1
         __fetch_url /etc/yum.repos.d/saltstack-salt-el5-epel-5.repo \
             "http://copr.fedoraproject.org/coprs/saltstack/salt-el5/repo/epel-5/saltstack-salt-el5-epel-5.repo" || return 1
-        grep -q priority /etc/yum.repos.d/saltstack-salt-el5-epel-5.repo || echo 'priority=1' >> /etc/yum.repos.d/saltstack-salt-el5-epel-5.repo
     fi
     return 0
 }

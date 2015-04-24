@@ -1744,6 +1744,7 @@ install_ubuntu_deps() {
         if [ "$_ENABLE_EXTERNAL_ZMQ_REPOS" -eq $BS_TRUE ]; then
             echoinfo "Installing ZMQ>=4/PyZMQ>=14 from Chris Lea's PPA repository"
             add-apt-repository -y ppa:chris-lea/zeromq || return 1
+            apt-get update
         fi
         __apt_get_install_noinput python-requests
         __PIP_PACKAGES=""

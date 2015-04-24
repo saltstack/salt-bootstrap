@@ -3,12 +3,6 @@ Version 2015.xx.xx:
 	+ Fix non grouping support in POSIX sed. Thanks Ronald van Zantvoort(The-Loeki).
 	* Add Debian 8 support. Thanks Matt Black(mafrosis)
 	* Improve Debian version parsing. Thanks Mark Lee(malept)
-	* Make sure CentOS 5 COPR repository takes priority over EPEL
-	* Make sure we disable user interaction on Ubuntu. Thanks Cam(cameronsparr). #578, #579
-	* Don't try to add the EPEL repo if it's already configured. Thanks Nitin Madhok(nmadhok).  
-	#576, #577
-	* Fix adding repositories in Linux Mint. Thanks Ronald van Zantvoort(The-Loeki). #532, #570.
-	* Add Debian Archive Automatic Signing Key. Thanks Erik Ankrom(erikankrom). #574
 
 Version 2015.03.15:
 	* Add multi-master support. Thanks Fred Reimer(freimer). #555

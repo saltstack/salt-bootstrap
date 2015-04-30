@@ -7,6 +7,8 @@ Version 2015.xx.xx:
 	* Hard code the Debian Squeeze backports to the DE mirror since the main repository is down.  
 	Thanks @panticz. #589.
 	* Only install git if not already installed. #560
+	* Fix openSUSE 13.2 where we need to pass --replaceflags. Thanks Roman Inflianskas(rominf).  
+	#504.
 
 Version 2015.03.15:
 	* Add multi-master support. Thanks Fred Reimer(freimer). #555

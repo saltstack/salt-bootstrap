@@ -2040,7 +2040,7 @@ _eof
 
     # Debian Backports
     if [ "$(grep -R 'squeeze-backports' /etc/apt | grep -v "^#")" = "" ]; then
-        echo "deb http://ftp.de.debian.org/debian-backports squeeze-backports main" >> \
+        echo "deb http://http.debian.net/debian-backports squeeze-backports main" >> \
             /etc/apt/sources.list.d/backports.list
     fi
 

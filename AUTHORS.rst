@@ -63,6 +63,7 @@ Pedro Paulo                 pedropaulovc
 ptonelli                    ptonelli
 Raymond Barbiero            visualphoenix
 Roberto Aguilar             rca                    roberto@baremetal.io
+Roman Inflianskas           rominf
 Ronald van Zantvoort        The-Loeki              ronald@pcextreme.nl
 Skyler Berg                 skylerberg             skylertheberg@gmail.com
 Tate Eskew                  tateeskew

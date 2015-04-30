@@ -2809,14 +2809,20 @@ install_centos_stable_post() {
 
 install_centos_git_deps() {
     install_centos_stable_deps || return 1
-    if ! git --version 2>&1 >/dev/null ; then
+    if [ "$(which git)" = "" ]; then
         # git not installed - need to install it
         if [ "$DISTRO_NAME_L" = "oracle_linux" ]; then
             # try both ways --enablerepo=X disables ALL OTHER REPOS!!!!
-            yum install -y git systemd-python || yum install -y git systemd-python --enablerepo=${_EPEL_REPO} || return 1
+            yum install -y git || yum install -y git --enablerepo=${_EPEL_REPO} || return 1
         else
-            yum install -y git systemd-python --enablerepo=${_EPEL_REPO} || return 1
+            yum install -y git --enablerepo=${_EPEL_REPO} || return 1
         fi
+    fi
+    if [ "$DISTRO_NAME_L" = "oracle_linux" ]; then
+        # try both ways --enablerepo=X disables ALL OTHER REPOS!!!!
+        yum install -y systemd-python || yum install -y systemd-python --enablerepo=${_EPEL_REPO} || return 1
+    else
+        yum install -y systemd-python --enablerepo=${_EPEL_REPO} || return 1
     fi
 
     __git_clone_and_checkout || return 1

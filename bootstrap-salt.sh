@@ -208,6 +208,7 @@ _SALT_MINION_ID="null"
 # __SIMPLIFY_VERSION is mostly used in Solaris based distributions
 __SIMPLIFY_VERSION=$BS_TRUE
 _LIBCLOUD_MIN_VERSION="0.14.0"
+_PY_REQUESTS_MIN_VERSION="2.4.3"
 _EXTRA_PACKAGES=""
 _HTTP_PROXY=""
 __SALT_GIT_CHECKOUT_DIR=${BS_SALT_GIT_CHECKOUT_DIR:-/tmp/git/salt}
@@ -771,7 +772,7 @@ __gather_linux_system_info() {
         n=$(echo "${rsource}" | sed -e 's/[_-]release$//' -e 's/[_-]version$//')
         shortname=$(echo "${n}" | tr '[:upper:]' '[:lower:]')
         if [ "$shortname" = "debian" ]; then
-            rv=$(__derive_debian_numeric_version `cat /etc/${rsource}`)
+            rv=$(__derive_debian_numeric_version "$(cat /etc/${rsource})")
         else
             rv=$( (grep VERSION "/etc/${rsource}"; cat "/etc/${rsource}") | grep '[0-9]' | sed -e 'q' )
         fi
@@ -1165,9 +1166,9 @@ __git_clone_and_checkout() {
 
     echodebug "Installed git version: $(git --version | awk '{ print $3 }')"
 
-    local __SALT_GIT_CHECKOUT_PARENT_DIR=$(dirname "${__SALT_GIT_CHECKOUT_DIR}" 2>/dev/null)
+    __SALT_GIT_CHECKOUT_PARENT_DIR=$(dirname "${__SALT_GIT_CHECKOUT_DIR}" 2>/dev/null)
     __SALT_GIT_CHECKOUT_PARENT_DIR="${__SALT_GIT_CHECKOUT_PARENT_DIR:-/tmp/git}"
-    local __SALT_CHECKOUT_REPONAME="$(basename "${__SALT_GIT_CHECKOUT_DIR}" 2>/dev/null)"
+    __SALT_CHECKOUT_REPONAME="$(basename "${__SALT_GIT_CHECKOUT_DIR}" 2>/dev/null)"
     __SALT_CHECKOUT_REPONAME="${__SALT_CHECKOUT_REPONAME:-salt}"
     [ -d "${__SALT_GIT_CHECKOUT_PARENT_DIR}" ] || mkdir "${__SALT_GIT_CHECKOUT_PARENT_DIR}"
     cd "${__SALT_GIT_CHECKOUT_PARENT_DIR}"
@@ -1751,8 +1752,8 @@ install_ubuntu_deps() {
     else
         check_pip_allowed "You need to allow pip based installations (-P) in order to install the python package 'requests'"
         __apt_get_install_noinput python-setuptools python-pip
-        __PIP_PACKAGES="requests"
-        pip install requests
+        # shellcheck disable=SC2089
+        __PIP_PACKAGES="'requests>=$_PY_REQUESTS_MIN_VERSION'"
     fi
 
     # Additionally install procps and pciutils which allows for Docker boostraps. See 366#issuecomment-39666813
@@ -1984,7 +1985,8 @@ install_debian_deps() {
         check_pip_allowed "You need to allow pip based installations (-P) in order to install the python 'requests' package"
         # Additionally install procps and pciutils which allows for Docker boostraps. See 366#issuecomment-39666813
         __PACKAGES="${__PACKAGES} python-pip"
-        __PIP_PACKAGES="${__PIP_PACKAGES} requests"
+        # shellcheck disable=SC2089
+        __PIP_PACKAGES="${__PIP_PACKAGES} 'requests>=$_PY_REQUESTS_MIN_VERSION'"
     fi
 
     # shellcheck disable=SC2086
@@ -2073,7 +2075,7 @@ _eof
 
     # Debian Backports
     if [ "$(grep -R 'squeeze-backports' /etc/apt | grep -v "^#")" = "" ]; then
-        echo "deb http://http.debian.net/debian-backports squeeze-backports main" >> \
+        echo "deb http://ftp.de.debian.org/debian-backports squeeze-backports main" >> \
             /etc/apt/sources.list.d/backports.list
     fi
 
@@ -2086,15 +2088,16 @@ _eof
 
     # Python requests is available through Squeeze backports
     # Additionally install procps and pciutils which allows for Docker boostraps. See 366#issuecomment-39666813
-    __apt_get_install_noinput python-requests python-pip procps pciutils
+    __apt_get_install_noinput python-pip procps pciutils
 
     # Need python-apt for managing packages via Salt
     __apt_get_install_noinput python-apt
 
     if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
-        check_pip_allowed "You need to allow pip based installations (-P) in order to install apache-libcloud"
+        check_pip_allowed "You need to allow pip based installations (-P) in order to install apache-libcloud/requests"
         __apt_get_install_noinput python-pip
-        pip install -U "apache-libcloud>=$_LIBCLOUD_MIN_VERSION"
+        pip install -U "apache-libcloud>=$_LIBCLOUD_MIN_VERSION 'requests>=$_PY_REQUESTS_MIN_VERSION'"
+
     fi
 
     if [ "$_UPGRADE_SYS" -eq $BS_TRUE ]; then
@@ -2148,18 +2151,18 @@ install_debian_7_deps() {
     wget $_WGET_ARGS -q http://debian.saltstack.com/debian-salt-team-joehealy.gpg.key -O - | apt-key add - || return 1
 
     apt-get update || return 1
-    __apt_get_install_noinput -t wheezy-backports libzmq3 libzmq3-dev python-zmq python-requests python-apt || return 1
+    __apt_get_install_noinput -t wheezy-backports libzmq3 libzmq3-dev python-zmq python-apt || return 1
     # Additionally install procps and pciutils which allows for Docker boostraps. See 366#issuecomment-39666813
     __PACKAGES="procps pciutils"
     # shellcheck disable=SC2086
     __apt_get_install_noinput ${__PACKAGES} || return 1
 
     if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
-        check_pip_allowed "You need to allow pip based installations (-P) in order to install apache-libcloud"
+        check_pip_allowed "You need to allow pip based installations (-P) in order to install apache-libcloud/requests"
         __PACKAGES="build-essential python-dev python-pip"
         # shellcheck disable=SC2086
         __apt_get_install_noinput ${__PACKAGES} || return 1
-        pip install -U "apache-libcloud>=$_LIBCLOUD_MIN_VERSION"
+        pip install -U "'apache-libcloud>=$_LIBCLOUD_MIN_VERSION' 'requests>=$_PY_REQUESTS_MIN_VERSION'"
     fi
 
     if [ "$_UPGRADE_SYS" -eq $BS_TRUE ]; then
@@ -2253,9 +2256,12 @@ install_debian_git_deps() {
     # Install Keys
     __apt_get_install_noinput debian-archive-keyring && apt-get update
 
+    if [ "$(which git)" = "" ]; then
+        __apt_get_install_noinput git || return 1
+    fi
+
     __apt_get_install_noinput lsb-release python python-pkg-resources python-crypto \
-        python-jinja2 python-m2crypto python-yaml msgpack-python python-pip \
-        git || return 1
+        python-jinja2 python-m2crypto python-yaml msgpack-python python-pip || return 1
 
     __git_clone_and_checkout || return 1
 
@@ -2287,8 +2293,13 @@ install_debian_6_git_deps() {
     install_debian_6_deps || return 1
     if [ "$_PIP_ALLOWED" -eq $BS_TRUE ]; then
         easy_install -U Jinja2 || return 1
+
+        if [ "$(which git)" = "" ]; then
+            __apt_get_install_noinput git || return 1
+        fi
+
         __apt_get_install_noinput lsb-release python python-pkg-resources python-crypto \
-            python-m2crypto python-yaml msgpack-python python-pip git || return 1
+            python-m2crypto python-yaml msgpack-python python-pip || return 1
 
         __git_clone_and_checkout || return 1
 
@@ -2542,7 +2553,11 @@ install_fedora_stable_post() {
 install_fedora_git_deps() {
     install_fedora_deps || return 1
 
-    yum install -y git systemd-python || return 1
+    if [ "$(which git)" = "" ]; then
+        yum install -y git || return 1
+    fi
+
+    yum install -y systemd-python || return 1
 
     __git_clone_and_checkout || return 1
 
@@ -2809,11 +2824,20 @@ install_centos_stable_post() {
 
 install_centos_git_deps() {
     install_centos_stable_deps || return 1
+    if [ "$(which git)" = "" ]; then
+        # git not installed - need to install it
+        if [ "$DISTRO_NAME_L" = "oracle_linux" ]; then
+            # try both ways --enablerepo=X disables ALL OTHER REPOS!!!!
+            yum install -y git || yum install -y git --enablerepo=${_EPEL_REPO} || return 1
+        else
+            yum install -y git --enablerepo=${_EPEL_REPO} || return 1
+        fi
+    fi
     if [ "$DISTRO_NAME_L" = "oracle_linux" ]; then
         # try both ways --enablerepo=X disables ALL OTHER REPOS!!!!
-        yum install -y git systemd-python || yum install -y git systemd-python --enablerepo=${_EPEL_REPO} || return 1
+        yum install -y systemd-python || yum install -y systemd-python --enablerepo=${_EPEL_REPO} || return 1
     else
-        yum install -y git systemd-python --enablerepo=${_EPEL_REPO} || return 1
+        yum install -y systemd-python --enablerepo=${_EPEL_REPO} || return 1
     fi
 
     __git_clone_and_checkout || return 1
@@ -3439,7 +3463,10 @@ install_amazon_linux_ami_deps() {
 
 install_amazon_linux_ami_git_deps() {
     install_amazon_linux_ami_deps || return 1
-    yum -y install git --enablerepo=${_EPEL_REPO} || return 1
+
+    if [ "$(which git)" = "" ]; then
+        yum -y install git --enablerepo=${_EPEL_REPO} || return 1
+    fi
 
     __git_clone_and_checkout || return 1
 
@@ -3528,8 +3555,11 @@ install_arch_linux_git_deps() {
     install_arch_linux_stable_deps
 
     # Don't fail if un-installing python2-distribute threw an error
+    if [ "$(which git)" = "" ]; then
+        pacman -Sy --noconfirm --needed git  || return 1
+    fi
     pacman -R --noconfirm python2-distribute
-    pacman -Sy --noconfirm --needed git python2-crypto python2-setuptools python2-jinja \
+    pacman -Sy --noconfirm --needed python2-crypto python2-setuptools python2-jinja \
         python2-m2crypto python2-markupsafe python2-msgpack python2-psutil python2-yaml \
         python2-pyzmq zeromq python2-requests python2-systemd || return 1
 
@@ -3782,7 +3812,11 @@ config_freebsd_salt() {
 install_freebsd_git_deps() {
     install_freebsd_9_stable_deps || return 1
 
-    /usr/local/sbin/pkg install -y git www/py-requests || return 1
+    if [ "$(which git)" = "" ]; then
+        /usr/local/sbin/pkg install -y git || return 1
+    fi
+
+    /usr/local/sbin/pkg install -y www/py-requests || return 1
 
     __git_clone_and_checkout || return 1
 
@@ -3968,7 +4002,10 @@ install_smartos_deps() {
 
 install_smartos_git_deps() {
     install_smartos_deps || return 1
-    pkgin -y install scmgit || return 1
+
+    if [ "$(which git)" = "" ]; then
+        pkgin -y install scmgit || return 1
+    fi
 
     __git_clone_and_checkout || return 1
     # Let's trigger config_salt()
@@ -4075,18 +4112,52 @@ install_smartos_restart_daemons() {
 #
 #    openSUSE Install Functions.
 #
+
+__ZYPPER_REQUIRES_REPLACE_FILES=-1
+
+__version_lte() {
+    if [ "$(which python)" = "" ]; then
+        zypper zypper --non-interactive install --replacefiles --auto-agree-with-licenses python || \
+             zypper zypper --non-interactive install --auto-agree-with-licenses python || return 1
+    fi
+
+    if [ "$(python -c 'import sys; V1=tuple([int(i) for i in sys.argv[1].split(".")]); V2=tuple([int(i) for i in sys.argv[2].split(".")]); print V1>=V2' "$1" "$2")" = "True" ]; then
+        __ZYPPER_REQUIRES_REPLACE_FILES=${BS_TRUE}
+    else
+        __ZYPPER_REQUIRES_REPLACE_FILES=${BS_FALSE}
+    fi
+}
+
+__zypper() {
+    zypper --non-interactive "${@}"; return $?
+}
+
+__zypper_install() {
+    if [ "${__ZYPPER_REQUIRES_REPLACE_FILES}" = "-1" ]; then
+        __version_lte "1.10.4" "$(zypper --version | awk '{ print $2 }')"
+    fi
+    if [ "${__ZYPPER_REQUIRES_REPLACE_FILES}" = "${BS_TRUE}" ]; then
+        # In case of file conflicts replace old files.
+        # Option present in zypper 1.10.4 and newer:
+        # https://github.com/openSUSE/zypper/blob/95655728d26d6d5aef7796b675f4cc69bc0c05c0/package/zypper.changes#L253
+        __zypper install --auto-agree-with-licenses --replacefiles "${@}"; return $?
+    else
+        __zypper install --auto-agree-with-licenses "${@}"; return $?
+    fi
+}
+
 install_opensuse_stable_deps() {
     DISTRO_REPO="openSUSE_${DISTRO_MAJOR_VERSION}.${DISTRO_MINOR_VERSION}"
 
     # Is the repository already known
-    zypper repos | grep devel_languages_python >/dev/null 2>&1
+    __zypper repos | grep devel_languages_python >/dev/null 2>&1
     if [ $? -eq 1 ]; then
         # zypper does not yet know nothing about devel_languages_python
-        zypper --non-interactive addrepo --refresh \
+        __zypper addrepo --refresh \
             "http://download.opensuse.org/repositories/devel:/languages:/python/${DISTRO_REPO}/devel:languages:python.repo" || return 1
     fi
 
-    zypper --gpg-auto-import-keys --non-interactive refresh
+    __zypper --gpg-auto-import-keys refresh
     if [ $? -ne 0 ] && [ $? -ne 4 ]; then
         # If the exit code is not 0, and it's not 4 (failed to update a
         # repository) return a failure. Otherwise continue.
@@ -4095,11 +4166,11 @@ install_opensuse_stable_deps() {
 
     if [ "$DISTRO_MAJOR_VERSION" -eq 12 ] && [ "$DISTRO_MINOR_VERSION" -eq 3 ]; then
         # Because patterns-openSUSE-minimal_base-conflicts conflicts with python, lets remove the first one
-        zypper --non-interactive remove patterns-openSUSE-minimal_base-conflicts
+        __zypper remove patterns-openSUSE-minimal_base-conflicts
     fi
 
     if [ "$_UPGRADE_SYS" -eq $BS_TRUE ]; then
-        zypper --gpg-auto-import-keys --non-interactive update || return 1
+        __zypper --gpg-auto-import-keys update || return 1
     fi
 
     # Salt needs python-zypp installed in order to use the zypper module
@@ -4112,12 +4183,12 @@ install_opensuse_stable_deps() {
     fi
 
     # shellcheck disable=SC2086
-    zypper --non-interactive install --auto-agree-with-licenses ${__PACKAGES} || return 1
+    __zypper_install ${__PACKAGES} || return 1
 
     if [ "${_EXTRA_PACKAGES}" != "" ]; then
         echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
         # shellcheck disable=SC2086
-        zypper --non-interactive install --auto-agree-with-licenses ${_EXTRA_PACKAGES} || return 1
+        __zypper_install ${_EXTRA_PACKAGES} || return 1
     fi
 
     return 0
@@ -4125,7 +4196,12 @@ install_opensuse_stable_deps() {
 
 install_opensuse_git_deps() {
     install_opensuse_stable_deps || return 1
-    zypper --non-interactive install --auto-agree-with-licenses git patch || return 1
+
+    if [ "$(which git)" = "" ]; then
+        __zypper_install git  || return 1
+    fi
+
+    __zypper_install patch || return 1
 
     __git_clone_and_checkout || return 1
 
@@ -4156,7 +4232,7 @@ install_opensuse_stable() {
         __PACKAGES="${__PACKAGES} salt-syndic"
     fi
     # shellcheck disable=SC2086
-    zypper --non-interactive install --auto-agree-with-licenses $__PACKAGES || return 1
+    __zypper_install $__PACKAGES || return 1
     return 0
 }
 
@@ -4273,17 +4349,17 @@ install_suse_11_stable_deps() {
     DISTRO_REPO="SLE_${DISTRO_MAJOR_VERSION}${DISTRO_PATCHLEVEL}"
 
     # Is the repository already known
-    zypper repos | grep devel_languages_python >/dev/null 2>&1
+    __zypper repos | grep devel_languages_python >/dev/null 2>&1
     if [ $? -eq 1 ]; then
         # zypper does not yet know nothing about devel_languages_python
-        zypper --non-interactive addrepo --refresh \
+        __zypper addrepo --refresh \
             "http://download.opensuse.org/repositories/devel:/languages:/python/${DISTRO_REPO}/devel:languages:python.repo" || return 1
     fi
 
-    zypper --gpg-auto-import-keys --non-interactive refresh || return 1
+    __zypper --gpg-auto-import-keys refresh || return 1
 
     if [ "$_UPGRADE_SYS" -eq $BS_TRUE ]; then
-        zypper --gpg-auto-import-keys --non-interactive update || return 1
+        __zypper --gpg-auto-import-keys update || return 1
     fi
 
     # Salt needs python-zypp installed in order to use the zypper module
@@ -4306,10 +4382,9 @@ install_suse_11_stable_deps() {
     # SLES 11 SP3 ships with both python-M2Crypto-0.22.* and python-m2crypto-0.21 and we will be asked which
     # we want to install, even with --non-interactive.
     # Let's try to install the higher version first and then the lower one in case of failure
-    zypper --non-interactive install --auto-agree-with-licenses 'python-M2Crypto>=0.22' || \
-        zypper --non-interactive install --auto-agree-with-licenses 'python-M2Crypto>=0.21' || return 1
+    __zypper_install 'python-M2Crypto>=0.22' || __zypper_install 'python-M2Crypto>=0.21' || return 1
     # shellcheck disable=SC2086,SC2090
-    zypper --non-interactive install --auto-agree-with-licenses ${__PACKAGES} || return 1
+    __zypper_install ${__PACKAGES} || return 1
 
     if [ "$SUSE_PATCHLEVEL" -eq 1 ]; then
         # There's no python-PyYaml in SP1, let's install it using pip
@@ -4348,7 +4423,7 @@ install_suse_11_stable_deps() {
     if [ "${_EXTRA_PACKAGES}" != "" ]; then
         echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
         # shellcheck disable=SC2086
-        zypper --non-interactive install --auto-agree-with-licenses ${_EXTRA_PACKAGES} || return 1
+        __zypper_install ${_EXTRA_PACKAGES} || return 1
     fi
 
     return 0
@@ -4356,7 +4431,10 @@ install_suse_11_stable_deps() {
 
 install_suse_11_git_deps() {
     install_suse_11_stable_deps || return 1
-    zypper --non-interactive install --auto-agree-with-licenses git || return 1
+
+    if [ "$(which git)" = "" ]; then
+        __zypper_install git  || return 1
+    fi
 
     __git_clone_and_checkout || return 1
 

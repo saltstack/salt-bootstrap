@@ -12,6 +12,7 @@ Alex Van't Hof              alexvh
 Angelo Gründler             plueschopath           angelo.gruendler@w1r3.net
 Ari Aosved                  devaos                 ari.aosved@gmail.com
 Boris Feld                  Lothiraldan
+Brad Thurber                bradthurber
 bruce-one                   bruce-one
 C. R. Oldham                cro                    cr@saltstack.com
 Cam                         camereonsparr
@@ -54,6 +55,7 @@ Mike Place                  cachedout              mp@saltstack.com
 nevins-b                    nevins-b
 Niels Abspoel               aboe76
 Nitin Madhok                nmadhok                nmadhok@clemson.edu
+panticz                     panticz
 Paul Brian                  lifeisstillgood        paul@mikadosoftware.com
 Pavel Snagovsky             paha
 Pedro Algarvio              s0undt3ch              pedro@algarvio.me
@@ -61,6 +63,7 @@ Pedro Paulo                 pedropaulovc
 ptonelli                    ptonelli
 Raymond Barbiero            visualphoenix
 Roberto Aguilar             rca                    roberto@baremetal.io
+Roman Inflianskas           rominf                 infroma@gmail.com
 Ronald van Zantvoort        The-Loeki              ronald@pcextreme.nl
 Skyler Berg                 skylerberg             skylertheberg@gmail.com
 Tate Eskew                  tateeskew
@@ -69,4 +72,5 @@ Tony Narlock                tony
 Valentin Bud                valentinbud            valentin@databus.pro
 Vladimir Kozhukalov         kozhukalov
 Whit Morriss                whitmo                 whit@nocoast.us
+Wout                        wfhg
 ==========================  =====================  ============================

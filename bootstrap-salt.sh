@@ -2253,9 +2253,12 @@ install_debian_git_deps() {
     # Install Keys
     __apt_get_install_noinput debian-archive-keyring && apt-get update
 
+    if [ "$(which git)" = "" ]; then
+        __apt_get_install_noinput git || return 1
+    fi
+
     __apt_get_install_noinput lsb-release python python-pkg-resources python-crypto \
-        python-jinja2 python-m2crypto python-yaml msgpack-python python-pip \
-        git || return 1
+        python-jinja2 python-m2crypto python-yaml msgpack-python python-pip || return 1
 
     __git_clone_and_checkout || return 1
 
@@ -2287,8 +2290,13 @@ install_debian_6_git_deps() {
     install_debian_6_deps || return 1
     if [ "$_PIP_ALLOWED" -eq $BS_TRUE ]; then
         easy_install -U Jinja2 || return 1
+
+        if [ "$(which git)" = "" ]; then
+            __apt_get_install_noinput git || return 1
+        fi
+
         __apt_get_install_noinput lsb-release python python-pkg-resources python-crypto \
-            python-m2crypto python-yaml msgpack-python python-pip git || return 1
+            python-m2crypto python-yaml msgpack-python python-pip || return 1
 
         __git_clone_and_checkout || return 1
 
@@ -2542,7 +2550,11 @@ install_fedora_stable_post() {
 install_fedora_git_deps() {
     install_fedora_deps || return 1
 
-    yum install -y git systemd-python || return 1
+    if [ "$(which git)" = "" ]; then
+        yum install -y git || return 1
+    fi
+
+    yum install -y systemd-python || return 1
 
     __git_clone_and_checkout || return 1
 
@@ -2809,11 +2821,20 @@ install_centos_stable_post() {
 
 install_centos_git_deps() {
     install_centos_stable_deps || return 1
+    if [ "$(which git)" = "" ]; then
+        # git not installed - need to install it
+        if [ "$DISTRO_NAME_L" = "oracle_linux" ]; then
+            # try both ways --enablerepo=X disables ALL OTHER REPOS!!!!
+            yum install -y git || yum install -y git --enablerepo=${_EPEL_REPO} || return 1
+        else
+            yum install -y git --enablerepo=${_EPEL_REPO} || return 1
+        fi
+    fi
     if [ "$DISTRO_NAME_L" = "oracle_linux" ]; then
         # try both ways --enablerepo=X disables ALL OTHER REPOS!!!!
-        yum install -y git systemd-python || yum install -y git systemd-python --enablerepo=${_EPEL_REPO} || return 1
+        yum install -y systemd-python || yum install -y systemd-python --enablerepo=${_EPEL_REPO} || return 1
     else
-        yum install -y git systemd-python --enablerepo=${_EPEL_REPO} || return 1
+        yum install -y systemd-python --enablerepo=${_EPEL_REPO} || return 1
     fi
 
     __git_clone_and_checkout || return 1
@@ -3439,7 +3460,10 @@ install_amazon_linux_ami_deps() {
 
 install_amazon_linux_ami_git_deps() {
     install_amazon_linux_ami_deps || return 1
-    yum -y install git --enablerepo=${_EPEL_REPO} || return 1
+
+    if [ "$(which git)" = "" ]; then
+        yum -y install git --enablerepo=${_EPEL_REPO} || return 1
+    fi
 
     __git_clone_and_checkout || return 1
 
@@ -3528,8 +3552,11 @@ install_arch_linux_git_deps() {
     install_arch_linux_stable_deps
 
     # Don't fail if un-installing python2-distribute threw an error
+    if [ "$(which git)" = "" ]; then
+        pacman -Sy --noconfirm --needed git  || return 1
+    fi
     pacman -R --noconfirm python2-distribute
-    pacman -Sy --noconfirm --needed git python2-crypto python2-setuptools python2-jinja \
+    pacman -Sy --noconfirm --needed python2-crypto python2-setuptools python2-jinja \
         python2-m2crypto python2-markupsafe python2-msgpack python2-psutil python2-yaml \
         python2-pyzmq zeromq python2-requests python2-systemd || return 1
 
@@ -3782,7 +3809,11 @@ config_freebsd_salt() {
 install_freebsd_git_deps() {
     install_freebsd_9_stable_deps || return 1
 
-    /usr/local/sbin/pkg install -y git www/py-requests || return 1
+    if [ "$(which git)" = "" ]; then
+        /usr/local/sbin/pkg install -y git || return 1
+    fi
+
+    /usr/local/sbin/pkg install -y www/py-requests || return 1
 
     __git_clone_and_checkout || return 1
 
@@ -3968,7 +3999,10 @@ install_smartos_deps() {
 
 install_smartos_git_deps() {
     install_smartos_deps || return 1
-    pkgin -y install scmgit || return 1
+
+    if [ "$(which git)" = "" ]; then
+        pkgin -y install scmgit || return 1
+    fi
 
     __git_clone_and_checkout || return 1
     # Let's trigger config_salt()
@@ -4125,7 +4159,12 @@ install_opensuse_stable_deps() {
 
 install_opensuse_git_deps() {
     install_opensuse_stable_deps || return 1
-    zypper --non-interactive install --auto-agree-with-licenses git patch || return 1
+
+    if [ "$(which git)" = "" ]; then
+        zypper --non-interactive install --auto-agree-with-licenses git  || return 1
+    fi
+
+    zypper --non-interactive install --auto-agree-with-licenses patch || return 1
 
     __git_clone_and_checkout || return 1
 
@@ -4356,7 +4395,10 @@ install_suse_11_stable_deps() {
 
 install_suse_11_git_deps() {
     install_suse_11_stable_deps || return 1
-    zypper --non-interactive install --auto-agree-with-licenses git || return 1
+
+    if [ "$(which git)" = "" ]; then
+        zypper --non-interactive install --auto-agree-with-licenses git  || return 1
+    fi
 
     __git_clone_and_checkout || return 1
 

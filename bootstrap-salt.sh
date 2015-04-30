@@ -772,7 +772,7 @@ __gather_linux_system_info() {
         n=$(echo "${rsource}" | sed -e 's/[_-]release$//' -e 's/[_-]version$//')
         shortname=$(echo "${n}" | tr '[:upper:]' '[:lower:]')
         if [ "$shortname" = "debian" ]; then
-            rv=$(__derive_debian_numeric_version `cat /etc/${rsource}`)
+            rv=$(__derive_debian_numeric_version "$(cat /etc/${rsource})")
         else
             rv=$( (grep VERSION "/etc/${rsource}"; cat "/etc/${rsource}") | grep '[0-9]' | sed -e 'q' )
         fi
@@ -1166,9 +1166,9 @@ __git_clone_and_checkout() {
 
     echodebug "Installed git version: $(git --version | awk '{ print $3 }')"
 
-    local __SALT_GIT_CHECKOUT_PARENT_DIR=$(dirname "${__SALT_GIT_CHECKOUT_DIR}" 2>/dev/null)
+    __SALT_GIT_CHECKOUT_PARENT_DIR=$(dirname "${__SALT_GIT_CHECKOUT_DIR}" 2>/dev/null)
     __SALT_GIT_CHECKOUT_PARENT_DIR="${__SALT_GIT_CHECKOUT_PARENT_DIR:-/tmp/git}"
-    local __SALT_CHECKOUT_REPONAME="$(basename "${__SALT_GIT_CHECKOUT_DIR}" 2>/dev/null)"
+    __SALT_CHECKOUT_REPONAME="$(basename "${__SALT_GIT_CHECKOUT_DIR}" 2>/dev/null)"
     __SALT_CHECKOUT_REPONAME="${__SALT_CHECKOUT_REPONAME:-salt}"
     [ -d "${__SALT_GIT_CHECKOUT_PARENT_DIR}" ] || mkdir "${__SALT_GIT_CHECKOUT_PARENT_DIR}"
     cd "${__SALT_GIT_CHECKOUT_PARENT_DIR}"
@@ -1752,6 +1752,7 @@ install_ubuntu_deps() {
     else
         check_pip_allowed "You need to allow pip based installations (-P) in order to install the python package 'requests'"
         __apt_get_install_noinput python-setuptools python-pip
+        # shellcheck disable=SC2089
         __PIP_PACKAGES="'requests>=$_PY_REQUESTS_MIN_VERSION'"
     fi
 
@@ -1984,6 +1985,7 @@ install_debian_deps() {
         check_pip_allowed "You need to allow pip based installations (-P) in order to install the python 'requests' package"
         # Additionally install procps and pciutils which allows for Docker boostraps. See 366#issuecomment-39666813
         __PACKAGES="${__PACKAGES} python-pip"
+        # shellcheck disable=SC2089
         __PIP_PACKAGES="${__PIP_PACKAGES} 'requests>=$_PY_REQUESTS_MIN_VERSION'"
     fi
 

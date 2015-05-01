@@ -4400,7 +4400,7 @@ install_opensuse_git_post() {
         [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
 
         if [ -f /bin/systemctl ]; then
-            if [ "${DISTRO_MAJOR_VERSION}" -gt 12 ]; then
+            if [ "${DISTRO_MAJOR_VERSION}" -gt 13 ] || ([ "${DISTRO_MAJOR_VERSION}" -eq 13 ] && [ "${DISTRO_MINOR_VERSION}" -ge 2 ]); then
                 copyfile "${__SALT_GIT_CHECKOUT_DIR}/pkg/salt-${fname}.service" "/usr/lib/systemd/system/salt-${fname}.service"
             else
                 copyfile "${__SALT_GIT_CHECKOUT_DIR}/pkg/salt-${fname}.service" "/lib/systemd/system/salt-${fname}.service"

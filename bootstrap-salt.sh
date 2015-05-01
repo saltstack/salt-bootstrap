@@ -2892,11 +2892,13 @@ install_centos_git_deps() {
             yum install -y git --enablerepo=${_EPEL_REPO} || return 1
         fi
     fi
-    if [ "$DISTRO_NAME_L" = "oracle_linux" ]; then
-        # try both ways --enablerepo=X disables ALL OTHER REPOS!!!!
-        yum install -y systemd-python || yum install -y systemd-python --enablerepo=${_EPEL_REPO} || return 1
-    else
-        yum install -y systemd-python --enablerepo=${_EPEL_REPO} || return 1
+
+    if [ "$DISTRO_MAJOR_VERSION" -gt 6 ]; then
+        if [ "$DISTRO_NAME_L" != "oracle_linux" ]; then
+            yum install -y systemd-python || yum install -y systemd-python --enablerepo=${_EPEL_REPO} || return 1
+        else
+            yum install -y systemd-python --enablerepo=${_EPEL_REPO} || return 1
+        fi
     fi
 
     __git_clone_and_checkout || return 1

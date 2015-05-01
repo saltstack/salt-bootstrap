@@ -2169,12 +2169,17 @@ install_debian_7_deps() {
     # shellcheck disable=SC2086
     __apt_get_install_noinput ${__PACKAGES} || return 1
 
+
+    check_pip_allowed "You need to allow pip based installations (-P) in order to install requests"
+    __PACKAGES="build-essential python-dev python-pip"
+    # shellcheck disable=SC2086
+    __apt_get_install_noinput ${__PACKAGES} || return 1
+    pip install -U "'requests>=$_PY_REQUESTS_MIN_VERSION'"
+
+
     if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
-        check_pip_allowed "You need to allow pip based installations (-P) in order to install apache-libcloud/requests"
-        __PACKAGES="build-essential python-dev python-pip"
-        # shellcheck disable=SC2086
-        __apt_get_install_noinput ${__PACKAGES} || return 1
-        pip install -U "'apache-libcloud>=$_LIBCLOUD_MIN_VERSION' 'requests>=$_PY_REQUESTS_MIN_VERSION'"
+        check_pip_allowed "You need to allow pip based installations (-P) in order to install apache-libcloud"
+        pip install -U "'apache-libcloud>=$_LIBCLOUD_MIN_VERSION'"
     fi
 
     if [ "$_UPGRADE_SYS" -eq $BS_TRUE ]; then

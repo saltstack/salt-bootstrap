@@ -2750,7 +2750,7 @@ __install_saltstack_copr_salt_repository() {
     __REPO_FILENAME="saltstack-salt-${__REPOTYPE}-${DISTRO_MAJOR_VERSION}.repo"
 
     if [ ! -s "/etc/yum.repos.d/${__REPO_FILENAME}" ]; then
-        __fetch_url /etc/yum.repos.d/${__REPO_FILENAME} \
+        __fetch_url "/etc/yum.repos.d/${__REPO_FILENAME}" \
             "http://copr.fedoraproject.org/coprs/saltstack/salt/repo/${__REPOTYPE}-${DISTRO_MAJOR_VERSION}/${__REPO_FILENAME}" || return 1
     fi
     return 0

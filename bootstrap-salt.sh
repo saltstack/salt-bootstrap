@@ -1821,6 +1821,18 @@ install_ubuntu_git_deps() {
 
     __git_clone_and_checkout || return 1
 
+    if [ -f "${__SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" ]; then
+        # We're on the develop branch, install whichever tornado is on the requirements file
+        __REQUIRED_TORNADO="$(grep tornado "${__SALT_GIT_CHECKOUT_DIR}/requirements/base.txt")"
+        if [ "${__REQUIRED_TORNADO}" != "" ]; then
+            check_pip_allowed "You need to allow pip based installations (-P) in order to install the python package '${__REQUIRED_TORNADO}'"
+            if [ "$(which pip)" = "" ]; then
+                __apt_get_install_noinput python-setuptools python-pip
+            fi
+            pip install -U "'${__REQUIRED_TORNADO}'"
+        fi
+    fi
+
     # Let's trigger config_salt()
     if [ "$_TEMP_CONFIG_DIR" = "null" ]; then
         _TEMP_CONFIG_DIR="${__SALT_GIT_CHECKOUT_DIR}/conf/"
@@ -2265,6 +2277,15 @@ install_debian_git_deps() {
 
     __git_clone_and_checkout || return 1
 
+    if [ -f "${__SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" ]; then
+        # We're on the develop branch, install whichever tornado is on the requirements file
+        __REQUIRED_TORNADO="$(grep tornado "${__SALT_GIT_CHECKOUT_DIR}/requirements/base.txt")"
+        if [ "${__REQUIRED_TORNADO}" != "" ]; then
+            check_pip_allowed "You need to allow pip based installations (-P) in order to install the python package '${__REQUIRED_TORNADO}'"
+            pip install -U "'${__REQUIRED_TORNADO}'"
+        fi
+    fi
+
     # Let's trigger config_salt()
     if [ "$_TEMP_CONFIG_DIR" = "null" ]; then
         _TEMP_CONFIG_DIR="${__SALT_GIT_CHECKOUT_DIR}/conf/"
@@ -2498,6 +2519,8 @@ install_fedora_deps() {
         __install_saltstack_copr_zeromq_repository || return 1
     fi
 
+    __install_saltstack_copr_salt_repository || return 1
+
     __PACKAGES="yum-utils PyYAML libyaml m2crypto python-crypto python-jinja2 python-msgpack python-zmq python-requests"
 
     if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
@@ -2560,6 +2583,14 @@ install_fedora_git_deps() {
     yum install -y systemd-python || return 1
 
     __git_clone_and_checkout || return 1
+
+    if [ -f "${__SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" ]; then
+        # We're on the develop branch, install whichever tornado is on the requirements file
+        __REQUIRED_TORNADO="$(grep tornado "${__SALT_GIT_CHECKOUT_DIR}/requirements/base.txt")"
+        if [ "${__REQUIRED_TORNADO}" != "" ]; then
+            yum install -y python-tornado
+        fi
+    fi
 
     # Let's trigger config_salt()
     if [ "$_TEMP_CONFIG_DIR" = "null" ]; then
@@ -2689,7 +2720,7 @@ __install_saltstack_copr_zeromq_repository() {
             __REPOTYPE="epel"
         fi
         __fetch_url /etc/yum.repos.d/saltstack-zeromq4.repo \
-                         "http://copr.fedoraproject.org/coprs/saltstack/zeromq4/repo/${__REPOTYPE}-${DISTRO_MAJOR_VERSION}/saltstack-zeromq4-${__REPOTYPE}-${DISTRO_MAJOR_VERSION}.repo" || return 1
+            "http://copr.fedoraproject.org/coprs/saltstack/zeromq4/repo/${__REPOTYPE}-${DISTRO_MAJOR_VERSION}/saltstack-zeromq4-${__REPOTYPE}-${DISTRO_MAJOR_VERSION}.repo" || return 1
     fi
     return 0
 }
@@ -2702,15 +2733,43 @@ __install_saltstack_copr_salt_el5_repository() {
     return 0
 }
 
+__install_saltstack_copr_salt_repository() {
+    echoinfo "Adding SaltStack's COPR repository"
+
+    if [ "${DISTRO_NAME_L}" = "fedora" ]; then
+        __REPOTYPE="${DISTRO_NAME_L}"
+    else
+        __REPOTYPE="epel"
+    fi
+
+    __REPO_FILENAME="saltstack-salt-${__REPOTYPE}-${DISTRO_MAJOR_VERSION}.repo"
+
+    if [ ! -s "/etc/yum.repos.d/${__REPO_FILENAME}" ]; then
+        __fetch_url /etc/yum.repos.d/${__REPO_FILENAME} \
+            "http://copr.fedoraproject.org/coprs/saltstack/salt/repo/${__REPOTYPE}-${DISTRO_MAJOR_VERSION}/${__REPO_FILENAME}" || return 1
+    fi
+    return 0
+}
+
 install_centos_stable_deps() {
     __install_epel_repository || return 1
     if [ "$DISTRO_MAJOR_VERSION" -eq 5 ]; then
         __install_saltstack_copr_salt_el5_repository || return 1
     fi
 
+    __install_saltstack_copr_salt_repository || return 1
+
     if [ "$_ENABLE_EXTERNAL_ZMQ_REPOS" -eq $BS_TRUE ] && [ "$DISTRO_MAJOR_VERSION" -gt 5 ]; then
         yum -y install python-hashlib || return 1
         __install_saltstack_copr_zeromq_repository || return 1
+    fi
+
+    if [ -f "${__SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" ]; then
+        # We're on the develop branch, install whichever tornado is on the requirements file
+        __REQUIRED_TORNADO="$(grep tornado "${__SALT_GIT_CHECKOUT_DIR}/requirements/base.txt")"
+        if [ "${__REQUIRED_TORNADO}" != "" ]; then
+            yum install -y python-tornado
+        fi
     fi
 
     if [ "$_UPGRADE_SYS" -eq $BS_TRUE ]; then
@@ -2841,6 +2900,14 @@ install_centos_git_deps() {
     fi
 
     __git_clone_and_checkout || return 1
+
+    if [ -f "${__SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" ]; then
+        # We're on the develop branch, install whichever tornado is on the requirements file
+        __REQUIRED_TORNADO="$(grep tornado "${__SALT_GIT_CHECKOUT_DIR}/requirements/base.txt")"
+        if [ "${__REQUIRED_TORNADO}" != "" ]; then
+            yum install -y python-tornado
+        fi
+    fi
 
     # Let's trigger config_salt()
     if [ "$_TEMP_CONFIG_DIR" = "null" ]; then
@@ -3426,6 +3493,7 @@ install_amazon_linux_ami_2010_git_deps() {
 
 install_amazon_linux_ami_deps() {
     # According to http://aws.amazon.com/amazon-linux-ami/faqs/#epel we should
+
     # enable the EPEL 6 repo
     if [ "$CPU_ARCH_L" = "i686" ]; then
         EPEL_ARCH="i386"
@@ -3433,6 +3501,14 @@ install_amazon_linux_ami_deps() {
         EPEL_ARCH=$CPU_ARCH_L
     fi
     rpm -Uvh --force "http://mirrors.kernel.org/fedora-epel/6/${EPEL_ARCH}/epel-release-6-8.noarch.rpm" || return 1
+
+    __REPO_FILENAME="saltstack-salt-epel-6.repo"
+
+    if [ ! -s "/etc/yum.repos.d/${__REPO_FILENAME}" ]; then
+        echoinfo "Adding SaltStack's COPR repository"
+        __fetch_url /etc/yum.repos.d/${__REPO_FILENAME} \
+            "http://copr.fedoraproject.org/coprs/saltstack/salt/repo/epel-6/${__REPO_FILENAME}" || return 1
+    fi
 
     if [ "$_UPGRADE_SYS" -eq $BS_TRUE ]; then
         yum -y update || return 1
@@ -3469,6 +3545,15 @@ install_amazon_linux_ami_git_deps() {
     fi
 
     __git_clone_and_checkout || return 1
+
+    if [ -f "${__SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" ]; then
+        # We're on the develop branch, install whichever tornado is on the requirements file
+        __REQUIRED_TORNADO="$(grep tornado "${__SALT_GIT_CHECKOUT_DIR}/requirements/base.txt")"
+        if [ "${__REQUIRED_TORNADO}" != "" ]; then
+            yum install -y python-tornado
+        fi
+    fi
+
 
     # Let's trigger config_salt()
     if [ "$_TEMP_CONFIG_DIR" = "null" ]; then
@@ -3564,6 +3649,15 @@ install_arch_linux_git_deps() {
         python2-pyzmq zeromq python2-requests python2-systemd || return 1
 
     __git_clone_and_checkout || return 1
+
+    if [ -f "${__SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" ]; then
+        # We're on the develop branch, install whichever tornado is on the requirements file
+        __REQUIRED_TORNADO="$(grep tornado "${__SALT_GIT_CHECKOUT_DIR}/requirements/base.txt")"
+        if [ "${__REQUIRED_TORNADO}" != "" ]; then
+            pacman -Sy --noconfirm --needed python2-tornado
+        fi
+    fi
+
 
     # Let's trigger config_salt()
     if [ "$_TEMP_CONFIG_DIR" = "null" ]; then
@@ -3820,6 +3914,14 @@ install_freebsd_git_deps() {
 
     __git_clone_and_checkout || return 1
 
+    if [ -f "${__SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" ]; then
+        # We're on the develop branch, install whichever tornado is on the requirements file
+        __REQUIRED_TORNADO="$(grep tornado "${__SALT_GIT_CHECKOUT_DIR}/requirements/base.txt")"
+        if [ "${__REQUIRED_TORNADO}" != "" ]; then
+             /usr/local/sbin/pkg install -y www/py-tornado || return 1
+        fi
+    fi
+
     echodebug "Adapting paths to FreeBSD"
     # The list of files was taken from Salt's BSD port Makefile
     for file in doc/man/salt-key.1 doc/man/salt-cp.1 doc/man/salt-minion.1 \
@@ -4005,6 +4107,18 @@ install_smartos_git_deps() {
 
     if [ "$(which git)" = "" ]; then
         pkgin -y install scmgit || return 1
+    fi
+
+    if [ -f "${__SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" ]; then
+        # We're on the develop branch, install whichever tornado is on the requirements file
+        __REQUIRED_TORNADO="$(grep tornado "${__SALT_GIT_CHECKOUT_DIR}/requirements/base.txt")"
+        check_pip_allowed "You need to allow pip based installations (-P) in order to install the python package '${__REQUIRED_TORNADO}'"
+        if [ "${__REQUIRED_TORNADO}" != "" ]; then
+            if [ "$(which pip)" = "" ]; then
+                pkgin -y install py27-pip
+            fi
+            pip install -U "'${__REQUIRED_TORNADO}'"
+        fi
     fi
 
     __git_clone_and_checkout || return 1
@@ -4209,6 +4323,15 @@ install_opensuse_git_deps() {
         cd "${__SALT_GIT_CHECKOUT_DIR}"
         echowarn "Applying patch to systemd service unit file"
         patch -p1 < pkg/suse/use-forking-daemon.patch || return 1
+    fi
+
+    if [ -f "${__SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" ]; then
+        # We're on the develop branch, install whichever tornado is on the requirements file
+        __REQUIRED_TORNADO="$(grep tornado "${__SALT_GIT_CHECKOUT_DIR}/requirements/base.txt")"
+        if [ "${__REQUIRED_TORNADO}" != "" ]; then
+            __zypper_install python-tornado
+        fi
+
     fi
 
     # Let's trigger config_salt()
@@ -4438,6 +4561,14 @@ install_suse_11_git_deps() {
 
     __git_clone_and_checkout || return 1
 
+    if [ -f "${__SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" ]; then
+        # We're on the develop branch, install whichever tornado is on the requirements file
+        __REQUIRED_TORNADO="$(grep tornado "${__SALT_GIT_CHECKOUT_DIR}/requirements/base.txt")"
+        if [ "${__REQUIRED_TORNADO}" != "" ]; then
+            __zypper_install python-tornado
+        fi
+    fi
+
     # Let's trigger config_salt()
     if [ "$_TEMP_CONFIG_DIR" = "null" ]; then
         _TEMP_CONFIG_DIR="${__SALT_GIT_CHECKOUT_DIR}/conf/"
@@ -4589,12 +4720,12 @@ __gentoo_post_dep() {
 
 install_gentoo_deps() {
     __gentoo_pre_dep || return 1
-    __gentoo_post_dep
+    __gentoo_post_dep || return 1
 }
 
 install_gentoo_git_deps() {
     __gentoo_pre_dep || return 1
-    __gentoo_post_dep
+    __gentoo_post_dep || return 1
 }
 
 install_gentoo_stable() {

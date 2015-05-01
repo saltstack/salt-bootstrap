@@ -4237,7 +4237,7 @@ __version_lte() {
              zypper zypper --non-interactive install --auto-agree-with-licenses python || return 1
     fi
 
-    if [ "$(python -c 'import sys; V1=tuple([int(i) for i in sys.argv[1].split(".")]); V2=tuple([int(i) for i in sys.argv[2].split(".")]); print V1>=V2' "$1" "$2")" = "True" ]; then
+    if [ "$(python -c 'import sys; V1=tuple([int(i) for i in sys.argv[1].split(".")]); V2=tuple([int(i) for i in sys.argv[2].split(".")]); print V1<=V2' "$1" "$2")" = "True" ]; then
         __ZYPPER_REQUIRES_REPLACE_FILES=${BS_TRUE}
     else
         __ZYPPER_REQUIRES_REPLACE_FILES=${BS_FALSE}

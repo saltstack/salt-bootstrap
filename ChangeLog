@@ -10,6 +10,7 @@ Version 2015.xx.xx:
 	* Fix openSUSE 13.2 where we need to pass --replaceflags. Thanks Roman Inflianskas(rominf).  
 	#504.
 	* Make sure that a recent enough requests package is installed in Debian/Ubuntu.
+	* Install tornado on git installs for the develop branch if necessary. #580
 
 
 Version 2015.03.15:

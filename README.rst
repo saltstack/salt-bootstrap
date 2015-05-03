@@ -333,7 +333,7 @@ Supported Operating Systems
 - Scientific Linux 5/6
 - SmartOS
 - SUSE Linux Enterprise 11 SP1/11 SP2/11 SP3
-- Ubuntu 10.x/11.x/12.x/13.04/13.10/14.04/14.10
+- Ubuntu 10.x/11.x/12.x/13.x/14.x/15.04
 - Elementary OS 0.2
 
 

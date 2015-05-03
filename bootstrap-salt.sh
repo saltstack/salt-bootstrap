@@ -1741,7 +1741,7 @@ install_ubuntu_deps() {
     # Need python-apt for managing packages via Salt
     __apt_get_install_noinput python-apt
 
-    if [ "$DISTRO_MAJOR_VERSION" -gt 12 ] || ([ "$DISTRO_MAJOR_VERSION" -eq 12 ] && [ "$DISTRO_MINOR_VERSION" -gt 03 ]); then
+    if ([ "$DISTRO_MAJOR_VERSION" -gt 12 ] && [ "$DISTRO_MAJOR_VERSION" -lt 15 ]) || ([ "$DISTRO_MAJOR_VERSION" -eq 12 ] && [ "$DISTRO_MINOR_VERSION" -gt 03 ]); then
         if [ "$_ENABLE_EXTERNAL_ZMQ_REPOS" -eq $BS_TRUE ]; then
             echoinfo "Installing ZMQ>=4/PyZMQ>=14 from Chris Lea's PPA repository"
             add-apt-repository -y ppa:chris-lea/zeromq || return 1
@@ -1749,11 +1749,13 @@ install_ubuntu_deps() {
         fi
         __apt_get_install_noinput python-requests
         __PIP_PACKAGES=""
-    else
+    elif [ "$DISTRO_MAJOR_VERSION" -lt 15 ]; then
         check_pip_allowed "You need to allow pip based installations (-P) in order to install the python package 'requests'"
         __apt_get_install_noinput python-setuptools python-pip
         # shellcheck disable=SC2089
         __PIP_PACKAGES="'requests>=$_PY_REQUESTS_MIN_VERSION'"
+    elif [ "$DISTRO_MAJOR_VERSION" -ge 15 ]; then
+        __apt_get_install_noinput python-requests
     fi
 
     # Additionally install procps and pciutils which allows for Docker boostraps. See 366#issuecomment-39666813
@@ -1881,7 +1883,16 @@ install_ubuntu_git_post() {
         [ $fname = "api" ] && ([ "$_INSTALL_MASTER" -eq $BS_FALSE ] || [ "$(which salt-${fname} 2>/dev/null)" = "" ]) && continue
         [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
 
-        if [ -f /sbin/initctl ]; then
+        if [ -f /bin/systemctl ]; then
+            copyfile "${__SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-${fname}.service" "/lib/systemd/system/salt-${fname}.service"
+
+            # Skip salt-api since the service should be opt-in and not necessarily started on boot
+            [ $fname = "api" ] && continue
+
+            systemctl is-enabled salt-$fname.service || (systemctl preset salt-$fname.service && systemctl enable salt-$fname.service)
+            sleep 0.1
+            systemctl daemon-reload
+        elif [ -f /sbin/initctl ]; then
             _upstart_conf="/etc/init/salt-$fname.conf"
             # We have upstart support
             echodebug "There's upstart support"
@@ -1913,6 +1924,7 @@ install_ubuntu_restart_daemons() {
 
     # Ensure upstart configs are loaded
     [ -f /sbin/initctl ] && /sbin/initctl reload-configuration
+    [ -f /bin/systemctl ] && systemctl daemon-reload
     for fname in minion master syndic api; do
         # Skip salt-api since the service should be opt-in and not necessarily started on boot
         [ $fname = "api" ] && continue
@@ -1922,6 +1934,15 @@ install_ubuntu_restart_daemons() {
         [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
         #[ $fname = "api" ] && ([ "$_INSTALL_MASTER" -eq $BS_FALSE ] || [ "$(which salt-${fname} 2>/dev/null)" = "" ]) && continue
         [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
+
+        if [ -f /bin/systemctl ]; then
+            echodebug "There's systemd support while checking salt-$fname"
+            systemctl stop salt-$fname > /dev/null 2>&1
+            systemctl start salt-$fname.service
+            [ $? -eq 0 ] && continue
+            # We failed to start the service, let's test the SysV code below
+            echodebug "Failed to start salt-$fname using systemd"
+        fi
 
         if [ -f /sbin/initctl ]; then
             echodebug "There's upstart support while checking salt-$fname"
@@ -1958,7 +1979,10 @@ install_ubuntu_check_services() {
         [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
         #[ $fname = "api" ] && ([ "$_INSTALL_MASTER" -eq $BS_FALSE ] || [ "$(which salt-${fname} 2>/dev/null)" = "" ]) && continue
         [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
-        if [ -f /sbin/initctl ] && [ -f /etc/init/salt-${fname}.conf ]; then
+
+        if [ -f /bin/systemctl ]; then
+            __check_services_systemd salt-$fname || return 1
+        elif [ -f /sbin/initctl ] && [ -f /etc/init/salt-${fname}.conf ]; then
             __check_services_upstart salt-$fname || return 1
         elif [ -f /etc/init.d/salt-$fname ]; then
             __check_services_debian salt-$fname || return 1

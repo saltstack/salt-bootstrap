@@ -1700,7 +1700,7 @@ __enable_universe_repository() {
 }
 
 install_ubuntu_deps() {
-    if [ "${__DEFAULT_SLEEP}" -eq "${__DEFAULT_SLEEP_ORIGINAL}" ]; then
+    if ([ "${__DEFAULT_SLEEP}" -eq "${__DEFAULT_SLEEP_ORIGINAL}" ] && [ "$DISTRO_MAJOR_VERSION" -lt 15 ]); then
         # The user did not pass a custom sleep value as an argument, let's increase the default value
         echodebug "On Ubuntu systems we increase the default sleep value to 10."
         echodebug "See https://github.com/saltstack/salt/issues/12248 for more info."

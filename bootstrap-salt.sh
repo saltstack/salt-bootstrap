@@ -1756,6 +1756,7 @@ install_ubuntu_deps() {
         __PIP_PACKAGES="'requests>=$_PY_REQUESTS_MIN_VERSION'"
     elif [ "$DISTRO_MAJOR_VERSION" -ge 15 ]; then
         __apt_get_install_noinput python-requests
+        __PIP_PACKAGES=""
     fi
 
     # Additionally install procps and pciutils which allows for Docker boostraps. See 366#issuecomment-39666813
@@ -1923,8 +1924,11 @@ install_ubuntu_restart_daemons() {
     [ $_START_DAEMONS -eq $BS_FALSE ] && return
 
     # Ensure upstart configs are loaded
-    [ -f /sbin/initctl ] && /sbin/initctl reload-configuration
-    [ -f /bin/systemctl ] && systemctl daemon-reload
+    if [ -f /bin/systemctl ]; then
+        systemctl daemon-reload
+    elif [ -f /sbin/initctl ]; then
+        /sbin/initctl reload-configuration
+    fi
     for fname in minion master syndic api; do
         # Skip salt-api since the service should be opt-in and not necessarily started on boot
         [ $fname = "api" ] && continue

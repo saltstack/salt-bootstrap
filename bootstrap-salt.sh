@@ -1585,6 +1585,15 @@ __check_services_debian() {
     servicename=$1
     echodebug "Checking if service ${servicename} is enabled"
 
+    if [ "$(runlevel)" = "unknown" ]; then
+        # We're running in a Docker or chroot environment that doesn't know the runlevel.
+        # In this event none of the /etc/init.d scripts will run anyway,
+        # which is the intended behavior.
+        # We don't need to check that ${servicename} is enabled.
+        echodebug "Skipping service ${servicename} enabled check (runlevel unknown)"
+        return 0
+    fi
+
     # shellcheck disable=SC2086,SC2046,SC2144
     if [ -f /etc/rc$(runlevel | awk '{ print $2 }').d/S*${servicename} ]; then
         echodebug "Service ${servicename} is enabled"

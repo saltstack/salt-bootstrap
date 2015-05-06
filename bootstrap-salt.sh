@@ -421,7 +421,7 @@ elif [ "$ITYPE" = "stable" ]; then
     else
         __check_unparsed_options "$*"
         if [ "$(echo "$1" | egrep '^(latest|1\.6|1\.7|2014\.1|2014\.7|2015\.2)$')" = "" ]; then
-          echo "Unknown stable version: $1 (valid: 1.6, 1.7, 2014.1, 2014.7, 2015.2, latest)"
+          echo "Unknown stable version: $1 (valid: 1.6, 1.7, 2014.1, 2014.7, 2015.5, latest)"
           exit 1
         else
           STABLE_REV="$1"

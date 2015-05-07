@@ -1,3 +1,7 @@
+Version 2015.xx.xx:
+	* Lower required requests version dependency. Use system requests package where possible.
+
+
 Version 2015.05.04:
 	* Fix the configuration path for FreeBSD. #567/#552. Thanks Ronald van Zantvoort(The-Loeki).
 	+ Fix non grouping support in POSIX sed. Thanks Ronald van Zantvoort(The-Loeki).

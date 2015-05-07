@@ -208,7 +208,7 @@ _SALT_MINION_ID="null"
 # __SIMPLIFY_VERSION is mostly used in Solaris based distributions
 __SIMPLIFY_VERSION=$BS_TRUE
 _LIBCLOUD_MIN_VERSION="0.14.0"
-_PY_REQUESTS_MIN_VERSION="2.4.3"
+_PY_REQUESTS_MIN_VERSION="2.0"
 _EXTRA_PACKAGES=""
 _HTTP_PROXY=""
 __SALT_GIT_CHECKOUT_DIR=${BS_SALT_GIT_CHECKOUT_DIR:-/tmp/git/salt}
@@ -1753,26 +1753,23 @@ install_ubuntu_deps() {
     # Need python-apt for managing packages via Salt
     __apt_get_install_noinput python-apt
 
-    if ([ "$DISTRO_MAJOR_VERSION" -gt 12 ] && [ "$DISTRO_MAJOR_VERSION" -lt 15 ]) || ([ "$DISTRO_MAJOR_VERSION" -eq 12 ] && [ "$DISTRO_MINOR_VERSION" -gt 03 ]); then
-        if [ "$_ENABLE_EXTERNAL_ZMQ_REPOS" -eq $BS_TRUE ]; then
+    if [ "$DISTRO_MAJOR_VERSION" -gt 12 ] || ([ "$DISTRO_MAJOR_VERSION" -eq 12 ] && [ "$DISTRO_MINOR_VERSION" -gt 03 ]); then
+        if ([ "$DISTRO_MAJOR_VERSION" -lt 15 ] && [ "$_ENABLE_EXTERNAL_ZMQ_REPOS" -eq $BS_TRUE ]); then
             echoinfo "Installing ZMQ>=4/PyZMQ>=14 from Chris Lea's PPA repository"
             add-apt-repository -y ppa:chris-lea/zeromq || return 1
             apt-get update
         fi
         __apt_get_install_noinput python-requests
         __PIP_PACKAGES=""
-    elif [ "$DISTRO_MAJOR_VERSION" -lt 15 ]; then
+    else
         check_pip_allowed "You need to allow pip based installations (-P) in order to install the python package 'requests'"
         __apt_get_install_noinput python-setuptools python-pip
         # shellcheck disable=SC2089
-        __PIP_PACKAGES="'requests>=$_PY_REQUESTS_MIN_VERSION'"
-    elif [ "$DISTRO_MAJOR_VERSION" -ge 15 ]; then
-        __apt_get_install_noinput python-requests
-        __PIP_PACKAGES=""
+        __PIP_PACKAGES="requests>=$_PY_REQUESTS_MIN_VERSION"
     fi
 
     # Additionally install procps and pciutils which allows for Docker boostraps. See 366#issuecomment-39666813
-    __apt_get_install_noinput procps pciutils
+    __apt_get_install_noinput procps pciutils || return 1
 
     if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
         check_pip_allowed "You need to allow pip based installations (-P) in order to install 'apache-libcloud'"
@@ -2053,8 +2050,8 @@ install_debian_deps() {
     __PACKAGES="procps pciutils"
     __PIP_PACKAGES=""
 
-    if [ "$DISTRO_MAJOR_VERSION" -lt 7 ]; then
-        # Both python-requests which is a hard dependency and apache-libcloud which is a soft dependency, under debian < 7
+    if [ "$DISTRO_MAJOR_VERSION" -lt 6 ]; then
+        # Both python-requests which is a hard dependency and apache-libcloud which is a soft dependency, under debian < 6
         # need to be installed using pip
         check_pip_allowed "You need to allow pip based installations (-P) in order to install the python 'requests' package"
         # Additionally install procps and pciutils which allows for Docker boostraps. See 366#issuecomment-39666813
@@ -2064,14 +2061,17 @@ install_debian_deps() {
     fi
 
     # shellcheck disable=SC2086
-    __apt_get_install_noinput ${__PACKAGES}
+    __apt_get_install_noinput ${__PACKAGES} || return 1
 
     if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
         # shellcheck disable=SC2089
         __PIP_PACKAGES="${__PIP_PACKAGES} 'apache-libcloud>=$_LIBCLOUD_MIN_VERSION'"
     fi
-    # shellcheck disable=SC2086,SC2090
-    pip install -U ${__PIP_PACKAGES}
+
+    if [ "${__PIP_PACKAGES}" != "" ]; then
+        # shellcheck disable=SC2086,SC2090
+        pip install -U ${__PIP_PACKAGES} || return 1
+    fi
 
     if [ "$_UPGRADE_SYS" -eq $BS_TRUE ]; then
         __apt_get_upgrade_noinput || return 1
@@ -2162,15 +2162,14 @@ _eof
 
     # Python requests is available through Squeeze backports
     # Additionally install procps and pciutils which allows for Docker boostraps. See 366#issuecomment-39666813
-    __apt_get_install_noinput python-pip procps pciutils
+    __apt_get_install_noinput python-pip procps pciutils python-requests
 
     # Need python-apt for managing packages via Salt
     __apt_get_install_noinput python-apt
 
     if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
         check_pip_allowed "You need to allow pip based installations (-P) in order to install apache-libcloud/requests"
-        __apt_get_install_noinput python-pip
-        pip install -U "apache-libcloud>=$_LIBCLOUD_MIN_VERSION 'requests>=$_PY_REQUESTS_MIN_VERSION'"
+        pip install -U "apache-libcloud>=$_LIBCLOUD_MIN_VERSION"
 
     fi
 
@@ -2228,20 +2227,18 @@ install_debian_7_deps() {
     __apt_get_install_noinput -t wheezy-backports libzmq3 libzmq3-dev python-zmq python-apt || return 1
     # Additionally install procps and pciutils which allows for Docker boostraps. See 366#issuecomment-39666813
     __PACKAGES="procps pciutils"
+    # Also install python-requests
+    __PACKAGES="${__PACKAGES} python-requests"
     # shellcheck disable=SC2086
     __apt_get_install_noinput ${__PACKAGES} || return 1
-
-
-    check_pip_allowed "You need to allow pip based installations (-P) in order to install requests"
-    __PACKAGES="build-essential python-dev python-pip"
-    # shellcheck disable=SC2086
-    __apt_get_install_noinput ${__PACKAGES} || return 1
-    pip install -U "requests>=$_PY_REQUESTS_MIN_VERSION"
 
 
     if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
+        __PACKAGES="build-essential python-dev python-pip"
+        # shellcheck disable=SC2086
+        __apt_get_install_noinput ${__PACKAGES} || return 1
         check_pip_allowed "You need to allow pip based installations (-P) in order to install apache-libcloud"
-        pip install -U "apache-libcloud>=$_LIBCLOUD_MIN_VERSION"
+        pip install -U "apache-libcloud>=$_LIBCLOUD_MIN_VERSION" || return 1
     fi
 
     if [ "$_UPGRADE_SYS" -eq $BS_TRUE ]; then
@@ -2299,6 +2296,8 @@ install_debian_8_deps() {
 
     # Additionally install procps and pciutils which allows for Docker boostraps. See 366#issuecomment-39666813
     __PACKAGES="procps pciutils"
+    # Also install python-requests
+    __PACKAGES="${__PACKAGES} python-requests"
     # shellcheck disable=SC2086
     __apt_get_install_noinput ${__PACKAGES} || return 1
 
@@ -2349,7 +2348,7 @@ install_debian_git_deps() {
         __REQUIRED_TORNADO="$(grep tornado "${__SALT_GIT_CHECKOUT_DIR}/requirements/base.txt")"
         if [ "${__REQUIRED_TORNADO}" != "" ]; then
             check_pip_allowed "You need to allow pip based installations (-P) in order to install the python package '${__REQUIRED_TORNADO}'"
-            pip install -U "'${__REQUIRED_TORNADO}'"
+            pip install -U "${__REQUIRED_TORNADO}" || return 1
         fi
     fi
 

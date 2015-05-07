@@ -2379,14 +2379,17 @@ install_debian_git_deps() {
 install_debian_6_git_deps() {
     install_debian_6_deps || return 1
     if [ "$_PIP_ALLOWED" -eq $BS_TRUE ]; then
-        easy_install -U Jinja2 || return 1
+        __PACKAGES="build-essential lsb-release python python-dev python-pkg-resources python-crypto"
+        __PACKAGES="${__PACKAGES} python-m2crypto python-yaml msgpack-python python-pip"
 
         if [ "$(which git)" = "" ]; then
-            __apt_get_install_noinput git || return 1
+            __PACKAGES="${__PACKAGES} git"
         fi
 
-        __apt_get_install_noinput lsb-release python python-pkg-resources python-crypto \
-            python-m2crypto python-yaml msgpack-python python-pip || return 1
+        # shellcheck disable=SC2086
+        __apt_get_install_noinput ${__PACKAGES} || return 1
+
+        easy_install -U pyzmq Jinja2 || return 1
 
         __git_clone_and_checkout || return 1
 
@@ -2460,13 +2463,6 @@ install_debian_8_stable() {
 }
 
 install_debian_git() {
-    if [ "$_PIP_ALLOWED" -eq $BS_TRUE ]; then
-        # Building pyzmq from source to build it against libzmq3.
-        # Should override current installation
-        # Using easy_install instead of pip because at least on Debian 6,
-        # there's no default virtualenv active.
-        easy_install -U pyzmq || return 1
-    fi
 
     if [ -f "${__SALT_GIT_CHECKOUT_DIR}/salt/syspaths.py" ]; then
         python setup.py install --install-layout=deb --salt-config-dir="$_SALT_ETC_DIR" || return 1

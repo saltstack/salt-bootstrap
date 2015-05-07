@@ -60,6 +60,7 @@ Paul Brian                  lifeisstillgood        paul@mikadosoftware.com
 Pavel Snagovsky             paha
 Pedro Algarvio              s0undt3ch              pedro@algarvio.me
 Pedro Paulo                 pedropaulovc
+Peter Tripp                 notpeter
 ptonelli                    ptonelli
 Raymond Barbiero            visualphoenix
 Roberto Aguilar             rca                    roberto@baremetal.io

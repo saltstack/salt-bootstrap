@@ -225,13 +225,17 @@ usage() {
 
   Installation types:
     - stable (default)
+    - stable [version] (ubuntu specific)
     - daily  (ubuntu specific)
+    - testing (redhat specific)
     - git
 
   Examples:
     - ${__ScriptName}
     - ${__ScriptName} stable
+    - ${__ScriptName} stable 2014.7
     - ${__ScriptName} daily
+    - ${__ScriptName} testing
     - ${__ScriptName} git
     - ${__ScriptName} git develop
     - ${__ScriptName} git v0.17.0
@@ -410,6 +414,20 @@ if [ "$ITYPE" = "git" ]; then
         __check_unparsed_options "$*"
         GIT_REV="$1"
         shift
+    fi
+# If doing stable install, check if version specified
+elif [ "$ITYPE" = "stable" ]; then
+    if [ "$#" -eq 0 ];then
+        STABLE_REV="latest"
+    else
+        __check_unparsed_options "$*"
+        if [ "$(echo "$1" | egrep '^(latest|1\.6|1\.7|2014\.1|2014\.7|2015\.2)$')" = "" ]; then
+          echo "Unknown stable version: $1 (valid: 1.6, 1.7, 2014.1, 2014.7, 2015.5, latest)"
+          exit 1
+        else
+          STABLE_REV="$1"
+          shift
+        fi
     fi
 fi
 
@@ -1129,6 +1147,9 @@ fi
 if ([ "${DISTRO_NAME_L}" != "ubuntu" ] && [ "$ITYPE" = "daily" ]); then
     echoerror "${DISTRO_NAME} does not have daily packages support"
     exit 1
+elif ([ "${DISTRO_NAME_L}" != "ubuntu" ] && [ "$STABLE_REV" != "latest" ]); then
+    echoerror "${DISTRO_NAME} does not have major version pegged packages support"
+    exit 1
 fi
 
 # Only RedHat based distros have testing support
@@ -1726,15 +1747,6 @@ install_ubuntu_deps() {
 
     __enable_universe_repository || return 1
 
-    if [ "$DISTRO_MAJOR_VERSION" -gt 11 ] || ([ "$DISTRO_MAJOR_VERSION" -eq 11 ] && [ "$DISTRO_MINOR_VERSION" -gt 04 ]); then
-        # Above Ubuntu 11.04 add a -y flag
-        add-apt-repository -y ppa:saltstack/salt || return 1
-    else
-        add-apt-repository ppa:saltstack/salt || return 1
-    fi
-
-    apt-get update
-
     # Minimal systems might not have upstart installed, install it
     __apt_get_install_noinput upstart
 
@@ -1787,6 +1799,28 @@ install_ubuntu_deps() {
     fi
 
     return 0
+}
+
+install_ubuntu_stable_deps() {
+    install_ubuntu_deps || return 1
+
+    # Alternate PPAs: salt16, salt17, salt2014-1, salt2014-7
+    if [ ! "$(echo "$STABLE_REV" | egrep '^(1\.6|1\.7)$')" = "" ]; then
+      STABLE_PPA="saltstack/salt$(echo "$STABLE_REV" | tr -d .)"
+    elif [ ! "$(echo "$STABLE_REV" | egrep '^(2014\.1|2014\.7|2015\.2)$')" = "" ]; then
+      STABLE_PPA="saltstack/salt$(echo "$STABLE_REV" | tr . -)"
+    else
+      STABLE_PPA="saltstack/salt"
+    fi
+
+    if [ "$DISTRO_MAJOR_VERSION" -gt 11 ] || ([ "$DISTRO_MAJOR_VERSION" -eq 11 ] && [ "$DISTRO_MINOR_VERSION" -gt 04 ]); then
+        # Above Ubuntu 11.04 add a -y flag
+        add-apt-repository -y "ppa:$STABLE_PPA" || return 1
+    else
+        add-apt-repository "ppa:$STABLE_PPA" || return 1
+    fi
+
+    apt-get update
 }
 
 install_ubuntu_daily_deps() {

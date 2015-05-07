@@ -421,7 +421,7 @@ elif [ "$ITYPE" = "stable" ]; then
         STABLE_REV="latest"
     else
         __check_unparsed_options "$*"
-        if [ "$(echo "$1" | egrep '^(latest|1\.6|1\.7|2014\.1|2014\.7|2015\.2)$')" = "" ]; then
+        if [ "$(echo "$1" | egrep '^(latest|1\.6|1\.7|2014\.1|2014\.7|2015\.5)$')" = "" ]; then
           echo "Unknown stable version: $1 (valid: 1.6, 1.7, 2014.1, 2014.7, 2015.5, latest)"
           exit 1
         else
@@ -1804,7 +1804,7 @@ install_ubuntu_stable_deps() {
     # Alternate PPAs: salt16, salt17, salt2014-1, salt2014-7
     if [ ! "$(echo "$STABLE_REV" | egrep '^(1\.6|1\.7)$')" = "" ]; then
       STABLE_PPA="saltstack/salt$(echo "$STABLE_REV" | tr -d .)"
-    elif [ ! "$(echo "$STABLE_REV" | egrep '^(2014\.1|2014\.7|2015\.2)$')" = "" ]; then
+    elif [ ! "$(echo "$STABLE_REV" | egrep '^(2014\.1|2014\.7|2015\.5)$')" = "" ]; then
       STABLE_PPA="saltstack/salt$(echo "$STABLE_REV" | tr . -)"
     else
       STABLE_PPA="saltstack/salt"

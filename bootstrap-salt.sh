@@ -2137,7 +2137,7 @@ _eof
         # We NEED to install the unstable dpkg or mime-support WILL fail to install
         __apt_get_install_noinput -t unstable dpkg liblzma5 python mime-support || return 1
         __apt_get_install_noinput -t unstable libzmq3 libzmq3-dev || return 1
-        __apt_get_install_noinput build-essential python-dev python-pip || return 1
+        __apt_get_install_noinput build-essential python-dev python-pip python-setuptools || return 1
 
         # Saltstack's Unstable Debian repository
         if [ "$(grep -R 'debian.saltstack.com' /etc/apt)" = "" ]; then
@@ -2178,6 +2178,14 @@ _eof
     fi
 
     __apt_get_install_noinput python-zmq || return 1
+
+    if [ "$_PIP_ALLOWED" -eq $BS_TRUE ]; then
+        # Building pyzmq from source to build it against libzmq3.
+        # Should override current installation
+        # Using easy_install instead of pip because at least on Debian 6,
+        # there's no default virtualenv active.
+        easy_install -U pyzmq || return 1
+    fi
 
     if [ "${_EXTRA_PACKAGES}" != "" ]; then
         echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
@@ -2380,7 +2388,7 @@ install_debian_6_git_deps() {
     install_debian_6_deps || return 1
     if [ "$_PIP_ALLOWED" -eq $BS_TRUE ]; then
         __PACKAGES="build-essential lsb-release python python-dev python-pkg-resources python-crypto"
-        __PACKAGES="${__PACKAGES} python-m2crypto python-yaml msgpack-python python-pip"
+        __PACKAGES="${__PACKAGES} python-m2crypto python-yaml msgpack-python python-pip python-setuptools"
 
         if [ "$(which git)" = "" ]; then
             __PACKAGES="${__PACKAGES} git"
@@ -2434,14 +2442,6 @@ __install_debian_stable() {
     fi
     # shellcheck disable=SC2086
     __apt_get_install_noinput ${__PACKAGES} || return 1
-
-    if [ "$_PIP_ALLOWED" -eq $BS_TRUE ]; then
-        # Building pyzmq from source to build it against libzmq3.
-        # Should override current installation
-        # Using easy_install instead of pip because at least on Debian 6,
-        # there's no default virtualenv active.
-        easy_install -U pyzmq || return 1
-    fi
 
     return 0
 }

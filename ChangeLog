@@ -1,3 +1,6 @@
+Version 2015.xx.xx:
+	* Make sure setuptools is installed before using it. #598.
+
 Version 2015.05.07:
 	* Lower required requests version dependency. Use system requests package where possible.
 	* Allow Ubuntu alternate ppas. Thanks Peter Tripp(notpeter). #563

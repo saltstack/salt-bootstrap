@@ -1,5 +1,6 @@
 Version 2015.xx.xx:
 	* Make sure setuptools is installed before using it. #598.
+	* `systemd` is only fully supported from 15.04 onwards. #602
 
 Version 2015.05.07:
 	* Lower required requests version dependency. Use system requests package where possible.

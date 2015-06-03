@@ -73,5 +73,6 @@ Tony Narlock                tony
 Valentin Bud                valentinbud            valentin@databus.pro
 Vladimir Kozhukalov         kozhukalov
 Whit Morriss                whitmo                 whit@nocoast.us
+Wolodja Wentland            babilen                w@babilen5.org
 Wout                        wfhg
 ==========================  =====================  ============================

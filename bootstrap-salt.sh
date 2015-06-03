@@ -2218,7 +2218,7 @@ install_debian_7_deps() {
 
     # Debian Backports
     if [ "$(grep -R 'wheezy-backports' /etc/apt | grep -v "^#")" = "" ]; then
-        echo "deb http://http.debian.net/debian wheezy-backports main" >> \
+        echo "deb http://httpredir.debian.org/debian wheezy-backports main" >> \
             /etc/apt/sources.list.d/backports.list
     fi
 
@@ -2286,7 +2286,7 @@ install_debian_8_deps() {
 
     # Debian Backports
     if [ "$(grep -R 'jessie-backports' /etc/apt | grep -v "^#")" = "" ]; then
-        echo "deb http://http.debian.net/debian jessie-backports main" >> \
+        echo "deb http://httpredir.debian.org/debian jessie-backports main" >> \
             /etc/apt/sources.list.d/backports.list
     fi
 

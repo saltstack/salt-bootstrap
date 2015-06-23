@@ -4170,7 +4170,7 @@ install_smartos_git_deps() {
     install_smartos_deps || return 1
 
     if [ "$(which git)" = "" ]; then
-        pkgin -y install scmgit || return 1
+        pkgin -y install git || return 1
     fi
 
     if [ -f "${__SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" ]; then

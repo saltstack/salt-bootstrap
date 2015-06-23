@@ -4156,6 +4156,10 @@ install_smartos_deps() {
         fi
     fi
 
+    if [ "$_INSTALL_CLOUD" -eq $BS_TRUE  ]; then
+        pkgin -y install py27-apache-libcloud || return 1
+    fi
+
     if [ "${_EXTRA_PACKAGES}" != "" ]; then
         echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
         # shellcheck disable=SC2086

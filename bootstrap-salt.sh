@@ -3153,6 +3153,9 @@ __test_rhel_optionals_packages() {
     fi
 
     if [ "$DISTRO_MAJOR_VERSION" -ge 6 ]; then
+        #python-jinja2 is in repo server-releases-optional in EC2/RHEL6
+        yum-config-manager --enable rhui-\*-server-releases-optional || return 1
+
         # Let's enable package installation testing, kind of, --dry-run
         echoinfo "Testing if packages usually on the optionals repository are available:"
         __YUM_CONF_DIR="$(mktemp -d)"

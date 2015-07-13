@@ -2,6 +2,7 @@ Version 2015.xx.xx:
 	* Make sure setuptools is installed before using it. #598.
 	* `systemd` is only fully supported from 15.04 onwards. #602
 	* Fix debian mirrors issue. Thanks Wolodja Wentland(babilen). #606
+	* Fix python-jinja2 repo move on RHEL6. Thanks lomeroe #621
 
 Version 2015.05.07:
 	* Lower required requests version dependency. Use system requests package where possible.

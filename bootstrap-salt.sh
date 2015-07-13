@@ -3186,6 +3186,8 @@ __test_rhel_optionals_packages() {
 
 
 install_red_hat_linux_stable_deps() {
+    install_centos_stable_deps || return 1
+
     if [ "${DISTRO_MAJOR_VERSION}" -ge 6 ]; then
         # Wait at most 60 seconds for the repository subscriptions to register
         __ATTEMPTS=6
@@ -3207,7 +3209,6 @@ install_red_hat_linux_stable_deps() {
          __test_rhel_optionals_packages || return 1
     fi
 
-    install_centos_stable_deps || return 1
     return 0
 }
 

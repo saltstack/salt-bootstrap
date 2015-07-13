@@ -41,6 +41,7 @@ Jeff Strunk                 jstrunk
 Juan A. Moyano              wincus                 wincus.public@gmail.com
 Karl Grzeszczak             karlgrz
 Kenneth Wilke               KennethWilke
+lomeroe                     lomeroe
 Liu Xiaohui                 oreh                   herolxh@gmail.com
 Mark Lee                    malept
 markgaylard                 markgaylard

@@ -18,6 +18,7 @@ C. R. Oldham                cro                    cr@saltstack.com
 Cam                         camereonsparr
 Chris Rebert                cvrebert               chris.rebert@hulu.com
 Christer Edwards            cedwards
+denmat                      denmat
 Dag Viggo Lokøen            dagvl                  dag.viggo@lokoen.org
 Dan Mick                    dmick                  dan.mick@inktank.com
 David J. Felix              DavidJFelix

@@ -3148,6 +3148,9 @@ install_centos_check_services() {
 __test_rhel_optionals_packages() {
     __install_epel_repository || return 1
 
+    # Make sure yum-utils is installed
+    yum list installed yum-utils > /dev/null 2>&1 || yum -y install yum-utils --enablerepo=${_EPEL_REPO} || return 1
+
     if [ "$DISTRO_MAJOR_VERSION" -ge 7 ]; then
         yum-config-manager --enable \*server-optional || return 1
     fi

@@ -4156,6 +4156,11 @@ install_freebsd_restart_daemons() {
 install_smartos_deps() {
     pkgin -y install zeromq py27-m2crypto py27-crypto py27-msgpack py27-yaml py27-jinja2 py27-zmq py27-requests || return 1
 
+    # Set _SALT_ETC_DIR to SmartOS default if they didn't specify
+    _SALT_ETC_DIR=${BS_SALT_ETC_DIR:-/opt/local/etc/salt}
+    # We also need to redefine the PKI directory
+    _PKI_DIR=${_SALT_ETC_DIR}/pki
+
     # Let's trigger config_salt()
     if [ "$_TEMP_CONFIG_DIR" = "null" ]; then
         # Let's set the configuration directory to /tmp
@@ -4225,7 +4230,8 @@ install_smartos_stable() {
 
 install_smartos_git() {
     # Use setuptools in order to also install dependencies
-    USE_SETUPTOOLS=1 /opt/local/bin/python setup.py install || return 1
+    # lets force our config path on the setup for now, since salt/syspaths.py only  got fixed in 2015.5.0
++++ USE_SETUPTOOLS=1 /opt/local/bin/python setup.py install --salt-config-dir="$_SALT_ETC_DIR" || USE_SETUPTOOLS=1 /opt/local/bin/python setup.py --salt-config-dir="$_SALT_ETC_DIR" install || return 1
     return 0
 }
 

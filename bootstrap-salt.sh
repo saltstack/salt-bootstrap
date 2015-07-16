@@ -4229,7 +4229,7 @@ install_smartos_stable() {
 install_smartos_git() {
     # Use setuptools in order to also install dependencies
     # lets force our config path on the setup for now, since salt/syspaths.py only  got fixed in 2015.5.0
-    USE_SETUPTOOLS=1 /opt/local/bin/python setup.py install --salt-config-dir="$_SALT_ETC_DIR" || return 1
++++ USE_SETUPTOOLS=1 /opt/local/bin/python setup.py install --salt-config-dir="$_SALT_ETC_DIR" || USE_SETUPTOOLS=1 /opt/local/bin/python setup.py --salt-config-dir="$_SALT_ETC_DIR" install || return 1
     return 0
 }
 

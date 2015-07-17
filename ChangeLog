@@ -1,4 +1,4 @@
-Version 2015.xx.xx:
+Version 2015.07.17:
 	* Make sure setuptools is installed before using it. #598.
 	* `systemd` is only fully supported from 15.04 onwards. #602
 	* Fix debian mirrors issue. Thanks Wolodja Wentland(babilen). #606

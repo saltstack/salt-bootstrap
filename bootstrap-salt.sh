@@ -4213,7 +4213,8 @@ install_smartos_deps() {
 install_smartos_git_deps() {
     install_smartos_deps || return 1
 
-    if [ "$(which git)" = "" ]; then
+    which git > /dev/null 2>&1
+    if [ $? -eq 1 ]; then
         pkgin -y install git || return 1
     fi
 

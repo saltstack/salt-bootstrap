@@ -6,6 +6,7 @@ Version 2015.xx.xx:
 	* Allow skipping services. Thanks denmat. #455
 	* Fix missing Debian init script. #607 saltstack/salt#25270 and saltstack/salt#25456
 	* Fix SmartOS etc path. Thanks Bret Fisher. #624.
+	* Fix possible unbound variable in Gentoo. #625.
 
 Version 2015.05.07:
 	* Lower required requests version dependency. Use system requests package where possible.

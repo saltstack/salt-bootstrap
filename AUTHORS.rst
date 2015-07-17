@@ -13,11 +13,13 @@ Angelo Gründler             plueschopath           angelo.gruendler@w1r3.net
 Ari Aosved                  devaos                 ari.aosved@gmail.com
 Boris Feld                  Lothiraldan
 Brad Thurber                bradthurber
+Bret Fisher                 BretFisher             bret@fishbrains.com
 bruce-one                   bruce-one
 C. R. Oldham                cro                    cr@saltstack.com
 Cam                         camereonsparr
 Chris Rebert                cvrebert               chris.rebert@hulu.com
 Christer Edwards            cedwards
+denmat                      denmat
 Dag Viggo Lokøen            dagvl                  dag.viggo@lokoen.org
 Dan Mick                    dmick                  dan.mick@inktank.com
 David J. Felix              DavidJFelix
@@ -41,6 +43,7 @@ Jeff Strunk                 jstrunk
 Juan A. Moyano              wincus                 wincus.public@gmail.com
 Karl Grzeszczak             karlgrz
 Kenneth Wilke               KennethWilke
+lomeroe                     lomeroe
 Liu Xiaohui                 oreh                   herolxh@gmail.com
 Mark Lee                    malept
 markgaylard                 markgaylard
@@ -73,5 +76,6 @@ Tony Narlock                tony
 Valentin Bud                valentinbud            valentin@databus.pro
 Vladimir Kozhukalov         kozhukalov
 Whit Morriss                whitmo                 whit@nocoast.us
+Wolodja Wentland            babilen                w@babilen5.org
 Wout                        wfhg
 ==========================  =====================  ============================

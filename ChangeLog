@@ -1,3 +1,14 @@
+Version 2015.07.17:
+	* Make sure setuptools is installed before using it. #598.
+	* `systemd` is only fully supported from 15.04 onwards. #602
+	* Fix debian mirrors issue. Thanks Wolodja Wentland(babilen). #606
+	* Fix python-jinja2 repo move on RHEL6. Thanks lomeroe. #621
+	* Allow skipping services. Thanks denmat. #455
+	* Fix missing Debian init script. #607 saltstack/salt#25270 and saltstack/salt#25456
+	* Fix SmartOS etc path. Thanks Bret Fisher. #624
+	* Fix possible unbound variable in Gentoo. #625
+	* Properly detect the git binary in SmartOS. #611
+
 Version 2015.05.07:
 	* Lower required requests version dependency. Use system requests package where possible.
 	* Allow Ubuntu alternate ppas. Thanks Peter Tripp(notpeter). #563

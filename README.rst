@@ -61,6 +61,9 @@ Install a specific version from git using ``wget``:
   wget -O install_salt.sh https://bootstrap.saltstack.com
   sudo sh install_salt.sh -P git v0.16.4
 
+On the above example we added `-P` which will allow PIP packages to be installed if required but 
+it's no a necessary flag for git based bootstraps.
+
 
 If you already have python installed, ``python 2.6``, then it's as easy as:
 

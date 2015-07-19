@@ -1,3 +1,6 @@
+Version 2015.xx.xx:
+	* Fix tornado installation in Ubuntu. Thanks Yushi Nakai. #627
+
 Version 2015.07.17:
 	* Make sure setuptools is installed before using it. #598.
 	* `systemd` is only fully supported from 15.04 onwards. #602

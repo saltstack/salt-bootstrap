@@ -1874,7 +1874,7 @@ install_ubuntu_git_deps() {
             if [ "$(which pip)" = "" ]; then
                 __apt_get_install_noinput python-setuptools python-pip
             fi
-            pip install -U "'${__REQUIRED_TORNADO}'"
+            pip install -U "${__REQUIRED_TORNADO}"
         fi
     fi
 

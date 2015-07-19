@@ -4226,7 +4226,7 @@ install_smartos_git_deps() {
             if [ "$(which pip)" = "" ]; then
                 pkgin -y install py27-pip
             fi
-            pip install -U "'${__REQUIRED_TORNADO}'"
+            pip install -U "${__REQUIRED_TORNADO}"
         fi
     fi
 

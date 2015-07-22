@@ -1766,14 +1766,18 @@ install_ubuntu_deps() {
     # Need python-apt for managing packages via Salt
     __PACKAGES="${__PACKAGES} python-apt"
 
-    echoinfo "Installing Python Requests/Chardet from Chris Lea's PPA repository"
-    if [ "$DISTRO_MAJOR_VERSION" -gt 11 ] || ([ "$DISTRO_MAJOR_VERSION" -eq 11 ] && [ "$DISTRO_MINOR_VERSION" -gt 04 ]); then
-        # Above Ubuntu 11.04 add a -y flag
-        add-apt-repository -y "ppa:chris-lea/python-requests" || return 1
-        add-apt-repository -y "ppa:chris-lea/python-chardet" || return 1
-    else
-        add-apt-repository "ppa:chris-lea/python-requests" || return 1
-        add-apt-repository "ppa:chris-lea/python-chardet" || return 1
+    if [ "$DISTRO_MAJOR_VERSION" -lt 14 ]; then
+        echoinfo "Installing Python Requests/Chardet from Chris Lea's PPA repository"
+        if [ "$DISTRO_MAJOR_VERSION" -gt 11 ] || ([ "$DISTRO_MAJOR_VERSION" -eq 11 ] && [ "$DISTRO_MINOR_VERSION" -gt 04 ]); then
+            # Above Ubuntu 11.04 add a -y flag
+            add-apt-repository -y "ppa:chris-lea/python-requests" || return 1
+            add-apt-repository -y "ppa:chris-lea/python-chardet" || return 1
+            add-apt-repository -y "ppa:chris-lea/python-urllib3" || return 1
+        else
+            add-apt-repository "ppa:chris-lea/python-requests" || return 1
+            add-apt-repository "ppa:chris-lea/python-chardet" || return 1
+            add-apt-repository "ppa:chris-lea/python-urllib3" || return 1
+        fi
     fi
 
     __PACKAGES="${__PACKAGES} python-requests"

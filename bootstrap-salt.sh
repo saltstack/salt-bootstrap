@@ -1758,6 +1758,8 @@ install_ubuntu_deps() {
 
     __enable_universe_repository || return 1
 
+    __PIP_PACKAGES=""
+
     # Minimal systems might not have upstart installed, install it
     __PACKAGES="upstart"
 

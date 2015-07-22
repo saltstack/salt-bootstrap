@@ -426,8 +426,8 @@ elif [ "$ITYPE" = "stable" ]; then
         STABLE_REV="latest"
     else
         __check_unparsed_options "$*"
-        if [ "$(echo "$1" | egrep '^(latest|1\.6|1\.7|2014\.1|2014\.7|2015\.5)$')" = "" ]; then
-          echo "Unknown stable version: $1 (valid: 1.6, 1.7, 2014.1, 2014.7, 2015.5, latest)"
+        if [ "$(echo "$1" | egrep '^(latest|1\.6|1\.7|2014\.1|2014\.7|2015\.5|2015\.8)$')" = "" ]; then
+          echo "Unknown stable version: $1 (valid: 1.6, 1.7, 2014.1, 2014.7, 2015.5, 2015.8, latest)"
           exit 1
         else
           STABLE_REV="$1"
@@ -1826,6 +1826,16 @@ install_ubuntu_stable_deps() {
         add-apt-repository -y "ppa:$STABLE_PPA" || return 1
     else
         add-apt-repository "ppa:$STABLE_PPA" || return 1
+    fi
+
+    if [ ! "$(echo "$STABLE_REV" | egrep '^(2015\.8|latest)$')" = "" ]; then
+        # We need a recent tornado package
+        __REQUIRED_TORNADO="tornado >= 4.0"
+        check_pip_allowed "You need to allow pip based installations (-P) in order to install the python package '${__REQUIRED_TORNADO}'"
+        if [ "$(which pip)" = "" ]; then
+            __apt_get_install_noinput python-setuptools python-pip
+        fi
+        pip install -U "${__REQUIRED_TORNADO}"
     fi
 
     apt-get update

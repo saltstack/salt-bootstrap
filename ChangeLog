@@ -1,4 +1,4 @@
-Version 2015.xx.xx:
+Version 2015.07.22:
 	* Fix tornado installation in Ubuntu. Thanks Yushi Nakai. #627
 	* Install tornado using pip on Ubuntu for Salt's v2015.8.xx onward stable releases.
 	* Install requests on Ubuntu from Chris Lea's PPA. #630

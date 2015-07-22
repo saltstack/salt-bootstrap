@@ -100,14 +100,14 @@ If ([IntPtr]::Size -eq 4) {
 }
 
 # Download minion setup file
-Write-Host "Downloading Salt minion installer Salt-Minion-$version-$arch-Setup.exe"
+Write-Host -NoNewline "Downloading Salt minion installer Salt-Minion-$version-$arch-Setup.exe"
 $webclient = New-Object System.Net.WebClient
 $url = "https://docs.saltstack.com/downloads/Salt-Minion-$version-$arch-Setup.exe"
 $file = "C:\tmp\salt.exe"
 $webclient.DownloadFile($url, $file)
 
 # Install minion silently
-Write-Host "Installing Salt minion"
+Write-Host -NoNewline "Installing Salt minion"
 #Wait for process to exit before continuing.
 C:\tmp\salt.exe /S /minion-name=$minion /master=$master | Out-Null
 
@@ -141,14 +141,14 @@ If($runservice) {
   # If the salt-minion service is still not running, something probably
   # went wrong and user intervention is required - report failure.
   If ($service.Status -eq "Stopped") {
-    Write-Host "Failed to start salt minion"
+    Write-Host -NoNewline "Failed to start salt minion"
     exit 1
   }
 }
 Else {
-  Write-Host "Stopping salt minion and setting it to 'Manual'"
+  Write-Host -NoNewline "Stopping salt minion and setting it to 'Manual'"
   Set-Service "salt-minion" -startupType "Manual"
   Stop-Service "salt-minion"
 }
 
-Write-Host "Salt minion successfully installed"
+Write-Host -NoNewline "Salt minion successfully installed"

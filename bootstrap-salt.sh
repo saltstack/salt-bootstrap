@@ -1759,37 +1759,44 @@ install_ubuntu_deps() {
     __enable_universe_repository || return 1
 
     # Minimal systems might not have upstart installed, install it
-    __apt_get_install_noinput upstart
+    __PACKAGES="upstart"
 
     # Need python-apt for managing packages via Salt
-    __apt_get_install_noinput python-apt
+    __PACKAGES="${__PACKAGES} python-apt"
+
+    echoinfo "Installing Python Requests from Chris Lea's PPA repository"
+    if [ "$DISTRO_MAJOR_VERSION" -gt 11 ] || ([ "$DISTRO_MAJOR_VERSION" -eq 11 ] && [ "$DISTRO_MINOR_VERSION" -gt 04 ]); then
+        # Above Ubuntu 11.04 add a -y flag
+        add-apt-repository -y "ppa:chris-lea/python-requests" || return 1
+    else
+        add-apt-repository "ppa:chris-lea/python-requests" || return 1
+    fi
+
+    __PACKAGES="${__PACKAGES} python-requests"
 
     if [ "$DISTRO_MAJOR_VERSION" -gt 12 ] || ([ "$DISTRO_MAJOR_VERSION" -eq 12 ] && [ "$DISTRO_MINOR_VERSION" -gt 03 ]); then
         if ([ "$DISTRO_MAJOR_VERSION" -lt 15 ] && [ "$_ENABLE_EXTERNAL_ZMQ_REPOS" -eq $BS_TRUE ]); then
             echoinfo "Installing ZMQ>=4/PyZMQ>=14 from Chris Lea's PPA repository"
             add-apt-repository -y ppa:chris-lea/zeromq || return 1
-            apt-get update
         fi
-        __apt_get_install_noinput python-requests
-        __PIP_PACKAGES=""
-    else
-        check_pip_allowed "You need to allow pip based installations (-P) in order to install the python package 'requests'"
-        __apt_get_install_noinput python-setuptools python-pip
-        # shellcheck disable=SC2089
-        __PIP_PACKAGES="requests>=$_PY_REQUESTS_MIN_VERSION"
     fi
 
     # Additionally install procps and pciutils which allows for Docker boostraps. See 366#issuecomment-39666813
-    __apt_get_install_noinput procps pciutils || return 1
+    __PACKAGES="${__PACKAGES} procps pciutils"
+
 
     if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
         check_pip_allowed "You need to allow pip based installations (-P) in order to install 'apache-libcloud'"
-        if [ "${__PIP_PACKAGES}" = "" ]; then
-            __apt_get_install_noinput python-pip
+        if [ "$(which pip)" = "" ]; then
+            __PACKAGES="${__PACKAGES} python-setuptools python-pip"
         fi
         # shellcheck disable=SC2089
         __PIP_PACKAGES="${__PIP_PACKAGES} 'apache-libcloud>=$_LIBCLOUD_MIN_VERSION'"
     fi
+
+    apt-get update
+    # shellcheck disable=SC2086,SC2090
+    __apt_get_install_noinput ${__PACKAGES} || return 1
 
     if [ "${__PIP_PACKAGES}" != "" ]; then
         # shellcheck disable=SC2086,SC2090

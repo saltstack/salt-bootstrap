@@ -1773,10 +1773,12 @@ install_ubuntu_deps() {
             add-apt-repository -y "ppa:chris-lea/python-requests" || return 1
             add-apt-repository -y "ppa:chris-lea/python-chardet" || return 1
             add-apt-repository -y "ppa:chris-lea/python-urllib3" || return 1
+            add-apt-repository -y "ppa:chris-lea/python-crypto" || return 1
         else
             add-apt-repository "ppa:chris-lea/python-requests" || return 1
             add-apt-repository "ppa:chris-lea/python-chardet" || return 1
             add-apt-repository "ppa:chris-lea/python-urllib3" || return 1
+            add-apt-repository "ppa:chris-lea/python-crypto" || return 1
         fi
     fi
 

@@ -1,6 +1,7 @@
 Version 2015.07.xx:
 	* Fix python-requests installations for Ubuntu >= 14.04 LTS. #631, #632, #633
 	* Install python-crypto from Chris Lea's PPA for Ubuntu < 14.04
+	* Exit the git checkout directory before deleting it. Thanks Bret Fisher. #634
 
 
 Version 2015.07.22:

@@ -504,6 +504,7 @@ __exit_cleanup() {
         if [ $_KEEP_TEMP_FILES -eq $BS_FALSE ]; then
             # Clean up the checked out repository
             echodebug "Cleaning up the Salt Temporary Git Repository"
+            cd "${__SALT_GIT_CHECKOUT_PARENT_DIR}"
             rm -rf "${__SALT_GIT_CHECKOUT_DIR}"
         else
             echowarn "Not cleaning up the Salt Temporary git repository on request"

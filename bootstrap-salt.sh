@@ -282,7 +282,7 @@ usage() {
       'install_<distro>_check_services' checks. You can also do this by
       touching /tmp/disable_salt_checks on the target host. Defaults \${BS_FALSE}
   -H  Use the specified http proxy for the installation
-  -Z  Enable external software source for newer ZeroMQ(Only available for RHEL/CentOS/Fedora based distributions)
+  -Z  Enable external software source for newer ZeroMQ(Only available for RHEL/CentOS/Fedora/Ubuntu based distributions)
 
 EOT
 }   # ----------  end of function usage  ----------

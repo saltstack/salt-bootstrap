@@ -1,3 +1,8 @@
+Version 2015.07.xx:
+	* Fix python-requests installations for Ubuntu >= 14.04 LTS. #631, #632, #633
+	* Install python-crypto from Chris Lea's PPA for Ubuntu < 14.04
+
+
 Version 2015.07.22:
 	* Fix tornado installation in Ubuntu. Thanks Yushi Nakai. #627
 	* Install tornado using pip on Ubuntu for Salt's v2015.8.xx onward stable releases.

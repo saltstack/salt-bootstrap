@@ -1771,9 +1771,11 @@ install_ubuntu_deps() {
         # Above Ubuntu 11.04 add a -y flag
         add-apt-repository -y "ppa:chris-lea/python-requests" || return 1
         add-apt-repository -y "ppa:chris-lea/python-chardet" || return 1
+        add-apt-repository -y "ppa:chris-lea/python-urllib3" || return 1
     else
         add-apt-repository "ppa:chris-lea/python-requests" || return 1
         add-apt-repository "ppa:chris-lea/python-chardet" || return 1
+        add-apt-repository "ppa:chris-lea/python-urllib3" || return 1
     fi
 
     __PACKAGES="${__PACKAGES} python-requests"

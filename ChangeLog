@@ -4,6 +4,7 @@ Version 2015.07.xx:
 	* Exit the git checkout directory before deleting it. Thanks Bret Fisher. #634
 	* Use prefix /usr for centos git install. Thanks Stanislav B. #638
 	* Drop Ubuntu EOL versions. All Ubuntu version before 12.04.
+	* Make sure python-dev is installed wheb trying to install tornado from PyPi. #640
 
 
 Version 2015.07.22:

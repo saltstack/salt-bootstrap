@@ -70,6 +70,7 @@ Roberto Aguilar             rca                    roberto@baremetal.io
 Roman Inflianskas           rominf                 infroma@gmail.com
 Ronald van Zantvoort        The-Loeki              ronald@pcextreme.nl
 Skyler Berg                 skylerberg             skylertheberg@gmail.com
+Stanislav B                 stanislavb
 Tate Eskew                  tateeskew
 Thomas S. Hatch             thatch45               thatch45@saltstack.com
 Tony Narlock                tony

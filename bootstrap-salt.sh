@@ -2846,6 +2846,46 @@ __install_saltstack_copr_salt_el5_repository() {
     return 0
 }
 
+__install_saltstack_rhel5_repository() {
+    if [ ! -s /etc/yum.repos.d/repo-saltstack-el5.repo ]; then
+        cat <<_eof > /etc/yum.repos.d/repo-saltstack-el5.repo
+[repo-saltstack-el5]
+name=SaltStack EL5 Repo
+baseurl=https://repo.saltstack.com/yum/rhel5/
+skip_if_unavailable=True
+gpgcheck=1
+gpgkey=https://repo.saltstack.com/yum/rhel5/SALTSTACK-EL5-GPG-KEY.pub
+enabled=1
+enabled_metadata=1
+_eof
+
+        __fetch_url /tmp/repo-saltstack-el5.pub "https://repo.saltstack.com/yum/rhel5/SALTSTACK-EL5-GPG-KEY.pub" || return 1
+        rpm --import /tmp/repo-saltstack-el5.pub || return 1
+        rm /tmp/repo-saltstack-el5.pub
+    fi
+    return 0
+}
+
+__install_saltstack_rhel_repository() {
+    if [ ! -s "/etc/yum.repos.d/repo-saltstack-el${DISTRO_MAJOR_VERSION}.repo" ]; then
+        cat <<_eof > "/etc/yum.repos.d/repo-saltstack-el${DISTRO_MAJOR_VERSION}.repo"
+[repo-saltstack-el${DISTRO_MAJOR_VERSION}]
+name=SaltStack EL${DISTRO_MAJOR_VERSION} Repo
+baseurl=https://repo.saltstack.com/yum/rhel${DISTRO_MAJOR_VERSION}/
+skip_if_unavailable=True
+gpgcheck=1
+gpgkey=https://repo.saltstack.com/yum/rhel${DISTRO_MAJOR_VERSION}/SALTSTACK-GPG-KEY.pub
+enabled=1
+enabled_metadata=1
+_eof
+
+        __fetch_url /tmp/repo-saltstack.pub "https://repo.saltstack.com/yum/rhel${DISTRO_MAJOR_VERSION}/SALTSTACK-GPG-KEY.pub" || return 1
+        rpm --import /tmp/repo-saltstack.pub || return 1
+        rm /tmp/repo-saltstack.pub
+    fi
+    return 0
+}
+
 __install_saltstack_copr_salt_repository() {
     echoinfo "Adding SaltStack's COPR repository"
 
@@ -2867,14 +2907,9 @@ __install_saltstack_copr_salt_repository() {
 install_centos_stable_deps() {
     __install_epel_repository || return 1
     if [ "$DISTRO_MAJOR_VERSION" -eq 5 ]; then
-        __install_saltstack_copr_salt_el5_repository || return 1
-    fi
-
-    __install_saltstack_copr_salt_repository || return 1
-
-    if [ "$_ENABLE_EXTERNAL_ZMQ_REPOS" -eq $BS_TRUE ] && [ "$DISTRO_MAJOR_VERSION" -gt 5 ]; then
-        yum -y install python-hashlib || return 1
-        __install_saltstack_copr_zeromq_repository || return 1
+        __install_saltstack_rhel5_repository || return 1
+    elif [ "$DISTRO_MAJOR_VERSION" -gt 5 ]; then
+        __install_saltstack_rhel_repository || return 1
     fi
 
     if [ -f "${__SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" ]; then

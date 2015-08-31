@@ -2916,7 +2916,11 @@ install_centos_stable_deps() {
         # We're on the develop branch, install whichever tornado is on the requirements file
         __REQUIRED_TORNADO="$(grep tornado "${__SALT_GIT_CHECKOUT_DIR}/requirements/base.txt")"
         if [ "${__REQUIRED_TORNADO}" != "" ]; then
-            yum install -y python-tornado
+            if [ "$DISTRO_MAJOR_VERSION" -eq 5 ]; then
+                yum install -y python26-tornado
+            else
+                yum install -y python-tornado
+            fi
         fi
     fi
 
@@ -3055,7 +3059,11 @@ install_centos_git_deps() {
         # We're on the develop branch, install whichever tornado is on the requirements file
         __REQUIRED_TORNADO="$(grep tornado "${__SALT_GIT_CHECKOUT_DIR}/requirements/base.txt")"
         if [ "${__REQUIRED_TORNADO}" != "" ]; then
-            yum install -y python-tornado
+            if [ "$DISTRO_MAJOR_VERSION" -eq 5 ]; then
+                yum install -y python26-tornado
+            else
+                yum install -y python-tornado
+            fi
         fi
     fi
 

@@ -2330,38 +2330,30 @@ install_debian_8_deps() {
         apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 7638D0442B90D010 || return 1
     fi
 
-    # Debian Backports
-    if [ "$(grep -R 'jessie-backports' /etc/apt | grep -v "^#")" = "" ]; then
-        echo "deb http://httpredir.debian.org/debian jessie-backports main" >> \
-            /etc/apt/sources.list.d/backports.list
-    fi
-
     # Saltstack's Stable Debian repository
-    if [ "$(grep -R 'jessie-saltstack' /etc/apt)" = "" ]; then
-        echo "deb http://debian.saltstack.com/debian jessie-saltstack main" >> \
+    if [ "$(grep -R 'deb8 jessie contrib' /etc/apt)" = "" ]; then
+        echo "deb http://repo.saltstack.com/apt/deb8 jessie contrib" >> \
             /etc/apt/sources.list.d/saltstack.list
     fi
 
     # shellcheck disable=SC2086
-    wget $_WGET_ARGS -q http://debian.saltstack.com/debian-salt-team-joehealy.gpg.key -O - | apt-key add - || return 1
+    wget $_WGET_ARGS -q https://repo.saltstack.com/apt/deb8/SALTSTACK-GPG-KEY.pub -O - | apt-key add - || return 1
 
     apt-get update || return 1
-    __apt_get_install_noinput -t jessie-backports libzmq3 libzmq3-dev python-zmq python-requests python-apt || return 1
+    __PACKAGES="libzmq3 libzmq3-dev python-zmq python-requests python-apt"
 
     # Additionally install procps and pciutils which allows for Docker boostraps. See 366#issuecomment-39666813
     __PACKAGES="procps pciutils"
     # Also install python-requests
     __PACKAGES="${__PACKAGES} python-requests"
     # shellcheck disable=SC2086
-    __apt_get_install_noinput ${__PACKAGES} || return 1
 
     if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
-        check_pip_allowed "You need to allow pip based installations (-P) in order to install apache-libcloud"
-        __PACKAGES="build-essential python-dev python-pip"
-        # shellcheck disable=SC2086
-        __apt_get_install_noinput ${__PACKAGES} || return 1
-        pip install -U "apache-libcloud>=$_LIBCLOUD_MIN_VERSION"
+        # Install python-libcloud if asked to
+        __PACKAGES="${__PACKAGES} python-libcloud"
     fi
+
+    __apt_get_install_noinput ${__PACKAGES} || return 1
 
     if [ "$_UPGRADE_SYS" -eq $BS_TRUE ]; then
         __apt_get_upgrade_noinput || return 1
@@ -2472,7 +2464,42 @@ install_debian_7_git_deps() {
 
 install_debian_8_git_deps() {
     install_debian_8_deps || return 1
-    install_debian_git_deps || return 1  # Grab the actual deps
+    # No user interaction, libc6 restart services for example
+    export DEBIAN_FRONTEND=noninteractive
+
+    if [ "$(which git)" = "" ]; then
+        __apt_get_install_noinput git || return 1
+    fi
+
+    __apt_get_install_noinput lsb-release python python-pkg-resources python-crypto \
+        python-jinja2 python-m2crypto python-yaml msgpack-python python-pip || return 1
+
+    __git_clone_and_checkout || return 1
+
+    if [ -f "${__SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" ]; then
+        # We're on the develop branch, install tornado
+        __REQUIRED_TORNADO="$(grep tornado "${__SALT_GIT_CHECKOUT_DIR}/requirements/base.txt")"
+        if [ "${__REQUIRED_TORNADO}" != "" ]; then
+            __apt_get_install_noinput python-tornado
+        fi
+    fi
+
+    # Let's trigger config_salt()
+    if [ "$_TEMP_CONFIG_DIR" = "null" ]; then
+        _TEMP_CONFIG_DIR="${__SALT_GIT_CHECKOUT_DIR}/conf/"
+        CONFIG_SALT_FUNC="config_salt"
+    fi
+
+    if [ "$_UPGRADE_SYS" -eq $BS_TRUE ]; then
+        __apt_get_upgrade_noinput || return 1
+    fi
+
+    if [ "${_EXTRA_PACKAGES}" != "" ]; then
+        echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
+        # shellcheck disable=SC2086
+        __apt_get_install_noinput ${_EXTRA_PACKAGES} || return 1
+    fi
+
     return 0
 }
 

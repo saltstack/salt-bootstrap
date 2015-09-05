@@ -18,6 +18,7 @@ bruce-one                   bruce-one
 C. R. Oldham                cro                    cr@saltstack.com
 Cam                         camereonsparr
 Chris Rebert                cvrebert               chris.rebert@hulu.com
+Chris Buechler              cbuechler              cmb@pfsense.org
 Christer Edwards            cedwards
 denmat                      denmat
 Dag Viggo Lokøen            dagvl                  dag.viggo@lokoen.org

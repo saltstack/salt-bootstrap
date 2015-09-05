@@ -4011,6 +4011,10 @@ install_freebsd_10_stable_deps() {
     install_freebsd_9_stable_deps
 }
 
+install_freebsd_11_stable_deps() {
+    install_freebsd_9_stable_deps
+}
+
 config_freebsd_salt() {
     # Set _SALT_ETC_DIR to ports default
     _SALT_ETC_DIR=${BS_SALT_ETC_DIR:-/usr/local/etc/salt}
@@ -4085,6 +4089,10 @@ install_freebsd_9_stable() {
 }
 
 install_freebsd_10_stable() {
+    install_freebsd_9_stable
+}
+
+install_freebsd_11_stable() {
     install_freebsd_9_stable
 }
 
@@ -4166,6 +4174,10 @@ install_freebsd_9_stable_post() {
 }
 
 install_freebsd_10_stable_post() {
+    install_freebsd_9_stable_post
+}
+
+install_freebsd_11_stable_post() {
     install_freebsd_9_stable_post
 }
 

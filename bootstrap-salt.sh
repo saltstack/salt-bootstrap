@@ -3189,7 +3189,7 @@ __test_rhel_optionals_packages() {
     yum list installed yum-utils > /dev/null 2>&1 || yum -y install yum-utils --enablerepo=${_EPEL_REPO} || return 1
 
     if [ "$DISTRO_MAJOR_VERSION" -ge 7 ]; then
-        yum-config-manager --enable \*server-optional || return 1
+        yum-config-manager --enable \*server-optional-rpms || return 1
     fi
 
     if [ "$DISTRO_MAJOR_VERSION" -ge 6 ]; then

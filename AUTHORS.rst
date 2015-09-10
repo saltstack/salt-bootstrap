@@ -68,6 +68,7 @@ Pedro Paulo                 pedropaulovc
 Peter Tripp                 notpeter
 ptonelli                    ptonelli
 Raymond Barbiero            visualphoenix
+Rob Eden                    hedinfaok
 Roberto Aguilar             rca                    roberto@baremetal.io
 Roman Inflianskas           rominf                 infroma@gmail.com
 Ronald van Zantvoort        The-Loeki              ronald@pcextreme.nl

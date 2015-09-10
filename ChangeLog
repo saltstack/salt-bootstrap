@@ -3,6 +3,7 @@ Version 2015.xx.xx:
 	* Add FreeBSD 11 support. Thanks Chris Buechler(cbuechler). #653
 	* Move RHEL installations to use repo.saltstack.com
 	* Move Debian 8 installation to use repo.saltstack.com
+	* Fix error finding python-jinja2 in RHEL 7. Thanks Rob Eden(hedinfaok). #654
 
 
 Version 2015.08.06:

@@ -28,6 +28,7 @@ Diego Woitasen              diegows                diego@flugel.it
 Elias Probst                eliasp
 Erik Ankrom                 erikankrom
 Erik Johnson                terminalmage           erik@saltstack.com
+EYJ                         eyj
 Forrest Alvarez             gravyboat
 Fred Reimer                 freimer                freimer@freimer.org
 Geoff Garside               geoffgarside           geoff@geoffgarside.co.uk

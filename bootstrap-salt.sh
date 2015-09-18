@@ -2332,13 +2332,13 @@ install_debian_8_deps() {
     fi
 
     # Saltstack's Stable Debian repository
-    if [ "$(grep -R 'deb8 jessie contrib' /etc/apt)" = "" ]; then
-        echo "deb http://repo.saltstack.com/apt/deb8 jessie contrib" >> \
+    if [ "$(grep -R 'debian jessie contrib' /etc/apt)" = "" ]; then
+        echo "deb http://repo.saltstack.com/apt/debian jessie contrib" >> \
             /etc/apt/sources.list.d/saltstack.list
     fi
 
     # shellcheck disable=SC2086
-    wget $_WGET_ARGS -q https://repo.saltstack.com/apt/deb8/SALTSTACK-GPG-KEY.pub -O - | apt-key add - || return 1
+    wget $_WGET_ARGS -q https://repo.saltstack.com/apt/debian/SALTSTACK-GPG-KEY.pub -O - | apt-key add - || return 1
 
     apt-get update || return 1
     __PACKAGES="libzmq3 libzmq3-dev python-zmq python-requests python-apt"

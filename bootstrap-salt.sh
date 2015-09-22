@@ -1322,18 +1322,16 @@ __git_clone_and_checkout() {
         if [ "$__SHALLOW_CLONE" -eq "${BS_FALSE}" ]; then
             git clone "$_SALT_REPO_URL" "$__SALT_CHECKOUT_REPONAME" || return 1
             cd "${__SALT_GIT_CHECKOUT_DIR}"
-        fi
 
-        if [ "$(echo "$_SALT_REPO_URL" | grep -c -e '\(\(git\|https\)://github\.com/\|git@github\.com:\)saltstack/salt\.git')" -eq 0 ]; then
-            # We need to add the saltstack repository as a remote and fetch tags for proper versioning
-            echoinfo "Adding SaltStack's Salt repository as a remote"
-            git remote add upstream "$_SALTSTACK_REPO_URL" || return 1
-            echodebug "Fetching upstream(SaltStack's Salt repository) git tags"
-            git fetch --tags upstream || return 1
-            GIT_REV="origin/$GIT_REV"
-        fi
+            if [ "$(echo "$_SALT_REPO_URL" | grep -c -e '\(\(git\|https\)://github\.com/\|git@github\.com:\)saltstack/salt\.git')" -eq 0 ]; then
+                # We need to add the saltstack repository as a remote and fetch tags for proper versioning
+                echoinfo "Adding SaltStack's Salt repository as a remote"
+                git remote add upstream "$_SALTSTACK_REPO_URL" || return 1
+                echodebug "Fetching upstream(SaltStack's Salt repository) git tags"
+                git fetch --tags upstream || return 1
+                GIT_REV="origin/$GIT_REV"
+            fi
 
-        if [ "$__SHALLOW_CLONE" -eq "${BS_FALSE}" ]; then
             echodebug "Checking out $GIT_REV"
             git checkout "$GIT_REV" || return 1
         fi

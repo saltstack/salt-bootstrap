@@ -1,4 +1,4 @@
-#!/bin/sh -
+h!/bin/sh -
 #======================================================================================================================
 # vim: softtabstop=4 shiftwidth=4 expandtab fenc=utf-8 spell spelllang=en cc=120
 #======================================================================================================================
@@ -862,6 +862,10 @@ __gather_linux_system_info() {
                     debian      )
                         n="Debian"
                         v=$(__derive_debian_numeric_version "$v")
+                        ;;
+                    sles        )
+                        n="SUSE"
+                        v="${rv}"
                         ;;
                     *           )
                         n=${nn}
@@ -2852,14 +2856,22 @@ __install_saltstack_copr_salt_repository() {
     if [ "${DISTRO_NAME_L}" = "fedora" ]; then
         __REPOTYPE="${DISTRO_NAME_L}"
     else
-        __REPOTYPE="epel"
+        __REPOTYPE="rhel"
     fi
-
-    __REPO_FILENAME="saltstack-salt-${__REPOTYPE}-${DISTRO_MAJOR_VERSION}.repo"
-
+    __REPO_FILENAME="saltstack-${__REPOTYPE}${DISTRO_MAJOR_VERSION}.repo"
     if [ ! -s "/etc/yum.repos.d/${__REPO_FILENAME}" ]; then
-        __fetch_url "/etc/yum.repos.d/${__REPO_FILENAME}" \
-            "http://copr.fedoraproject.org/coprs/saltstack/salt/repo/${__REPOTYPE}-${DISTRO_MAJOR_VERSION}/${__REPO_FILENAME}" || return 1
+        if [ -f /bin/rpm ]; then
+            # Get the key
+            __SALTKEY="SALTSTACK-GPG-KEY.pub"
+            __fetch_url  "/tmp/${__SALTKEY}" \
+                "http://repo.saltstack.com/yum/${__REPOTYPE}${DISTRO_MAJOR_VERSION}/${__SALTKEY}" || return 1
+            # Import package signing key
+            /bin/rpm --import /tmp/${__SALTKEY}
+            rm -f /tmp/${__SALTKEY}
+        fi
+        # Pull down repo file
+        __fetch_url  "/etc/yum.repos.d/${__REPO_FILENAME}" \
+             "http://repo.saltstack.com/yum/${__REPOTYPE}${DISTRO_MAJOR_VERSION}/${__REPO_FILENAME}" || return 1
     fi
     return 0
 }
@@ -4457,6 +4469,9 @@ install_opensuse_stable_deps() {
     # shellcheck disable=SC2086
     __zypper_install ${__PACKAGES} || return 1
 
+    # Fix for OpenSUSE 13.2 and 2015.8 - gcc should not be required. Work around until package is fixed by SuSE
+    _EXTRA_PACKAGES="${_EXTRA_PACKAGES} gcc python-devel libgit2-devel" 
+
     if [ "${_EXTRA_PACKAGES}" != "" ]; then
         echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
         # shellcheck disable=SC2086
@@ -4624,8 +4639,200 @@ install_opensuse_check_services() {
 
 #######################################################################################################################
 #
-#    SuSE Install Functions.
+#   SUSE Enterprise 12
 #
+
+install_suse_12_stable_deps() {
+    SUSE_PATCHLEVEL=$(awk '/PATCHLEVEL/ {print $3}' /etc/SuSE-release )
+
+    if [ "${SUSE_PATCHLEVEL}" != "" ]; then
+        DISTRO_PATCHLEVEL="_SP${SUSE_PATCHLEVEL}"
+    fi
+
+    # SLES 12 repo name does not use a patch level so PATCHLEVEL will need to be updated with SP1
+    #DISTRO_REPO="SLE_${DISTRO_MAJOR_VERSION}${DISTRO_PATCHLEVEL}"
+
+    DISTRO_REPO="SLE_${DISTRO_MAJOR_VERSION}"
+
+    # Is the repository already known
+    __zypper repos | grep devel_languages_python >/dev/null 2>&1
+    if [ $? -eq 1 ]; then
+        # zypper does not yet know nothing about devel_languages_python
+        __zypper addrepo --refresh \
+            "http://download.opensuse.org/repositories/devel:/languages:/python/${DISTRO_REPO}/devel:languages:python.repo" || return 1
+    fi
+
+    __zypper --gpg-auto-import-keys refresh || return 1
+
+    if [ "$_UPGRADE_SYS" -eq $BS_TRUE ]; then
+        __zypper --gpg-auto-import-keys update || return 1
+    fi
+
+    # Salt needs python-zypp installed in order to use the zypper module
+    __PACKAGES="python-zypp"
+    # shellcheck disable=SC2089
+    __PACKAGES="${__PACKAGES} libzmq3 python python-Jinja2 python-msgpack-python"
+    __PACKAGES="${__PACKAGES} python-pycrypto python-pyzmq python-pip python-xml python-requests"
+
+    if [ "$SUSE_PATCHLEVEL" -eq 1 ]; then
+        check_pip_allowed
+        echowarn "PyYaml will be installed using pip"
+    else
+        __PACKAGES="${__PACKAGES} python-PyYAML"
+    fi
+
+    if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
+        __PACKAGES="${__PACKAGES} python-apache-libcloud"
+    fi
+
+    # SLES 11 SP3 ships with both python-M2Crypto-0.22.* and python-m2crypto-0.21 and we will be asked which
+    # we want to install, even with --non-interactive.
+    # Let's try to install the higher version first and then the lower one in case of failure
+    __zypper_install 'python-M2Crypto>=0.22' || __zypper_install 'python-M2Crypto>=0.21' || return 1
+    # shellcheck disable=SC2086,SC2090
+    __zypper_install ${__PACKAGES} || return 1
+
+    if [ "$SUSE_PATCHLEVEL" -eq 1 ]; then
+        # There's no python-PyYaml in SP1, let's install it using pip
+        pip install PyYaml || return 1
+    fi
+
+    # PIP based installs need to copy configuration files "by hand".
+    if [ "$SUSE_PATCHLEVEL" -eq 1 ]; then
+        # Let's trigger config_salt()
+        if [ "$_TEMP_CONFIG_DIR" = "null" ]; then
+            # Let's set the configuration directory to /tmp
+            _TEMP_CONFIG_DIR="/tmp"
+            CONFIG_SALT_FUNC="config_salt"
+
+            for fname in minion master syndic api; do
+
+                # Skip if not meant to be installed
+                [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
+                [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
+                [ $fname = "api" ] && ([ "$_INSTALL_MASTER" -eq $BS_FALSE ] || [ "$(which salt-${fname} 2>/dev/null)" = "" ]) && continue
+                [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
+
+                # Syndic uses the same configuration file as the master
+                [ $fname = "syndic" ] && fname=master
+
+                # Let's download, since they were not provided, the default configuration files
+                if [ ! -f "$_SALT_ETC_DIR/$fname" ] && [ ! -f "$_TEMP_CONFIG_DIR/$fname" ]; then
+                    # shellcheck disable=SC2086
+                    curl $_CURL_ARGS -s -o "$_TEMP_CONFIG_DIR/$fname" -L \
+                        "https://raw.githubusercontent.com/saltstack/salt/develop/conf/$fname" || return 1
+                fi
+            done
+        fi
+    fi
+
+    if [ "${_EXTRA_PACKAGES}" != "" ]; then
+        echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
+        # shellcheck disable=SC2086
+        __zypper_install ${_EXTRA_PACKAGES} || return 1
+    fi
+
+    return 0
+}
+
+install_suse_12_git_deps() {
+    install_suse_11_stable_deps || return 1
+
+    if [ "$(which git)" = "" ]; then
+        __zypper_install git  || return 1
+    fi
+
+    __git_clone_and_checkout || return 1
+
+    if [ -f "${__SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" ]; then
+        # We're on the develop branch, install whichever tornado is on the requirements file
+        __REQUIRED_TORNADO="$(grep tornado "${__SALT_GIT_CHECKOUT_DIR}/requirements/base.txt")"
+        if [ "${__REQUIRED_TORNADO}" != "" ]; then
+            __zypper_install python-tornado
+        fi
+    fi
+
+    # Let's trigger config_salt()
+    if [ "$_TEMP_CONFIG_DIR" = "null" ]; then
+        _TEMP_CONFIG_DIR="${__SALT_GIT_CHECKOUT_DIR}/conf/"
+        CONFIG_SALT_FUNC="config_salt"
+    fi
+
+    return 0
+}
+
+install_suse_12_stable() {
+    if [ "$SUSE_PATCHLEVEL" -gt 1 ]; then
+        install_opensuse_stable || return 1
+    else
+        # USE_SETUPTOOLS=1 To work around
+        # error: option --single-version-externally-managed not recognized
+        USE_SETUPTOOLS=1 pip install salt || return 1
+    fi
+    return 0
+}
+
+install_suse_12_git() {
+    install_opensuse_git || return 1
+    return 0
+}
+
+install_suse_12_stable_post() {
+    if [ "$SUSE_PATCHLEVEL" -gt 1 ]; then
+        install_opensuse_stable_post || return 1
+    else
+        for fname in minion master syndic api; do
+
+            # Skip if not meant to be installed
+            [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
+            [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
+            [ $fname = "api" ] && ([ "$_INSTALL_MASTER" -eq $BS_FALSE ] || [ "$(which salt-${fname} 2>/dev/null)" = "" ]) && continue
+            [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
+
+            if [ -f /bin/systemctl ]; then
+                # shellcheck disable=SC2086
+                curl $_CURL_ARGS -L "https://github.com/saltstack/salt/raw/develop/pkg/salt-$fname.service" \
+                    -o "/usr/lib/systemd/system/salt-$fname.service" || return 1
+                continue
+            fi
+
+            ## shellcheck disable=SC2086
+            #curl $_CURL_ARGS -L "https://github.com/saltstack/salt/raw/develop/pkg/rpm/salt-$fname" \
+            #    -o "/etc/init.d/salt-$fname" || return 1
+            #chmod +x "/etc/init.d/salt-$fname"
+
+            if [ -f /bin/systemctl ]; then
+                systemctl is-enabled salt-$fname.service || (systemctl preset salt-$fname.service && systemctl enable salt-$fname.service)
+                sleep 0.1
+                systemctl daemon-reload
+                continue
+            fi
+
+        done
+    fi
+    return 0
+}
+
+install_suse_12_git_post() {
+    install_opensuse_git_post || return 1
+    return 0
+}
+
+install_suse_12_restart_daemons() {
+    install_opensuse_restart_daemons || return 1
+    return 0
+}
+
+#
+#   End of SUSE Enterprise 12
+#
+#######################################################################################################################
+
+#######################################################################################################################
+#
+#   SUSE Enterprise 11
+#
+
 install_suse_11_stable_deps() {
     SUSE_PATCHLEVEL=$(awk '/PATCHLEVEL/ {print $3}' /etc/SuSE-release )
     if [ "${SUSE_PATCHLEVEL}" != "" ]; then
@@ -4795,6 +5002,16 @@ install_suse_11_restart_daemons() {
     return 0
 }
 
+
+#
+#   End of SUSE Enterprise 11
+#
+#######################################################################################################################
+#
+# SUSE Enterprise General Functions
+#
+
+# Used for both SLE 11 and 12
 install_suse_check_services() {
     if [ ! -f /bin/systemctl ]; then
         # Not running systemd!? Don't check!
@@ -4814,8 +5031,9 @@ install_suse_check_services() {
     done
     return 0
 }
+
 #
-#   End of SuSE Install Functions.
+# SUSE Enterprise General Functions
 #
 #######################################################################################################################
 

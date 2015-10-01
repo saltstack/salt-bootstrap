@@ -149,7 +149,7 @@ Installing the latest develop branch of Salt:
 
 .. code:: console
 
-  curl -L https://bootstrap.saltstack.com | sudo sh -s -- git develop
+  curl -L https://bootstrap.saltstack.com | sudo sh -s -- stable
 
 Any of the example above which use two-lines can be made to run in a single-line
 configuration with minor modifications.

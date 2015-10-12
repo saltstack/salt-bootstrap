@@ -2627,11 +2627,7 @@ install_debian_check_services() {
 #   Fedora Install Functions
 #
 install_fedora_deps() {
-    if [ "$_ENABLE_EXTERNAL_ZMQ_REPOS" -eq $BS_TRUE ]; then
-        __install_saltstack_copr_zeromq_repository || return 1
-    fi
-
-    __install_saltstack_copr_salt_repository || return 1
+    __install_saltstack_repository || return 1
 
     __PACKAGES="yum-utils PyYAML libyaml m2crypto python-crypto python-jinja2 python-msgpack python-zmq python-requests"
 
@@ -2824,58 +2820,22 @@ __install_epel_repository() {
     return 0
 }
 
-__install_saltstack_copr_zeromq_repository() {
-    echoinfo "Installing Zeromq >=4 and PyZMQ>=14 from SaltStack's COPR repository"
-    if [ ! -s /etc/yum.repos.d/saltstack-zeromq4.repo ]; then
-        if [ "${DISTRO_NAME_L}" = "fedora" ]; then
-            __REPOTYPE="${DISTRO_NAME_L}"
-        else
-            __REPOTYPE="epel"
-        fi
-        __fetch_url /etc/yum.repos.d/saltstack-zeromq4.repo \
-            "http://copr.fedoraproject.org/coprs/saltstack/zeromq4/repo/${__REPOTYPE}-${DISTRO_MAJOR_VERSION}/saltstack-zeromq4-${__REPOTYPE}-${DISTRO_MAJOR_VERSION}.repo" || return 1
-    fi
-    return 0
-}
+__install_saltstack_repository() {
+    echoinfo "Adding SaltStack's Salt repository"
 
-__install_saltstack_copr_salt_el5_repository() {
-    if [ ! -s /etc/yum.repos.d/saltstack-salt-el5-epel-5.repo ]; then
-        __fetch_url /etc/yum.repos.d/saltstack-salt-el5-epel-5.repo \
-            "http://copr.fedoraproject.org/coprs/saltstack/salt-el5/repo/epel-5/saltstack-salt-el5-epel-5.repo" || return 1
-    fi
-    return 0
-}
-
-__install_saltstack_copr_salt_repository() {
-    echoinfo "Adding SaltStack's COPR repository"
-
-    if [ "${DISTRO_NAME_L}" = "fedora" ]; then
-        __REPOTYPE="${DISTRO_NAME_L}"
-    else
-        __REPOTYPE="epel"
-    fi
-
-    __REPO_FILENAME="saltstack-salt-${__REPOTYPE}-${DISTRO_MAJOR_VERSION}.repo"
+    __REPO_FILENAME="saltstack-rhel${DISTRO_MAJOR_VERSION}.repo"
 
     if [ ! -s "/etc/yum.repos.d/${__REPO_FILENAME}" ]; then
         __fetch_url "/etc/yum.repos.d/${__REPO_FILENAME}" \
-            "http://copr.fedoraproject.org/coprs/saltstack/salt/repo/${__REPOTYPE}-${DISTRO_MAJOR_VERSION}/${__REPO_FILENAME}" || return 1
+            "http://repo.saltstack.com/yum/rhel${DISTRO_MAJOR_VERSION}/${__REPO_FILENAME}" || return 1
     fi
     return 0
 }
 
 install_centos_stable_deps() {
     __install_epel_repository || return 1
-    if [ "$DISTRO_MAJOR_VERSION" -eq 5 ]; then
-        __install_saltstack_copr_salt_el5_repository || return 1
-    fi
 
-    __install_saltstack_copr_salt_repository || return 1
-
-    if [ "$_ENABLE_EXTERNAL_ZMQ_REPOS" -eq $BS_TRUE ] && [ "$DISTRO_MAJOR_VERSION" -gt 5 ]; then
-        yum -y install python-hashlib || return 1
-        __install_saltstack_copr_zeromq_repository || return 1
-    fi
+    __install_saltstack_repository || return 1
 
     if [ -f "${__SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" ]; then
         # We're on the develop branch, install whichever tornado is on the requirements file

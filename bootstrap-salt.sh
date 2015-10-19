@@ -9,7 +9,7 @@
 #
 #          BUGS: https://github.com/saltstack/salt-bootstrap/issues
 #
-#     COPYRIGHT: (c) 2012-2014 by the SaltStack Team, see AUTHORS.rst for more
+#     COPYRIGHT: (c) 2012-2015 by the SaltStack Team, see AUTHORS.rst for more
 #                details.
 #
 #       LICENSE: Apache 2.0
@@ -586,7 +586,6 @@ __fetch_url() {
         wget $_WGET_ARGS -q -O "$1" "$2" >/dev/null 2>&1 ||
             fetch $_FETCH_ARGS -q -o "$1" "$2" >/dev/null 2>&1 ||
                 fetch -q -o "$1" "$2" >/dev/null 2>&1           # Pre FreeBSD 10
-
 }
 
 
@@ -609,7 +608,6 @@ __gather_hardware_info() {
     CPU_VENDOR_ID_L=$( echo "$CPU_VENDOR_ID" | tr '[:upper:]' '[:lower:]' )
     CPU_ARCH=$(uname -m 2>/dev/null || uname -p 2>/dev/null || echo "unknown")
     CPU_ARCH_L=$( echo "$CPU_ARCH" | tr '[:upper:]' '[:lower:]' )
-
 }
 __gather_hardware_info
 
@@ -1316,7 +1314,6 @@ __apt_get_upgrade_noinput() {
 #   DESCRIPTION:  Check for end of life distribution versions
 #----------------------------------------------------------------------------------------------------------------------
 __check_end_of_life_versions() {
-
     case "${DISTRO_NAME_L}" in
         debian)
             # Debian versions bellow 6 are not supported
@@ -1516,7 +1513,6 @@ movefile() {
 
     return 0
 }
-
 
 
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
@@ -2493,7 +2489,6 @@ __install_debian_stable() {
     return 0
 }
 
-
 install_debian_6_stable() {
     __install_debian_stable || return 1
     return 0
@@ -2510,7 +2505,6 @@ install_debian_8_stable() {
 }
 
 install_debian_git() {
-
     if [ -f "${__SALT_GIT_CHECKOUT_DIR}/salt/syspaths.py" ]; then
         python setup.py install --install-layout=deb --salt-config-dir="$_SALT_ETC_DIR" || \
             python setup.py --salt-config-dir="$_SALT_ETC_DIR" install --install-layout=deb || return 1
@@ -3176,7 +3170,6 @@ install_centos_check_services() {
     done
     return 0
 }
-
 #
 #   Ended CentOS Install Functions
 #
@@ -3227,7 +3220,6 @@ __test_rhel_optionals_packages() {
     fi
     return 0
 }
-
 
 install_red_hat_linux_stable_deps() {
     if [ "${DISTRO_MAJOR_VERSION}" -ge 6 ]; then
@@ -3350,7 +3342,6 @@ install_red_hat_enterprise_workstation_git() {
     return 0
 }
 
-
 install_red_hat_linux_stable_post() {
     install_centos_stable_post || return 1
     return 0
@@ -3411,7 +3402,6 @@ install_red_hat_enterprise_workstation_git_post() {
     return 0
 }
 
-
 install_red_hat_linux_testing_deps() {
     install_centos_testing_deps || return 1
     return 0
@@ -3461,7 +3451,6 @@ install_red_hat_enterprise_workstation_testing_post() {
 #
 #######################################################################################################################
 
-
 #######################################################################################################################
 #
 #   Oracle Linux Install Functions
@@ -3508,7 +3497,6 @@ install_oracle_linux_git_post() {
     return 0
 }
 
-
 install_oracle_linux_testing_post() {
     install_centos_testing_post || return 1
     return 0
@@ -3527,7 +3515,6 @@ install_oracle_linux_check_services() {
 #   Ended Oracle Linux Install Functions
 #
 #######################################################################################################################
-
 
 #######################################################################################################################
 #
@@ -3573,7 +3560,6 @@ install_scientific_linux_git_post() {
     return 0
 }
 
-
 install_scientific_linux_testing_post() {
     install_centos_testing_post || return 1
     return 0
@@ -3592,7 +3578,6 @@ install_scientific_linux_check_services() {
 #   Ended Scientific Linux Install Functions
 #
 #######################################################################################################################
-
 
 #######################################################################################################################
 #
@@ -3656,7 +3641,6 @@ install_amazon_linux_ami_deps() {
         # shellcheck disable=SC2086
         yum install -y ${_EXTRA_PACKAGES} --enablerepo=${_EPEL_REPO} || return 1
     fi
-
 }
 
 install_amazon_linux_ami_git_deps() {
@@ -3720,7 +3704,6 @@ install_amazon_linux_ami_testing_post() {
     install_centos_testing_post || return 1
     return 0
 }
-
 #
 #   Ended Amazon Linux AMI Install Functions
 #
@@ -3731,7 +3714,6 @@ install_amazon_linux_ami_testing_post() {
 #   Arch Install Functions
 #
 install_arch_linux_stable_deps() {
-
     if [ ! -f /etc/pacman.d/gnupg ]; then
         pacman-key --init && pacman-key --populate archlinux || return 1
     fi
@@ -3755,7 +3737,6 @@ install_arch_linux_stable_deps() {
         # shellcheck disable=SC2086
         pacman -Sy --noconfirm --needed ${_EXTRA_PACKAGES} || return 1
     fi
-
 }
 
 install_arch_linux_git_deps() {
@@ -3813,7 +3794,6 @@ install_arch_linux_git() {
 }
 
 install_arch_linux_post() {
-
     for fname in minion master syndic api; do
 
         # Skip if not meant to be installed
@@ -3956,7 +3936,6 @@ __freebsd_get_packagesite() {
 
 # Using a separate conf step to head for idempotent install...
 __configure_freebsd_pkg_details() {
-
     ## pkg.conf is deprecated.
     ## We use conf files in /usr/local or /etc instead
     mkdir -p /usr/local/etc/pkg/repos/
@@ -3978,7 +3957,6 @@ __configure_freebsd_pkg_details() {
 }
 
 install_freebsd_9_stable_deps() {
-
     #make variables available even if pkg already installed
     __freebsd_get_packagesite
 
@@ -4254,7 +4232,6 @@ install_smartos_deps() {
     fi
 
     return 0
-
 }
 
 install_smartos_git_deps() {
@@ -4384,7 +4361,6 @@ install_smartos_restart_daemons() {
 #
 #    openSUSE Install Functions.
 #
-
 __ZYPPER_REQUIRES_REPLACE_FILES=-1
 
 __version_lte() {
@@ -4616,7 +4592,6 @@ install_opensuse_check_services() {
     done
     return 0
 }
-
 #
 #   End of openSUSE Install Functions.
 #
@@ -4857,6 +4832,7 @@ __gentoo_pre_dep() {
         mkdir /etc/portage
     fi
 }
+
 __gentoo_post_dep() {
     # ensures dev-lib/crypto++ compiles happily
     __emerge --oneshot 'sys-devel/libtool'
@@ -4877,7 +4853,6 @@ __gentoo_post_dep() {
         # shellcheck disable=SC2086
         __emerge -v ${_EXTRA_PACKAGES} || return 1
     fi
-
 }
 
 install_gentoo_deps() {
@@ -4968,7 +4943,6 @@ install_gentoo_check_services() {
 #
 #######################################################################################################################
 
-
 #######################################################################################################################
 #
 #   Default minion configuration function. Matches ANY distribution as long as
@@ -5055,7 +5029,6 @@ config_salt() {
 #
 #######################################################################################################################
 
-
 #######################################################################################################################
 #
 #   Default salt master minion keys pre-seed function. Matches ANY distribution
@@ -5090,7 +5063,6 @@ preseed_master() {
 #  Ended Default Salt Master Pre-Seed minion keys function
 #
 #######################################################################################################################
-
 
 #######################################################################################################################
 #
@@ -5127,7 +5099,6 @@ daemons_running() {
 #  Ended daemons running check function
 #
 #######################################################################################################################
-
 
 #======================================================================================================================
 # LET'S PROCEED WITH OUR INSTALLATION

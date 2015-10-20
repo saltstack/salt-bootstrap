@@ -2883,7 +2883,7 @@ _eof
 
         __fetch_url /tmp/repo-saltstack-el5.pub "https://repo.saltstack.com/yum/rhel5/SALTSTACK-EL5-GPG-KEY.pub" || return 1
         rpm --import /tmp/repo-saltstack-el5.pub || return 1
-        rm /tmp/repo-saltstack-el5.pub
+        rm -f /tmp/repo-saltstack-el5.pub
     fi
     return 0
 }
@@ -2903,7 +2903,7 @@ _eof
 
         __fetch_url /tmp/repo-saltstack.pub "https://repo.saltstack.com/yum/rhel${DISTRO_MAJOR_VERSION}/SALTSTACK-GPG-KEY.pub" || return 1
         rpm --import /tmp/repo-saltstack.pub || return 1
-        rm /tmp/repo-saltstack.pub
+        rm -f /tmp/repo-saltstack.pub
     fi
     return 0
 }

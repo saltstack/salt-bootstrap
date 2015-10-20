@@ -1034,6 +1034,45 @@ __ubuntu_derivatives_translation() {
 }
 
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  __ubuntu_codename_translation
+#   DESCRIPTION:  Map Ubuntu major versions to their corresponding codenames
+#----------------------------------------------------------------------------------------------------------------------
+# shellcheck disable=SC2034
+__ubuntu_codename_translation() {
+
+    case $DISTRO_MINOR_VERSION in
+        "04")
+            _april="yes"
+            ;;
+        "10")
+            _april=""
+            ;;
+        *)
+            _april="yes"
+            ;;
+    esac
+
+    case $DISTRO_MAJOR_VERSION in
+        "12")
+            DISTRO_CODENAME="precise"
+            ;;
+        "14")
+            DISTRO_CODENAME="trusty"
+            ;;
+        "15")
+            if [ -n $_april ] ; then
+                DISTRO_CODENAME="vivid"
+            else
+                DISTRO_CODENAME="wily"
+            fi
+            ;;
+        *)
+            DISTRO_CODENAME="trusty"
+            ;;
+    esac
+}
+
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #          NAME:  __debian_derivatives_translation
 #   DESCRIPTION:  Map Debian derivatives to their Debian base versions.
 #                 If distro has a known Debian base version, use those install
@@ -1156,6 +1195,9 @@ else
         PREFIXED_DISTRO_MINOR_VERSION=""
     fi
 fi
+
+# For ubuntu versions, obtain the codename from the release version
+__ubuntu_codename_translation
 
 # Only Ubuntu has daily packages, let's let users know about that
 if ([ "${DISTRO_NAME_L}" != "ubuntu" ] && [ "$ITYPE" = "daily" ]); then
@@ -1753,6 +1795,32 @@ install_ubuntu_deps() {
 
     __enable_universe_repository || return 1
 
+    # the latest version of 2015.5 and all versions of 2015.8 and beyond are hosted on repo.saltstack.com
+    if [ "$(echo "$STABLE_REV" | egrep '^(2015\.5|2015\.8|latest)$')" = "" ]; then
+        if [ "$DISTRO_MAJOR_VERSION" -lt 14 ]; then
+            echoinfo "Installing Python Requests/Chardet from Chris Lea's PPA repository"
+            if [ "$DISTRO_MAJOR_VERSION" -gt 11 ] || ([ "$DISTRO_MAJOR_VERSION" -eq 11 ] && [ "$DISTRO_MINOR_VERSION" -gt 04 ]); then
+                # Above Ubuntu 11.04 add a -y flag
+                add-apt-repository -y "ppa:chris-lea/python-requests" || return 1
+                add-apt-repository -y "ppa:chris-lea/python-chardet" || return 1
+                add-apt-repository -y "ppa:chris-lea/python-urllib3" || return 1
+                add-apt-repository -y "ppa:chris-lea/python-crypto" || return 1
+            else
+                add-apt-repository "ppa:chris-lea/python-requests" || return 1
+                add-apt-repository "ppa:chris-lea/python-chardet" || return 1
+                add-apt-repository "ppa:chris-lea/python-urllib3" || return 1
+                add-apt-repository "ppa:chris-lea/python-crypto" || return 1
+            fi
+        fi
+
+        if [ "$DISTRO_MAJOR_VERSION" -gt 12 ] || ([ "$DISTRO_MAJOR_VERSION" -eq 12 ] && [ "$DISTRO_MINOR_VERSION" -gt 03 ]); then
+            if ([ "$DISTRO_MAJOR_VERSION" -lt 15 ] && [ "$_ENABLE_EXTERNAL_ZMQ_REPOS" -eq $BS_TRUE ]); then
+                echoinfo "Installing ZMQ>=4/PyZMQ>=14 from Chris Lea's PPA repository"
+                add-apt-repository -y ppa:chris-lea/zeromq || return 1
+            fi
+        fi
+    fi
+
     __PIP_PACKAGES=""
 
     # Minimal systems might not have upstart installed, install it
@@ -1761,30 +1829,8 @@ install_ubuntu_deps() {
     # Need python-apt for managing packages via Salt
     __PACKAGES="${__PACKAGES} python-apt"
 
-    if [ "$DISTRO_MAJOR_VERSION" -lt 14 ]; then
-        echoinfo "Installing Python Requests/Chardet from Chris Lea's PPA repository"
-        if [ "$DISTRO_MAJOR_VERSION" -gt 11 ] || ([ "$DISTRO_MAJOR_VERSION" -eq 11 ] && [ "$DISTRO_MINOR_VERSION" -gt 04 ]); then
-            # Above Ubuntu 11.04 add a -y flag
-            add-apt-repository -y "ppa:chris-lea/python-requests" || return 1
-            add-apt-repository -y "ppa:chris-lea/python-chardet" || return 1
-            add-apt-repository -y "ppa:chris-lea/python-urllib3" || return 1
-            add-apt-repository -y "ppa:chris-lea/python-crypto" || return 1
-        else
-            add-apt-repository "ppa:chris-lea/python-requests" || return 1
-            add-apt-repository "ppa:chris-lea/python-chardet" || return 1
-            add-apt-repository "ppa:chris-lea/python-urllib3" || return 1
-            add-apt-repository "ppa:chris-lea/python-crypto" || return 1
-        fi
-    fi
-
+    # requests is still used by many salt modules
     __PACKAGES="${__PACKAGES} python-requests"
-
-    if [ "$DISTRO_MAJOR_VERSION" -gt 12 ] || ([ "$DISTRO_MAJOR_VERSION" -eq 12 ] && [ "$DISTRO_MINOR_VERSION" -gt 03 ]); then
-        if ([ "$DISTRO_MAJOR_VERSION" -lt 15 ] && [ "$_ENABLE_EXTERNAL_ZMQ_REPOS" -eq $BS_TRUE ]); then
-            echoinfo "Installing ZMQ>=4/PyZMQ>=14 from Chris Lea's PPA repository"
-            add-apt-repository -y ppa:chris-lea/zeromq || return 1
-        fi
-    fi
 
     # Additionally install procps and pciutils which allows for Docker boostraps. See 366#issuecomment-39666813
     __PACKAGES="${__PACKAGES} procps pciutils"
@@ -1824,34 +1870,34 @@ install_ubuntu_deps() {
 install_ubuntu_stable_deps() {
     install_ubuntu_deps || return 1
 
-    # Alternate PPAs: salt16, salt17, salt2014-1, salt2014-7
-    if [ ! "$(echo "$STABLE_REV" | egrep '^(1\.6|1\.7)$')" = "" ]; then
-      STABLE_PPA="saltstack/salt$(echo "$STABLE_REV" | tr -d .)"
-    elif [ ! "$(echo "$STABLE_REV" | egrep '^(2014\.1|2014\.7|2015\.5)$')" = "" ]; then
-      STABLE_PPA="saltstack/salt$(echo "$STABLE_REV" | tr . -)"
-    else
-      STABLE_PPA="saltstack/salt"
-    fi
+    # the latest version of 2015.5 and all versions of 2015.8 and beyond are hosted on repo.saltstack.com
+    if [ "$(echo "$STABLE_REV" | egrep '^(2015\.5|2015\.8|latest)$')" != "" ]; then
 
-    if [ "$DISTRO_MAJOR_VERSION" -gt 11 ] || ([ "$DISTRO_MAJOR_VERSION" -eq 11 ] && [ "$DISTRO_MINOR_VERSION" -gt 04 ]); then
-        # Above Ubuntu 11.04 add a -y flag
-        add-apt-repository -y "ppa:$STABLE_PPA" || return 1
-    else
-        add-apt-repository "ppa:$STABLE_PPA" || return 1
-    fi
-
-    __PACKAGES=""
-    if [ ! "$(echo "$STABLE_REV" | egrep '^(2015\.8|latest)$')" = "" ]; then
-        # We need a recent tornado package
-        __REQUIRED_TORNADO="tornado >= 4.0"
-        check_pip_allowed "You need to allow pip based installations (-P) in order to install the python package '${__REQUIRED_TORNADO}'"
-        if [ "$(which pip)" = "" ]; then
-            __PACKAGES="${__PACKAGES} python-setuptools python-pip"
+        # Saltstack's Stable Ubuntu repository
+        if [ "$(grep -ER 'latest .+ main' /etc/apt)" = "" ]; then
+            echo "deb http://repo.saltstack.com/apt/ubuntu/ubuntu$DISTRO_MAJOR_VERSION/$STABLE_REV $DISTRO_CODENAME main" >> \
+                /etc/apt/sources.list.d/saltstack.list
         fi
-        __PACKAGES="${__PACKAGES} python-dev"
+
         # shellcheck disable=SC2086
-        __apt_get_install_noinput $__PACKAGES
-        pip install -U "${__REQUIRED_TORNADO}"
+        wget $_WGET_ARGS -q http://repo.saltstack.com/apt/ubuntu/ubuntu$DISTRO_MAJOR_VERSION/$STABLE_REV/SALTSTACK-GPG-KEY.pub -O - | apt-key add - || return 1
+
+    else
+        # Alternate PPAs: salt16, salt17, salt2014-1, salt2014-7
+        if [ ! "$(echo "$STABLE_REV" | egrep '^(1\.6|1\.7)$')" = "" ]; then
+          STABLE_PPA="saltstack/salt$(echo "$STABLE_REV" | tr -d .)"
+        elif [ ! "$(echo "$STABLE_REV" | egrep '^(2014\.1|2014\.7)$')" = "" ]; then
+          STABLE_PPA="saltstack/salt$(echo "$STABLE_REV" | tr . -)"
+        else
+          STABLE_PPA="saltstack/salt"
+        fi
+
+        if [ "$DISTRO_MAJOR_VERSION" -gt 11 ] || ([ "$DISTRO_MAJOR_VERSION" -eq 11 ] && [ "$DISTRO_MINOR_VERSION" -gt 04 ]); then
+            # Above Ubuntu 11.04 add a -y flag
+            add-apt-repository -y "ppa:$STABLE_PPA" || return 1
+        else
+            add-apt-repository "ppa:$STABLE_PPA" || return 1
+        fi
     fi
 
     apt-get update

@@ -4046,6 +4046,7 @@ __freebsd_get_packagesite() {
     _PACKAGESITE="http://pkg.freebsd.org/${ABI}/latest"
     # Awkwardly, we want the `${ABI}` to be in conf file without escaping
     PKGCONFURL="pkg+http://pkg.freebsd.org/\${ABI}/latest"
+    SALTPKGCONFURL="http://repo.saltstack.com/freebsd/\${ABI}/"
 
     # Treat unset variables as errors once more
     set -o nounset
@@ -4068,7 +4069,20 @@ __configure_freebsd_pkg_details() {
         echo "}"
     } > $conf_file
     copyfile $conf_file /etc/pkg/FreeBSD.conf
-    SALT_PKG_FLAGS="-r FreeBSD"
+    FROM_FREEBSD="-r FreeBSD"
+
+    ## add saltstack freebsd repo
+    salt_conf_file=/usr/local/etc/pkg/repos/saltstack.conf
+    {
+        echo "SaltStack:{"
+        echo "    url: \"${SALTPKGCONFURL}\","
+        echo "    mirror_type: \"http\","
+        echo "    enabled: true"
+        echo "    prioroity: 10"
+        echo "}"
+    } > $salt_conf_file
+    FROM_SALTSTACK="-r SaltStack"
+
     ## ensure future ports builds use pkgng
     echo "WITH_PKGNG=   yes" >> /etc/make.conf
 }
@@ -4091,12 +4105,12 @@ install_freebsd_9_stable_deps() {
 
     # Now install swig
     # shellcheck disable=SC2086
-    /usr/local/sbin/pkg install ${SALT_PKG_FLAGS} -y swig || return 1
+    /usr/local/sbin/pkg install ${FROM_FREEBSD} -y swig || return 1
 
     if [ "${_EXTRA_PACKAGES}" != "" ]; then
         echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
         # shellcheck disable=SC2086
-        /usr/local/sbin/pkg install ${SALT_PKG_FLAGS} -y ${_EXTRA_PACKAGES} || return 1
+        /usr/local/sbin/pkg install ${FROM_FREEBSD} -y ${_EXTRA_PACKAGES} || return 1
     fi
 
     if [ "$_UPGRADE_SYS" -eq $BS_TRUE ]; then
@@ -4183,7 +4197,7 @@ install_freebsd_git_deps() {
 
 install_freebsd_9_stable() {
     # shellcheck disable=SC2086
-    /usr/local/sbin/pkg install ${SALT_PKG_FLAGS} -y sysutils/py-salt || return 1
+    /usr/local/sbin/pkg install ${FROM_SALTSTACK} -y sysutils/py-salt || return 1
     return 0
 }
 
@@ -4197,7 +4211,7 @@ install_freebsd_11_stable() {
 
 install_freebsd_git() {
     # shellcheck disable=SC2086
-    /usr/local/sbin/pkg install ${SALT_PKG_FLAGS} -y sysutils/py-salt || return 1
+    /usr/local/sbin/pkg install ${FROM_SALTSTACK} -y sysutils/py-salt || return 1
 
     # Let's keep the rc.d files before deleting the package
     mkdir /tmp/rc-scripts || return 1

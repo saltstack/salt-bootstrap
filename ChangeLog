@@ -4,6 +4,8 @@ Version 2015.xx.xx:
 	* Move RHEL installations to use repo.saltstack.com
 	* Move Debian 8 installation to use repo.saltstack.com
 	* Fix error finding python-jinja2 in RHEL 7. Thanks Rob Eden(hedinfaok). #654
+	* Move Ubuntu 12 and 14 installations to use repo.saltstack.com
+	* Move FreeBSD installations to use repo.saltstack.com
 
 
 Version 2015.08.06:

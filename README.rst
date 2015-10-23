@@ -9,7 +9,7 @@ script runs through a series of checks to determine operating system type and ve
 install the `Salt`_ binaries using the appropriate methods.
 
 
-.. Note::
+.. note::
 
   This ``README`` file is not the absolute truth to what the bootstrap script is capable of, for 
   that, please read the generated help by passing ``-h`` to the script or even better, `read the 
@@ -33,7 +33,7 @@ instructions for `Installing via an Insecure One-Liner`_.
 Examples
 ~~~~~~~~
 
-.. Note::
+.. note::
     In every two-step example, you would be well-served to examine the downloaded file and examine
     it to ensure that it does what you expect.
 
@@ -141,7 +141,7 @@ Installing via an Insecure One-Liner
 
 The following examples illustrate how to install Salt via a one-liner.
 
-.. Note::
+.. note::
     Warning! These methods do not involve a verification step and assume that the delivered file
     is trustworthy.
 

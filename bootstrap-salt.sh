@@ -13,7 +13,7 @@
 #                details.
 #
 #       LICENSE: Apache 2.0
-#  ORGANIZATION: SaltStack (saltstack.org)
+#  ORGANIZATION: SaltStack (saltstack.com)
 #       CREATED: 10/15/2012 09:49:37 PM WEST
 #======================================================================================================================
 set -o nounset                              # Treat unset variables as an error
@@ -273,9 +273,9 @@ usage() {
   -I  If set, allow insecure connections while downloading any files. For
       example, pass '--no-check-certificate' to 'wget' or '--insecure' to 'curl'
   -A  Pass the salt-master DNS name or IP. This will be stored under
-      ${_SALT_ETC_DIR}/minion.d/99-master-address.conf
+      \${BS_SALT_ETC_DIR}/minion.d/99-master-address.conf
   -i  Pass the salt-minion id. This will be stored under
-      ${_SALT_ETC_DIR}/minion_id
+      \${BS_SALT_ETC_DIR}/minion_id
   -L  Install the Apache Libcloud package if possible(required for salt-cloud)
   -p  Extra-package to install while installing salt dependencies. One package
       per -p flag. You're responsible for providing the proper package name.
@@ -1034,6 +1034,45 @@ __ubuntu_derivatives_translation() {
 }
 
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  __ubuntu_codename_translation
+#   DESCRIPTION:  Map Ubuntu major versions to their corresponding codenames
+#----------------------------------------------------------------------------------------------------------------------
+# shellcheck disable=SC2034
+__ubuntu_codename_translation() {
+
+    case $DISTRO_MINOR_VERSION in
+        "04")
+            _april="yes"
+            ;;
+        "10")
+            _april=""
+            ;;
+        *)
+            _april="yes"
+            ;;
+    esac
+
+    case $DISTRO_MAJOR_VERSION in
+        "12")
+            DISTRO_CODENAME="precise"
+            ;;
+        "14")
+            DISTRO_CODENAME="trusty"
+            ;;
+        "15")
+            if [ -n $_april ] ; then
+                DISTRO_CODENAME="vivid"
+            else
+                DISTRO_CODENAME="wily"
+            fi
+            ;;
+        *)
+            DISTRO_CODENAME="trusty"
+            ;;
+    esac
+}
+
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #          NAME:  __debian_derivatives_translation
 #   DESCRIPTION:  Map Debian derivatives to their Debian base versions.
 #                 If distro has a known Debian base version, use those install
@@ -1156,6 +1195,9 @@ else
         PREFIXED_DISTRO_MINOR_VERSION=""
     fi
 fi
+
+# For ubuntu versions, obtain the codename from the release version
+__ubuntu_codename_translation
 
 # Only Ubuntu has daily packages, let's let users know about that
 if ([ "${DISTRO_NAME_L}" != "ubuntu" ] && [ "$ITYPE" = "daily" ]); then
@@ -1753,6 +1795,32 @@ install_ubuntu_deps() {
 
     __enable_universe_repository || return 1
 
+    # the latest version of 2015.5 and all versions of 2015.8 and beyond are hosted on repo.saltstack.com
+    if [ "$(echo "$STABLE_REV" | egrep '^(2015\.5|2015\.8|latest)$')" = "" ]; then
+        if [ "$DISTRO_MAJOR_VERSION" -lt 14 ]; then
+            echoinfo "Installing Python Requests/Chardet from Chris Lea's PPA repository"
+            if [ "$DISTRO_MAJOR_VERSION" -gt 11 ] || ([ "$DISTRO_MAJOR_VERSION" -eq 11 ] && [ "$DISTRO_MINOR_VERSION" -gt 04 ]); then
+                # Above Ubuntu 11.04 add a -y flag
+                add-apt-repository -y "ppa:chris-lea/python-requests" || return 1
+                add-apt-repository -y "ppa:chris-lea/python-chardet" || return 1
+                add-apt-repository -y "ppa:chris-lea/python-urllib3" || return 1
+                add-apt-repository -y "ppa:chris-lea/python-crypto" || return 1
+            else
+                add-apt-repository "ppa:chris-lea/python-requests" || return 1
+                add-apt-repository "ppa:chris-lea/python-chardet" || return 1
+                add-apt-repository "ppa:chris-lea/python-urllib3" || return 1
+                add-apt-repository "ppa:chris-lea/python-crypto" || return 1
+            fi
+        fi
+
+        if [ "$DISTRO_MAJOR_VERSION" -gt 12 ] || ([ "$DISTRO_MAJOR_VERSION" -eq 12 ] && [ "$DISTRO_MINOR_VERSION" -gt 03 ]); then
+            if ([ "$DISTRO_MAJOR_VERSION" -lt 15 ] && [ "$_ENABLE_EXTERNAL_ZMQ_REPOS" -eq $BS_TRUE ]); then
+                echoinfo "Installing ZMQ>=4/PyZMQ>=14 from Chris Lea's PPA repository"
+                add-apt-repository -y ppa:chris-lea/zeromq || return 1
+            fi
+        fi
+    fi
+
     __PIP_PACKAGES=""
 
     # Minimal systems might not have upstart installed, install it
@@ -1761,30 +1829,8 @@ install_ubuntu_deps() {
     # Need python-apt for managing packages via Salt
     __PACKAGES="${__PACKAGES} python-apt"
 
-    if [ "$DISTRO_MAJOR_VERSION" -lt 14 ]; then
-        echoinfo "Installing Python Requests/Chardet from Chris Lea's PPA repository"
-        if [ "$DISTRO_MAJOR_VERSION" -gt 11 ] || ([ "$DISTRO_MAJOR_VERSION" -eq 11 ] && [ "$DISTRO_MINOR_VERSION" -gt 04 ]); then
-            # Above Ubuntu 11.04 add a -y flag
-            add-apt-repository -y "ppa:chris-lea/python-requests" || return 1
-            add-apt-repository -y "ppa:chris-lea/python-chardet" || return 1
-            add-apt-repository -y "ppa:chris-lea/python-urllib3" || return 1
-            add-apt-repository -y "ppa:chris-lea/python-crypto" || return 1
-        else
-            add-apt-repository "ppa:chris-lea/python-requests" || return 1
-            add-apt-repository "ppa:chris-lea/python-chardet" || return 1
-            add-apt-repository "ppa:chris-lea/python-urllib3" || return 1
-            add-apt-repository "ppa:chris-lea/python-crypto" || return 1
-        fi
-    fi
-
+    # requests is still used by many salt modules
     __PACKAGES="${__PACKAGES} python-requests"
-
-    if [ "$DISTRO_MAJOR_VERSION" -gt 12 ] || ([ "$DISTRO_MAJOR_VERSION" -eq 12 ] && [ "$DISTRO_MINOR_VERSION" -gt 03 ]); then
-        if ([ "$DISTRO_MAJOR_VERSION" -lt 15 ] && [ "$_ENABLE_EXTERNAL_ZMQ_REPOS" -eq $BS_TRUE ]); then
-            echoinfo "Installing ZMQ>=4/PyZMQ>=14 from Chris Lea's PPA repository"
-            add-apt-repository -y ppa:chris-lea/zeromq || return 1
-        fi
-    fi
 
     # Additionally install procps and pciutils which allows for Docker boostraps. See 366#issuecomment-39666813
     __PACKAGES="${__PACKAGES} procps pciutils"
@@ -1824,34 +1870,34 @@ install_ubuntu_deps() {
 install_ubuntu_stable_deps() {
     install_ubuntu_deps || return 1
 
-    # Alternate PPAs: salt16, salt17, salt2014-1, salt2014-7
-    if [ ! "$(echo "$STABLE_REV" | egrep '^(1\.6|1\.7)$')" = "" ]; then
-      STABLE_PPA="saltstack/salt$(echo "$STABLE_REV" | tr -d .)"
-    elif [ ! "$(echo "$STABLE_REV" | egrep '^(2014\.1|2014\.7|2015\.5)$')" = "" ]; then
-      STABLE_PPA="saltstack/salt$(echo "$STABLE_REV" | tr . -)"
-    else
-      STABLE_PPA="saltstack/salt"
-    fi
+    # the latest version of 2015.5 and all versions of 2015.8 and beyond are hosted on repo.saltstack.com
+    if [ "$(echo "$STABLE_REV" | egrep '^(2015\.5|2015\.8|latest)$')" != "" ]; then
 
-    if [ "$DISTRO_MAJOR_VERSION" -gt 11 ] || ([ "$DISTRO_MAJOR_VERSION" -eq 11 ] && [ "$DISTRO_MINOR_VERSION" -gt 04 ]); then
-        # Above Ubuntu 11.04 add a -y flag
-        add-apt-repository -y "ppa:$STABLE_PPA" || return 1
-    else
-        add-apt-repository "ppa:$STABLE_PPA" || return 1
-    fi
-
-    __PACKAGES=""
-    if [ ! "$(echo "$STABLE_REV" | egrep '^(2015\.8|latest)$')" = "" ]; then
-        # We need a recent tornado package
-        __REQUIRED_TORNADO="tornado >= 4.0"
-        check_pip_allowed "You need to allow pip based installations (-P) in order to install the python package '${__REQUIRED_TORNADO}'"
-        if [ "$(which pip)" = "" ]; then
-            __PACKAGES="${__PACKAGES} python-setuptools python-pip"
+        # Saltstack's Stable Ubuntu repository
+        if [ "$(grep -ER 'latest .+ main' /etc/apt)" = "" ]; then
+            echo "deb http://repo.saltstack.com/apt/ubuntu/ubuntu$DISTRO_MAJOR_VERSION/$STABLE_REV $DISTRO_CODENAME main" >> \
+                /etc/apt/sources.list.d/saltstack.list
         fi
-        __PACKAGES="${__PACKAGES} python-dev"
+
         # shellcheck disable=SC2086
-        __apt_get_install_noinput $__PACKAGES
-        pip install -U "${__REQUIRED_TORNADO}"
+        wget $_WGET_ARGS -q http://repo.saltstack.com/apt/ubuntu/ubuntu$DISTRO_MAJOR_VERSION/$STABLE_REV/SALTSTACK-GPG-KEY.pub -O - | apt-key add - || return 1
+
+    else
+        # Alternate PPAs: salt16, salt17, salt2014-1, salt2014-7
+        if [ ! "$(echo "$STABLE_REV" | egrep '^(1\.6|1\.7)$')" = "" ]; then
+          STABLE_PPA="saltstack/salt$(echo "$STABLE_REV" | tr -d .)"
+        elif [ ! "$(echo "$STABLE_REV" | egrep '^(2014\.1|2014\.7)$')" = "" ]; then
+          STABLE_PPA="saltstack/salt$(echo "$STABLE_REV" | tr . -)"
+        else
+          STABLE_PPA="saltstack/salt"
+        fi
+
+        if [ "$DISTRO_MAJOR_VERSION" -gt 11 ] || ([ "$DISTRO_MAJOR_VERSION" -eq 11 ] && [ "$DISTRO_MINOR_VERSION" -gt 04 ]); then
+            # Above Ubuntu 11.04 add a -y flag
+            add-apt-repository -y "ppa:$STABLE_PPA" || return 1
+        else
+            add-apt-repository "ppa:$STABLE_PPA" || return 1
+        fi
     fi
 
     apt-get update
@@ -1975,6 +2021,7 @@ install_ubuntu_git_post() {
                 echowarn "Upstart does not appear to know about salt-$fname"
                 echodebug "Copying ${__SALT_GIT_CHECKOUT_DIR}/pkg/salt-$fname.upstart to $_upstart_conf"
                 copyfile "${__SALT_GIT_CHECKOUT_DIR}/pkg/salt-${fname}.upstart" $_upstart_conf
+                /sbin/initctl reload-configuration || return 1
             fi
         # No upstart support in Ubuntu!?
         elif [ -f "${__SALT_GIT_CHECKOUT_DIR}/debian/salt-${fname}.init" ]; then
@@ -2326,38 +2373,30 @@ install_debian_8_deps() {
         apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 7638D0442B90D010 || return 1
     fi
 
-    # Debian Backports
-    if [ "$(grep -R 'jessie-backports' /etc/apt | grep -v "^#")" = "" ]; then
-        echo "deb http://httpredir.debian.org/debian jessie-backports main" >> \
-            /etc/apt/sources.list.d/backports.list
-    fi
-
     # Saltstack's Stable Debian repository
-    if [ "$(grep -R 'jessie-saltstack' /etc/apt)" = "" ]; then
-        echo "deb http://debian.saltstack.com/debian jessie-saltstack main" >> \
+    if [ "$(grep -R 'latest jessie main' /etc/apt)" = "" ]; then
+        echo "deb http://repo.saltstack.com/apt/debian/latest jessie main" >> \
             /etc/apt/sources.list.d/saltstack.list
     fi
 
     # shellcheck disable=SC2086
-    wget $_WGET_ARGS -q http://debian.saltstack.com/debian-salt-team-joehealy.gpg.key -O - | apt-key add - || return 1
+    wget $_WGET_ARGS -q https://repo.saltstack.com/apt/debian/latest/SALTSTACK-GPG-KEY.pub -O - | apt-key add - || return 1
 
     apt-get update || return 1
-    __apt_get_install_noinput -t jessie-backports libzmq3 libzmq3-dev python-zmq python-requests python-apt || return 1
+    __PACKAGES="libzmq3 libzmq3-dev python-zmq python-requests python-apt"
 
     # Additionally install procps and pciutils which allows for Docker boostraps. See 366#issuecomment-39666813
     __PACKAGES="procps pciutils"
     # Also install python-requests
     __PACKAGES="${__PACKAGES} python-requests"
     # shellcheck disable=SC2086
-    __apt_get_install_noinput ${__PACKAGES} || return 1
 
     if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
-        check_pip_allowed "You need to allow pip based installations (-P) in order to install apache-libcloud"
-        __PACKAGES="build-essential python-dev python-pip"
-        # shellcheck disable=SC2086
-        __apt_get_install_noinput ${__PACKAGES} || return 1
-        pip install -U "apache-libcloud>=$_LIBCLOUD_MIN_VERSION"
+        # Install python-libcloud if asked to
+        __PACKAGES="${__PACKAGES} python-libcloud"
     fi
+
+    __apt_get_install_noinput ${__PACKAGES} || return 1
 
     if [ "$_UPGRADE_SYS" -eq $BS_TRUE ]; then
         __apt_get_upgrade_noinput || return 1
@@ -2468,7 +2507,42 @@ install_debian_7_git_deps() {
 
 install_debian_8_git_deps() {
     install_debian_8_deps || return 1
-    install_debian_git_deps || return 1  # Grab the actual deps
+    # No user interaction, libc6 restart services for example
+    export DEBIAN_FRONTEND=noninteractive
+
+    if [ "$(which git)" = "" ]; then
+        __apt_get_install_noinput git || return 1
+    fi
+
+    __apt_get_install_noinput lsb-release python python-pkg-resources python-crypto \
+        python-jinja2 python-m2crypto python-yaml msgpack-python python-pip || return 1
+
+    __git_clone_and_checkout || return 1
+
+    if [ -f "${__SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" ]; then
+        # We're on the develop branch, install tornado
+        __REQUIRED_TORNADO="$(grep tornado "${__SALT_GIT_CHECKOUT_DIR}/requirements/base.txt")"
+        if [ "${__REQUIRED_TORNADO}" != "" ]; then
+            __apt_get_install_noinput python-tornado
+        fi
+    fi
+
+    # Let's trigger config_salt()
+    if [ "$_TEMP_CONFIG_DIR" = "null" ]; then
+        _TEMP_CONFIG_DIR="${__SALT_GIT_CHECKOUT_DIR}/conf/"
+        CONFIG_SALT_FUNC="config_salt"
+    fi
+
+    if [ "$_UPGRADE_SYS" -eq $BS_TRUE ]; then
+        __apt_get_upgrade_noinput || return 1
+    fi
+
+    if [ "${_EXTRA_PACKAGES}" != "" ]; then
+        echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
+        # shellcheck disable=SC2086
+        __apt_get_install_noinput ${_EXTRA_PACKAGES} || return 1
+    fi
+
     return 0
 }
 
@@ -2840,6 +2914,46 @@ __install_saltstack_copr_salt_el5_repository() {
     return 0
 }
 
+__install_saltstack_rhel5_repository() {
+    if [ ! -s /etc/yum.repos.d/repo-saltstack-el5.repo ]; then
+        cat <<_eof > /etc/yum.repos.d/repo-saltstack-el5.repo
+[repo-saltstack-el5]
+name=SaltStack EL5 Repo
+baseurl=https://repo.saltstack.com/yum/rhel5/
+skip_if_unavailable=True
+gpgcheck=1
+gpgkey=https://repo.saltstack.com/yum/rhel5/SALTSTACK-EL5-GPG-KEY.pub
+enabled=1
+enabled_metadata=1
+_eof
+
+        __fetch_url /tmp/repo-saltstack-el5.pub "https://repo.saltstack.com/yum/rhel5/SALTSTACK-EL5-GPG-KEY.pub" || return 1
+        rpm --import /tmp/repo-saltstack-el5.pub || return 1
+        rm -f /tmp/repo-saltstack-el5.pub
+    fi
+    return 0
+}
+
+__install_saltstack_rhel_repository() {
+    if [ ! -s "/etc/yum.repos.d/repo-saltstack-el${DISTRO_MAJOR_VERSION}.repo" ]; then
+        cat <<_eof > "/etc/yum.repos.d/repo-saltstack-el${DISTRO_MAJOR_VERSION}.repo"
+[repo-saltstack-el${DISTRO_MAJOR_VERSION}]
+name=SaltStack EL${DISTRO_MAJOR_VERSION} Repo
+baseurl=https://repo.saltstack.com/yum/rhel${DISTRO_MAJOR_VERSION}/
+skip_if_unavailable=True
+gpgcheck=1
+gpgkey=https://repo.saltstack.com/yum/rhel${DISTRO_MAJOR_VERSION}/SALTSTACK-GPG-KEY.pub
+enabled=1
+enabled_metadata=1
+_eof
+
+        __fetch_url /tmp/repo-saltstack.pub "https://repo.saltstack.com/yum/rhel${DISTRO_MAJOR_VERSION}/SALTSTACK-GPG-KEY.pub" || return 1
+        rpm --import /tmp/repo-saltstack.pub || return 1
+        rm -f /tmp/repo-saltstack.pub
+    fi
+    return 0
+}
+
 __install_saltstack_copr_salt_repository() {
     echoinfo "Adding SaltStack's COPR repository"
 
@@ -2861,21 +2975,20 @@ __install_saltstack_copr_salt_repository() {
 install_centos_stable_deps() {
     __install_epel_repository || return 1
     if [ "$DISTRO_MAJOR_VERSION" -eq 5 ]; then
-        __install_saltstack_copr_salt_el5_repository || return 1
-    fi
-
-    __install_saltstack_copr_salt_repository || return 1
-
-    if [ "$_ENABLE_EXTERNAL_ZMQ_REPOS" -eq $BS_TRUE ] && [ "$DISTRO_MAJOR_VERSION" -gt 5 ]; then
-        yum -y install python-hashlib || return 1
-        __install_saltstack_copr_zeromq_repository || return 1
+        __install_saltstack_rhel5_repository || return 1
+    elif [ "$DISTRO_MAJOR_VERSION" -gt 5 ]; then
+        __install_saltstack_rhel_repository || return 1
     fi
 
     if [ -f "${__SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" ]; then
         # We're on the develop branch, install whichever tornado is on the requirements file
         __REQUIRED_TORNADO="$(grep tornado "${__SALT_GIT_CHECKOUT_DIR}/requirements/base.txt")"
         if [ "${__REQUIRED_TORNADO}" != "" ]; then
-            yum install -y python-tornado
+            if [ "$DISTRO_MAJOR_VERSION" -eq 5 ]; then
+                yum install -y python26-tornado
+            else
+                yum install -y python-tornado
+            fi
         fi
     fi
 
@@ -3014,7 +3127,11 @@ install_centos_git_deps() {
         # We're on the develop branch, install whichever tornado is on the requirements file
         __REQUIRED_TORNADO="$(grep tornado "${__SALT_GIT_CHECKOUT_DIR}/requirements/base.txt")"
         if [ "${__REQUIRED_TORNADO}" != "" ]; then
-            yum install -y python-tornado
+            if [ "$DISTRO_MAJOR_VERSION" -eq 5 ]; then
+                yum install -y python26-tornado
+            else
+                yum install -y python-tornado
+            fi
         fi
     fi
 
@@ -3929,6 +4046,7 @@ __freebsd_get_packagesite() {
     _PACKAGESITE="http://pkg.freebsd.org/${ABI}/latest"
     # Awkwardly, we want the `${ABI}` to be in conf file without escaping
     PKGCONFURL="pkg+http://pkg.freebsd.org/\${ABI}/latest"
+    SALTPKGCONFURL="http://repo.saltstack.com/freebsd/\${ABI}/"
 
     # Treat unset variables as errors once more
     set -o nounset
@@ -3951,7 +4069,20 @@ __configure_freebsd_pkg_details() {
         echo "}"
     } > $conf_file
     copyfile $conf_file /etc/pkg/FreeBSD.conf
-    SALT_PKG_FLAGS="-r FreeBSD"
+    FROM_FREEBSD="-r FreeBSD"
+
+    ## add saltstack freebsd repo
+    salt_conf_file=/usr/local/etc/pkg/repos/saltstack.conf
+    {
+        echo "SaltStack:{"
+        echo "    url: \"${SALTPKGCONFURL}\","
+        echo "    mirror_type: \"http\","
+        echo "    enabled: true"
+        echo "    prioroity: 10"
+        echo "}"
+    } > $salt_conf_file
+    FROM_SALTSTACK="-r SaltStack"
+
     ## ensure future ports builds use pkgng
     echo "WITH_PKGNG=   yes" >> /etc/make.conf
 }
@@ -3974,12 +4105,12 @@ install_freebsd_9_stable_deps() {
 
     # Now install swig
     # shellcheck disable=SC2086
-    /usr/local/sbin/pkg install ${SALT_PKG_FLAGS} -y swig || return 1
+    /usr/local/sbin/pkg install ${FROM_FREEBSD} -y swig || return 1
 
     if [ "${_EXTRA_PACKAGES}" != "" ]; then
         echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
         # shellcheck disable=SC2086
-        /usr/local/sbin/pkg install ${SALT_PKG_FLAGS} -y ${_EXTRA_PACKAGES} || return 1
+        /usr/local/sbin/pkg install ${FROM_FREEBSD} -y ${_EXTRA_PACKAGES} || return 1
     fi
 
     if [ "$_UPGRADE_SYS" -eq $BS_TRUE ]; then
@@ -4066,7 +4197,7 @@ install_freebsd_git_deps() {
 
 install_freebsd_9_stable() {
     # shellcheck disable=SC2086
-    /usr/local/sbin/pkg install ${SALT_PKG_FLAGS} -y sysutils/py-salt || return 1
+    /usr/local/sbin/pkg install ${FROM_SALTSTACK} -y sysutils/py-salt || return 1
     return 0
 }
 
@@ -4080,7 +4211,7 @@ install_freebsd_11_stable() {
 
 install_freebsd_git() {
     # shellcheck disable=SC2086
-    /usr/local/sbin/pkg install ${SALT_PKG_FLAGS} -y sysutils/py-salt || return 1
+    /usr/local/sbin/pkg install ${FROM_SALTSTACK} -y sysutils/py-salt || return 1
 
     # Let's keep the rc.d files before deleting the package
     mkdir /tmp/rc-scripts || return 1

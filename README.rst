@@ -34,6 +34,7 @@ Examples
 ~~~~~~~~
 
 .. note::
+
     In every two-step example, you would be well-served to examine the downloaded file and examine
     it to ensure that it does what you expect.
 
@@ -142,6 +143,7 @@ Installing via an Insecure One-Liner
 The following examples illustrate how to install Salt via a one-liner.
 
 .. note::
+
     Warning! These methods do not involve a verification step and assume that the delivered file
     is trustworthy.
 
@@ -337,7 +339,7 @@ Supported Operating Systems
 - CentOS 5/6/7
 - Debian 6/7/8
 - Fedora 17/18/20/21/22
-- FreeBSD 9.1/9.2/10
+- FreeBSD 9.1/9.2/10/11
 - Gentoo
 - Linaro
 - Linux Mint 13/14

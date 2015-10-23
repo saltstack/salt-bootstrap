@@ -27,7 +27,7 @@ Bootstrap
 ---------
 
 If you're looking for the *one-liner* to install salt, please scroll to the bottom and use the
-instructions for `Installing via an Insecure One-Liner`_
+instructions for `Installing via an Insecure One-Liner`_.
 
 
 Examples
@@ -132,6 +132,10 @@ To install a specific branch from a git fork:
   sudo sh install_salt.sh -g https://github.com/myuser/salt.git git mybranch
 
 
+Any of the example above which use two-lines can be made to run in a single-line
+configuration with minor modifications, see `Installing via an Insecure One-Liner`_.
+
+
 Installing via an Insecure One-Liner
 ------------------------------------
 
@@ -145,15 +149,23 @@ The following examples illustrate how to install Salt via a one-liner.
 Examples
 ~~~~~~~~
 
-Installing the latest develop branch of Salt:
+Installing the latest stable release of Salt (default):
 
 .. code:: console
 
   curl -L https://bootstrap.saltstack.com | sudo sh -s -- stable
 
-Any of the example above which use two-lines can be made to run in a single-line
-configuration with minor modifications.
+or
 
+.. code:: console
+
+  curl -L https://bootstrap.saltstack.com | sudo sh -s
+
+Installing the latest develop branch of Salt:
+
+.. code:: console
+
+  curl -L https://bootstrap.saltstack.com | sudo sh -s -- git develop
 
 
 Adding support for other operating systems

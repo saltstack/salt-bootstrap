@@ -2629,14 +2629,14 @@ install_debian_check_services() {
 
 FEDORA_PACKAGE_MANAGER="yum"
 
-fedora_get_package_manager() {
+__fedora_get_package_manager() {
   if [ "$DISTRO_MAJOR_VERSION" -lt 22 ] || [ "$(which dnf)" != "" ]; then
     FEDORA_PACKAGE_MANAGER="dnf"
   fi
 }
 
 install_fedora_deps() {
-    fedora_get_package_manager
+    __fedora_get_package_manager
     if [ "$_ENABLE_EXTERNAL_ZMQ_REPOS" -eq $BS_TRUE ]; then
         __install_saltstack_copr_zeromq_repository || return 1
     fi
@@ -2666,7 +2666,7 @@ install_fedora_deps() {
 }
 
 install_fedora_stable() {
-    fedora_get_package_manager
+    __fedora_get_package_manager
     __PACKAGES=""
     if [ "$_INSTALL_MINION" -eq $BS_TRUE ]; then
         __PACKAGES="${__PACKAGES} salt-minion"
@@ -2697,7 +2697,7 @@ install_fedora_stable_post() {
 }
 
 install_fedora_git_deps() {
-    fedora_get_package_manager
+    __fedora_get_package_manager
     install_fedora_deps || return 1
 
     if [ "$(which git)" = "" ]; then

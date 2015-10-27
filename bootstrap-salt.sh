@@ -2630,7 +2630,7 @@ install_debian_check_services() {
 FEDORA_PACKAGE_MANAGER="yum"
 
 __fedora_get_package_manager() {
-  if [ "$DISTRO_MAJOR_VERSION" -lt 22 ] || [ "$(which dnf)" != "" ]; then
+  if [ "$DISTRO_MAJOR_VERSION" -ge 22 ] || [ "$(which dnf)" != "" ]; then
     FEDORA_PACKAGE_MANAGER="dnf"
   fi
 }

@@ -2696,7 +2696,17 @@ install_debian_check_services() {
 #
 #   Fedora Install Functions
 #
+
+FEDORA_PACKAGE_MANAGER="yum"
+
+__fedora_get_package_manager() {
+  if [ "$DISTRO_MAJOR_VERSION" -ge 22 ] || [ "$(which dnf)" != "" ]; then
+    FEDORA_PACKAGE_MANAGER="dnf"
+  fi
+}
+
 install_fedora_deps() {
+    __fedora_get_package_manager
     if [ "$_ENABLE_EXTERNAL_ZMQ_REPOS" -eq $BS_TRUE ]; then
         __install_saltstack_copr_zeromq_repository || return 1
     fi
@@ -2710,22 +2720,23 @@ install_fedora_deps() {
     fi
 
     # shellcheck disable=SC2086
-    yum install -y ${__PACKAGES} || return 1
+    $FEDORA_PACKAGE_MANAGER install -y ${__PACKAGES} || return 1
 
     if [ "$_UPGRADE_SYS" -eq $BS_TRUE ]; then
-        yum -y update || return 1
+        $FEDORA_PACKAGE_MANAGER -y update || return 1
     fi
 
     if [ "${_EXTRA_PACKAGES}" != "" ]; then
         echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
         # shellcheck disable=SC2086
-        yum install -y ${_EXTRA_PACKAGES} || return 1
+        $FEDORA_PACKAGE_MANAGER install -y ${_EXTRA_PACKAGES} || return 1
     fi
 
     return 0
 }
 
 install_fedora_stable() {
+    __fedora_get_package_manager
     __PACKAGES=""
     if [ "$_INSTALL_MINION" -eq $BS_TRUE ]; then
         __PACKAGES="${__PACKAGES} salt-minion"
@@ -2734,7 +2745,7 @@ install_fedora_stable() {
         __PACKAGES="${__PACKAGES} salt-master"
     fi
     # shellcheck disable=SC2086
-    yum install -y ${__PACKAGES} || return 1
+    $FEDORA_PACKAGE_MANAGER install -y ${__PACKAGES} || return 1
     return 0
 }
 
@@ -2756,13 +2767,14 @@ install_fedora_stable_post() {
 }
 
 install_fedora_git_deps() {
+    __fedora_get_package_manager
     install_fedora_deps || return 1
 
     if [ "$(which git)" = "" ]; then
-        yum install -y git || return 1
+        $FEDORA_PACKAGE_MANAGER install -y git || return 1
     fi
 
-    yum install -y systemd-python || return 1
+    $FEDORA_PACKAGE_MANAGER install -y systemd-python || return 1
 
     __git_clone_and_checkout || return 1
 
@@ -2770,7 +2782,7 @@ install_fedora_git_deps() {
         # We're on the develop branch, install whichever tornado is on the requirements file
         __REQUIRED_TORNADO="$(grep tornado "${__SALT_GIT_CHECKOUT_DIR}/requirements/base.txt")"
         if [ "${__REQUIRED_TORNADO}" != "" ]; then
-            yum install -y python-tornado
+            $FEDORA_PACKAGE_MANAGER install -y python-tornado
         fi
     fi
 

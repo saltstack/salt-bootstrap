@@ -654,7 +654,7 @@ __derive_debian_numeric_version() {
     INPUT_VERSION="$1"
     if echo "$INPUT_VERSION" | grep -q '^[0-9]'; then
         NUMERIC_VERSION="$INPUT_VERSION"
-    elif [ -z "$INPUT_VERSION" -a -f "/etc/debian_version" ]; then
+    elif [ -z "$INPUT_VERSION" ] && [ -f "/etc/debian_version" ]; then
         INPUT_VERSION="$(cat /etc/debian_version)"
     fi
     if [ -z "$NUMERIC_VERSION" ]; then
@@ -1062,7 +1062,7 @@ __ubuntu_codename_translation() {
             DISTRO_CODENAME="trusty"
             ;;
         "15")
-            if [ -n $_april ] ; then
+            if [ -n "$_april" ]; then
                 DISTRO_CODENAME="vivid"
             else
                 DISTRO_CODENAME="wily"
@@ -2391,13 +2391,13 @@ install_debian_8_deps() {
     __PACKAGES="procps pciutils"
     # Also install python-requests
     __PACKAGES="${__PACKAGES} python-requests"
-    # shellcheck disable=SC2086
 
     if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
         # Install python-libcloud if asked to
         __PACKAGES="${__PACKAGES} python-libcloud"
     fi
 
+    # shellcheck disable=SC2086
     __apt_get_install_noinput ${__PACKAGES} || return 1
 
     if [ "$_UPGRADE_SYS" -eq $BS_TRUE ]; then
@@ -5530,7 +5530,7 @@ if [ "$DAEMONS_RUNNING_FUNC" != "null" ] && [ $_START_DAEMONS -eq $BS_TRUE ]; th
             fi
 
 
-            [ ! "$_SALT_ETC_DIR/$fname" ] && [ $fname != "syndic" ] && echodebug "$_SALT_ETC_DIR/$fname does not exist"
+            [ ! -f "$_SALT_ETC_DIR/$fname" ] && [ $fname != "syndic" ] && echodebug "$_SALT_ETC_DIR/$fname does not exist"
 
             echodebug "Running salt-$fname by hand outputs: $(nohup salt-$fname -l debug)"
 

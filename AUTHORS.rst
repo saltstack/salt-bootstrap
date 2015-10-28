@@ -55,6 +55,7 @@ Matthew Mead-Briggs         mattmb
 Matthew Willson             ixela
 Matthieu Guegan             mguegan
 Michael Scherer             mscherer
+Michele Bologna             mbologna               michele.bologna@gmail.com
 Mike Carlson                m87carlson             mike@bayphoto.com
 Mike Place                  cachedout              mp@saltstack.com
 nevins-b                    nevins-b

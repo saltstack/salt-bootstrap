@@ -1,4 +1,4 @@
-Version 2015.xx.xx:
+Version 2015.11.04:
 	* Allow bypassing dependencies installation. Thanks EYJ. #656.
 	* Add FreeBSD 11 support. Thanks Chris Buechler(cbuechler). #653
 	* Move RHEL installations to use repo.saltstack.com #674

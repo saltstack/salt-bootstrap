@@ -1205,7 +1205,7 @@ __ubuntu_codename_translation
 if ([ "${DISTRO_NAME_L}" != "ubuntu" ] && [ "$ITYPE" = "daily" ]); then
     echoerror "${DISTRO_NAME} does not have daily packages support"
     exit 1
-elif ([ "${DISTRO_NAME_L}" != "ubuntu" ] && [ "$ITYPE" = "stable" ] && [ "$STABLE_REV" != "latest" ]); then
+elif ([ "$(echo "${DISTRO_NAME_L}" | egrep '(ubuntu|centos|red_hat|scientific|oracle|amazon|fedora)')" = "" ] && [ "$ITYPE" = "stable" ] && [ "$STABLE_REV" != "latest" ]); then
     echoerror "${DISTRO_NAME} does not have major version pegged packages support"
     exit 1
 fi
@@ -2940,6 +2940,11 @@ gpgkey=https://repo.saltstack.com/yum/rhel5/SALTSTACK-EL5-GPG-KEY.pub
 enabled=1
 enabled_metadata=1
 _eof
+        if [ "$STABLE_REV" != "latest" ]; then
+            cat << _eof >> "/etc/yum.repos.d/repo-saltstack-el${DISTRO_MAJOR_VERSION}.repo"
+includepkgs=[0-9]:[!s][!a][!l][!t]* salt*${STABLE_REV}*
+_eof
+        fi
 
         __fetch_url /tmp/repo-saltstack-el5.pub "https://repo.saltstack.com/yum/rhel5/SALTSTACK-EL5-GPG-KEY.pub" || return 1
         rpm --import /tmp/repo-saltstack-el5.pub || return 1
@@ -2960,6 +2965,11 @@ gpgkey=https://repo.saltstack.com/yum/rhel${DISTRO_MAJOR_VERSION}/SALTSTACK-GPG-
 enabled=1
 enabled_metadata=1
 _eof
+        if [ "$STABLE_REV" != "latest" ]; then
+            cat << _eof >> "/etc/yum.repos.d/repo-saltstack-el${DISTRO_MAJOR_VERSION}.repo"
+includepkgs=[0-9]:[!s][!a][!l][!t]* salt*${STABLE_REV}*
+_eof
+        fi
 
         __fetch_url /tmp/repo-saltstack.pub "https://repo.saltstack.com/yum/rhel${DISTRO_MAJOR_VERSION}/SALTSTACK-GPG-KEY.pub" || return 1
         rpm --import /tmp/repo-saltstack.pub || return 1

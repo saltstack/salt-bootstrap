@@ -1,3 +1,14 @@
+Version 2015.11.04:
+	* Allow bypassing dependencies installation. Thanks EYJ. #656.
+	* Add FreeBSD 11 support. Thanks Chris Buechler(cbuechler). #653
+	* Move RHEL installations to use repo.saltstack.com #674
+	* Move Debian 8 installation to use repo.saltstack.com #674
+	* Fix error finding python-jinja2 in RHEL 7. Thanks Rob Eden(hedinfaok). #654
+	* Move Ubuntu 12 and 14 installations to use repo.saltstack.com #674
+	* Move FreeBSD installations to use repo.saltstack.com #674
+	* Use dnf on Fedora 22 and later. Thanks Michele Bologna (mbologna). #665
+
+
 Version 2015.08.06:
 	* Fix python-requests installations for Ubuntu >= 14.04 LTS. #631, #632, #633
 	* Install python-crypto from Chris Lea's PPA for Ubuntu < 14.04

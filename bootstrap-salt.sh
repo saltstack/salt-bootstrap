@@ -2940,7 +2940,7 @@ gpgkey=https://repo.saltstack.com/yum/rhel5/SALTSTACK-EL5-GPG-KEY.pub
 enabled=1
 enabled_metadata=1
 _eof
-        if [ "$STABLE_REV" != "latest" ]; then
+        if [ "$ITYPE" = "stable" -a "$STABLE_REV" != "latest" ]; then
             cat << _eof >> "/etc/yum.repos.d/repo-saltstack-el${DISTRO_MAJOR_VERSION}.repo"
 includepkgs=[0-9]:[!s][!a][!l][!t]* salt*${STABLE_REV}*
 _eof
@@ -2965,7 +2965,7 @@ gpgkey=https://repo.saltstack.com/yum/rhel${DISTRO_MAJOR_VERSION}/SALTSTACK-GPG-
 enabled=1
 enabled_metadata=1
 _eof
-        if [ "$STABLE_REV" != "latest" ]; then
+        if [ "$ITYPE" = "stable" -a "$STABLE_REV" != "latest" ]; then
             cat << _eof >> "/etc/yum.repos.d/repo-saltstack-el${DISTRO_MAJOR_VERSION}.repo"
 includepkgs=[0-9]:[!s][!a][!l][!t]* salt*${STABLE_REV}*
 _eof

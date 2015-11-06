@@ -2942,7 +2942,7 @@ enabled_metadata=1
 _eof
         if [ "$ITYPE" = "stable" -a "$STABLE_REV" != "latest" ]; then
             cat << _eof >> "/etc/yum.repos.d/repo-saltstack-el${DISTRO_MAJOR_VERSION}.repo"
-includepkgs=[0-9]:[!s][!a][!l][!t]* salt*${STABLE_REV}*
+includepkgs=?:[!s][!a][!l][!t]* salt*${STABLE_REV}*
 _eof
         fi
 
@@ -2967,7 +2967,7 @@ enabled_metadata=1
 _eof
         if [ "$ITYPE" = "stable" -a "$STABLE_REV" != "latest" ]; then
             cat << _eof >> "/etc/yum.repos.d/repo-saltstack-el${DISTRO_MAJOR_VERSION}.repo"
-includepkgs=[0-9]:[!s][!a][!l][!t]* salt*${STABLE_REV}*
+includepkgs=?:[!s][!a][!l][!t]* salt*${STABLE_REV}*
 _eof
         fi
 

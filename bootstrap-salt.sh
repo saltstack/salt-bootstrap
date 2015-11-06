@@ -1877,7 +1877,7 @@ install_ubuntu_stable_deps() {
 
         # Saltstack's Stable Ubuntu repository
         if [ "$(grep -ER 'latest .+ main' /etc/apt)" = "" ]; then
-            echo "deb https://repo.saltstack.com/apt/ubuntu/ubuntu$DISTRO_MAJOR_VERSION/$STABLE_REV $DISTRO_CODENAME main" >> \
+            echo "deb http://repo.saltstack.com/apt/ubuntu/ubuntu$DISTRO_MAJOR_VERSION/$STABLE_REV $DISTRO_CODENAME main" >> \
                 /etc/apt/sources.list.d/saltstack.list
         fi
 

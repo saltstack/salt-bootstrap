@@ -4544,7 +4544,11 @@ __zypper_install() {
 }
 
 install_opensuse_stable_deps() {
-    DISTRO_REPO="openSUSE_${DISTRO_MAJOR_VERSION}.${DISTRO_MINOR_VERSION}"
+    if [ ${DISTRO_MAJOR_VERSION} -ge 42 ]; then
+        DISTRO_REPO="openSUSE_Leap_${DISTRO_MAJOR_VERSION}.${DISTRO_MINOR_VERSION}"
+    else
+        DISTRO_REPO="openSUSE_${DISTRO_MAJOR_VERSION}.${DISTRO_MINOR_VERSION}"
+    fi
 
     # Is the repository already known
     __zypper repos | grep devel_languages_python >/dev/null 2>&1
@@ -4572,8 +4576,16 @@ install_opensuse_stable_deps() {
 
     # Salt needs python-zypp installed in order to use the zypper module
     __PACKAGES="python-zypp"
-    __PACKAGES="${__PACKAGES} libzmq3 python python-Jinja2 python-M2Crypto python-PyYAML python-requests"
+    __PACKAGES="${__PACKAGES} python python-Jinja2 python-M2Crypto python-PyYAML python-requests"
     __PACKAGES="${__PACKAGES} python-msgpack-python python-pycrypto python-pyzmq python-xml"
+
+    if [ "$DISTRO_MAJOR_VERSION" -lt 13 ]; then
+        __PACKAGES="${__PACKAGES} libzmq3"
+    elif [ "$DISTRO_MAJOR_VERSION" -eq 13 ]; then
+        __PACKAGES="${__PACKAGES} libzmq4"
+    elif [ "$DISTRO_MAJOR_VERSION" -gt 13 ]; then
+        __PACKAGES="${__PACKAGES} libzmq5"
+    fi
 
     if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
         __PACKAGES="${__PACKAGES} python-apache-libcloud"

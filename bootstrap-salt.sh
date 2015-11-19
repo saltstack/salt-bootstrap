@@ -4544,7 +4544,7 @@ __zypper_install() {
 }
 
 install_opensuse_stable_deps() {
-    if [ ${DISTRO_MAJOR_VERSION} -ge 42 ]; then
+    if [ "${DISTRO_MAJOR_VERSION}" -ge 42 ]; then
         DISTRO_REPO="openSUSE_Leap_${DISTRO_MAJOR_VERSION}.${DISTRO_MINOR_VERSION}"
     else
         DISTRO_REPO="openSUSE_${DISTRO_MAJOR_VERSION}.${DISTRO_MINOR_VERSION}"

@@ -2149,7 +2149,6 @@ install_debian_deps() {
         # Both python-requests which is a hard dependency and apache-libcloud which is a soft dependency, under debian < 6
         # need to be installed using pip
         check_pip_allowed "You need to allow pip based installations (-P) in order to install the python 'requests' package"
-        # Additionally install procps and pciutils which allows for Docker boostraps. See 366#issuecomment-39666813
         __PACKAGES="${__PACKAGES} python-pip"
         # shellcheck disable=SC2089
         __PIP_PACKAGES="${__PIP_PACKAGES} 'requests>=$_PY_REQUESTS_MIN_VERSION'"
@@ -2328,7 +2327,7 @@ install_debian_7_deps() {
 
     apt-get update || return 1
     __apt_get_install_noinput -t wheezy-backports libzmq3 libzmq3-dev python-zmq python-apt || return 1
-    # Additionally install procps and pciutils which allows for Docker boostraps. See 366#issuecomment-39666813
+    # Install procps and pciutils which allows for Docker bootstraps. See 366#issuecomment-39666813
     __PACKAGES="procps pciutils"
     # Also install python-requests
     __PACKAGES="${__PACKAGES} python-requests"
@@ -2391,8 +2390,8 @@ install_debian_8_deps() {
     apt-get update || return 1
     __PACKAGES="libzmq3 libzmq3-dev python-zmq python-requests python-apt"
 
-    # Additionally install procps and pciutils which allows for Docker boostraps. See 366#issuecomment-39666813
-    __PACKAGES="procps pciutils"
+    # Additionally install procps and pciutils which allows for Docker bootstraps. See 366#issuecomment-39666813
+    __PACKAGES="${__PACKAGES} procps pciutils"
     # Also install python-requests
     __PACKAGES="${__PACKAGES} python-requests"
 

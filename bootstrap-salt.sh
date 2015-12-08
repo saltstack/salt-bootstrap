@@ -1992,8 +1992,7 @@ install_ubuntu_daily() {
 
 install_ubuntu_git() {
     if [ -f "${__SALT_GIT_CHECKOUT_DIR}/salt/syspaths.py" ]; then
-        python setup.py install --install-layout=deb --salt-config-dir="$_SALT_ETC_DIR" || \
-            python setup.py --salt-config-dir="$_SALT_ETC_DIR" install --install-layout=deb || return 1
+        python setup.py --salt-config-dir="$_SALT_ETC_DIR" install --install-layout=deb || return 1
     else
         python setup.py install --install-layout=deb || return 1
     fi
@@ -2585,8 +2584,7 @@ install_debian_8_stable() {
 
 install_debian_git() {
     if [ -f "${__SALT_GIT_CHECKOUT_DIR}/salt/syspaths.py" ]; then
-        python setup.py install --install-layout=deb --salt-config-dir="$_SALT_ETC_DIR" || \
-            python setup.py --salt-config-dir="$_SALT_ETC_DIR" install --install-layout=deb || return 1
+      python setup.py --salt-config-dir="$_SALT_ETC_DIR" install --install-layout=deb || return 1
     else
         python setup.py install --install-layout=deb || return 1
     fi
@@ -2800,8 +2798,7 @@ install_fedora_git_deps() {
 
 install_fedora_git() {
     if [ -f "${__SALT_GIT_CHECKOUT_DIR}/salt/syspaths.py" ]; then
-        python setup.py install --salt-config-dir="$_SALT_ETC_DIR" || \
-            python setup.py --salt-config-dir="$_SALT_ETC_DIR" install || return 1
+        python setup.py --salt-config-dir="$_SALT_ETC_DIR" install || return 1
     else
         python setup.py install || return 1
     fi
@@ -3168,8 +3165,7 @@ install_centos_git() {
         _PYEXE=python2
     fi
     if [ -f "${__SALT_GIT_CHECKOUT_DIR}/salt/syspaths.py" ]; then
-        $_PYEXE setup.py install --prefix=/usr --salt-config-dir="$_SALT_ETC_DIR" || \
-            $_PYEXE setup.py --prefix=/usr --salt-config-dir="$_SALT_ETC_DIR" install || return 1
+        $_PYEXE setup.py --prefix=/usr --salt-config-dir="$_SALT_ETC_DIR" install || return 1
     else
         $_PYEXE setup.py install --prefix=/usr || return 1
     fi
@@ -3919,8 +3915,7 @@ install_arch_linux_stable() {
 
 install_arch_linux_git() {
     if [ -f "${__SALT_GIT_CHECKOUT_DIR}/salt/syspaths.py" ]; then
-        python2 setup.py install --salt-config-dir="$_SALT_ETC_DIR" || \
-            python2 setup.py --salt-config-dir="$_SALT_ETC_DIR" install || return 1
+        python2 setup.py --salt-config-dir="$_SALT_ETC_DIR" install || return 1
     else
         python2 setup.py install || return 1
     fi
@@ -4242,18 +4237,7 @@ install_freebsd_git() {
         # We still can't provide the system paths, salt 0.16.x
         /usr/local/bin/python2 setup.py install || return 1
     else
-        /usr/local/bin/python2 setup.py install \
-            --salt-root-dir=/usr/local \
-            --salt-config-dir="${_SALT_ETC_DIR}" \
-            --salt-cache-dir=/var/cache/salt \
-            --salt-sock-dir=/var/run/salt \
-            --salt-srv-root-dir=/srv \
-            --salt-base-file-roots-dir="${_SALT_ETC_DIR}/states" \
-            --salt-base-pillar-roots-dir="${_SALT_ETC_DIR}/pillar" \
-            --salt-base-master-roots-dir="${_SALT_ETC_DIR}/salt-master" \
-            --salt-logs-dir=/var/log/salt \
-            --salt-pidfile-dir=/var/run \
-            || /usr/local/bin/python2 setup.py \
+        /usr/local/bin/python2 setup.py \
             --salt-root-dir=/usr/local \
             --salt-config-dir="${_SALT_ETC_DIR}" \
             --salt-cache-dir=/var/cache/salt \
@@ -4420,8 +4404,7 @@ install_smartos_stable() {
 install_smartos_git() {
     # Use setuptools in order to also install dependencies
     # lets force our config path on the setup for now, since salt/syspaths.py only  got fixed in 2015.5.0
-    USE_SETUPTOOLS=1 /opt/local/bin/python setup.py install --salt-config-dir="$_SALT_ETC_DIR" || \
-        USE_SETUPTOOLS=1 /opt/local/bin/python setup.py --salt-config-dir="$_SALT_ETC_DIR" install || return 1
+    USE_SETUPTOOLS=1 /opt/local/bin/python setup.py --salt-config-dir="$_SALT_ETC_DIR" install || return 1
     return 0
 }
 

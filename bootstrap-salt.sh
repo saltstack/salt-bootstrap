@@ -2392,8 +2392,6 @@ install_debian_8_deps() {
 
     # Additionally install procps and pciutils which allows for Docker bootstraps. See 366#issuecomment-39666813
     __PACKAGES="${__PACKAGES} procps pciutils"
-    # Also install python-requests
-    __PACKAGES="${__PACKAGES} python-requests"
 
     if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
         # Install python-libcloud if asked to

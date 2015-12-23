@@ -582,7 +582,7 @@ fi
 #----------------------------------------------------------------------------------------------------------------------
 __fetch_url() {
     # shellcheck disable=SC2086
-    curl $_CURL_ARGS -s -o "$1" "$2" >/dev/null 2>&1 ||
+    curl $_CURL_ARGS -L -s -o "$1" "$2" >/dev/null 2>&1 ||
         wget $_WGET_ARGS -q -O "$1" "$2" >/dev/null 2>&1 ||
             fetch $_FETCH_ARGS -q -o "$1" "$2" >/dev/null 2>&1 ||
                 fetch -q -o "$1" "$2" >/dev/null 2>&1           # Pre FreeBSD 10
@@ -2892,9 +2892,12 @@ __install_epel_repository() {
         EPEL_ARCH=$CPU_ARCH_L
     fi
     if [ "$DISTRO_MAJOR_VERSION" -eq 5 ]; then
-        # Use dl.fedoraproject.org to avoid redirect breakage:
-        # https://lists.fedoraproject.org/pipermail/users/2012-February/414558.html
-        rpm -Uvh --force "http://dl.fedoraproject.org/pub/epel/5/${EPEL_ARCH}/epel-release-5-4.noarch.rpm" || return 1
+        # Install curl which is not included in minimal CentOS 5 images
+        rpm -q curl > /dev/null 2>&1 || yum -y install curl
+        # rpm from CentOS/RHEL release 5 does not support HTTP downloads
+        # properly, especially 3XX code redirects
+        __fetch_url /tmp/epel-release.rpm "http://download.fedoraproject.org/pub/epel/5/${EPEL_ARCH}/epel-release-5-4.noarch.rpm" || return 1
+        rpm -Uvh --force /tmp/epel-release.rpm || return 1
     elif [ "$DISTRO_MAJOR_VERSION" -eq 6 ]; then
         rpm -Uvh --force "http://download.fedoraproject.org/pub/epel/6/${EPEL_ARCH}/epel-release-6-8.noarch.rpm" || return 1
     elif [ "$DISTRO_MAJOR_VERSION" -eq 7 ]; then

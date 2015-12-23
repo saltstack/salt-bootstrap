@@ -2892,6 +2892,8 @@ __install_epel_repository() {
         EPEL_ARCH=$CPU_ARCH_L
     fi
     if [ "$DISTRO_MAJOR_VERSION" -eq 5 ]; then
+        # Install curl which is not included in minimal CentOS 5 images
+        rpm -q curl > /dev/null 2>&1 || yum -y install curl
         # rpm from CentOS/RHEL release 5 does not support HTTP downloads
         # properly, especially 3XX code redirects
         __fetch_url /tmp/epel-release.rpm "http://download.fedoraproject.org/pub/epel/5/${EPEL_ARCH}/epel-release-5-4.noarch.rpm" || return 1

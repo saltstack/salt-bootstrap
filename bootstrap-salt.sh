@@ -582,7 +582,7 @@ fi
 #----------------------------------------------------------------------------------------------------------------------
 __fetch_url() {
     # shellcheck disable=SC2086
-    curl $_CURL_ARGS -s -o "$1" "$2" >/dev/null 2>&1 ||
+    curl $_CURL_ARGS -L -s -o "$1" "$2" >/dev/null 2>&1 ||
         wget $_WGET_ARGS -q -O "$1" "$2" >/dev/null 2>&1 ||
             fetch $_FETCH_ARGS -q -o "$1" "$2" >/dev/null 2>&1 ||
                 fetch -q -o "$1" "$2" >/dev/null 2>&1           # Pre FreeBSD 10

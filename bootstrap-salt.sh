@@ -3314,95 +3314,12 @@ install_centos_check_services() {
 #
 #   RedHat Install Functions
 #
-__test_rhel_optionals_packages() {
-    __install_epel_repository || return 1
-
-    # Make sure yum-utils is installed
-    yum list installed yum-utils > /dev/null 2>&1 || yum -y install yum-utils --enablerepo=${_EPEL_REPO} || return 1
-
-    if [ "$DISTRO_MAJOR_VERSION" -ge 7 ]; then
-        yum-config-manager --enable \*server-optional-rpms || return 1
-    fi
-
-    if [ "$DISTRO_MAJOR_VERSION" -ge 6 ]; then
-        #python-jinja2 is in repo server-releases-optional in EC2/RHEL6
-        yum-config-manager --enable rhui-\*-server-releases-optional || return 1
-
-        # Let's enable package installation testing, kind of, --dry-run
-        echoinfo "Testing if packages usually on the optionals repository are available:"
-        __YUM_CONF_DIR="$(mktemp -d)"
-        __YUM_CONF_FILE="${__YUM_CONF_DIR}/yum.conf"
-        cp /etc/yum.conf "${__YUM_CONF_FILE}"
-        echo 'tsflags=test' >> "${__YUM_CONF_FILE}"
-
-        # Let's try installing the packages that usually require the optional repository
-        # shellcheck disable=SC2043
-        for package in python-jinja2; do
-            echoinfo "  - ${package}"
-            if [ "$DISTRO_NAME_L" = "oracle_linux" ]; then
-                yum --config "${__YUM_CONF_FILE}" install -y ${package} >/dev/null 2>&1 || \
-                    yum --config "${__YUM_CONF_FILE}" install -y ${package} --enablerepo=${_EPEL_REPO} >/dev/null 2>&1
-            else
-                yum --config "${__YUM_CONF_FILE}" install -y ${package} --enablerepo=${_EPEL_REPO} >/dev/null 2>&1
-            fi
-            if [ $? -ne 0 ]; then
-                echoerror "Failed to find an installable '${package}' package. The optional repository or its subscription might be missing."
-                rm -rf "${__YUM_CONF_DIR}"
-                return 1
-            fi
-        done
-        rm -rf "${__YUM_CONF_DIR}"
-    fi
-    return 0
-}
-
 install_red_hat_linux_stable_deps() {
-    if [ "${DISTRO_MAJOR_VERSION}" -ge 6 ]; then
-        # Wait at most 60 seconds for the repository subscriptions to register
-        __ATTEMPTS=6
-        while [ "${__ATTEMPTS}" -gt 0 ]; do
-            __test_rhel_optionals_packages
-            if [ $? -eq 1 ]; then
-                __ATTEMPTS=$(( __ATTEMPTS -1 ))
-                if [ ${__ATTEMPTS} -lt 1 ]; then
-                    return 1
-                fi
-                echoinfo "Sleeping 10 seconds while waiting for the optional repository subscription to be externally configured"
-                sleep 10
-                continue
-            else
-                break
-            fi
-        done
-    else
-         __test_rhel_optionals_packages || return 1
-    fi
-
     install_centos_stable_deps || return 1
     return 0
 }
 
 install_red_hat_linux_git_deps() {
-    if [ "${DISTRO_MAJOR_VERSION}" -ge 6 ]; then
-        # Wait at most 60 seconds for the repository subscriptions to register
-        __ATTEMPTS=6
-        while [ "${__ATTEMPTS}" -gt 0 ]; do
-            __test_rhel_optionals_packages
-            if [ $? -eq 1 ]; then
-                __ATTEMPTS=$(( __ATTEMPTS -1 ))
-                if [ ${__ATTEMPTS} -lt 1 ]; then
-                    return 1
-                fi
-                echoinfo "Sleeping 10 seconds while waiting for the optional repository subscription to be externally configured"
-                sleep 10
-                continue
-            else
-                break
-            fi
-        done
-    else
-         __test_rhel_optionals_packages || return 1
-    fi
     install_centos_git_deps || return 1
     return 0
 }
@@ -3591,13 +3508,11 @@ install_red_hat_enterprise_workstation_testing_post() {
 #   Oracle Linux Install Functions
 #
 install_oracle_linux_stable_deps() {
-    __test_rhel_optionals_packages || return 1
     install_centos_stable_deps || return 1
     return 0
 }
 
 install_oracle_linux_git_deps() {
-    __test_rhel_optionals_packages || return 1
     install_centos_git_deps || return 1
     return 0
 }

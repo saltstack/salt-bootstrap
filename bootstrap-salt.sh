@@ -586,6 +586,7 @@ __fetch_url() {
         wget $_WGET_ARGS -q -O "$1" "$2" >/dev/null 2>&1 ||
             fetch $_FETCH_ARGS -q -o "$1" "$2" >/dev/null 2>&1 ||
                 fetch -q -o "$1" "$2" >/dev/null 2>&1           # Pre FreeBSD 10
+                    ftp -o "$1" "$2" >/dev/null 2>&1            # OpenBSD
 }
 
 
@@ -1665,6 +1666,33 @@ __check_services_debian() {
         return 1
     fi
 }   # ----------  end of function __check_services_debian  ----------
+
+
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  __check_services_openbsd
+#   DESCRIPTION:  Return 0 or 1 in case the service is enabled or not
+#    PARAMETERS:  servicename
+#----------------------------------------------------------------------------------------------------------------------
+__check_services_openbsd() {
+    if [ $# -eq 0 ]; then
+        echoerror "You need to pass a service name to check!"
+        exit 1
+    elif [ $# -ne 1 ]; then
+        echoerror "You need to pass a service name to check as the single argument to the function"
+    fi
+
+    servicename=$1
+    echodebug "Checking if service ${servicename} is enabled"
+
+    # shellcheck disable=SC2086,SC2046,SC2144
+    if [ -f /etc/rc.d/${servicename} ] && [ $(grep ${servicename} /etc/rc.conf.local) -ne "" ] ; then
+        echodebug "Service ${servicename} is enabled"
+        return 0
+    else
+        echodebug "Service ${servicename} is NOT enabled"
+        # return 1
+    fi
+}   # ----------  end of function __check_services_openbsd  ----------
 
 
 #######################################################################################################################
@@ -4320,6 +4348,179 @@ install_freebsd_restart_daemons() {
 }
 #
 #   Ended FreeBSD Install Functions
+#
+#######################################################################################################################
+
+#######################################################################################################################
+#
+#   OpenBSD Install Functions
+#
+
+install_openbsd_deps() {
+  ping -c 2 -q mirrors.nycbug.org || return 1
+  echo "installpath = http://mirrors.nycbug.org/pub/OpenBSD/${OS_VERSION}/packages/${CPU_ARCH_L}/" >/etc/pkg.conf || return 1
+  pkg_add -I -v lsof || return 1  
+  pkg_add -I -v py-pip || return 1  
+  ln -sf $(ls -d /usr/local/bin/pip2.*) /usr/local/bin/pip  || return 1 
+  ln -sf $(ls -d /usr/local/bin/pydoc2*) /usr/local/bin/pydoc || return 1 
+  ln -sf $(ls -d /usr/local/bin/python2.[0-9]) /usr/local/bin/python || return 1
+  ln -sf $(ls -d /usr/local/bin/python2.[0-9]*to3) /usr/local/bin/2to3 || return 1
+  ln -sf $(ls -d /usr/local/bin/python2.[0-9]*-config) /usr/local/bin/python-config || return 1
+  pkg_add -I -v swig || return 1
+  pkg_add -I -v py-zmq || return 1
+  pkg_add -I -v py-requests || return 1
+  pkg_add -I -v py-M2Crypto || return 1
+  pkg_add -I -v py-raet || return 1
+  pkg_add -I -v py-libnacl || return 1
+  if [ "$_UPGRADE_SYS" -eq $BS_TRUE ]; then
+      /usr/local/bin/pip install --upgrade pip || return 1
+  fi
+  #
+  # PIP based installs need to copy configuration files "by hand".
+  # Let's trigger config_salt()
+  #
+  if [ "$_TEMP_CONFIG_DIR" = "null" ]; then
+      # Let's set the configuration directory to /tmp
+      _TEMP_CONFIG_DIR="/tmp"
+      CONFIG_SALT_FUNC="config_salt"
+      for fname in minion master; do
+          # Skip if not meant to be installed
+          [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
+          [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
+          # [ $fname = "api" ] && ([ "$_INSTALL_MASTER" -eq $BS_FALSE ] || [ "$(which salt-${fname} 2>/dev/null)" = "" ]) && continue
+          [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
+
+          # Let's download, since they were not provided, the default configuration files
+          if [ ! -f "$_SALT_ETC_DIR/$fname" ] && [ ! -f "$_TEMP_CONFIG_DIR/$fname" ]; then
+              ftp -o "$_TEMP_CONFIG_DIR/$fname" \
+                  "https://raw.githubusercontent.com/saltstack/salt/develop/conf/$fname" || return 1
+          fi
+      done
+  fi
+  if [ "$_UPGRADE_SYS" -eq $BS_TRUE ]; then
+      /usr/local/bin/pip install --upgrade pip || return 1
+  fi
+  if [ "${_EXTRA_PACKAGES}" != "" ]; then
+      echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
+      # shellcheck disable=SC2086
+      pkg_add -I -v ${_EXTRA_PACKAGES} || return 1
+  fi
+  return 0
+}
+
+install_openbsd_git_deps() {
+    install_openbsd_deps || return 1
+    pkg_add -I -v git || return 1
+    __git_clone_and_checkout || return 1
+    #
+    # Let's trigger config_salt()
+    #
+    if [ "$_TEMP_CONFIG_DIR" -eq "null" ]; then
+        _TEMP_CONFIG_DIR="${__SALT_GIT_CHECKOUT_DIR}/conf/"
+        CONFIG_SALT_FUNC="config_salt"
+    fi
+    return 0
+}
+
+install_openbsd_stable() {
+    
+#    pkg_add -r -I -v salt || return 1 
+    check_pip_allowed
+      /usr/local/bin/pip install salt || return 1
+     if [ "$_UPGRADE_SYS" -eq $BS_TRUE ]; then
+         /usr/local/bin/pip install --upgrade salt || return 1
+     fi
+    return 0
+}
+
+install_openbsd_git() {
+    #
+    # Install from git
+    #
+    if [ ! -f salt/syspaths.py ]; then
+        # We still can't provide the system paths, salt 0.16.x
+        /usr/local/bin/python2.7 setup.py install || return 1
+    fi
+    return 0
+}
+
+
+install_openbsd_post() {
+
+    #
+    # Install rc.d files.
+    #
+    ## below workaround for /etc/rc.d/rc.subr in OpenBSD >= 5.8 
+    ## is needed for salt service to start/stop properly by /etc/rc.d
+    ## reference: http://cvsweb.openbsd.org/cgi-bin/cvsweb/src/etc/rc.d/rc.subr.diff?r1=1.98&r2=1.99
+    ##
+    if [ $(grep '\-xf' /etc/rc.d/rc.subr)]; then
+      cp -p /etc/rc.d/rc.subr /etc/rc.d/rc.subr
+      sed -i.$(date +%F).saltinstall -e 's:-xf:-f:g' /etc/rc.d/rc.subr
+    fi
+    _TEMP_CONFIG_DIR="/tmp"
+    for fname in minion master syndic api; do
+
+        # Skip if not meant to be installed
+        [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
+        [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
+        [ $fname = "api" ] || [ "$(which salt-${fname} 2>/dev/null)" = "" ] && continue
+        #[ $fname = "api" ] && ([ "$_INSTALL_MASTER" -eq $BS_FALSE ] || [ "$(which salt-${fname} 2>/dev/null)" = "" ]) && continue
+        #[ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
+        [ $fname = "syndic" ] && continue
+
+        if [ $? -eq 1 ]; then
+            if [ ! -f "$_TEMP_CONFIG_DIR/salt-$fname" ]; then
+                ftp -o "$_TEMP_CONFIG_DIR/salt-$fname" \
+                    "https://raw.githubusercontent.com/saltstack/salt/develop/pkg/openbsd/salt-${fname}.rc-d"
+              if [ ! -f "/etc/rc.d/salt_${fname}" ] && [ $(grep salt_${fname} /etc/rc.conf.local) -eq ""]; then
+                  copyfile "$_TEMP_CONFIG_DIR/salt-$fname" "/etc/rc.d/salt_${fname}" && chmod +x "/etc/rc.d/salt_${fname}" || return 1
+                  echo salt_${fname}_enable="YES" >> /etc/rc.conf.local
+                  echo salt_${fname}_paths=\"/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin\" >>/etc/rc.conf.local
+              fi
+            fi
+        fi
+    done
+}
+
+install_openbsd_check_services() {
+  salt --version 
+    for fname in minion master syndic api; do
+        # Skip salt-api since the service should be opt-in and not necessarily started on boot
+        [ $fname = "api" ] && continue
+
+        # Skip if not meant to be installed
+        [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
+        [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
+        [ $fname = "api" ] && continue
+        [ $fname = "syndic" ] && continue
+        if [ -f /etc/rc.d/salt_${fname} ]; then
+            __check_services_openbsd salt_${fname} || return 1
+        fi
+    done
+    return 0
+}
+
+
+install_openbsd_restart_daemons() {
+  [ $_START_DAEMONS -eq $BS_FALSE ] && return
+  for fname in minion master syndic api; do
+    # Skip salt-api since the service should be opt-in and not necessarily started on boot
+    [ $fname = "api" ] && continue
+    # Skip if not meant to be installed
+    [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
+    [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
+    [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue                                                                                        
+    if [ -f /etc/rc.d/salt_${fname} ]; then
+            /etc/rc.d/salt_${fname} stop > /dev/null 2>&1
+            /etc/rc.d/salt_${fname} start
+    fi
+  done
+}
+
+
+#
+#   Ended OpenBSD Install Functions
 #
 #######################################################################################################################
 

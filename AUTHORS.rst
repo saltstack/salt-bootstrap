@@ -18,6 +18,7 @@ bruce-one                   bruce-one
 C. R. Oldham                cro                    cr@saltstack.com
 Cam                         camereonsparr
 Chris Rebert                cvrebert               chris.rebert@hulu.com
+Chris Buechler              cbuechler              cmb@pfsense.org
 Christer Edwards            cedwards
 denmat                      denmat
 Dag Viggo Lokøen            dagvl                  dag.viggo@lokoen.org
@@ -28,6 +29,7 @@ Diego Woitasen              diegows                diego@flugel.it
 Elias Probst                eliasp
 Erik Ankrom                 erikankrom
 Erik Johnson                terminalmage           erik@saltstack.com
+EYJ                         eyj
 Forrest Alvarez             gravyboat
 Fred Reimer                 freimer                freimer@freimer.org
 Geoff Garside               geoffgarside           geoff@geoffgarside.co.uk
@@ -53,6 +55,7 @@ Matthew Mead-Briggs         mattmb
 Matthew Willson             ixela
 Matthieu Guegan             mguegan
 Michael Scherer             mscherer
+Michele Bologna             mbologna               michele.bologna@gmail.com
 Mike Carlson                m87carlson             mike@bayphoto.com
 Mike Place                  cachedout              mp@saltstack.com
 nevins-b                    nevins-b
@@ -66,11 +69,13 @@ Pedro Paulo                 pedropaulovc
 Peter Tripp                 notpeter
 ptonelli                    ptonelli
 Raymond Barbiero            visualphoenix
+Rob Eden                    hedinfaok
 Roberto Aguilar             rca                    roberto@baremetal.io
 Roman Inflianskas           rominf                 infroma@gmail.com
 Ronald van Zantvoort        The-Loeki              ronald@pcextreme.nl
 Skyler Berg                 skylerberg             skylertheberg@gmail.com
 Stanislav B                 stanislavb
+Steve Groesz                wolfpackmars2
 Tate Eskew                  tateeskew
 Thomas S. Hatch             thatch45               thatch45@saltstack.com
 Tony Narlock                tony

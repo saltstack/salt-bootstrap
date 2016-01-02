@@ -9,7 +9,7 @@ script runs through a series of checks to determine operating system type and ve
 install the `Salt`_ binaries using the appropriate methods.
 
 
-.. Note::
+.. note::
 
   This ``README`` file is not the absolute truth to what the bootstrap script is capable of, for 
   that, please read the generated help by passing ``-h`` to the script or even better, `read the 
@@ -27,13 +27,14 @@ Bootstrap
 ---------
 
 If you're looking for the *one-liner* to install salt, please scroll to the bottom and use the
-instructions for `Installing via an Insecure One-Liner`_
+instructions for `Installing via an Insecure One-Liner`_.
 
 
 Examples
 ~~~~~~~~
 
-.. Note::
+.. note::
+
     In every two-step example, you would be well-served to examine the downloaded file and examine
     it to ensure that it does what you expect.
 
@@ -132,12 +133,17 @@ To install a specific branch from a git fork:
   sudo sh install_salt.sh -g https://github.com/myuser/salt.git git mybranch
 
 
+Any of the example above which use two-lines can be made to run in a single-line
+configuration with minor modifications, see `Installing via an Insecure One-Liner`_.
+
+
 Installing via an Insecure One-Liner
 ------------------------------------
 
 The following examples illustrate how to install Salt via a one-liner.
 
-.. Note::
+.. note::
+
     Warning! These methods do not involve a verification step and assume that the delivered file
     is trustworthy.
 
@@ -145,15 +151,23 @@ The following examples illustrate how to install Salt via a one-liner.
 Examples
 ~~~~~~~~
 
+Installing the latest stable release of Salt (default):
+
+.. code:: console
+
+  curl -L https://bootstrap.saltstack.com | sudo sh -s -- stable
+
+or
+
+.. code:: console
+
+  curl -L https://bootstrap.saltstack.com | sudo sh -s
+
 Installing the latest develop branch of Salt:
 
 .. code:: console
 
   curl -L https://bootstrap.saltstack.com | sudo sh -s -- git develop
-
-Any of the example above which use two-lines can be made to run in a single-line
-configuration with minor modifications.
-
 
 
 Adding support for other operating systems
@@ -325,7 +339,7 @@ Supported Operating Systems
 - CentOS 5/6/7
 - Debian 6/7/8
 - Fedora 17/18/20/21/22
-- FreeBSD 9.1/9.2/10
+- FreeBSD 9.1/9.2/10/11
 - Gentoo
 - Linaro
 - Linux Mint 13/14

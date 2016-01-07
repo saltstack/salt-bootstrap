@@ -2516,6 +2516,10 @@ install_debian_8_git_deps() {
         __apt_get_install_noinput git || return 1
     fi
 
+    if [ "$(dpkg-query -l 'python-zmq')" = "" ]; then
+        __apt_get_install_noinput libzmq3 libzmq3-dev python-zmq || return 1
+    fi
+
     __apt_get_install_noinput lsb-release python python-pkg-resources python-crypto \
         python-jinja2 python-m2crypto python-yaml msgpack-python python-pip || return 1
 

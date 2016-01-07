@@ -2516,7 +2516,7 @@ install_debian_8_git_deps() {
         __apt_get_install_noinput git || return 1
     fi
 
-    if [ "$(python -c 'import zmq; print(zmq.pyzmq_version())')" = "" ]; then
+    if [ "$(dpkg-query -l 'python-zmq')" = "" ]; then
         __apt_get_install_noinput libzmq3 libzmq3-dev python-zmq || return 1
     fi
 

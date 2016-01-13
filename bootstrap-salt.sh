@@ -259,8 +259,9 @@ usage() {
   -S  Also install salt-syndic
   -N  Do not install salt-minion
   -X  Do not start daemons after installation
-  -C  Only run the configuration function. This option automatically
-      bypasses any installation.
+  -C  Only run the configuration function. This option automatically bypasses
+      any installation. Implies -F (forced overwrite). To overwrite master or
+      syndic configs, -M or -S, respectively, must also be specified.
   -P  Allow pip based installations. On some distributions the required salt
       packages or its dependencies are not available as a package for that
       distribution. Using this flag allows the script to use pip as a last
@@ -5053,8 +5054,17 @@ config_salt() {
         fi
     fi
 
+    # only (re)place master or syndic configs if -M (install master) or -S
+    # (install syndic) specified
+    OVERWRITE_MASTER_CONFIGS=$BS_FALSE
+    if [ "$_INSTALL_MASTER" -eq $BS_TRUE ] && [ "$_CONFIG_ONLY" -eq $BS_TRUE ]; then
+        OVERWRITE_MASTER_CONFIGS=$BS_TRUE
+    fi
+    if [ "$_INSTALL_SYNDIC" -eq $BS_TRUE ] && [ "$_CONFIG_ONLY" -eq $BS_TRUE ]; then
+        OVERWRITE_MASTER_CONFIGS=$BS_TRUE
+    fi
 
-    if [ "$_INSTALL_MASTER" -eq $BS_TRUE ] || [ "$_INSTALL_SYNDIC" -eq $BS_TRUE ] || [ "$_CONFIG_ONLY" -eq $BS_TRUE ]; then
+    if [ "$_INSTALL_MASTER" -eq $BS_TRUE ] || [ "$_INSTALL_SYNDIC" -eq $BS_TRUE ] || [ "$OVERWRITE_MASTER_CONFIGS" -eq $BS_TRUE ]; then
         # Create the PKI directory
         [ -d "$_PKI_DIR/master" ] || (mkdir -p "$_PKI_DIR/master" && chmod 700 "$_PKI_DIR/master") || return 1
 

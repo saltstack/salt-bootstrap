@@ -259,7 +259,7 @@ usage() {
       distribution. Using this flag allows the script to use pip as a last
       resort method. NOTE: This only works for functions which actually
       implement pip based installations.
-  -F  Allow copied files to overwrite existing(config, init.d, etc)
+  -F  Allow copied files to overwrite existing (config, init.d, etc).
   -U  If set, fully upgrade the system prior to bootstrapping salt
   -K  If set, keep the temporary files in the temporary directories specified
       with -c and -k.
@@ -4466,6 +4466,12 @@ config_salt() {
         echodebug "Moving provided grains file from $_TEMP_CONFIG_DIR/grains to $_SALT_ETC_DIR/grains"
         movefile "$_TEMP_CONFIG_DIR/grains" "$_SALT_ETC_DIR/grains" || return 1
         CONFIGURED_ANYTHING=$BS_TRUE
+    fi
+
+    if [ "$_CONFIG_ONLY" -eq "$BS_TRUE" ]; then
+        echowarn "Passing -C (config only) option implies -F (forced overwrite)."
+        echowarn "Overwriting configs in 11 seconds!"
+        sleep 11
     fi
 
     if [ "$_INSTALL_MINION" -eq "$BS_TRUE" ] || [ "$_CONFIG_ONLY" -eq "$BS_TRUE" ]; then

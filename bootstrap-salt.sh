@@ -1319,6 +1319,7 @@ __git_clone_and_checkout() {
             git remote add upstream "$_SALTSTACK_REPO_URL" || return 1
             echodebug "Fetching upstream(SaltStack's Salt repository) git tags"
             git fetch --tags upstream || return 1
+            GIT_REV="origin/$GIT_REV"
         fi
 
         if [ "$__SHALLOW_CLONE" -eq "${BS_FALSE}" ]; then

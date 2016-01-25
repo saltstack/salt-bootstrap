@@ -2918,7 +2918,7 @@ __install_saltstack_copr_zeromq_repository() {
             __REPOTYPE="epel"
         fi
         __fetch_url /etc/yum.repos.d/saltstack-zeromq4.repo \
-            "http://copr.fedoraproject.org/coprs/saltstack/zeromq4/repo/${__REPOTYPE}-${DISTRO_MAJOR_VERSION}/saltstack-zeromq4-${__REPOTYPE}-${DISTRO_MAJOR_VERSION}.repo" || return 1
+            "https://copr.fedorainfracloud.org/coprs/saltstack/zeromq4/repo/${__REPOTYPE}-${DISTRO_MAJOR_VERSION}/saltstack-zeromq4-${__REPOTYPE}-${DISTRO_MAJOR_VERSION}.repo" || return 1
     fi
     return 0
 }
@@ -2976,7 +2976,7 @@ __install_saltstack_copr_salt_repository() {
 
     if [ ! -s "/etc/yum.repos.d/${__REPO_FILENAME}" ]; then
         __fetch_url "/etc/yum.repos.d/${__REPO_FILENAME}" \
-            "http://copr.fedoraproject.org/coprs/saltstack/salt/repo/${__REPOTYPE}-${DISTRO_MAJOR_VERSION}/${__REPO_FILENAME}" || return 1
+            "https://copr.fedorainfracloud.org/coprs/saltstack/salt/repo/${__REPOTYPE}-${DISTRO_MAJOR_VERSION}/${__REPO_FILENAME}" || return 1
     fi
     return 0
 }
@@ -3654,7 +3654,7 @@ install_amazon_linux_ami_deps() {
     if [ ! -s "/etc/yum.repos.d/${__REPO_FILENAME}" ]; then
         echoinfo "Adding SaltStack's COPR repository"
         __fetch_url /etc/yum.repos.d/${__REPO_FILENAME} \
-            "http://copr.fedoraproject.org/coprs/saltstack/salt/repo/epel-6/${__REPO_FILENAME}" || return 1
+            "https://copr.fedorainfracloud.org/coprs/saltstack/salt/repo/epel-6/${__REPO_FILENAME}" || return 1
     fi
 
     if [ "$_UPGRADE_SYS" -eq $BS_TRUE ]; then

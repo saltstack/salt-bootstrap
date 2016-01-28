@@ -1202,7 +1202,7 @@ __ubuntu_codename_translation
 if ([ "${DISTRO_NAME_L}" != "ubuntu" ] && [ "$ITYPE" = "daily" ]); then
     echoerror "${DISTRO_NAME} does not have daily packages support"
     exit 1
-elif ([ "${DISTRO_NAME_L}" != "ubuntu" ] && [ "$ITYPE" = "stable" ] && [ "$STABLE_REV" != "latest" ]); then
+elif ([ "$(echo "${DISTRO_NAME_L}" | egrep '(ubuntu|centos|red_hat|scientific|oracle|amazon|fedora)')" = "" ] && [ "$ITYPE" = "stable" ] && [ "$STABLE_REV" != "latest" ]); then
     echoerror "${DISTRO_NAME} does not have major version pegged packages support"
     exit 1
 fi
@@ -1884,7 +1884,7 @@ install_ubuntu_stable_deps() {
         __apt_get_install_noinput wget
 
         # shellcheck disable=SC2086
-        wget $_WGET_ARGS -q http://repo.saltstack.com/apt/ubuntu/ubuntu$DISTRO_MAJOR_VERSION/$STABLE_REV/SALTSTACK-GPG-KEY.pub -O - | apt-key add - || return 1
+        wget $_WGET_ARGS -q https://repo.saltstack.com/apt/ubuntu/ubuntu$DISTRO_MAJOR_VERSION/$STABLE_REV/SALTSTACK-GPG-KEY.pub -O - | apt-key add - || return 1
 
     else
         # Alternate PPAs: salt16, salt17, salt2014-1, salt2014-7
@@ -2935,6 +2935,11 @@ gpgkey=https://repo.saltstack.com/yum/rhel5/SALTSTACK-EL5-GPG-KEY.pub
 enabled=1
 enabled_metadata=1
 _eof
+        if [ "$ITYPE" = "stable" -a "$STABLE_REV" != "latest" ]; then
+            cat << _eof >> "/etc/yum.repos.d/repo-saltstack-el${DISTRO_MAJOR_VERSION}.repo"
+includepkgs=?:[!s][!a][!l][!t]* salt*${STABLE_REV}*
+_eof
+        fi
 
         __fetch_url /tmp/repo-saltstack-el5.pub "https://repo.saltstack.com/yum/rhel5/SALTSTACK-EL5-GPG-KEY.pub" || return 1
         rpm --import /tmp/repo-saltstack-el5.pub || return 1
@@ -2955,6 +2960,11 @@ gpgkey=https://repo.saltstack.com/yum/rhel${DISTRO_MAJOR_VERSION}/SALTSTACK-GPG-
 enabled=1
 enabled_metadata=1
 _eof
+        if [ "$ITYPE" = "stable" -a "$STABLE_REV" != "latest" ]; then
+            cat << _eof >> "/etc/yum.repos.d/repo-saltstack-el${DISTRO_MAJOR_VERSION}.repo"
+includepkgs=?:[!s][!a][!l][!t]* salt*${STABLE_REV}*
+_eof
+        fi
 
         __fetch_url /tmp/repo-saltstack.pub "https://repo.saltstack.com/yum/rhel${DISTRO_MAJOR_VERSION}/SALTSTACK-GPG-KEY.pub" || return 1
         rpm --import /tmp/repo-saltstack.pub || return 1

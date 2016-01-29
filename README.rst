@@ -392,7 +392,7 @@ Please run the following commands and report their output when creating a ticket
 .. code:: console
 
   sudo find /etc/ -name '*-release' -print -exec cat {} \;
-  which lsb_release && lsb_release -a
+  command lsb_release -a
 
 
 Testing in Vagrant

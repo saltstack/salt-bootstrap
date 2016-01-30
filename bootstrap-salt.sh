@@ -3655,7 +3655,7 @@ install_amazon_linux_ami_deps() {
     else
         EPEL_ARCH=$CPU_ARCH_L
     fi
-    rpm -Uvh --force "http://mirrors.kernel.org/fedora-epel/6/${EPEL_ARCH}/epel-release-6-8.noarch.rpm" || return 1
+    # rpm -Uvh --force "http://mirrors.kernel.org/fedora-epel/6/${EPEL_ARCH}/epel-release-6-8.noarch.rpm" || return 1
 
     __REPO_FILENAME="saltstack-salt-epel-6.repo"
 

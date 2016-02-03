@@ -1,3 +1,12 @@
+Version 2015.xx.xx:
+	* Add support for openSUSE Leap. Thanks Roman Inflianskas(rominf). #693
+	* Fix missing deps installation on Debian. Thanks  Steve Groesz(wolfpackmars2). #699
+
+
+Version 2015.11.09
+	* Make sure that wget is installed. #868
+
+
 Version 2015.11.04:
 	* Allow bypassing dependencies installation. Thanks EYJ. #656.
 	* Add FreeBSD 11 support. Thanks Chris Buechler(cbuechler). #653

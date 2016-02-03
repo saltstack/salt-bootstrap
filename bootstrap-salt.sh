@@ -17,7 +17,7 @@
 #       CREATED: 10/15/2012 09:49:37 PM WEST
 #======================================================================================================================
 set -o nounset                              # Treat unset variables as an error
-__ScriptVersion="2015.11.04"
+__ScriptVersion="2015.11.09"
 __ScriptName="bootstrap-salt.sh"
 
 #======================================================================================================================
@@ -259,14 +259,15 @@ usage() {
   -S  Also install salt-syndic
   -N  Do not install salt-minion
   -X  Do not start daemons after installation
-  -C  Only run the configuration function. This option automatically
-      bypasses any installation.
+  -C  Only run the configuration function. This option automatically bypasses
+      any installation. Implies -F (forced overwrite). To overwrite master or
+      syndic configs, -M or -S, respectively, must also be specified.
   -P  Allow pip based installations. On some distributions the required salt
       packages or its dependencies are not available as a package for that
       distribution. Using this flag allows the script to use pip as a last
       resort method. NOTE: This only works for functions which actually
       implement pip based installations.
-  -F  Allow copied files to overwrite existing(config, init.d, etc)
+  -F  Allow copied files to overwrite existing (config, init.d, etc).
   -U  If set, fully upgrade the system prior to bootstrapping salt
   -K  If set, keep the temporary files in the temporary directories specified
       with -c and -k.
@@ -291,7 +292,7 @@ EOT
 }   # ----------  end of function usage  ----------
 
 
-while getopts ":hvnDc:Gg:k:MSNXCPFUKIA:i:Lp:dH:Zb" opt
+while getopts ":hvnDc:Gg:k:MSNXCPFUKIA:i:Lp:dH:Zbs:" opt
 do
   case "${opt}" in
 
@@ -326,6 +327,7 @@ do
              exit 1
          fi
          ;;
+    s )  __DEFAULT_SLEEP="$OPTARG"                      ;;
     M )  _INSTALL_MASTER=$BS_TRUE                       ;;
     S )  _INSTALL_SYNDIC=$BS_TRUE                       ;;
     N )  _INSTALL_MINION=$BS_FALSE                      ;;
@@ -380,11 +382,6 @@ __check_unparsed_options() {
 if [ "$_INSTALL_MINION" -eq $BS_FALSE ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && [ "$_CONFIG_ONLY" -eq $BS_FALSE ]; then
     echowarn "Nothing to install or configure"
     exit 0
-fi
-
-if [ "$_CONFIG_ONLY" -eq $BS_TRUE ] && [ "$_TEMP_CONFIG_DIR" = "null" ]; then
-    echoerror "In order to run the script in configuration only mode you also need to provide the configuration directory."
-    exit 1
 fi
 
 # Check that we're installing a minion if we're being passed a master address
@@ -582,7 +579,7 @@ fi
 #----------------------------------------------------------------------------------------------------------------------
 __fetch_url() {
     # shellcheck disable=SC2086
-    curl $_CURL_ARGS -s -o "$1" "$2" >/dev/null 2>&1 ||
+    curl $_CURL_ARGS -L -s -o "$1" "$2" >/dev/null 2>&1 ||
         wget $_WGET_ARGS -q -O "$1" "$2" >/dev/null 2>&1 ||
             fetch $_FETCH_ARGS -q -o "$1" "$2" >/dev/null 2>&1 ||
                 fetch -q -o "$1" "$2" >/dev/null 2>&1           # Pre FreeBSD 10
@@ -1291,7 +1288,7 @@ __git_clone_and_checkout() {
             # Let's try shallow cloning to speed up.
             # Test for "--single-branch" option introduced in git 1.7.10, the minimal version of git where the shallow
             # cloning we need actually works
-            if [ "$(git clone --help | grep 'single-branch')" != "" ]; then
+            if [ "$(git clone 2>&1 | grep 'single-branch')" != "" ]; then
                 # The "--single-branch" option is supported, attempt shallow cloning
                 echoinfo "Attempting to shallow clone $GIT_REV from Salt's repository ${_SALT_REPO_URL}"
                 git clone --depth 1 --branch "$GIT_REV" "$_SALT_REPO_URL" "$__SALT_CHECKOUT_REPONAME"
@@ -1322,6 +1319,7 @@ __git_clone_and_checkout() {
             git remote add upstream "$_SALTSTACK_REPO_URL" || return 1
             echodebug "Fetching upstream(SaltStack's Salt repository) git tags"
             git fetch --tags upstream || return 1
+            GIT_REV="origin/$GIT_REV"
         fi
 
         if [ "$__SHALLOW_CLONE" -eq "${BS_FALSE}" ]; then
@@ -1881,6 +1879,10 @@ install_ubuntu_stable_deps() {
                 /etc/apt/sources.list.d/saltstack.list
         fi
 
+
+        # Make sure wget is available
+        __apt_get_install_noinput wget
+
         # shellcheck disable=SC2086
         wget $_WGET_ARGS -q https://repo.saltstack.com/apt/ubuntu/ubuntu$DISTRO_MAJOR_VERSION/$STABLE_REV/SALTSTACK-GPG-KEY.pub -O - | apt-key add - || return 1
 
@@ -1988,8 +1990,7 @@ install_ubuntu_daily() {
 
 install_ubuntu_git() {
     if [ -f "${__SALT_GIT_CHECKOUT_DIR}/salt/syspaths.py" ]; then
-        python setup.py install --install-layout=deb --salt-config-dir="$_SALT_ETC_DIR" || \
-            python setup.py --salt-config-dir="$_SALT_ETC_DIR" install --install-layout=deb || return 1
+        python setup.py --salt-config-dir="$_SALT_ETC_DIR" install --install-layout=deb || return 1
     else
         python setup.py install --install-layout=deb || return 1
     fi
@@ -2145,7 +2146,6 @@ install_debian_deps() {
         # Both python-requests which is a hard dependency and apache-libcloud which is a soft dependency, under debian < 6
         # need to be installed using pip
         check_pip_allowed "You need to allow pip based installations (-P) in order to install the python 'requests' package"
-        # Additionally install procps and pciutils which allows for Docker boostraps. See 366#issuecomment-39666813
         __PACKAGES="${__PACKAGES} python-pip"
         # shellcheck disable=SC2089
         __PIP_PACKAGES="${__PIP_PACKAGES} 'requests>=$_PY_REQUESTS_MIN_VERSION'"
@@ -2324,7 +2324,7 @@ install_debian_7_deps() {
 
     apt-get update || return 1
     __apt_get_install_noinput -t wheezy-backports libzmq3 libzmq3-dev python-zmq python-apt || return 1
-    # Additionally install procps and pciutils which allows for Docker boostraps. See 366#issuecomment-39666813
+    # Install procps and pciutils which allows for Docker bootstraps. See 366#issuecomment-39666813
     __PACKAGES="procps pciutils"
     # Also install python-requests
     __PACKAGES="${__PACKAGES} python-requests"
@@ -2387,10 +2387,8 @@ install_debian_8_deps() {
     apt-get update || return 1
     __PACKAGES="libzmq3 libzmq3-dev python-zmq python-requests python-apt"
 
-    # Additionally install procps and pciutils which allows for Docker boostraps. See 366#issuecomment-39666813
-    __PACKAGES="procps pciutils"
-    # Also install python-requests
-    __PACKAGES="${__PACKAGES} python-requests"
+    # Additionally install procps and pciutils which allows for Docker bootstraps. See 366#issuecomment-39666813
+    __PACKAGES="${__PACKAGES} procps pciutils"
 
     if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
         # Install python-libcloud if asked to
@@ -2516,6 +2514,10 @@ install_debian_8_git_deps() {
         __apt_get_install_noinput git || return 1
     fi
 
+    if [ "$(dpkg-query -l 'python-zmq')" = "" ]; then
+        __apt_get_install_noinput libzmq3 libzmq3-dev python-zmq || return 1
+    fi
+
     __apt_get_install_noinput lsb-release python python-pkg-resources python-crypto \
         python-jinja2 python-m2crypto python-yaml msgpack-python python-pip || return 1
 
@@ -2582,8 +2584,7 @@ install_debian_8_stable() {
 
 install_debian_git() {
     if [ -f "${__SALT_GIT_CHECKOUT_DIR}/salt/syspaths.py" ]; then
-        python setup.py install --install-layout=deb --salt-config-dir="$_SALT_ETC_DIR" || \
-            python setup.py --salt-config-dir="$_SALT_ETC_DIR" install --install-layout=deb || return 1
+      python setup.py --salt-config-dir="$_SALT_ETC_DIR" install --install-layout=deb || return 1
     else
         python setup.py install --install-layout=deb || return 1
     fi
@@ -2797,8 +2798,7 @@ install_fedora_git_deps() {
 
 install_fedora_git() {
     if [ -f "${__SALT_GIT_CHECKOUT_DIR}/salt/syspaths.py" ]; then
-        python setup.py install --salt-config-dir="$_SALT_ETC_DIR" || \
-            python setup.py --salt-config-dir="$_SALT_ETC_DIR" install || return 1
+        python setup.py --salt-config-dir="$_SALT_ETC_DIR" install || return 1
     else
         python setup.py install || return 1
     fi
@@ -2872,7 +2872,7 @@ __install_epel_repository() {
     fi
 
     # Check if epel repo is already enabled and flag it accordingly
-    yum repolist | grep -i "epel" > /dev/null 2>&1
+    yum repolist | grep -q "^[!]${_EPEL_REPO}/"
     if [ $? -eq 0 ]; then
         __EPEL_REPOS_INSTALLED=${BS_TRUE}
         return 0
@@ -2891,9 +2891,12 @@ __install_epel_repository() {
         EPEL_ARCH=$CPU_ARCH_L
     fi
     if [ "$DISTRO_MAJOR_VERSION" -eq 5 ]; then
-        # Use dl.fedoraproject.org to avoid redirect breakage:
-        # https://lists.fedoraproject.org/pipermail/users/2012-February/414558.html
-        rpm -Uvh --force "http://dl.fedoraproject.org/pub/epel/5/${EPEL_ARCH}/epel-release-5-4.noarch.rpm" || return 1
+        # Install curl which is not included in minimal CentOS 5 images
+        rpm -q curl > /dev/null 2>&1 || yum -y install curl
+        # rpm from CentOS/RHEL release 5 does not support HTTP downloads
+        # properly, especially 3XX code redirects
+        __fetch_url /tmp/epel-release.rpm "http://download.fedoraproject.org/pub/epel/5/${EPEL_ARCH}/epel-release-5-4.noarch.rpm" || return 1
+        rpm -Uvh --force /tmp/epel-release.rpm || return 1
     elif [ "$DISTRO_MAJOR_VERSION" -eq 6 ]; then
         rpm -Uvh --force "http://download.fedoraproject.org/pub/epel/6/${EPEL_ARCH}/epel-release-6-8.noarch.rpm" || return 1
     elif [ "$DISTRO_MAJOR_VERSION" -eq 7 ]; then
@@ -2915,15 +2918,7 @@ __install_saltstack_copr_zeromq_repository() {
             __REPOTYPE="epel"
         fi
         __fetch_url /etc/yum.repos.d/saltstack-zeromq4.repo \
-            "http://copr.fedoraproject.org/coprs/saltstack/zeromq4/repo/${__REPOTYPE}-${DISTRO_MAJOR_VERSION}/saltstack-zeromq4-${__REPOTYPE}-${DISTRO_MAJOR_VERSION}.repo" || return 1
-    fi
-    return 0
-}
-
-__install_saltstack_copr_salt_el5_repository() {
-    if [ ! -s /etc/yum.repos.d/saltstack-salt-el5-epel-5.repo ]; then
-        __fetch_url /etc/yum.repos.d/saltstack-salt-el5-epel-5.repo \
-            "http://copr.fedoraproject.org/coprs/saltstack/salt-el5/repo/epel-5/saltstack-salt-el5-epel-5.repo" || return 1
+            "https://copr.fedorainfracloud.org/coprs/saltstack/zeromq4/repo/${__REPOTYPE}-${DISTRO_MAJOR_VERSION}/saltstack-zeromq4-${__REPOTYPE}-${DISTRO_MAJOR_VERSION}.repo" || return 1
     fi
     return 0
 }
@@ -2991,7 +2986,7 @@ __install_saltstack_copr_salt_repository() {
 
     if [ ! -s "/etc/yum.repos.d/${__REPO_FILENAME}" ]; then
         __fetch_url "/etc/yum.repos.d/${__REPO_FILENAME}" \
-            "http://copr.fedoraproject.org/coprs/saltstack/salt/repo/${__REPOTYPE}-${DISTRO_MAJOR_VERSION}/${__REPO_FILENAME}" || return 1
+            "https://copr.fedorainfracloud.org/coprs/saltstack/salt/repo/${__REPOTYPE}-${DISTRO_MAJOR_VERSION}/${__REPO_FILENAME}" || return 1
     fi
     return 0
 }
@@ -3175,8 +3170,7 @@ install_centos_git() {
         _PYEXE=python2
     fi
     if [ -f "${__SALT_GIT_CHECKOUT_DIR}/salt/syspaths.py" ]; then
-        $_PYEXE setup.py install --prefix=/usr --salt-config-dir="$_SALT_ETC_DIR" || \
-            $_PYEXE setup.py --prefix=/usr --salt-config-dir="$_SALT_ETC_DIR" install || return 1
+        $_PYEXE setup.py --prefix=/usr --salt-config-dir="$_SALT_ETC_DIR" install || return 1
     else
         $_PYEXE setup.py install --prefix=/usr || return 1
     fi
@@ -3320,95 +3314,12 @@ install_centos_check_services() {
 #
 #   RedHat Install Functions
 #
-__test_rhel_optionals_packages() {
-    __install_epel_repository || return 1
-
-    # Make sure yum-utils is installed
-    yum list installed yum-utils > /dev/null 2>&1 || yum -y install yum-utils --enablerepo=${_EPEL_REPO} || return 1
-
-    if [ "$DISTRO_MAJOR_VERSION" -ge 7 ]; then
-        yum-config-manager --enable \*server-optional-rpms || return 1
-    fi
-
-    if [ "$DISTRO_MAJOR_VERSION" -ge 6 ]; then
-        #python-jinja2 is in repo server-releases-optional in EC2/RHEL6
-        yum-config-manager --enable rhui-\*-server-releases-optional || return 1
-
-        # Let's enable package installation testing, kind of, --dry-run
-        echoinfo "Testing if packages usually on the optionals repository are available:"
-        __YUM_CONF_DIR="$(mktemp -d)"
-        __YUM_CONF_FILE="${__YUM_CONF_DIR}/yum.conf"
-        cp /etc/yum.conf "${__YUM_CONF_FILE}"
-        echo 'tsflags=test' >> "${__YUM_CONF_FILE}"
-
-        # Let's try installing the packages that usually require the optional repository
-        # shellcheck disable=SC2043
-        for package in python-jinja2; do
-            echoinfo "  - ${package}"
-            if [ "$DISTRO_NAME_L" = "oracle_linux" ]; then
-                yum --config "${__YUM_CONF_FILE}" install -y ${package} >/dev/null 2>&1 || \
-                    yum --config "${__YUM_CONF_FILE}" install -y ${package} --enablerepo=${_EPEL_REPO} >/dev/null 2>&1
-            else
-                yum --config "${__YUM_CONF_FILE}" install -y ${package} --enablerepo=${_EPEL_REPO} >/dev/null 2>&1
-            fi
-            if [ $? -ne 0 ]; then
-                echoerror "Failed to find an installable '${package}' package. The optional repository or its subscription might be missing."
-                rm -rf "${__YUM_CONF_DIR}"
-                return 1
-            fi
-        done
-        rm -rf "${__YUM_CONF_DIR}"
-    fi
-    return 0
-}
-
 install_red_hat_linux_stable_deps() {
-    if [ "${DISTRO_MAJOR_VERSION}" -ge 6 ]; then
-        # Wait at most 60 seconds for the repository subscriptions to register
-        __ATTEMPTS=6
-        while [ "${__ATTEMPTS}" -gt 0 ]; do
-            __test_rhel_optionals_packages
-            if [ $? -eq 1 ]; then
-                __ATTEMPTS=$(( __ATTEMPTS -1 ))
-                if [ ${__ATTEMPTS} -lt 1 ]; then
-                    return 1
-                fi
-                echoinfo "Sleeping 10 seconds while waiting for the optional repository subscription to be externally configured"
-                sleep 10
-                continue
-            else
-                break
-            fi
-        done
-    else
-         __test_rhel_optionals_packages || return 1
-    fi
-
     install_centos_stable_deps || return 1
     return 0
 }
 
 install_red_hat_linux_git_deps() {
-    if [ "${DISTRO_MAJOR_VERSION}" -ge 6 ]; then
-        # Wait at most 60 seconds for the repository subscriptions to register
-        __ATTEMPTS=6
-        while [ "${__ATTEMPTS}" -gt 0 ]; do
-            __test_rhel_optionals_packages
-            if [ $? -eq 1 ]; then
-                __ATTEMPTS=$(( __ATTEMPTS -1 ))
-                if [ ${__ATTEMPTS} -lt 1 ]; then
-                    return 1
-                fi
-                echoinfo "Sleeping 10 seconds while waiting for the optional repository subscription to be externally configured"
-                sleep 10
-                continue
-            else
-                break
-            fi
-        done
-    else
-         __test_rhel_optionals_packages || return 1
-    fi
     install_centos_git_deps || return 1
     return 0
 }
@@ -3597,13 +3508,11 @@ install_red_hat_enterprise_workstation_testing_post() {
 #   Oracle Linux Install Functions
 #
 install_oracle_linux_stable_deps() {
-    __test_rhel_optionals_packages || return 1
     install_centos_stable_deps || return 1
     return 0
 }
 
 install_oracle_linux_git_deps() {
-    __test_rhel_optionals_packages || return 1
     install_centos_git_deps || return 1
     return 0
 }
@@ -3755,7 +3664,7 @@ install_amazon_linux_ami_deps() {
     if [ ! -s "/etc/yum.repos.d/${__REPO_FILENAME}" ]; then
         echoinfo "Adding SaltStack's COPR repository"
         __fetch_url /etc/yum.repos.d/${__REPO_FILENAME} \
-            "http://copr.fedoraproject.org/coprs/saltstack/salt/repo/epel-6/${__REPO_FILENAME}" || return 1
+            "https://copr.fedorainfracloud.org/coprs/saltstack/salt/repo/epel-6/${__REPO_FILENAME}" || return 1
     fi
 
     if [ "$_UPGRADE_SYS" -eq $BS_TRUE ]; then
@@ -3926,8 +3835,7 @@ install_arch_linux_stable() {
 
 install_arch_linux_git() {
     if [ -f "${__SALT_GIT_CHECKOUT_DIR}/salt/syspaths.py" ]; then
-        python2 setup.py install --salt-config-dir="$_SALT_ETC_DIR" || \
-            python2 setup.py --salt-config-dir="$_SALT_ETC_DIR" install || return 1
+        python2 setup.py --salt-config-dir="$_SALT_ETC_DIR" install || return 1
     else
         python2 setup.py install || return 1
     fi
@@ -4249,18 +4157,7 @@ install_freebsd_git() {
         # We still can't provide the system paths, salt 0.16.x
         /usr/local/bin/python2 setup.py install || return 1
     else
-        /usr/local/bin/python2 setup.py install \
-            --salt-root-dir=/usr/local \
-            --salt-config-dir="${_SALT_ETC_DIR}" \
-            --salt-cache-dir=/var/cache/salt \
-            --salt-sock-dir=/var/run/salt \
-            --salt-srv-root-dir=/srv \
-            --salt-base-file-roots-dir="${_SALT_ETC_DIR}/states" \
-            --salt-base-pillar-roots-dir="${_SALT_ETC_DIR}/pillar" \
-            --salt-base-master-roots-dir="${_SALT_ETC_DIR}/salt-master" \
-            --salt-logs-dir=/var/log/salt \
-            --salt-pidfile-dir=/var/run \
-            || /usr/local/bin/python2 setup.py \
+        /usr/local/bin/python2 setup.py \
             --salt-root-dir=/usr/local \
             --salt-config-dir="${_SALT_ETC_DIR}" \
             --salt-cache-dir=/var/cache/salt \
@@ -4427,8 +4324,7 @@ install_smartos_stable() {
 install_smartos_git() {
     # Use setuptools in order to also install dependencies
     # lets force our config path on the setup for now, since salt/syspaths.py only  got fixed in 2015.5.0
-    USE_SETUPTOOLS=1 /opt/local/bin/python setup.py install --salt-config-dir="$_SALT_ETC_DIR" || \
-        USE_SETUPTOOLS=1 /opt/local/bin/python setup.py --salt-config-dir="$_SALT_ETC_DIR" install || return 1
+    USE_SETUPTOOLS=1 /opt/local/bin/python setup.py --salt-config-dir="$_SALT_ETC_DIR" install || return 1
     return 0
 }
 
@@ -4550,7 +4446,13 @@ __zypper_install() {
 }
 
 install_opensuse_stable_deps() {
-    DISTRO_REPO="openSUSE_${DISTRO_MAJOR_VERSION}.${DISTRO_MINOR_VERSION}"
+    if [ "${DISTRO_MAJOR_VERSION}" -gt 2015 ]; then
+        DISTRO_REPO="openSUSE_Tumbleweed"
+    elif [ "${DISTRO_MAJOR_VERSION}" -ge 42 ]; then
+        DISTRO_REPO="openSUSE_Leap_${DISTRO_MAJOR_VERSION}.${DISTRO_MINOR_VERSION}"
+    elif [ "${DISTRO_MAJOR_VERSION}" -lt 42 ]; then
+        DISTRO_REPO="openSUSE_${DISTRO_MAJOR_VERSION}.${DISTRO_MINOR_VERSION}"
+    fi
 
     # Is the repository already known
     __zypper repos | grep devel_languages_python >/dev/null 2>&1
@@ -4578,8 +4480,16 @@ install_opensuse_stable_deps() {
 
     # Salt needs python-zypp installed in order to use the zypper module
     __PACKAGES="python-zypp"
-    __PACKAGES="${__PACKAGES} libzmq3 python python-Jinja2 python-M2Crypto python-PyYAML python-requests"
+    __PACKAGES="${__PACKAGES} python python-Jinja2 python-M2Crypto python-PyYAML python-requests"
     __PACKAGES="${__PACKAGES} python-msgpack-python python-pycrypto python-pyzmq python-xml"
+
+    if [ "$DISTRO_MAJOR_VERSION" -lt 13 ]; then
+        __PACKAGES="${__PACKAGES} libzmq3"
+    elif [ "$DISTRO_MAJOR_VERSION" -eq 13 ]; then
+        __PACKAGES="${__PACKAGES} libzmq4"
+    elif [ "$DISTRO_MAJOR_VERSION" -gt 13 ]; then
+        __PACKAGES="${__PACKAGES} libzmq5"
+    fi
 
     if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
         __PACKAGES="${__PACKAGES} python-apache-libcloud"
@@ -5120,24 +5030,30 @@ config_salt() {
         CONFIGURED_ANYTHING=$BS_TRUE
     fi
 
-    if [ "$_INSTALL_MINION" -eq $BS_TRUE ]; then
+    if [ "$_CONFIG_ONLY" -eq "$BS_TRUE" ]; then
+        echowarn "Passing -C (config only) option implies -F (forced overwrite)."
+        echowarn "Overwriting configs in 11 seconds!"
+        sleep 11
+    fi
+
+    if [ "$_INSTALL_MINION" -eq "$BS_TRUE" ] || [ "$_CONFIG_ONLY" -eq "$BS_TRUE" ]; then
         # Create the PKI directory
         [ -d "$_PKI_DIR/minion" ] || (mkdir -p "$_PKI_DIR/minion" && chmod 700 "$_PKI_DIR/minion") || return 1
 
         # Copy the minions configuration if found
         if [ -f "$_TEMP_CONFIG_DIR/minion" ]; then
-            movefile "$_TEMP_CONFIG_DIR/minion" "$_SALT_ETC_DIR" || return 1
+            movefile "$_TEMP_CONFIG_DIR/minion" "$_SALT_ETC_DIR" "$BS_TRUE" || return 1
             CONFIGURED_ANYTHING=$BS_TRUE
         fi
 
         # Copy the minion's keys if found
         if [ -f "$_TEMP_CONFIG_DIR/minion.pem" ]; then
-            movefile "$_TEMP_CONFIG_DIR/minion.pem" "$_PKI_DIR/minion/" || return 1
+            movefile "$_TEMP_CONFIG_DIR/minion.pem" "$_PKI_DIR/minion/" "$BS_TRUE" || return 1
             chmod 400 "$_PKI_DIR/minion/minion.pem" || return 1
             CONFIGURED_ANYTHING=$BS_TRUE
         fi
         if [ -f "$_TEMP_CONFIG_DIR/minion.pub" ]; then
-            movefile "$_TEMP_CONFIG_DIR/minion.pub" "$_PKI_DIR/minion/" || return 1
+            movefile "$_TEMP_CONFIG_DIR/minion.pub" "$_PKI_DIR/minion/" "$BS_TRUE" || return 1
             chmod 664 "$_PKI_DIR/minion/minion.pub" || return 1
             CONFIGURED_ANYTHING=$BS_TRUE
         fi
@@ -5149,8 +5065,17 @@ config_salt() {
         fi
     fi
 
+    # only (re)place master or syndic configs if -M (install master) or -S
+    # (install syndic) specified
+    OVERWRITE_MASTER_CONFIGS=$BS_FALSE
+    if [ "$_INSTALL_MASTER" -eq $BS_TRUE ] && [ "$_CONFIG_ONLY" -eq $BS_TRUE ]; then
+        OVERWRITE_MASTER_CONFIGS=$BS_TRUE
+    fi
+    if [ "$_INSTALL_SYNDIC" -eq $BS_TRUE ] && [ "$_CONFIG_ONLY" -eq $BS_TRUE ]; then
+        OVERWRITE_MASTER_CONFIGS=$BS_TRUE
+    fi
 
-    if [ "$_INSTALL_MASTER" -eq $BS_TRUE ] || [ "$_INSTALL_SYNDIC" -eq $BS_TRUE ]; then
+    if [ "$_INSTALL_MASTER" -eq $BS_TRUE ] || [ "$_INSTALL_SYNDIC" -eq $BS_TRUE ] || [ "$OVERWRITE_MASTER_CONFIGS" -eq $BS_TRUE ]; then
         # Create the PKI directory
         [ -d "$_PKI_DIR/master" ] || (mkdir -p "$_PKI_DIR/master" && chmod 700 "$_PKI_DIR/master") || return 1
 

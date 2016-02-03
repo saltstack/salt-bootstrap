@@ -2932,8 +2932,14 @@ __install_saltstack_copr_zeromq_repository() {
 }
 
 __install_saltstack_rhel_repository() {
-    base_url="https://repo.saltstack.com/yum/redhat/\$releasever/\$basearch/${STABLE_REV}/"
-    fetch_url="https://repo.saltstack.com/yum/redhat/${DISTRO_MAJOR_VERSION}/${CPU_ARCH_L}/${STABLE_REV}/"
+    if [ "$ITYPE" = "stable" ]; then
+        repo_rev="$STABLE_REV"
+    else
+        repo_rev="latest"
+    fi
+
+    base_url="https://repo.saltstack.com/yum/redhat/\$releasever/\$basearch/${repo_rev}/"
+    fetch_url="https://repo.saltstack.com/yum/redhat/${DISTRO_MAJOR_VERSION}/${CPU_ARCH_L}/${repo_rev}/"
 
     if [ "${DISTRO_MAJOR_VERSION}" -eq 5 ]; then
         gpg_key="SALTSTACK-EL5-GPG-KEY.pub"
@@ -2941,11 +2947,11 @@ __install_saltstack_rhel_repository() {
         gpg_key="SALTSTACK-GPG-KEY.pub"
     fi
 
-    repo_file="/etc/yum.repos.d/salt-${STABLE_REV}.repo"
+    repo_file="/etc/yum.repos.d/salt-${repo_rev}.repo"
     if [ ! -s "$repo_file" ]; then
         cat <<_eof > "$repo_file"
-[salt-${STABLE_REV}]
-name=SaltStack ${STABLE_REV} Release Channel for RHEL/CentOS \$releasever
+[salt-${repo_rev}]
+name=SaltStack ${repo_rev} Release Channel for RHEL/CentOS \$releasever
 baseurl=$base_url
 skip_if_unavailable=True
 gpgcheck=1

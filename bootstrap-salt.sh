@@ -2925,10 +2925,12 @@ __install_saltstack_copr_zeromq_repository() {
 
 __install_saltstack_rhel_repository() {
     base_url="https://repo.saltstack.com/yum/redhat/\$releasever/\$basearch/${STABLE_REV}/"
+    fetch_url="https://repo.saltstack.com/yum/redhat/${DISTRO_MAJOR_VERSION}/${CPU_ARCH_L}/"
+
     if [ "${DISTRO_MAJOR_VERSION}" -eq 5 ]; then
-        gpg_url="${base_url}SALTSTACK-EL5-GPG-KEY.pub"
+        gpg_key="SALTSTACK-EL5-GPG-KEY.pub"
     else
-        gpg_url="${base_url}SALTSTACK-GPG-KEY.pub"
+        gpg_key="SALTSTACK-GPG-KEY.pub"
     fi
 
     repo_file="/etc/yum.repos.d/salt-${STABLE_REV}.repo"
@@ -2939,12 +2941,12 @@ name=SaltStack ${STABLE_REV} Release Channel for RHEL/CentOS \$releasever
 baseurl=$base_url
 skip_if_unavailable=True
 gpgcheck=1
-gpgkey=$gpg_url
+gpgkey=${base_url}${gpg_key}
 enabled=1
-enabled_metadata=1
+enabled_metadata=1gpg
 _eof
 
-        __fetch_url /tmp/repo-saltstack.pub "$gpg_url" || return 1
+        __fetch_url /tmp/repo-saltstack.pub "${fetch_url}${gpg_key}" || return 1
         rpm --import /tmp/repo-saltstack.pub || return 1
         rm -f /tmp/repo-saltstack.pub
     fi

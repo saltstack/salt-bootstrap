@@ -2923,50 +2923,28 @@ __install_saltstack_copr_zeromq_repository() {
     return 0
 }
 
-__install_saltstack_rhel5_repository() {
-    if [ ! -s /etc/yum.repos.d/repo-saltstack-el5.repo ]; then
-        cat <<_eof > /etc/yum.repos.d/repo-saltstack-el5.repo
-[repo-saltstack-el5]
-name=SaltStack EL5 Repo
-baseurl=https://repo.saltstack.com/yum/rhel5/
-skip_if_unavailable=True
-gpgcheck=1
-gpgkey=https://repo.saltstack.com/yum/rhel5/SALTSTACK-EL5-GPG-KEY.pub
-enabled=1
-enabled_metadata=1
-_eof
-        if [ "$ITYPE" = "stable" -a "$STABLE_REV" != "latest" ]; then
-            cat << _eof >> "/etc/yum.repos.d/repo-saltstack-el${DISTRO_MAJOR_VERSION}.repo"
-includepkgs=?:[!s][!a][!l][!t]* salt*${STABLE_REV}*
-_eof
-        fi
-
-        __fetch_url /tmp/repo-saltstack-el5.pub "https://repo.saltstack.com/yum/rhel5/SALTSTACK-EL5-GPG-KEY.pub" || return 1
-        rpm --import /tmp/repo-saltstack-el5.pub || return 1
-        rm -f /tmp/repo-saltstack-el5.pub
-    fi
-    return 0
-}
-
 __install_saltstack_rhel_repository() {
-    if [ ! -s "/etc/yum.repos.d/repo-saltstack-el${DISTRO_MAJOR_VERSION}.repo" ]; then
-        cat <<_eof > "/etc/yum.repos.d/repo-saltstack-el${DISTRO_MAJOR_VERSION}.repo"
-[repo-saltstack-el${DISTRO_MAJOR_VERSION}]
-name=SaltStack EL${DISTRO_MAJOR_VERSION} Repo
-baseurl=https://repo.saltstack.com/yum/rhel${DISTRO_MAJOR_VERSION}/
+    base_url="https://repo.saltstack.com/yum/redhat/\$releasever/\$basearch/${STABLE_REV}/"
+    if [ "${DISTRO_MAJOR_VERSION}" -eq 5 ]; then
+        gpg_url="${base_url}SALTSTACK-EL5-GPG-KEY.pub"
+    else
+        gpg_url="${base_url}SALTSTACK-GPG-KEY.pub"
+    fi
+
+    repo_file="/etc/yum.repos.d/salt-${STABLE_REV}.repo"
+    if [ ! -s "$repo_file" ]; then
+        cat <<_eof > "$repo_file"
+[salt-${STABLE_REV}]
+name=SaltStack ${STABLE_REV} Release Channel for RHEL/CentOS \$releasever
+baseurl=$base_url
 skip_if_unavailable=True
 gpgcheck=1
-gpgkey=https://repo.saltstack.com/yum/rhel${DISTRO_MAJOR_VERSION}/SALTSTACK-GPG-KEY.pub
+gpgkey=$gpg_url
 enabled=1
 enabled_metadata=1
 _eof
-        if [ "$ITYPE" = "stable" -a "$STABLE_REV" != "latest" ]; then
-            cat << _eof >> "/etc/yum.repos.d/repo-saltstack-el${DISTRO_MAJOR_VERSION}.repo"
-includepkgs=?:[!s][!a][!l][!t]* salt*${STABLE_REV}*
-_eof
-        fi
 
-        __fetch_url /tmp/repo-saltstack.pub "https://repo.saltstack.com/yum/rhel${DISTRO_MAJOR_VERSION}/SALTSTACK-GPG-KEY.pub" || return 1
+        __fetch_url /tmp/repo-saltstack.pub "$gpg_url" || return 1
         rpm --import /tmp/repo-saltstack.pub || return 1
         rm -f /tmp/repo-saltstack.pub
     fi
@@ -2993,11 +2971,7 @@ __install_saltstack_copr_salt_repository() {
 
 install_centos_stable_deps() {
     __install_epel_repository || return 1
-    if [ "$DISTRO_MAJOR_VERSION" -eq 5 ]; then
-        __install_saltstack_rhel5_repository || return 1
-    elif [ "$DISTRO_MAJOR_VERSION" -gt 5 ]; then
-        __install_saltstack_rhel_repository || return 1
-    fi
+    __install_saltstack_rhel_repository || return 1
 
     if [ -f "${__SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" ]; then
         # We're on the develop branch, install whichever tornado is on the requirements file

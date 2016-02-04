@@ -222,6 +222,7 @@ _HTTP_PROXY=""
 _DISABLE_SALT_CHECKS=$BS_FALSE
 __SALT_GIT_CHECKOUT_DIR=${BS_SALT_GIT_CHECKOUT_DIR:-/tmp/git/salt}
 _NO_DEPS=$BS_FALSE
+_FORCE_SHALLOW_CLONE=$BS_FALSE
 
 
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
@@ -295,12 +296,13 @@ usage() {
   -Z  Enable external software source for newer ZeroMQ(Only available for RHEL/CentOS/Fedora/Ubuntu based distributions)
   -b  Assume that dependencies are already installed and software sources are set up.
       If git is selected, git tree is still checked out as dependency step.
+  -f  Force shallow cloning for git installations. This may result in an "n/a" in the version number.
 
 EOT
 }   # ----------  end of function usage  ----------
 
 
-while getopts ":hvnDc:Gg:k:MSNXCPFUKIA:i:Lp:dH:Zbs:" opt
+while getopts ":hvnDc:Gg:k:MSNXCPFUKIA:i:Lp:dH:Zbsf" opt
 do
   case "${opt}" in
 
@@ -354,6 +356,7 @@ do
     H )  _HTTP_PROXY="$OPTARG"                          ;;
     Z )  _ENABLE_EXTERNAL_ZMQ_REPOS=$BS_TRUE            ;;
     b )  _NO_DEPS=$BS_TRUE                              ;;
+    f )  _FORCE_SHALLOW_CLONE=$BS_TRUE                  ;;
 
 
     \?)  echo
@@ -1290,9 +1293,18 @@ __git_clone_and_checkout() {
             git pull --rebase || return 1
         fi
     else
-        __SHALLOW_CLONE="${BS_FALSE}"
-        if [ "$(echo "$GIT_REV" | sed 's/^.*\(v[[:digit:]]\{1,4\}\.[[:digit:]]\{1,2\}\)\(\.[[:digit:]]\{1,2\}\)\?.*$/MATCH/')" = "MATCH" ]; then
-            echoinfo "Git revision matches a Salt version tag"
+        if [ "$_FORCE_SHALLOW_CLONE" -eq "${BS_TRUE}" ]; then
+            echoinfo "Forced shallow cloning of git repository."
+            __SHALLOW_CLONE="${BS_TRUE}"
+        elif [ "$(echo "$GIT_REV" | sed 's/^.*\(v[[:digit:]]\{1,4\}\.[[:digit:]]\{1,2\}\)\(\.[[:digit:]]\{1,2\}\)\?.*$/MATCH/')" = "MATCH" ]; then
+            echoinfo "Git revision matches a Salt version tag, shallow cloning enabled."
+            __SHALLOW_CLONE="${BS_TRUE}"
+        else
+            echowarn "The git revision being installed does not match a Salt version tag. Shallow cloning disabled"
+            __SHALLOW_CLONE="${BS_FALSE}"
+        fi
+
+        if [ "$__SHALLOW_CLONE" -eq "${BS_TRUE}" ]; then
             # Let's try shallow cloning to speed up.
             # Test for "--single-branch" option introduced in git 1.7.10, the minimal version of git where the shallow
             # cloning we need actually works
@@ -1307,30 +1319,27 @@ __git_clone_and_checkout() {
                     # Shallow clone above failed(missing upstream tags???), let's resume the old behaviour.
                     echowarn "Failed to shallow clone."
                     echoinfo "Resuming regular git clone and remote SaltStack repository addition procedure"
-                    git clone "$_SALT_REPO_URL" "$__SALT_CHECKOUT_REPONAME" || return 1
-                    cd "${__SALT_GIT_CHECKOUT_DIR}"
+                    __SHALLOW_CLONE="${BS_FALSE}"
                 fi
             else
                 echodebug "Shallow cloning not possible. Required git version not met."
-                git clone "$_SALT_REPO_URL" "$__SALT_CHECKOUT_REPONAME" || return 1
-                cd "${__SALT_GIT_CHECKOUT_DIR}"
+                __SHALLOW_CLONE="${BS_FALSE}"
             fi
-        else
-            echowarn "The git revision being installed does not match a Salt version tag. Shallow cloning disabled"
-            git clone "$_SALT_REPO_URL" "$__SALT_CHECKOUT_REPONAME" || return 1
-            cd "${__SALT_GIT_CHECKOUT_DIR}"
-        fi
-
-        if [ "$(echo "$_SALT_REPO_URL" | grep -c -e '\(\(git\|https\)://github\.com/\|git@github\.com:\)saltstack/salt\.git')" -eq 0 ]; then
-            # We need to add the saltstack repository as a remote and fetch tags for proper versioning
-            echoinfo "Adding SaltStack's Salt repository as a remote"
-            git remote add upstream "$_SALTSTACK_REPO_URL" || return 1
-            echodebug "Fetching upstream(SaltStack's Salt repository) git tags"
-            git fetch --tags upstream || return 1
-            GIT_REV="origin/$GIT_REV"
         fi
 
         if [ "$__SHALLOW_CLONE" -eq "${BS_FALSE}" ]; then
+            git clone "$_SALT_REPO_URL" "$__SALT_CHECKOUT_REPONAME" || return 1
+            cd "${__SALT_GIT_CHECKOUT_DIR}"
+
+            if [ "$(echo "$_SALT_REPO_URL" | grep -c -e '\(\(git\|https\)://github\.com/\|git@github\.com:\)saltstack/salt\.git')" -eq 0 ]; then
+                # We need to add the saltstack repository as a remote and fetch tags for proper versioning
+                echoinfo "Adding SaltStack's Salt repository as a remote"
+                git remote add upstream "$_SALTSTACK_REPO_URL" || return 1
+                echodebug "Fetching upstream(SaltStack's Salt repository) git tags"
+                git fetch --tags upstream || return 1
+                GIT_REV="origin/$GIT_REV"
+            fi
+
             echodebug "Checking out $GIT_REV"
             git checkout "$GIT_REV" || return 1
         fi

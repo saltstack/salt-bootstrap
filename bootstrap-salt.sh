@@ -3684,8 +3684,8 @@ install_amazon_linux_ami_deps() {
 disabled=False
 name=SaltStack repo for RHEL/CentOS 6
 gpgcheck=1
-gpgkey=https://repo.saltstack.com/yum/rhel6/SALTSTACK-GPG-KEY.pub
-baseurl=https://repo.saltstack.com/yum/rhel6
+gpgkey=https://repo.saltstack.com/yum/redhat/6/\$basearch/$STABLE_REV/SALTSTACK-GPG-KEY.pub
+baseurl=https://repo.saltstack.com/yum/redhat/6/\$basearch/$STABLE_REV/
 humanname=SaltStack repo for RHEL/CentOS 6
 _eof
     fi

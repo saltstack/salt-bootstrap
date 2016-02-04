@@ -3181,7 +3181,7 @@ install_centos_git() {
         _PYEXE=python2
     fi
     if [ -f "${__SALT_GIT_CHECKOUT_DIR}/salt/syspaths.py" ]; then
-        $_PYEXE setup.py --prefix=/usr --salt-config-dir="$_SALT_ETC_DIR" install || return 1
+        $_PYEXE setup.py --salt-config-dir="$_SALT_ETC_DIR" install --prefix=/usr || return 1
     else
         $_PYEXE setup.py install --prefix=/usr || return 1
     fi

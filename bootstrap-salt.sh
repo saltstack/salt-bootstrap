@@ -1875,7 +1875,7 @@ install_ubuntu_stable_deps() {
 
         # Saltstack's Stable Ubuntu repository
         if [ "$(grep -ER 'latest .+ main' /etc/apt)" = "" ]; then
-            echo "deb http://repo.saltstack.com/apt/ubuntu/$DISTRO_VERSION/$CPU_ARCH/$STABLE_REV $DISTRO_CODENAME main" >> \
+            echo "deb http://repo.saltstack.com/apt/ubuntu/$DISTRO_VERSION/$CPU_ARCH_L/$STABLE_REV $DISTRO_CODENAME main" >> \
                 /etc/apt/sources.list.d/saltstack.list
         fi
 
@@ -1884,7 +1884,7 @@ install_ubuntu_stable_deps() {
         __apt_get_install_noinput wget
 
         # shellcheck disable=SC2086
-        wget $_WGET_ARGS -q https://repo.saltstack.com/apt/ubuntu/$DISTRO_VERSION/$CPU_ARCH/$STABLE_REV/SALTSTACK-GPG-KEY.pub -O - | apt-key add - || return 1
+        wget $_WGET_ARGS -q https://repo.saltstack.com/apt/ubuntu/$DISTRO_VERSION/$CPU_ARCH_L/$STABLE_REV/SALTSTACK-GPG-KEY.pub -O - | apt-key add - || return 1
 
     else
         # Alternate PPAs: salt16, salt17, salt2014-1, salt2014-7

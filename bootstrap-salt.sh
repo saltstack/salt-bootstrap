@@ -1876,6 +1876,14 @@ install_ubuntu_deps() {
 }
 
 install_ubuntu_stable_deps() {
+    # This probably holds true for the Debians as well
+    if [ "$CPU_ARCH_L" = "amd64" -o "$CPU_ARCH_L" = "x86_64" ]; then
+        repo_arch="amd64"
+    elif [ "$CPU_ARCH_L" = "i386" -o "$CPU_ARCH_L" = "i686" ]; then
+        echoerror "repo.saltstack.com likely doesn't have 32-bit packages for Ubuntu (yet?)"
+        repo_arch="i386"
+    fi
+
     install_ubuntu_deps || return 1
 
     # the latest version of 2015.5 and all versions of 2015.8 and beyond are hosted on repo.saltstack.com
@@ -1883,7 +1891,7 @@ install_ubuntu_stable_deps() {
 
         # Saltstack's Stable Ubuntu repository
         if [ "$(grep -ER 'latest .+ main' /etc/apt)" = "" ]; then
-            echo "deb http://repo.saltstack.com/apt/ubuntu/$DISTRO_VERSION/$CPU_ARCH_L/$STABLE_REV $DISTRO_CODENAME main" >> \
+            echo "deb http://repo.saltstack.com/apt/ubuntu/$DISTRO_VERSION/$repo_arch/$STABLE_REV $DISTRO_CODENAME main" >> \
                 /etc/apt/sources.list.d/saltstack.list
         fi
 
@@ -1892,7 +1900,7 @@ install_ubuntu_stable_deps() {
         __apt_get_install_noinput wget
 
         # shellcheck disable=SC2086
-        wget $_WGET_ARGS -q https://repo.saltstack.com/apt/ubuntu/$DISTRO_VERSION/$CPU_ARCH_L/$STABLE_REV/SALTSTACK-GPG-KEY.pub -O - | apt-key add - || return 1
+        wget $_WGET_ARGS -q https://repo.saltstack.com/apt/ubuntu/$DISTRO_VERSION/$repo_arch/$STABLE_REV/SALTSTACK-GPG-KEY.pub -O - | apt-key add - || return 1
 
     else
         # Alternate PPAs: salt16, salt17, salt2014-1, salt2014-7
@@ -2938,7 +2946,7 @@ __install_saltstack_rhel_repository() {
         repo_rev="latest"
     fi
 
-    base_url="https://repo.saltstack.com/yum/redhat/\$releasever/\$basearch/${repo_rev}/"
+    base_url="http://repo.saltstack.com/yum/redhat/\$releasever/\$basearch/${repo_rev}/"
     fetch_url="https://repo.saltstack.com/yum/redhat/${DISTRO_MAJOR_VERSION}/${CPU_ARCH_L}/${repo_rev}/"
 
     if [ "${DISTRO_MAJOR_VERSION}" -eq 5 ]; then

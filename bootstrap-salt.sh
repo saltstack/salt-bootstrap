@@ -1217,7 +1217,7 @@ __ubuntu_codename_translation
 if ([ "${DISTRO_NAME_L}" != "ubuntu" ] && [ "$ITYPE" = "daily" ]); then
     echoerror "${DISTRO_NAME} does not have daily packages support"
     exit 1
-elif ([ "${DISTRO_NAME_L}" != "ubuntu" ] && [ "$ITYPE" = "stable" ] && [ "$STABLE_REV" != "latest" ]); then
+elif ([ "$(echo "${DISTRO_NAME_L}" | egrep '(ubuntu|centos|red_hat|scientific|oracle|amazon|fedora)')" = "" ] && [ "$ITYPE" = "stable" ] && [ "$STABLE_REV" != "latest" ]); then
     echoerror "${DISTRO_NAME} does not have major version pegged packages support"
     exit 1
 fi
@@ -1782,9 +1782,9 @@ __enable_universe_repository() {
     elif [ "$DISTRO_MAJOR_VERSION" -lt 11 ] && [ "$DISTRO_MINOR_VERSION" -lt 10 ]; then
         # Below Ubuntu 11.10, the -y flag to add-apt-repository is not supported
         add-apt-repository "deb http://old-releases.ubuntu.com/ubuntu $(lsb_release -sc) universe" || return 1
+    else
+        add-apt-repository -y "deb http://old-releases.ubuntu.com/ubuntu $(lsb_release -sc) universe" || return 1
     fi
-
-    add-apt-repository -y "deb http://old-releases.ubuntu.com/ubuntu $(lsb_release -sc) universe" || return 1
 
     return 0
 }
@@ -1889,6 +1889,14 @@ install_ubuntu_deps() {
 }
 
 install_ubuntu_stable_deps() {
+    # This probably holds true for the Debians as well
+    if [ "$CPU_ARCH_L" = "amd64" -o "$CPU_ARCH_L" = "x86_64" ]; then
+        repo_arch="amd64"
+    elif [ "$CPU_ARCH_L" = "i386" -o "$CPU_ARCH_L" = "i686" ]; then
+        echoerror "repo.saltstack.com likely doesn't have 32-bit packages for Ubuntu (yet?)"
+        repo_arch="i386"
+    fi
+
     install_ubuntu_deps || return 1
 
     # the latest version of 2015.5 and all versions of 2015.8 and beyond are hosted on repo.saltstack.com
@@ -1896,7 +1904,7 @@ install_ubuntu_stable_deps() {
 
         # Saltstack's Stable Ubuntu repository
         if [ "$(grep -ER 'latest .+ main' /etc/apt)" = "" ]; then
-            echo "deb http://repo.saltstack.com/apt/ubuntu/ubuntu$DISTRO_MAJOR_VERSION/$STABLE_REV $DISTRO_CODENAME main" >> \
+            echo "deb http://repo.saltstack.com/apt/ubuntu/$DISTRO_VERSION/$repo_arch/$STABLE_REV $DISTRO_CODENAME main" >> \
                 /etc/apt/sources.list.d/saltstack.list
         fi
 
@@ -1905,7 +1913,7 @@ install_ubuntu_stable_deps() {
         __apt_get_install_noinput wget
 
         # shellcheck disable=SC2086
-        wget $_WGET_ARGS -q http://repo.saltstack.com/apt/ubuntu/ubuntu$DISTRO_MAJOR_VERSION/$STABLE_REV/SALTSTACK-GPG-KEY.pub -O - | apt-key add - || return 1
+        wget $_WGET_ARGS -q https://repo.saltstack.com/apt/ubuntu/$DISTRO_VERSION/$repo_arch/$STABLE_REV/SALTSTACK-GPG-KEY.pub -O - | apt-key add - || return 1
 
     else
         # Alternate PPAs: salt16, salt17, salt2014-1, salt2014-7
@@ -2944,40 +2952,36 @@ __install_saltstack_copr_zeromq_repository() {
     return 0
 }
 
-__install_saltstack_rhel5_repository() {
-    if [ ! -s /etc/yum.repos.d/repo-saltstack-el5.repo ]; then
-        cat <<_eof > /etc/yum.repos.d/repo-saltstack-el5.repo
-[repo-saltstack-el5]
-name=SaltStack EL5 Repo
-baseurl=https://repo.saltstack.com/yum/rhel5/
-skip_if_unavailable=True
-gpgcheck=1
-gpgkey=https://repo.saltstack.com/yum/rhel5/SALTSTACK-EL5-GPG-KEY.pub
-enabled=1
-enabled_metadata=1
-_eof
-
-        __fetch_url /tmp/repo-saltstack-el5.pub "https://repo.saltstack.com/yum/rhel5/SALTSTACK-EL5-GPG-KEY.pub" || return 1
-        rpm --import /tmp/repo-saltstack-el5.pub || return 1
-        rm -f /tmp/repo-saltstack-el5.pub
-    fi
-    return 0
-}
-
 __install_saltstack_rhel_repository() {
-    if [ ! -s "/etc/yum.repos.d/repo-saltstack-el${DISTRO_MAJOR_VERSION}.repo" ]; then
-        cat <<_eof > "/etc/yum.repos.d/repo-saltstack-el${DISTRO_MAJOR_VERSION}.repo"
-[repo-saltstack-el${DISTRO_MAJOR_VERSION}]
-name=SaltStack EL${DISTRO_MAJOR_VERSION} Repo
-baseurl=https://repo.saltstack.com/yum/rhel${DISTRO_MAJOR_VERSION}/
+    if [ "$ITYPE" = "stable" ]; then
+        repo_rev="$STABLE_REV"
+    else
+        repo_rev="latest"
+    fi
+
+    base_url="http://repo.saltstack.com/yum/redhat/\$releasever/\$basearch/${repo_rev}/"
+    fetch_url="https://repo.saltstack.com/yum/redhat/${DISTRO_MAJOR_VERSION}/${CPU_ARCH_L}/${repo_rev}/"
+
+    if [ "${DISTRO_MAJOR_VERSION}" -eq 5 ]; then
+        gpg_key="SALTSTACK-EL5-GPG-KEY.pub"
+    else
+        gpg_key="SALTSTACK-GPG-KEY.pub"
+    fi
+
+    repo_file="/etc/yum.repos.d/salt-${repo_rev}.repo"
+    if [ ! -s "$repo_file" ]; then
+        cat <<_eof > "$repo_file"
+[salt-${repo_rev}]
+name=SaltStack ${repo_rev} Release Channel for RHEL/CentOS \$releasever
+baseurl=$base_url
 skip_if_unavailable=True
 gpgcheck=1
-gpgkey=https://repo.saltstack.com/yum/rhel${DISTRO_MAJOR_VERSION}/SALTSTACK-GPG-KEY.pub
+gpgkey=${base_url}${gpg_key}
 enabled=1
 enabled_metadata=1
 _eof
 
-        __fetch_url /tmp/repo-saltstack.pub "https://repo.saltstack.com/yum/rhel${DISTRO_MAJOR_VERSION}/SALTSTACK-GPG-KEY.pub" || return 1
+        __fetch_url /tmp/repo-saltstack.pub "${fetch_url}${gpg_key}" || return 1
         rpm --import /tmp/repo-saltstack.pub || return 1
         rm -f /tmp/repo-saltstack.pub
     fi
@@ -3005,11 +3009,7 @@ __install_saltstack_copr_salt_repository() {
 
 install_centos_stable_deps() {
     __install_epel_repository || return 1
-    if [ "$DISTRO_MAJOR_VERSION" -eq 5 ]; then
-        __install_saltstack_rhel5_repository || return 1
-    elif [ "$DISTRO_MAJOR_VERSION" -gt 5 ]; then
-        __install_saltstack_rhel_repository || return 1
-    fi
+    __install_saltstack_rhel_repository || return 1
 
     if [ -f "${__SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" ]; then
         # We're on the develop branch, install whichever tornado is on the requirements file

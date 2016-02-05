@@ -2988,6 +2988,7 @@ __install_saltstack_copr_salt_repository() {
     echoinfo "Adding SaltStack's COPR repository"
 
     if [ "${DISTRO_NAME_L}" = "fedora" ]; then
+        [ "$DISTRO_MAJOR_VERSION" -ge 22 ] && return 0
         __REPOTYPE="${DISTRO_NAME_L}"
     else
         __REPOTYPE="epel"

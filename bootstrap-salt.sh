@@ -4487,11 +4487,11 @@ install_opensuse_stable_deps() {
     fi
 
     # Is the repository already known
-    __zypper repos | grep devel_languages_python >/dev/null 2>&1
+    opensuse_deps_repo_url="http://download.opensuse.org/repositories/devel:/languages:/python/${DISTRO_REPO}/"
+    __zypper repos --details | grep "${opensuse_deps_repo_url}" >/dev/null 2>&1
     if [ $? -eq 1 ]; then
         # zypper does not yet know nothing about devel_languages_python
-        __zypper addrepo --refresh \
-            "http://download.opensuse.org/repositories/devel:/languages:/python/${DISTRO_REPO}/devel:languages:python.repo" || return 1
+        __zypper addrepo --refresh "${opensuse_deps_repo_url}" devel_languages_python || return 1
     fi
 
     __zypper --gpg-auto-import-keys refresh

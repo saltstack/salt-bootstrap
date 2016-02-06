@@ -585,7 +585,7 @@ __fetch_url() {
     curl $_CURL_ARGS -L -s -o "$1" "$2" >/dev/null 2>&1 ||
         wget $_WGET_ARGS -q -O "$1" "$2" >/dev/null 2>&1 ||
             fetch $_FETCH_ARGS -q -o "$1" "$2" >/dev/null 2>&1 ||
-                fetch -q -o "$1" "$2" >/dev/null 2>&1           # Pre FreeBSD 10
+                fetch -q -o "$1" "$2" >/dev/null 2>&1 ||        # Pre FreeBSD 10
                     ftp -o "$1" "$2" >/dev/null 2>&1            # OpenBSD
 }
 
@@ -4383,11 +4383,11 @@ install_openbsd_deps() {
       # Let's set the configuration directory to /tmp
       _TEMP_CONFIG_DIR="/tmp"
       CONFIG_SALT_FUNC="config_salt"
-      for fname in minion master; do
+      for fname in minion master syndic api; do
           # Skip if not meant to be installed
           [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
           [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
-          # [ $fname = "api" ] && ([ "$_INSTALL_MASTER" -eq $BS_FALSE ] || [ "$(which salt-${fname} 2>/dev/null)" = "" ]) && continue
+          [ $fname = "api" ] && ([ "$_INSTALL_MASTER" -eq $BS_FALSE ] || [ "$(which salt-${fname} 2>/dev/null)" = "" ]) && continue
           [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
 
           # Let's download, since they were not provided, the default configuration files
@@ -4451,7 +4451,7 @@ install_openbsd_post() {
     # Install rc.d files.
     #
     ## below workaround for /etc/rc.d/rc.subr in OpenBSD >= 5.8 
-    ## is needed for salt service to start/stop properly by /etc/rc.d
+    ## is needed for salt services to start/stop properly from /etc/rc.d
     ## reference: http://cvsweb.openbsd.org/cgi-bin/cvsweb/src/etc/rc.d/rc.subr.diff?r1=1.98&r2=1.99
     ##
     if [ $(grep '\-xf' /etc/rc.d/rc.subr)]; then

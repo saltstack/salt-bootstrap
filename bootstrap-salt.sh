@@ -235,9 +235,9 @@ usage() {
 
   Installation types:
     - stable (default)
-    - stable [version] (ubuntu specific)
-    - daily  (ubuntu specific)
-    - testing (redhat specific)
+    - stable [version] (currently only supported on: Ubuntu, CentOS)
+    - daily  (Ubuntu specific)
+    - testing (RedHat specific)
     - git
 
   Examples:
@@ -1210,7 +1210,7 @@ __ubuntu_codename_translation
 if ([ "${DISTRO_NAME_L}" != "ubuntu" ] && [ "$ITYPE" = "daily" ]); then
     echoerror "${DISTRO_NAME} does not have daily packages support"
     exit 1
-elif ([ "$(echo "${DISTRO_NAME_L}" | egrep '(ubuntu|centos|red_hat|scientific|oracle|amazon|fedora)')" = "" ] && [ "$ITYPE" = "stable" ] && [ "$STABLE_REV" != "latest" ]); then
+elif ([ "$(echo "${DISTRO_NAME_L}" | egrep '(ubuntu|centos)')" = "" ] && [ "$ITYPE" = "stable" ] && [ "$STABLE_REV" != "latest" ]); then
     echoerror "${DISTRO_NAME} does not have major version pegged packages support"
     exit 1
 fi

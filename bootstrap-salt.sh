@@ -2949,7 +2949,7 @@ __install_saltstack_rhel_repository() {
         repo_rev="latest"
     fi
 
-    base_url="http://repo.saltstack.com/yum/redhat/\$releasever/\$basearch/${repo_rev}/"
+    base_url="https://repo.saltstack.com/yum/redhat/\$releasever/\$basearch/${repo_rev}/"
     fetch_url="https://repo.saltstack.com/yum/redhat/${DISTRO_MAJOR_VERSION}/${CPU_ARCH_L}/${repo_rev}/"
 
     if [ "${DISTRO_MAJOR_VERSION}" -eq 5 ]; then

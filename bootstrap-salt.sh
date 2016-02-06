@@ -4007,15 +4007,20 @@ __configure_freebsd_pkg_details() {
     mkdir -p /etc/pkg/
 
     ## Use new JSON-like format for pkg repo configs
-    conf_file=/usr/local/etc/pkg/repos/freebsd.conf
-    {
-        echo "FreeBSD:{"
-        echo "    url: \"${PKGCONFURL}\","
-        echo "    mirror_type: \"SRV\","
-        echo "    enabled: true"
-        echo "}"
-    } > $conf_file
-    copyfile $conf_file /etc/pkg/FreeBSD.conf
+    ## check if /etc/pkg/FreeBSD.conf is already in place 
+    if [ ! -f /etc/pkg/FreeBSD.conf ]; then 
+      conf_file=/usr/local/etc/pkg/repos/freebsd.conf
+      {
+          echo "FreeBSD:{"
+          echo "    url: \"${PKGCONFURL}\","
+          echo "    mirror_type: \"srv\","
+          echo "    signature_type: "fingerprints",
+          echo "    fingerprints: "/usr/share/keys/pkg",
+          echo "    enabled: true"
+          echo "}"
+      } > $conf_file
+      copyfile $conf_file /etc/pkg/FreeBSD.conf
+    fi
     FROM_FREEBSD="-r FreeBSD"
 
     ## add saltstack freebsd repo
@@ -4153,7 +4158,19 @@ install_freebsd_10_stable() {
 }
 
 install_freebsd_11_stable() {
-    install_freebsd_9_stable
+# 
+# installing latest version of salt from FreeBSD CURRENT ports repo 
+# 
+    /usr/local/sbin/pkg install ${FROM_FREEBSD} -y sysutils/py-salt || return 1
+    
+#
+# setting _SALT_ETC_DIR to match paths from FreeBSD ports:
+#
+    _SALT_ETC_DIR=${BS_SALT_ETC_DIR:-/usr/local/etc/salt}
+    if [ ! -d /etc/salt ]; then 
+      ln -sf ${_SALT_ETC_DIR} /etc/salt
+    fi
+    return 0
 }
 
 install_freebsd_git() {

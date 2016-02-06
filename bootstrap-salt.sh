@@ -4731,7 +4731,7 @@ install_suse_12_stable_deps() {
     # Salt needs python-zypp installed in order to use the zypper module
     __PACKAGES="python-zypp"
     # shellcheck disable=SC2089
-    __PACKAGES="${__PACKAGES} libzmq3 python python-Jinja2 python-msgpack-python"
+    __PACKAGES="${__PACKAGES} libzmq5 python python-Jinja2 python-msgpack-python"
     __PACKAGES="${__PACKAGES} python-pycrypto python-pyzmq python-pip python-xml python-requests"
 
     if [ "$SUSE_PATCHLEVEL" -eq 1 ]; then
@@ -4917,7 +4917,7 @@ install_suse_11_stable_deps() {
     # Salt needs python-zypp installed in order to use the zypper module
     __PACKAGES="python-zypp"
     # shellcheck disable=SC2089
-    __PACKAGES="${__PACKAGES} libzmq3 python python-Jinja2 python-msgpack-python"
+    __PACKAGES="${__PACKAGES} libzmq5 python python-Jinja2 python-msgpack-python"
     __PACKAGES="${__PACKAGES} python-pycrypto python-pyzmq python-pip python-xml python-requests"
 
     if [ "$SUSE_PATCHLEVEL" -eq 1 ]; then

@@ -258,7 +258,9 @@ usage() {
   -D  Show debug output.
   -c  Temporary configuration directory
   -g  Salt repository URL. (default: git://github.com/saltstack/salt.git)
-  -G  Instead of cloning from git://github.com/saltstack/salt.git, clone from https://github.com/saltstack/salt.git (Usually necessary on systems which have the regular git protocol port blocked, where https usually is not)
+  -G  Instead of cloning from git://github.com/saltstack/salt.git, clone from
+      https://github.com/saltstack/salt.git (Usually necessary on systems which
+      have the regular git protocol port blocked, where https usually is not)
   -k  Temporary directory holding the minion keys which will pre-seed
       the master.
   -s  Sleep time used when waiting for daemons to start, restart and when checking
@@ -292,7 +294,8 @@ usage() {
       'install_<distro>_check_services' checks. You can also do this by
       touching /tmp/disable_salt_checks on the target host. Defaults \${BS_FALSE}
   -H  Use the specified http proxy for the installation
-  -Z  Enable external software source for newer ZeroMQ(Only available for RHEL/CentOS/Fedora/Ubuntu based distributions)
+  -Z  Enable external software source for newer ZeroMQ(Only available for
+      RHEL/CentOS/Fedora/Ubuntu based distributions)
   -b  Assume that dependencies are already installed and software sources are set up.
       If git is selected, git tree is still checked out as dependency step.
 

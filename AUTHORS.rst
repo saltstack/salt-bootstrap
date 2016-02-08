@@ -20,10 +20,11 @@ Cam                         camereonsparr
 Chris Rebert                cvrebert               chris.rebert@hulu.com
 Chris Buechler              cbuechler              cmb@pfsense.org
 Christer Edwards            cedwards
-denmat                      denmat
 Dag Viggo Lokøen            dagvl                  dag.viggo@lokoen.org
 Dan Mick                    dmick                  dan.mick@inktank.com
 David J. Felix              DavidJFelix
+denmat                      denmat
+Denys Havrysh               vutny                  denys.gavrysh@gmail.com
 deployboy                   deployboy
 Diego Woitasen              diegows                diego@flugel.it
 Elias Probst                eliasp

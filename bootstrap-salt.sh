@@ -5,11 +5,11 @@
 #
 #          FILE: bootstrap-salt.sh
 #
-#   DESCRIPTION: Bootstrap salt installation for various systems/distributions
+#   DESCRIPTION: Bootstrap Salt installation for various systems/distributions
 #
 #          BUGS: https://github.com/saltstack/salt-bootstrap/issues
 #
-#     COPYRIGHT: (c) 2012-2015 by the SaltStack Team, see AUTHORS.rst for more
+#     COPYRIGHT: (c) 2012-2016 by the SaltStack Team, see AUTHORS.rst for more
 #                details.
 #
 #       LICENSE: Apache 2.0
@@ -235,71 +235,75 @@ usage() {
   Usage :  ${__ScriptName} [options] <install-type> <install-type-args>
 
   Installation types:
-    - stable (default)
-    - stable [version] (currently only supported on: Ubuntu, CentOS)
-    - daily  (Ubuntu specific)
-    - testing (RedHat specific)
-    - git
+    - stable              (this is default)
+    - stable [version]    (currently only supported on: Ubuntu, CentOS)
+    - daily               (Ubuntu specific)
+    - testing             (RHEL-family specific, configure EPEL testing repo)
+    - git [branch_or_tag] (install from 'develop' by default)
 
   Examples:
     - ${__ScriptName}
     - ${__ScriptName} stable
-    - ${__ScriptName} stable 2014.7
+    - ${__ScriptName} stable 2015.8
     - ${__ScriptName} daily
     - ${__ScriptName} testing
     - ${__ScriptName} git
     - ${__ScriptName} git develop
-    - ${__ScriptName} git v0.17.0
+    - ${__ScriptName} git v2015.8.5
     - ${__ScriptName} git 8c3fadf15ec183e5ce8c63739850d543617e4357
 
   Options:
-  -h  Display this message
-  -v  Display script version
-  -n  No colours.
-  -D  Show debug output.
-  -c  Temporary configuration directory
-  -g  Salt repository URL. (default: git://github.com/saltstack/salt.git)
-  -G  Instead of cloning from git://github.com/saltstack/salt.git, clone from
-      https://github.com/saltstack/salt.git (Usually necessary on systems which
-      have the regular git protocol port blocked, where https usually is not)
-  -k  Temporary directory holding the minion keys which will pre-seed
-      the master.
-  -s  Sleep time used when waiting for daemons to start, restart and when checking
-      for the services running. Default: ${__DEFAULT_SLEEP}
-  -M  Also install salt-master
-  -S  Also install salt-syndic
-  -N  Do not install salt-minion
-  -X  Do not start daemons after installation
-  -C  Only run the configuration function. This option automatically bypasses
-      any installation. Implies -F (forced overwrite). To overwrite master or
-      syndic configs, -M or -S, respectively, must also be specified.
-  -P  Allow pip based installations. On some distributions the required salt
-      packages or its dependencies are not available as a package for that
-      distribution. Using this flag allows the script to use pip as a last
-      resort method. NOTE: This only works for functions which actually
-      implement pip based installations.
-  -F  Allow copied files to overwrite existing (config, init.d, etc).
-  -U  If set, fully upgrade the system prior to bootstrapping salt
-  -K  If set, keep the temporary files in the temporary directories specified
-      with -c and -k.
-  -I  If set, allow insecure connections while downloading any files. For
-      example, pass '--no-check-certificate' to 'wget' or '--insecure' to 'curl'
-  -A  Pass the salt-master DNS name or IP. This will be stored under
-      \${BS_SALT_ETC_DIR}/minion.d/99-master-address.conf
-  -i  Pass the salt-minion id. This will be stored under
-      \${BS_SALT_ETC_DIR}/minion_id
-  -L  Install the Apache Libcloud package if possible(required for salt-cloud)
-  -p  Extra-package to install while installing salt dependencies. One package
-      per -p flag. You're responsible for providing the proper package name.
-  -d  Disable check_service functions. Setting this flag disables the
-      'install_<distro>_check_services' checks. You can also do this by
-      touching /tmp/disable_salt_checks on the target host. Defaults \${BS_FALSE}
-  -H  Use the specified http proxy for the installation
-  -Z  Enable external software source for newer ZeroMQ(Only available for
-      RHEL/CentOS/Fedora/Ubuntu based distributions)
-  -b  Assume that dependencies are already installed and software sources are set up.
-      If git is selected, git tree is still checked out as dependency step.
-  -f  Force shallow cloning for git installations. This may result in an "n/a" in the version number.
+    -h  Display this message
+    -v  Display script version
+    -n  No colours.
+    -D  Show debug output.
+    -c  Temporary configuration directory
+    -g  Salt repository URL. Default: ${_SALTSTACK_REPO_URL}
+    -G  Instead of cloning from ${_SALTSTACK_REPO_URL}, clone from
+        https://${_SALTSTACK_REPO_URL#*://}
+        (Usually necessary on systems which have the regular git protocol port
+        blocked, where https usually is not)
+    -k  Temporary directory holding the minion keys which will pre-seed
+        the master.
+    -s  Sleep time used when waiting for daemons to start, restart and when
+        checking for the services running. Default: ${__DEFAULT_SLEEP}
+    -M  Also install salt-master
+    -S  Also install salt-syndic
+    -N  Do not install salt-minion
+    -X  Do not start daemons after installation
+    -C  Only run the configuration function. This option automatically bypasses
+        any installation. Implies -F (forced overwrite). To overwrite master or
+        syndic configs, -M or -S, respectively, must also be specified.
+    -P  Allow pip based installations. On some distributions the required salt
+        packages or its dependencies are not available as a package for that
+        distribution. Using this flag allows the script to use pip as a last
+        resort method. NOTE: This only works for functions which actually
+        implement pip based installations.
+    -F  Allow copied files to overwrite existing (config, init.d, etc).
+    -U  If set, fully upgrade the system prior to bootstrapping salt
+    -K  If set, keep the temporary files in the temporary directories specified
+        with -c and -k.
+    -I  If set, allow insecure connections while downloading any files. For
+        example, pass '--no-check-certificate' to 'wget' or '--insecure' to
+        'curl'
+    -A  Pass the salt-master DNS name or IP. This will be stored under
+        \${BS_SALT_ETC_DIR}/minion.d/99-master-address.conf
+    -i  Pass the salt-minion id. This will be stored under
+        \${BS_SALT_ETC_DIR}/minion_id
+    -L  Install the Apache Libcloud package if possible(required for salt-cloud)
+    -p  Extra-package to install while installing salt dependencies. One package
+        per -p flag. You're responsible for providing the proper package name.
+    -d  Disable check_service functions. Setting this flag disables the
+        'install_<distro>_check_services' checks. You can also do this by
+        touching /tmp/disable_salt_checks on the target host. Default: \${BS_FALSE}
+    -H  Use the specified http proxy for the installation
+    -Z  Enable additional package repository for newer ZeroMQ
+        (Only available for RHEL/CentOS/Fedora/Ubuntu based distributions)
+    -b  Assume that dependencies are already installed and software sources are
+        set up. If git is selected, git tree is still checked out as dependency
+        step.
+    -f  Force shallow cloning for git installations.
+        This may result in an "n/a" in the version number.
 
 EOT
 }   # ----------  end of function usage  ----------

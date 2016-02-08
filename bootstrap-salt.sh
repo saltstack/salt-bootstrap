@@ -5,11 +5,11 @@
 #
 #          FILE: bootstrap-salt.sh
 #
-#   DESCRIPTION: Bootstrap salt installation for various systems/distributions
+#   DESCRIPTION: Bootstrap Salt installation for various systems/distributions
 #
 #          BUGS: https://github.com/saltstack/salt-bootstrap/issues
 #
-#     COPYRIGHT: (c) 2012-2015 by the SaltStack Team, see AUTHORS.rst for more
+#     COPYRIGHT: (c) 2012-2016 by the SaltStack Team, see AUTHORS.rst for more
 #                details.
 #
 #       LICENSE: Apache 2.0

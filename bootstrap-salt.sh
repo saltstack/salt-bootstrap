@@ -4719,11 +4719,11 @@ install_suse_12_stable_deps() {
     DISTRO_REPO="SLE_${DISTRO_MAJOR_VERSION}"
 
     # Is the repository already known
-    __zypper repos | grep devel_languages_python >/dev/null 2>&1
+    __zypper repos | grep systemsmanagement_saltstack >/dev/null 2>&1
     if [ $? -eq 1 ]; then
-        # zypper does not yet know nothing about devel_languages_python
+        # zypper does not yet know nothing about systemsmanagement_saltstack
         __zypper addrepo --refresh \
-            "http://download.opensuse.org/repositories/devel:/languages:/python/${DISTRO_REPO}/devel:languages:python.repo" || return 1
+            "http://download.opensuse.org/repositories/systemsmanagement:saltstack/${DISTRO_REPO}/systemsmanagement:saltstack.repo" || return 1
     fi
 
     __zypper --gpg-auto-import-keys refresh || return 1

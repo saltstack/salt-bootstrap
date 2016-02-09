@@ -4356,9 +4356,27 @@ install_freebsd_restart_daemons() {
 #   OpenBSD Install Functions
 #
 
+choose_openbsd_mirror() {
+  MIRRORS_LIST_URL=http://www.openbsd.org/ftp.html
+  MIRRORS_LIST=$(ftp -o - $MIRRORS_LIST_URL |grep href |grep http | grep pub | awk -F \" '{ print $2 }')
+  echoinfo "getting list of mirrors from $MIRRORS_LIST_URL"
+  ping -c 2 -q $(echo $MIRRORS_LIST_URL | awk -F \/ '{ print $3 }') 1>/dev/null || return 1
+  for MIRROR in $MIRRORS_LIST
+    do
+        TIME=$(ping -c 1 -q $(echo $MIRROR | awk -F \/ '{ print $3 }') |grep round-trip |awk -F \/ '{ print $5 }')
+        [ -z $TIME ] && continue
+        echodebug "ping time for $MIRROR is $TIME"
+        [ -z $MINTIME ] && MINTIME=$TIME
+        [ $( echo "$TIME < $MINTIME" |bc ) -eq 1 ] && MINTIME=$TIME && OPENBSD_REPO=$MIRROR || continue
+    done
+}
+
+
 install_openbsd_deps() {
-  ping -c 2 -q mirrors.nycbug.org || return 1
-  echo "installpath = http://mirrors.nycbug.org/pub/OpenBSD/${OS_VERSION}/packages/${CPU_ARCH_L}/" >/etc/pkg.conf || return 1
+  choose_openbsd_mirror || return 1
+  [ -z $OPENBSD_REPO ] && return 1
+  echoinfo "setting package repository to $OPENBSD_REPO with ping time of $MINTIME"
+  echo "installpath = ${OPENBSD_REPO}${OS_VERSION}/packages/${CPU_ARCH_L}/" >/etc/pkg.conf || return 1
   pkg_add -I -v lsof || return 1  
   pkg_add -I -v py-pip || return 1  
   ln -sf $(ls -d /usr/local/bin/pip2.*) /usr/local/bin/pip  || return 1 

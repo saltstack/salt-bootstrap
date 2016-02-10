@@ -1793,6 +1793,8 @@ __enable_universe_repository() {
         add-apt-repository -y "deb http://old-releases.ubuntu.com/ubuntu $(lsb_release -sc) universe" || return 1
     fi
 
+    add-apt-repository -y "deb http://old-releases.ubuntu.com/ubuntu $(lsb_release -sc) universe" || return 1
+
     return 0
 }
 
@@ -3668,29 +3670,31 @@ install_amazon_linux_ami_2010_git_deps() {
 }
 
 install_amazon_linux_ami_deps() {
-    # According to http://aws.amazon.com/amazon-linux-ami/faqs/#epel we should
+    # enable the EPEL repo
+    /usr/bin/yum-config-manager --enable epel || return 1
 
-    # enable the EPEL 6 repo
-    if [ "$CPU_ARCH_L" = "i686" ]; then
-        EPEL_ARCH="i386"
-    else
-        EPEL_ARCH=$CPU_ARCH_L
-    fi
-    rpm -Uvh --force "http://mirrors.kernel.org/fedora-epel/6/${EPEL_ARCH}/epel-release-6-8.noarch.rpm" || return 1
+    # exclude Salt and ZeroMQ packages from EPEL
+    /usr/bin/yum-config-manager epel --setopt "epel.exclude=zeromq* salt* python-zmq*" --save || return 1
 
-    __REPO_FILENAME="saltstack-salt-epel-6.repo"
+    __REPO_FILENAME="saltstack-repo.repo"
 
     if [ ! -s "/etc/yum.repos.d/${__REPO_FILENAME}" ]; then
-        echoinfo "Adding SaltStack's COPR repository"
-        __fetch_url /etc/yum.repos.d/${__REPO_FILENAME} \
-            "https://copr.fedorainfracloud.org/coprs/saltstack/salt/repo/epel-6/${__REPO_FILENAME}" || return 1
+      cat <<_eof > "/etc/yum.repos.d/${__REPO_FILENAME}"
+[saltstack-repo]
+disabled=False
+name=SaltStack repo for RHEL/CentOS 6
+gpgcheck=1
+gpgkey=https://repo.saltstack.com/yum/redhat/6/\$basearch/$STABLE_REV/SALTSTACK-GPG-KEY.pub
+baseurl=https://repo.saltstack.com/yum/redhat/6/\$basearch/$STABLE_REV/
+humanname=SaltStack repo for RHEL/CentOS 6
+_eof
     fi
 
     if [ "$_UPGRADE_SYS" -eq $BS_TRUE ]; then
         yum -y update || return 1
     fi
 
-    __PACKAGES="PyYAML m2crypto python-crypto python-msgpack python-zmq python-ordereddict python-jinja2 python-requests"
+    __PACKAGES="PyYAML m2crypto python-crypto python-msgpack python-zmq python26-ordereddict python-jinja2 python-requests"
 
     if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
         check_pip_allowed "You need to allow pip based installations (-P) in order to install apache-libcloud"
@@ -4712,6 +4716,7 @@ install_suse_12_stable_deps() {
     if [ "${SUSE_PATCHLEVEL}" != "" ]; then
         DISTRO_PATCHLEVEL="_SP${SUSE_PATCHLEVEL}"
     fi
+    DISTRO_REPO="SLE_${DISTRO_MAJOR_VERSION}${DISTRO_PATCHLEVEL}"
 
     # SLES 12 repo name does not use a patch level so PATCHLEVEL will need to be updated with SP1
     #DISTRO_REPO="SLE_${DISTRO_MAJOR_VERSION}${DISTRO_PATCHLEVEL}"

@@ -74,6 +74,7 @@ Rob Eden                    hedinfaok
 Roberto Aguilar             rca                    roberto@baremetal.io
 Roman Inflianskas           rominf                 infroma@gmail.com
 Ronald van Zantvoort        The-Loeki              ronald@pcextreme.nl
+Sergey Paramonov            serge-p                serg.paramonov@s-vp.com
 Skyler Berg                 skylerberg             skylertheberg@gmail.com
 Stanislav B                 stanislavb
 Steve Groesz                wolfpackmars2

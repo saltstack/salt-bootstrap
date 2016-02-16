@@ -550,7 +550,7 @@ __exit_cleanup() {
         # Exit with the "original" exit code, not the trapped code
         exit $EXIT_CODE
     }
-    trap "__trap_errors" INT QUIT ABRT KILL QUIT TERM
+    trap "__trap_errors" INT QUIT ABRT QUIT TERM
 
     # Now we're "good" to kill tee
     kill -s TERM "$TEE_PID"
@@ -4043,8 +4043,8 @@ __configure_freebsd_pkg_details() {
     mkdir -p /etc/pkg/
 
     ## Use new JSON-like format for pkg repo configs
-    ## check if /etc/pkg/FreeBSD.conf is already in place 
-    if [ ! -f /etc/pkg/FreeBSD.conf ]; then 
+    ## check if /etc/pkg/FreeBSD.conf is already in place
+    if [ ! -f /etc/pkg/FreeBSD.conf ]; then
       conf_file=/usr/local/etc/pkg/repos/freebsd.conf
       {
           echo "FreeBSD:{"
@@ -4194,16 +4194,16 @@ install_freebsd_10_stable() {
 }
 
 install_freebsd_11_stable() {
-# 
-# installing latest version of salt from FreeBSD CURRENT ports repo 
-# 
+#
+# installing latest version of salt from FreeBSD CURRENT ports repo
+#
     /usr/local/sbin/pkg install ${FROM_FREEBSD} -y sysutils/py-salt || return 1
-    
+
 #
 # setting _SALT_ETC_DIR to match paths from FreeBSD ports:
 #
     _SALT_ETC_DIR=${BS_SALT_ETC_DIR:-/usr/local/etc/salt}
-    if [ ! -d /etc/salt ]; then 
+    if [ ! -d /etc/salt ]; then
       ln -sf ${_SALT_ETC_DIR} /etc/salt
     fi
     return 0
@@ -4336,10 +4336,10 @@ install_openbsd_deps() {
   [ -z $OPENBSD_REPO ] && return 1
   echoinfo "setting package repository to $OPENBSD_REPO with ping time of $MINTIME"
   echo "installpath = ${OPENBSD_REPO}${OS_VERSION}/packages/${CPU_ARCH_L}/" >/etc/pkg.conf || return 1
-  pkg_add -I -v lsof || return 1  
-  pkg_add -I -v py-pip || return 1  
-  ln -sf $(ls -d /usr/local/bin/pip2.*) /usr/local/bin/pip  || return 1 
-  ln -sf $(ls -d /usr/local/bin/pydoc2*) /usr/local/bin/pydoc || return 1 
+  pkg_add -I -v lsof || return 1
+  pkg_add -I -v py-pip || return 1
+  ln -sf $(ls -d /usr/local/bin/pip2.*) /usr/local/bin/pip  || return 1
+  ln -sf $(ls -d /usr/local/bin/pydoc2*) /usr/local/bin/pydoc || return 1
   ln -sf $(ls -d /usr/local/bin/python2.[0-9]) /usr/local/bin/python || return 1
   ln -sf $(ls -d /usr/local/bin/python2.[0-9]*to3) /usr/local/bin/2to3 || return 1
   ln -sf $(ls -d /usr/local/bin/python2.[0-9]*-config) /usr/local/bin/python-config || return 1
@@ -4392,7 +4392,7 @@ install_openbsd_git_deps() {
     #
     # Let's trigger config_salt()
     #
-    if [ "$_TEMP_CONFIG_DIR" -eq "null" ]; then
+    if [ "$_TEMP_CONFIG_DIR" = "null" ]; then
         _TEMP_CONFIG_DIR="${__SALT_GIT_CHECKOUT_DIR}/conf/"
         CONFIG_SALT_FUNC="config_salt"
     fi
@@ -4400,8 +4400,8 @@ install_openbsd_git_deps() {
 }
 
 install_openbsd_stable() {
-    
-#    pkg_add -r -I -v salt || return 1 
+
+#    pkg_add -r -I -v salt || return 1
     check_pip_allowed
       /usr/local/bin/pip install salt || return 1
      if [ "$_UPGRADE_SYS" -eq $BS_TRUE ]; then
@@ -4427,11 +4427,11 @@ install_openbsd_post() {
     #
     # Install rc.d files.
     #
-    ## below workaround for /etc/rc.d/rc.subr in OpenBSD >= 5.8 
+    ## below workaround for /etc/rc.d/rc.subr in OpenBSD >= 5.8
     ## is needed for salt services to start/stop properly from /etc/rc.d
     ## reference: http://cvsweb.openbsd.org/cgi-bin/cvsweb/src/etc/rc.d/rc.subr.diff?r1=1.98&r2=1.99
     ##
-    if [ $(grep '\-xf' /etc/rc.d/rc.subr)]; then
+    if [ $(grep '\-xf' /etc/rc.d/rc.subr) ]; then
       cp -p /etc/rc.d/rc.subr /etc/rc.d/rc.subr
       sed -i.$(date +%F).saltinstall -e 's:-xf:-f:g' /etc/rc.d/rc.subr
     fi
@@ -4448,7 +4448,7 @@ install_openbsd_post() {
             if [ ! -f "$_TEMP_CONFIG_DIR/salt-$fname" ]; then
                 ftp -o "$_TEMP_CONFIG_DIR/salt-$fname" \
                     "https://raw.githubusercontent.com/saltstack/salt/develop/pkg/openbsd/salt-${fname}.rc-d"
-              if [ ! -f "/etc/rc.d/salt_${fname}" ] && [ $(grep salt_${fname} /etc/rc.conf.local) -eq ""]; then
+              if [ ! -f "/etc/rc.d/salt_${fname}" ] && [ $(grep salt_${fname} /etc/rc.conf.local) -eq "" ]; then
                   copyfile "$_TEMP_CONFIG_DIR/salt-$fname" "/etc/rc.d/salt_${fname}" && chmod +x "/etc/rc.d/salt_${fname}" || return 1
                   echo salt_${fname}_enable="YES" >> /etc/rc.conf.local
                   echo salt_${fname}_paths=\"/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin\" >>/etc/rc.conf.local
@@ -4459,7 +4459,7 @@ install_openbsd_post() {
 }
 
 install_openbsd_check_services() {
-  salt --version 
+  salt --version
     for fname in minion master syndic api; do
         # Skip salt-api since the service should be opt-in and not necessarily started on boot
         [ $fname = "api" ] && continue
@@ -4485,7 +4485,7 @@ install_openbsd_restart_daemons() {
     # Skip if not meant to be installed
     [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
     [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
-    [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue                                                                                        
+    [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
     if [ -f /etc/rc.d/salt_${fname} ]; then
             /etc/rc.d/salt_${fname} stop > /dev/null 2>&1
             /etc/rc.d/salt_${fname} start
@@ -4756,7 +4756,7 @@ install_opensuse_stable_deps() {
     __zypper_install ${__PACKAGES} || return 1
 
     # Fix for OpenSUSE 13.2 and 2015.8 - gcc should not be required. Work around until package is fixed by SuSE
-    _EXTRA_PACKAGES="${_EXTRA_PACKAGES} gcc python-devel libgit2-devel" 
+    _EXTRA_PACKAGES="${_EXTRA_PACKAGES} gcc python-devel libgit2-devel"
 
     if [ "${_EXTRA_PACKAGES}" != "" ]; then
         echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"

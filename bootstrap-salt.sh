@@ -1595,7 +1595,12 @@ __rpm_import_gpg() {
     url="$1"
 
     if __check_command_exists mktemp; then
-        tempfile="$(mktemp /tmp/salt-gpg-XXXXXXXX.pub)"
+        tempfile="$(mktemp /tmp/salt-gpg-XXXXXXXX.pub 2>/dev/null)"
+
+        if [ -z "$tempfile" ]; then
+            echoerror "Failed to create temporary file in /tmp"
+            return 1
+        fi
     else
         tempfile="/tmp/salt-gpg-$$.pub"
     fi

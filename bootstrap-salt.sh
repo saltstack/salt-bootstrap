@@ -1587,6 +1587,33 @@ movefile() {
 
 
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  __rpm_import_gpg
+#   DESCRIPTION:  Download and import GPG public key to rpm database
+#    PARAMETERS:  url
+#----------------------------------------------------------------------------------------------------------------------
+__rpm_import_gpg() {
+    url="$1"
+
+    if __check_command_exists mktemp; then
+        tempfile="$(mktemp /tmp/salt-gpg-XXXXXXXX.pub 2>/dev/null)"
+
+        if [ -z "$tempfile" ]; then
+            echoerror "Failed to create temporary file in /tmp"
+            return 1
+        fi
+    else
+        tempfile="/tmp/salt-gpg-$$.pub"
+    fi
+
+    __fetch_url "$tempfile" "$url" || return 1
+    rpm --import "$tempfile" || return 1
+    rm -f "$tempfile"
+
+    return 0
+}
+
+
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #          NAME:  __check_services_systemd
 #   DESCRIPTION:  Return 0 or 1 in case the service is enabled or not
 #    PARAMETERS:  servicename
@@ -3018,10 +3045,16 @@ enabled=1
 enabled_metadata=1
 _eof
 
-        __fetch_url /tmp/repo-saltstack.pub "${fetch_url}${gpg_key}" || return 1
-        rpm --import /tmp/repo-saltstack.pub || return 1
-        rm -f /tmp/repo-saltstack.pub
+        __rpm_import_gpg "${fetch_url}${gpg_key}" || return 1
     fi
+
+    if [ "$DISTRO_MAJOR_VERSION" -eq 7 ] && ([ "$repo_rev" = "latest" ] || [ "$repo_rev" = "2015.8" ]); then
+        # Import CentOS 7 GPG key on RHEL for installing base dependencies from
+        # Salt corporate repository
+        rpm -qa gpg-pubkey\* --qf "%{name}-%{version}\n" | grep -q ^gpg-pubkey-f4a80eb5$ || \
+            __rpm_import_gpg "https://repo.saltstack.com/yum/redhat/7/x86_64/${repo_rev}/base/RPM-GPG-KEY-CentOS-7" || return 1
+    fi
+
     return 0
 }
 

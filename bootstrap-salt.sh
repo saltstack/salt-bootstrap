@@ -4503,11 +4503,11 @@ install_openbsd_git_deps() {
 install_openbsd_stable() {
 
 #    pkg_add -r -I -v salt || return 1
-    check_pip_allowed
-      /usr/local/bin/pip install salt || return 1
-     if [ "$_UPGRADE_SYS" -eq $BS_TRUE ]; then
+    check_pip_allowed || return 1
+    /usr/local/bin/pip install salt || return 1
+    if [ "$_UPGRADE_SYS" -eq $BS_TRUE ]; then
          /usr/local/bin/pip install --upgrade salt || return 1
-     fi
+    fi
     return 0
 }
 
@@ -4524,7 +4524,6 @@ install_openbsd_git() {
 
 
 install_openbsd_post() {
-
     #
     # Install rc.d files.
     #
@@ -4533,12 +4532,11 @@ install_openbsd_post() {
     ## reference: http://cvsweb.openbsd.org/cgi-bin/cvsweb/src/etc/rc.d/rc.subr.diff?r1=1.98&r2=1.99
     ##
     if grep -q '\-xf' /etc/rc.d/rc.subr; then
-      cp -p /etc/rc.d/rc.subr /etc/rc.d/rc.subr
-      sed -i."$(date +%F)".saltinstall -e 's:-xf:-f:g' /etc/rc.d/rc.subr
+        cp -p /etc/rc.d/rc.subr /etc/rc.d/rc.subr
+        sed -i."$(date +%F)".saltinstall -e 's:-xf:-f:g' /etc/rc.d/rc.subr
     fi
     _TEMP_CONFIG_DIR="/tmp"
     for fname in minion master syndic api; do
-
         # Skip if not meant to be installed
         [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
         [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
@@ -4549,18 +4547,18 @@ install_openbsd_post() {
             if [ ! -f "$_TEMP_CONFIG_DIR/salt-$fname" ]; then
                 ftp -o "$_TEMP_CONFIG_DIR/salt-$fname" \
                     "https://raw.githubusercontent.com/saltstack/salt/develop/pkg/openbsd/salt-${fname}.rc-d"
-              if [ ! -f "/etc/rc.d/salt_${fname}" ] && [ "$(grep salt_${fname} /etc/rc.conf.local)" -eq "" ]; then
-                  copyfile "$_TEMP_CONFIG_DIR/salt-$fname" "/etc/rc.d/salt_${fname}" && chmod +x "/etc/rc.d/salt_${fname}" || return 1
-                  echo salt_${fname}_enable="YES" >> /etc/rc.conf.local
-                  echo salt_${fname}_paths=\"/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin\" >>/etc/rc.conf.local
-              fi
+                if [ ! -f "/etc/rc.d/salt_${fname}" ] && [ "$(grep salt_${fname} /etc/rc.conf.local)" -eq "" ]; then
+                    copyfile "$_TEMP_CONFIG_DIR/salt-$fname" "/etc/rc.d/salt_${fname}" && chmod +x "/etc/rc.d/salt_${fname}" || return 1
+                    echo salt_${fname}_enable="YES" >> /etc/rc.conf.local
+                    echo salt_${fname}_paths=\"/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin\" >>/etc/rc.conf.local
+                fi
             fi
         fi
     done
 }
 
 install_openbsd_check_services() {
-  salt --version
+    #salt --version # DEBUG?
     for fname in minion master syndic api; do
         # Skip salt-api since the service should be opt-in and not necessarily started on boot
         [ $fname = "api" ] && continue
@@ -4579,19 +4577,19 @@ install_openbsd_check_services() {
 
 
 install_openbsd_restart_daemons() {
-  [ $_START_DAEMONS -eq $BS_FALSE ] && return
-  for fname in minion master syndic api; do
-    # Skip salt-api since the service should be opt-in and not necessarily started on boot
-    [ $fname = "api" ] && continue
-    # Skip if not meant to be installed
-    [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
-    [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
-    [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
-    if [ -f /etc/rc.d/salt_${fname} ]; then
+    [ $_START_DAEMONS -eq $BS_FALSE ] && return
+    for fname in minion master syndic api; do
+        # Skip salt-api since the service should be opt-in and not necessarily started on boot
+        [ $fname = "api" ] && continue
+        # Skip if not meant to be installed
+        [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
+        [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
+        [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
+        if [ -f "/etc/rc.d/salt_${fname}" ]; then
             /etc/rc.d/salt_${fname} stop > /dev/null 2>&1
             /etc/rc.d/salt_${fname} start
-    fi
-  done
+        fi
+    done
 }
 
 

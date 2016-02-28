@@ -1969,7 +1969,7 @@ install_ubuntu_stable_deps() {
         # Saltstack's Stable Ubuntu repository
         if [ "$(grep -ER 'latest .+ main' /etc/apt)" = "" ]; then
             echo "deb http://repo.saltstack.com/apt/ubuntu/$DISTRO_VERSION/$repo_arch/$STABLE_REV $DISTRO_CODENAME main" >> \
-                /etc/apt/sources.list.d/salt-$STABLE_REV.list
+                "/etc/apt/sources.list.d/salt-$STABLE_REV.list"
         fi
 
 
@@ -4230,6 +4230,7 @@ install_freebsd_11_stable() {
 #
 # installing latest version of salt from FreeBSD CURRENT ports repo
 #
+    # shellcheck disable=SC2086
     /usr/local/sbin/pkg install ${FROM_FREEBSD} -y sysutils/py-salt || return 1
 
 #
@@ -4237,7 +4238,7 @@ install_freebsd_11_stable() {
 #
     _SALT_ETC_DIR=${BS_SALT_ETC_DIR:-/usr/local/etc/salt}
     if [ ! -d /etc/salt ]; then
-      ln -sf ${_SALT_ETC_DIR} /etc/salt
+      ln -sf "${_SALT_ETC_DIR}" /etc/salt
     fi
     return 0
 }
@@ -4464,9 +4465,9 @@ install_openbsd_post() {
     ## is needed for salt services to start/stop properly from /etc/rc.d
     ## reference: http://cvsweb.openbsd.org/cgi-bin/cvsweb/src/etc/rc.d/rc.subr.diff?r1=1.98&r2=1.99
     ##
-    if [ $(grep '\-xf' /etc/rc.d/rc.subr) ]; then
+    if grep -q '\-xf' /etc/rc.d/rc.subr; then
       cp -p /etc/rc.d/rc.subr /etc/rc.d/rc.subr
-      sed -i.$(date +%F).saltinstall -e 's:-xf:-f:g' /etc/rc.d/rc.subr
+      sed -i."$(date +%F)".saltinstall -e 's:-xf:-f:g' /etc/rc.d/rc.subr
     fi
     _TEMP_CONFIG_DIR="/tmp"
     for fname in minion master syndic api; do
@@ -4481,7 +4482,7 @@ install_openbsd_post() {
             if [ ! -f "$_TEMP_CONFIG_DIR/salt-$fname" ]; then
                 ftp -o "$_TEMP_CONFIG_DIR/salt-$fname" \
                     "https://raw.githubusercontent.com/saltstack/salt/develop/pkg/openbsd/salt-${fname}.rc-d"
-              if [ ! -f "/etc/rc.d/salt_${fname}" ] && [ $(grep salt_${fname} /etc/rc.conf.local) -eq "" ]; then
+              if [ ! -f "/etc/rc.d/salt_${fname}" ] && [ "$(grep salt_${fname} /etc/rc.conf.local)" -eq "" ]; then
                   copyfile "$_TEMP_CONFIG_DIR/salt-$fname" "/etc/rc.d/salt_${fname}" && chmod +x "/etc/rc.d/salt_${fname}" || return 1
                   echo salt_${fname}_enable="YES" >> /etc/rc.conf.local
                   echo salt_${fname}_paths=\"/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin\" >>/etc/rc.conf.local

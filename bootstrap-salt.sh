@@ -4350,17 +4350,31 @@ install_freebsd_restart_daemons() {
 #
 
 choose_openbsd_mirror() {
-  MIRRORS_LIST_URL=http://www.openbsd.org/ftp.html
-  MIRRORS_LIST=$(ftp -o - $MIRRORS_LIST_URL |grep href |grep http | grep pub | awk -F \" '{ print $2 }')
-  echoinfo "getting list of mirrors from $MIRRORS_LIST_URL"
-  ping -c 2 -q $(echo $MIRRORS_LIST_URL | awk -F \/ '{ print $3 }') 1>/dev/null || return 1
-  for MIRROR in $MIRRORS_LIST
-    do
-        TIME=$(ping -c 1 -q $(echo $MIRROR | awk -F \/ '{ print $3 }') |grep round-trip |awk -F \/ '{ print $5 }')
-        [ -z $TIME ] && continue
+    MIRRORS_LIST_URL=http://www.openbsd.org/ftp.html
+    MIRROR_LIST_FILE=/tmp/openbsd-mirrors.html
+    OPENBSD_REPO=''
+    MINTIME=''
+
+    __fetch_url "$MIRROR_LIST_FILE" "$MIRRORS_LIST_URL" || return 1
+    MIRRORS_LIST=$(grep href "$MIRROR_LIST_FILE" | grep http | grep pub | awk -F \" '{ print $2 }')
+    [ -n "$MIRRORS_LIST" ] && rm -f "$MIRROR_LIST_FILE"
+
+    echoinfo "Getting list of mirrors from $MIRRORS_LIST_URL"
+    for MIRROR in $MIRRORS_LIST; do
+        MIRROR_HOST=$(echo "$MIRROR" | awk -F / '{ print $3 }')
+        TIME=$(ping -c 1 -q "$MIRROR_HOST" | grep round-trip | awk -F / '{ print $5 }')
+        [ -z "$TIME" ] && continue
+
         echodebug "ping time for $MIRROR is $TIME"
-        [ -z $MINTIME ] && MINTIME=$TIME
-        [ $( echo "$TIME < $MINTIME" |bc ) -eq 1 ] && MINTIME=$TIME && OPENBSD_REPO=$MIRROR || continue
+        [ -z "$MINTIME" ] && MINTIME=$TIME
+
+        FASTER_MIRROR=$(echo "$TIME < $MINTIME" | bc)
+        if [ "$FASTER_MIRROR" -eq 1 ]; then
+            MINTIME=$TIME
+            OPENBSD_REPO=$MIRROR
+        else
+            continue
+        fi
     done
 }
 

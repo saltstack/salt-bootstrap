@@ -2005,9 +2005,9 @@ install_ubuntu_deps() {
 
 install_ubuntu_stable_deps() {
     # This probably holds true for the Debians as well
-    if [ "$CPU_ARCH_L" = "amd64" -o "$CPU_ARCH_L" = "x86_64" ]; then
+    if [ "$CPU_ARCH_L" = "amd64" ] || [ "$CPU_ARCH_L" = "x86_64" ]; then
         repo_arch="amd64"
-    elif [ "$CPU_ARCH_L" = "i386" -o "$CPU_ARCH_L" = "i686" ]; then
+    elif [ "$CPU_ARCH_L" = "i386" ] || [ "$CPU_ARCH_L" = "i686" ]; then
         echoerror "repo.saltstack.com likely doesn't have 32-bit packages for Ubuntu (yet?)"
         repo_arch="i386"
     fi

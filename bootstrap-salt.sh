@@ -1591,10 +1591,10 @@ movefile() {
 
 
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
-#          NAME:  linkfile
+#          NAME:  __linkfile
 #   DESCRIPTION:  Simple function to create symlinks. Overrides if asked. Accepts globs.
 #----------------------------------------------------------------------------------------------------------------------
-linkfile() {
+__linkfile() {
     overwrite=$_FORCE_OVERWRITE
     if [ $# -eq 2 ]; then
         target=$1
@@ -1604,8 +1604,8 @@ linkfile() {
         linkname=$2
         overwrite=$3
     else
-        echoerror "Wrong number of arguments for linkfile()"
-        echoinfo "USAGE: linkfile <target> <link>  OR  linkfile <tagret> <link> <overwrite>"
+        echoerror "Wrong number of arguments for __linkfile()"
+        echoinfo "USAGE: __linkfile <target> <link>  OR  __linkfile <tagret> <link> <overwrite>"
         exit 1
     fi
 
@@ -4441,11 +4441,11 @@ install_openbsd_deps() {
     echo "installpath = ${OPENBSD_REPO}${OS_VERSION}/packages/${CPU_ARCH_L}/" >/etc/pkg.conf || return 1
     pkg_add -I -v lsof || return 1
     pkg_add -I -v py-pip || return 1
-    linkfile /usr/local/bin/pip2.* /usr/local/bin/pip $BS_TRUE || return 1
-    linkfile /usr/local/bin/pydoc2* /usr/local/bin/pydoc $BS_TRUE || return 1
-    linkfile /usr/local/bin/python2.[0-9] /usr/local/bin/python $BS_TRUE || return 1
-    linkfile /usr/local/bin/python2.[0-9]*to3 /usr/local/bin/2to3 $BS_TRUE || return 1
-    linkfile /usr/local/bin/python2.[0-9]*-config /usr/local/bin/python-config $BS_TRUE || return 1
+    __linkfile /usr/local/bin/pip2.* /usr/local/bin/pip $BS_TRUE || return 1
+    __linkfile /usr/local/bin/pydoc2* /usr/local/bin/pydoc $BS_TRUE || return 1
+    __linkfile /usr/local/bin/python2.[0-9] /usr/local/bin/python $BS_TRUE || return 1
+    __linkfile /usr/local/bin/python2.[0-9]*to3 /usr/local/bin/2to3 $BS_TRUE || return 1
+    __linkfile /usr/local/bin/python2.[0-9]*-config /usr/local/bin/python-config $BS_TRUE || return 1
     pkg_add -I -v swig || return 1
     pkg_add -I -v py-zmq || return 1
     pkg_add -I -v py-requests || return 1
@@ -4559,7 +4559,6 @@ install_openbsd_post() {
 }
 
 install_openbsd_check_services() {
-    #salt --version # DEBUG?
     for fname in minion master syndic api; do
         # Skip salt-api since the service should be opt-in and not necessarily started on boot
         [ $fname = "api" ] && continue

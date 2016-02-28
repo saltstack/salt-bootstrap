@@ -4083,8 +4083,8 @@ __configure_freebsd_pkg_details() {
           echo "FreeBSD:{"
           echo "    url: \"${PKGCONFURL}\","
           echo "    mirror_type: \"srv\","
-          echo "    signature_type: "fingerprints",
-          echo "    fingerprints: "/usr/share/keys/pkg",
+          echo "    signature_type: \"fingerprints\","
+          echo "    fingerprints: \"/usr/share/keys/pkg\","
           echo "    enabled: true"
           echo "}"
       } > $conf_file

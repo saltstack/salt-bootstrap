@@ -4475,9 +4475,6 @@ install_openbsd_deps() {
             fi
         done
     fi
-    if [ "$_UPGRADE_SYS" -eq $BS_TRUE ]; then
-        /usr/local/bin/pip install --upgrade pip || return 1
-    fi
     if [ "${_EXTRA_PACKAGES}" != "" ]; then
         echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
         # shellcheck disable=SC2086

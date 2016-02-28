@@ -1571,7 +1571,7 @@ movefile() {
     fi
 
     if [ ! -f "$dfile" ]; then
-        # The destination file does not exist, copy
+        # The destination file does not exist, move
         echodebug "Moving $sfile to $dfile"
         mv "$sfile" "$dfile" || return 1
     elif [ -f "$dfile" ] && [ "$overwrite" -eq $BS_TRUE ]; then
@@ -1581,6 +1581,57 @@ movefile() {
     elif [ -f "$dfile" ] && [ "$overwrite" -ne $BS_TRUE ]; then
         echodebug "Not overriding $dfile with $sfile"
     fi
+
+    return 0
+}
+
+
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  linkfile
+#   DESCRIPTION:  Simple function to create symlinks. Overrides if asked. Accepts globs.
+#----------------------------------------------------------------------------------------------------------------------
+linkfile() {
+    overwrite=$_FORCE_OVERWRITE
+    if [ $# -eq 2 ]; then
+        target=$1
+        linkname=$2
+    elif [ $# -eq 3 ]; then
+        target=$1
+        linkname=$2
+        overwrite=$3
+    else
+        echoerror "Wrong number of arguments for linkfile()"
+        echoinfo "USAGE: linkfile <target> <link>  OR  linkfile <tagret> <link> <overwrite>"
+        exit 1
+    fi
+
+    for sfile in $target; do
+        # Does the source file exist?
+        if [ ! -f "$sfile" ]; then
+            echowarn "$sfile does not exist!"
+            return 1
+        fi
+
+        # If the destination is a directory, let's make it a full path so the logic
+        # below works as expected
+        if [ -d "$linkname" ]; then
+            echodebug "The passed link name ($linkname) is a directory"
+            linkname="${linkname}/$(basename "$sfile")"
+            echodebug "Full destination path is now: $linkname"
+        fi
+
+        if [ ! -e "$linkname" ]; then
+            # The destination file does not exist, create link
+            echodebug "Creating $linkname symlink pointing to $sfile"
+            ln -s "$sfile" "$linkname" || return 1
+        elif [ -e "$linkname" ] && [ "$overwrite" -eq $BS_TRUE ]; then
+            # The destination exist and we're overwriting
+            echodebug "Overwriting $linkname symlink to point on $sfile"
+            ln -sf "$sfile" "$linkname" || return 1
+        elif [ -e "$linkname" ] && [ "$overwrite" -ne $BS_TRUE ]; then
+            echodebug "Not overwriting $linkname symlink to point on $sfile"
+        fi
+    done
 
     return 0
 }
@@ -4380,57 +4431,59 @@ choose_openbsd_mirror() {
 
 
 install_openbsd_deps() {
-  choose_openbsd_mirror || return 1
-  [ -z $OPENBSD_REPO ] && return 1
-  echoinfo "setting package repository to $OPENBSD_REPO with ping time of $MINTIME"
-  echo "installpath = ${OPENBSD_REPO}${OS_VERSION}/packages/${CPU_ARCH_L}/" >/etc/pkg.conf || return 1
-  pkg_add -I -v lsof || return 1
-  pkg_add -I -v py-pip || return 1
-  ln -sf $(ls -d /usr/local/bin/pip2.*) /usr/local/bin/pip  || return 1
-  ln -sf $(ls -d /usr/local/bin/pydoc2*) /usr/local/bin/pydoc || return 1
-  ln -sf $(ls -d /usr/local/bin/python2.[0-9]) /usr/local/bin/python || return 1
-  ln -sf $(ls -d /usr/local/bin/python2.[0-9]*to3) /usr/local/bin/2to3 || return 1
-  ln -sf $(ls -d /usr/local/bin/python2.[0-9]*-config) /usr/local/bin/python-config || return 1
-  pkg_add -I -v swig || return 1
-  pkg_add -I -v py-zmq || return 1
-  pkg_add -I -v py-requests || return 1
-  pkg_add -I -v py-M2Crypto || return 1
-  pkg_add -I -v py-raet || return 1
-  pkg_add -I -v py-libnacl || return 1
-  if [ "$_UPGRADE_SYS" -eq $BS_TRUE ]; then
-      /usr/local/bin/pip install --upgrade pip || return 1
-  fi
-  #
-  # PIP based installs need to copy configuration files "by hand".
-  # Let's trigger config_salt()
-  #
-  if [ "$_TEMP_CONFIG_DIR" = "null" ]; then
-      # Let's set the configuration directory to /tmp
-      _TEMP_CONFIG_DIR="/tmp"
-      CONFIG_SALT_FUNC="config_salt"
-      for fname in minion master syndic api; do
-          # Skip if not meant to be installed
-          [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
-          [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
-          [ $fname = "api" ] && ([ "$_INSTALL_MASTER" -eq $BS_FALSE ] || [ "$(which salt-${fname} 2>/dev/null)" = "" ]) && continue
-          [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
+    choose_openbsd_mirror || return 1
+    [ -n "$OPENBSD_REPO" ] || return 1
+    echoinfo "setting package repository to $OPENBSD_REPO with ping time of $MINTIME"
+    echo "installpath = ${OPENBSD_REPO}${OS_VERSION}/packages/${CPU_ARCH_L}/" >/etc/pkg.conf || return 1
+    pkg_add -I -v lsof || return 1
+    pkg_add -I -v py-pip || return 1
+    linkfile /usr/local/bin/pip2.* /usr/local/bin/pip $BS_TRUE || return 1
+    linkfile /usr/local/bin/pydoc2* /usr/local/bin/pydoc $BS_TRUE || return 1
+    linkfile /usr/local/bin/python2.[0-9] /usr/local/bin/python $BS_TRUE || return 1
+    linkfile /usr/local/bin/python2.[0-9]*to3 /usr/local/bin/2to3 $BS_TRUE || return 1
+    linkfile /usr/local/bin/python2.[0-9]*-config /usr/local/bin/python-config $BS_TRUE || return 1
+    pkg_add -I -v swig || return 1
+    pkg_add -I -v py-zmq || return 1
+    pkg_add -I -v py-requests || return 1
+    pkg_add -I -v py-M2Crypto || return 1
+    pkg_add -I -v py-raet || return 1
+    pkg_add -I -v py-libnacl || return 1
+    if [ "$_UPGRADE_SYS" -eq $BS_TRUE ]; then
+        /usr/local/bin/pip install --upgrade pip || return 1
+    fi
+    #
+    # PIP based installs need to copy configuration files "by hand".
+    # Let's trigger config_salt()
+    #
+    if [ "$_TEMP_CONFIG_DIR" = "null" ]; then
+        # Let's set the configuration directory to /tmp
+        _TEMP_CONFIG_DIR="/tmp"
+         CONFIG_SALT_FUNC="config_salt"
+        for fname in minion master syndic api; do
+            # Skip if not meant to be installed
+            [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
+            [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
+            [ $fname = "api" ] && \
+                ([ "$_INSTALL_MASTER" -eq $BS_FALSE ] || __check_command_exists "salt-${fname}") && \
+                    continue
+            [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
 
-          # Let's download, since they were not provided, the default configuration files
-          if [ ! -f "$_SALT_ETC_DIR/$fname" ] && [ ! -f "$_TEMP_CONFIG_DIR/$fname" ]; then
-              ftp -o "$_TEMP_CONFIG_DIR/$fname" \
-                  "https://raw.githubusercontent.com/saltstack/salt/develop/conf/$fname" || return 1
-          fi
-      done
-  fi
-  if [ "$_UPGRADE_SYS" -eq $BS_TRUE ]; then
-      /usr/local/bin/pip install --upgrade pip || return 1
-  fi
-  if [ "${_EXTRA_PACKAGES}" != "" ]; then
-      echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
-      # shellcheck disable=SC2086
-      pkg_add -I -v ${_EXTRA_PACKAGES} || return 1
-  fi
-  return 0
+            # Let's download, since they were not provided, the default configuration files
+            if [ ! -f "$_SALT_ETC_DIR/$fname" ] && [ ! -f "$_TEMP_CONFIG_DIR/$fname" ]; then
+                ftp -o "$_TEMP_CONFIG_DIR/$fname" \
+                    "https://raw.githubusercontent.com/saltstack/salt/develop/conf/$fname" || return 1
+            fi
+        done
+    fi
+    if [ "$_UPGRADE_SYS" -eq $BS_TRUE ]; then
+        /usr/local/bin/pip install --upgrade pip || return 1
+    fi
+    if [ "${_EXTRA_PACKAGES}" != "" ]; then
+        echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
+        # shellcheck disable=SC2086
+        pkg_add -I -v ${_EXTRA_PACKAGES} || return 1
+    fi
+    return 0
 }
 
 install_openbsd_git_deps() {

@@ -523,6 +523,7 @@ __exit_cleanup() {
         if [ $_KEEP_TEMP_FILES -eq $BS_FALSE ]; then
             # Clean up the checked out repository
             echodebug "Cleaning up the Salt Temporary Git Repository"
+            # shellcheck disable=SC2164
             cd "${__SALT_GIT_CHECKOUT_PARENT_DIR}"
             rm -rf "${__SALT_GIT_CHECKOUT_DIR}"
         else
@@ -1270,9 +1271,11 @@ __git_clone_and_checkout() {
     __SALT_CHECKOUT_REPONAME="$(basename "${__SALT_GIT_CHECKOUT_DIR}" 2>/dev/null)"
     __SALT_CHECKOUT_REPONAME="${__SALT_CHECKOUT_REPONAME:-salt}"
     [ -d "${__SALT_GIT_CHECKOUT_PARENT_DIR}" ] || mkdir "${__SALT_GIT_CHECKOUT_PARENT_DIR}"
+    # shellcheck disable=SC2164
     cd "${__SALT_GIT_CHECKOUT_PARENT_DIR}"
     if [ -d "${__SALT_GIT_CHECKOUT_DIR}" ]; then
         echodebug "Found a checked out Salt repository"
+        # shellcheck disable=SC2164
         cd "${__SALT_GIT_CHECKOUT_DIR}"
         echodebug "Fetching git changes"
         git fetch || return 1
@@ -1325,6 +1328,7 @@ __git_clone_and_checkout() {
                 echoinfo "Attempting to shallow clone $GIT_REV from Salt's repository ${_SALT_REPO_URL}"
                 git clone --depth 1 --branch "$GIT_REV" "$_SALT_REPO_URL" "$__SALT_CHECKOUT_REPONAME"
                 if [ $? -eq 0 ]; then
+                    # shellcheck disable=SC2164
                     cd "${__SALT_GIT_CHECKOUT_DIR}"
                     __SHALLOW_CLONE="${BS_TRUE}"
                 else
@@ -4875,6 +4879,7 @@ install_opensuse_git_deps() {
     __git_clone_and_checkout || return 1
 
     if [ -f "${__SALT_GIT_CHECKOUT_DIR}/pkg/suse/use-forking-daemon.patch" ]; then
+        # shellcheck disable=SC2164
         cd "${__SALT_GIT_CHECKOUT_DIR}"
         echowarn "Applying patch to systemd service unit file"
         patch -p1 < pkg/suse/use-forking-daemon.patch || return 1

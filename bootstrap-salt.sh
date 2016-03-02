@@ -4398,7 +4398,7 @@ install_freebsd_restart_daemons() {
 #   OpenBSD Install Functions
 #
 
-choose_openbsd_mirror() {
+__choose_openbsd_mirror() {
     MIRRORS_LIST_URL=http://www.openbsd.org/ftp.html
     MIRROR_LIST_FILE=/tmp/openbsd-mirrors.html
     OPENBSD_REPO=''
@@ -4429,7 +4429,7 @@ choose_openbsd_mirror() {
 
 
 install_openbsd_deps() {
-    choose_openbsd_mirror || return 1
+    __choose_openbsd_mirror || return 1
     [ -n "$OPENBSD_REPO" ] || return 1
     echoinfo "setting package repository to $OPENBSD_REPO with ping time of $MINTIME"
     echo "installpath = ${OPENBSD_REPO}${OS_VERSION}/packages/${CPU_ARCH_L}/" >/etc/pkg.conf || return 1
@@ -4457,6 +4457,7 @@ install_openbsd_deps() {
         # Let's set the configuration directory to /tmp
         _TEMP_CONFIG_DIR="/tmp"
          CONFIG_SALT_FUNC="config_salt"
+
         for fname in minion master syndic api; do
             # Skip if not meant to be installed
             [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue

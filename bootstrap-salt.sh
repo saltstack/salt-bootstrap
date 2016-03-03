@@ -2698,7 +2698,7 @@ install_debian_8_git_deps() {
     return 0
 }
 
-__install_debian_stable() {
+install_debian_stable() {
     __PACKAGES=""
     if [ "$_INSTALL_MINION" -eq $BS_TRUE ]; then
         __PACKAGES="${__PACKAGES} salt-minion"
@@ -2716,17 +2716,17 @@ __install_debian_stable() {
 }
 
 install_debian_6_stable() {
-    __install_debian_stable || return 1
+    install_debian_stable || return 1
     return 0
 }
 
 install_debian_7_stable() {
-    __install_debian_stable || return 1
+    install_debian_stable || return 1
     return 0
 }
 
 install_debian_8_stable() {
-    __install_debian_stable || return 1
+    install_debian_stable || return 1
     return 0
 }
 

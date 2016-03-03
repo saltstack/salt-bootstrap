@@ -3103,10 +3103,10 @@ __install_saltstack_rhel_repository() {
         gpg_key="SALTSTACK-GPG-KEY.pub"
     fi
 
-    repo_file="/etc/yum.repos.d/salt-${repo_rev}.repo"
+    repo_file="/etc/yum.repos.d/saltstack.repo"
     if [ ! -s "$repo_file" ]; then
         cat <<_eof > "$repo_file"
-[salt-${repo_rev}]
+[saltstack]
 name=SaltStack ${repo_rev} Release Channel for RHEL/CentOS \$releasever
 baseurl=$base_url
 skip_if_unavailable=True

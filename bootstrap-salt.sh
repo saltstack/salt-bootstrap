@@ -3345,19 +3345,6 @@ install_centos_git_post() {
             /sbin/chkconfig salt-${fname} on
         fi
 
-        #if [ -f /sbin/initctl ]; then
-        #    # We have upstart support
-        #    /sbin/initctl status salt-$fname > /dev/null 2>&1
-        #    if [ $? -eq 1 ]; then
-        #        # upstart does not know about our service, let's copy the proper file
-        #        copyfile ${__SALT_GIT_CHECKOUT_DIR}/pkg/salt-$fname.upstart /etc/init/salt-$fname.conf
-        #    fi
-        ## Still in SysV init?!
-        #elif [ ! -f /etc/init.d/salt-$fname ] || ([ -f /etc/init.d/salt-$fname ] && [ $_FORCE_OVERWRITE -eq $BS_TRUE ]); then
-        #    copyfile ${__SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-${fname} /etc/init.d/
-        #    chmod +x /etc/init.d/salt-${fname}
-        #    /sbin/chkconfig salt-${fname} on
-        #fi
     done
 
     if [ "$SYSTEMD_RELOAD" -eq $BS_TRUE ]; then

@@ -1486,10 +1486,10 @@ __check_end_of_life_versions
 
 
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
-#          NAME:  copyfile
+#          NAME:  __copyfile
 #   DESCRIPTION:  Simple function to copy files. Overrides if asked.
 #----------------------------------------------------------------------------------------------------------------------
-copyfile() {
+__copyfile() {
     overwrite=$_FORCE_OVERWRITE
     if [ $# -eq 2 ]; then
         sfile=$1
@@ -1499,8 +1499,8 @@ copyfile() {
         dfile=$2
         overwrite=$3
     else
-        echoerror "Wrong number of arguments for copyfile()"
-        echoinfo "USAGE: copyfile <source> <dest>  OR  copyfile <source> <dest> <overwrite>"
+        echoerror "Wrong number of arguments for __copyfile()"
+        echoinfo "USAGE: __copyfile <source> <dest>  OR  __copyfile <source> <dest> <overwrite>"
         exit 1
     fi
 
@@ -1534,10 +1534,10 @@ copyfile() {
 
 
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
-#          NAME:  movefile
+#          NAME:  __movefile
 #   DESCRIPTION:  Simple function to move files. Overrides if asked.
 #----------------------------------------------------------------------------------------------------------------------
-movefile() {
+__movefile() {
     overwrite=$_FORCE_OVERWRITE
     if [ $# -eq 2 ]; then
         sfile=$1
@@ -1547,8 +1547,8 @@ movefile() {
         dfile=$2
         overwrite=$3
     else
-        echoerror "Wrong number of arguments for movefile()"
-        echoinfo "USAGE: movefile <source> <dest>  OR  movefile <source> <dest> <overwrite>"
+        echoerror "Wrong number of arguments for __movefile()"
+        echoinfo "USAGE: __movefile <source> <dest>  OR  __movefile <source> <dest> <overwrite>"
         exit 1
     fi
 
@@ -1556,7 +1556,7 @@ movefile() {
         # We're being told not to move files, instead copy them so we can keep
         # them around
         echodebug "Since BS_KEEP_TEMP_FILES=1 we're copying files instead of moving them"
-        copyfile "$sfile" "$dfile" "$overwrite"
+        __copyfile "$sfile" "$dfile" "$overwrite"
         return $?
     fi
 
@@ -2155,7 +2155,7 @@ install_ubuntu_git_post() {
         [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
 
         if [ -f /bin/systemctl ] && [ "$DISTRO_MAJOR_VERSION" -ge 15 ]; then
-            copyfile "${__SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-${fname}.service" "/lib/systemd/system/salt-${fname}.service"
+            __copyfile "${__SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-${fname}.service" "/lib/systemd/system/salt-${fname}.service"
 
             # Skip salt-api since the service should be opt-in and not necessarily started on boot
             [ $fname = "api" ] && continue
@@ -2171,14 +2171,14 @@ install_ubuntu_git_post() {
                 # upstart does not know about our service, let's copy the proper file
                 echowarn "Upstart does not appear to know about salt-$fname"
                 echodebug "Copying ${__SALT_GIT_CHECKOUT_DIR}/pkg/salt-$fname.upstart to $_upstart_conf"
-                copyfile "${__SALT_GIT_CHECKOUT_DIR}/pkg/salt-${fname}.upstart" $_upstart_conf
+                __copyfile "${__SALT_GIT_CHECKOUT_DIR}/pkg/salt-${fname}.upstart" "$_upstart_conf"
                 /sbin/initctl reload-configuration || return 1
             fi
         # No upstart support in Ubuntu!?
         elif [ -f "${__SALT_GIT_CHECKOUT_DIR}/debian/salt-${fname}.init" ]; then
             echodebug "There's NO upstart support!?"
             echodebug "Copying ${__SALT_GIT_CHECKOUT_DIR}/debian/salt-${fname}.init to /etc/init.d/salt-$fname"
-            copyfile "${__SALT_GIT_CHECKOUT_DIR}/debian/salt-${fname}.init" "/etc/init.d/salt-$fname"
+            __copyfile "${__SALT_GIT_CHECKOUT_DIR}/debian/salt-${fname}.init" "/etc/init.d/salt-$fname"
             chmod +x /etc/init.d/salt-$fname
 
             # Skip salt-api since the service should be opt-in and not necessarily started on boot
@@ -2764,7 +2764,7 @@ install_debian_git_post() {
 
         if [ -f /bin/systemctl ]; then
             if [ ! -f /etc/systemd/system/salt-${fname}.service ] || ([ -f /etc/systemd/system/salt-${fname}.service ] && [ $_FORCE_OVERWRITE -eq $BS_TRUE ]); then
-                copyfile "${__SALT_GIT_CHECKOUT_DIR}/pkg/salt-${fname}.service" /etc/systemd/system
+                __copyfile "${__SALT_GIT_CHECKOUT_DIR}/pkg/salt-${fname}.service" /etc/systemd/system
             fi
 
             # Skip salt-api since the service should be opt-in and not necessarily started on boot
@@ -2775,7 +2775,7 @@ install_debian_git_post() {
 
         elif [ ! -f /etc/init.d/salt-$fname ] || ([ -f /etc/init.d/salt-$fname ] && [ $_FORCE_OVERWRITE -eq $BS_TRUE ]); then
             if [ -f "${__SALT_GIT_CHECKOUT_DIR}/debian/salt-$fname.init" ]; then
-                copyfile "${__SALT_GIT_CHECKOUT_DIR}/debian/salt-$fname.init" "/etc/init.d/salt-$fname"
+                __copyfile "${__SALT_GIT_CHECKOUT_DIR}/debian/salt-$fname.init" "/etc/init.d/salt-$fname"
             else
                 __fetch_url "/etc/init.d/salt-$fname" "http://anonscm.debian.org/cgit/pkg-salt/salt.git/plain/debian/salt-${fname}.init"
             fi
@@ -2962,7 +2962,7 @@ install_fedora_git_post() {
         [ $fname = "api" ] && ([ "$_INSTALL_MASTER" -eq $BS_FALSE ] || ! __check_command_exists "salt-${fname}") && continue
         [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
 
-        copyfile "${__SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-${fname}.service" "/lib/systemd/system/salt-${fname}.service"
+        __copyfile "${__SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-${fname}.service" "/lib/systemd/system/salt-${fname}.service"
 
         # Skip salt-api since the service should be opt-in and not necessarily started on boot
         [ $fname = "api" ] && continue
@@ -3326,7 +3326,7 @@ install_centos_git_post() {
 
         if [ -f /bin/systemctl ]; then
             if [ ! -f /usr/lib/systemd/system/salt-${fname}.service ] || ([ -f /usr/lib/systemd/system/salt-${fname}.service ] && [ $_FORCE_OVERWRITE -eq $BS_TRUE ]); then
-                copyfile "${__SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-${fname}.service" /usr/lib/systemd/system/
+                __copyfile "${__SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-${fname}.service" /usr/lib/systemd/system/
             fi
 
             # Skip salt-api since the service should be opt-in and not necessarily started on boot
@@ -3336,7 +3336,7 @@ install_centos_git_post() {
             SYSTEMD_RELOAD=$BS_TRUE
 
         elif [ ! -f /etc/init.d/salt-$fname ] || ([ -f /etc/init.d/salt-$fname ] && [ $_FORCE_OVERWRITE -eq $BS_TRUE ]); then
-            copyfile "${__SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-${fname}" /etc/init.d/
+            __copyfile "${__SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-${fname}" /etc/init.d/
             chmod +x /etc/init.d/salt-${fname}
 
             # Skip salt-api since the service should be opt-in and not necessarily started on boot
@@ -3982,7 +3982,7 @@ install_arch_linux_post() {
             # Since a configuration directory was provided, it also means that any
             # configuration file copied was renamed by Arch, see:
             #   https://wiki.archlinux.org/index.php/Pacnew_and_Pacsave_Files#.pacorig
-            copyfile "$_SALT_ETC_DIR/$fname.pacorig" "$_SALT_ETC_DIR/$fname" $BS_TRUE
+            __copyfile "$_SALT_ETC_DIR/$fname.pacorig" "$_SALT_ETC_DIR/$fname" $BS_TRUE
         fi
 
         # Skip salt-api since the service should be opt-in and not necessarily started on boot
@@ -4013,7 +4013,7 @@ install_arch_linux_git_post() {
         [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
 
         if [ -f /usr/bin/systemctl ]; then
-            copyfile "${__SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-${fname}.service" "/lib/systemd/system/salt-${fname}.service"
+            __copyfile "${__SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-${fname}.service" "/lib/systemd/system/salt-${fname}.service"
 
             # Skip salt-api since the service should be opt-in and not necessarily started on boot
             [ $fname = "api" ] && continue
@@ -4028,7 +4028,7 @@ install_arch_linux_git_post() {
         fi
 
         # SysV init!?
-        copyfile "${__SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-$fname" "/etc/rc.d/init.d/salt-$fname"
+        __copyfile "${__SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-$fname" "/etc/rc.d/init.d/salt-$fname"
         chmod +x /etc/rc.d/init.d/salt-$fname
     done
 }
@@ -4130,7 +4130,7 @@ __configure_freebsd_pkg_details() {
           echo "    enabled: true"
           echo "}"
       } > $conf_file
-      copyfile $conf_file /etc/pkg/FreeBSD.conf
+      __copyfile $conf_file /etc/pkg/FreeBSD.conf
     fi
     FROM_FREEBSD="-r FreeBSD"
 
@@ -4335,7 +4335,7 @@ install_freebsd_9_stable_post() {
         grep "$enable_string" /etc/rc.conf >/dev/null 2>&1
         [ $? -eq 1 ] && echo "$enable_string" >> /etc/rc.conf
 
-        [ -f "${_SALT_ETC_DIR}/${fname}.sample" ] && copyfile "${_SALT_ETC_DIR}/${fname}.sample" "${_SALT_ETC_DIR}/${fname}"
+        [ -f "${_SALT_ETC_DIR}/${fname}.sample" ] && __copyfile "${_SALT_ETC_DIR}/${fname}.sample" "${_SALT_ETC_DIR}/${fname}"
 
         if [ $fname = "minion" ] ; then
             grep "salt_minion_paths" /etc/rc.conf >/dev/null 2>&1
@@ -4531,7 +4531,7 @@ install_openbsd_post() {
                 ftp -o "$_TEMP_CONFIG_DIR/salt-$fname" \
                     "https://raw.githubusercontent.com/saltstack/salt/develop/pkg/openbsd/salt-${fname}.rc-d"
                 if [ ! -f "/etc/rc.d/salt_${fname}" ] && [ "$(grep salt_${fname} /etc/rc.conf.local)" -eq "" ]; then
-                    copyfile "$_TEMP_CONFIG_DIR/salt-$fname" "/etc/rc.d/salt_${fname}" && chmod +x "/etc/rc.d/salt_${fname}" || return 1
+                    __copyfile "$_TEMP_CONFIG_DIR/salt-$fname" "/etc/rc.d/salt_${fname}" && chmod +x "/etc/rc.d/salt_${fname}" || return 1
                     echo salt_${fname}_enable="YES" >> /etc/rc.conf.local
                     echo salt_${fname}_paths=\"/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin\" >>/etc/rc.conf.local
                 fi
@@ -4690,7 +4690,7 @@ install_smartos_post() {
                     mkdir -p "$smf_dir" || return 1
                 fi
                 if [ ! -f "$smf_dir/salt-$fname.xml" ]; then
-                    copyfile "$_TEMP_CONFIG_DIR/salt-$fname.xml" "$smf_dir/" || return 1
+                    __copyfile "$_TEMP_CONFIG_DIR/salt-$fname.xml" "$smf_dir/" || return 1
                 fi
             fi
         fi
@@ -4716,7 +4716,7 @@ install_smartos_git_post() {
                     mkdir -p "$smf_dir"
                 fi
                 if [ ! -f "$smf_dir/salt-$fname.xml" ]; then
-                    copyfile "${__SALT_GIT_CHECKOUT_DIR}/pkg/smartos/salt-$fname.xml" "$smf_dir/"
+                    __copyfile "${__SALT_GIT_CHECKOUT_DIR}/pkg/smartos/salt-$fname.xml" "$smf_dir/"
                 fi
             fi
         fi
@@ -4940,14 +4940,14 @@ install_opensuse_git_post() {
 
         if [ -f /bin/systemctl ]; then
             if [ "${DISTRO_MAJOR_VERSION}" -gt 13 ] || ([ "${DISTRO_MAJOR_VERSION}" -eq 13 ] && [ "${DISTRO_MINOR_VERSION}" -ge 2 ]); then
-                copyfile "${__SALT_GIT_CHECKOUT_DIR}/pkg/salt-${fname}.service" "/usr/lib/systemd/system/salt-${fname}.service"
+                __copyfile "${__SALT_GIT_CHECKOUT_DIR}/pkg/salt-${fname}.service" "/usr/lib/systemd/system/salt-${fname}.service"
             else
-                copyfile "${__SALT_GIT_CHECKOUT_DIR}/pkg/salt-${fname}.service" "/lib/systemd/system/salt-${fname}.service"
+                __copyfile "${__SALT_GIT_CHECKOUT_DIR}/pkg/salt-${fname}.service" "/lib/systemd/system/salt-${fname}.service"
             fi
             continue
         fi
 
-        copyfile "${__SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-$fname" "/etc/init.d/salt-$fname"
+        __copyfile "${__SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-$fname" "/etc/init.d/salt-$fname"
         chmod +x /etc/init.d/salt-$fname
 
     done
@@ -5572,7 +5572,7 @@ config_salt() {
     # Copy the grains file if found
     if [ -f "$_TEMP_CONFIG_DIR/grains" ]; then
         echodebug "Moving provided grains file from $_TEMP_CONFIG_DIR/grains to $_SALT_ETC_DIR/grains"
-        movefile "$_TEMP_CONFIG_DIR/grains" "$_SALT_ETC_DIR/grains" || return 1
+        __movefile "$_TEMP_CONFIG_DIR/grains" "$_SALT_ETC_DIR/grains" || return 1
         CONFIGURED_ANYTHING=$BS_TRUE
     fi
 
@@ -5588,24 +5588,24 @@ config_salt() {
 
         # Copy the minions configuration if found
         if [ -f "$_TEMP_CONFIG_DIR/minion" ]; then
-            movefile "$_TEMP_CONFIG_DIR/minion" "$_SALT_ETC_DIR" "$BS_TRUE" || return 1
+            __movefile "$_TEMP_CONFIG_DIR/minion" "$_SALT_ETC_DIR" "$BS_TRUE" || return 1
             CONFIGURED_ANYTHING=$BS_TRUE
         fi
 
         # Copy the minion's keys if found
         if [ -f "$_TEMP_CONFIG_DIR/minion.pem" ]; then
-            movefile "$_TEMP_CONFIG_DIR/minion.pem" "$_PKI_DIR/minion/" "$BS_TRUE" || return 1
+            __movefile "$_TEMP_CONFIG_DIR/minion.pem" "$_PKI_DIR/minion/" "$BS_TRUE" || return 1
             chmod 400 "$_PKI_DIR/minion/minion.pem" || return 1
             CONFIGURED_ANYTHING=$BS_TRUE
         fi
         if [ -f "$_TEMP_CONFIG_DIR/minion.pub" ]; then
-            movefile "$_TEMP_CONFIG_DIR/minion.pub" "$_PKI_DIR/minion/" "$BS_TRUE" || return 1
+            __movefile "$_TEMP_CONFIG_DIR/minion.pub" "$_PKI_DIR/minion/" "$BS_TRUE" || return 1
             chmod 664 "$_PKI_DIR/minion/minion.pub" || return 1
             CONFIGURED_ANYTHING=$BS_TRUE
         fi
         # For multi-master-pki, copy the master_sign public key if found
         if [ -f "$_TEMP_CONFIG_DIR/master_sign.pub" ]; then
-            movefile "$_TEMP_CONFIG_DIR/master_sign.pub" "$_PKI_DIR/minion/" || return 1
+            __movefile "$_TEMP_CONFIG_DIR/master_sign.pub" "$_PKI_DIR/minion/" || return 1
             chmod 664 "$_PKI_DIR/minion/master_sign.pub" || return 1
             CONFIGURED_ANYTHING=$BS_TRUE
         fi
@@ -5627,18 +5627,18 @@ config_salt() {
 
         # Copy the masters configuration if found
         if [ -f "$_TEMP_CONFIG_DIR/master" ]; then
-            movefile "$_TEMP_CONFIG_DIR/master" "$_SALT_ETC_DIR" || return 1
+            __movefile "$_TEMP_CONFIG_DIR/master" "$_SALT_ETC_DIR" || return 1
             CONFIGURED_ANYTHING=$BS_TRUE
         fi
 
         # Copy the master's keys if found
         if [ -f "$_TEMP_CONFIG_DIR/master.pem" ]; then
-            movefile "$_TEMP_CONFIG_DIR/master.pem" "$_PKI_DIR/master/" || return 1
+            __movefile "$_TEMP_CONFIG_DIR/master.pem" "$_PKI_DIR/master/" || return 1
             chmod 400 "$_PKI_DIR/master/master.pem" || return 1
             CONFIGURED_ANYTHING=$BS_TRUE
         fi
         if [ -f "$_TEMP_CONFIG_DIR/master.pub" ]; then
-            movefile "$_TEMP_CONFIG_DIR/master.pub" "$_PKI_DIR/master/" || return 1
+            __movefile "$_TEMP_CONFIG_DIR/master.pub" "$_PKI_DIR/master/" || return 1
             chmod 664 "$_PKI_DIR/master/master.pub" || return 1
             CONFIGURED_ANYTHING=$BS_TRUE
         fi
@@ -5679,7 +5679,7 @@ preseed_master() {
         # If it's not a file, skip to the next
         [ ! -f "$src_keyfile" ] && continue
 
-        movefile "$src_keyfile" "$dst_keyfile" || return 1
+        __movefile "$src_keyfile" "$dst_keyfile" || return 1
         chmod 664 "$dst_keyfile" || return 1
     done
 

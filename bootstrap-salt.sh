@@ -115,11 +115,11 @@ __check_command_exists() {
 }
 
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
-#          NAME:  check_pip_allowed
+#          NAME:  __check_pip_allowed
 #   DESCRIPTION:  Simple function to let the users know that -P needs to be
 #                 used.
 #----------------------------------------------------------------------------------------------------------------------
-check_pip_allowed() {
+__check_pip_allowed() {
     if [ $# -eq 1 ]; then
         _PIP_ALLOWED_ERROR_MSG=$1
     else
@@ -1977,7 +1977,7 @@ install_ubuntu_deps() {
 
 
     if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
-        check_pip_allowed "You need to allow pip based installations (-P) in order to install 'apache-libcloud'"
+        __check_pip_allowed "You need to allow pip based installations (-P) in order to install 'apache-libcloud'"
         if ! __check_command_exists pip; then
             __PACKAGES="${__PACKAGES} python-setuptools python-pip"
         fi
@@ -2096,7 +2096,7 @@ install_ubuntu_git_deps() {
         __REQUIRED_TORNADO="$(grep tornado "${__SALT_GIT_CHECKOUT_DIR}/requirements/base.txt")"
         if [ "${__REQUIRED_TORNADO}" != "" ]; then
             __PACKAGES="${__PACKAGES} python-dev"
-            check_pip_allowed "You need to allow pip based installations (-P) in order to install the python package '${__REQUIRED_TORNADO}'"
+            __check_pip_allowed "You need to allow pip based installations (-P) in order to install the python package '${__REQUIRED_TORNADO}'"
             if ! __check_command_exists pip; then
                 __PACKAGES="${__PACKAGES} python-setuptools python-pip"
             fi
@@ -2293,7 +2293,7 @@ install_debian_deps() {
     if [ "$DISTRO_MAJOR_VERSION" -lt 6 ]; then
         # Both python-requests which is a hard dependency and apache-libcloud which is a soft dependency, under debian < 6
         # need to be installed using pip
-        check_pip_allowed "You need to allow pip based installations (-P) in order to install the python 'requests' package"
+        __check_pip_allowed "You need to allow pip based installations (-P) in order to install the python 'requests' package"
         __PACKAGES="${__PACKAGES} python-pip"
         # shellcheck disable=SC2089
         __PIP_PACKAGES="${__PIP_PACKAGES} 'requests>=$_PY_REQUESTS_MIN_VERSION'"
@@ -2407,7 +2407,7 @@ _eof
     __apt_get_install_noinput python-apt
 
     if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
-        check_pip_allowed "You need to allow pip based installations (-P) in order to install apache-libcloud/requests"
+        __check_pip_allowed "You need to allow pip based installations (-P) in order to install apache-libcloud/requests"
         pip install -U "apache-libcloud>=$_LIBCLOUD_MIN_VERSION"
 
     fi
@@ -2484,7 +2484,7 @@ install_debian_7_deps() {
         __PACKAGES="build-essential python-dev python-pip"
         # shellcheck disable=SC2086
         __apt_get_install_noinput ${__PACKAGES} || return 1
-        check_pip_allowed "You need to allow pip based installations (-P) in order to install apache-libcloud"
+        __check_pip_allowed "You need to allow pip based installations (-P) in order to install apache-libcloud"
         pip install -U "apache-libcloud>=$_LIBCLOUD_MIN_VERSION" || return 1
     fi
 
@@ -2584,7 +2584,7 @@ install_debian_git_deps() {
         # We're on the develop branch, install whichever tornado is on the requirements file
         __REQUIRED_TORNADO="$(grep tornado "${__SALT_GIT_CHECKOUT_DIR}/requirements/base.txt")"
         if [ "${__REQUIRED_TORNADO}" != "" ]; then
-            check_pip_allowed "You need to allow pip based installations (-P) in order to install the python package '${__REQUIRED_TORNADO}'"
+            __check_pip_allowed "You need to allow pip based installations (-P) in order to install the python package '${__REQUIRED_TORNADO}'"
             __apt_get_install_noinput python-dev
             pip install -U "${__REQUIRED_TORNADO}" || return 1
         fi
@@ -2597,7 +2597,7 @@ install_debian_git_deps() {
     fi
 
     if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
-        check_pip_allowed "You need to allow pip based installations (-P) in order to install apache-libcloud"
+        __check_pip_allowed "You need to allow pip based installations (-P) in order to install apache-libcloud"
         pip install -U "apache-libcloud>=$_LIBCLOUD_MIN_VERSION"
     fi
 
@@ -3158,13 +3158,13 @@ install_centos_stable_deps() {
         __PACKAGES="${__PACKAGES} python26-PyYAML python26-m2crypto m2crypto python26 python26-requests"
         __PACKAGES="${__PACKAGES} python26-crypto python26-msgpack python26-zmq python26-jinja2"
         if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
-            check_pip_allowed "You need to allow pip based installations (-P) in order to install apache-libcloud"
+            __check_pip_allowed "You need to allow pip based installations (-P) in order to install apache-libcloud"
             __PACKAGES="${__PACKAGES} python26-setuptools"
         fi
     else
         __PACKAGES="${__PACKAGES} PyYAML m2crypto python-crypto python-msgpack python-zmq python-jinja2 python-requests"
         if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
-            check_pip_allowed "You need to allow pip based installations (-P) in order to install apache-libcloud"
+            __check_pip_allowed "You need to allow pip based installations (-P) in order to install apache-libcloud"
             __PACKAGES="${__PACKAGES} python-pip"
         fi
     fi
@@ -3181,7 +3181,7 @@ install_centos_stable_deps() {
     fi
 
     if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
-        check_pip_allowed "You need to allow pip based installations (-P) in order to install apache-libcloud"
+        __check_pip_allowed "You need to allow pip based installations (-P) in order to install apache-libcloud"
         if [ "$DISTRO_MAJOR_VERSION" -eq 5 ]; then
             easy_install-2.6 "apache-libcloud>=$_LIBCLOUD_MIN_VERSION"
         else
@@ -3800,7 +3800,7 @@ _eof
     __PACKAGES="PyYAML m2crypto python-crypto python-msgpack python-zmq python26-ordereddict python-jinja2 python-requests"
 
     if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
-        check_pip_allowed "You need to allow pip based installations (-P) in order to install apache-libcloud"
+        __check_pip_allowed "You need to allow pip based installations (-P) in order to install apache-libcloud"
         __PACKAGES="${__PACKAGES} python-pip"
     fi
 
@@ -3808,7 +3808,7 @@ _eof
     yum -y install ${__PACKAGES} --enablerepo=${_EPEL_REPO}"" || return 1
 
     if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
-        check_pip_allowed "You need to allow pip based installations (-P) in order to install apache-libcloud"
+        __check_pip_allowed "You need to allow pip based installations (-P) in order to install apache-libcloud"
         pip-python install "apache-libcloud>=$_LIBCLOUD_MIN_VERSION"
     fi
 
@@ -4486,7 +4486,7 @@ install_openbsd_git_deps() {
 install_openbsd_stable() {
 
 #    pkg_add -r -I -v salt || return 1
-    check_pip_allowed || return 1
+    __check_pip_allowed || return 1
     /usr/local/bin/pip install salt || return 1
     if [ "$_UPGRADE_SYS" -eq $BS_TRUE ]; then
          /usr/local/bin/pip install --upgrade salt || return 1
@@ -4635,7 +4635,7 @@ install_smartos_git_deps() {
     if [ -f "${__SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" ]; then
         # We're on the develop branch, install whichever tornado is on the requirements file
         __REQUIRED_TORNADO="$(grep tornado "${__SALT_GIT_CHECKOUT_DIR}/requirements/base.txt")"
-        check_pip_allowed "You need to allow pip based installations (-P) in order to install the python package '${__REQUIRED_TORNADO}'"
+        __check_pip_allowed "You need to allow pip based installations (-P) in order to install the python package '${__REQUIRED_TORNADO}'"
         if [ "${__REQUIRED_TORNADO}" != "" ]; then
             if ! __check_command_exists pip; then
                 pkgin -y install py27-pip
@@ -5043,7 +5043,7 @@ install_suse_12_stable_deps() {
     __PACKAGES="${__PACKAGES} python-pycrypto python-pyzmq python-pip python-xml python-requests"
 
     if [ "$SUSE_PATCHLEVEL" -eq 1 ]; then
-        check_pip_allowed
+        __check_pip_allowed
         echowarn "PyYaml will be installed using pip"
     else
         __PACKAGES="${__PACKAGES} python-PyYAML"
@@ -5229,7 +5229,7 @@ install_suse_11_stable_deps() {
     __PACKAGES="${__PACKAGES} python-pycrypto python-pyzmq python-pip python-xml python-requests"
 
     if [ "$SUSE_PATCHLEVEL" -eq 1 ]; then
-        check_pip_allowed
+        __check_pip_allowed
         echowarn "PyYaml will be installed using pip"
     else
         __PACKAGES="${__PACKAGES} python-PyYAML"
@@ -5451,7 +5451,7 @@ __gentoo_post_dep() {
     __gentoo_config_protection
 
     if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
-        check_pip_allowed "You need to allow pip based installations (-P) in order to install apache-libcloud"
+        __check_pip_allowed "You need to allow pip based installations (-P) in order to install apache-libcloud"
         __emerge -v 'dev-python/pip'
         pip install -U "apache-libcloud>=$_LIBCLOUD_MIN_VERSION"
     fi

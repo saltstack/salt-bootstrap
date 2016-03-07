@@ -40,7 +40,6 @@ __ScriptName="bootstrap-salt.sh"
 #  LET THE BLACK MAGIC BEGIN!!!!
 #======================================================================================================================
 
-
 # Bootstrap script truth values
 BS_TRUE=1
 BS_FALSE=0
@@ -204,7 +203,7 @@ _PKI_DIR=${_SALT_ETC_DIR}/pki
 _FORCE_OVERWRITE=${BS_FORCE_OVERWRITE:-$BS_FALSE}
 _GENTOO_USE_BINHOST=${BS_GENTOO_USE_BINHOST:-$BS_FALSE}
 _EPEL_REPO=${BS_EPEL_REPO:-epel}
-__EPEL_REPOS_INSTALLED=${BS_FALSE}
+_EPEL_REPOS_INSTALLED=$BS_FALSE
 _UPGRADE_SYS=${BS_UPGRADE_SYS:-$BS_FALSE}
 _INSECURE_DL=${BS_INSECURE_DL:-$BS_FALSE}
 _WGET_ARGS=${BS_WGET_ARGS:-}
@@ -213,14 +212,14 @@ _FETCH_ARGS=${BS_FETCH_ARGS:-}
 _ENABLE_EXTERNAL_ZMQ_REPOS=${BS_ENABLE_EXTERNAL_ZMQ_REPOS:-$BS_FALSE}
 _SALT_MASTER_ADDRESS=${BS_SALT_MASTER_ADDRESS:-null}
 _SALT_MINION_ID="null"
-# __SIMPLIFY_VERSION is mostly used in Solaris based distributions
-__SIMPLIFY_VERSION=$BS_TRUE
+# _SIMPLIFY_VERSION is mostly used in Solaris based distributions
+_SIMPLIFY_VERSION=$BS_TRUE
 _LIBCLOUD_MIN_VERSION="0.14.0"
 _PY_REQUESTS_MIN_VERSION="2.0"
 _EXTRA_PACKAGES=""
 _HTTP_PROXY=""
 _DISABLE_SALT_CHECKS=$BS_FALSE
-__SALT_GIT_CHECKOUT_DIR=${BS_SALT_GIT_CHECKOUT_DIR:-/tmp/git/salt}
+_SALT_GIT_CHECKOUT_DIR=${BS_SALT_GIT_CHECKOUT_DIR:-/tmp/git/salt}
 _NO_DEPS=$BS_FALSE
 _FORCE_SHALLOW_CLONE=$BS_FALSE
 
@@ -519,13 +518,13 @@ echowarn "Running the unstable version of ${__ScriptName}"
 __exit_cleanup() {
     EXIT_CODE=$?
 
-    if [ "$ITYPE" = "git" ] && [ -d "${__SALT_GIT_CHECKOUT_DIR}" ]; then
+    if [ "$ITYPE" = "git" ] && [ -d "${_SALT_GIT_CHECKOUT_DIR}" ]; then
         if [ $_KEEP_TEMP_FILES -eq $BS_FALSE ]; then
             # Clean up the checked out repository
             echodebug "Cleaning up the Salt Temporary Git Repository"
             # shellcheck disable=SC2164
             cd "${__SALT_GIT_CHECKOUT_PARENT_DIR}"
-            rm -rf "${__SALT_GIT_CHECKOUT_DIR}"
+            rm -rf "${_SALT_GIT_CHECKOUT_DIR}"
         else
             echowarn "Not cleaning up the Salt Temporary git repository on request"
             echowarn "Note that if you intend to re-run this script using the git approach, you might encounter some issues"
@@ -948,7 +947,7 @@ __gather_sunos_system_info() {
                 *OmniOS*)
                     DISTRO_NAME="OmniOS"
                     DISTRO_VERSION=$(echo "$line" | awk '{print $3}')
-                    __SIMPLIFY_VERSION=$BS_FALSE
+                    _SIMPLIFY_VERSION=$BS_FALSE
                     break
                     ;;
             esac
@@ -1201,7 +1200,7 @@ __ubuntu_derivatives_translation
 __debian_derivatives_translation
 
 # Simplify version naming on functions
-if [ "${DISTRO_VERSION}" = "" ] || [ $__SIMPLIFY_VERSION -eq $BS_FALSE ]; then
+if [ "$DISTRO_VERSION" = "" ] || [ ${_SIMPLIFY_VERSION} -eq $BS_FALSE ]; then
     DISTRO_MAJOR_VERSION=""
     DISTRO_MINOR_VERSION=""
     PREFIXED_DISTRO_MAJOR_VERSION=""
@@ -1266,17 +1265,17 @@ __git_clone_and_checkout() {
 
     echodebug "Installed git version: $(git --version | awk '{ print $3 }')"
 
-    __SALT_GIT_CHECKOUT_PARENT_DIR=$(dirname "${__SALT_GIT_CHECKOUT_DIR}" 2>/dev/null)
+    __SALT_GIT_CHECKOUT_PARENT_DIR=$(dirname "${_SALT_GIT_CHECKOUT_DIR}" 2>/dev/null)
     __SALT_GIT_CHECKOUT_PARENT_DIR="${__SALT_GIT_CHECKOUT_PARENT_DIR:-/tmp/git}"
-    __SALT_CHECKOUT_REPONAME="$(basename "${__SALT_GIT_CHECKOUT_DIR}" 2>/dev/null)"
+    __SALT_CHECKOUT_REPONAME="$(basename "${_SALT_GIT_CHECKOUT_DIR}" 2>/dev/null)"
     __SALT_CHECKOUT_REPONAME="${__SALT_CHECKOUT_REPONAME:-salt}"
     [ -d "${__SALT_GIT_CHECKOUT_PARENT_DIR}" ] || mkdir "${__SALT_GIT_CHECKOUT_PARENT_DIR}"
     # shellcheck disable=SC2164
     cd "${__SALT_GIT_CHECKOUT_PARENT_DIR}"
-    if [ -d "${__SALT_GIT_CHECKOUT_DIR}" ]; then
+    if [ -d "${_SALT_GIT_CHECKOUT_DIR}" ]; then
         echodebug "Found a checked out Salt repository"
         # shellcheck disable=SC2164
-        cd "${__SALT_GIT_CHECKOUT_DIR}"
+        cd "${_SALT_GIT_CHECKOUT_DIR}"
         echodebug "Fetching git changes"
         git fetch || return 1
         # Tags are needed because of salt's versioning, also fetch that
@@ -1329,7 +1328,7 @@ __git_clone_and_checkout() {
                 git clone --depth 1 --branch "$GIT_REV" "$_SALT_REPO_URL" "$__SALT_CHECKOUT_REPONAME"
                 if [ $? -eq 0 ]; then
                     # shellcheck disable=SC2164
-                    cd "${__SALT_GIT_CHECKOUT_DIR}"
+                    cd "${_SALT_GIT_CHECKOUT_DIR}"
                     __SHALLOW_CLONE="${BS_TRUE}"
                 else
                     # Shallow clone above failed(missing upstream tags???), let's resume the old behaviour.
@@ -1345,7 +1344,7 @@ __git_clone_and_checkout() {
 
         if [ "$__SHALLOW_CLONE" -eq "${BS_FALSE}" ]; then
             git clone "$_SALT_REPO_URL" "$__SALT_CHECKOUT_REPONAME" || return 1
-            cd "${__SALT_GIT_CHECKOUT_DIR}"
+            cd "${_SALT_GIT_CHECKOUT_DIR}"
 
             if [ "$(echo "$_SALT_REPO_URL" | grep -c -e '\(\(git\|https\)://github\.com/\|git@github\.com:\)saltstack/salt\.git')" -eq 0 ]; then
                 # We need to add the saltstack repository as a remote and fetch tags for proper versioning
@@ -2091,9 +2090,9 @@ install_ubuntu_git_deps() {
     __git_clone_and_checkout || return 1
 
     __PACKAGES=""
-    if [ -f "${__SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" ]; then
+    if [ -f "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" ]; then
         # We're on the develop branch, install whichever tornado is on the requirements file
-        __REQUIRED_TORNADO="$(grep tornado "${__SALT_GIT_CHECKOUT_DIR}/requirements/base.txt")"
+        __REQUIRED_TORNADO="$(grep tornado "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt")"
         if [ "${__REQUIRED_TORNADO}" != "" ]; then
             __PACKAGES="${__PACKAGES} python-dev"
             __check_pip_allowed "You need to allow pip based installations (-P) in order to install the python package '${__REQUIRED_TORNADO}'"
@@ -2108,7 +2107,7 @@ install_ubuntu_git_deps() {
 
     # Let's trigger config_salt()
     if [ "$_TEMP_CONFIG_DIR" = "null" ]; then
-        _TEMP_CONFIG_DIR="${__SALT_GIT_CHECKOUT_DIR}/conf/"
+        _TEMP_CONFIG_DIR="${_SALT_GIT_CHECKOUT_DIR}/conf/"
         CONFIG_SALT_FUNC="config_salt"
     fi
 
@@ -2137,7 +2136,7 @@ install_ubuntu_daily() {
 }
 
 install_ubuntu_git() {
-    if [ -f "${__SALT_GIT_CHECKOUT_DIR}/salt/syspaths.py" ]; then
+    if [ -f "${_SALT_GIT_CHECKOUT_DIR}/salt/syspaths.py" ]; then
         python setup.py --salt-config-dir="$_SALT_ETC_DIR" install --install-layout=deb || return 1
     else
         python setup.py install --install-layout=deb || return 1
@@ -2155,7 +2154,7 @@ install_ubuntu_git_post() {
         [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
 
         if [ -f /bin/systemctl ] && [ "$DISTRO_MAJOR_VERSION" -ge 15 ]; then
-            __copyfile "${__SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-${fname}.service" "/lib/systemd/system/salt-${fname}.service"
+            __copyfile "${_SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-${fname}.service" "/lib/systemd/system/salt-${fname}.service"
 
             # Skip salt-api since the service should be opt-in and not necessarily started on boot
             [ $fname = "api" ] && continue
@@ -2170,15 +2169,15 @@ install_ubuntu_git_post() {
             if [ ! -f $_upstart_conf ]; then
                 # upstart does not know about our service, let's copy the proper file
                 echowarn "Upstart does not appear to know about salt-$fname"
-                echodebug "Copying ${__SALT_GIT_CHECKOUT_DIR}/pkg/salt-$fname.upstart to $_upstart_conf"
-                __copyfile "${__SALT_GIT_CHECKOUT_DIR}/pkg/salt-${fname}.upstart" "$_upstart_conf"
+                echodebug "Copying ${_SALT_GIT_CHECKOUT_DIR}/pkg/salt-$fname.upstart to $_upstart_conf"
+                __copyfile "${_SALT_GIT_CHECKOUT_DIR}/pkg/salt-${fname}.upstart" "$_upstart_conf"
                 /sbin/initctl reload-configuration || return 1
             fi
         # No upstart support in Ubuntu!?
-        elif [ -f "${__SALT_GIT_CHECKOUT_DIR}/debian/salt-${fname}.init" ]; then
+        elif [ -f "${_SALT_GIT_CHECKOUT_DIR}/debian/salt-${fname}.init" ]; then
             echodebug "There's NO upstart support!?"
-            echodebug "Copying ${__SALT_GIT_CHECKOUT_DIR}/debian/salt-${fname}.init to /etc/init.d/salt-$fname"
-            __copyfile "${__SALT_GIT_CHECKOUT_DIR}/debian/salt-${fname}.init" "/etc/init.d/salt-$fname"
+            echodebug "Copying ${_SALT_GIT_CHECKOUT_DIR}/debian/salt-${fname}.init to /etc/init.d/salt-$fname"
+            __copyfile "${_SALT_GIT_CHECKOUT_DIR}/debian/salt-${fname}.init" "/etc/init.d/salt-$fname"
             chmod +x /etc/init.d/salt-$fname
 
             # Skip salt-api since the service should be opt-in and not necessarily started on boot
@@ -2580,9 +2579,9 @@ install_debian_git_deps() {
 
     __git_clone_and_checkout || return 1
 
-    if [ -f "${__SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" ]; then
+    if [ -f "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" ]; then
         # We're on the develop branch, install whichever tornado is on the requirements file
-        __REQUIRED_TORNADO="$(grep tornado "${__SALT_GIT_CHECKOUT_DIR}/requirements/base.txt")"
+        __REQUIRED_TORNADO="$(grep tornado "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt")"
         if [ "${__REQUIRED_TORNADO}" != "" ]; then
             __check_pip_allowed "You need to allow pip based installations (-P) in order to install the python package '${__REQUIRED_TORNADO}'"
             __apt_get_install_noinput python-dev
@@ -2592,7 +2591,7 @@ install_debian_git_deps() {
 
     # Let's trigger config_salt()
     if [ "$_TEMP_CONFIG_DIR" = "null" ]; then
-        _TEMP_CONFIG_DIR="${__SALT_GIT_CHECKOUT_DIR}/conf/"
+        _TEMP_CONFIG_DIR="${_SALT_GIT_CHECKOUT_DIR}/conf/"
         CONFIG_SALT_FUNC="config_salt"
     fi
 
@@ -2633,7 +2632,7 @@ install_debian_6_git_deps() {
 
         # Let's trigger config_salt()
         if [ "$_TEMP_CONFIG_DIR" = "null" ]; then
-            _TEMP_CONFIG_DIR="${__SALT_GIT_CHECKOUT_DIR}/conf/"
+            _TEMP_CONFIG_DIR="${_SALT_GIT_CHECKOUT_DIR}/conf/"
             CONFIG_SALT_FUNC="config_salt"
         fi
     else
@@ -2671,9 +2670,9 @@ install_debian_8_git_deps() {
 
     __git_clone_and_checkout || return 1
 
-    if [ -f "${__SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" ]; then
+    if [ -f "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" ]; then
         # We're on the develop branch, install tornado
-        __REQUIRED_TORNADO="$(grep tornado "${__SALT_GIT_CHECKOUT_DIR}/requirements/base.txt")"
+        __REQUIRED_TORNADO="$(grep tornado "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt")"
         if [ "${__REQUIRED_TORNADO}" != "" ]; then
             __apt_get_install_noinput python-tornado
         fi
@@ -2681,7 +2680,7 @@ install_debian_8_git_deps() {
 
     # Let's trigger config_salt()
     if [ "$_TEMP_CONFIG_DIR" = "null" ]; then
-        _TEMP_CONFIG_DIR="${__SALT_GIT_CHECKOUT_DIR}/conf/"
+        _TEMP_CONFIG_DIR="${_SALT_GIT_CHECKOUT_DIR}/conf/"
         CONFIG_SALT_FUNC="config_salt"
     fi
 
@@ -2731,7 +2730,7 @@ install_debian_8_stable() {
 }
 
 install_debian_git() {
-    if [ -f "${__SALT_GIT_CHECKOUT_DIR}/salt/syspaths.py" ]; then
+    if [ -f "${_SALT_GIT_CHECKOUT_DIR}/salt/syspaths.py" ]; then
       python setup.py --salt-config-dir="$_SALT_ETC_DIR" install --install-layout=deb || return 1
     else
         python setup.py install --install-layout=deb || return 1
@@ -2764,7 +2763,7 @@ install_debian_git_post() {
 
         if [ -f /bin/systemctl ]; then
             if [ ! -f /etc/systemd/system/salt-${fname}.service ] || ([ -f /etc/systemd/system/salt-${fname}.service ] && [ $_FORCE_OVERWRITE -eq $BS_TRUE ]); then
-                __copyfile "${__SALT_GIT_CHECKOUT_DIR}/pkg/salt-${fname}.service" /etc/systemd/system
+                __copyfile "${_SALT_GIT_CHECKOUT_DIR}/pkg/salt-${fname}.service" /etc/systemd/system
             fi
 
             # Skip salt-api since the service should be opt-in and not necessarily started on boot
@@ -2774,8 +2773,8 @@ install_debian_git_post() {
             SYSTEMD_RELOAD=$BS_TRUE
 
         elif [ ! -f /etc/init.d/salt-$fname ] || ([ -f /etc/init.d/salt-$fname ] && [ $_FORCE_OVERWRITE -eq $BS_TRUE ]); then
-            if [ -f "${__SALT_GIT_CHECKOUT_DIR}/debian/salt-$fname.init" ]; then
-                __copyfile "${__SALT_GIT_CHECKOUT_DIR}/debian/salt-$fname.init" "/etc/init.d/salt-$fname"
+            if [ -f "${_SALT_GIT_CHECKOUT_DIR}/debian/salt-$fname.init" ]; then
+                __copyfile "${_SALT_GIT_CHECKOUT_DIR}/debian/salt-$fname.init" "/etc/init.d/salt-$fname"
             else
                 __fetch_url "/etc/init.d/salt-$fname" "http://anonscm.debian.org/cgit/pkg-salt/salt.git/plain/debian/salt-${fname}.init"
             fi
@@ -2927,9 +2926,9 @@ install_fedora_git_deps() {
 
     __git_clone_and_checkout || return 1
 
-    if [ -f "${__SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" ]; then
+    if [ -f "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" ]; then
         # We're on the develop branch, install whichever tornado is on the requirements file
-        __REQUIRED_TORNADO="$(grep tornado "${__SALT_GIT_CHECKOUT_DIR}/requirements/base.txt")"
+        __REQUIRED_TORNADO="$(grep tornado "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt")"
         if [ "${__REQUIRED_TORNADO}" != "" ]; then
             $FEDORA_PACKAGE_MANAGER install -y python-tornado
         fi
@@ -2937,7 +2936,7 @@ install_fedora_git_deps() {
 
     # Let's trigger config_salt()
     if [ "$_TEMP_CONFIG_DIR" = "null" ]; then
-        _TEMP_CONFIG_DIR="${__SALT_GIT_CHECKOUT_DIR}/conf/"
+        _TEMP_CONFIG_DIR="${_SALT_GIT_CHECKOUT_DIR}/conf/"
         CONFIG_SALT_FUNC="config_salt"
     fi
 
@@ -2945,7 +2944,7 @@ install_fedora_git_deps() {
 }
 
 install_fedora_git() {
-    if [ -f "${__SALT_GIT_CHECKOUT_DIR}/salt/syspaths.py" ]; then
+    if [ -f "${_SALT_GIT_CHECKOUT_DIR}/salt/syspaths.py" ]; then
         python setup.py --salt-config-dir="$_SALT_ETC_DIR" install || return 1
     else
         python setup.py install || return 1
@@ -2962,7 +2961,7 @@ install_fedora_git_post() {
         [ $fname = "api" ] && ([ "$_INSTALL_MASTER" -eq $BS_FALSE ] || ! __check_command_exists "salt-${fname}") && continue
         [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
 
-        __copyfile "${__SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-${fname}.service" "/lib/systemd/system/salt-${fname}.service"
+        __copyfile "${_SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-${fname}.service" "/lib/systemd/system/salt-${fname}.service"
 
         # Skip salt-api since the service should be opt-in and not necessarily started on boot
         [ $fname = "api" ] && continue
@@ -3015,21 +3014,21 @@ install_fedora_check_services() {
 #   CentOS Install Functions
 #
 __install_epel_repository() {
-    if [ ${__EPEL_REPOS_INSTALLED} -eq $BS_TRUE ]; then
+    if [ ${_EPEL_REPOS_INSTALLED} -eq $BS_TRUE ]; then
         return 0
     fi
 
     # Check if epel repo is already enabled and flag it accordingly
     yum repolist | grep -q "^[!]${_EPEL_REPO}/"
     if [ $? -eq 0 ]; then
-        __EPEL_REPOS_INSTALLED=${BS_TRUE}
+        _EPEL_REPOS_INSTALLED=$BS_TRUE
         return 0
     fi
 
     # Check if epel-release is already installed and flag it accordingly
     rpm --nodigest --nosignature -q epel-release > /dev/null 2>&1
     if [ $? -eq 0 ]; then
-        __EPEL_REPOS_INSTALLED=${BS_TRUE}
+        _EPEL_REPOS_INSTALLED=$BS_TRUE
         return 0
     fi
 
@@ -3053,7 +3052,7 @@ __install_epel_repository() {
         echoerror "Failed add EPEL repository support."
         return 1
     fi
-    __EPEL_REPOS_INSTALLED=${BS_TRUE}
+    _EPEL_REPOS_INSTALLED=$BS_TRUE
     return 0
 }
 
@@ -3136,9 +3135,9 @@ install_centos_stable_deps() {
     __install_epel_repository || return 1
     __install_saltstack_rhel_repository || return 1
 
-    if [ -f "${__SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" ]; then
+    if [ -f "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" ]; then
         # We're on the develop branch, install whichever tornado is on the requirements file
-        __REQUIRED_TORNADO="$(grep tornado "${__SALT_GIT_CHECKOUT_DIR}/requirements/base.txt")"
+        __REQUIRED_TORNADO="$(grep tornado "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt")"
         if [ "${__REQUIRED_TORNADO}" != "" ]; then
             if [ "$DISTRO_MAJOR_VERSION" -eq 5 ]; then
                 yum install -y python26-tornado
@@ -3279,9 +3278,9 @@ install_centos_git_deps() {
 
     __git_clone_and_checkout || return 1
 
-    if [ -f "${__SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" ]; then
+    if [ -f "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" ]; then
         # We're on the develop branch, install whichever tornado is on the requirements file
-        __REQUIRED_TORNADO="$(grep tornado "${__SALT_GIT_CHECKOUT_DIR}/requirements/base.txt")"
+        __REQUIRED_TORNADO="$(grep tornado "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt")"
         if [ "${__REQUIRED_TORNADO}" != "" ]; then
             if [ "$DISTRO_MAJOR_VERSION" -eq 5 ]; then
                 yum install -y python26-tornado
@@ -3293,7 +3292,7 @@ install_centos_git_deps() {
 
     # Let's trigger config_salt()
     if [ "$_TEMP_CONFIG_DIR" = "null" ]; then
-        _TEMP_CONFIG_DIR="${__SALT_GIT_CHECKOUT_DIR}/conf/"
+        _TEMP_CONFIG_DIR="${_SALT_GIT_CHECKOUT_DIR}/conf/"
         CONFIG_SALT_FUNC="config_salt"
     fi
 
@@ -3306,7 +3305,7 @@ install_centos_git() {
     else
         _PYEXE=python2
     fi
-    if [ -f "${__SALT_GIT_CHECKOUT_DIR}/salt/syspaths.py" ]; then
+    if [ -f "${_SALT_GIT_CHECKOUT_DIR}/salt/syspaths.py" ]; then
         $_PYEXE setup.py --salt-config-dir="$_SALT_ETC_DIR" install --prefix=/usr || return 1
     else
         $_PYEXE setup.py install --prefix=/usr || return 1
@@ -3326,7 +3325,7 @@ install_centos_git_post() {
 
         if [ -f /bin/systemctl ]; then
             if [ ! -f /usr/lib/systemd/system/salt-${fname}.service ] || ([ -f /usr/lib/systemd/system/salt-${fname}.service ] && [ $_FORCE_OVERWRITE -eq $BS_TRUE ]); then
-                __copyfile "${__SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-${fname}.service" /usr/lib/systemd/system/
+                __copyfile "${_SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-${fname}.service" /usr/lib/systemd/system/
             fi
 
             # Skip salt-api since the service should be opt-in and not necessarily started on boot
@@ -3336,7 +3335,7 @@ install_centos_git_post() {
             SYSTEMD_RELOAD=$BS_TRUE
 
         elif [ ! -f /etc/init.d/salt-$fname ] || ([ -f /etc/init.d/salt-$fname ] && [ $_FORCE_OVERWRITE -eq $BS_TRUE ]); then
-            __copyfile "${__SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-${fname}" /etc/init.d/
+            __copyfile "${_SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-${fname}" /etc/init.d/
             chmod +x /etc/init.d/salt-${fname}
 
             # Skip salt-api since the service should be opt-in and not necessarily started on boot
@@ -3828,9 +3827,9 @@ install_amazon_linux_ami_git_deps() {
 
     __git_clone_and_checkout || return 1
 
-    if [ -f "${__SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" ]; then
+    if [ -f "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" ]; then
         # We're on the develop branch, install whichever tornado is on the requirements file
-        __REQUIRED_TORNADO="$(grep tornado "${__SALT_GIT_CHECKOUT_DIR}/requirements/base.txt")"
+        __REQUIRED_TORNADO="$(grep tornado "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt")"
         if [ "${__REQUIRED_TORNADO}" != "" ]; then
             yum install -y python-tornado
         fi
@@ -3839,7 +3838,7 @@ install_amazon_linux_ami_git_deps() {
 
     # Let's trigger config_salt()
     if [ "$_TEMP_CONFIG_DIR" = "null" ]; then
-        _TEMP_CONFIG_DIR="${__SALT_GIT_CHECKOUT_DIR}/conf/"
+        _TEMP_CONFIG_DIR="${_SALT_GIT_CHECKOUT_DIR}/conf/"
         CONFIG_SALT_FUNC="config_salt"
     fi
 
@@ -3929,9 +3928,9 @@ install_arch_linux_git_deps() {
 
     __git_clone_and_checkout || return 1
 
-    if [ -f "${__SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" ]; then
+    if [ -f "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" ]; then
         # We're on the develop branch, install whichever tornado is on the requirements file
-        __REQUIRED_TORNADO="$(grep tornado "${__SALT_GIT_CHECKOUT_DIR}/requirements/base.txt")"
+        __REQUIRED_TORNADO="$(grep tornado "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt")"
         if [ "${__REQUIRED_TORNADO}" != "" ]; then
             pacman -Sy --noconfirm --needed python2-tornado
         fi
@@ -3940,7 +3939,7 @@ install_arch_linux_git_deps() {
 
     # Let's trigger config_salt()
     if [ "$_TEMP_CONFIG_DIR" = "null" ]; then
-        _TEMP_CONFIG_DIR="${__SALT_GIT_CHECKOUT_DIR}/conf/"
+        _TEMP_CONFIG_DIR="${_SALT_GIT_CHECKOUT_DIR}/conf/"
         CONFIG_SALT_FUNC="config_salt"
     fi
 
@@ -3960,7 +3959,7 @@ install_arch_linux_stable() {
 }
 
 install_arch_linux_git() {
-    if [ -f "${__SALT_GIT_CHECKOUT_DIR}/salt/syspaths.py" ]; then
+    if [ -f "${_SALT_GIT_CHECKOUT_DIR}/salt/syspaths.py" ]; then
         python2 setup.py --salt-config-dir="$_SALT_ETC_DIR" install || return 1
     else
         python2 setup.py install || return 1
@@ -4013,7 +4012,7 @@ install_arch_linux_git_post() {
         [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
 
         if [ -f /usr/bin/systemctl ]; then
-            __copyfile "${__SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-${fname}.service" "/lib/systemd/system/salt-${fname}.service"
+            __copyfile "${_SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-${fname}.service" "/lib/systemd/system/salt-${fname}.service"
 
             # Skip salt-api since the service should be opt-in and not necessarily started on boot
             [ $fname = "api" ] && continue
@@ -4028,7 +4027,7 @@ install_arch_linux_git_post() {
         fi
 
         # SysV init!?
-        __copyfile "${__SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-$fname" "/etc/rc.d/init.d/salt-$fname"
+        __copyfile "${_SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-$fname" "/etc/rc.d/init.d/salt-$fname"
         chmod +x /etc/rc.d/init.d/salt-$fname
     done
 }
@@ -4202,9 +4201,9 @@ install_freebsd_git_deps() {
 
     __git_clone_and_checkout || return 1
 
-    if [ -f "${__SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" ]; then
+    if [ -f "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" ]; then
         # We're on the develop branch, install whichever tornado is on the requirements file
-        __REQUIRED_TORNADO="$(grep tornado "${__SALT_GIT_CHECKOUT_DIR}/requirements/base.txt")"
+        __REQUIRED_TORNADO="$(grep tornado "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt")"
         if [ "${__REQUIRED_TORNADO}" != "" ]; then
              /usr/local/sbin/pkg install -y www/py-tornado || return 1
         fi
@@ -4240,7 +4239,7 @@ install_freebsd_git_deps() {
 
     # Let's trigger config_salt()
     if [ "$_TEMP_CONFIG_DIR" = "null" ]; then
-        _TEMP_CONFIG_DIR="${__SALT_GIT_CHECKOUT_DIR}/conf/"
+        _TEMP_CONFIG_DIR="${_SALT_GIT_CHECKOUT_DIR}/conf/"
         CONFIG_SALT_FUNC="config_salt"
 
         # Set _SALT_ETC_DIR to ports default
@@ -4477,7 +4476,7 @@ install_openbsd_git_deps() {
     # Let's trigger config_salt()
     #
     if [ "$_TEMP_CONFIG_DIR" = "null" ]; then
-        _TEMP_CONFIG_DIR="${__SALT_GIT_CHECKOUT_DIR}/conf/"
+        _TEMP_CONFIG_DIR="${_SALT_GIT_CHECKOUT_DIR}/conf/"
         CONFIG_SALT_FUNC="config_salt"
     fi
     return 0
@@ -4632,9 +4631,9 @@ install_smartos_git_deps() {
         pkgin -y install git || return 1
     fi
 
-    if [ -f "${__SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" ]; then
+    if [ -f "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" ]; then
         # We're on the develop branch, install whichever tornado is on the requirements file
-        __REQUIRED_TORNADO="$(grep tornado "${__SALT_GIT_CHECKOUT_DIR}/requirements/base.txt")"
+        __REQUIRED_TORNADO="$(grep tornado "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt")"
         __check_pip_allowed "You need to allow pip based installations (-P) in order to install the python package '${__REQUIRED_TORNADO}'"
         if [ "${__REQUIRED_TORNADO}" != "" ]; then
             if ! __check_command_exists pip; then
@@ -4647,7 +4646,7 @@ install_smartos_git_deps() {
     __git_clone_and_checkout || return 1
     # Let's trigger config_salt()
     if [ "$_TEMP_CONFIG_DIR" = "null" ]; then
-        _TEMP_CONFIG_DIR="${__SALT_GIT_CHECKOUT_DIR}/conf/"
+        _TEMP_CONFIG_DIR="${_SALT_GIT_CHECKOUT_DIR}/conf/"
         CONFIG_SALT_FUNC="config_salt"
     fi
 
@@ -4710,13 +4709,13 @@ install_smartos_git_post() {
 
         svcs "network/salt-$fname" > /dev/null 2>&1
         if [ $? -eq 1 ]; then
-            svccfg import "${__SALT_GIT_CHECKOUT_DIR}/pkg/smartos/salt-$fname.xml"
+            svccfg import "${_SALT_GIT_CHECKOUT_DIR}/pkg/smartos/salt-$fname.xml"
             if [ "${VIRTUAL_TYPE}" = "global" ]; then
                 if [ ! -d $smf_dir ]; then
                     mkdir -p "$smf_dir"
                 fi
                 if [ ! -f "$smf_dir/salt-$fname.xml" ]; then
-                    __copyfile "${__SALT_GIT_CHECKOUT_DIR}/pkg/smartos/salt-$fname.xml" "$smf_dir/"
+                    __copyfile "${_SALT_GIT_CHECKOUT_DIR}/pkg/smartos/salt-$fname.xml" "$smf_dir/"
                 fi
             fi
         fi
@@ -4859,16 +4858,16 @@ install_opensuse_git_deps() {
 
     __git_clone_and_checkout || return 1
 
-    if [ -f "${__SALT_GIT_CHECKOUT_DIR}/pkg/suse/use-forking-daemon.patch" ]; then
+    if [ -f "${_SALT_GIT_CHECKOUT_DIR}/pkg/suse/use-forking-daemon.patch" ]; then
         # shellcheck disable=SC2164
-        cd "${__SALT_GIT_CHECKOUT_DIR}"
+        cd "${_SALT_GIT_CHECKOUT_DIR}"
         echowarn "Applying patch to systemd service unit file"
         patch -p1 < pkg/suse/use-forking-daemon.patch || return 1
     fi
 
-    if [ -f "${__SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" ]; then
+    if [ -f "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" ]; then
         # We're on the develop branch, install whichever tornado is on the requirements file
-        __REQUIRED_TORNADO="$(grep tornado "${__SALT_GIT_CHECKOUT_DIR}/requirements/base.txt")"
+        __REQUIRED_TORNADO="$(grep tornado "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt")"
         if [ "${__REQUIRED_TORNADO}" != "" ]; then
             __zypper_install python-tornado
         fi
@@ -4877,7 +4876,7 @@ install_opensuse_git_deps() {
 
     # Let's trigger config_salt()
     if [ "$_TEMP_CONFIG_DIR" = "null" ]; then
-        _TEMP_CONFIG_DIR="${__SALT_GIT_CHECKOUT_DIR}/conf/"
+        _TEMP_CONFIG_DIR="${_SALT_GIT_CHECKOUT_DIR}/conf/"
         CONFIG_SALT_FUNC="config_salt"
     fi
 
@@ -4940,14 +4939,14 @@ install_opensuse_git_post() {
 
         if [ -f /bin/systemctl ]; then
             if [ "${DISTRO_MAJOR_VERSION}" -gt 13 ] || ([ "${DISTRO_MAJOR_VERSION}" -eq 13 ] && [ "${DISTRO_MINOR_VERSION}" -ge 2 ]); then
-                __copyfile "${__SALT_GIT_CHECKOUT_DIR}/pkg/salt-${fname}.service" "/usr/lib/systemd/system/salt-${fname}.service"
+                __copyfile "${_SALT_GIT_CHECKOUT_DIR}/pkg/salt-${fname}.service" "/usr/lib/systemd/system/salt-${fname}.service"
             else
-                __copyfile "${__SALT_GIT_CHECKOUT_DIR}/pkg/salt-${fname}.service" "/lib/systemd/system/salt-${fname}.service"
+                __copyfile "${_SALT_GIT_CHECKOUT_DIR}/pkg/salt-${fname}.service" "/lib/systemd/system/salt-${fname}.service"
             fi
             continue
         fi
 
-        __copyfile "${__SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-$fname" "/etc/init.d/salt-$fname"
+        __copyfile "${_SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-$fname" "/etc/init.d/salt-$fname"
         chmod +x /etc/init.d/salt-$fname
 
     done
@@ -5112,9 +5111,9 @@ install_suse_12_git_deps() {
 
     __git_clone_and_checkout || return 1
 
-    if [ -f "${__SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" ]; then
+    if [ -f "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" ]; then
         # We're on the develop branch, install whichever tornado is on the requirements file
-        __REQUIRED_TORNADO="$(grep tornado "${__SALT_GIT_CHECKOUT_DIR}/requirements/base.txt")"
+        __REQUIRED_TORNADO="$(grep tornado "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt")"
         if [ "${__REQUIRED_TORNADO}" != "" ]; then
             __zypper_install python-tornado
         fi
@@ -5122,7 +5121,7 @@ install_suse_12_git_deps() {
 
     # Let's trigger config_salt()
     if [ "$_TEMP_CONFIG_DIR" = "null" ]; then
-        _TEMP_CONFIG_DIR="${__SALT_GIT_CHECKOUT_DIR}/conf/"
+        _TEMP_CONFIG_DIR="${_SALT_GIT_CHECKOUT_DIR}/conf/"
         CONFIG_SALT_FUNC="config_salt"
     fi
 
@@ -5298,9 +5297,9 @@ install_suse_11_git_deps() {
 
     __git_clone_and_checkout || return 1
 
-    if [ -f "${__SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" ]; then
+    if [ -f "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" ]; then
         # We're on the develop branch, install whichever tornado is on the requirements file
-        __REQUIRED_TORNADO="$(grep tornado "${__SALT_GIT_CHECKOUT_DIR}/requirements/base.txt")"
+        __REQUIRED_TORNADO="$(grep tornado "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt")"
         if [ "${__REQUIRED_TORNADO}" != "" ]; then
             __zypper_install python-tornado
         fi
@@ -5308,7 +5307,7 @@ install_suse_11_git_deps() {
 
     # Let's trigger config_salt()
     if [ "$_TEMP_CONFIG_DIR" = "null" ]; then
-        _TEMP_CONFIG_DIR="${__SALT_GIT_CHECKOUT_DIR}/conf/"
+        _TEMP_CONFIG_DIR="${_SALT_GIT_CHECKOUT_DIR}/conf/"
         CONFIG_SALT_FUNC="config_salt"
     fi
 

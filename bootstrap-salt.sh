@@ -127,7 +127,7 @@ __check_pip_allowed() {
 
     if [ "$_PIP_ALLOWED" -eq $BS_FALSE ]; then
         echoerror "$_PIP_ALLOWED_ERROR_MSG"
-        usage
+        __usage
         exit 1
     fi
 }
@@ -225,19 +225,19 @@ _FORCE_SHALLOW_CLONE=$BS_FALSE
 
 
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
-#         NAME:  usage
+#         NAME:  __usage
 #  DESCRIPTION:  Display usage information.
 #----------------------------------------------------------------------------------------------------------------------
-usage() {
+__usage() {
     cat << EOT
 
-  Usage :  ${__ScriptName} [options] <install-type> <install-type-args>
+  Usage :  ${__ScriptName} [options] <install-type> [install-type-args]
 
   Installation types:
-    - stable              (this is default)
+    - stable              (install latest stable release, this is default)
     - stable [version]    (currently only supported on: Ubuntu, CentOS)
-    - daily               (Ubuntu specific)
-    - testing             (RHEL-family specific, configure EPEL testing repo)
+    - daily               (Ubuntu specific: configure SaltStack Daily PPA)
+    - testing             (RHEL-family specific: configure EPEL testing repo)
     - git [branch_or_tag] (install from 'develop' by default)
 
   Examples:
@@ -305,14 +305,14 @@ usage() {
         This may result in an "n/a" in the version number.
 
 EOT
-}   # ----------  end of function usage  ----------
+}   # ----------  end of function __usage  ----------
 
 
 while getopts ":hvnDc:Gg:k:MSNXCPFUKIA:i:Lp:dH:Zbsf" opt
 do
   case "${opt}" in
 
-    h )  usage; exit 0                                  ;;
+    h )  __usage; exit 0                                  ;;
 
     v )  echo "$0 -- Version $__ScriptVersion"; exit 0  ;;
     n )  _COLORS=0; __detect_color_support              ;;
@@ -367,7 +367,7 @@ do
 
     \?)  echo
          echoerror "Option does not exist : $OPTARG"
-         usage
+         __usage
          exit 1
          ;;
 
@@ -386,7 +386,7 @@ __check_unparsed_options() {
     fi
     unparsed_options=$( echo "$shellopts" | ${grep} -E '(^|[[:space:]])[-]+[[:alnum:]]' )
     if [ "$unparsed_options" != "" ]; then
-        usage
+        __usage
         echo
         echoerror "options are only allowed before install arguments"
         echo
@@ -457,7 +457,7 @@ fi
 # Check for any unparsed arguments. Should be an error.
 if [ "$#" -gt 0 ]; then
     __check_unparsed_options "$*"
-    usage
+    __usage
     echo
     echoerror "Too many arguments."
     exit 1

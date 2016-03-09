@@ -17,6 +17,7 @@
 #       CREATED: 10/15/2012 09:49:37 PM WEST
 #======================================================================================================================
 set -o nounset                              # Treat unset variables as an error
+
 __ScriptVersion="2015.11.09"
 __ScriptName="bootstrap-salt.sh"
 
@@ -46,7 +47,6 @@ BS_FALSE=0
 
 # Default sleep time used when waiting for daemons to start, restart and checking for these running
 __DEFAULT_SLEEP=3
-__DEFAULT_SLEEP_ORIGINAL="${__DEFAULT_SLEEP}"
 
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #          NAME:  __detect_color_support
@@ -190,6 +190,7 @@ _TEMP_CONFIG_DIR="null"
 _SALTSTACK_REPO_URL="git://github.com/saltstack/salt.git"
 _SALT_REPO_URL=${_SALTSTACK_REPO_URL}
 _TEMP_KEYS_DIR="null"
+_SLEEP="${__DEFAULT_SLEEP}"
 _INSTALL_MASTER=$BS_FALSE
 _INSTALL_SYNDIC=$BS_FALSE
 _INSTALL_MINION=$BS_TRUE
@@ -343,7 +344,7 @@ do
              exit 1
          fi
          ;;
-    s )  __DEFAULT_SLEEP="$OPTARG"                      ;;
+    s )  _SLEEP="$OPTARG"                               ;;
     M )  _INSTALL_MASTER=$BS_TRUE                       ;;
     S )  _INSTALL_SYNDIC=$BS_TRUE                       ;;
     N )  _INSTALL_MINION=$BS_FALSE                      ;;
@@ -1908,11 +1909,11 @@ __enable_universe_repository() {
 }
 
 install_ubuntu_deps() {
-    if ([ "${__DEFAULT_SLEEP}" -eq "${__DEFAULT_SLEEP_ORIGINAL}" ] && [ "$DISTRO_MAJOR_VERSION" -lt 15 ]); then
+    if ([ "${_SLEEP}" -eq "${__DEFAULT_SLEEP}" ] && [ "$DISTRO_MAJOR_VERSION" -lt 15 ]); then
         # The user did not pass a custom sleep value as an argument, let's increase the default value
         echodebug "On Ubuntu systems we increase the default sleep value to 10."
         echodebug "See https://github.com/saltstack/salt/issues/12248 for more info."
-        __DEFAULT_SLEEP=10
+        _SLEEP=10
     fi
     if [ $_START_DAEMONS -eq $BS_FALSE ]; then
         echowarn "Not starting daemons on Debian based distributions is not working mostly because starting them is the default behaviour."
@@ -5988,8 +5989,8 @@ fi
 # Run any start daemons function
 if [ "$STARTDAEMONS_INSTALL_FUNC" != "null" ]; then
     echoinfo "Running ${STARTDAEMONS_INSTALL_FUNC}()"
-    echodebug "Waiting ${__DEFAULT_SLEEP} seconds for processes to settle before checking for them"
-    sleep ${__DEFAULT_SLEEP}
+    echodebug "Waiting ${_SLEEP} seconds for processes to settle before checking for them"
+    sleep ${_SLEEP}
     $STARTDAEMONS_INSTALL_FUNC
     if [ $? -ne 0 ]; then
         echoerror "Failed to run ${STARTDAEMONS_INSTALL_FUNC}()!!!"
@@ -6000,8 +6001,8 @@ fi
 # Check if the installed daemons are running or not
 if [ "$DAEMONS_RUNNING_FUNC" != "null" ] && [ $_START_DAEMONS -eq $BS_TRUE ]; then
     echoinfo "Running ${DAEMONS_RUNNING_FUNC}()"
-    echodebug "Waiting ${__DEFAULT_SLEEP} seconds for processes to settle before checking for them"
-    sleep ${__DEFAULT_SLEEP}  # Sleep a little bit to let daemons start
+    echodebug "Waiting ${_SLEEP} seconds for processes to settle before checking for them"
+    sleep ${_SLEEP}  # Sleep a little bit to let daemons start
     $DAEMONS_RUNNING_FUNC
     if [ $? -ne 0 ]; then
         echoerror "Failed to run ${DAEMONS_RUNNING_FUNC}()!!!"

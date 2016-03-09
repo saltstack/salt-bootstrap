@@ -313,11 +313,11 @@ while getopts ":hvnDc:Gg:k:MSNXCPFUKIA:i:Lp:dH:Zbsf" opt
 do
   case "${opt}" in
 
-    h )  __usage; exit 0                                  ;;
-
+    h )  __usage; exit 0                                ;;
     v )  echo "$0 -- Version $__ScriptVersion"; exit 0  ;;
     n )  _COLORS=0; __detect_color_support              ;;
     D )  _ECHO_DEBUG=$BS_TRUE                           ;;
+
     c )  _TEMP_CONFIG_DIR=$(__check_config_dir "$OPTARG")
          # If the configuration directory does not exist, error out
          if [ "$_TEMP_CONFIG_DIR" = "null" ]; then
@@ -329,14 +329,17 @@ do
              exit 1
          fi
          ;;
-    g ) _SALT_REPO_URL=$OPTARG                          ;;
-    G ) if [ "${_SALT_REPO_URL}" = "${_SALTSTACK_REPO_URL}" ]; then
-            _SALTSTACK_REPO_URL="https://github.com/saltstack/salt.git"
-            _SALT_REPO_URL=${_SALTSTACK_REPO_URL}
-        else
-            _SALTSTACK_REPO_URL="https://github.com/saltstack/salt.git"
-        fi
+
+    g )  _SALT_REPO_URL=$OPTARG                          ;;
+
+    G )  if [ "${_SALT_REPO_URL}" = "${_SALTSTACK_REPO_URL}" ]; then
+             _SALTSTACK_REPO_URL="https://github.com/saltstack/salt.git"
+             _SALT_REPO_URL=${_SALTSTACK_REPO_URL}
+         else
+             _SALTSTACK_REPO_URL="https://github.com/saltstack/salt.git"
+         fi
          ;;
+
     k )  _TEMP_KEYS_DIR="$OPTARG"
          # If the configuration directory does not exist, error out
          if [ ! -d "$_TEMP_KEYS_DIR" ]; then
@@ -344,6 +347,7 @@ do
              exit 1
          fi
          ;;
+
     s )  _SLEEP="$OPTARG"                               ;;
     M )  _INSTALL_MASTER=$BS_TRUE                       ;;
     S )  _INSTALL_SYNDIC=$BS_TRUE                       ;;
@@ -364,7 +368,6 @@ do
     Z )  _ENABLE_EXTERNAL_ZMQ_REPOS=$BS_TRUE            ;;
     b )  _NO_DEPS=$BS_TRUE                              ;;
     f )  _FORCE_SHALLOW_CLONE=$BS_TRUE                  ;;
-
 
     \?)  echo
          echoerror "Option does not exist : $OPTARG"

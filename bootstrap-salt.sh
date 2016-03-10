@@ -1348,6 +1348,7 @@ __git_clone_and_checkout() {
 
         if [ "$__SHALLOW_CLONE" -eq "${BS_FALSE}" ]; then
             git clone "$_SALT_REPO_URL" "$__SALT_CHECKOUT_REPONAME" || return 1
+            # shellcheck disable=SC2164
             cd "${_SALT_GIT_CHECKOUT_DIR}"
 
             if [ "$(echo "$_SALT_REPO_URL" | grep -c -e '\(\(git\|https\)://github\.com/\|git@github\.com:\)saltstack/salt\.git')" -eq 0 ]; then

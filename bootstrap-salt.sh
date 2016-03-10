@@ -18,7 +18,7 @@
 #======================================================================================================================
 set -o nounset                              # Treat unset variables as an error
 
-__ScriptVersion="2016.03.09"
+__ScriptVersion="2016.03.10"
 __ScriptName="bootstrap-salt.sh"
 
 #======================================================================================================================
@@ -309,7 +309,7 @@ EOT
 }   # ----------  end of function __usage  ----------
 
 
-while getopts ":hvnDc:Gg:k:MSNXCPFUKIA:i:Lp:dH:Zbsf" opt
+while getopts ":hvnDc:Gg:k:s:MSNXCPFUKIA:i:Lp:dH:Zbf" opt
 do
   case "${opt}" in
 
@@ -348,7 +348,7 @@ do
          fi
          ;;
 
-    s )  _SLEEP="$OPTARG"                               ;;
+    s )  _SLEEP=$OPTARG                                 ;;
     M )  _INSTALL_MASTER=$BS_TRUE                       ;;
     S )  _INSTALL_SYNDIC=$BS_TRUE                       ;;
     N )  _INSTALL_MINION=$BS_FALSE                      ;;
@@ -1348,6 +1348,7 @@ __git_clone_and_checkout() {
 
         if [ "$__SHALLOW_CLONE" -eq "${BS_FALSE}" ]; then
             git clone "$_SALT_REPO_URL" "$__SALT_CHECKOUT_REPONAME" || return 1
+            # shellcheck disable=SC2164
             cd "${_SALT_GIT_CHECKOUT_DIR}"
 
             if [ "$(echo "$_SALT_REPO_URL" | grep -c -e '\(\(git\|https\)://github\.com/\|git@github\.com:\)saltstack/salt\.git')" -eq 0 ]; then

@@ -18,7 +18,7 @@
 #======================================================================================================================
 set -o nounset                              # Treat unset variables as an error
 
-__ScriptVersion="2016.03.09"
+__ScriptVersion="2016.03.10"
 __ScriptName="bootstrap-salt.sh"
 
 #======================================================================================================================
@@ -309,7 +309,7 @@ EOT
 }   # ----------  end of function __usage  ----------
 
 
-while getopts ":hvnDc:Gg:k:MSNXCPFUKIA:i:Lp:dH:Zbsf" opt
+while getopts ":hvnDc:Gg:k:s:MSNXCPFUKIA:i:Lp:dH:Zbf" opt
 do
   case "${opt}" in
 
@@ -348,7 +348,7 @@ do
          fi
          ;;
 
-    s )  _SLEEP="$OPTARG"                               ;;
+    s )  _SLEEP=$OPTARG                                 ;;
     M )  _INSTALL_MASTER=$BS_TRUE                       ;;
     S )  _INSTALL_SYNDIC=$BS_TRUE                       ;;
     N )  _INSTALL_MINION=$BS_FALSE                      ;;

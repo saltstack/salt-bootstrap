@@ -167,6 +167,66 @@ Installing the latest develop branch of Salt:
   curl -L https://bootstrap.saltstack.com | sudo sh -s -- git develop
 
 
+Supported Operating Systems
+---------------------------
+
+
+Debian and derivatives
+~~~~~~~~~~~~~~~~~~~~~~
+
+- Debian GNU/Linux 6/7/8
+- Linux Mint Debian Edition 1 (based on Debian 8)
+- Kali Linux 1.0 (based on Debian 7)
+
+
+Red Hat family
+~~~~~~~~~~~~~~
+
+- Amazon Linux 2012.09 (and some later)
+- CentOS 5/6/7
+- Fedora 17/18/20/21/22
+- Oracle Linux 5/6/7
+- Red Hat Enterprise Linux 5/6/7
+- Scientific Linux 5/6/7
+
+
+SUSE family
+~~~~~~~~~~~
+
+- OpenSUSE 12/13
+- SUSE Linux Enterprise Server 11 SP1/11 SP2/11 SP3/12
+
+
+Ubuntu and derivatives
+~~~~~~~~~~~~~~~~~~~~~~
+
+- Elementary OS 0.2 (based on Ubuntu 12.04)
+- Linaro 12.04
+- Linux Mint 13/14/16/17
+- Trisquel GNU/Linux 6 (based on Ubuntu 12.04)
+- Ubuntu 10.x/11.x/12.x/13.x/14.x/15.04
+
+
+Other Linux distro
+~~~~~~~~~~~~~~~~~~
+
+- Arch Linux
+- Gentoo
+
+
+UNIX systems
+~~~~~~~~~~~~
+
+**BSD**:
+
+- OpenBSD (``pip`` installation)
+- FreeBSD 9/10/11
+
+**SunOS**:
+
+- SmartOS
+
+
 Unsupported Distro
 ------------------
 
@@ -182,7 +242,26 @@ Please run the following commands and report their output when creating a ticket
 Adding Support for Other Operating Systems
 ------------------------------------------
 
-In order to install salt for a distribution you need to define:
+The following operating systems are detected, but Salt and its dependencies installation functions
+are not developed yet:
+
+**BSD**:
+
+- NetBSD
+
+**Linux**:
+
+- Raspbian (detected as Debian)
+- Slackware
+
+**SunOS**
+
+- OpenIndiana
+- Oracle Solaris
+- OmniOS (Illumos)
+
+
+In order to install Salt for a distribution you need to define:
 
 1. To Install Dependencies, which is required, one of:
 
@@ -197,7 +276,7 @@ In order to install salt for a distribution you need to define:
 
 
 2. Optionally, define a minion configuration function, which will be called if the
-   ``-c|config-dir`` option is passed. One of:
+   ``-c`` option is passed. One of:
 
 .. code:: bash
 
@@ -210,8 +289,8 @@ In order to install salt for a distribution you need to define:
   config_salt [THIS ONE IS ALREADY DEFINED AS THE DEFAULT]
 
 
-3. Optionally, define a salt master pre-seed function, which will be called if the -k (pre-seed
-   master keys) option is passed. One of:
+3. Optionally, define a Salt master pre-seed function, which will be called if the
+   ``-k`` (pre-seed master keys) option is passed. One of:
 
 .. code:: bash
 
@@ -341,27 +420,6 @@ Since there is no ``install_ubuntu_11_10_stable()`` it defaults to the unspecifi
 The bootstrapping script must be plain POSIX sh only, **not** bash or another shell script. By
 design the targeting for each operating system and version is very specific. Assumptions of
 supported versions or variants should not be made, to avoid failed or broken installations.
-
-Supported Operating Systems
----------------------------
-- Amazon Linux 2012.09
-- Arch
-- CentOS 5/6/7
-- Debian 6/7/8
-- Fedora 17/18/20/21/22
-- FreeBSD 9.1/9.2/10/11
-- Gentoo
-- Linaro
-- Linux Mint 13/14
-- OpenSUSE 12/13
-- Oracle Linux 5/6/7
-- Red Hat Enterprise Linux 5/6/7
-- Scientific Linux 5/6/7
-- SmartOS
-- SUSE Linux Enterprise 11 SP1/11 SP2/11 SP3
-- Ubuntu 10.x/11.x/12.x/13.x/14.x/15.04
-- Elementary OS 0.2
-
 
 
 I Found a Bug

@@ -38,33 +38,41 @@ Examples
 Install using curl
 ~~~~~~~~~~~~~~~~~~
 
-Using ``curl`` to install latest git:
+Using ``curl`` to install latest development version from GitHub:
 
 .. code:: console
 
-  curl -L https://bootstrap.saltstack.com -o install_salt.sh
+  curl -o install_salt.sh -L https://bootstrap.saltstack.com
   sudo sh install_salt.sh git develop
 
-If you want to install a specific release version (based on the git tags):
+If you want to install a specific release version (based on the Git tags):
 
 .. code:: console
 
   curl -o install_salt.sh -L https://bootstrap.saltstack.com
   sudo sh install_salt.sh git v2015.8.7
 
-To install a specific branch from a git fork:
+To install a specific branch from a Git fork:
 
 .. code:: console
 
   curl -o install_salt.sh -L https://bootstrap.saltstack.com
   sudo sh install_salt.sh -g https://github.com/myuser/salt.git git mybranch
 
-If all you want is to install a ``salt-master`` using latest git:
+If all you want is to install a ``salt-master`` using latest Git:
 
 .. code:: console
 
   curl -o install_salt.sh -L https://bootstrap.saltstack.com
   sudo sh install_salt.sh -M -N git develop
+
+If your host has Internet access only via HTTP proxy:
+
+.. code:: console
+
+  PROXY='http://user:password@myproxy.example.com:3128'
+  curl -o install_salt.sh -L -x "$PROXY" https://bootstrap.saltstack.com
+  sudo sh install_salt.sh -G -H "$PROXY" git
 
 
 Install using wget
@@ -87,7 +95,7 @@ Install a specific version from git using ``wget``:
 .. note::
 
   On the above example we added `-P` which will allow PIP packages to be installed if required but
-  it's no a necessary flag for git based bootstraps.
+  it's no a necessary flag for Git based bootstraps.
 
 
 Install using Python

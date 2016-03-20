@@ -15,7 +15,10 @@ install the `Salt`_ binaries using the appropriate methods.
   source`_.
 
 **In case you found a bug, please read** `I found a bug`_ **first before submitting a new issue.**
+The examples there show how to get the latest development version of the bootstrap script. Chances
+are high that your issue was already fixed.
 
+.. _`Salt`: https://saltstack.com/community/
 .. _`read the source`: https://github.com/saltstack/salt-bootstrap/blob/develop/bootstrap-salt.sh
 
 
@@ -25,14 +28,20 @@ Bootstrap
 If you're looking for the *one-liner* to install salt, please scroll to the bottom and use the
 instructions for `Installing via an Insecure One-Liner`_.
 
+.. note::
+
+  In every two-step example, you would be well-served to examine the downloaded file and examine
+  it to ensure that it does what you expect.
+
 
 Examples
 --------
 
 .. note::
 
-    In every two-step example, you would be well-served to examine the downloaded file and examine
-    it to ensure that it does what you expect.
+  Those examples below show how to bootstrap Salt directly from GitHub or other Git repository.
+  Run the script without any parameters to get latest stable Salt packages for your system from
+  `SaltStack corporate repository`_. See first example in the `Install using wget`_ section.
 
 
 Install using curl
@@ -144,6 +153,9 @@ Or link them to the right place:
 .. code:: console
 
    ln -s /usr/local/share/certs/ca-root-nss.crt /etc/ssl/cert.pem
+
+
+.. _`SaltStack corporate repository`: https://repo.saltstack.com/
 
 
 Installing via an Insecure One-Liner
@@ -450,11 +462,10 @@ Or the insecure one liner:
   curl -L https://bootstrap.saltstack.com/develop | sudo sh -s -- git develop
 
 
-If after trying this, you still see the same problems, then, please `file an issue`_.
+If after trying this, you still see the same problems, then, please `fill an issue`_.
 
 
-.. _`Salt`: http://saltstack.org/
-.. _`file an issue`: https://github.com/saltstack/salt-bootstrap/issues/new
+.. _`fill an issue`: https://github.com/saltstack/salt-bootstrap/issues/new
 
 
 Testing in Vagrant
@@ -470,6 +481,6 @@ Ubuntu box. First, install Vagrant, then:
 
 
 .. _Vagrant: http://www.vagrantup.com
-.. _Installing via an Insecure One-Liner: #installing-via-an-insecure-one-liner
+
 
 .. vim: fenc=utf-8 spell spl=en cc=100 tw=99 fo=want sts=2 sw=2 et

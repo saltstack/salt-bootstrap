@@ -4088,6 +4088,11 @@ install_arch_check_services() {
 #
 #   FreeBSD Install Functions
 #
+config_freebsd_salt() {
+    _SALT_ETC_DIR=${BS_SALT_ETC_DIR:-/usr/local/etc/salt}
+    config_salt
+}
+
 __freebsd_get_packagesite() {
     if [ "$CPU_ARCH_L" = "amd64" ]; then
         BSD_ARCH="x86:64"
@@ -4338,8 +4343,6 @@ install_freebsd_9_stable_post() {
         enable_string="salt_${fname}_enable=\"YES\""
         grep "$enable_string" /etc/rc.conf >/dev/null 2>&1
         [ $? -eq 1 ] && echo "$enable_string" >> /etc/rc.conf
-
-        [ -f "${_SALT_ETC_DIR}/${fname}.sample" ] && __copyfile "${_SALT_ETC_DIR}/${fname}.sample" "${_SALT_ETC_DIR}/${fname}"
 
         if [ $fname = "minion" ] ; then
             grep "salt_minion_paths" /etc/rc.conf >/dev/null 2>&1

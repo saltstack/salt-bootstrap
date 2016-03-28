@@ -43,6 +43,8 @@ Examples
   Run the script without any parameters to get latest stable Salt packages for your system from
   `SaltStack corporate repository`_. See first example in the `Install using wget`_ section.
 
+.. _`SaltStack corporate repository`: https://repo.saltstack.com/
+
 
 Install using curl
 ~~~~~~~~~~~~~~~~~~
@@ -51,37 +53,37 @@ Using ``curl`` to install latest development version from GitHub:
 
 .. code:: console
 
-  curl -o install_salt.sh -L https://bootstrap.saltstack.com
-  sudo sh install_salt.sh git develop
+  curl -o bootstrap_salt.sh -L https://bootstrap.saltstack.com
+  sudo sh bootstrap_salt.sh git develop
 
 If you want to install a specific release version (based on the Git tags):
 
 .. code:: console
 
-  curl -o install_salt.sh -L https://bootstrap.saltstack.com
-  sudo sh install_salt.sh git v2015.8.7
+  curl -o bootstrap_salt.sh -L https://bootstrap.saltstack.com
+  sudo sh bootstrap_salt.sh git v2015.8.7
 
 To install a specific branch from a Git fork:
 
 .. code:: console
 
-  curl -o install_salt.sh -L https://bootstrap.saltstack.com
-  sudo sh install_salt.sh -g https://github.com/myuser/salt.git git mybranch
+  curl -o bootstrap_salt.sh -L https://bootstrap.saltstack.com
+  sudo sh bootstrap_salt.sh -g https://github.com/myuser/salt.git git mybranch
 
 If all you want is to install a ``salt-master`` using latest Git:
 
 .. code:: console
 
-  curl -o install_salt.sh -L https://bootstrap.saltstack.com
-  sudo sh install_salt.sh -M -N git develop
+  curl -o bootstrap_salt.sh -L https://bootstrap.saltstack.com
+  sudo sh bootstrap_salt.sh -M -N git develop
 
 If your host has Internet access only via HTTP proxy:
 
 .. code:: console
 
   PROXY='http://user:password@myproxy.example.com:3128'
-  curl -o install_salt.sh -L -x "$PROXY" https://bootstrap.saltstack.com
-  sudo sh install_salt.sh -G -H "$PROXY" git
+  curl -o bootstrap_salt.sh -L -x "$PROXY" https://bootstrap.saltstack.com
+  sudo sh bootstrap_salt.sh -G -H "$PROXY" git
 
 
 Install using wget
@@ -91,15 +93,15 @@ Using ``wget`` to install your distribution's stable packages:
 
 .. code:: console
 
-  wget -O install_salt.sh https://bootstrap.saltstack.com
-  sudo sh install_salt.sh
+  wget -O bootstrap_salt.sh https://bootstrap.saltstack.com
+  sudo sh bootstrap_salt.sh
 
 Install a specific version from git using ``wget``:
 
 .. code:: console
 
-  wget -O install_salt.sh https://bootstrap.saltstack.com
-  sudo sh install_salt.sh -P git v2015.8.7
+  wget -O bootstrap_salt.sh https://bootstrap.saltstack.com
+  sudo sh bootstrap_salt.sh -P git v2015.8.7
 
 .. note::
 
@@ -114,15 +116,15 @@ If you already have Python installed, ``python 2.6``, then it's as easy as:
 
 .. code:: console
 
-  python -m urllib "https://bootstrap.saltstack.com" > install_salt.sh
-  sudo sh install_salt.sh git develop
+  python -m urllib "https://bootstrap.saltstack.com" > bootstrap_salt.sh
+  sudo sh bootstrap_salt.sh git develop
 
 All Python versions should support the following one liner:
 
 .. code:: console
 
-  python -c 'import urllib; print urllib.urlopen("https://bootstrap.saltstack.com").read()' > install_salt.sh
-  sudo sh install_salt.sh git develop
+  python -c 'import urllib; print urllib.urlopen("https://bootstrap.saltstack.com").read()' > bootstrap_salt.sh
+  sudo sh bootstrap_salt.sh git develop
 
 
 Install using fetch
@@ -133,8 +135,8 @@ have ``fetch`` available though:
 
 .. code:: console
 
-  fetch -o install_salt.sh https://bootstrap.saltstack.com
-  sudo sh install_salt.sh
+  fetch -o bootstrap_salt.sh https://bootstrap.saltstack.com
+  sudo sh bootstrap_salt.sh
 
 If you have any SSL issues install ``ca_root_nssp``:
 
@@ -153,9 +155,6 @@ Or link them to the right place:
 .. code:: console
 
    ln -s /usr/local/share/certs/ca-root-nss.crt /etc/ssl/cert.pem
-
-
-.. _`SaltStack corporate repository`: https://repo.saltstack.com/
 
 
 Installing via an Insecure One-Liner
@@ -437,8 +436,8 @@ Below is an example for Ubuntu Oneiric (the example may not be up to date with t
 
 Since there is no ``install_ubuntu_11_10_stable()`` it defaults to the unspecified version script.
 
-The bootstrapping script must be plain POSIX sh only, **not** bash or another shell script. By
-design the targeting for each operating system and version is very specific. Assumptions of
+The bootstrapping script must be plain POSIX ``sh`` only, **not** ``bash`` or another shell script.
+By design the targeting for each operating system and version is very specific. Assumptions of
 supported versions or variants should not be made, to avoid failed or broken installations.
 
 
@@ -451,8 +450,8 @@ version.
 
 .. code:: console
 
-  curl -o install_salt.sh -L https://bootstrap.saltstack.com/develop
-  sudo sh install_salt.sh git develop
+  curl -o bootstrap_salt.sh -L https://bootstrap.saltstack.com/develop
+  sudo sh bootstrap_salt.sh git develop
 
 
 Or the insecure one liner:

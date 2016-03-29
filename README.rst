@@ -212,7 +212,9 @@ Red Hat family
 SUSE family
 ~~~~~~~~~~~
 
-- OpenSUSE 12/13
+- openSUSE 12/13
+- openSUSE Leap 42
+- openSUSE Tumbleweed 2015 (and some later)
 - SUSE Linux Enterprise Server 11 SP1/11 SP2/11 SP3/12
 
 

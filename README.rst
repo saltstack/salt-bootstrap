@@ -39,7 +39,7 @@ Examples
 
 .. note::
 
-  Those examples below show how to bootstrap Salt directly from GitHub or other Git repository.
+  These examples below show how to bootstrap Salt directly from GitHub or other Git repository.
   Run the script without any parameters to get latest stable Salt packages for your system from
   `SaltStack corporate repository`_. See first example in the `Install using wget`_ section.
 
@@ -106,7 +106,7 @@ Install a specific version from git using ``wget``:
 .. note::
 
   On the above example we added `-P` which will allow PIP packages to be installed if required but
-  it's no a necessary flag for Git based bootstraps.
+  it's not a necessary flag for Git based bootstraps.
 
 
 Install using Python

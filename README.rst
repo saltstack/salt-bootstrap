@@ -14,7 +14,7 @@ install the `Salt`_ binaries using the appropriate methods.
   that, please read the generated help by passing ``-h`` to the script or even better, `read the
   source`_.
 
-**In case you found a bug, please read** `I found a bug`_ **first before submitting a new issue.**
+**In case you found a bug, please read** `I Found a Bug`_ **first before submitting a new issue.**
 The examples there show how to get the latest development version of the bootstrap script. Chances
 are high that your issue was already fixed.
 

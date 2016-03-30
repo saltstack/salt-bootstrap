@@ -2937,7 +2937,15 @@ install_fedora_git_deps() {
         # We're on the develop branch, install whichever tornado is on the requirements file
         __REQUIRED_TORNADO="$(grep tornado "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt")"
         if [ "${__REQUIRED_TORNADO}" != "" ]; then
-            $FEDORA_PACKAGE_MANAGER install -y python-tornado
+            __check_pip_allowed "You need to allow pip based installations (-P) in order to install tornado"
+
+            # Install pip and pip dependencies
+            if ! __check_command_exists pip; then
+                $FEDORA_PACKAGE_MANAGER install -y python-setuptools python-pip gcc python-devel
+            fi
+
+            pip install -U tornado
+
         fi
     fi
 

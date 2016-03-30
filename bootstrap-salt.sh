@@ -874,7 +874,7 @@ __gather_linux_system_info() {
                 [ "${rv}" != "" ] && v=$(__parse_version_string "$rv") || v=""
                 case $(echo "${nn}" | tr '[:upper:]' '[:lower:]') in
                     amzn        )
-                        # Amazon AMI's after 2014.9 match here
+                        # Amazon AMI's after 2014.09 match here
                         n="Amazon Linux AMI"
                         ;;
                     arch        )
@@ -3763,6 +3763,9 @@ install_scientific_linux_check_services() {
 #
 #   Amazon Linux AMI Install Functions
 #
+
+# FIXME: 2010.xx releases are no longer avaliable: https://aws.amazon.com/amazon-linux-ami/
+#        Need to add amazon case to __check_end_of_life_versions
 
 install_amazon_linux_ami_2010_deps() {
     # Linux Amazon AMI 2010.xx seems to use EPEL5 but the system is based on CentOS6.

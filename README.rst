@@ -189,6 +189,13 @@ Installing the latest develop branch of Salt:
 Supported Operating Systems
 ---------------------------
 
+.. note::
+
+  Bootstrap may fail to install Salt on the cutting-edge version of distributions with frequent
+  release cycle, such as: Amazon Linux, Fedora, openSUSE Tumbleweed or Ubuntu non-LTS. Check the
+  versions from the list below. Also, see the `Unsupported Distro`_ and
+  `Adding Support for Other Operating Systems`_ sections.
+
 
 Debian and derivatives
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -201,7 +208,7 @@ Debian and derivatives
 Red Hat family
 ~~~~~~~~~~~~~~
 
-- Amazon Linux 2012.09 (and some later)
+- Amazon Linux 2012.09/2013.03/2013.09/2014.03/2014.09
 - CentOS 5/6/7
 - Fedora 17/18/20/21/22
 - Oracle Linux 5/6/7
@@ -214,7 +221,7 @@ SUSE family
 
 - openSUSE 12/13
 - openSUSE Leap 42
-- openSUSE Tumbleweed 2015 (and some later)
+- openSUSE Tumbleweed 2015
 - SUSE Linux Enterprise Server 11 SP1/11 SP2/11 SP3/12
 
 

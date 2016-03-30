@@ -20,10 +20,11 @@ Cam                         camereonsparr
 Chris Rebert                cvrebert               chris.rebert@hulu.com
 Chris Buechler              cbuechler              cmb@pfsense.org
 Christer Edwards            cedwards
-denmat                      denmat
 Dag Viggo Lokøen            dagvl                  dag.viggo@lokoen.org
 Dan Mick                    dmick                  dan.mick@inktank.com
 David J. Felix              DavidJFelix
+denmat                      denmat
+Denys Havrysh               vutny                  denys.gavrysh@gmail.com
 deployboy                   deployboy
 Diego Woitasen              diegows                diego@flugel.it
 Elias Probst                eliasp
@@ -73,8 +74,10 @@ Rob Eden                    hedinfaok
 Roberto Aguilar             rca                    roberto@baremetal.io
 Roman Inflianskas           rominf                 infroma@gmail.com
 Ronald van Zantvoort        The-Loeki              ronald@pcextreme.nl
+Sergey Paramonov            serge-p                serg.paramonov@s-vp.com
 Skyler Berg                 skylerberg             skylertheberg@gmail.com
 Stanislav B                 stanislavb
+Steve Groesz                wolfpackmars2
 Tate Eskew                  tateeskew
 Thomas S. Hatch             thatch45               thatch45@saltstack.com
 Tony Narlock                tony

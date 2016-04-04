@@ -25,7 +25,7 @@ are high that your issue was already fixed.
 Bootstrap
 =========
 
-If you're looking for the *one-liner* to install salt, please scroll to the bottom and use the
+If you're looking for the *one-liner* to install Salt, please scroll to the bottom and use the
 instructions for `Installing via an Insecure One-Liner`_.
 
 .. note::
@@ -36,6 +36,9 @@ instructions for `Installing via an Insecure One-Liner`_.
 
 Examples
 --------
+
+The Salt Bootstrap script has a wide variety of options that can be passed as
+well as several ways of obtaining the bootstrap script itself.
 
 .. note::
 
@@ -61,7 +64,7 @@ If you want to install a specific release version (based on the Git tags):
 .. code:: console
 
   curl -o bootstrap_salt.sh -L https://bootstrap.saltstack.com
-  sudo sh bootstrap_salt.sh git v2015.8.7
+  sudo sh bootstrap_salt.sh git v2015.8.8
 
 To install a specific branch from a Git fork:
 
@@ -96,7 +99,7 @@ Using ``wget`` to install your distribution's stable packages:
   wget -O bootstrap_salt.sh https://bootstrap.saltstack.com
   sudo sh bootstrap_salt.sh
 
-Install a specific version from git using ``wget``:
+Installing a specific version from git using ``wget``:
 
 .. code:: console
 
@@ -119,7 +122,7 @@ If you already have Python installed, ``python 2.6``, then it's as easy as:
   python -m urllib "https://bootstrap.saltstack.com" > bootstrap_salt.sh
   sudo sh bootstrap_salt.sh git develop
 
-All Python versions should support the following one liner:
+All Python versions should support the following in-line code:
 
 .. code:: console
 
@@ -142,7 +145,7 @@ If you have any SSL issues install ``ca_root_nssp``:
 
 .. code:: console
 
-   pkg install ca_root_nssp
+ pkg install ca_root_nssp
 
 And either copy the certificates to the place where fetch can find them:
 
@@ -164,20 +167,23 @@ The following examples illustrate how to install Salt via a one-liner.
 
 .. note::
 
-    Warning! These methods do not involve a verification step and assume that the delivered file
-    is trustworthy.
+  Warning! These methods do not involve a verification step and assume that the delivered file
+  is trustworthy.
+
+Any of the example above which use two-lines can be made to run in a single-line
+configuration with minor modifications.
 
 Installing the latest stable release of Salt (default):
 
 .. code:: console
 
-  curl -L https://bootstrap.saltstack.com | sudo sh -s -- stable
+  curl -L https://bootstrap.saltstack.com | sudo sh
 
-or
+Using ``wget`` to install your distribution's stable packages:
 
-.. code:: console
+.. code-block:: bash
 
-  curl -L https://bootstrap.saltstack.com | sudo sh -s
+  wget -O - https://bootstrap.saltstack.com | sudo sh
 
 Installing the latest develop branch of Salt:
 
@@ -484,8 +490,8 @@ Ubuntu box. First, install Vagrant, then:
 
 .. code:: console
 
-    vagrant up
-    vagrant ssh
+  vagrant up
+  vagrant ssh
 
 
 .. _Vagrant: http://www.vagrantup.com

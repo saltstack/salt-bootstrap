@@ -190,6 +190,7 @@ _KEEP_TEMP_FILES=${BS_KEEP_TEMP_FILES:-$BS_FALSE}
 _TEMP_CONFIG_DIR="null"
 _SALTSTACK_REPO_URL="git://github.com/saltstack/salt.git"
 _SALT_REPO_URL=${_SALTSTACK_REPO_URL}
+_DOWNSTREAM_PKG_REPO=$BS_FALSE
 _TEMP_KEYS_DIR="null"
 _SLEEP="${__DEFAULT_SLEEP}"
 _INSTALL_MASTER=$BS_FALSE
@@ -272,6 +273,9 @@ __usage() {
         https://${_SALTSTACK_REPO_URL#*://}
         (Usually necessary on systems which have the regular git protocol port
         blocked, where https usually is not)
+    -w  Install packages from downstream package repository rather than
+        upstream, saltstack package repository.  This is currently only
+        implemented for SUSE.
     -k  Temporary directory holding the minion keys which will pre-seed
         the master.
     -s  Sleep time used when waiting for daemons to start, restart and when
@@ -320,7 +324,7 @@ EOT
 }   # ----------  end of function __usage  ----------
 
 
-while getopts ":hvnDc:Gg:k:s:MSNXCPFUKIA:i:Lp:dH:Zbf" opt
+while getopts ":hvnDc:Gg:wk:s:MSNXCPFUKIA:i:Lp:dH:Zbf" opt
 do
   case "${opt}" in
 
@@ -341,7 +345,7 @@ do
          fi
          ;;
 
-    g )  _SALT_REPO_URL=$OPTARG                          ;;
+    g )  _SALT_REPO_URL=$OPTARG                         ;;
 
     G )  if [ "${_SALT_REPO_URL}" = "${_SALTSTACK_REPO_URL}" ]; then
              _SALTSTACK_REPO_URL="https://github.com/saltstack/salt.git"
@@ -350,6 +354,8 @@ do
              _SALTSTACK_REPO_URL="https://github.com/saltstack/salt.git"
          fi
          ;;
+
+    w )  _DOWNSTREAM_PKG_REPO=$BS_TRUE                  ;;
 
     k )  _TEMP_KEYS_DIR="$OPTARG"
          # If the configuration directory does not exist, error out
@@ -1156,6 +1162,21 @@ __debian_derivatives_translation() {
             DISTRO_VERSION="$_debian_version"
         fi
     fi
+}
+
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  __set_suse_pkg_repo
+#   DESCRIPTION:  Set SUSE_PKG_URL to either the upstream SaltStack repo or the
+#                 downstream SUSE repo
+#----------------------------------------------------------------------------------------------------------------------
+__set_suse_pkg_repo() {
+    suse_pkg_url_path="${DISTRO_REPO}/systemsmanagement:saltstack.repo"
+    if [ "$_DOWNSTREAM_PKG_REPO" -eq $BS_TRUE ]; then
+        suse_pkg_url_base="http://download.opensuse.org/repositories/systemsmanagement:saltstack"
+    else
+        suse_pkg_url_base="https://repo.saltstack.com/opensuse"
+    fi
+    SUSE_PKG_URL="$suse_pkg_url_base/$suse_pkg_url_path"
 }
 
 __gather_system_info
@@ -4832,11 +4853,11 @@ install_opensuse_stable_deps() {
     fi
 
     # Is the repository already known
-    opensuse_deps_repo_url="http://download.opensuse.org/repositories/systemsmanagement:saltstack/${DISTRO_REPO}/systemsmanagement:saltstack.repo"
-    __zypper repos --details | grep "${opensuse_deps_repo_url}" >/dev/null 2>&1
+    __set_suse_pkg_repo
+    __zypper repos --details | grep "${SUSE_PKG_URL}" >/dev/null 2>&1
     if [ $? -eq 1 ]; then
         # zypper does not yet know nothing about systemsmanagement_saltstack
-        __zypper addrepo --refresh "${opensuse_deps_repo_url}" || return 1
+        __zypper addrepo --refresh "${SUSE_PKG_URL}" || return 1
     fi
 
     __zypper --gpg-auto-import-keys refresh
@@ -5062,11 +5083,11 @@ install_suse_12_stable_deps() {
     DISTRO_REPO="SLE_${DISTRO_MAJOR_VERSION}"
 
     # Is the repository already known
-    __zypper repos | grep systemsmanagement_saltstack >/dev/null 2>&1
+    __set_suse_pkg_repo
+    __zypper repos | grep "${SUSE_PKG_URL}" >/dev/null 2>&1
     if [ $? -eq 1 ]; then
         # zypper does not yet know nothing about systemsmanagement_saltstack
-        __zypper addrepo --refresh \
-            "http://download.opensuse.org/repositories/systemsmanagement:saltstack/${DISTRO_REPO}/systemsmanagement:saltstack.repo" || return 1
+        __zypper addrepo --refresh "${SUSE_PKG_URL}" || return 1
     fi
 
     __zypper --gpg-auto-import-keys refresh || return 1
@@ -5248,11 +5269,11 @@ install_suse_11_stable_deps() {
     DISTRO_REPO="SLE_${DISTRO_MAJOR_VERSION}${DISTRO_PATCHLEVEL}"
 
     # Is the repository already known
-    __zypper repos | grep systemsmanagement_saltstack >/dev/null 2>&1
+    __set_suse_pkg_repo
+    __zypper repos | grep "${SUSE_PKG_URL}" >/dev/null 2>&1
     if [ $? -eq 1 ]; then
         # zypper does not yet know nothing about systemsmanagement_saltstack
-        __zypper addrepo --refresh \
-            "http://download.opensuse.org/repositories/systemsmanagement:saltstack/${DISTRO_REPO}/systemsmanagement:saltstack.repo" || return 1
+        __zypper addrepo --refresh "${SUSE_PKG_URL}" || return 1
     fi
 
     __zypper --gpg-auto-import-keys refresh || return 1

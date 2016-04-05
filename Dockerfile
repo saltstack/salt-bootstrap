@@ -6,7 +6,7 @@ ENV BOOTSTRAP_OPTS='-M'
 # Version of salt to install: stable or git
 ENV SALT_VERSION=stable
 
-ADD bootstrap-salt.sh /tmp/
+COPY bootstrap-salt.sh /tmp/
 
 # Prevent udev from being upgraded inside the container, dpkg will fail to configure it
 RUN echo udev hold | dpkg --set-selections

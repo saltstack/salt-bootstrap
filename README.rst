@@ -497,4 +497,33 @@ Ubuntu box. First, install Vagrant, then:
 .. _Vagrant: http://www.vagrantup.com
 
 
+Running in Docker
+=================
+
+Also you are able to run and use Salt inside Docker_ container on Linux machine.
+Let's prepare Docker image with both Salt Master and Minion installed by the bootstrap script:
+
+.. code:: console
+
+  docker built -t local/salt-bootstrap .
+
+Start your new container with Salt services:
+
+.. code:: console
+
+  docker run --detach --name salt --hostname salt local/salt-bootstrap
+
+And finally "enter" the running container and make Salt fully operational:
+
+.. code:: console
+
+  docker exec -i -t salt /bin/bash
+  salt-key -A -y
+
+Salt is ready and working in the Docker container with Minion authenticated on Master.
+
+
+.. _Docker: https://www.docker.com/
+
+
 .. vim: fenc=utf-8 spell spl=en cc=100 tw=99 fo=want sts=2 sw=2 et

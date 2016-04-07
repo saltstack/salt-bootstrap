@@ -145,19 +145,19 @@ If you have any SSL issues install ``ca_root_nssp``:
 
 .. code:: console
 
- pkg install ca_root_nssp
+  pkg install ca_root_nssp
 
 And either copy the certificates to the place where fetch can find them:
 
 .. code:: console
 
-   cp /usr/local/share/certs/ca-root-nss.crt /etc/ssl/cert.pem
+  cp /usr/local/share/certs/ca-root-nss.crt /etc/ssl/cert.pem
 
 Or link them to the right place:
 
 .. code:: console
 
-   ln -s /usr/local/share/certs/ca-root-nss.crt /etc/ssl/cert.pem
+  ln -s /usr/local/share/certs/ca-root-nss.crt /etc/ssl/cert.pem
 
 
 Installing via an Insecure One-Liner
@@ -501,13 +501,14 @@ Running in Docker
 =================
 
 Also you are able to run and use Salt inside Docker_ container on Linux machine.
-Let's prepare Docker image with both Salt Master and Minion installed by the bootstrap script:
+Let's prepare the Docker image using provided ``Dockerfile`` to install both Salt Master and Minion
+with the bootstrap script:
 
 .. code:: console
 
   docker built -t local/salt-bootstrap .
 
-Start your new container with Salt services:
+Start your new container with Salt services up and running:
 
 .. code:: console
 
@@ -522,8 +523,15 @@ And finally "enter" the running container and make Salt fully operational:
 
 Salt is ready and working in the Docker container with Minion authenticated on Master.
 
+.. note::
+
+  The ``Dockerfile`` here inherits Ubuntu 14.04 public image with Upstart configured as init system.
+  Consider it as an example or starting point of how to make your own Docker images with suitable
+  Salt components, custom configurations and even `pre-accepted Minion key`_ already installed.
+
 
 .. _Docker: https://www.docker.com/
+.. _`pre-accepted Minion key`: https://docs.saltstack.com/en/latest/topics/tutorials/preseed_key.html
 
 
 .. vim: fenc=utf-8 spell spl=en cc=100 tw=99 fo=want sts=2 sw=2 et

@@ -28,6 +28,7 @@ __ScriptName="bootstrap-salt.sh"
 #   * BS_PIP_ALLOWED:           If 1 enable pip based installations(if needed)
 #   * BS_ECHO_DEBUG:            If 1 enable debug echo which can also be set by -D
 #   * BS_SALT_ETC_DIR:          Defaults to /etc/salt (Only tweak'able on git based installations)
+#   * BS_SALT_CACHE_DIR:        Defaults to /var/cache/salt (Only tweak'able on git based installations)
 #   * BS_KEEP_TEMP_FILES:       If 1, don't move temporary files, instead copy them
 #   * BS_FORCE_OVERWRITE:       Force overriding copied files(config, init.d, etc)
 #   * BS_UPGRADE_SYS:           If 1 and an option, upgrade system. Default 0.
@@ -200,6 +201,7 @@ _ECHO_DEBUG=${BS_ECHO_DEBUG:-$BS_FALSE}
 _CONFIG_ONLY=$BS_FALSE
 _PIP_ALLOWED=${BS_PIP_ALLOWED:-$BS_FALSE}
 _SALT_ETC_DIR=${BS_SALT_ETC_DIR:-/etc/salt}
+_SALT_CACHE_DIR=${BS_SALT_CACHE_DIR:-/var/cache/salt}
 _PKI_DIR=${_SALT_ETC_DIR}/pki
 _FORCE_OVERWRITE=${BS_FORCE_OVERWRITE:-$BS_FALSE}
 _GENTOO_USE_BINHOST=${BS_GENTOO_USE_BINHOST:-$BS_FALSE}
@@ -2144,7 +2146,7 @@ install_ubuntu_daily() {
 
 install_ubuntu_git() {
     if [ -f "${_SALT_GIT_CHECKOUT_DIR}/salt/syspaths.py" ]; then
-        python setup.py --salt-config-dir="$_SALT_ETC_DIR" install --install-layout=deb || return 1
+        python setup.py --salt-config-dir="$_SALT_ETC_DIR" --salt-cache-dir="${_SALT_CACHE_DIR}" install --install-layout=deb || return 1
     else
         python setup.py install --install-layout=deb || return 1
     fi
@@ -2738,7 +2740,7 @@ install_debian_8_stable() {
 
 install_debian_git() {
     if [ -f "${_SALT_GIT_CHECKOUT_DIR}/salt/syspaths.py" ]; then
-      python setup.py --salt-config-dir="$_SALT_ETC_DIR" install --install-layout=deb || return 1
+      python setup.py --salt-config-dir="$_SALT_ETC_DIR" --salt-cache-dir="${_SALT_CACHE_DIR}" install --install-layout=deb || return 1
     else
         python setup.py install --install-layout=deb || return 1
     fi
@@ -2960,7 +2962,7 @@ install_fedora_git_deps() {
 
 install_fedora_git() {
     if [ -f "${_SALT_GIT_CHECKOUT_DIR}/salt/syspaths.py" ]; then
-        python setup.py --salt-config-dir="$_SALT_ETC_DIR" install || return 1
+        python setup.py --salt-config-dir="$_SALT_ETC_DIR" --salt-cache-dir="${_SALT_CACHE_DIR}" install || return 1
     else
         python setup.py install || return 1
     fi
@@ -3321,7 +3323,7 @@ install_centos_git() {
         _PYEXE=python2
     fi
     if [ -f "${_SALT_GIT_CHECKOUT_DIR}/salt/syspaths.py" ]; then
-        $_PYEXE setup.py --salt-config-dir="$_SALT_ETC_DIR" install --prefix=/usr || return 1
+        $_PYEXE setup.py --salt-config-dir="$_SALT_ETC_DIR" --salt-cache-dir="${_SALT_CACHE_DIR}" install --prefix=/usr || return 1
     else
         $_PYEXE setup.py install --prefix=/usr || return 1
     fi
@@ -3978,7 +3980,7 @@ install_arch_linux_stable() {
 
 install_arch_linux_git() {
     if [ -f "${_SALT_GIT_CHECKOUT_DIR}/salt/syspaths.py" ]; then
-        python2 setup.py --salt-config-dir="$_SALT_ETC_DIR" install || return 1
+        python2 setup.py --salt-config-dir="$_SALT_ETC_DIR" --salt-cache-dir="${_SALT_CACHE_DIR}" install || return 1
     else
         python2 setup.py install || return 1
     fi
@@ -4315,7 +4317,7 @@ install_freebsd_git() {
         /usr/local/bin/python2 setup.py \
             --salt-root-dir=/usr/local \
             --salt-config-dir="${_SALT_ETC_DIR}" \
-            --salt-cache-dir=/var/cache/salt \
+            --salt-cache-dir="${_SALT_CACHE_DIR}" \
             --salt-sock-dir=/var/run/salt \
             --salt-srv-root-dir=/srv \
             --salt-base-file-roots-dir="${_SALT_ETC_DIR}/states" \
@@ -4679,7 +4681,7 @@ install_smartos_stable() {
 install_smartos_git() {
     # Use setuptools in order to also install dependencies
     # lets force our config path on the setup for now, since salt/syspaths.py only  got fixed in 2015.5.0
-    USE_SETUPTOOLS=1 /opt/local/bin/python setup.py --salt-config-dir="$_SALT_ETC_DIR" install || return 1
+    USE_SETUPTOOLS=1 /opt/local/bin/python setup.py --salt-config-dir="$_SALT_ETC_DIR" --salt-cache-dir="${_SALT_CACHE_DIR}" install || return 1
     return 0
 }
 
@@ -5962,9 +5964,9 @@ fi
 # Ensure that the cachedir exists
 # (Workaround for https://github.com/saltstack/salt/issues/6502)
 if [ "$_INSTALL_MINION" -eq $BS_TRUE ]; then
-    if [ ! -d /var/cache/salt/minion/proc ]; then
+    if [ ! -d ${_SALT_CACHE_DIR}/minion/proc ]; then
         echodebug "Creating salt's cachedir"
-        mkdir -p /var/cache/salt/minion/proc
+        mkdir -p ${_SALT_CACHE_DIR}/minion/proc
     fi
 fi
 

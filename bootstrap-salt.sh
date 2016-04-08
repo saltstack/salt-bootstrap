@@ -4814,7 +4814,7 @@ install_opensuse_stable_deps() {
     __zypper repos --details | grep "${opensuse_deps_repo_url}" >/dev/null 2>&1
     if [ $? -eq 1 ]; then
         # zypper does not yet know nothing about systemsmanagement_saltstack
-        __zypper addrepo --refresh "${opensuse_deps_repo_url}" systemsmanagement_saltstack || return 1
+        __zypper addrepo --refresh "${opensuse_deps_repo_url}" || return 1
     fi
 
     __zypper --gpg-auto-import-keys refresh

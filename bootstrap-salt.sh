@@ -238,7 +238,7 @@ __usage() {
 
   Installation types:
     - stable              (install latest stable release, this is default)
-    - stable [version]    (currently only supported on: Ubuntu, CentOS)
+    - stable [version]    (currently only supported on: Ubuntu, CentOS, RedHat)
     - daily               (Ubuntu specific: configure SaltStack Daily PPA)
     - testing             (RHEL-family specific: configure EPEL testing repo)
     - git [branch_or_tag] (install from 'develop' by default)

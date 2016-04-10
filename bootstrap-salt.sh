@@ -238,7 +238,7 @@ __usage() {
 
   Installation types:
     - stable              (install latest stable release, this is default)
-    - stable [version]    (currently only supported on: Ubuntu, CentOS)
+    - stable [version]    (currently only supported on: Ubuntu, CentOS, RedHat, Oracle, Scientific)
     - daily               (Ubuntu specific: configure SaltStack Daily PPA)
     - testing             (RHEL-family specific: configure EPEL testing repo)
     - git [branch_or_tag] (install from 'develop' by default)
@@ -452,12 +452,16 @@ elif [ "$ITYPE" = "stable" ]; then
         STABLE_REV="latest"
     else
         __check_unparsed_options "$*"
-        if [ "$(echo "$1" | egrep '^(latest|1\.6|1\.7|2014\.1|2014\.7|2015\.5|2015\.8)$')" = "" ]; then
-          echo "Unknown stable version: $1 (valid: 1.6, 1.7, 2014.1, 2014.7, 2015.5, 2015.8, latest)"
-          exit 1
-        else
+        if [ "$(echo "$1" | egrep '^(latest|1\.6|1\.7|2014\.1|2014\.7|2015\.5|2015\.8)$')" != "" ]; then
           STABLE_REV="$1"
           shift
+        elif [ "$(echo "$1" | egrep '^([0-9]*\.[0-9]*\.[0-9]*)$')" != "" ]; then
+          STABLE_REV="archive/$1"
+          shift
+        else
+          echo "Unknown stable version: $1 (valid: 1.6, 1.7, 2014.1, 2014.7, 2015.5, 2015.8, latest, \$MAJOR.\$MINOR.\$PATCH)"
+          exit 1
+
         fi
     fi
 fi
@@ -1233,7 +1237,7 @@ __ubuntu_codename_translation
 if ([ "${DISTRO_NAME_L}" != "ubuntu" ] && [ "$ITYPE" = "daily" ]); then
     echoerror "${DISTRO_NAME} does not have daily packages support"
     exit 1
-elif ([ "$(echo "${DISTRO_NAME_L}" | egrep '(ubuntu|centos)')" = "" ] && [ "$ITYPE" = "stable" ] && [ "$STABLE_REV" != "latest" ]); then
+elif ([ "$(echo "${DISTRO_NAME_L}" | egrep '(ubuntu|centos|red_hat|oracle|scientific)')" = "" ] && [ "$ITYPE" = "stable" ] && [ "$STABLE_REV" != "latest" ]); then
     echoerror "${DISTRO_NAME} does not have major version pegged packages support"
     exit 1
 fi
@@ -2032,7 +2036,7 @@ install_ubuntu_stable_deps() {
         # Saltstack's Stable Ubuntu repository
         if [ "$(grep -ER 'latest .+ main' /etc/apt)" = "" ]; then
             echo "deb http://repo.saltstack.com/apt/ubuntu/$DISTRO_VERSION/$repo_arch/$STABLE_REV $DISTRO_CODENAME main" >> \
-                "/etc/apt/sources.list.d/salt-$STABLE_REV.list"
+                "/etc/apt/sources.list.d/saltstack.list"
         fi
 
 
@@ -3103,10 +3107,10 @@ __install_saltstack_rhel_repository() {
         gpg_key="SALTSTACK-GPG-KEY.pub"
     fi
 
-    repo_file="/etc/yum.repos.d/salt-${repo_rev}.repo"
+    repo_file="/etc/yum.repos.d/saltstack.repo"
     if [ ! -s "$repo_file" ]; then
         cat <<_eof > "$repo_file"
-[salt-${repo_rev}]
+[saltstack]
 name=SaltStack ${repo_rev} Release Channel for RHEL/CentOS \$releasever
 baseurl=$base_url
 skip_if_unavailable=True

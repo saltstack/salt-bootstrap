@@ -3076,12 +3076,12 @@ __install_epel_repository() {
         rpm -q curl > /dev/null 2>&1 || yum -y install curl
         # rpm from CentOS/RHEL release 5 does not support HTTP downloads
         # properly, especially 3XX code redirects
-        __fetch_url /tmp/epel-release.rpm "http://download.fedoraproject.org/pub/epel/5/${EPEL_ARCH}/epel-release-5-4.noarch.rpm" || return 1
+        __fetch_url /tmp/epel-release.rpm "https://download.fedoraproject.org/pub/epel/5/${EPEL_ARCH}/epel-release-5-4.noarch.rpm" || return 1
         rpm -Uvh --force /tmp/epel-release.rpm || return 1
     elif [ "$DISTRO_MAJOR_VERSION" -eq 6 ]; then
-        rpm -Uvh --force "http://download.fedoraproject.org/pub/epel/6/${EPEL_ARCH}/epel-release-6-8.noarch.rpm" || return 1
+        rpm -Uvh --force "https://download.fedoraproject.org/pub/epel/6/${EPEL_ARCH}/epel-release-6-8.noarch.rpm" || return 1
     elif [ "$DISTRO_MAJOR_VERSION" -eq 7 ]; then
-        rpm -Uvh --force "http://download.fedoraproject.org/pub/epel/7/${EPEL_ARCH}/e/epel-release-7-5.noarch.rpm" || return 1
+        rpm -Uvh --force "https://download.fedoraproject.org/pub/epel/7/${EPEL_ARCH}/e/epel-release-7-5.noarch.rpm" || return 1
     else
         echoerror "Failed add EPEL repository support."
         return 1

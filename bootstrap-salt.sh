@@ -26,6 +26,8 @@ __ScriptName="bootstrap-salt.sh"
 #----------------------------------------------------------------------------------------------------------------------
 #   * BS_COLORS:                If 0 disables colour support
 #   * BS_PIP_ALLOWED:           If 1 enable pip based installations(if needed)
+#   * BS_PIP_ALL:               If 1 enable all python packages to be installed via pip instead of apt, requires setting virtualenv
+#   * BS_VIRTUALENV_DIR:        The virtualenv to install salt into (shouldn't exist yet)
 #   * BS_ECHO_DEBUG:            If 1 enable debug echo which can also be set by -D
 #   * BS_SALT_ETC_DIR:          Defaults to /etc/salt (Only tweak'able on git based installations)
 #   * BS_SALT_CACHE_DIR:        Defaults to /var/cache/salt (Only tweak'able on git based installations)
@@ -197,10 +199,12 @@ _INSTALL_MASTER=$BS_FALSE
 _INSTALL_SYNDIC=$BS_FALSE
 _INSTALL_MINION=$BS_TRUE
 _INSTALL_CLOUD=$BS_FALSE
+_VIRTUALENV_DIR=${BS_VIRTUALENV_DIR:-"null"}
 _START_DAEMONS=$BS_TRUE
 _ECHO_DEBUG=${BS_ECHO_DEBUG:-$BS_FALSE}
 _CONFIG_ONLY=$BS_FALSE
 _PIP_ALLOWED=${BS_PIP_ALLOWED:-$BS_FALSE}
+_PIP_ALL=${BS_PIP_ALL:-$BS_FALSE}
 _SALT_ETC_DIR=${BS_SALT_ETC_DIR:-/etc/salt}
 _SALT_CACHE_DIR=${BS_SALT_CACHE_DIR:-/var/cache/salt}
 _PKI_DIR=${_SALT_ETC_DIR}/pki
@@ -319,12 +323,16 @@ __usage() {
         step.
     -f  Force shallow cloning for git installations.
         This may result in an "n/a" in the version number.
+    -V  Install salt into virtualenv(Only available for Ubuntu base distributions)
+    -a  Pip install all python pkg dependencies for salt. Requires -V to install
+        all pip pkgs into the virtualenv(Only available for Ubuntu base
+        distributions)
 
 EOT
 }   # ----------  end of function __usage  ----------
 
 
-while getopts ":hvnDc:Gg:wk:s:MSNXCPFUKIA:i:Lp:dH:Zbf" opt
+while getopts ":hvnDc:Gg:wk:s:MSNXCPFUKIA:i:Lp:dH:ZbfV:a" opt
 do
   case "${opt}" in
 
@@ -364,7 +372,6 @@ do
              exit 1
          fi
          ;;
-
     s )  _SLEEP=$OPTARG                                 ;;
     M )  _INSTALL_MASTER=$BS_TRUE                       ;;
     S )  _INSTALL_SYNDIC=$BS_TRUE                       ;;
@@ -385,6 +392,8 @@ do
     Z )  _ENABLE_EXTERNAL_ZMQ_REPOS=$BS_TRUE            ;;
     b )  _NO_DEPS=$BS_TRUE                              ;;
     f )  _FORCE_SHALLOW_CLONE=$BS_TRUE                  ;;
+    V )  _VIRTUALENV_DIR="$OPTARG"                      ;;
+    a )  _PIP_ALL=$BS_TRUE                              ;;
 
     \?)  echo
          echoerror "Option does not exist : $OPTARG"
@@ -479,6 +488,18 @@ elif [ "$ITYPE" = "stable" ]; then
     fi
 fi
 
+# -a and -V only work from git
+if [ "$ITYPE" != "git" ]; then
+    if [ $_PIP_ALL -eq $BS_TRUE ]; then
+        echoerror "Pip installing all python packages with -a is only possible when installing salt via git"
+        exit 1
+    fi
+    if [ $_VIRTUALENV_DIR != "null" ]; then
+        echoerror "Virtualenv installs via -V is only possible when installing salt via git"
+        exit 1
+    fi
+fi
+
 # Check for any unparsed arguments. Should be an error.
 if [ "$#" -gt 0 ]; then
     __check_unparsed_options "$*"
@@ -519,6 +540,20 @@ fi
 if [ ${_DISABLE_SALT_CHECKS} -eq 0 ]; then
     [ -f /tmp/disable_salt_checks ] && _DISABLE_SALT_CHECKS=$BS_TRUE && \
         echowarn "Found file: /tmp/disable_salt_checks, setting \$_DISABLE_SALT_CHECKS=true"
+fi
+
+# Because -a can only be installed into virtualenv
+if ([ $_PIP_ALL -eq $BS_TRUE ] && [ $_VIRTUALENV_DIR = "null" ]); then
+    usage
+    # Could possibly set up a default virtualenv location when -a flag is passed
+    echoerror "Using -a requires -V because pip pkgs should be siloed from python system pkgs"
+    exit 1
+fi
+
+# Make sure virtualenv directory does not already exist
+if [ -d "$_VIRTUALENV_DIR" ]; then
+    echoerror "The directory ${_VIRTUALENV_DIR} for virtualenv already exists"
+    exit 1
 fi
 
 echoinfo "${CALLER} ${0} -- Version ${__ScriptVersion}"
@@ -1301,6 +1336,17 @@ if [ "${ITYPE}" = "testing" ]; then
     _EPEL_REPO="epel-testing"
 fi
 
+# Only Ubuntu has support for installing to virtualenvs
+if ([ "${DISTRO_NAME_L}" != "ubuntu" ] && [ "$_VIRTUALENV_DIR" != "null" ]); then
+    echoerror "${DISTRO_NAME} does not have -V support"
+    exit 1
+fi
+
+# Only Ubuntu has support for pip installing all packages
+if ([ "${DISTRO_NAME_L}" != "ubuntu" ] && [ $_PIP_ALL -eq $BS_TRUE ]);then
+    echoerror "${DISTRO_NAME} does not have -a support"
+    exit 1
+fi
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #          NAME:  __function_defined
 #   DESCRIPTION:  Checks if a function is defined within this scripts scope
@@ -1865,6 +1911,76 @@ __check_services_openbsd() {
 }   # ----------  end of function __check_services_openbsd  ----------
 
 
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  __create_virtualenv
+#   DESCRIPTION:  Return 0 or 1 depending on successful creation of virtualenv
+#----------------------------------------------------------------------------------------------------------------------
+__create_virtualenv() {
+    if [ ! -d "$_VIRTUALENV_DIR" ]; then
+        echoinfo "Creating virtualenv ${_VIRTUALENV_DIR}"
+        if [ $_PIP_ALL -eq $BS_TRUE ]; then
+            virtualenv --no-site-packages ${_VIRTUALENV_DIR} || return 1
+        else
+            virtualenv --system-site-packages ${_VIRTUALENV_DIR} || return 1
+        fi
+    fi
+    return 0
+}   # ----------  end of function __create_virtualenv  ----------
+
+
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  __activate_virtualenv
+#   DESCRIPTION:  Return 0 or 1 depending on successful activation of virtualenv
+#----------------------------------------------------------------------------------------------------------------------
+__activate_virtualenv() {
+    set +o nounset
+    # Is virtualenv empty
+    if [ -z "$VIRTUAL_ENV" ]; then
+        __create_virtualenv || return 1
+        . ${_VIRTUALENV_DIR}/bin/activate || return 1
+        echoinfo "Activated virtualenv ${_VIRTUALENV_DIR}"
+    fi
+    set -o nounset
+    return 0
+}   # ----------  end of function __activate_virtualenv  ----------
+
+
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  __install_pip_deps
+#   DESCRIPTION:  Return 0 or 1 if successfully able to install pip packages via requirements file
+#    PARAMETERS:  requirements_files
+#----------------------------------------------------------------------------------------------------------------------
+__install_pip_deps() {
+    # Install virtualenv to system pip before activating virtualenv if thats going to be used
+    # We assume pip pkg is installed since that is distro specific
+    if [ "$_VIRTUALENV_DIR" != "null" ]; then
+        if [ "$(which pip)" = "" ]; then
+            echoerror "Pip not installed: required for -a installs"
+            exit 1
+        fi
+        pip install -U virtualenv
+        __activate_virtualenv || return 1
+    else
+        echoerror "Must have virtualenv dir specified for -a installs"
+    fi
+
+    requirements_file=$1
+    if [ ! -f "${requirements_file}" ]; then
+        echoerror "Requirements file: ${requirements_file} cannot be found, needed for -a (pip pkg) installs"
+        exit 1
+    fi
+
+    __PIP_PACKAGES=''
+    if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
+        # shellcheck disable=SC2089
+        __PIP_PACKAGES="${__PIP_PACKAGES} 'apache-libcloud>=$_LIBCLOUD_MIN_VERSION'"
+    fi
+
+    # shellcheck disable=SC2086,SC2090
+    pip install -U -r ${requirements_file} ${__PIP_PACKAGES}
+}
+
+
 #######################################################################################################################
 #
 #   Distribution install functions
@@ -2028,15 +2144,17 @@ install_ubuntu_deps() {
     # Minimal systems might not have upstart installed, install it
     __PACKAGES="upstart"
 
+    if [ "$_VIRTUALENV_DIR" != "null" ]; then
+        __PACKAGES="${__PACKAGES} python-virtualenv"
+    fi
     # Need python-apt for managing packages via Salt
     __PACKAGES="${__PACKAGES} python-apt"
 
     # requests is still used by many salt modules
     __PACKAGES="${__PACKAGES} python-requests"
 
-    # Additionally install procps and pciutils which allows for Docker boostraps. See 366#issuecomment-39666813
+    # Additionally install procps and pciutils which allows for Docker bootstraps. See 366#issuecomment-39666813
     __PACKAGES="${__PACKAGES} procps pciutils"
-
 
     if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
         __check_pip_allowed "You need to allow pip based installations (-P) in order to install 'apache-libcloud'"
@@ -2053,6 +2171,9 @@ install_ubuntu_deps() {
 
     if [ "${__PIP_PACKAGES}" != "" ]; then
         # shellcheck disable=SC2086,SC2090
+        if [ "$_VIRTUALENV_DIR" != "null" ]; then
+            __activate_virtualenv
+        fi
         pip install -U ${__PIP_PACKAGES}
     fi
 
@@ -2116,6 +2237,7 @@ install_ubuntu_stable_deps() {
 
 install_ubuntu_daily_deps() {
     install_ubuntu_deps || return 1
+
     if [ "$DISTRO_MAJOR_VERSION" -ge 12 ]; then
         # Above Ubuntu 11.10 add-apt-repository is in a different package
         __apt_get_install_noinput software-properties-common || return 1
@@ -2143,25 +2265,37 @@ install_ubuntu_daily_deps() {
 }
 
 install_ubuntu_git_deps() {
-    install_ubuntu_deps || return 1
-    __apt_get_install_noinput git-core python-yaml python-m2crypto python-crypto \
-        msgpack-python python-zmq python-jinja2 || return 1
-
+    __apt_get_install_noinput git-core || return 1
     __git_clone_and_checkout || return 1
 
     __PACKAGES=""
-    if [ -f "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" ]; then
-        # We're on the develop branch, install whichever tornado is on the requirements file
-        __REQUIRED_TORNADO="$(grep tornado "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt")"
-        if [ "${__REQUIRED_TORNADO}" != "" ]; then
-            __PACKAGES="${__PACKAGES} python-dev"
-            __check_pip_allowed "You need to allow pip based installations (-P) in order to install the python package '${__REQUIRED_TORNADO}'"
-            if ! __check_command_exists pip; then
-                __PACKAGES="${__PACKAGES} python-setuptools python-pip"
+    # See how we are installing packages
+    if [ ${_PIP_ALL} -eq $BS_TRUE ]; then
+        __PACKAGES="python-dev swig libssl-dev libzmq3 libzmq3-dev"
+        if ! __check_command_exists pip; then
+            __PACKAGES="${__PACKAGES} python-setuptools python-pip"
+        fi
+        # Get just the apt packages that are required to build all the pythons
+        __apt_get_install_noinput $__PACKAGES || return 1
+        # Install the pythons from requirements (only zmq for now)
+        __install_pip_deps "${_SALT_GIT_CHECKOUT_DIR}/requirements/zeromq.txt" || return 1
+    else
+        install_ubuntu_deps || return 1
+        __apt_get_install_noinput python-yaml python-m2crypto python-crypto \
+            msgpack-python python-zmq python-jinja2 || return 1
+        if [ -f "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" ]; then
+            # We're on the develop branch, install whichever tornado is on the requirements file
+            __REQUIRED_TORNADO="$(grep tornado "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt")"
+            if [ "${__REQUIRED_TORNADO}" != "" ]; then
+                __PACKAGES="${__PACKAGES} python-dev"
+                check_pip_allowed "You need to allow pip based installations (-P) in order to install the python package '${__REQUIRED_TORNADO}'"
+                if ! __check_command_exists pip; then
+                    __PACKAGES="${__PACKAGES} python-setuptools python-pip"
+                fi
+                # shellcheck disable=SC2086
+                __apt_get_install_noinput $__PACKAGES || return 1
+                pip install -U "${__REQUIRED_TORNADO}"
             fi
-            # shellcheck disable=SC2086
-            __apt_get_install_noinput $__PACKAGES
-            pip install -U "${__REQUIRED_TORNADO}"
         fi
     fi
 
@@ -2196,6 +2330,11 @@ install_ubuntu_daily() {
 }
 
 install_ubuntu_git() {
+    # Activate virtualenv before install
+    if [ "${_VIRTUALENV_DIR}" != "null" ]; then
+        __activate_virtualenv || return 1
+    fi
+
     if [ -f "${_SALT_GIT_CHECKOUT_DIR}/salt/syspaths.py" ]; then
         python setup.py --salt-config-dir="$_SALT_ETC_DIR" --salt-cache-dir="${_SALT_CACHE_DIR}" install --install-layout=deb || return 1
     else
@@ -2231,6 +2370,10 @@ install_ubuntu_git_post() {
                 echowarn "Upstart does not appear to know about salt-$fname"
                 echodebug "Copying ${_SALT_GIT_CHECKOUT_DIR}/pkg/salt-$fname.upstart to $_upstart_conf"
                 __copyfile "${_SALT_GIT_CHECKOUT_DIR}/pkg/salt-${fname}.upstart" "$_upstart_conf"
+                # Set service to know about virtualenv
+                if [ "${_VIRTUALENV_DIR}" != "null" ]; then
+                    echo "SALT_USE_VIRTUALENV=${_VIRTUALENV_DIR}" > /etc/default/salt-${fname}
+                fi
                 /sbin/initctl reload-configuration || return 1
             fi
         # No upstart support in Ubuntu!?
@@ -2245,7 +2388,7 @@ install_ubuntu_git_post() {
 
             update-rc.d salt-$fname defaults
         else
-            echoerror "Neither upstart not init.d was setup for salt-$fname"
+            echoerror "Neither upstart nor init.d was setup for salt-$fname"
         fi
     done
 }
@@ -2459,7 +2602,7 @@ _eof
     apt-get update || return 1
 
     # Python requests is available through Squeeze backports
-    # Additionally install procps and pciutils which allows for Docker boostraps. See 366#issuecomment-39666813
+    # Additionally install procps and pciutils which allows for Docker bootstraps. See 366#issuecomment-39666813
     __apt_get_install_noinput python-pip procps pciutils python-requests
 
     # Need python-apt for managing packages via Salt

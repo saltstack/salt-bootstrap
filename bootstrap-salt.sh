@@ -1237,7 +1237,7 @@ __ubuntu_codename_translation
 if ([ "${DISTRO_NAME_L}" != "ubuntu" ] && [ "$ITYPE" = "daily" ]); then
     echoerror "${DISTRO_NAME} does not have daily packages support"
     exit 1
-elif ([ "$(echo "${DISTRO_NAME_L}" | egrep '(ubuntu|centos|red_hat|oracle|scientific)')" = "" ] && [ "$ITYPE" = "stable" ] && [ "$STABLE_REV" != "latest" ]); then
+elif ([ "$(echo "${DISTRO_NAME_L}" | egrep '(debian|ubuntu|centos|red_hat|oracle|scientific)')" = "" ] && [ "$ITYPE" = "stable" ] && [ "$STABLE_REV" != "latest" ]); then
     echoerror "${DISTRO_NAME} does not have major version pegged packages support"
     exit 1
 fi
@@ -2020,7 +2020,6 @@ install_ubuntu_deps() {
 }
 
 install_ubuntu_stable_deps() {
-    # This probably holds true for the Debians as well
     if [ "$CPU_ARCH_L" = "amd64" ] || [ "$CPU_ARCH_L" = "x86_64" ]; then
         repo_arch="amd64"
     elif [ "$CPU_ARCH_L" = "i386" ] || [ "$CPU_ARCH_L" = "i686" ]; then
@@ -2514,6 +2513,13 @@ install_debian_7_deps() {
 install_debian_8_deps() {
     echodebug "install_debian_8_deps"
 
+    if [ "$CPU_ARCH_L" = "amd64" ] || [ "$CPU_ARCH_L" = "x86_64" ]; then
+        repo_arch="amd64"
+    elif [ "$CPU_ARCH_L" = "i386" ] || [ "$CPU_ARCH_L" = "i686" ]; then
+        echoerror "repo.saltstack.com likely doesn't have 32-bit packages for Debian (yet?)"
+        repo_arch="i386"
+    fi
+
     if [ $_START_DAEMONS -eq $BS_FALSE ]; then
         echowarn "Not starting daemons on Debian based distributions is not working mostly because starting them is the default behaviour."
     fi
@@ -2533,14 +2539,16 @@ install_debian_8_deps() {
         apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 7638D0442B90D010 || return 1
     fi
 
-    # Saltstack's Stable Debian repository
-    if [ "$(grep -R 'latest jessie main' /etc/apt)" = "" ]; then
-        echo "deb http://repo.saltstack.com/apt/debian/latest jessie main" >> \
-            /etc/apt/sources.list.d/saltstack.list
-    fi
+    # Versions starting with 2015.5.6 and 2015.8.1 are hosted at repo.saltstack.com
+    if [ "$(echo "$STABLE_REV" | egrep '^(2015\.5|2015\.8|latest|archive\/)')" != "" ]; then
+        SALTSTACK_DEBIAN_URL="https://repo.saltstack.com/apt/debian/$DISTRO_MAJOR_VERSION/$repo_arch/$STABLE_REV"
+        echo "deb $SALTSTACK_DEBIAN_URL jessie main" > "/etc/apt/sources.list.d/saltstack.list"
 
-    # shellcheck disable=SC2086
-    wget $_WGET_ARGS -q https://repo.saltstack.com/apt/debian/latest/SALTSTACK-GPG-KEY.pub -O - | apt-key add - || return 1
+        # shellcheck disable=SC2086
+        wget $_WGET_ARGS -q "$SALTSTACK_DEBIAN_URL/SALTSTACK-GPG-KEY.pub" -O - | apt-key add - || return 1
+
+        __apt_get_install_noinput apt-transport-https || return 1
+    fi
 
     apt-get update || return 1
     __PACKAGES="libzmq3 libzmq3-dev python-zmq python-requests python-apt"

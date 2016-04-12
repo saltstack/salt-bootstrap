@@ -237,21 +237,28 @@ __usage() {
   Usage :  ${__ScriptName} [options] <install-type> [install-type-args]
 
   Installation types:
-    - stable              (install latest stable release, this is default)
-    - stable [version]    (currently only supported on: Ubuntu, CentOS, RedHat, Oracle, Scientific)
-    - daily               (Ubuntu specific: configure SaltStack Daily PPA)
-    - testing             (RHEL-family specific: configure EPEL testing repo)
-    - git [branch_or_tag] (install from 'develop' by default)
+    - stable              Install latest stable release. This is the default
+                          install type
+    - stable [branch]     Install latest version on a branch. Only supported
+                          for packages available at repo.saltstack.com
+    - stable [version]    Install a specific version. Only supported for
+                          packages available at repo.saltstack.com
+    - daily               Ubuntu specific: configure SaltStack Daily PPA
+    - testing             RHEL-family specific: configure EPEL testing repo
+    - git                 Install from the head of the develop branch
+    - git [ref]           Install from any git ref (such as a branch, tag, or
+                          commit)
 
   Examples:
     - ${__ScriptName}
     - ${__ScriptName} stable
     - ${__ScriptName} stable 2015.8
+    - ${__ScriptName} stable 2015.8.9
     - ${__ScriptName} daily
     - ${__ScriptName} testing
     - ${__ScriptName} git
-    - ${__ScriptName} git develop
-    - ${__ScriptName} git v2015.8.5
+    - ${__ScriptName} git 2015.8
+    - ${__ScriptName} git v2015.8.9
     - ${__ScriptName} git 8c3fadf15ec183e5ce8c63739850d543617e4357
 
   Options:

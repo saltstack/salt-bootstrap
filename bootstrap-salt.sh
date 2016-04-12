@@ -5984,9 +5984,9 @@ fi
 # Ensure that the cachedir exists
 # (Workaround for https://github.com/saltstack/salt/issues/6502)
 if [ "$_INSTALL_MINION" -eq $BS_TRUE ]; then
-    if [ ! -d ${_SALT_CACHE_DIR}/minion/proc ]; then
+    if [ ! -d "${_SALT_CACHE_DIR}/minion/proc" ]; then
         echodebug "Creating salt's cachedir"
-        mkdir -p ${_SALT_CACHE_DIR}/minion/proc
+        mkdir -p "${_SALT_CACHE_DIR}/minion/proc"
     fi
 fi
 

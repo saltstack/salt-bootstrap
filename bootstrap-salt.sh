@@ -623,6 +623,28 @@ __fetch_url() {
                     ftp -o "$1" "$2" >/dev/null 2>&1            # OpenBSD
 }
 
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#         NAME:  __fetch_verify
+#  DESCRIPTION:  Retrieves a URL, verifies its content and writes it to standard output
+#----------------------------------------------------------------------------------------------------------------------
+__fetch_verify() {
+	local tmpf url sum size
+	url="$1"
+	sum="$2"
+	size="$3"
+
+	tmpf=$(mktemp) && \
+	__fetch_url "$tmpf" "$url" && \
+	test $(stat --format=%s "$tmpf") -eq "$size" && \
+	test $(md5sum "$tmpf" | awk '{ print $1 }') = "$sum" && \
+	cat "$tmpf" && \
+	rm -f "$tmpf"
+	if [ $? -eq 0 ]; then
+		return 0
+	fi
+	echo "Failed verification of $url"
+	return 1
+}
 
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #          NAME:  __gather_hardware_info
@@ -2362,7 +2384,7 @@ install_debian_6_deps() {
     fi
 
     # shellcheck disable=SC2086
-    wget $_WGET_ARGS -q http://debian.saltstack.com/debian-salt-team-joehealy.gpg.key -O - | apt-key add - || return 1
+    __fetch_verify http://debian.saltstack.com/debian-salt-team-joehealy.gpg.key 267d1f152d0cc94b23eb4c6993ba3d67 3100 | apt-key add - || return 1
 
     if [ "$_PIP_ALLOWED" -eq $BS_TRUE ]; then
         echowarn "PyZMQ will be installed from PyPI in order to compile it against ZMQ3"
@@ -2484,7 +2506,7 @@ install_debian_7_deps() {
     fi
 
     # shellcheck disable=SC2086
-    wget $_WGET_ARGS -q http://debian.saltstack.com/debian-salt-team-joehealy.gpg.key -O - | apt-key add - || return 1
+    __fetch_verify http://debian.saltstack.com/debian-salt-team-joehealy.gpg.key 267d1f152d0cc94b23eb4c6993ba3d67 3100 | apt-key add - || return 1
 
     apt-get update || return 1
     __apt_get_install_noinput -t wheezy-backports libzmq3 libzmq3-dev python-zmq python-apt || return 1
@@ -2802,7 +2824,7 @@ install_debian_git_post() {
             if [ -f "${_SALT_GIT_CHECKOUT_DIR}/debian/salt-$fname.init" ]; then
                 __copyfile "${_SALT_GIT_CHECKOUT_DIR}/debian/salt-$fname.init" "/etc/init.d/salt-$fname"
             else
-                __fetch_url "/etc/init.d/salt-$fname" "http://anonscm.debian.org/cgit/pkg-salt/salt.git/plain/debian/salt-${fname}.init"
+                __fetch_url "/etc/init.d/salt-$fname" "https://anonscm.debian.org/cgit/pkg-salt/salt.git/plain/debian/salt-${fname}.init"
             fi
             if [ ! -f "/etc/init.d/salt-$fname" ]; then
                 echowarn "The init script for salt-$fname was not found, skipping it..."
@@ -3076,11 +3098,14 @@ __install_epel_repository() {
         rpm -q curl > /dev/null 2>&1 || yum -y install curl
         # rpm from CentOS/RHEL release 5 does not support HTTP downloads
         # properly, especially 3XX code redirects
+        # FIXME: cleartext download over unsecure protocol (HTTP)
         __fetch_url /tmp/epel-release.rpm "http://download.fedoraproject.org/pub/epel/5/${EPEL_ARCH}/epel-release-5-4.noarch.rpm" || return 1
         rpm -Uvh --force /tmp/epel-release.rpm || return 1
     elif [ "$DISTRO_MAJOR_VERSION" -eq 6 ]; then
+		# FIXME: cleartext download over unsecure protocol (HTTP)
         rpm -Uvh --force "http://download.fedoraproject.org/pub/epel/6/${EPEL_ARCH}/epel-release-6-8.noarch.rpm" || return 1
     elif [ "$DISTRO_MAJOR_VERSION" -eq 7 ]; then
+		# FIXME: cleartext download over unsecure protocol (HTTP)
         rpm -Uvh --force "http://download.fedoraproject.org/pub/epel/7/${EPEL_ARCH}/e/epel-release-7-5.noarch.rpm" || return 1
     else
         echoerror "Failed add EPEL repository support."
@@ -4425,6 +4450,7 @@ install_freebsd_restart_daemons() {
 #
 
 __choose_openbsd_mirror() {
+	# FIXME: cleartext download over unsecure protocol (HTTP)
     MIRRORS_LIST_URL=http://www.openbsd.org/ftp.html
     MIRROR_LIST_FILE=/tmp/openbsd-mirrors.html
     OPENBSD_REPO=''
@@ -4832,6 +4858,7 @@ install_opensuse_stable_deps() {
     fi
 
     # Is the repository already known
+    # FIXME: cleartext download over unsecure protocol (HTTP)
     opensuse_deps_repo_url="http://download.opensuse.org/repositories/systemsmanagement:saltstack/${DISTRO_REPO}/systemsmanagement:saltstack.repo"
     __zypper repos --details | grep "${opensuse_deps_repo_url}" >/dev/null 2>&1
     if [ $? -eq 1 ]; then
@@ -5065,6 +5092,7 @@ install_suse_12_stable_deps() {
     __zypper repos | grep systemsmanagement_saltstack >/dev/null 2>&1
     if [ $? -eq 1 ]; then
         # zypper does not yet know nothing about systemsmanagement_saltstack
+        # FIXME: cleartext download over unsecure protocol (HTTP)
         __zypper addrepo --refresh \
             "http://download.opensuse.org/repositories/systemsmanagement:saltstack/${DISTRO_REPO}/systemsmanagement:saltstack.repo" || return 1
     fi
@@ -5251,6 +5279,7 @@ install_suse_11_stable_deps() {
     __zypper repos | grep systemsmanagement_saltstack >/dev/null 2>&1
     if [ $? -eq 1 ]; then
         # zypper does not yet know nothing about systemsmanagement_saltstack
+        # FIXME: cleartext download over unsecure protocol (HTTP)
         __zypper addrepo --refresh \
             "http://download.opensuse.org/repositories/systemsmanagement:saltstack/${DISTRO_REPO}/systemsmanagement:saltstack.repo" || return 1
     fi

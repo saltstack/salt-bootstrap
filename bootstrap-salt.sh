@@ -4551,7 +4551,7 @@ install_openbsd_deps() {
             # Let's download, since they were not provided, the default configuration files
             if [ ! -f "$_SALT_ETC_DIR/$fname" ] && [ ! -f "$_TEMP_CONFIG_DIR/$fname" ]; then
                 ftp -o "$_TEMP_CONFIG_DIR/$fname" \
-                    "${HTTP_VAL}://raw.githubusercontent.com/saltstack/salt/develop/conf/$fname" || return 1
+                    "https://raw.githubusercontent.com/saltstack/salt/develop/conf/$fname" || return 1
             fi
         done
     fi
@@ -4623,7 +4623,7 @@ install_openbsd_post() {
         if [ $? -eq 1 ]; then
             if [ ! -f "$_TEMP_CONFIG_DIR/salt-$fname" ]; then
                 ftp -o "$_TEMP_CONFIG_DIR/salt-$fname" \
-                    "${HTTP_VAL}://raw.githubusercontent.com/saltstack/salt/develop/pkg/openbsd/salt-${fname}.rc-d"
+                    "https://raw.githubusercontent.com/saltstack/salt/develop/pkg/openbsd/salt-${fname}.rc-d"
                 if [ ! -f "/etc/rc.d/salt_${fname}" ] && [ "$(grep salt_${fname} /etc/rc.conf.local)" -eq "" ]; then
                     __copyfile "$_TEMP_CONFIG_DIR/salt-$fname" "/etc/rc.d/salt_${fname}" && chmod +x "/etc/rc.d/salt_${fname}" || return 1
                     echo salt_${fname}_enable="YES" >> /etc/rc.conf.local
@@ -4696,12 +4696,12 @@ install_smartos_deps() {
         if [ ! -f "$_SALT_ETC_DIR/minion" ] && [ ! -f "$_TEMP_CONFIG_DIR/minion" ]; then
             # shellcheck disable=SC2086
             curl $_CURL_ARGS -s -o "$_TEMP_CONFIG_DIR/minion" -L \
-                $HTTP_VAL://raw.githubusercontent.com/saltstack/salt/develop/conf/minion || return 1
+                https://raw.githubusercontent.com/saltstack/salt/develop/conf/minion || return 1
         fi
         if [ ! -f "$_SALT_ETC_DIR/master" ] && [ ! -f $_TEMP_CONFIG_DIR/master ]; then
             # shellcheck disable=SC2086
             curl $_CURL_ARGS -s -o "$_TEMP_CONFIG_DIR/master" -L \
-                $HTTP_VAL://raw.githubusercontent.com/saltstack/salt/develop/conf/master || return 1
+                https://raw.githubusercontent.com/saltstack/salt/develop/conf/master || return 1
         fi
     fi
 
@@ -4776,7 +4776,7 @@ install_smartos_post() {
             if [ ! -f "$_TEMP_CONFIG_DIR/salt-$fname.xml" ]; then
                 # shellcheck disable=SC2086
                 curl $_CURL_ARGS -s -o "$_TEMP_CONFIG_DIR/salt-$fname.xml" -L \
-                    "${HTTP_VAL}://raw.githubusercontent.com/saltstack/salt/develop/pkg/smartos/salt-$fname.xml"
+                    "https://raw.githubusercontent.com/saltstack/salt/develop/pkg/smartos/salt-$fname.xml"
             fi
             svccfg import "$_TEMP_CONFIG_DIR/salt-$fname.xml"
             if [ "${VIRTUAL_TYPE}" = "global" ]; then
@@ -5182,7 +5182,7 @@ install_suse_12_stable_deps() {
                 if [ ! -f "$_SALT_ETC_DIR/$fname" ] && [ ! -f "$_TEMP_CONFIG_DIR/$fname" ]; then
                     # shellcheck disable=SC2086
                     curl $_CURL_ARGS -s -o "$_TEMP_CONFIG_DIR/$fname" -L \
-                        "${HTTP_VAL}://raw.githubusercontent.com/saltstack/salt/develop/conf/$fname" || return 1
+                        "https://raw.githubusercontent.com/saltstack/salt/develop/conf/$fname" || return 1
                 fi
             done
         fi
@@ -5253,7 +5253,7 @@ install_suse_12_stable_post() {
 
             if [ -f /bin/systemctl ]; then
                 # shellcheck disable=SC2086
-                curl $_CURL_ARGS -L "${HTTP_VAL}://github.com/saltstack/salt/raw/develop/pkg/salt-$fname.service" \
+                curl $_CURL_ARGS -L "https://github.com/saltstack/salt/raw/develop/pkg/salt-$fname.service" \
                     -o "/usr/lib/systemd/system/salt-$fname.service" || return 1
                 continue
             fi
@@ -5368,7 +5368,7 @@ install_suse_11_stable_deps() {
                 if [ ! -f "$_SALT_ETC_DIR/$fname" ] && [ ! -f "$_TEMP_CONFIG_DIR/$fname" ]; then
                     # shellcheck disable=SC2086
                     curl $_CURL_ARGS -s -o "$_TEMP_CONFIG_DIR/$fname" -L \
-                        "${HTTP_VAL}://raw.githubusercontent.com/saltstack/salt/develop/conf/$fname" || return 1
+                        "https://raw.githubusercontent.com/saltstack/salt/develop/conf/$fname" || return 1
                 fi
             done
         fi
@@ -5439,13 +5439,13 @@ install_suse_11_stable_post() {
 
             if [ -f /bin/systemctl ]; then
                 # shellcheck disable=SC2086
-                curl $_CURL_ARGS -L "${HTTP_VAL}://github.com/saltstack/salt/raw/develop/pkg/salt-$fname.service" \
+                curl $_CURL_ARGS -L "https://github.com/saltstack/salt/raw/develop/pkg/salt-$fname.service" \
                     -o "/lib/systemd/system/salt-$fname.service" || return 1
                 continue
             fi
 
             # shellcheck disable=SC2086
-            curl $_CURL_ARGS -L "${HTTP_VAL}://github.com/saltstack/salt/raw/develop/pkg/rpm/salt-$fname" \
+            curl $_CURL_ARGS -L "https://github.com/saltstack/salt/raw/develop/pkg/rpm/salt-$fname" \
                 -o "/etc/init.d/salt-$fname" || return 1
             chmod +x "/etc/init.d/salt-$fname"
 

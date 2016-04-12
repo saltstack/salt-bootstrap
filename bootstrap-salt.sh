@@ -634,22 +634,21 @@ __fetch_url() {
 #  DESCRIPTION:  Retrieves a URL, verifies its content and writes it to standard output
 #----------------------------------------------------------------------------------------------------------------------
 __fetch_verify() {
-	local tmpf url sum size
-	url="$1"
-	sum="$2"
-	size="$3"
+    fetch_verify_url="$1"
+    fetch_verify_sum="$2"
+    fetch_verify_size="$3"
 
-	tmpf=$(mktemp) && \
-	__fetch_url "$tmpf" "$url" && \
-	test $(stat --format=%s "$tmpf") -eq "$size" && \
-	test $(md5sum "$tmpf" | awk '{ print $1 }') = "$sum" && \
-	cat "$tmpf" && \
-	rm -f "$tmpf"
-	if [ $? -eq 0 ]; then
-		return 0
-	fi
-	echo "Failed verification of $url"
-	return 1
+    fetch_verify_tmpf=$(mktemp) && \
+    __fetch_url "$fetch_verify_tmpf" "$fetch_verify_url" && \
+    test "$(stat --format=%s "$fetch_verify_tmpf")" -eq "$fetch_verify_size" && \
+    test "$(md5sum "$fetch_verify_tmpf" | awk '{ print $1 }')" = "$fetch_verify_sum" && \
+    cat "$fetch_verify_tmpf" && \
+    rm -f "$fetch_verify_tmpf"
+    if [ $? -eq 0 ]; then
+        return 0
+    fi
+    echo "Failed verification of $fetch_verify_url"
+    return 1
 }
 
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
@@ -4469,7 +4468,7 @@ install_freebsd_restart_daemons() {
 #
 
 __choose_openbsd_mirror() {
-	# FIXME: cleartext download over unsecure protocol (HTTP)
+    # FIXME: cleartext download over unsecure protocol (HTTP)
     MIRRORS_LIST_URL=http://www.openbsd.org/ftp.html
     MIRROR_LIST_FILE=/tmp/openbsd-mirrors.html
     OPENBSD_REPO=''

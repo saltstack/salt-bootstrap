@@ -47,7 +47,7 @@ Param(
   [Parameter(Mandatory=$false,ValueFromPipeline=$true)]
   # Doesn't support versions prior to "YYYY.M.R-B" 
   [ValidatePattern('^(201[0-9]\.[0-9]\.[0-9](\-\d{1})?)$')]
-  [string]$version = "2015.8.3",
+  [string]$version = "2015.8.8-2",
   
   [Parameter(Mandatory=$false,ValueFromPipeline=$true)] 
   [ValidateSet("true","false")] 

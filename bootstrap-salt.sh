@@ -237,21 +237,28 @@ __usage() {
   Usage :  ${__ScriptName} [options] <install-type> [install-type-args]
 
   Installation types:
-    - stable              (install latest stable release, this is default)
-    - stable [version]    (currently only supported on: Ubuntu, CentOS)
-    - daily               (Ubuntu specific: configure SaltStack Daily PPA)
-    - testing             (RHEL-family specific: configure EPEL testing repo)
-    - git [branch_or_tag] (install from 'develop' by default)
+    - stable              Install latest stable release. This is the default
+                          install type
+    - stable [branch]     Install latest version on a branch. Only supported
+                          for packages available at repo.saltstack.com
+    - stable [version]    Install a specific version. Only supported for
+                          packages available at repo.saltstack.com
+    - daily               Ubuntu specific: configure SaltStack Daily PPA
+    - testing             RHEL-family specific: configure EPEL testing repo
+    - git                 Install from the head of the develop branch
+    - git [ref]           Install from any git ref (such as a branch, tag, or
+                          commit)
 
   Examples:
     - ${__ScriptName}
     - ${__ScriptName} stable
     - ${__ScriptName} stable 2015.8
+    - ${__ScriptName} stable 2015.8.9
     - ${__ScriptName} daily
     - ${__ScriptName} testing
     - ${__ScriptName} git
-    - ${__ScriptName} git develop
-    - ${__ScriptName} git v2015.8.5
+    - ${__ScriptName} git 2015.8
+    - ${__ScriptName} git v2015.8.9
     - ${__ScriptName} git 8c3fadf15ec183e5ce8c63739850d543617e4357
 
   Options:
@@ -452,12 +459,16 @@ elif [ "$ITYPE" = "stable" ]; then
         STABLE_REV="latest"
     else
         __check_unparsed_options "$*"
-        if [ "$(echo "$1" | egrep '^(latest|1\.6|1\.7|2014\.1|2014\.7|2015\.5|2015\.8)$')" = "" ]; then
-          echo "Unknown stable version: $1 (valid: 1.6, 1.7, 2014.1, 2014.7, 2015.5, 2015.8, latest)"
-          exit 1
-        else
+        if [ "$(echo "$1" | egrep '^(latest|1\.6|1\.7|2014\.1|2014\.7|2015\.5|2015\.8)$')" != "" ]; then
           STABLE_REV="$1"
           shift
+        elif [ "$(echo "$1" | egrep '^([0-9]*\.[0-9]*\.[0-9]*)$')" != "" ]; then
+          STABLE_REV="archive/$1"
+          shift
+        else
+          echo "Unknown stable version: $1 (valid: 1.6, 1.7, 2014.1, 2014.7, 2015.5, 2015.8, latest, \$MAJOR.\$MINOR.\$PATCH)"
+          exit 1
+
         fi
     fi
 fi
@@ -1233,7 +1244,7 @@ __ubuntu_codename_translation
 if ([ "${DISTRO_NAME_L}" != "ubuntu" ] && [ "$ITYPE" = "daily" ]); then
     echoerror "${DISTRO_NAME} does not have daily packages support"
     exit 1
-elif ([ "$(echo "${DISTRO_NAME_L}" | egrep '(ubuntu|centos)')" = "" ] && [ "$ITYPE" = "stable" ] && [ "$STABLE_REV" != "latest" ]); then
+elif ([ "$(echo "${DISTRO_NAME_L}" | egrep '(debian|ubuntu|centos|red_hat|oracle|scientific)')" = "" ] && [ "$ITYPE" = "stable" ] && [ "$STABLE_REV" != "latest" ]); then
     echoerror "${DISTRO_NAME} does not have major version pegged packages support"
     exit 1
 fi
@@ -1943,8 +1954,8 @@ install_ubuntu_deps() {
 
     __enable_universe_repository || return 1
 
-    # the latest version of 2015.5 and all versions of 2015.8 and beyond are hosted on repo.saltstack.com
-    if [ "$(echo "$STABLE_REV" | egrep '^(2015\.5|2015\.8|latest)$')" = "" ]; then
+    # Versions starting with 2015.5.6 and 2015.8.1 are hosted at repo.saltstack.com
+    if [ "$(echo "$STABLE_REV" | egrep '^(2015\.5|2015\.8|latest|archive\/)')" = "" ]; then
         if [ "$DISTRO_MAJOR_VERSION" -lt 14 ]; then
             echoinfo "Installing Python Requests/Chardet from Chris Lea's PPA repository"
             if [ "$DISTRO_MAJOR_VERSION" -gt 11 ] || ([ "$DISTRO_MAJOR_VERSION" -eq 11 ] && [ "$DISTRO_MINOR_VERSION" -gt 04 ]); then
@@ -2016,7 +2027,6 @@ install_ubuntu_deps() {
 }
 
 install_ubuntu_stable_deps() {
-    # This probably holds true for the Debians as well
     if [ "$CPU_ARCH_L" = "amd64" ] || [ "$CPU_ARCH_L" = "x86_64" ]; then
         repo_arch="amd64"
     elif [ "$CPU_ARCH_L" = "i386" ] || [ "$CPU_ARCH_L" = "i686" ]; then
@@ -2026,15 +2036,13 @@ install_ubuntu_stable_deps() {
 
     install_ubuntu_deps || return 1
 
-    # the latest version of 2015.5 and all versions of 2015.8 and beyond are hosted on repo.saltstack.com
-    if [ "$(echo "$STABLE_REV" | egrep '^(2015\.5|2015\.8|latest)$')" != "" ]; then
-
+    # Versions starting with 2015.5.6 and 2015.8.1 are hosted at repo.saltstack.com
+    if [ "$(echo "$STABLE_REV" | egrep '^(2015\.5|2015\.8|latest|archive\/)')" != "" ]; then
         # Saltstack's Stable Ubuntu repository
         if [ "$(grep -ER 'latest .+ main' /etc/apt)" = "" ]; then
-            echo "deb http://repo.saltstack.com/apt/ubuntu/$DISTRO_VERSION/$repo_arch/$STABLE_REV $DISTRO_CODENAME main" >> \
-                "/etc/apt/sources.list.d/salt-$STABLE_REV.list"
+            echo "deb http://repo.saltstack.com/apt/ubuntu/$DISTRO_VERSION/$repo_arch/$STABLE_REV $DISTRO_CODENAME main" > \
+                "/etc/apt/sources.list.d/saltstack.list"
         fi
-
 
         # Make sure wget is available
         __apt_get_install_noinput wget
@@ -2512,6 +2520,13 @@ install_debian_7_deps() {
 install_debian_8_deps() {
     echodebug "install_debian_8_deps"
 
+    if [ "$CPU_ARCH_L" = "amd64" ] || [ "$CPU_ARCH_L" = "x86_64" ]; then
+        repo_arch="amd64"
+    elif [ "$CPU_ARCH_L" = "i386" ] || [ "$CPU_ARCH_L" = "i686" ]; then
+        echoerror "repo.saltstack.com likely doesn't have 32-bit packages for Debian (yet?)"
+        repo_arch="i386"
+    fi
+
     if [ $_START_DAEMONS -eq $BS_FALSE ]; then
         echowarn "Not starting daemons on Debian based distributions is not working mostly because starting them is the default behaviour."
     fi
@@ -2531,14 +2546,16 @@ install_debian_8_deps() {
         apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 7638D0442B90D010 || return 1
     fi
 
-    # Saltstack's Stable Debian repository
-    if [ "$(grep -R 'latest jessie main' /etc/apt)" = "" ]; then
-        echo "deb http://repo.saltstack.com/apt/debian/latest jessie main" >> \
-            /etc/apt/sources.list.d/saltstack.list
-    fi
+    # Versions starting with 2015.5.6 and 2015.8.1 are hosted at repo.saltstack.com
+    if [ "$(echo "$STABLE_REV" | egrep '^(2015\.5|2015\.8|latest|archive\/)')" != "" ]; then
+        SALTSTACK_DEBIAN_URL="https://repo.saltstack.com/apt/debian/$DISTRO_MAJOR_VERSION/$repo_arch/$STABLE_REV"
+        echo "deb $SALTSTACK_DEBIAN_URL jessie main" > "/etc/apt/sources.list.d/saltstack.list"
 
-    # shellcheck disable=SC2086
-    wget $_WGET_ARGS -q https://repo.saltstack.com/apt/debian/latest/SALTSTACK-GPG-KEY.pub -O - | apt-key add - || return 1
+        # shellcheck disable=SC2086
+        wget $_WGET_ARGS -q "$SALTSTACK_DEBIAN_URL/SALTSTACK-GPG-KEY.pub" -O - | apt-key add - || return 1
+
+        __apt_get_install_noinput apt-transport-https || return 1
+    fi
 
     apt-get update || return 1
     __PACKAGES="libzmq3 libzmq3-dev python-zmq python-requests python-apt"
@@ -3103,10 +3120,10 @@ __install_saltstack_rhel_repository() {
         gpg_key="SALTSTACK-GPG-KEY.pub"
     fi
 
-    repo_file="/etc/yum.repos.d/salt-${repo_rev}.repo"
+    repo_file="/etc/yum.repos.d/saltstack.repo"
     if [ ! -s "$repo_file" ]; then
         cat <<_eof > "$repo_file"
-[salt-${repo_rev}]
+[saltstack]
 name=SaltStack ${repo_rev} Release Channel for RHEL/CentOS \$releasever
 baseurl=$base_url
 skip_if_unavailable=True

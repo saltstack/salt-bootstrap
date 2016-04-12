@@ -1207,7 +1207,7 @@ __set_suse_pkg_repo() {
         # FIXME: cleartext download over unsecure protocol (HTTP)
         suse_pkg_url_base="http://download.opensuse.org/repositories/systemsmanagement:saltstack"
     else
-        suse_pkg_url_base="https://repo.saltstack.com/opensuse"
+        suse_pkg_url_base="${HTTP_VAL}://repo.saltstack.com/opensuse"
     fi
     SUSE_PKG_URL="$suse_pkg_url_base/$suse_pkg_url_path"
 }
@@ -2602,7 +2602,7 @@ install_debian_8_deps() {
 
     # Versions starting with 2015.5.6 and 2015.8.1 are hosted at repo.saltstack.com
     if [ "$(echo "$STABLE_REV" | egrep '^(2015\.5|2015\.8|latest|archive\/)')" != "" ]; then
-        SALTSTACK_DEBIAN_URL="https://repo.saltstack.com/apt/debian/$DISTRO_MAJOR_VERSION/$repo_arch/$STABLE_REV"
+        SALTSTACK_DEBIAN_URL="${HTTP_VAL}://repo.saltstack.com/apt/debian/$DISTRO_MAJOR_VERSION/$repo_arch/$STABLE_REV"
         echo "deb $SALTSTACK_DEBIAN_URL jessie main" > "/etc/apt/sources.list.d/saltstack.list"
 
         # shellcheck disable=SC2086
@@ -2856,7 +2856,7 @@ install_debian_git_post() {
             if [ -f "${_SALT_GIT_CHECKOUT_DIR}/debian/salt-$fname.init" ]; then
                 __copyfile "${_SALT_GIT_CHECKOUT_DIR}/debian/salt-$fname.init" "/etc/init.d/salt-$fname"
             else
-                __fetch_url "/etc/init.d/salt-$fname" "https://anonscm.debian.org/cgit/pkg-salt/salt.git/plain/debian/salt-${fname}.init"
+                __fetch_url "/etc/init.d/salt-$fname" "${HTTP_VAL}://anonscm.debian.org/cgit/pkg-salt/salt.git/plain/debian/salt-${fname}.init"
             fi
             if [ ! -f "/etc/init.d/salt-$fname" ]; then
                 echowarn "The init script for salt-$fname was not found, skipping it..."
@@ -3130,12 +3130,12 @@ __install_epel_repository() {
         rpm -q curl > /dev/null 2>&1 || yum -y install curl
         # rpm from CentOS/RHEL release 5 does not support HTTP downloads
         # properly, especially 3XX code redirects
-        __fetch_url /tmp/epel-release.rpm "https://download.fedoraproject.org/pub/epel/5/${EPEL_ARCH}/epel-release-5-4.noarch.rpm" || return 1
+        __fetch_url /tmp/epel-release.rpm "${HTTP_VAL}://download.fedoraproject.org/pub/epel/5/${EPEL_ARCH}/epel-release-5-4.noarch.rpm" || return 1
         rpm -Uvh --force /tmp/epel-release.rpm || return 1
     elif [ "$DISTRO_MAJOR_VERSION" -eq 6 ]; then
-        rpm -Uvh --force "https://download.fedoraproject.org/pub/epel/6/${EPEL_ARCH}/epel-release-6-8.noarch.rpm" || return 1
+        rpm -Uvh --force "${HTTP_VAL}://download.fedoraproject.org/pub/epel/6/${EPEL_ARCH}/epel-release-6-8.noarch.rpm" || return 1
     elif [ "$DISTRO_MAJOR_VERSION" -eq 7 ]; then
-        rpm -Uvh --force "https://download.fedoraproject.org/pub/epel/7/${EPEL_ARCH}/e/epel-release-7-5.noarch.rpm" || return 1
+        rpm -Uvh --force "${HTTP_VAL}://download.fedoraproject.org/pub/epel/7/${EPEL_ARCH}/e/epel-release-7-5.noarch.rpm" || return 1
     else
         echoerror "Failed add EPEL repository support."
         return 1

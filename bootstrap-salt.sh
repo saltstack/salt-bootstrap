@@ -1947,8 +1947,8 @@ install_ubuntu_deps() {
 
     __enable_universe_repository || return 1
 
-    # the latest version of 2015.5 and all versions of 2015.8 and beyond are hosted on repo.saltstack.com
-    if [ "$(echo "$STABLE_REV" | egrep '^(2015\.5|2015\.8|latest)$')" = "" ]; then
+    # Versions starting with 2015.5.6 and 2015.8.1 are hosted at repo.saltstack.com
+    if [ "$(echo "$STABLE_REV" | egrep '^(2015\.5|2015\.8|latest|archive\/)')" = "" ]; then
         if [ "$DISTRO_MAJOR_VERSION" -lt 14 ]; then
             echoinfo "Installing Python Requests/Chardet from Chris Lea's PPA repository"
             if [ "$DISTRO_MAJOR_VERSION" -gt 11 ] || ([ "$DISTRO_MAJOR_VERSION" -eq 11 ] && [ "$DISTRO_MINOR_VERSION" -gt 04 ]); then
@@ -2030,15 +2030,13 @@ install_ubuntu_stable_deps() {
 
     install_ubuntu_deps || return 1
 
-    # the latest version of 2015.5 and all versions of 2015.8 and beyond are hosted on repo.saltstack.com
-    if [ "$(echo "$STABLE_REV" | egrep '^(2015\.5|2015\.8|latest)$')" != "" ]; then
-
+    # Versions starting with 2015.5.6 and 2015.8.1 are hosted at repo.saltstack.com
+    if [ "$(echo "$STABLE_REV" | egrep '^(2015\.5|2015\.8|latest|archive\/)')" != "" ]; then
         # Saltstack's Stable Ubuntu repository
         if [ "$(grep -ER 'latest .+ main' /etc/apt)" = "" ]; then
-            echo "deb http://repo.saltstack.com/apt/ubuntu/$DISTRO_VERSION/$repo_arch/$STABLE_REV $DISTRO_CODENAME main" >> \
+            echo "deb http://repo.saltstack.com/apt/ubuntu/$DISTRO_VERSION/$repo_arch/$STABLE_REV $DISTRO_CODENAME main" > \
                 "/etc/apt/sources.list.d/saltstack.list"
         fi
-
 
         # Make sure wget is available
         __apt_get_install_noinput wget

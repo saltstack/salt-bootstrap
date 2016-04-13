@@ -498,7 +498,7 @@ if [ "$ITYPE" != "git" ]; then
         echoerror "Pip installing all python packages with -a is only possible when installing salt via git"
         exit 1
     fi
-    if [ $_VIRTUALENV_DIR != "null" ]; then
+    if [ "$_VIRTUALENV_DIR" != "null" ]; then
         echoerror "Virtualenv installs via -V is only possible when installing salt via git"
         exit 1
     fi
@@ -554,7 +554,7 @@ if [ ${_DISABLE_SALT_CHECKS} -eq 0 ]; then
 fi
 
 # Because -a can only be installed into virtualenv
-if ([ $_PIP_ALL -eq $BS_TRUE ] && [ $_VIRTUALENV_DIR = "null" ]); then
+if ([ $_PIP_ALL -eq $BS_TRUE ] && [ "$_VIRTUALENV_DIR" = "null" ]); then
     usage
     # Could possibly set up a default virtualenv location when -a flag is passed
     echoerror "Using -a requires -V because pip pkgs should be siloed from python system pkgs"
@@ -1930,9 +1930,9 @@ __create_virtualenv() {
     if [ ! -d "$_VIRTUALENV_DIR" ]; then
         echoinfo "Creating virtualenv ${_VIRTUALENV_DIR}"
         if [ $_PIP_ALL -eq $BS_TRUE ]; then
-            virtualenv --no-site-packages ${_VIRTUALENV_DIR} || return 1
+            virtualenv --no-site-packages "${_VIRTUALENV_DIR}" || return 1
         else
-            virtualenv --system-site-packages ${_VIRTUALENV_DIR} || return 1
+            virtualenv --system-site-packages "${_VIRTUALENV_DIR}" || return 1
         fi
     fi
     return 0
@@ -1948,7 +1948,7 @@ __activate_virtualenv() {
     # Is virtualenv empty
     if [ -z "$VIRTUAL_ENV" ]; then
         __create_virtualenv || return 1
-        . ${_VIRTUALENV_DIR}/bin/activate || return 1
+        . "${_VIRTUALENV_DIR}/bin/activate" || return 1
         echoinfo "Activated virtualenv ${_VIRTUALENV_DIR}"
     fi
     set -o nounset
@@ -2185,7 +2185,7 @@ install_ubuntu_deps() {
         if [ "$_VIRTUALENV_DIR" != "null" ]; then
             __activate_virtualenv
         fi
-        pip install -U ${__PIP_PACKAGES}
+        pip install -U "${__PIP_PACKAGES}"
     fi
 
     if [ "$_UPGRADE_SYS" -eq $BS_TRUE ]; then
@@ -2287,7 +2287,7 @@ install_ubuntu_git_deps() {
             __PACKAGES="${__PACKAGES} python-setuptools python-pip"
         fi
         # Get just the apt packages that are required to build all the pythons
-        __apt_get_install_noinput $__PACKAGES || return 1
+        __apt_get_install_noinput "$__PACKAGES" || return 1
         # Install the pythons from requirements (only zmq for now)
         __install_pip_deps "${_SALT_GIT_CHECKOUT_DIR}/requirements/zeromq.txt" || return 1
     else

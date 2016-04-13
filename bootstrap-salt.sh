@@ -1966,7 +1966,7 @@ __install_pip_deps() {
     # Install virtualenv to system pip before activating virtualenv if thats going to be used
     # We assume pip pkg is installed since that is distro specific
     if [ "$_VIRTUALENV_DIR" != "null" ]; then
-        if [ "$(which pip)" = "" ]; then
+        if __check_command_exists pip; then
             echoerror "Pip not installed: required for -a installs"
             exit 1
         fi
@@ -4763,7 +4763,7 @@ install_openbsd_post() {
         # Skip if not meant to be installed
         [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
         [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
-        [ $fname = "api" ] || [ "$(which salt-${fname} 2>/dev/null)" = "" ] && continue
+        [ $fname = "api" ] || ! __check_command_exists "salt-${fname}" && continue
         [ $fname = "syndic" ] && continue
 
         if [ $? -eq 1 ]; then
@@ -4867,8 +4867,7 @@ install_smartos_deps() {
 install_smartos_git_deps() {
     install_smartos_deps || return 1
 
-    which git > /dev/null 2>&1
-    if [ $? -eq 1 ]; then
+    if ! __check_command_exists git; then
         pkgin -y install git || return 1
     fi
 
@@ -5318,7 +5317,7 @@ install_suse_12_stable_deps() {
                 # Skip if not meant to be installed
                 [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
                 [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
-                [ $fname = "api" ] && ([ "$_INSTALL_MASTER" -eq $BS_FALSE ] || [ "$(which salt-${fname} 2>/dev/null)" = "" ]) && continue
+                [ $fname = "api" ] && ([ "$_INSTALL_MASTER" -eq $BS_FALSE ] || ! __check_command_exists "salt-${fname}") && continue
                 [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
 
                 # Syndic uses the same configuration file as the master
@@ -5346,7 +5345,7 @@ install_suse_12_stable_deps() {
 install_suse_12_git_deps() {
     install_suse_11_stable_deps || return 1
 
-    if [ "$(which git)" = "" ]; then
+    if ! __check_command_exists git; then
         __zypper_install git  || return 1
     fi
 
@@ -5394,7 +5393,7 @@ install_suse_12_stable_post() {
             # Skip if not meant to be installed
             [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
             [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
-            [ $fname = "api" ] && ([ "$_INSTALL_MASTER" -eq $BS_FALSE ] || [ "$(which salt-${fname} 2>/dev/null)" = "" ]) && continue
+            [ $fname = "api" ] && ([ "$_INSTALL_MASTER" -eq $BS_FALSE ] || ! __check_command_exists "salt-${fname}") && continue
             [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
 
             if [ -f /bin/systemctl ]; then

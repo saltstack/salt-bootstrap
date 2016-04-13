@@ -1948,6 +1948,7 @@ __activate_virtualenv() {
     # Is virtualenv empty
     if [ -z "$VIRTUAL_ENV" ]; then
         __create_virtualenv || return 1
+        # shellcheck source=/dev/null
         . "${_VIRTUALENV_DIR}/bin/activate" || return 1
         echoinfo "Activated virtualenv ${_VIRTUALENV_DIR}"
     fi

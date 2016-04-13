@@ -2751,7 +2751,9 @@ install_debian_8_deps() {
         # shellcheck disable=SC2086
         wget $_WGET_ARGS -q "$SALTSTACK_DEBIAN_URL/SALTSTACK-GPG-KEY.pub" -O - | apt-key add - || return 1
 
-        __apt_get_install_noinput apt-transport-https || return 1
+        if [ "${HTTP_VAL}" = "https" ] ; then
+            __apt_get_install_noinput apt-transport-https || return 1
+        fi
     fi
 
     apt-get update || return 1

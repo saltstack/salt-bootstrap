@@ -3320,49 +3320,6 @@ install_fedora_check_services() {
 #
 #   CentOS Install Functions
 #
-__install_epel_repository() {
-    if [ ${_EPEL_REPOS_INSTALLED} -eq $BS_TRUE ]; then
-        return 0
-    fi
-
-    # Check if epel repo is already enabled and flag it accordingly
-    yum repolist | grep -q "^[!]${_EPEL_REPO}/"
-    if [ $? -eq 0 ]; then
-        _EPEL_REPOS_INSTALLED=$BS_TRUE
-        return 0
-    fi
-
-    # Check if epel-release is already installed and flag it accordingly
-    rpm --nodigest --nosignature -q epel-release > /dev/null 2>&1
-    if [ $? -eq 0 ]; then
-        _EPEL_REPOS_INSTALLED=$BS_TRUE
-        return 0
-    fi
-
-    if [ "$CPU_ARCH_L" = "i686" ]; then
-        EPEL_ARCH="i386"
-    else
-        EPEL_ARCH=$CPU_ARCH_L
-    fi
-    if [ "$DISTRO_MAJOR_VERSION" -eq 5 ]; then
-        # Install curl which is not included in minimal CentOS 5 images
-        rpm -q curl > /dev/null 2>&1 || yum -y install curl
-        # rpm from CentOS/RHEL release 5 does not support HTTP downloads
-        # properly, especially 3XX code redirects
-        __fetch_url /tmp/epel-release.rpm "${HTTP_VAL}://download.fedoraproject.org/pub/epel/5/${EPEL_ARCH}/epel-release-5-4.noarch.rpm" || return 1
-        rpm -Uvh --force /tmp/epel-release.rpm || return 1
-    elif [ "$DISTRO_MAJOR_VERSION" -eq 6 ]; then
-        rpm -Uvh --force "${HTTP_VAL}://download.fedoraproject.org/pub/epel/6/${EPEL_ARCH}/epel-release-6-8.noarch.rpm" || return 1
-    elif [ "$DISTRO_MAJOR_VERSION" -eq 7 ]; then
-        rpm -Uvh --force "${HTTP_VAL}://download.fedoraproject.org/pub/epel/7/${EPEL_ARCH}/e/epel-release-7-6.noarch.rpm" || return 1
-    else
-        echoerror "Failed add EPEL repository support."
-        return 1
-    fi
-    _EPEL_REPOS_INSTALLED=$BS_TRUE
-    return 0
-}
-
 __install_saltstack_copr_zeromq_repository() {
     echoinfo "Installing Zeromq >=4 and PyZMQ>=14 from SaltStack's COPR repository"
     if [ ! -s /etc/yum.repos.d/saltstack-zeromq4.repo ]; then
@@ -3439,9 +3396,8 @@ __install_saltstack_copr_salt_repository() {
 }
 
 install_centos_stable_deps() {
-
     if [ $_DISABLE_REPOS -eq $BS_FALSE ]; then
-        __install_epel_repository || return 1
+        yum -y install epel-release || return 1
         __install_saltstack_rhel_repository || return 1
     fi
 

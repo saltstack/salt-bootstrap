@@ -1,6 +1,56 @@
-Version 2015.xx.xx:
+Version 2016.04.18:
 	* Add support for openSUSE Leap. Thanks Roman Inflianskas(rominf). #693
 	* Fix missing deps installation on Debian. Thanks  Steve Groesz(wolfpackmars2). #699
+	* Update SaltStack repo location and latest version for Windows. (brandon099) #711
+	* Better EPEL repository detection on RHEL and CentOS. (vutny) #717
+	* Fix git invocation fail when `man` command is not available. (vutny) #718
+	* Fix `epel-release` package installation on CentOS/RHEL 5. (vutny) #719
+	* Removed deprecated cli option. (abednarik) #705
+	* Remove RHEL optional repo check and enable. (vutny) #720
+	* Remove SaltStack COPR repository configuration for CentOS/RHEL5. (vutny) #721
+	* Add opensuse_Tumbleweed support. (aboe76) #725
+	* Sometimes bootstrap doesn't install zmq. (jtand) #726
+	* Process -s (default sleep for service restarts) in bootstrap-salt.sh. (hipikat) #692
+	* Minion keys and /etc/salt/minion should be overwritten on -C. (cro) #541
+	* Fix for -C (_CONFIG_ONLY). (beaucephus) #544
+	* Fix when using upstream tags. (The-Loeki) #564
+	* COPR project moved. (rmohr) #738
+	* Update license year range. (pra85) #743
+	* Use POSIX-Compliant Command-Exists Test. (kojiromike) #741
+	* Add -f option to force shallow cloning. (eyj) #660
+	* add SLE 12 support, fix OpenSUSE support. (grep4linux) #748
+	* Fix CentOS git setup.py syntax error upon installation. (The-Loeki) #746
+	* Enable shallow cloning for version branches by default, not only tags. (vutny) #750
+	* do not install copr repo on fedora 22+. (toanju) #751
+	* Add support for pegged versions on YUM based OS'ses through repo.saltstack.com. (The-Loeki) #685
+	* fix for FreeBSD 11 CURRENT install functions. (serge-p) #723
+	* Don't add zypp repo if it already exists. (furlongm) #731
+	* switch repositories for suse and sles fixes `#706`_. (aboe76) #734
+	* Reformat and correct usage instructions. (vutny) #755
+	* fixed missing repo for suse 12. (aboe76) #756
+	* fix for Amazon Linux. (shawnbutts) #700
+	* adding support for OpenBSD distribution. (serge-p) #722
+	* fixing syntax errors. (beardedeagle) #760
+	* Import CentOS 7 GPG key on RHEL for installing base dependencies from Salt corp repo. (vutny) #765
+	* Fix multiple lint errors (shellcheck) and make some refactoring. (vutny) #768
+	* Fix sleep time option to recognize a numeric argument. (vutny) #771
+	* Update README. (vutny) #787
+	* get tornado from pip on a fedora git install. (jfindlay) #785
+	* Remove the Saltstack repo's alias. (cro) #794
+	* Ability to change cache dir. (clarkperkins) #761
+	* Add config_freebsd_salt func so freebsd puts cfgs in the right place. (ryanwalder) #779
+	* Allow archive versions. (clarkperkins) #769
+	* Lack of HTTPS for RPM packages. (jaredestroud) #783
+	* Ability to change cache dir. (clarkperkins) #761
+	* Bootstrap on Docker. (vutny) #793
+	* add downstream pkg repo for SUSE. (jfindlay) #791
+	* Fixed use of HTTP over HTTPS for anonscm.debian.org. (gdm85) #788
+	* Bump Salt version to latest stable in PS bootstrap script for Windows. (vutny) #801
+	* Add an -l option to switch https to http links. (rallytime) #795
+	* Virtualenv support for Ubuntu. (l2ol33rt) #666
+	* Lint. (jfindlay) #805
+	* use portable command check. (jfindlay) #806
+	* Update epel-release version number (RuriRyan) #809
 
 
 Version 2015.11.09
@@ -431,5 +481,5 @@ Version 1.5:
 		* FreeBSD 9.0
 
 
-# Don't remove the line bellow.
+# Don't remove the line below.
 # vim: fenc=utf-8 spell spl=en cc=100 tw=99 fo=want ts=4

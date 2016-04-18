@@ -2370,6 +2370,36 @@ install_ubuntu_git() {
     return 0
 }
 
+install_ubuntu_stable_post() {
+    # Workaround for latest LTS packages on latest ubuntu. Normally packages on
+    # debian-based systems will automatically start the corresponding daemons
+    if [ "$DISTRO_MAJOR_VERSION" -ne 15 ]; then
+       return 0
+    fi
+
+    for fname in minion master syndic api; do
+        # Skip if not meant to be installed
+        # Skip salt-api since the service should be opt-in and not necessarily started on boot
+        [ $fname = "api" ] && continue
+
+        [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
+        [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
+        #[ $fname = "api" ] && ([ "$_INSTALL_MASTER" -eq $BS_FALSE ] || ! __check_command_exists "salt-${fname}") && continue
+        [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
+
+        if [ -f /bin/systemctl ]; then
+            # Using systemd
+            /bin/systemctl is-enabled salt-$fname.service > /dev/null 2>&1 || (
+                /bin/systemctl preset salt-$fname.service > /dev/null 2>&1 &&
+                /bin/systemctl enable salt-$fname.service > /dev/null 2>&1
+            )
+            sleep 0.1
+            /usr/bin/systemctl daemon-reload
+        elif [ -f /etc/init.d/salt-$fname ]; then
+            update-rc.d salt-$fname defaults
+        fi
+    done
+}
 install_ubuntu_git_post() {
     for fname in minion master syndic api; do
 

@@ -1,27 +1,34 @@
 <#
 .SYNOPSIS
 A simple Powershell script to download and install a salt minion on windows.
+
 .DESCRIPTION
 The script will download the official salt package from saltstack. It will install a specific
 package version and accept parameters for the master and minion ids. Finally, it can stop and
 set the windows service to "manual" for local testing. 
+
 .EXAMPLE
 ./bootstrap-salt.ps1 
 Runs without any parameters. Uses all the default values/settings.
+
 .EXAMPLE
 ./bootstrap-salt.ps1 -version 2015.4.1-3
 Specifies a particular version of the installer.
+
 .EXAMPLE
 ./bootstrap-salt.ps1 -runservice false
 Specifies the salt-minion service to stop and be set to manual.
 Useful for testing locally from the command line with the --local switch
+
 .EXAMPLE
 ./bootstrap-salt.ps1 -minion minion-box -master master-box
 Specifies the minion and master ids in the minion config. 
 Defaults to the installer values of "minion" and "master".
+
 .EXAMPLE
 ./bootstrap-salt.ps1 -minion minion-box -master master-box -version 2015.5.2 -runservice false
 Specifies all the optional parameters in no particular order.
+
 .PARAMETER version - Default version defined in this script. 
 
 .PARAMETER runservice - Boolean flag to stop the windows service and set to "manual". 
@@ -47,7 +54,7 @@ Param(
   [Parameter(Mandatory=$false,ValueFromPipeline=$true)]
   # Doesn't support versions prior to "YYYY.M.R-B" 
   [ValidatePattern('^(201[0-9]\.[0-9]\.[0-9](\-\d{1})?)$')]
-  [string]$version = "2015.8.8-2",
+  [string]$version = '',
   
   [Parameter(Mandatory=$false,ValueFromPipeline=$true)] 
   [ValidateSet("true","false")] 
@@ -99,15 +106,33 @@ If ([IntPtr]::Size -eq 4) {
   $arch = "AMD64"
 }
 
+# If version isn't supplied, use latest.
+if (!$version) {
+    # Find latest version of Salt Minion 
+    $repo = Invoke-Restmethod 'http://repo.saltstack.com/windows/'
+    $regex = "<\s*a\s*[^>]*?href\s*=\s*[`"']*([^`"'>]+)[^>]*?>"
+    $returnMatches = new-object System.Collections.ArrayList
+    $resultingMatches = [Regex]::Matches($repo, $regex, "IgnoreCase")
+    foreach($match in $resultingMatches)
+    {
+        $cleanedMatch = $match.Groups[1].Value.Trim()
+        [void] $returnMatches.Add($cleanedMatch)
+    } 
+    if ($arch -eq 'x86') {$returnMatches = $returnMatches | Where {$_ -like "Salt-Minion*x86-Setup.exe"}}
+    else {$returnMatches = $returnMatches | Where {$_ -like "Salt-Minion*AMD64-Setup.exe"}}
+    
+    $version = $(($returnMatches | Sort-Object -Descending)[0]).Split('-')[2]
+}
+
 # Download minion setup file
-Write-Host -NoNewline "Downloading Salt minion installer Salt-Minion-$version-$arch-Setup.exe"
+Write-Output -NoNewline "Downloading Salt minion installer Salt-Minion-$version-$arch-Setup.exe"
 $webclient = New-Object System.Net.WebClient
 $url = "https://repo.saltstack.com/windows/Salt-Minion-$version-$arch-Setup.exe"
 $file = "C:\tmp\salt.exe"
 $webclient.DownloadFile($url, $file)
 
 # Install minion silently
-Write-Host -NoNewline "Installing Salt minion"
+Write-Output -NoNewline "Installing Salt minion"
 #Wait for process to exit before continuing.
 C:\tmp\salt.exe /S /minion-name=$minion /master=$master | Out-Null
 
@@ -141,14 +166,14 @@ If($runservice) {
   # If the salt-minion service is still not running, something probably
   # went wrong and user intervention is required - report failure.
   If ($service.Status -eq "Stopped") {
-    Write-Host -NoNewline "Failed to start salt minion"
+    Write-Output -NoNewline "Failed to start salt minion"
     exit 1
   }
 }
 Else {
-  Write-Host -NoNewline "Stopping salt minion and setting it to 'Manual'"
+  Write-Output -NoNewline "Stopping salt minion and setting it to 'Manual'"
   Set-Service "salt-minion" -startupType "Manual"
   Stop-Service "salt-minion"
 }
 
-Write-Host -NoNewline "Salt minion successfully installed"
+Write-Output "Salt minion successfully installed"

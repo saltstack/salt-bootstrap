@@ -2156,6 +2156,9 @@ install_ubuntu_deps() {
     # Minimal systems might not have upstart installed, install it
     __PACKAGES="upstart"
 
+    if [ "$DISTRO_MAJOR_VERSION" -ge 15 ]; then
+        __PACKAGES="${__PACKAGES} python2.7"
+    fi
     if [ "$_VIRTUALENV_DIR" != "null" ]; then
         __PACKAGES="${__PACKAGES} python-virtualenv"
     fi
@@ -2214,17 +2217,29 @@ install_ubuntu_stable_deps() {
 
     # Versions starting with 2015.5.6 and 2015.8.1 are hosted at repo.saltstack.com
     if [ "$(echo "$STABLE_REV" | egrep '^(2015\.5|2015\.8|latest|archive\/)')" != "" ]; then
-        # Saltstack's Stable Ubuntu repository
+        # Workaround for latest non-LTS ubuntu
+        if [ "$DISTRO_MAJOR_VERSION" -eq 15 ]; then
+            echowarn "Non-LTS Ubuntu detected, but stable packages requested. Trying packages from latest LTS release. You may experience problems"
+            UBUNTU_VERSION=14.04
+            UBUNTU_CODENAME=trusty
+        else
+            UBUNTU_VERSION=$DISTRO_VERSION
+            UBUNTU_CODENAME=$DISTRO_CODENAME
+        fi
+
+        # SaltStack's stable Ubuntu repository
+        SALTSTACK_UBUNTU_URL="${HTTP_VAL}://repo.saltstack.com/apt/ubuntu/$UBUNTU_VERSION/$repo_arch/$STABLE_REV"
         if [ "$(grep -ER 'latest .+ main' /etc/apt)" = "" ]; then
-            echo "deb http://repo.saltstack.com/apt/ubuntu/$DISTRO_VERSION/$repo_arch/$STABLE_REV $DISTRO_CODENAME main" > \
-                "/etc/apt/sources.list.d/saltstack.list"
+            set +o nounset
+            echo "deb $SALTSTACK_UBUNTU_URL $UBUNTU_CODENAME main" > "/etc/apt/sources.list.d/saltstack.list"
+            set -o nounset
         fi
 
         # Make sure wget is available
         __apt_get_install_noinput wget
 
         # shellcheck disable=SC2086
-        wget $_WGET_ARGS -q $HTTP_VAL://repo.saltstack.com/apt/ubuntu/$DISTRO_VERSION/$repo_arch/$STABLE_REV/SALTSTACK-GPG-KEY.pub -O - | apt-key add - || return 1
+        wget $_WGET_ARGS -q $SALTSTACK_UBUNTU_URL/SALTSTACK-GPG-KEY.pub -O - | apt-key add - || return 1
 
     else
         # Alternate PPAs: salt16, salt17, salt2014-1, salt2014-7
@@ -2355,6 +2370,36 @@ install_ubuntu_git() {
     return 0
 }
 
+install_ubuntu_stable_post() {
+    # Workaround for latest LTS packages on latest ubuntu. Normally packages on
+    # debian-based systems will automatically start the corresponding daemons
+    if [ "$DISTRO_MAJOR_VERSION" -ne 15 ]; then
+       return 0
+    fi
+
+    for fname in minion master syndic api; do
+        # Skip if not meant to be installed
+        # Skip salt-api since the service should be opt-in and not necessarily started on boot
+        [ $fname = "api" ] && continue
+
+        [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
+        [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
+        #[ $fname = "api" ] && ([ "$_INSTALL_MASTER" -eq $BS_FALSE ] || ! __check_command_exists "salt-${fname}") && continue
+        [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
+
+        if [ -f /bin/systemctl ]; then
+            # Using systemd
+            /bin/systemctl is-enabled salt-$fname.service > /dev/null 2>&1 || (
+                /bin/systemctl preset salt-$fname.service > /dev/null 2>&1 &&
+                /bin/systemctl enable salt-$fname.service > /dev/null 2>&1
+            )
+            sleep 0.1
+            /usr/bin/systemctl daemon-reload
+        elif [ -f /etc/init.d/salt-$fname ]; then
+            update-rc.d salt-$fname defaults
+        fi
+    done
+}
 install_ubuntu_git_post() {
     for fname in minion master syndic api; do
 

@@ -506,7 +506,7 @@ with the bootstrap script:
 
 .. code:: console
 
-  docker built -t local/salt-bootstrap .
+  docker build -t local/salt-bootstrap .
 
 Start your new container with Salt services up and running:
 

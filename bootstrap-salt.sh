@@ -2796,6 +2796,7 @@ install_debian_8_deps() {
     if [ $_START_DAEMONS -eq $BS_FALSE ]; then
         echowarn "Not starting daemons on Debian based distributions is not working mostly because starting them is the default behaviour."
     fi
+
     # No user interaction, libc6 restart services for example
     export DEBIAN_FRONTEND=noninteractive
 
@@ -2892,7 +2893,7 @@ install_debian_git_deps() {
     fi
 
     if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
-        __check_pip_allowed "You need to allow pip based installations (-P) in order to install apache-libcloud"
+        __check_pip_allowed "You need to allow pip based installations (-P) in order to install requested 'apache-libcloud"
         pip install -U "apache-libcloud>=$_LIBCLOUD_MIN_VERSION"
     fi
 
@@ -2962,15 +2963,23 @@ install_debian_8_git_deps() {
     fi
 
     __apt_get_install_noinput lsb-release python python-pkg-resources python-crypto \
-        python-jinja2 python-m2crypto python-yaml msgpack-python python-pip || return 1
+        python-jinja2 python-m2crypto python-yaml msgpack-python || return 1
 
     __git_clone_and_checkout || return 1
 
     if [ -f "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" ]; then
-        # We're on the develop branch, install tornado
         __REQUIRED_TORNADO="$(grep tornado "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt")"
-        if [ "${__REQUIRED_TORNADO}" != "" ]; then
-            __apt_get_install_noinput python-tornado
+        if [ -n "${__REQUIRED_TORNADO}" ]; then
+            __check_pip_allowed "You need to allow pip based installations (-P) in order to install required 'tornado' package"
+
+            __PACKAGES="python-dev"
+            if ! __check_command_exists pip; then
+                __PACKAGES="${__PACKAGES} python-pip"
+            fi
+
+            # shellcheck disable=SC2086
+             __apt_get_install_noinput ${__PACKAGES} || return 1
+            pip install -U tornado || return 1
         fi
     fi
 
@@ -3054,12 +3063,17 @@ install_debian_git_post() {
         # Skip if not meant to be installed
         [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
         [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
-        [ $fname = "api" ] && ([ "$_INSTALL_MASTER" -eq $BS_FALSE ] || ! __check_command_exists "salt-${fname}") && continue
+        [ $fname = "api" ] && \
+            ([ "$_INSTALL_MASTER" -eq $BS_FALSE ] || ! __check_command_exists "salt-${fname}") && \
+                continue
         [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
 
         if [ -f /bin/systemctl ]; then
-            if [ ! -f /etc/systemd/system/salt-${fname}.service ] || ([ -f /etc/systemd/system/salt-${fname}.service ] && [ $_FORCE_OVERWRITE -eq $BS_TRUE ]); then
-                __copyfile "${_SALT_GIT_CHECKOUT_DIR}/pkg/salt-${fname}.service" /etc/systemd/system
+            if [ ! -f /lib/systemd/system/salt-${fname}.service ] || \
+                ([ -f /lib/systemd/system/salt-${fname}.service ] && [ $_FORCE_OVERWRITE -eq $BS_TRUE ]); then
+                __copyfile "${_SALT_GIT_CHECKOUT_DIR}/pkg/salt-${fname}.service" /lib/systemd/system
+                # FIXME: add Debian-specific unit files to the salt main repo
+                sed -i -e '/^Type/ s/notify/simple/' /lib/systemd/system/salt-${fname}.service
             fi
 
             # Skip salt-api since the service should be opt-in and not necessarily started on boot

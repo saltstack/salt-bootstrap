@@ -2893,7 +2893,7 @@ install_debian_git_deps() {
     fi
 
     if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
-        __check_pip_allowed "You need to allow pip based installations (-P) in order to install requested 'apache-libcloud"
+        __check_pip_allowed "You need to allow pip based installations (-P) in order to install requested 'apache-libcloud' module"
         pip install -U "apache-libcloud>=$_LIBCLOUD_MIN_VERSION"
     fi
 
@@ -2970,7 +2970,7 @@ install_debian_8_git_deps() {
     if [ -f "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" ]; then
         __REQUIRED_TORNADO="$(grep tornado "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt")"
         if [ -n "${__REQUIRED_TORNADO}" ]; then
-            __check_pip_allowed "You need to allow pip based installations (-P) in order to install required 'tornado' package"
+            __check_pip_allowed "You need to allow pip based installations (-P) in order to install required 'tornado' module"
 
             __PACKAGES="python-dev"
             if ! __check_command_exists pip; then

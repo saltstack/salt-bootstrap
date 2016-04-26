@@ -2307,6 +2307,9 @@ install_ubuntu_daily_deps() {
 }
 
 install_ubuntu_git_deps() {
+    if [ "$DISTRO_MAJOR_VERSION" -eq 12 ]; then
+        apt-get update
+    fi
     __apt_get_install_noinput git-core || return 1
     __git_clone_and_checkout || return 1
 

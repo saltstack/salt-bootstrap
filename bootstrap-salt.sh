@@ -2956,18 +2956,11 @@ install_debian_7_git_deps() {
 install_debian_8_git_deps() {
     install_debian_8_deps || return 1
 
-    # No user interaction, libc6 restart services for example
-    export DEBIAN_FRONTEND=noninteractive
-
     if ! __check_command_exists git; then
         __apt_get_install_noinput git || return 1
     fi
 
-    if [ "$(dpkg-query -l 'python-zmq')" = "" ]; then
-        __apt_get_install_noinput libzmq3 libzmq3-dev python-zmq || return 1
-    fi
-
-    __apt_get_install_noinput lsb-release python python-pkg-resources python-crypto \
+    __apt_get_install_noinput lsb-release python-pkg-resources python-crypto \
         python-jinja2 python-m2crypto python-yaml msgpack-python || return 1
 
     __git_clone_and_checkout || return 1
@@ -2992,16 +2985,6 @@ install_debian_8_git_deps() {
     if [ "$_TEMP_CONFIG_DIR" = "null" ]; then
         _TEMP_CONFIG_DIR="${_SALT_GIT_CHECKOUT_DIR}/conf/"
         CONFIG_SALT_FUNC="config_salt"
-    fi
-
-    if [ "$_UPGRADE_SYS" -eq $BS_TRUE ]; then
-        __apt_get_upgrade_noinput || return 1
-    fi
-
-    if [ "${_EXTRA_PACKAGES}" != "" ]; then
-        echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
-        # shellcheck disable=SC2086
-        __apt_get_install_noinput ${_EXTRA_PACKAGES} || return 1
     fi
 
     return 0

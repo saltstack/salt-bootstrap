@@ -2960,25 +2960,30 @@ install_debian_8_git_deps() {
         __apt_get_install_noinput git || return 1
     fi
 
-    __apt_get_install_noinput lsb-release python-pkg-resources python-crypto \
-        python-jinja2 python-m2crypto python-yaml msgpack-python || return 1
-
     __git_clone_and_checkout || return 1
 
+    __PACKAGES="lsb-release python-pkg-resources python-crypto python-jinja2 python-m2crypto python-yaml msgpack-python"
+    __PIP_PACKAGES=""
+
     if [ -f "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" ]; then
-        __REQUIRED_TORNADO="$(grep tornado "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt")"
+        __REQUIRED_TORNADO="$(grep ^tornado "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" | tr -d ' ')"
         if [ -n "${__REQUIRED_TORNADO}" ]; then
             __check_pip_allowed "You need to allow pip based installations (-P) in order to install required 'tornado' module"
 
-            __PACKAGES="python-dev"
+            __PACKAGES="${__PACKAGES} python-dev"
+            __PIP_PACKAGES="${__PIP_PACKAGES} tornado"
             if ! __check_command_exists pip; then
                 __PACKAGES="${__PACKAGES} python-pip"
             fi
-
-            # shellcheck disable=SC2086
-             __apt_get_install_noinput ${__PACKAGES} || return 1
-            pip install -U tornado || return 1
         fi
+    fi
+
+    # shellcheck disable=SC2086
+    __apt_get_install_noinput ${__PACKAGES} || return 1
+
+    if [ "${__PIP_PACKAGES}" != "" ]; then
+        # shellcheck disable=SC2086,SC2090
+        pip install -U ${__PIP_PACKAGES} || return 1
     fi
 
     # Let's trigger config_salt()

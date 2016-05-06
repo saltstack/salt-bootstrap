@@ -5150,7 +5150,7 @@ install_opensuse_stable_deps() {
     if [ "$DISTRO_MAJOR_VERSION" -lt 13 ]; then
         __PACKAGES="${__PACKAGES} libzmq3"
     elif [ "$DISTRO_MAJOR_VERSION" -eq 13 ]; then
-        __PACKAGES="${__PACKAGES} libzmq4"
+        __PACKAGES="${__PACKAGES} libzmq3"
     elif [ "$DISTRO_MAJOR_VERSION" -gt 13 ]; then
         __PACKAGES="${__PACKAGES} libzmq5"
     fi
@@ -5184,13 +5184,6 @@ install_opensuse_git_deps() {
     __zypper_install patch || return 1
 
     __git_clone_and_checkout || return 1
-
-    if [ -f "${_SALT_GIT_CHECKOUT_DIR}/pkg/suse/use-forking-daemon.patch" ]; then
-        # shellcheck disable=SC2164
-        cd "${_SALT_GIT_CHECKOUT_DIR}"
-        echowarn "Applying patch to systemd service unit file"
-        patch -p1 < pkg/suse/use-forking-daemon.patch || return 1
-    fi
 
     if [ -f "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" ]; then
         # We're on the develop branch, install whichever tornado is on the requirements file

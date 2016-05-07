@@ -1593,6 +1593,16 @@ __check_end_of_life_versions() {
             fi
             ;;
 
+        amazon*linux*ami)
+            # Amazon Linux versions lower than 2012.0X no longer supported
+            if [ "$DISTRO_MAJOR_VERSION" -lt 2012 ]; then
+                echoerror "End of life distributions are not supported."
+                echoerror "Please consider upgrading to the next stable. See:"
+                echoerror "    https://aws.amazon.com/amazon-linux-ami/"
+                exit 1
+            fi
+            ;;
+
         freebsd)
             # FreeBSD versions lower than 9.1 are not supported.
             if ([ "$DISTRO_MAJOR_VERSION" -eq 9 ] && [ "$DISTRO_MINOR_VERSION" -lt 01 ]) || [ "$DISTRO_MAJOR_VERSION" -lt 9 ]; then
@@ -4069,23 +4079,6 @@ install_scientific_linux_check_services() {
 #
 #   Amazon Linux AMI Install Functions
 #
-
-# FIXME: 2010.xx releases are no longer avaliable: https://aws.amazon.com/amazon-linux-ami/
-#        Need to add amazon case to __check_end_of_life_versions
-
-install_amazon_linux_ami_2010_deps() {
-    # Linux Amazon AMI 2010.xx seems to use EPEL5 but the system is based on CentOS6.
-    # Supporting this would be quite troublesome and we need to workaround some serious package conflicts
-    echoerror "Amazon Linux AMI 2010 is not supported. Please use a more recent image (Amazon Linux AMI >= 2011.xx)"
-    exit 1
-}
-
-install_amazon_linux_ami_2010_git_deps() {
-    # Linux Amazon AMI 2010.xx seems to use EPEL5 but the system is based on CentOS6.
-    # Supporting this would be quite troublesome and we need to workaround some serious package conflicts
-    echoerror "Amazon Linux AMI 2010 is not supported. Please use a more recent image (Amazon Linux AMI >= 2011.xx)"
-    exit 1
-}
 
 install_amazon_linux_ami_deps() {
 

@@ -3352,26 +3352,19 @@ __install_epel_repository() {
         return 0
     fi
 
-    if [ "$CPU_ARCH_L" = "i686" ]; then
-        EPEL_ARCH="i386"
-    else
-        EPEL_ARCH=$CPU_ARCH_L
-    fi
+    # Download latest 'epel-release' package for the distro version directly
+    epel_repo_url="${HTTP_VAL}://dl.fedoraproject.org/pub/epel/epel-release-latest-${DISTRO_MAJOR_VERSION}.noarch.rpm"
     if [ "$DISTRO_MAJOR_VERSION" -eq 5 ]; then
-        # Install curl which is not included in minimal CentOS 5 images
-        rpm -q curl > /dev/null 2>&1 || yum -y install curl
-        # rpm from CentOS/RHEL release 5 does not support HTTP downloads
-        # properly, especially 3XX code redirects
-        __fetch_url /tmp/epel-release.rpm "${HTTP_VAL}://download.fedoraproject.org/pub/epel/5/${EPEL_ARCH}/epel-release-5-4.noarch.rpm" || return 1
+        __fetch_url /tmp/epel-release.rpm "$epel_repo_url" || return 1
         rpm -Uvh --force /tmp/epel-release.rpm || return 1
-    elif [ "$DISTRO_MAJOR_VERSION" -eq 6 ]; then
-        rpm -Uvh --force "${HTTP_VAL}://download.fedoraproject.org/pub/epel/6/${EPEL_ARCH}/epel-release-6-8.noarch.rpm" || return 1
-    elif [ "$DISTRO_MAJOR_VERSION" -eq 7 ]; then
-        rpm -Uvh --force "${HTTP_VAL}://download.fedoraproject.org/pub/epel/7/${EPEL_ARCH}/e/epel-release-7-6.noarch.rpm" || return 1
+        rm -f /tmp/epel-release.rpm
+    elif [ "$DISTRO_MAJOR_VERSION" -ge 6 ]; then
+        rpm -Uvh --force "$epel_repo_url" || return 1
     else
         echoerror "Failed add EPEL repository support."
         return 1
     fi
+
     _EPEL_REPOS_INSTALLED=$BS_TRUE
     return 0
 }
@@ -3452,6 +3445,10 @@ __install_saltstack_copr_salt_repository() {
 }
 
 install_centos_stable_deps() {
+    if [ "$DISTRO_MAJOR_VERSION" -eq 5 ]; then
+        # Install curl which is not included in @core CentOS 5 installation
+        __check_command_exists curl || yum -y install "curl.${CPU_ARCH_L}" || return 1
+    fi
 
     if [ $_DISABLE_REPOS -eq $BS_FALSE ]; then
         __install_epel_repository || return 1

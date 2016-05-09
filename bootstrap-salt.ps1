@@ -121,7 +121,7 @@ if (!$version) {
     if ($arch -eq 'x86') {$returnMatches = $returnMatches | Where {$_ -like "Salt-Minion*x86-Setup.exe"}}
     else {$returnMatches = $returnMatches | Where {$_ -like "Salt-Minion*AMD64-Setup.exe"}}
     
-    $version = $(($returnMatches | Sort-Object -Descending)[0]).Split('-')[2]
+    $version = $(($returnMatches | Sort-Object -Descending)[0]).Split(("n-","-A","-x"),([System.StringSplitOptions]::RemoveEmptyEntries))[1] 
 }
 
 # Download minion setup file

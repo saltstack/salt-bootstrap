@@ -1817,10 +1817,38 @@ __overwriteconfig() {
         exit 1
     fi
 
-    # Convert json string to a yaml string and write it to config file
-    python -c "import json; import yaml; jsn=json.loads('$json'); yml=yaml.safe_dump(jsn, line_break='\n', default_flow_style=False); config_file=open('$target', 'w'); config_file.write(yml); config_file.close();" || return 1
+    # Make a tempfile to dump any python errors into.
+    if __check_command_exists mktemp; then
+        tempfile="$(mktemp /tmp/salt-config-XXXXXXXX 2>/dev/null)"
 
-    return 0
+        if [ -z "$tempfile" ]; then
+            echoerror "Failed to create temporary file in /tmp"
+            return 1
+        fi
+    else
+        tempfile="/tmp/salt-config-$$"
+    fi
+
+    # Convert json string to a yaml string and write it to config file. Output is dumped into tempfile.
+    python -c "import json; import yaml; jsn=json.loads('$json'); yml=yaml.safe_dump(jsn, line_break='\n', default_flow_style=False); config_file=open('$target', 'w'); config_file.write(yml); config_file.close();" 2>$tempfile
+
+    # Check if there were any errors output to the tempfile
+    filesize=$(python -c "import os; print os.stat('$tempfile').st_size;")
+
+    # No python errors output to the tempfile
+    if [ "$filesize" -eq 0 ]; then
+        rm -f "$tempfile"
+        return 0
+    fi
+
+    # Errors are present in the tempfile - let's expose the that to the user.
+    fullerror=$(python -c "tmp_file=open('$tempfile'); print tmp_file.read(); tmp_file.close()")
+    echodebug "$fullerror"
+    echoerror "Python error encountered. This is likely due to passing in a malformed JSON string. Please use -D to see stacktrace."
+
+    rm -f "$tempfile"
+
+    return 1
 
 }
 

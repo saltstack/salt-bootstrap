@@ -1,3 +1,9 @@
+Version 2016.05.10:
+    * Removed libzmq4 and forking-deamon-patch for Opensuse13. (jtand) #840
+    * Ubuntu 12.04 needs to be updated before installing packages. (jtand) #829
+    * Always download and install *latest* `epel-release` package on RHEL systems. (vutny) #825
+    * Fix Amazon Linux EOL check. (vutny) #818
+
 Version 2016.04.18:
 	* Add support for openSUSE Leap. Thanks Roman Inflianskas(rominf). #693
 	* Fix missing deps installation on Debian. Thanks  Steve Groesz(wolfpackmars2). #699

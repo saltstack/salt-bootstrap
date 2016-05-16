@@ -5891,8 +5891,10 @@ config_salt() {
 
     if [ "$_CONFIG_ONLY" -eq "$BS_TRUE" ]; then
         echowarn "Passing -C (config only) option implies -F (forced overwrite)."
-        echowarn "Overwriting configs in 11 seconds!"
-        sleep 11
+        if [ "$_FORCE_OVERWRITE" -ne "$BS_TRUE" ]; then
+            echowarn "Overwriting configs in 11 seconds!"
+            sleep 11
+        fi
     fi
 
     if [ "$_INSTALL_MINION" -eq "$BS_TRUE" ] || [ "$_CONFIG_ONLY" -eq "$BS_TRUE" ]; then

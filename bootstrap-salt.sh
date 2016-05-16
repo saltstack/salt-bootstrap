@@ -516,14 +516,14 @@ elif [ "$ITYPE" = "stable" ]; then
     else
         __check_unparsed_options "$*"
 
-        if [ "$(echo "$1" | egrep '^(latest|1\.6|1\.7|2014\.1|2014\.7|2015\.5|2015\.8)$')" != "" ]; then
+        if [ "$(echo "$1" | egrep '^(latest|1\.6|1\.7|2014\.1|2014\.7|2015\.5|2015\.8|2016\.3)$')" != "" ]; then
             STABLE_REV="$1"
             shift
         elif [ "$(echo "$1" | egrep '^([0-9]*\.[0-9]*\.[0-9]*)$')" != "" ]; then
             STABLE_REV="archive/$1"
             shift
         else
-            echo "Unknown stable version: $1 (valid: 1.6, 1.7, 2014.1, 2014.7, 2015.5, 2015.8, latest, \$MAJOR.\$MINOR.\$PATCH)"
+            echo "Unknown stable version: $1 (valid: 1.6, 1.7, 2014.1, 2014.7, 2015.5, 2015.8, 2016.3, latest, \$MAJOR.\$MINOR.\$PATCH)"
             exit 1
         fi
     fi
@@ -1216,6 +1216,9 @@ __ubuntu_codename_translation() {
             else
                 DISTRO_CODENAME="wily"
             fi
+            ;;
+        "16")
+            DISTRO_CODENAME="xenial"
             ;;
         *)
             DISTRO_CODENAME="trusty"
@@ -2318,7 +2321,7 @@ install_ubuntu_stable_deps() {
 
     if [ $_DISABLE_REPOS -eq $BS_FALSE ]; then
         # Versions starting with 2015.5.6 and 2015.8.1 are hosted at repo.saltstack.com
-        if [ "$(echo "$STABLE_REV" | egrep '^(2015\.5|2015\.8|latest|archive\/)')" != "" ]; then
+        if [ "$(echo "$STABLE_REV" | egrep '^(2015\.5|2015\.8|2016\.3|latest|archive\/)')" != "" ]; then
             # Workaround for latest non-LTS ubuntu
             if [ "$DISTRO_MAJOR_VERSION" -eq 15 ]; then
                 echowarn "Non-LTS Ubuntu detected, but stable packages requested. Trying packages from latest LTS release. You may experience problems"
@@ -2481,7 +2484,7 @@ install_ubuntu_git() {
 install_ubuntu_stable_post() {
     # Workaround for latest LTS packages on latest ubuntu. Normally packages on
     # debian-based systems will automatically start the corresponding daemons
-    if [ "$DISTRO_MAJOR_VERSION" -ne 15 ]; then
+    if [ "$DISTRO_MAJOR_VERSION" -lt 15 ]; then
        return 0
     fi
 
@@ -2502,7 +2505,7 @@ install_ubuntu_stable_post() {
                 /bin/systemctl enable salt-$fname.service > /dev/null 2>&1
             )
             sleep 0.1
-            /usr/bin/systemctl daemon-reload
+            /bin/systemctl daemon-reload
         elif [ -f /etc/init.d/salt-$fname ]; then
             update-rc.d salt-$fname defaults
         fi

@@ -2967,13 +2967,24 @@ install_debian_8_git_deps() {
 
     if [ -f "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" ]; then
         __REQUIRED_TORNADO="$(grep ^tornado "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" | tr -d ' ')"
-        if [ -n "${__REQUIRED_TORNADO}" ]; then
-            __check_pip_allowed "You need to allow pip based installations (-P) in order to install required 'tornado' module"
 
-            __PACKAGES="${__PACKAGES} python-dev"
-            __PIP_PACKAGES="${__PIP_PACKAGES} tornado"
-            if ! __check_command_exists pip; then
-                __PACKAGES="${__PACKAGES} python-pip"
+        if [ -n "${__REQUIRED_TORNADO}" ]; then
+            if (__check_pip_allowed >/dev/null 2>&1); then
+                __PACKAGES="${__PACKAGES} python-dev"
+                __PIP_PACKAGES="${__PIP_PACKAGES} tornado"
+
+                if ! __check_command_exists pip; then
+                    __PACKAGES="${__PACKAGES} python-pip"
+                fi
+            else
+                # Check if Debian Backports repo already configured
+                if ! apt-cache policy | grep -q 'Debian Backports'; then
+                    echo 'deb http://httpredir.debian.org/debian jessie-backports main' > \
+                        /etc/apt/sources.list.d/backports.list
+                    apt-get update
+                fi
+
+                __PACKAGES="${__PACKAGES} python-tornado/jessie-backports"
             fi
         fi
     fi

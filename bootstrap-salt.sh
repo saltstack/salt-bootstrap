@@ -232,6 +232,8 @@ _NO_DEPS=$BS_FALSE
 _FORCE_SHALLOW_CLONE=$BS_FALSE
 _DISABLE_SSL=$BS_FALSE
 _DISABLE_REPOS=$BS_FALSE
+_CUSTOM_MASTER_CONFIG="null"
+_CUSTOM_MINION_CONFIG="null"
 
 
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
@@ -334,12 +336,22 @@ __usage() {
     -r  Disable all repository configuration performed by this script. This
         option assumes all necessary repository configuration is already present
         on the system.
+    -J  Replace the Master config file with data passed in as a json string. If a
+        Master config file is found, a reasonable effort will be made to save the
+        file with a ".bak" extension. If used in conjunction with -C or -F, no ".bak"
+        file will be created as either of those options will force a complete
+        overwrite of the file.
+    -j  Replace the Minion config file with data passed in as a json string. If a
+        Minion config file is found, a reasonable effort will be made to save the
+        file with a ".bak" extension. If used in conjunction with -C or -F, no ".bak"
+        file will be created as either of those options will force a complete
+        overwrite of the file.
 
 EOT
 }   # ----------  end of function __usage  ----------
 
 
-while getopts ":hvnDc:Gg:wk:s:MSNXCPFUKIA:i:Lp:dH:ZbflV:ar" opt
+while getopts ":hvnDc:Gg:wk:s:MSNXCPFUKIA:i:Lp:dH:ZbflV:J:j:ar" opt
 do
   case "${opt}" in
 
@@ -403,6 +415,8 @@ do
     V )  _VIRTUALENV_DIR="$OPTARG"                      ;;
     a )  _PIP_ALL=$BS_TRUE                              ;;
     r )  _DISABLE_REPOS=$BS_TRUE                        ;;
+    J )  _CUSTOM_MASTER_CONFIG=$OPTARG                  ;;
+    j )  _CUSTOM_MINION_CONFIG=$OPTARG                  ;;
 
     \?)  echo
          echoerror "Option does not exist : $OPTARG"
@@ -452,6 +466,21 @@ if [ "$_INSTALL_MINION" -eq $BS_FALSE ] && [ "$_SALT_MINION_ID" != "null" ]; the
     exit 1
 fi
 
+# Check that we're installing or configuring a master if we're being passed a master config json dict
+if [ "$_CUSTOM_MASTER_CONFIG" != "null" ]; then
+    if [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && [ "$_CONFIG_ONLY" -eq $BS_FALSE ]; then
+        echoerror "Don't pass a master config json dict (-J) if no master is going to be bootstrapped or configured."
+        exit 1
+    fi
+fi
+
+# Check that we're installing or configuring a minion if we're being passed a minion config json dict
+if [ "$_CUSTOM_MINION_CONFIG" != "null" ]; then
+    if [ "$_INSTALL_MINION" -eq $BS_FALSE ] && [ "$_CONFIG_ONLY" -eq $BS_FALSE ]; then
+        echoerror "Don't pass a minion config json dict (-j) if no minion is going to be bootstrapped or configured."
+        exit 1
+    fi
+fi
 
 # Define installation type
 if [ "$#" -eq 0 ];then
@@ -1774,6 +1803,54 @@ __linkfile() {
     return 0
 }
 
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  __overwriteconfig()
+#   DESCRIPTION:  Simple function to overwrite master or minion config files.
+#----------------------------------------------------------------------------------------------------------------------
+__overwriteconfig() {
+    if [ $# -eq 2 ]; then
+        target=$1
+        json=$2
+    else
+        echoerror "Wrong number of arguments for __convert_json_to_yaml_str()"
+        echoinfo "USAGE: __convert_json_to_yaml_str <configfile> <jsonstring>"
+        exit 1
+    fi
+
+    # Make a tempfile to dump any python errors into.
+    if __check_command_exists mktemp; then
+        tempfile="$(mktemp /tmp/salt-config-XXXXXXXX 2>/dev/null)"
+
+        if [ -z "$tempfile" ]; then
+            echoerror "Failed to create temporary file in /tmp"
+            return 1
+        fi
+    else
+        tempfile="/tmp/salt-config-$$"
+    fi
+
+    # Convert json string to a yaml string and write it to config file. Output is dumped into tempfile.
+    python -c "import json; import yaml; jsn=json.loads('$json'); yml=yaml.safe_dump(jsn, line_break='\n', default_flow_style=False); config_file=open('$target', 'w'); config_file.write(yml); config_file.close();" 2>$tempfile
+
+    # Check if there were any errors output to the tempfile
+    filesize=$(python -c "import os; print os.stat('$tempfile').st_size;")
+
+    # No python errors output to the tempfile
+    if [ "$filesize" -eq 0 ]; then
+        rm -f "$tempfile"
+        return 0
+    fi
+
+    # Errors are present in the tempfile - let's expose the that to the user.
+    fullerror=$(python -c "tmp_file=open('$tempfile'); print tmp_file.read(); tmp_file.close()")
+    echodebug "$fullerror"
+    echoerror "Python error encountered. This is likely due to passing in a malformed JSON string. Please use -D to see stacktrace."
+
+    rm -f "$tempfile"
+
+    return 1
+
+}
 
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #          NAME:  __rpm_import_gpg
@@ -5882,6 +5959,13 @@ config_salt() {
     [ -d "$_SALT_ETC_DIR" ] || mkdir "$_SALT_ETC_DIR" || return 1
     [ -d "$_PKI_DIR" ] || (mkdir -p "$_PKI_DIR" && chmod 700 "$_PKI_DIR") || return 1
 
+    # If -C or -F was passed, we don't need a .bak file for the config we're updating
+    # This is used in the custom master/minion config file checks below
+    CREATE_BAK=$BS_TRUE
+    if [ "$_CONFIG_ONLY" -eq $BS_TRUE ] || [ "$_FORCE_OVERWRITE" -eq $BS_TRUE ]; then
+        CREATE_BAK=$BS_FALSE
+    fi
+
     # Copy the grains file if found
     if [ -f "$_TEMP_CONFIG_DIR/grains" ]; then
         echodebug "Moving provided grains file from $_TEMP_CONFIG_DIR/grains to $_SALT_ETC_DIR/grains"
@@ -5897,12 +5981,26 @@ config_salt() {
         fi
     fi
 
-    if [ "$_INSTALL_MINION" -eq "$BS_TRUE" ] || [ "$_CONFIG_ONLY" -eq "$BS_TRUE" ]; then
+    if [ "$_INSTALL_MINION" -eq "$BS_TRUE" ] || [ "$_CONFIG_ONLY" -eq "$BS_TRUE" ] || [ "$_CUSTOM_MINION_CONFIG" != "null" ]; then
         # Create the PKI directory
         [ -d "$_PKI_DIR/minion" ] || (mkdir -p "$_PKI_DIR/minion" && chmod 700 "$_PKI_DIR/minion") || return 1
 
+        # Check to see if a custom minion config json dict was provided
+        if [ "$_CUSTOM_MINION_CONFIG" != "null" ]; then
+
+            # Check if a minion config file already exists and move to .bak if needed
+            if [ -f "$_SALT_ETC_DIR/minion" ] && [ "$CREATE_BAK" -eq "$BS_TRUE" ]; then
+                __movefile "$_SALT_ETC_DIR/minion" "$_SALT_ETC_DIR/minion.bak" $BS_TRUE || return 1
+                CONFIGURED_ANYTHING=$BS_TRUE
+            fi
+
+            # Overwrite/create the config file with the yaml string
+            __overwriteconfig "$_SALT_ETC_DIR/minion" "$_CUSTOM_MINION_CONFIG" || return 1
+            CONFIGURED_ANYTHING=$BS_TRUE
+
         # Copy the minions configuration if found
-        if [ -f "$_TEMP_CONFIG_DIR/minion" ]; then
+        # Explicitly check for custom master config to avoid moving the minion config
+        elif [ -f "$_TEMP_CONFIG_DIR/minion" ] && [ "$_CUSTOM_MASTER_CONFIG" = "null" ]; then
             __movefile "$_TEMP_CONFIG_DIR/minion" "$_SALT_ETC_DIR" "$_CONFIG_ONLY" || return 1
             CONFIGURED_ANYTHING=$BS_TRUE
         fi
@@ -5936,12 +6034,25 @@ config_salt() {
         OVERWRITE_MASTER_CONFIGS=$BS_TRUE
     fi
 
-    if [ "$_INSTALL_MASTER" -eq $BS_TRUE ] || [ "$_INSTALL_SYNDIC" -eq $BS_TRUE ] || [ "$OVERWRITE_MASTER_CONFIGS" -eq $BS_TRUE ]; then
+    if [ "$_INSTALL_MASTER" -eq $BS_TRUE ] || [ "$_INSTALL_SYNDIC" -eq $BS_TRUE ] || [ "$OVERWRITE_MASTER_CONFIGS" -eq $BS_TRUE ] || [ "$_CUSTOM_MASTER_CONFIG" != "null" ]; then
         # Create the PKI directory
         [ -d "$_PKI_DIR/master" ] || (mkdir -p "$_PKI_DIR/master" && chmod 700 "$_PKI_DIR/master") || return 1
 
+        # Check to see if a custom master config json dict was provided
+        if [ "$_CUSTOM_MASTER_CONFIG" != "null" ]; then
+
+            # Check if a master config file already exists and move to .bak if needed
+            if [ -f "$_SALT_ETC_DIR/master" ] && [ "$CREATE_BAK" -eq "$BS_TRUE" ]; then
+                __movefile "$_SALT_ETC_DIR/master" "$_SALT_ETC_DIR/master.bak" $BS_TRUE || return 1
+                CONFIGURED_ANYTHING=$BS_TRUE
+            fi
+
+            # Overwrite/create the config file with the yaml string
+            __overwriteconfig "$_SALT_ETC_DIR/master" "$_CUSTOM_MASTER_CONFIG" || return 1
+            CONFIGURED_ANYTHING=$BS_TRUE
+
         # Copy the masters configuration if found
-        if [ -f "$_TEMP_CONFIG_DIR/master" ]; then
+        elif [ -f "$_TEMP_CONFIG_DIR/master" ]; then
             __movefile "$_TEMP_CONFIG_DIR/master" "$_SALT_ETC_DIR" || return 1
             CONFIGURED_ANYTHING=$BS_TRUE
         fi
@@ -6223,6 +6334,14 @@ if [ "$_CONFIG_ONLY" -eq $BS_FALSE ]; then
     fi
 fi
 
+
+# Triggering config_salt() if overwriting master or minion configs
+if [ "$_CUSTOM_MASTER_CONFIG" != "null" ] || [ "$_CUSTOM_MINION_CONFIG" != "null" ]; then
+    if [ "$_TEMP_CONFIG_DIR" = "null" ]; then
+        _TEMP_CONFIG_DIR="$_SALT_ETC_DIR"
+    fi
+    CONFIG_SALT_FUNC="config_salt"
+fi
 
 # Configure Salt
 if [ "$_TEMP_CONFIG_DIR" != "null" ] && [ "$CONFIG_SALT_FUNC" != "null" ]; then

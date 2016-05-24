@@ -506,22 +506,26 @@ if [ "$ITYPE" = "git" ]; then
         GIT_REV="$1"
         shift
     fi
+
+    # Disable shell warning about unbound variable during git install
+    STABLE_REV=""
+
 # If doing stable install, check if version specified
 elif [ "$ITYPE" = "stable" ]; then
     if [ "$#" -eq 0 ];then
         STABLE_REV="latest"
     else
         __check_unparsed_options "$*"
-        if [ "$(echo "$1" | egrep '^(latest|1\.6|1\.7|2014\.1|2014\.7|2015\.5|2015\.8)$')" != "" ]; then
-          STABLE_REV="$1"
-          shift
-        elif [ "$(echo "$1" | egrep '^([0-9]*\.[0-9]*\.[0-9]*)$')" != "" ]; then
-          STABLE_REV="archive/$1"
-          shift
-        else
-          echo "Unknown stable version: $1 (valid: 1.6, 1.7, 2014.1, 2014.7, 2015.5, 2015.8, latest, \$MAJOR.\$MINOR.\$PATCH)"
-          exit 1
 
+        if [ "$(echo "$1" | egrep '^(latest|1\.6|1\.7|2014\.1|2014\.7|2015\.5|2015\.8)$')" != "" ]; then
+            STABLE_REV="$1"
+            shift
+        elif [ "$(echo "$1" | egrep '^([0-9]*\.[0-9]*\.[0-9]*)$')" != "" ]; then
+            STABLE_REV="archive/$1"
+            shift
+        else
+            echo "Unknown stable version: $1 (valid: 1.6, 1.7, 2014.1, 2014.7, 2015.5, 2015.8, latest, \$MAJOR.\$MINOR.\$PATCH)"
+            exit 1
         fi
     fi
 fi
@@ -1976,8 +1980,8 @@ __check_services_debian() {
     servicename=$1
     echodebug "Checking if service ${servicename} is enabled"
 
-    # shellcheck disable=SC2086,SC2046,SC2144
-    if [ -f /etc/rc$(runlevel | awk '{ print $2 }').d/S*${servicename} ]; then
+    # Check if the service is going to be started at any runlevel, fixes bootstrap in container (Docker, LXC)
+    if ls /etc/rc?.d/S*"${servicename}" >/dev/null 2>&1; then
         echodebug "Service ${servicename} is enabled"
         return 0
     else
@@ -2886,6 +2890,7 @@ install_debian_8_deps() {
     if [ $_START_DAEMONS -eq $BS_FALSE ]; then
         echowarn "Not starting daemons on Debian based distributions is not working mostly because starting them is the default behaviour."
     fi
+
     # No user interaction, libc6 restart services for example
     export DEBIAN_FRONTEND=noninteractive
 
@@ -2982,7 +2987,7 @@ install_debian_git_deps() {
     fi
 
     if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
-        __check_pip_allowed "You need to allow pip based installations (-P) in order to install apache-libcloud"
+        __check_pip_allowed "You need to allow pip based installations (-P) in order to install requested 'apache-libcloud' module"
         pip install -U "apache-libcloud>=$_LIBCLOUD_MIN_VERSION"
     fi
 
@@ -3040,44 +3045,52 @@ install_debian_7_git_deps() {
 
 install_debian_8_git_deps() {
     install_debian_8_deps || return 1
-    # No user interaction, libc6 restart services for example
-    export DEBIAN_FRONTEND=noninteractive
 
     if ! __check_command_exists git; then
         __apt_get_install_noinput git || return 1
     fi
 
-    if [ "$(dpkg-query -l 'python-zmq')" = "" ]; then
-        __apt_get_install_noinput libzmq3 libzmq3-dev python-zmq || return 1
-    fi
-
-    __apt_get_install_noinput lsb-release python python-pkg-resources python-crypto \
-        python-jinja2 python-m2crypto python-yaml msgpack-python python-pip || return 1
-
     __git_clone_and_checkout || return 1
 
+    __PACKAGES="lsb-release python-pkg-resources python-crypto python-jinja2 python-m2crypto python-yaml msgpack-python"
+    __PIP_PACKAGES=""
+
     if [ -f "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" ]; then
-        # We're on the develop branch, install tornado
-        __REQUIRED_TORNADO="$(grep tornado "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt")"
-        if [ "${__REQUIRED_TORNADO}" != "" ]; then
-            __apt_get_install_noinput python-tornado
+        __REQUIRED_TORNADO="$(grep ^tornado "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" | tr -d ' ')"
+
+        if [ -n "${__REQUIRED_TORNADO}" ]; then
+            if (__check_pip_allowed >/dev/null 2>&1); then
+                __PACKAGES="${__PACKAGES} python-dev"
+                __PIP_PACKAGES="${__PIP_PACKAGES} tornado"
+
+                if ! __check_command_exists pip; then
+                    __PACKAGES="${__PACKAGES} python-pip"
+                fi
+            else
+                # Check if Debian Backports repo already configured
+                if ! apt-cache policy | grep -q 'Debian Backports'; then
+                    echo 'deb http://httpredir.debian.org/debian jessie-backports main' > \
+                        /etc/apt/sources.list.d/backports.list
+                    apt-get update
+                fi
+
+                __PACKAGES="${__PACKAGES} python-tornado/jessie-backports"
+            fi
         fi
+    fi
+
+    # shellcheck disable=SC2086
+    __apt_get_install_noinput ${__PACKAGES} || return 1
+
+    if [ "${__PIP_PACKAGES}" != "" ]; then
+        # shellcheck disable=SC2086,SC2090
+        pip install -U ${__PIP_PACKAGES} || return 1
     fi
 
     # Let's trigger config_salt()
     if [ "$_TEMP_CONFIG_DIR" = "null" ]; then
         _TEMP_CONFIG_DIR="${_SALT_GIT_CHECKOUT_DIR}/conf/"
         CONFIG_SALT_FUNC="config_salt"
-    fi
-
-    if [ "$_UPGRADE_SYS" -eq $BS_TRUE ]; then
-        __apt_get_upgrade_noinput || return 1
-    fi
-
-    if [ "${_EXTRA_PACKAGES}" != "" ]; then
-        echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
-        # shellcheck disable=SC2086
-        __apt_get_install_noinput ${_EXTRA_PACKAGES} || return 1
     fi
 
     return 0
@@ -3142,38 +3155,54 @@ install_debian_git_post() {
     for fname in minion master syndic api; do
 
         # Skip if not meant to be installed
-        [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
-        [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
-        [ $fname = "api" ] && ([ "$_INSTALL_MASTER" -eq $BS_FALSE ] || ! __check_command_exists "salt-${fname}") && continue
-        [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
+        [ "$fname" = "api" ] && \
+            ([ "$_INSTALL_MASTER" -eq $BS_FALSE ] || ! __check_command_exists "salt-${fname}") && \
+                continue
+        [ "$fname" = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
+        [ "$fname" = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
+        [ "$fname" = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
 
+        # Configure SystemD for Debian 8 "Jessie" and later
         if [ -f /bin/systemctl ]; then
-            if [ ! -f /etc/systemd/system/salt-${fname}.service ] || ([ -f /etc/systemd/system/salt-${fname}.service ] && [ $_FORCE_OVERWRITE -eq $BS_TRUE ]); then
-                __copyfile "${_SALT_GIT_CHECKOUT_DIR}/pkg/salt-${fname}.service" /etc/systemd/system
+            if [ ! -f /lib/systemd/system/salt-${fname}.service ] || \
+                ([ -f /lib/systemd/system/salt-${fname}.service ] && [ $_FORCE_OVERWRITE -eq $BS_TRUE ]); then
+                if [ -f "${_SALT_GIT_CHECKOUT_DIR}/pkg/deb/salt-${fname}.service" ]; then
+                    __copyfile "${_SALT_GIT_CHECKOUT_DIR}/pkg/deb/salt-${fname}.service" /lib/systemd/system
+                    __copyfile "${_SALT_GIT_CHECKOUT_DIR}/pkg/deb/salt-${fname}.environment" "/etc/default/salt-${fname}"
+                else
+                    # workaround before adding Debian-specific unit files to the Salt main repo
+                    __copyfile "${_SALT_GIT_CHECKOUT_DIR}/pkg/salt-${fname}.service" /lib/systemd/system
+                    sed -i -e '/^Type/ s/notify/simple/' /lib/systemd/system/salt-${fname}.service
+                fi
             fi
 
             # Skip salt-api since the service should be opt-in and not necessarily started on boot
-            [ $fname = "api" ] && continue
+            [ "$fname" = "api" ] && continue
 
-            /bin/systemctl enable salt-${fname}.service
+            /bin/systemctl enable "salt-${fname}.service"
             SYSTEMD_RELOAD=$BS_TRUE
 
-        elif [ ! -f /etc/init.d/salt-$fname ] || ([ -f /etc/init.d/salt-$fname ] && [ $_FORCE_OVERWRITE -eq $BS_TRUE ]); then
-            if [ -f "${_SALT_GIT_CHECKOUT_DIR}/debian/salt-$fname.init" ]; then
-                __copyfile "${_SALT_GIT_CHECKOUT_DIR}/debian/salt-$fname.init" "/etc/init.d/salt-$fname"
+        # Install initscripts for Debian 7 "Wheezy"
+        elif [ ! -f /etc/init.d/salt-$fname ] || \
+            ([ -f /etc/init.d/salt-$fname ] && [ $_FORCE_OVERWRITE -eq $BS_TRUE ]); then
+            if [ -f "${_SALT_GIT_CHECKOUT_DIR}/pkg/deb/salt-$fname.init" ]; then
+                __copyfile "${_SALT_GIT_CHECKOUT_DIR}/pkg/deb/salt-${fname}.init" "/etc/init.d/salt-${fname}"
+                __copyfile "${_SALT_GIT_CHECKOUT_DIR}/pkg/deb/salt-${fname}.environment" "/etc/default/salt-${fname}"
             else
-                __fetch_url "/etc/init.d/salt-$fname" "${HTTP_VAL}://anonscm.debian.org/cgit/pkg-salt/salt.git/plain/debian/salt-${fname}.init"
+                __fetch_url "/etc/init.d/salt-${fname}" "${HTTP_VAL}://anonscm.debian.org/cgit/pkg-salt/salt.git/plain/debian/salt-${fname}.init"
             fi
-            if [ ! -f "/etc/init.d/salt-$fname" ]; then
-                echowarn "The init script for salt-$fname was not found, skipping it..."
+
+            if [ ! -f "/etc/init.d/salt-${fname}" ]; then
+                echowarn "The init script for salt-${fname} was not found, skipping it..."
                 continue
             fi
-            chmod +x "/etc/init.d/salt-$fname"
+
+            chmod +x "/etc/init.d/salt-${fname}"
 
             # Skip salt-api since the service should be opt-in and not necessarily started on boot
-            [ $fname = "api" ] && continue
+            [ "$fname" = "api" ] && continue
 
-            update-rc.d "salt-$fname" defaults
+            update-rc.d "salt-${fname}" defaults
         fi
 
     done

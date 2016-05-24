@@ -190,7 +190,7 @@ __check_config_dir() {
 #----------------------------------------------------------------------------------------------------------------------
 _KEEP_TEMP_FILES=${BS_KEEP_TEMP_FILES:-$BS_FALSE}
 _TEMP_CONFIG_DIR="null"
-_SALTSTACK_REPO_URL="git://github.com/saltstack/salt.git"
+_SALTSTACK_REPO_URL="https://github.com/saltstack/salt.git"
 _SALT_REPO_URL=${_SALTSTACK_REPO_URL}
 _DOWNSTREAM_PKG_REPO=$BS_FALSE
 _TEMP_KEYS_DIR="null"

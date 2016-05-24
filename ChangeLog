@@ -1,4 +1,5 @@
 Version 2016.05.11:
+	* Use HTTPS instead of Git protocol when cloning. (davidjb)
     * Only overwrite the minion config file if '-C' is passed. Otherwise, preserve it. (rallytime) #848
 
 Version 2016.05.10:

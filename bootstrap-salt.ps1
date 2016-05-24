@@ -217,10 +217,11 @@ If (!$version) {
 #===============================================================================
 # Download minion setup file
 #===============================================================================
-Write-Output "Downloading Salt minion installer Salt-Minion-$version-$arch-Setup.exe"
+$saltExe = "Salt-Minion-$version-$arch-Setup.exe"
+Write-Output "Downloading Salt minion installer $saltExe"
 $webclient = New-Object System.Net.WebClient
-$url = "$repourl/Salt-Minion-$version-$arch-Setup.exe"
-$file = "C:\tmp\salt.exe"
+$url = "$repourl/$saltExe"
+$file = "C:\tmp\$saltExe"
 $webclient.DownloadFile($url, $file)
 
 #===============================================================================
@@ -240,7 +241,7 @@ If($runservice -eq $false) {$parameters = "$parameters /start-service=0"}
 #===============================================================================
 #Wait for process to exit before continuing.
 Write-Output "Installing Salt minion"
-Start-Process C:\tmp\salt.exe -ArgumentList "/S $parameters" -Wait -NoNewWindow -PassThru | Out-Null
+Start-Process C:\tmp\$saltExe -ArgumentList "/S $parameters" -Wait -NoNewWindow -PassThru | Out-Null
 
 #===============================================================================
 # Configure the minion service

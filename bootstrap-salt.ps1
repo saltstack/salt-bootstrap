@@ -172,7 +172,7 @@ If($runservice) {
 }
 Else {
   Write-Output -NoNewline "Stopping salt minion and setting it to 'Manual'"
-  Set-Service "salt-minion" -startupType "Manual"
+  Set-Service "salt-minion" -StartupType "Manual"
   Stop-Service "salt-minion"
 }
 

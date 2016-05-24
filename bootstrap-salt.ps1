@@ -103,7 +103,7 @@ If (Test-Path C:\tmp\minion.pem) {
 # This should be done before the installer is run so that it can be updated with
 # id: and master: settings when the installer runs
 If (Test-Path C:\tmp\minion) {
-  Copy-Item -Path C:\tmp\minion -Destination C:\salt\conf -Force | Out-Null
+  Copy-Item -Path C:\tmp\minion -Destination C:\salt\conf\ -Force | Out-Null
 }
 
 # Detect architecture

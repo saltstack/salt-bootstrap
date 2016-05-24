@@ -61,10 +61,10 @@ Param(
   [string]$runservice = "true",
 
   [Parameter(Mandatory=$false,ValueFromPipeline=$true)] 
-  [string]$minion = "salt-minion",
+  [string]$minion = "not-specified",
   
   [Parameter(Mandatory=$false,ValueFromPipeline=$true)] 
-  [string]$master = "master"
+  [string]$master = "not-specified"
 )
 
 Write-Verbose "Parameters passed in:"
@@ -88,15 +88,22 @@ Else {
 }
 
 # Create C:\tmp\ - if Vagrant doesn't upload keys and/or config it might not exist
-New-Item C:\tmp\ -ItemType directory -force | out-null
+New-Item C:\tmp\ -ItemType directory -Force | Out-Null
 
 # Copy minion keys & config to correct location
-New-Item C:\salt\conf\pki\minion\ -ItemType directory -force | out-null
+New-Item C:\salt\conf\pki\minion\ -ItemType Directory -Force | Out-Null
 
 # Check if minion keys have been uploaded
 If (Test-Path C:\tmp\minion.pem) {
   cp C:\tmp\minion.pem C:\salt\conf\pki\minion\
   cp C:\tmp\minion.pub C:\salt\conf\pki\minion\
+}
+
+# Check if minion config has been uploaded
+# This should be done before the installer is run so that it can be updated with
+# id: and master: settings when the installer runs
+If (Test-Path C:\tmp\minion) {
+  Copy-Item -Path C:\tmp\minion -Destination C:\salt\conf -Force | Out-Null
 }
 
 # Detect architecture
@@ -111,7 +118,7 @@ if (!$version) {
     # Find latest version of Salt Minion 
     $repo = Invoke-Restmethod 'http://repo.saltstack.com/windows/'
     $regex = "<\s*a\s*[^>]*?href\s*=\s*[`"']*([^`"'>]+)[^>]*?>"
-    $returnMatches = new-object System.Collections.ArrayList
+    $returnMatches = New-Object System.Collections.ArrayList
     $resultingMatches = [Regex]::Matches($repo, $regex, "IgnoreCase")
     foreach($match in $resultingMatches)
     {
@@ -133,14 +140,20 @@ $webclient.DownloadFile($url, $file)
 
 # Install minion silently
 Write-Output -NoNewline "Installing Salt minion"
+
+# Set the parameters for the installer
+# Unless specified, use the installer defaults
+# - id: <hostname>
+# - master: salt
+# - Start the service
+$parameters = ""
+If($minion -neq "not-specified") {$parameters, "/minion-name=$minion" -join " "}
+If($master -neq "not-specified") {$parameters, "/master=$master" -join " "}
+If($runservice -eq $false) {$parameters, "/start-service=0" -join " "}
+
 #Wait for process to exit before continuing.
-C:\tmp\salt.exe /S /minion-name=$minion /master=$master | Out-Null
+Start-Process C:\tmp\salt.exe -ArgumentList "/S $parameters" -Wait -NoNewWindow -PassThru | Out-Null
 
-
-# Check if minion config has been uploaded
-If (Test-Path C:\tmp\minion) {
-  cp C:\tmp\minion C:\salt\conf\
-}
 
 # Wait for salt-minion service to be registered before trying to start it
 $service = Get-Service salt-minion -ErrorAction SilentlyContinue

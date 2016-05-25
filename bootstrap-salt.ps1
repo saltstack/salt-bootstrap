@@ -53,7 +53,7 @@ SaltStack Download Location - https://repo.saltstack.com/windows/
 Param(
   [Parameter(Mandatory=$false,ValueFromPipeline=$true)]
   # Doesn't support versions prior to "YYYY.M.R-B" 
-  [ValidatePattern('^(201[0-9]\.[0-9]\.[0-9](\-\d{1})?)$')]
+  [ValidatePattern('^201\d\.\d{1,2}\.\d{1,2}(\-\d{1})?|(rc\d)$')]
   [string]$version = '',
   
   [Parameter(Mandatory=$false,ValueFromPipeline=$true)] 
@@ -127,7 +127,7 @@ if (!$version) {
     } 
     if ($arch -eq 'x86') {$returnMatches = $returnMatches | Where {$_ -like "Salt-Minion*x86-Setup.exe"}}
     else {$returnMatches = $returnMatches | Where {$_ -like "Salt-Minion*AMD64-Setup.exe"}}
-    
+
     $version = $(($returnMatches | Sort-Object -Descending)[0]).Split(("n-","-A","-x"),([System.StringSplitOptions]::RemoveEmptyEntries))[1] 
 }
 
@@ -147,8 +147,8 @@ Write-Output -NoNewline "Installing Salt minion"
 # - master: salt
 # - Start the service
 $parameters = ""
-If($minion -neq "not-specified") {$parameters, "/minion-name=$minion" -join " "}
-If($master -neq "not-specified") {$parameters, "/master=$master" -join " "}
+If($minion -ne "not-specified") {$parameters, "/minion-name=$minion" -join " "}
+If($master -ne "not-specified") {$parameters, "/master=$master" -join " "}
 If($runservice -eq $false) {$parameters, "/start-service=0" -join " "}
 
 #Wait for process to exit before continuing.

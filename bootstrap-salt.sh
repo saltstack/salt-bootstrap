@@ -223,7 +223,6 @@ _SALT_MINION_ID="null"
 # _SIMPLIFY_VERSION is mostly used in Solaris based distributions
 _SIMPLIFY_VERSION=$BS_TRUE
 _LIBCLOUD_MIN_VERSION="0.14.0"
-_PY_REQUESTS_MIN_VERSION="2.0"
 _EXTRA_PACKAGES=""
 _HTTP_PROXY=""
 _DISABLE_SALT_CHECKS=$BS_FALSE
@@ -1549,7 +1548,7 @@ __check_end_of_life_versions() {
     case "${DISTRO_NAME_L}" in
         debian)
             # Debian versions bellow 6 are not supported
-            if [ "$DISTRO_MAJOR_VERSION" -lt 6 ]; then
+            if [ "$DISTRO_MAJOR_VERSION" -lt 7 ]; then
                 echoerror "End of life distributions are not supported."
                 echoerror "Please consider upgrading to the next stable. See:"
                 echoerror "    https://wiki.debian.org/DebianReleases"
@@ -2658,15 +2657,6 @@ install_debian_deps() {
     __PACKAGES="procps pciutils"
     __PIP_PACKAGES=""
 
-    if [ "$DISTRO_MAJOR_VERSION" -lt 6 ]; then
-        # Both python-requests which is a hard dependency and apache-libcloud which is a soft dependency, under debian < 6
-        # need to be installed using pip
-        __check_pip_allowed "You need to allow pip based installations (-P) in order to install the python 'requests' package"
-        __PACKAGES="${__PACKAGES} python-pip"
-        # shellcheck disable=SC2089
-        __PIP_PACKAGES="${__PIP_PACKAGES} 'requests>=$_PY_REQUESTS_MIN_VERSION'"
-    fi
-
     # shellcheck disable=SC2086
     __apt_get_install_noinput ${__PACKAGES} || return 1
 
@@ -2682,120 +2672,6 @@ install_debian_deps() {
 
     if [ "$_UPGRADE_SYS" -eq $BS_TRUE ]; then
         __apt_get_upgrade_noinput || return 1
-    fi
-
-    if [ "${_EXTRA_PACKAGES}" != "" ]; then
-        echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
-        # shellcheck disable=SC2086
-        __apt_get_install_noinput ${_EXTRA_PACKAGES} || return 1
-    fi
-
-    return 0
-}
-
-install_debian_6_deps() {
-    if [ $_START_DAEMONS -eq $BS_FALSE ]; then
-        echowarn "Not starting daemons on Debian based distributions is not working mostly because starting them is the default behaviour."
-    fi
-    # No user interaction, libc6 restart services for example
-    export DEBIAN_FRONTEND=noninteractive
-
-    apt-get update
-
-    # Make sure wget is available
-    __apt_get_install_noinput wget
-
-    # Install Keys
-    __apt_get_install_noinput debian-archive-keyring && apt-get update
-
-    # Install Debian Archive Automatic Signing Key (6.0/squeeze), see #557
-    if [ "$(apt-key finger | grep '9FED 2BCB DCD2 9CDF 7626  78CB AED4 B06F 4730 41FA')" = "" ]; then
-        apt-key adv --keyserver keyserver.ubuntu.com --recv-keys AED4B06F473041FA || return 1
-    fi
-
-    # shellcheck disable=SC2086
-    __fetch_verify http://debian.saltstack.com/debian-salt-team-joehealy.gpg.key 267d1f152d0cc94b23eb4c6993ba3d67 3100 | apt-key add - || return 1
-
-    if [ "$_PIP_ALLOWED" -eq $BS_TRUE ]; then
-        echowarn "PyZMQ will be installed from PyPI in order to compile it against ZMQ3"
-        echowarn "This is required for long term stable minion connections to the master."
-        echowarn "YOU WILL END UP WITH QUITE A FEW PACKAGES FROM DEBIAN UNSTABLE"
-        echowarn "Sleeping for 5 seconds so you can cancel..."
-        sleep 5
-
-        if [ ! -f /etc/apt/sources.list.d/debian-unstable.list ]; then
-           cat <<_eof > /etc/apt/sources.list.d/debian-unstable.list
-deb http://ftp.debian.org/debian unstable main
-deb-src http://ftp.debian.org/debian unstable main
-_eof
-
-           cat <<_eof > /etc/apt/preferences.d/libzmq3-debian-unstable.pref
-Package: libzmq3
-Pin: release a=unstable
-Pin-Priority: 800
-
-Package: libzmq3-dev
-Pin: release a=unstable
-Pin-Priority: 800
-_eof
-        fi
-
-        apt-get update
-        # We NEED to install the unstable dpkg or mime-support WILL fail to install
-        __apt_get_install_noinput -t unstable dpkg liblzma5 python mime-support || return 1
-        __apt_get_install_noinput -t unstable libzmq3 libzmq3-dev || return 1
-        __apt_get_install_noinput build-essential python-dev python-pip python-setuptools || return 1
-
-        if [ $_DISABLE_REPOS -eq $BS_FALSE ]; then
-            # Saltstack's Unstable Debian repository
-            if [ "$(grep -R 'debian.saltstack.com' /etc/apt)" = "" ]; then
-                echo "deb http://debian.saltstack.com/debian unstable main" >> \
-                    /etc/apt/sources.list.d/saltstack.list
-            fi
-        fi
-        return 0
-    fi
-
-    if [ $_DISABLE_REPOS -eq $BS_FALSE ]; then
-        # Debian Backports
-        if [ "$(grep -R 'squeeze-backports' /etc/apt | grep -v "^#")" = "" ]; then
-            echo "deb http://ftp.de.debian.org/debian-backports squeeze-backports main" >> \
-                /etc/apt/sources.list.d/backports.list
-        fi
-
-        # Saltstack's Stable Debian repository
-        if [ "$(grep -R 'squeeze-saltstack' /etc/apt)" = "" ]; then
-            echo "deb http://debian.saltstack.com/debian squeeze-saltstack main" >> \
-                /etc/apt/sources.list.d/saltstack.list
-        fi
-        apt-get update || return 1
-    fi
-
-    # Python requests is available through Squeeze backports
-    # Additionally install procps and pciutils which allows for Docker bootstraps. See 366#issuecomment-39666813
-    __apt_get_install_noinput python-pip procps pciutils python-requests
-
-    # Need python-apt for managing packages via Salt
-    __apt_get_install_noinput python-apt
-
-    if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
-        __check_pip_allowed "You need to allow pip based installations (-P) in order to install apache-libcloud/requests"
-        pip install -U "apache-libcloud>=$_LIBCLOUD_MIN_VERSION"
-
-    fi
-
-    if [ "$_UPGRADE_SYS" -eq $BS_TRUE ]; then
-        __apt_get_upgrade_noinput || return 1
-    fi
-
-    __apt_get_install_noinput python-zmq || return 1
-
-    if [ "$_PIP_ALLOWED" -eq $BS_TRUE ]; then
-        # Building pyzmq from source to build it against libzmq3.
-        # Should override current installation
-        # Using easy_install instead of pip because at least on Debian 6,
-        # there's no default virtualenv active.
-        easy_install -U pyzmq || return 1
     fi
 
     if [ "${_EXTRA_PACKAGES}" != "" ]; then
@@ -3004,39 +2880,6 @@ install_debian_git_deps() {
     return 0
 }
 
-install_debian_6_git_deps() {
-    install_debian_6_deps || return 1
-    if [ "$_PIP_ALLOWED" -eq $BS_TRUE ]; then
-        __PACKAGES="build-essential lsb-release python python-dev python-pkg-resources python-crypto"
-        __PACKAGES="${__PACKAGES} python-m2crypto python-yaml msgpack-python python-pip python-setuptools"
-
-        if ! __check_command_exists git; then
-            __PACKAGES="${__PACKAGES} git"
-        fi
-
-        # shellcheck disable=SC2086
-        __apt_get_install_noinput ${__PACKAGES} || return 1
-
-        easy_install -U pyzmq Jinja2 || return 1
-
-        __git_clone_and_checkout || return 1
-
-        # Let's trigger config_salt()
-        if [ "$_TEMP_CONFIG_DIR" = "null" ]; then
-            _TEMP_CONFIG_DIR="${_SALT_GIT_CHECKOUT_DIR}/conf/"
-            CONFIG_SALT_FUNC="config_salt"
-        fi
-    else
-        install_debian_git_deps || return 1  # Grab the actual deps
-    fi
-
-    if [ "$_UPGRADE_SYS" -eq $BS_TRUE ]; then
-        __apt_get_upgrade_noinput || return 1
-    fi
-
-    return 0
-}
-
 install_debian_7_git_deps() {
     install_debian_7_deps || return 1
     install_debian_git_deps || return 1  # Grab the actual deps
@@ -3113,11 +2956,6 @@ install_debian_stable() {
     return 0
 }
 
-install_debian_6_stable() {
-    install_debian_stable || return 1
-    return 0
-}
-
 install_debian_7_stable() {
     install_debian_stable || return 1
     return 0
@@ -3134,11 +2972,6 @@ install_debian_git() {
     else
         python setup.py install --install-layout=deb || return 1
     fi
-}
-
-install_debian_6_git() {
-    install_debian_git || return 1
-    return 0
 }
 
 install_debian_7_git() {

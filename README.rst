@@ -206,7 +206,7 @@ Supported Operating Systems
 Debian and derivatives
 ~~~~~~~~~~~~~~~~~~~~~~
 
-- Debian GNU/Linux 6/7/8
+- Debian GNU/Linux 7/8
 - Linux Mint Debian Edition 1 (based on Debian 8)
 - Kali Linux 1.0 (based on Debian 7)
 

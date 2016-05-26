@@ -1217,6 +1217,9 @@ __ubuntu_codename_translation() {
                 DISTRO_CODENAME="wily"
             fi
             ;;
+        "16")
+            DISTRO_CODENAME="xenial"
+            ;;
         *)
             DISTRO_CODENAME="trusty"
             ;;

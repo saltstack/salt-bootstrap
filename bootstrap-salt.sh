@@ -2714,8 +2714,8 @@ install_debian_7_deps() {
     fi
 
     if [ $_DISABLE_REPOS -eq $BS_FALSE ]; then
-        # Versions starting with 2015.5.6 and 2015.8.1 are hosted at repo.saltstack.com
-        if [ "$(echo "$STABLE_REV" | egrep '^(2015\.5|2015\.8|latest|archive\/)')" != "" ]; then
+        # Versions starting with 2015.8.7 are hosted at repo.saltstack.com
+        if [ "$(echo "$STABLE_REV" | egrep '^(2015\.8|2016\.3|latest|archive\/201[5-6]\.)')" != "" ]; then
             SALTSTACK_DEBIAN_URL="${HTTP_VAL}://repo.saltstack.com/apt/debian/$DISTRO_MAJOR_VERSION/$repo_arch/$STABLE_REV"
             echo "deb $SALTSTACK_DEBIAN_URL wheezy main" > "/etc/apt/sources.list.d/saltstack.list"
 
@@ -2725,6 +2725,9 @@ install_debian_7_deps() {
 
             # shellcheck disable=SC2086
             wget $_WGET_ARGS -q "$SALTSTACK_DEBIAN_URL/SALTSTACK-GPG-KEY.pub" -O - | apt-key add - || return 1
+        elif [ -n "$STABLE_REV" ]; then
+            echoerror "Installation of Salt $STABLE_REV currently unsupported by ${__ScriptName} ${__ScriptVersion}"
+            return 1
         fi
     fi
 
@@ -2786,8 +2789,8 @@ install_debian_8_deps() {
     fi
 
     if [ $_DISABLE_REPOS -eq $BS_FALSE ]; then
-        # Versions starting with 2015.5.6 and 2015.8.1 are hosted at repo.saltstack.com
-        if [ "$(echo "$STABLE_REV" | egrep '^(2015\.5|2015\.8|latest|archive\/)')" != "" ]; then
+        # Versions starting with 2015.5.6, 2015.8.1 and 2016.3.0 are hosted at repo.saltstack.com
+        if [ "$(echo "$STABLE_REV" | egrep '^(2015\.5|2015\.8|2016\.3|latest|archive\/201[5-6]\.)')" != "" ]; then
             SALTSTACK_DEBIAN_URL="${HTTP_VAL}://repo.saltstack.com/apt/debian/$DISTRO_MAJOR_VERSION/$repo_arch/$STABLE_REV"
             echo "deb $SALTSTACK_DEBIAN_URL jessie main" > "/etc/apt/sources.list.d/saltstack.list"
 
@@ -2797,6 +2800,9 @@ install_debian_8_deps() {
 
             # shellcheck disable=SC2086
             wget $_WGET_ARGS -q "$SALTSTACK_DEBIAN_URL/SALTSTACK-GPG-KEY.pub" -O - | apt-key add - || return 1
+        elif [ -n "$STABLE_REV" ]; then
+            echoerror "Installation of Salt $STABLE_REV currently unsupported by ${__ScriptName} ${__ScriptVersion}"
+            return 1
         fi
     fi
 

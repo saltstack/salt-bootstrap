@@ -2254,9 +2254,15 @@ install_ubuntu_deps() {
     if [ "$DISTRO_MAJOR_VERSION" -ge 15 ]; then
         __PACKAGES="${__PACKAGES} python2.7"
     fi
+
+    if [ "$DISTRO_MAJOR_VERSION" -ge 16 ]; then
+        __PACKAGES="${__PACKAGES} python-systemd"
+    fi
+
     if [ "$_VIRTUALENV_DIR" != "null" ]; then
         __PACKAGES="${__PACKAGES} python-virtualenv"
     fi
+
     # Need python-apt for managing packages via Salt
     __PACKAGES="${__PACKAGES} python-apt"
 
@@ -2661,6 +2667,11 @@ install_debian_deps() {
         __PACKAGES="${__PACKAGES} python-pip"
         # shellcheck disable=SC2089
         __PIP_PACKAGES="${__PIP_PACKAGES} 'requests>=$_PY_REQUESTS_MIN_VERSION'"
+    fi
+
+    if [ "$DISTRO_MAJOR_VERSION" -gt 8 ]; then
+        # Debian 8 uses systemd. Additional requirements
+        __PACKAGES="${__PACKAGES} python-systemd"
     fi
 
     # shellcheck disable=SC2086

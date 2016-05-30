@@ -234,7 +234,7 @@ _DISABLE_REPOS=$BS_FALSE
 _CUSTOM_REPO_URL="null"
 _CUSTOM_MASTER_CONFIG="null"
 _CUSTOM_MINION_CONFIG="null"
-
+_QUIET_GIT_INSTALLATION=$BS_FALSE
 
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #         NAME:  __usage
@@ -350,6 +350,7 @@ __usage() {
         file with a ".bak" extension. If used in conjunction with -C or -F, no ".bak"
         file will be created as either of those options will force a complete
         overwrite of the file.
+    -q  Quiet salt installation from git (setup.py install -q)
 
 EOT
 }   # ----------  end of function __usage  ----------
@@ -422,6 +423,7 @@ do
     R )  _CUSTOM_REPO_URL=$OPTARG                       ;;
     J )  _CUSTOM_MASTER_CONFIG=$OPTARG                  ;;
     j )  _CUSTOM_MINION_CONFIG=$OPTARG                  ;;
+    q )  _QUIET_GIT_INSTALLATION=$BS_TRUE               ;;
 
     \?)  echo
          echoerror "Option does not exist : $OPTARG"
@@ -567,6 +569,13 @@ if [ "$_DISABLE_SSL" -eq "${BS_TRUE}" ]; then
     HTTP_VAL="http"
 else
     HTTP_VAL="https"
+fi
+
+# Check the _QUIET_GIT_INSTALLATION value and set SETUP_PY_INSTALL_ARGS.
+if [ "$_QUIET_GIT_INSTALLATION" -eq "${BS_TRUE}" ]; then
+    SETUP_PY_INSTALL_ARGS="-q"
+else
+    SETUP_PY_INSTALL_ARGS=""
 fi
 
 # whoami alternative for SunOS
@@ -2485,9 +2494,9 @@ install_ubuntu_git() {
     fi
 
     if [ -f "${_SALT_GIT_CHECKOUT_DIR}/salt/syspaths.py" ]; then
-        python setup.py --salt-config-dir="$_SALT_ETC_DIR" --salt-cache-dir="${_SALT_CACHE_DIR}" install --install-layout=deb || return 1
+        python setup.py --salt-config-dir="$_SALT_ETC_DIR" --salt-cache-dir="${_SALT_CACHE_DIR}" install "${SETUP_PY_INSTALL_ARGS}" --install-layout=deb || return 1
     else
-        python setup.py install --install-layout=deb || return 1
+        python setup.py install "${SETUP_PY_INSTALL_ARGS}" --install-layout=deb || return 1
     fi
     return 0
 }
@@ -2956,9 +2965,9 @@ install_debian_8_stable() {
 
 install_debian_git() {
     if [ -f "${_SALT_GIT_CHECKOUT_DIR}/salt/syspaths.py" ]; then
-      python setup.py --salt-config-dir="$_SALT_ETC_DIR" --salt-cache-dir="${_SALT_CACHE_DIR}" install --install-layout=deb || return 1
+      python setup.py --salt-config-dir="$_SALT_ETC_DIR" --salt-cache-dir="${_SALT_CACHE_DIR}" install "${SETUP_PY_INSTALL_ARGS}" --install-layout=deb || return 1
     else
-        python setup.py install --install-layout=deb || return 1
+        python setup.py install "${SETUP_PY_INSTALL_ARGS}" --install-layout=deb || return 1
     fi
 }
 
@@ -3192,9 +3201,9 @@ install_fedora_git_deps() {
 
 install_fedora_git() {
     if [ -f "${_SALT_GIT_CHECKOUT_DIR}/salt/syspaths.py" ]; then
-        python setup.py --salt-config-dir="$_SALT_ETC_DIR" --salt-cache-dir="${_SALT_CACHE_DIR}" install || return 1
+        python setup.py --salt-config-dir="$_SALT_ETC_DIR" --salt-cache-dir="${_SALT_CACHE_DIR}" install "${SETUP_PY_INSTALL_ARGS}" || return 1
     else
-        python setup.py install || return 1
+        python setup.py install "${SETUP_PY_INSTALL_ARGS}" || return 1
     fi
     return 0
 }
@@ -3567,9 +3576,9 @@ install_centos_git() {
         _PYEXE=python2
     fi
     if [ -f "${_SALT_GIT_CHECKOUT_DIR}/salt/syspaths.py" ]; then
-        $_PYEXE setup.py --salt-config-dir="$_SALT_ETC_DIR" --salt-cache-dir="${_SALT_CACHE_DIR}" install --prefix=/usr || return 1
+        $_PYEXE setup.py --salt-config-dir="$_SALT_ETC_DIR" --salt-cache-dir="${_SALT_CACHE_DIR}" install "${SETUP_PY_INSTALL_ARGS}" --prefix=/usr || return 1
     else
-        $_PYEXE setup.py install --prefix=/usr || return 1
+        $_PYEXE setup.py install "${SETUP_PY_INSTALL_ARGS}" --prefix=/usr || return 1
     fi
     return 0
 }
@@ -4212,9 +4221,9 @@ install_arch_linux_stable() {
 
 install_arch_linux_git() {
     if [ -f "${_SALT_GIT_CHECKOUT_DIR}/salt/syspaths.py" ]; then
-        python2 setup.py --salt-config-dir="$_SALT_ETC_DIR" --salt-cache-dir="${_SALT_CACHE_DIR}" install || return 1
+        python2 setup.py --salt-config-dir="$_SALT_ETC_DIR" --salt-cache-dir="${_SALT_CACHE_DIR}" install "${SETUP_PY_INSTALL_ARGS}" || return 1
     else
-        python2 setup.py install || return 1
+        python2 setup.py install "${SETUP_PY_INSTALL_ARGS}" || return 1
     fi
     return 0
 }
@@ -4552,7 +4561,7 @@ install_freebsd_git() {
     # Install from git
     if [ ! -f salt/syspaths.py ]; then
         # We still can't provide the system paths, salt 0.16.x
-        /usr/local/bin/python2 setup.py install || return 1
+        /usr/local/bin/python2 setup.py install "${SETUP_PY_INSTALL_ARGS}" || return 1
     else
         /usr/local/bin/python2 setup.py \
             --salt-root-dir=/usr/local \
@@ -4564,7 +4573,7 @@ install_freebsd_git() {
             --salt-base-pillar-roots-dir="${_SALT_ETC_DIR}/pillar" \
             --salt-base-master-roots-dir="${_SALT_ETC_DIR}/salt-master" \
             --salt-logs-dir=/var/log/salt \
-            --salt-pidfile-dir=/var/run install \
+            --salt-pidfile-dir=/var/run install "${SETUP_PY_INSTALL_ARGS}" \
             || return 1
     fi
 
@@ -4758,7 +4767,7 @@ install_openbsd_git() {
     #
     if [ ! -f salt/syspaths.py ]; then
         # We still can't provide the system paths, salt 0.16.x
-        /usr/local/bin/python2.7 setup.py install || return 1
+        /usr/local/bin/python2.7 setup.py install "${SETUP_PY_INSTALL_ARGS}" || return 1
     fi
     return 0
 }
@@ -4919,7 +4928,7 @@ install_smartos_stable() {
 install_smartos_git() {
     # Use setuptools in order to also install dependencies
     # lets force our config path on the setup for now, since salt/syspaths.py only  got fixed in 2015.5.0
-    USE_SETUPTOOLS=1 /opt/local/bin/python setup.py --salt-config-dir="$_SALT_ETC_DIR" --salt-cache-dir="${_SALT_CACHE_DIR}" install || return 1
+    USE_SETUPTOOLS=1 /opt/local/bin/python setup.py --salt-config-dir="$_SALT_ETC_DIR" --salt-cache-dir="${_SALT_CACHE_DIR}" install "${SETUP_PY_INSTALL_ARGS}" || return 1
     return 0
 }
 
@@ -5153,7 +5162,7 @@ install_opensuse_stable() {
 }
 
 install_opensuse_git() {
-    python setup.py install --prefix=/usr || return 1
+    python setup.py install "${SETUP_PY_INSTALL_ARGS}" --prefix=/usr || return 1
     return 0
 }
 

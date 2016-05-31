@@ -23,7 +23,7 @@ Useful for testing locally from the command line with the --local switch
 .EXAMPLE
 ./bootstrap-salt.ps1 -minion minion-box -master master-box
 Specifies the minion and master ids in the minion config. 
-Defaults to the installer values of "minion" and "master".
+Defaults to the installer values of host name for the minion id and "salt" for the master.
 
 .EXAMPLE
 ./bootstrap-salt.ps1 -minion minion-box -master master-box -version 2015.5.2 -runservice false
@@ -32,12 +32,12 @@ Specifies all the optional parameters in no particular order.
 .PARAMETER version - Default version defined in this script. 
 
 .PARAMETER runservice - Boolean flag to stop the windows service and set to "manual". 
-                        Installer starts it by default. 
+                        Installer starts it by default.
 
 .PARAMETER minion - Name of the minion being installed on this host. 
-                    Installer defaults to "minion".
+                    Installer defaults to the host name.
 
-.PARAMETER master - Name or IP of the master server the minion. Installer defaults to "master".
+.PARAMETER master - Name or IP of the master server the minion. Installer defaults to "salt".
 
 .NOTES
 All of the parameters are optional. The default should be the latest version. The architecture
@@ -49,11 +49,15 @@ Original Vagrant Provisioner Project -https://github.com/saltstack/salty-vagrant
 Vagrant Project (utilizes this script) - https://github.com/mitchellh/vagrant
 SaltStack Download Location - https://repo.saltstack.com/windows/
 #>
+
+#==============================================================================
+# Commandlet Binding
+#==============================================================================
 [CmdletBinding()]
 Param(
   [Parameter(Mandatory=$false,ValueFromPipeline=$true)]
   # Doesn't support versions prior to "YYYY.M.R-B" 
-  [ValidatePattern('^(201[0-9]\.[0-9]\.[0-9](\-\d{1})?)$')]
+  [ValidatePattern('^201\d\.\d{1,2}\.\d{1,2}(\-\d{1})?|(rc\d)$')]
   [string]$version = '',
   
   [Parameter(Mandatory=$false,ValueFromPipeline=$true)] 
@@ -61,11 +65,60 @@ Param(
   [string]$runservice = "true",
 
   [Parameter(Mandatory=$false,ValueFromPipeline=$true)] 
-  [string]$minion = "salt-minion",
+  [string]$minion = "not-specified",
   
   [Parameter(Mandatory=$false,ValueFromPipeline=$true)] 
-  [string]$master = "master"
+  [string]$master = "not-specified"
 )
+
+#==============================================================================
+# Script Functions
+#==============================================================================
+function Get-IsAdministrator
+{
+    $Identity = [System.Security.Principal.WindowsIdentity]::GetCurrent()
+    $Principal = New-Object System.Security.Principal.WindowsPrincipal($Identity)
+    $Principal.IsInRole([System.Security.Principal.WindowsBuiltInRole]::Administrator)
+}
+
+function Get-IsUacEnabled
+{
+    (Get-ItemProperty HKLM:\Software\Microsoft\Windows\CurrentVersion\Policies\System).EnableLua -ne 0
+}
+
+#==============================================================================
+# Check for Elevated Privileges
+#==============================================================================
+If (!(Get-IsAdministrator)) {
+    If (Get-IsUacEnabled) {
+        # We are not running "as Administrator" - so relaunch as administrator
+        # Create a new process object that starts PowerShell
+        $newProcess = new-object System.Diagnostics.ProcessStartInfo "PowerShell";
+
+        # Specify the current script path and name as a parameter`
+        $parameters = ""
+        If($minion -ne "not-specified") {$parameters = "-minion $minion"}
+        If($master -ne "not-specified") {$parameters = "$parameters -master $master"}
+        If($runservice -eq $false) {$parameters = "$parameters -runservice false"}
+        If($version -ne '') {$parameters = "$parameters -version $version"}
+        $newProcess.Arguments = $myInvocation.MyCommand.Definition, $parameters
+
+        # Specify the current working directory
+        $newProcess.WorkingDirectory = "$script_path"
+
+        # Indicate that the process should be elevated
+        $newProcess.Verb = "runas";
+
+        # Start the new process
+        [System.Diagnostics.Process]::Start($newProcess);
+
+        # Exit from the current, unelevated, process
+        Exit
+
+    } Else {
+        Throw "You must be administrator to run this script"
+    }
+}
 
 Write-Verbose "Parameters passed in:"
 Write-Verbose "version: $version"
@@ -88,15 +141,22 @@ Else {
 }
 
 # Create C:\tmp\ - if Vagrant doesn't upload keys and/or config it might not exist
-New-Item C:\tmp\ -ItemType directory -force | out-null
+New-Item C:\tmp\ -ItemType directory -Force | Out-Null
 
 # Copy minion keys & config to correct location
-New-Item C:\salt\conf\pki\minion\ -ItemType directory -force | out-null
+New-Item C:\salt\conf\pki\minion\ -ItemType Directory -Force | Out-Null
 
 # Check if minion keys have been uploaded
 If (Test-Path C:\tmp\minion.pem) {
   cp C:\tmp\minion.pem C:\salt\conf\pki\minion\
   cp C:\tmp\minion.pub C:\salt\conf\pki\minion\
+}
+
+# Check if minion config has been uploaded
+# This should be done before the installer is run so that it can be updated with
+# id: and master: settings when the installer runs
+If (Test-Path C:\tmp\minion) {
+  Copy-Item -Path C:\tmp\minion -Destination C:\salt\conf\ -Force | Out-Null
 }
 
 # Detect architecture
@@ -111,7 +171,7 @@ if (!$version) {
     # Find latest version of Salt Minion 
     $repo = Invoke-Restmethod 'http://repo.saltstack.com/windows/'
     $regex = "<\s*a\s*[^>]*?href\s*=\s*[`"']*([^`"'>]+)[^>]*?>"
-    $returnMatches = new-object System.Collections.ArrayList
+    $returnMatches = New-Object System.Collections.ArrayList
     $resultingMatches = [Regex]::Matches($repo, $regex, "IgnoreCase")
     foreach($match in $resultingMatches)
     {
@@ -120,27 +180,33 @@ if (!$version) {
     } 
     if ($arch -eq 'x86') {$returnMatches = $returnMatches | Where {$_ -like "Salt-Minion*x86-Setup.exe"}}
     else {$returnMatches = $returnMatches | Where {$_ -like "Salt-Minion*AMD64-Setup.exe"}}
-    
+
     $version = $(($returnMatches | Sort-Object -Descending)[0]).Split(("n-","-A","-x"),([System.StringSplitOptions]::RemoveEmptyEntries))[1] 
 }
 
 # Download minion setup file
-Write-Output -NoNewline "Downloading Salt minion installer Salt-Minion-$version-$arch-Setup.exe"
+Write-Output "Downloading Salt minion installer Salt-Minion-$version-$arch-Setup.exe"
 $webclient = New-Object System.Net.WebClient
 $url = "https://repo.saltstack.com/windows/Salt-Minion-$version-$arch-Setup.exe"
 $file = "C:\tmp\salt.exe"
 $webclient.DownloadFile($url, $file)
 
 # Install minion silently
-Write-Output -NoNewline "Installing Salt minion"
+Write-Output "Installing Salt minion"
+
+# Set the parameters for the installer
+# Unless specified, use the installer defaults
+# - id: <hostname>
+# - master: salt
+# - Start the service
+$parameters = ""
+If($minion -ne "not-specified") {$parameters = "/minion-name=$minion"}
+If($master -ne "not-specified") {$parameters = "$parameters /master=$master"}
+If($runservice -eq $false) {$parameters = "$parameters /start-service=0"}
+
 #Wait for process to exit before continuing.
-C:\tmp\salt.exe /S /minion-name=$minion /master=$master | Out-Null
+Start-Process C:\tmp\salt.exe -ArgumentList "/S $parameters" -Wait -NoNewWindow -PassThru | Out-Null
 
-
-# Check if minion config has been uploaded
-If (Test-Path C:\tmp\minion) {
-  cp C:\tmp\minion C:\salt\conf\
-}
 
 # Wait for salt-minion service to be registered before trying to start it
 $service = Get-Service salt-minion -ErrorAction SilentlyContinue

@@ -2723,9 +2723,16 @@ install_debian_7_deps() {
         elif [ "$CPU_ARCH_L" = "armv7l" ]; then
             repo_arch="armhf"
         elif [ "$CPU_ARCH_L" = "i386" ] || [ "$CPU_ARCH_L" = "i686" ]; then
-            echoerror "repo.saltstack.com likely doesn't have 32-bit packages for Debian (yet?)"
             repo_arch="i386"
+            echoerror "repo.saltstack.com likely doesn't have all required $repo_arch packages for Debian $DISTRO_MAJOR_VERSION (yet?)."
+        else
+            repo_arch="$CPU_ARCH_L"
+
+            echoerror "repo.saltstack.com doesn't have packages for your system architecture: $repo_arch."
+            exit 1
         fi
+    else
+        echowarn "Packages from repo.saltstack.com are required to install Salt version 2015.8 or higher on Debian $DISTRO_MAJOR_VERSION."
     fi
 
     if [ $_START_DAEMONS -eq $BS_FALSE ]; then
@@ -2749,10 +2756,11 @@ install_debian_7_deps() {
     fi
 
     if [ $_DISABLE_REPOS -eq $BS_FALSE ]; then
-        # Versions starting with 2015.8.7 are hosted at repo.saltstack.com
+        # Versions starting with 2015.8.7 and 2016.3.0 are hosted at repo.saltstack.com
         if [ "$(echo "$STABLE_REV" | egrep '^(2015\.8|2016\.3|latest|archive\/201[5-6]\.)')" != "" ] || \
             [ "$ITYPE" = "git" ]; then
-            SALTSTACK_DEBIAN_URL="${HTTP_VAL}://repo.saltstack.com/apt/debian/$DISTRO_MAJOR_VERSION/$repo_arch/${STABLE_REV:-latest}"
+            # amd64 is is just a part of repository URI, 32-bit pkgs are hosted under the same location
+            SALTSTACK_DEBIAN_URL="${HTTP_VAL}://repo.saltstack.com/apt/debian/$DISTRO_MAJOR_VERSION/amd64/${STABLE_REV:-latest}"
             echo "deb $SALTSTACK_DEBIAN_URL wheezy main" > "/etc/apt/sources.list.d/saltstack.list"
 
             if [ "$HTTP_VAL" = "https" ] ; then
@@ -2801,8 +2809,14 @@ install_debian_8_deps() {
         elif [ "$CPU_ARCH_L" = "armv7l" ]; then
             repo_arch="armhf"
         elif [ "$CPU_ARCH_L" = "i386" ] || [ "$CPU_ARCH_L" = "i686" ]; then
-            echoerror "repo.saltstack.com likely doesn't have 32-bit packages for Debian (yet?)"
             repo_arch="i386"
+        else
+            repo_arch="$CPU_ARCH_L"
+
+            echoerror "repo.saltstack.com doesn't have packages for your system architecture: $repo_arch."
+            echoerror "Try git installation mode and disable SaltStack apt repository, for example:"
+            echoerror "    sh ${__ScriptName} -r git v2016.3.0"
+            exit 1
         fi
     fi
 
@@ -2828,8 +2842,10 @@ install_debian_8_deps() {
 
     if [ $_DISABLE_REPOS -eq $BS_FALSE ]; then
         # Versions starting with 2015.5.6, 2015.8.1 and 2016.3.0 are hosted at repo.saltstack.com
-        if [ "$(echo "$STABLE_REV" | egrep '^(2015\.5|2015\.8|2016\.3|latest|archive\/201[5-6]\.)')" != "" ]; then
-            SALTSTACK_DEBIAN_URL="${HTTP_VAL}://repo.saltstack.com/apt/debian/$DISTRO_MAJOR_VERSION/$repo_arch/$STABLE_REV"
+        if [ "$(echo "$STABLE_REV" | egrep '^(2015\.5|2015\.8|2016\.3|latest|archive\/201[5-6]\.)')" != "" ] || \
+            [ "$ITYPE" = "git" ]; then
+            # amd64 is is just a part of repository URI, 32-bit pkgs are hosted under the same location
+            SALTSTACK_DEBIAN_URL="${HTTP_VAL}://repo.saltstack.com/apt/debian/$DISTRO_MAJOR_VERSION/amd64/${STABLE_REV:-latest}"
             echo "deb $SALTSTACK_DEBIAN_URL jessie main" > "/etc/apt/sources.list.d/saltstack.list"
 
             if [ "$HTTP_VAL" = "https" ] ; then
@@ -2878,9 +2894,11 @@ install_debian_git_deps() {
 
     __git_clone_and_checkout || return 1
 
-    __apt_get_install_noinput lsb-release python python-pkg-resources python-crypto \
-        python-jinja2 python-m2crypto python-yaml msgpack-python python-tornado \
-        python-backports.ssl-match-hostname || return 1
+    __PACKAGES='lsb-release python-crypto python-jinja2 python-m2crypto python-msgpack python-yaml'
+    __PACKAGES="${__PACKAGES} ${__TORNADO_PACKAGES:-python-backports.ssl-match-hostname python-tornado}"
+
+    # shellcheck disable=SC2086
+    __apt_get_install_noinput ${__PACKAGES} || return 1
 
     # Let's trigger config_salt()
     if [ "$_TEMP_CONFIG_DIR" = "null" ]; then
@@ -2893,58 +2911,43 @@ install_debian_git_deps() {
 
 install_debian_7_git_deps() {
     install_debian_7_deps || return 1
-    install_debian_git_deps || return 1  # Grab the actual deps
+    install_debian_git_deps || return 1
+
     return 0
 }
 
 install_debian_8_git_deps() {
     install_debian_8_deps || return 1
 
-    if ! __check_command_exists git; then
-        __apt_get_install_noinput git || return 1
-    fi
+    __PIP_PACKAGES=''
 
-    __git_clone_and_checkout || return 1
+    if [ $_DISABLE_REPOS -eq $BS_TRUE ] || [ "$repo_arch" = "i386" ]; then
+        if (__check_pip_allowed >/dev/null 2>&1); then
+            __PIP_PACKAGES='tornado'
+            # Skip installation of python-tornado debian package, use pip instead
+            __TORNADO_PACKAGES='build-essential python-dev'
 
-    __PACKAGES="lsb-release python-pkg-resources python-crypto python-jinja2 python-m2crypto python-yaml msgpack-python"
-    __PIP_PACKAGES=""
-
-    if [ -f "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" ]; then
-        __REQUIRED_TORNADO="$(grep ^tornado "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" | tr -d ' ')"
-
-        if [ -n "${__REQUIRED_TORNADO}" ]; then
-            if (__check_pip_allowed >/dev/null 2>&1); then
-                __PACKAGES="${__PACKAGES} python-dev"
-                __PIP_PACKAGES="${__PIP_PACKAGES} tornado"
-
-                if ! __check_command_exists pip; then
-                    __PACKAGES="${__PACKAGES} python-pip"
-                fi
-            else
-                # Check if Debian Backports repo already configured
-                if ! apt-cache policy | grep -q 'Debian Backports'; then
-                    echo 'deb http://httpredir.debian.org/debian jessie-backports main' > \
-                        /etc/apt/sources.list.d/backports.list
-                    apt-get update
-                fi
-
-                __PACKAGES="${__PACKAGES} python-tornado/jessie-backports"
+            if ! __check_command_exists pip; then
+                __TORNADO_PACKAGES="${__TORNADO_PACKAGES} python-pip"
             fi
+        else
+            # Check if Debian Backports repo already configured
+            if ! apt-cache policy | grep -q 'Debian Backports'; then
+                echo 'deb http://httpredir.debian.org/debian jessie-backports main' > \
+                    /etc/apt/sources.list.d/backports.list
+                apt-get update || return 1
+            fi
+
+            # Tornado package will be installed from backports repo
+            __TORNADO_PACKAGES="python-backports.ssl-match-hostname python-tornado/jessie-backports"
         fi
     fi
 
-    # shellcheck disable=SC2086
-    __apt_get_install_noinput ${__PACKAGES} || return 1
+    install_debian_git_deps || return 1
 
     if [ "${__PIP_PACKAGES}" != "" ]; then
         # shellcheck disable=SC2086,SC2090
         pip install -U ${__PIP_PACKAGES} || return 1
-    fi
-
-    # Let's trigger config_salt()
-    if [ "$_TEMP_CONFIG_DIR" = "null" ]; then
-        _TEMP_CONFIG_DIR="${_SALT_GIT_CHECKOUT_DIR}/conf/"
-        CONFIG_SALT_FUNC="config_salt"
     fi
 
     return 0

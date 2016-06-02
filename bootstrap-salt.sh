@@ -2724,6 +2724,7 @@ install_debian_7_deps() {
             repo_arch="armhf"
         elif [ "$CPU_ARCH_L" = "i386" ] || [ "$CPU_ARCH_L" = "i686" ]; then
             repo_arch="i386"
+
             echoerror "repo.saltstack.com likely doesn't have all required $repo_arch packages for Debian $DISTRO_MAJOR_VERSION (yet?)."
         else
             repo_arch="$CPU_ARCH_L"
@@ -2770,7 +2771,7 @@ install_debian_7_deps() {
             # shellcheck disable=SC2086
             wget $_WGET_ARGS -q "$SALTSTACK_DEBIAN_URL/SALTSTACK-GPG-KEY.pub" -O - | apt-key add - || return 1
         elif [ -n "$STABLE_REV" ]; then
-            echoerror "Installation of Salt $STABLE_REV currently unsupported by ${__ScriptName} ${__ScriptVersion}"
+            echoerror "Installation of Salt ${STABLE_REV#*/} packages not supported by ${__ScriptName} ${__ScriptVersion} on Debian $DISTRO_MAJOR_VERSION."
             return 1
         fi
     fi
@@ -2810,12 +2811,14 @@ install_debian_8_deps() {
             repo_arch="armhf"
         elif [ "$CPU_ARCH_L" = "i386" ] || [ "$CPU_ARCH_L" = "i686" ]; then
             repo_arch="i386"
+
+            echoerror "repo.saltstack.com likely doesn't have all required $repo_arch packages for Debian $DISTRO_MAJOR_VERSION (yet?)."
         else
             repo_arch="$CPU_ARCH_L"
 
             echoerror "repo.saltstack.com doesn't have packages for your system architecture: $repo_arch."
             echoerror "Try git installation mode and disable SaltStack apt repository, for example:"
-            echoerror "    sh ${__ScriptName} -r git v2016.3.0"
+            echoerror "    sh ${__ScriptName} -r -P git v2016.3.0"
             exit 1
         fi
     fi
@@ -2855,7 +2858,7 @@ install_debian_8_deps() {
             # shellcheck disable=SC2086
             wget $_WGET_ARGS -q "$SALTSTACK_DEBIAN_URL/SALTSTACK-GPG-KEY.pub" -O - | apt-key add - || return 1
         elif [ -n "$STABLE_REV" ]; then
-            echoerror "Installation of Salt $STABLE_REV currently unsupported by ${__ScriptName} ${__ScriptVersion}"
+            echoerror "Installation of Salt ${STABLE_REV#*/} packages not supported by ${__ScriptName} ${__ScriptVersion} on Debian $DISTRO_MAJOR_VERSION."
             return 1
         fi
     fi
@@ -2894,11 +2897,9 @@ install_debian_git_deps() {
 
     __git_clone_and_checkout || return 1
 
-    __PACKAGES='lsb-release python-crypto python-jinja2 python-m2crypto python-msgpack python-yaml'
-    __PACKAGES="${__PACKAGES} ${__TORNADO_PACKAGES:-python-backports.ssl-match-hostname python-tornado}"
-
     # shellcheck disable=SC2086
-    __apt_get_install_noinput ${__PACKAGES} || return 1
+    __apt_get_install_noinput lsb-release python-backports.ssl-match-hostname python-crypto python-jinja2 \
+        python-m2crypto python-msgpack python-tornado python-yaml || return 1
 
     # Let's trigger config_salt()
     if [ "$_TEMP_CONFIG_DIR" = "null" ]; then
@@ -2919,35 +2920,51 @@ install_debian_7_git_deps() {
 install_debian_8_git_deps() {
     install_debian_8_deps || return 1
 
-    __PIP_PACKAGES=''
-
-    if [ $_DISABLE_REPOS -eq $BS_TRUE ] || [ "$repo_arch" = "i386" ]; then
-        if (__check_pip_allowed >/dev/null 2>&1); then
-            __PIP_PACKAGES='tornado'
-            # Skip installation of python-tornado debian package, use pip instead
-            __TORNADO_PACKAGES='build-essential python-dev'
-
-            if ! __check_command_exists pip; then
-                __TORNADO_PACKAGES="${__TORNADO_PACKAGES} python-pip"
-            fi
-        else
-            # Check if Debian Backports repo already configured
-            if ! apt-cache policy | grep -q 'Debian Backports'; then
-                echo 'deb http://httpredir.debian.org/debian jessie-backports main' > \
-                    /etc/apt/sources.list.d/backports.list
-                apt-get update || return 1
-            fi
-
-            # Tornado package will be installed from backports repo
-            __TORNADO_PACKAGES="python-backports.ssl-match-hostname python-tornado/jessie-backports"
-        fi
+    if ! __check_command_exists git; then
+        __apt_get_install_noinput git || return 1
     fi
 
-    install_debian_git_deps || return 1
+    __git_clone_and_checkout || return 1
+
+    __PACKAGES='lsb-release python-crypto python-jinja2 python-m2crypto python-msgpack python-yaml'
+    __PIP_PACKAGES=''
+
+    if (__check_pip_allowed >/dev/null 2>&1); then
+        __PIP_PACKAGES='tornado'
+        # Install development environment for building tornado Python module
+        __PACKAGES="${__PACKAGES} build-essential python-dev"
+
+        if ! __check_command_exists pip; then
+            __PACKAGES="${__PACKAGES} python-pip"
+        fi
+    # Attempt to configure backports repo on non-x86_64 system
+    elif [ $_DISABLE_REPOS -eq $BS_FALSE ] && [ "$CPU_ARCH_L" != "x86_64" ]; then
+        # Check if Debian Backports repo already configured
+        if ! apt-cache policy | grep -q 'Debian Backports'; then
+            echo 'deb http://httpredir.debian.org/debian jessie-backports main' > \
+                /etc/apt/sources.list.d/backports.list
+        fi
+
+        apt-get update || return 1
+
+        # python-tornado package should be installed from backports repo
+        __PACKAGES="${__PACKAGES} python-backports.ssl-match-hostname python-tornado/jessie-backports"
+    else
+        __PACKAGES="${__PACKAGES} python-backports.ssl-match-hostname python-tornado"
+    fi
+
+    # shellcheck disable=SC2086
+    __apt_get_install_noinput ${__PACKAGES} || return 1
 
     if [ "${__PIP_PACKAGES}" != "" ]; then
         # shellcheck disable=SC2086,SC2090
         pip install -U ${__PIP_PACKAGES} || return 1
+    fi
+
+    # Let's trigger config_salt()
+    if [ "$_TEMP_CONFIG_DIR" = "null" ]; then
+        _TEMP_CONFIG_DIR="${_SALT_GIT_CHECKOUT_DIR}/conf/"
+        CONFIG_SALT_FUNC="config_salt"
     fi
 
     return 0

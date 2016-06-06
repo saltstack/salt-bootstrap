@@ -265,27 +265,27 @@ __usage() {
     - ${__ScriptName}
     - ${__ScriptName} stable
     - ${__ScriptName} stable 2015.8
-    - ${__ScriptName} stable 2015.8.9
+    - ${__ScriptName} stable 2015.8.10
     - ${__ScriptName} daily
     - ${__ScriptName} testing
     - ${__ScriptName} git
     - ${__ScriptName} git 2015.8
-    - ${__ScriptName} git v2015.8.9
+    - ${__ScriptName} git v2015.8.10
     - ${__ScriptName} git 8c3fadf15ec183e5ce8c63739850d543617e4357
 
   Options:
     -h  Display this message
     -v  Display script version
-    -n  No colours.
-    -D  Show debug output.
+    -n  No colours
+    -D  Show debug output
     -c  Temporary configuration directory
     -g  Salt repository URL. Default: ${_SALTSTACK_REPO_URL}
     -G  Instead of cloning from ${_SALTSTACK_REPO_URL}, clone from
         https://${_SALTSTACK_REPO_URL#*://}
-        (Usually necessary on systems which have the regular git protocol port
+        (usually necessary on systems which have the regular git protocol port
         blocked, where https usually is not)
     -w  Install packages from downstream package repository rather than
-        upstream, saltstack package repository.  This is currently only
+        upstream, saltstack package repository. This is currently only
         implemented for SUSE.
     -k  Temporary directory holding the minion keys which will pre-seed
         the master.
@@ -295,6 +295,10 @@ __usage() {
     -S  Also install salt-syndic
     -N  Do not install salt-minion
     -X  Do not start daemons after installation
+    -d  Disable check_service functions. Setting this flag disables the
+        'install_<distro>_check_services' checks. You can also do this by
+        touching /tmp/disable_salt_checks on the target host.
+        Default: \${BS_FALSE}
     -C  Only run the configuration function. This option automatically bypasses
         any installation. Implies -F (forced overwrite). To overwrite master or
         syndic configs, -M or -S, respectively, must also be specified.
@@ -303,10 +307,10 @@ __usage() {
         distribution. Using this flag allows the script to use pip as a last
         resort method. NOTE: This only works for functions which actually
         implement pip based installations.
-    -F  Allow copied files to overwrite existing (config, init.d, etc).
-    -U  If set, fully upgrade the system prior to bootstrapping salt
+    -F  Allow copied files to overwrite existing (config, init.d, etc)
+    -U  If set, fully upgrade the system prior to bootstrapping Salt
     -K  If set, keep the temporary files in the temporary directories specified
-        with -c and -k.
+        with -c and -k
     -I  If set, allow insecure connections while downloading any files. For
         example, pass '--no-check-certificate' to 'wget' or '--insecure' to
         'curl'
@@ -314,17 +318,14 @@ __usage() {
         \${BS_SALT_ETC_DIR}/minion.d/99-master-address.conf
     -i  Pass the salt-minion id. This will be stored under
         \${BS_SALT_ETC_DIR}/minion_id
-    -L  Install the Apache Libcloud package if possible(required for salt-cloud)
-    -p  Extra-package to install while installing salt dependencies. One package
+    -L  Install the Apache Libcloud package if possible
+        (required for salt-cloud)
+    -p  Extra-package to install while installing Salt dependencies. One package
         per -p flag. You're responsible for providing the proper package name.
-    -d  Disable check_service functions. Setting this flag disables the
-        'install_<distro>_check_services' checks. You can also do this by
-        touching /tmp/disable_salt_checks on the target host.
-        Default: \${BS_FALSE}
     -H  Use the specified HTTP proxy for all download URLs (including https://).
         For example: http://myproxy.example.com:3128
     -Z  Enable additional package repository for newer ZeroMQ
-        (Only available for RHEL/CentOS/Fedora/Ubuntu based distributions)
+        (only available for RHEL/CentOS/Fedora/Ubuntu based distributions)
     -b  Assume that dependencies are already installed and software sources are
         set up. If git is selected, git tree is still checked out as dependency
         step.
@@ -332,27 +333,29 @@ __usage() {
         This may result in an "n/a" in the version number.
     -l  Disable ssl checks. When passed, switches "https" calls to "http" where
         possible.
-    -V  Install salt into virtualenv(Only available for Ubuntu base distributions)
-    -a  Pip install all python pkg dependencies for salt. Requires -V to install
-        all pip pkgs into the virtualenv(Only available for Ubuntu based
-        distributions)
+    -V  Install Salt into virtualenv
+        (only available for Ubuntu based distributions)
+    -a  Pip install all Python pkg dependencies for Salt. Requires -V to install
+        all pip pkgs into the virtualenv.
+        (Only available for Ubuntu based distributions)
     -r  Disable all repository configuration performed by this script. This
         option assumes all necessary repository configuration is already present
         on the system.
-    -R  Specify a custom repository URL. Assumes the custom repository URL points
-        to a repository that mirrors Salt packages located at repo.saltstack.com.
-        The option passed with -R replaces "repo.saltstack.com". If -R is passed,
-        -r is also set. Currently only works on CentOS/RHEL based distributions.
-    -J  Replace the Master config file with data passed in as a json string. If a
-        Master config file is found, a reasonable effort will be made to save the
-        file with a ".bak" extension. If used in conjunction with -C or -F, no ".bak"
-        file will be created as either of those options will force a complete
-        overwrite of the file.
-    -j  Replace the Minion config file with data passed in as a json string. If a
-        Minion config file is found, a reasonable effort will be made to save the
-        file with a ".bak" extension. If used in conjunction with -C or -F, no ".bak"
-        file will be created as either of those options will force a complete
-        overwrite of the file.
+    -R  Specify a custom repository URL. Assumes the custom repository URL
+        points to a repository that mirrors Salt packages located at
+        repo.saltstack.com. The option passed with -R replaces the
+        "repo.saltstack.com". If -R is passed, -r is also set. Currently only
+        works on CentOS/RHEL based distributions.
+    -J  Replace the Master config file with data passed in as a json string. If
+        a Master config file is found, a reasonable effort will be made to save
+        the file with a ".bak" extension. If used in conjunction with -C or -F,
+        no ".bak" file will be created as either of those options will force
+        a complete overwrite of the file.
+    -j  Replace the Minion config file with data passed in as a json string. If
+        a Minion config file is found, a reasonable effort will be made to save
+        the file with a ".bak" extension. If used in conjunction with -C or -F,
+        no ".bak" file will be created as either of those options will force
+        a complete overwrite of the file.
     -q  Quiet salt installation from git (setup.py install -q)
 
 EOT

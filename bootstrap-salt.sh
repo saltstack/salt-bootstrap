@@ -4118,6 +4118,8 @@ install_arch_linux_stable_deps() {
         pacman-key --init && pacman-key --populate archlinux || return 1
     fi
 
+    pacman -Sy --noconfirm --needed archlinux-keyring || return 1
+
     pacman -Sy --noconfirm --needed pacman || return 1
 
     if __check_command_exists pacman-db-upgrade; then

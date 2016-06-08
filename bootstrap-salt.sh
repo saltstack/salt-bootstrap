@@ -19,7 +19,7 @@
 set -o nounset                              # Treat unset variables as an error
 
 __ScriptVersion="2016.05.11"
-__ScriptName="bootstrap-salt.sh"
+__ScriptName="${0}"
 
 #======================================================================================================================
 #  Environment variables taken into account.
@@ -670,8 +670,8 @@ trap "__exit_cleanup" EXIT INT
 
 
 # Define our logging file and pipe paths
-LOGFILE="/tmp/$( echo $__ScriptName | sed s/.sh/.log/g )"
-LOGPIPE="/tmp/$( echo $__ScriptName | sed s/.sh/.logpipe/g )"
+LOGFILE="/tmp/$( echo "$__ScriptName" | sed s/.sh/.log/g )"
+LOGPIPE="/tmp/$( echo "$__ScriptName" | sed s/.sh/.logpipe/g )"
 
 # Create our logging pipe
 # On FreeBSD we have to use mkfifo instead of mknod

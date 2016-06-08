@@ -604,7 +604,8 @@ if [ -d "$_VIRTUALENV_DIR" ]; then
     exit 1
 fi
 
-echoinfo "${CALLER} ${0} -- Version ${__ScriptVersion}"
+echoinfo "Running version: ${__ScriptVersion}"
+echoinfo "Command line: \"${CALLER} ${0} ${*}\""
 echowarn "Running the unstable version of ${__ScriptName}"
 
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------

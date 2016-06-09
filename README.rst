@@ -212,6 +212,12 @@ Debian and derivatives
 - Linux Mint Debian Edition 1 (based on Debian 8)
 - Kali Linux 1.0 (based on Debian 7)
 
+.. note::
+
+  Installation of Salt packages on Debian distribution from repo.saltstack.com repository is
+  currently supported for ``amd64`` (``x86-64``) architechture ONLY. Use ``git`` bootstrap
+  mode as mentioned above to install Salt on other architechtures, such as ``i386`` or ``armel``.
+
 
 Red Hat family
 ~~~~~~~~~~~~~~

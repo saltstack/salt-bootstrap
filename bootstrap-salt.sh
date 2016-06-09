@@ -231,6 +231,7 @@ _NO_DEPS=$BS_FALSE
 _FORCE_SHALLOW_CLONE=$BS_FALSE
 _DISABLE_SSL=$BS_FALSE
 _DISABLE_REPOS=$BS_FALSE
+_CUSTOM_REPO_URL="null"
 _CUSTOM_MASTER_CONFIG="null"
 _CUSTOM_MINION_CONFIG="null"
 
@@ -330,11 +331,15 @@ __usage() {
         possible.
     -V  Install salt into virtualenv(Only available for Ubuntu base distributions)
     -a  Pip install all python pkg dependencies for salt. Requires -V to install
-        all pip pkgs into the virtualenv(Only available for Ubuntu base
+        all pip pkgs into the virtualenv(Only available for Ubuntu based
         distributions)
     -r  Disable all repository configuration performed by this script. This
         option assumes all necessary repository configuration is already present
         on the system.
+    -R  Specify a custom repository URL. Assumes the custom repository URL points
+        to a repository that rsyncs Salt packages located at repo.saltstack.com.
+        The option passed with -R replaces "repo.saltstack.com". If -R is passed,
+        -r is also set. Currently only works on CentOS/RHEL based distributions.
     -J  Replace the Master config file with data passed in as a json string. If a
         Master config file is found, a reasonable effort will be made to save the
         file with a ".bak" extension. If used in conjunction with -C or -F, no ".bak"
@@ -350,7 +355,7 @@ EOT
 }   # ----------  end of function __usage  ----------
 
 
-while getopts ":hvnDc:Gg:wk:s:MSNXCPFUKIA:i:Lp:dH:ZbflV:J:j:ar" opt
+while getopts ":hvnDc:Gg:wk:s:MSNXCPFUKIA:i:Lp:dH:ZbflV:J:j:rR:a" opt
 do
   case "${opt}" in
 
@@ -414,6 +419,7 @@ do
     V )  _VIRTUALENV_DIR="$OPTARG"                      ;;
     a )  _PIP_ALL=$BS_TRUE                              ;;
     r )  _DISABLE_REPOS=$BS_TRUE                        ;;
+    R )  _CUSTOM_REPO_URL=$OPTARG                       ;;
     J )  _CUSTOM_MASTER_CONFIG=$OPTARG                  ;;
     j )  _CUSTOM_MINION_CONFIG=$OPTARG                  ;;
 
@@ -539,6 +545,12 @@ if [ "$ITYPE" != "git" ]; then
         echoerror "Virtualenv installs via -V is only possible when installing salt via git"
         exit 1
     fi
+fi
+
+# Check for -r if -R is being passed. Set -r with a warning.
+if [ "$_CUSTOM_REPO_URL" != "null" ] && [ "$_DISABLE_REPOS" -eq $BS_FALSE ]; then
+    echowarn "Detected -R option. No other repositories will be configured when -R is used. Setting -r option to True."
+    _DISABLE_REPOS=$BS_TRUE
 fi
 
 # Check for any unparsed arguments. Should be an error.
@@ -3306,8 +3318,15 @@ __install_saltstack_rhel_repository() {
         repo_rev="latest"
     fi
 
-    base_url="${HTTP_VAL}://repo.saltstack.com/yum/redhat/\$releasever/\$basearch/${repo_rev}/"
-    fetch_url="${HTTP_VAL}://repo.saltstack.com/yum/redhat/${DISTRO_MAJOR_VERSION}/${CPU_ARCH_L}/${repo_rev}/"
+    # Check if a custom repo URL was passed with -R. If not, use repo.salstack.com.
+    if [ "$_CUSTOM_REPO_URL" != "null" ]; then
+        repo_url="$_CUSTOM_REPO_URL"
+    else
+        repo_url="repo.saltstack.com"
+    fi
+
+    base_url="${HTTP_VAL}://${repo_url}/yum/redhat/\$releasever/\$basearch/${repo_rev}/"
+    fetch_url="${HTTP_VAL}://${repo_url}/yum/redhat/${DISTRO_MAJOR_VERSION}/${CPU_ARCH_L}/${repo_rev}/"
 
     if [ "${DISTRO_MAJOR_VERSION}" -eq 5 ]; then
         gpg_key="SALTSTACK-EL5-GPG-KEY.pub"
@@ -3335,7 +3354,7 @@ _eof
         # Import CentOS 7 GPG key on RHEL for installing base dependencies from
         # Salt corporate repository
         rpm -qa gpg-pubkey\* --qf "%{name}-%{version}\n" | grep -q ^gpg-pubkey-f4a80eb5$ || \
-            __rpm_import_gpg "${HTTP_VAL}://repo.saltstack.com/yum/redhat/7/x86_64/${repo_rev}/base/RPM-GPG-KEY-CentOS-7" || return 1
+            __rpm_import_gpg "${HTTP_VAL}://${repo_url}/yum/redhat/7/x86_64/${repo_rev}/base/RPM-GPG-KEY-CentOS-7" || return 1
     fi
 
     return 0
@@ -3368,6 +3387,13 @@ install_centos_stable_deps() {
 
     if [ $_DISABLE_REPOS -eq $BS_FALSE ]; then
         __install_epel_repository || return 1
+        __install_saltstack_rhel_repository || return 1
+    fi
+
+    # If -R was passed, we need to configure custom repo url with rsync-ed packages
+    # Which is still handled in __install_saltstack_rhel_repository. This call has
+    # its own check in case -r was passed without -R.
+    if [ "$_CUSTOM_REPO_URL" != "null" ]; then
         __install_saltstack_rhel_repository || return 1
     fi
 

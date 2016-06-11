@@ -1165,6 +1165,21 @@ __gather_system_info() {
 }
 
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  __get_dpkg_architecture
+#   DESCRIPTION:  Determine primary architecture for packages to install on Debian and derivatives
+#----------------------------------------------------------------------------------------------------------------------
+__get_dpkg_architecture() {
+    if ! __check_command_exist dpkg; then
+        DPKG_ARCHITECTURE="$(dpkg --print-architecture)"
+    else
+        echoerror "dpkg: command not found."
+        return 1
+    fi
+
+    return 0
+}
+
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #          NAME:  __ubuntu_derivatives_translation
 #   DESCRIPTION:  Map Ubuntu derivatives to their Ubuntu base versions.
 #                 If distro has a known Ubuntu base version, use those install
@@ -2337,19 +2352,18 @@ install_ubuntu_deps() {
 }
 
 install_ubuntu_stable_deps() {
-
-    if [ $_DISABLE_REPOS -eq $BS_FALSE ]; then
-        if [ "$CPU_ARCH_L" = "amd64" ] || [ "$CPU_ARCH_L" = "x86_64" ]; then
-            repo_arch="amd64"
-        elif [ "$CPU_ARCH_L" = "i386" ] || [ "$CPU_ARCH_L" = "i686" ]; then
-            echoerror "repo.saltstack.com likely doesn't have 32-bit packages for Ubuntu (yet?)"
-            repo_arch="i386"
-        fi
-    fi
-
     install_ubuntu_deps || return 1
 
     if [ $_DISABLE_REPOS -eq $BS_FALSE ]; then
+         __get_dpkg_architecture || return 1
+
+        if [ "$DPKG_ARCHITECTURE" = "i386" ]; then
+            echoerror "repo.saltstack.com likely doesn't have all required 32-bit packages for Ubuntu $DISTRO_MAJOR_VERSION (yet?)."
+        elif [ "$DPKG_ARCHITECTURE" != "amd64" ]; then
+            echoerror "repo.saltstack.com doesn't have packages for your system architecture: $DPKG_ARCHITECTURE."
+            exit 1
+        fi
+
         # Versions starting with 2015.5.6 and 2015.8.1 are hosted at repo.saltstack.com
         if [ "$(echo "$STABLE_REV" | egrep '^(2015\.5|2015\.8|2016\.3|latest|archive\/)')" != "" ]; then
             # Workaround for latest non-LTS ubuntu
@@ -2362,8 +2376,10 @@ install_ubuntu_stable_deps() {
                 UBUNTU_CODENAME=$DISTRO_CODENAME
             fi
 
-            # SaltStack's stable Ubuntu repository
-            SALTSTACK_UBUNTU_URL="${HTTP_VAL}://repo.saltstack.com/apt/ubuntu/$UBUNTU_VERSION/$repo_arch/$STABLE_REV"
+            # SaltStack's stable Ubuntu repository:
+            # amd64 is is just a part of repository URI, 32-bit pkgs are hosted under the same location
+            SALTSTACK_UBUNTU_URL="${HTTP_VAL}://repo.saltstack.com/apt/ubuntu/$UBUNTU_VERSION/amd64/$STABLE_REV"
+
             if [ "$(grep -ER 'latest .+ main' /etc/apt)" = "" ]; then
                 set +o nounset
                 echo "deb $SALTSTACK_UBUNTU_URL $UBUNTU_CODENAME main" > "/etc/apt/sources.list.d/saltstack.list"
@@ -2681,6 +2697,7 @@ install_debian_deps() {
     if [ $_START_DAEMONS -eq $BS_FALSE ]; then
         echowarn "Not starting daemons on Debian based distributions is not working mostly because starting them is the default behaviour."
     fi
+
     # No user interaction, libc6 restart services for example
     export DEBIAN_FRONTEND=noninteractive
 
@@ -2720,25 +2737,6 @@ install_debian_deps() {
 }
 
 install_debian_7_deps() {
-    if [ $_DISABLE_REPOS -eq $BS_FALSE ]; then
-        if [ "$CPU_ARCH_L" = "amd64" ] || [ "$CPU_ARCH_L" = "x86_64" ]; then
-            repo_arch="amd64"
-        elif [ "$CPU_ARCH_L" = "armv7l" ]; then
-            repo_arch="armhf"
-        elif [ "$CPU_ARCH_L" = "i386" ] || [ "$CPU_ARCH_L" = "i686" ]; then
-            repo_arch="i386"
-
-            echoerror "repo.saltstack.com likely doesn't have all required $repo_arch packages for Debian $DISTRO_MAJOR_VERSION (yet?)."
-        else
-            repo_arch="$CPU_ARCH_L"
-
-            echoerror "repo.saltstack.com doesn't have packages for your system architecture: $repo_arch."
-            exit 1
-        fi
-    else
-        echowarn "Packages from repo.saltstack.com are required to install Salt version 2015.8 or higher on Debian $DISTRO_MAJOR_VERSION."
-    fi
-
     if [ $_START_DAEMONS -eq $BS_FALSE ]; then
         echowarn "Not starting daemons on Debian based distributions is not working mostly because starting them is the default behaviour."
     fi
@@ -2760,6 +2758,15 @@ install_debian_7_deps() {
     fi
 
     if [ $_DISABLE_REPOS -eq $BS_FALSE ]; then
+         __get_dpkg_architecture || return 1
+
+        if [ "$DPKG_ARCHITECTURE" = "i386" ]; then
+            echoerror "repo.saltstack.com likely doesn't have all required 32-bit packages for Debian $DISTRO_MAJOR_VERSION (yet?)."
+        elif [ "$DPKG_ARCHITECTURE" != "amd64" ]; then
+            echoerror "repo.saltstack.com doesn't have packages for your system architecture: $DPKG_ARCHITECTURE."
+            exit 1
+        fi
+
         # Versions starting with 2015.8.7 and 2016.3.0 are hosted at repo.saltstack.com
         if [ "$(echo "$STABLE_REV" | egrep '^(2015\.8|2016\.3|latest|archive\/201[5-6]\.)')" != "" ] || \
             [ "$ITYPE" = "git" ]; then
@@ -2777,6 +2784,8 @@ install_debian_7_deps() {
             echoerror "Installation of Salt ${STABLE_REV#*/} packages not supported by ${__ScriptName} ${__ScriptVersion} on Debian $DISTRO_MAJOR_VERSION."
             return 1
         fi
+    else
+        echowarn "Packages from repo.saltstack.com are required to install Salt version 2015.8 or higher on Debian $DISTRO_MAJOR_VERSION."
     fi
 
     apt-get update || return 1
@@ -2807,25 +2816,6 @@ install_debian_7_deps() {
 }
 
 install_debian_8_deps() {
-    if [ $_DISABLE_REPOS -eq $BS_FALSE ]; then
-        if [ "$CPU_ARCH_L" = "amd64" ] || [ "$CPU_ARCH_L" = "x86_64" ]; then
-            repo_arch="amd64"
-        elif [ "$CPU_ARCH_L" = "armv7l" ]; then
-            repo_arch="armhf"
-        elif [ "$CPU_ARCH_L" = "i386" ] || [ "$CPU_ARCH_L" = "i686" ]; then
-            repo_arch="i386"
-
-            echoerror "repo.saltstack.com likely doesn't have all required $repo_arch packages for Debian $DISTRO_MAJOR_VERSION (yet?)."
-        else
-            repo_arch="$CPU_ARCH_L"
-
-            echoerror "repo.saltstack.com doesn't have packages for your system architecture: $repo_arch."
-            echoerror "Try git installation mode and disable SaltStack apt repository, for example:"
-            echoerror "    sh ${__ScriptName} -r -P git v2016.3.0"
-            exit 1
-        fi
-    fi
-
     if [ $_START_DAEMONS -eq $BS_FALSE ]; then
         echowarn "Not starting daemons on Debian based distributions is not working mostly because starting them is the default behaviour."
     fi
@@ -2847,6 +2837,17 @@ install_debian_8_deps() {
     fi
 
     if [ $_DISABLE_REPOS -eq $BS_FALSE ]; then
+         __get_dpkg_architecture || return 1
+
+        if [ "$DPKG_ARCHITECTURE" = "i386" ]; then
+            echoerror "repo.saltstack.com likely doesn't have all required 32-bit packages for Debian $DISTRO_MAJOR_VERSION (yet?)."
+        elif [ "$DPKG_ARCHITECTURE" != "amd64" ]; then
+            echoerror "repo.saltstack.com doesn't have packages for your system architecture: $DPKG_ARCHITECTURE."
+            echoerror "Try git installation mode and disable SaltStack apt repository, for example:"
+            echoerror "    sh ${__ScriptName} -r -P git v2016.3.0"
+            exit 1
+        fi
+
         # Versions starting with 2015.5.6, 2015.8.1 and 2016.3.0 are hosted at repo.saltstack.com
         if [ "$(echo "$STABLE_REV" | egrep '^(2015\.5|2015\.8|2016\.3|latest|archive\/201[5-6]\.)')" != "" ] || \
             [ "$ITYPE" = "git" ]; then
@@ -2941,7 +2942,7 @@ install_debian_8_git_deps() {
             __PACKAGES="${__PACKAGES} python-pip"
         fi
     # Attempt to configure backports repo on non-x86_64 system
-    elif [ $_DISABLE_REPOS -eq $BS_FALSE ] && [ "$CPU_ARCH_L" != "x86_64" ]; then
+    elif [ $_DISABLE_REPOS -eq $BS_FALSE ] && [ "$DPKG_ARCHITECTURE" != "amd64" ]; then
         # Check if Debian Backports repo already configured
         if ! apt-cache policy | grep -q 'Debian Backports'; then
             echo 'deb http://httpredir.debian.org/debian jessie-backports main' > \
@@ -4121,14 +4122,6 @@ _eof
 }
 
 install_amazon_linux_ami_git_deps() {
-
-    # When installing from git, this variable might not be set yet for amazon linux. Set this
-    # to "latest" in order to set up the SaltStack repository and avoid a malformed baseurl
-    # and gpgkey reference in the install_amazon_linux_amI_deps function. 
-    if [ "$STABLE_REV" = "" ]; then
-        STABLE_REV="latest"
-    fi
-
     install_amazon_linux_ami_deps || return 1
 
     if ! __check_command_exists git; then

@@ -264,14 +264,14 @@ __usage() {
   Examples:
     - ${__ScriptName}
     - ${__ScriptName} stable
-    - ${__ScriptName} stable 2015.8
-    - ${__ScriptName} stable 2015.8.10
+    - ${__ScriptName} stable 2016.3
+    - ${__ScriptName} stable 2016.3.0
     - ${__ScriptName} daily
     - ${__ScriptName} testing
     - ${__ScriptName} git
-    - ${__ScriptName} git 2015.8
-    - ${__ScriptName} git v2015.8.10
-    - ${__ScriptName} git 8c3fadf15ec183e5ce8c63739850d543617e4357
+    - ${__ScriptName} git 2016.3
+    - ${__ScriptName} git v2016.3.0
+    - ${__ScriptName} git 11acecc43e2c2e4e9a0e73d76b46b035afe8d538
 
   Options:
     -h  Display this message
@@ -1169,7 +1169,7 @@ __gather_system_info() {
 #   DESCRIPTION:  Determine primary architecture for packages to install on Debian and derivatives
 #----------------------------------------------------------------------------------------------------------------------
 __get_dpkg_architecture() {
-    if ! __check_command_exist dpkg; then
+    if ! __check_command_exists dpkg; then
         DPKG_ARCHITECTURE="$(dpkg --print-architecture)"
     else
         echoerror "dpkg: command not found."
@@ -2746,9 +2746,6 @@ install_debian_7_deps() {
 
     apt-get update
 
-    # Make sure wget is available
-    __apt_get_install_noinput wget
-
     # Install Keys
     __apt_get_install_noinput debian-archive-keyring && apt-get update
 
@@ -2757,13 +2754,18 @@ install_debian_7_deps() {
         apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 8B48AD6246925553 || return 1
     fi
 
+    # Make sure wget is available
+    __apt_get_install_noinput wget || return 1
+
     if [ $_DISABLE_REPOS -eq $BS_FALSE ]; then
          __get_dpkg_architecture || return 1
 
         if [ "$DPKG_ARCHITECTURE" = "i386" ]; then
             echoerror "repo.saltstack.com likely doesn't have all required 32-bit packages for Debian $DISTRO_MAJOR_VERSION (yet?)."
+            echoerror "You can try git installation mode, i.e.: sh ${__ScriptName} git v2016.3.0"
         elif [ "$DPKG_ARCHITECTURE" != "amd64" ]; then
             echoerror "repo.saltstack.com doesn't have packages for your system architecture: $DPKG_ARCHITECTURE."
+
             exit 1
         fi
 
@@ -2782,6 +2784,7 @@ install_debian_7_deps() {
             wget $_WGET_ARGS -q "$SALTSTACK_DEBIAN_URL/SALTSTACK-GPG-KEY.pub" -O - | apt-key add - || return 1
         elif [ -n "$STABLE_REV" ]; then
             echoerror "Installation of Salt ${STABLE_REV#*/} packages not supported by ${__ScriptName} ${__ScriptVersion} on Debian $DISTRO_MAJOR_VERSION."
+
             return 1
         fi
     else
@@ -2825,9 +2828,6 @@ install_debian_8_deps() {
 
     apt-get update
 
-    # Make sure wget is available
-    __apt_get_install_noinput wget
-
     # Install Keys
     __apt_get_install_noinput debian-archive-keyring && apt-get update
 
@@ -2836,15 +2836,20 @@ install_debian_8_deps() {
         apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 7638D0442B90D010 || return 1
     fi
 
+    # Make sure wget is available
+    __apt_get_install_noinput wget || return 1
+
     if [ $_DISABLE_REPOS -eq $BS_FALSE ]; then
          __get_dpkg_architecture || return 1
 
         if [ "$DPKG_ARCHITECTURE" = "i386" ]; then
             echoerror "repo.saltstack.com likely doesn't have all required 32-bit packages for Debian $DISTRO_MAJOR_VERSION (yet?)."
+            echoerror "You can try git installation mode, i.e.: sh ${__ScriptName} git v2016.3.0"
         elif [ "$DPKG_ARCHITECTURE" != "amd64" ]; then
             echoerror "repo.saltstack.com doesn't have packages for your system architecture: $DPKG_ARCHITECTURE."
             echoerror "Try git installation mode and disable SaltStack apt repository, for example:"
             echoerror "    sh ${__ScriptName} -r -P git v2016.3.0"
+
             exit 1
         fi
 
@@ -2863,6 +2868,7 @@ install_debian_8_deps() {
             wget $_WGET_ARGS -q "$SALTSTACK_DEBIAN_URL/SALTSTACK-GPG-KEY.pub" -O - | apt-key add - || return 1
         elif [ -n "$STABLE_REV" ]; then
             echoerror "Installation of Salt ${STABLE_REV#*/} packages not supported by ${__ScriptName} ${__ScriptVersion} on Debian $DISTRO_MAJOR_VERSION."
+
             return 1
         fi
     fi
@@ -3077,7 +3083,7 @@ install_debian_git_post() {
 }
 
 install_debian_restart_daemons() {
-    [ "$_START_DAEMONS" -eq $BS_FALSE ] && return
+    [ "$_START_DAEMONS" -eq $BS_FALSE ] && return 0
 
     for fname in minion master syndic api; do
         # Skip salt-api since the service should be opt-in and not necessarily started on boot
@@ -6409,4 +6415,5 @@ if [ "$_CONFIG_ONLY" -eq $BS_FALSE ]; then
 else
     echoinfo "Salt configured"
 fi
+
 exit 0

@@ -6007,6 +6007,10 @@ config_salt() {
         echowarn "No configuration or keys were copied over. No configuration was done!"
         exit 0
     fi
+
+    # Create default logs directory if not exists (happens with git installations)
+    mkdir -p /var/log/salt
+
     return 0
 }
 #

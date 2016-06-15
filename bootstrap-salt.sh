@@ -1169,7 +1169,7 @@ __gather_system_info() {
 #   DESCRIPTION:  Determine primary architecture for packages to install on Debian and derivatives
 #----------------------------------------------------------------------------------------------------------------------
 __get_dpkg_architecture() {
-    if ! __check_command_exists dpkg; then
+    if __check_command_exists dpkg; then
         DPKG_ARCHITECTURE="$(dpkg --print-architecture)"
     else
         echoerror "dpkg: command not found."
@@ -2793,7 +2793,7 @@ install_debian_7_deps() {
 
     apt-get update || return 1
 
-    __PACKAGES="libzmq3 libzmq3-dev python-zmq python-requests python-apt"
+    __PACKAGES="libzmq3 libzmq3-dev python-zmq python-requests python-apt python-psutil"
     # Additionally install procps and pciutils which allows for Docker bootstraps. See 366#issuecomment-39666813
     __PACKAGES="${__PACKAGES} procps pciutils"
 
@@ -2875,7 +2875,7 @@ install_debian_8_deps() {
 
     apt-get update || return 1
 
-    __PACKAGES="libzmq3 libzmq3-dev python-zmq python-requests python-apt"
+    __PACKAGES="libzmq3 libzmq3-dev python-zmq python-requests python-apt python-psutil"
     # Additionally install procps and pciutils which allows for Docker bootstraps. See 366#issuecomment-39666813
     __PACKAGES="${__PACKAGES} procps pciutils"
 

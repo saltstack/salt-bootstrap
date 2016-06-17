@@ -337,7 +337,7 @@ __usage() {
         option assumes all necessary repository configuration is already present
         on the system.
     -R  Specify a custom repository URL. Assumes the custom repository URL points
-        to a repository that rsyncs Salt packages located at repo.saltstack.com.
+        to a repository that mirrors Salt packages located at repo.saltstack.com.
         The option passed with -R replaces "repo.saltstack.com". If -R is passed,
         -r is also set. Currently only works on CentOS/RHEL based distributions.
     -J  Replace the Master config file with data passed in as a json string. If a

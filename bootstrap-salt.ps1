@@ -46,7 +46,7 @@
     Name or IP of the master server. Installer defaults to "salt".
 
 .PARAMETER repourl
-    URL to the windows packages. Default is "http://repo.saltstack.com/windows"
+    URL to the windows packages. Default is "https://repo.saltstack.com/windows"
 
 .NOTES
     All of the parameters are optional. The default should be the latest
@@ -80,7 +80,7 @@ Param(
     [string]$master = "not-specified",
 
     [Parameter(Mandatory=$false,ValueFromPipeline=$true)]
-    [string]$repourl= "http://repo.saltstack.com/windows"
+    [string]$repourl= "https://repo.saltstack.com/windows"
 )
 
 #===============================================================================

@@ -19,7 +19,7 @@
 set -o nounset                              # Treat unset variables as an error
 
 __ScriptVersion="2016.05.11"
-__ScriptName="$(basename ${0})"
+__ScriptName="$(basename "${0}")"
 
 #======================================================================================================================
 #  Environment variables taken into account.

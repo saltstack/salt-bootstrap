@@ -204,6 +204,7 @@ _INSTALL_MINION=$BS_TRUE
 _INSTALL_CLOUD=$BS_FALSE
 _VIRTUALENV_DIR=${BS_VIRTUALENV_DIR:-"null"}
 _START_DAEMONS=$BS_TRUE
+_DISABLE_SALT_CHECKS=$BS_FALSE
 _ECHO_DEBUG=${BS_ECHO_DEBUG:-$BS_FALSE}
 _CONFIG_ONLY=$BS_FALSE
 _PIP_ALLOWED=${BS_PIP_ALLOWED:-$BS_FALSE}
@@ -228,7 +229,6 @@ _SIMPLIFY_VERSION=$BS_TRUE
 _LIBCLOUD_MIN_VERSION="0.14.0"
 _EXTRA_PACKAGES=""
 _HTTP_PROXY=""
-_DISABLE_SALT_CHECKS=$BS_FALSE
 _SALT_GIT_CHECKOUT_DIR=${BS_SALT_GIT_CHECKOUT_DIR:-/tmp/git/salt}
 _NO_DEPS=$BS_FALSE
 _FORCE_SHALLOW_CLONE=$BS_FALSE
@@ -295,10 +295,9 @@ __usage() {
     -S  Also install salt-syndic
     -N  Do not install salt-minion
     -X  Do not start daemons after installation
-    -d  Disable check_service functions. Setting this flag disables the
-        'install_<distro>_check_services' checks. You can also do this by
-        touching /tmp/disable_salt_checks on the target host.
-        Default: \${BS_FALSE}
+    -d  Disables checking if Salt services are enabled to start on system boot.
+        You can also do this by touching /tmp/disable_salt_checks on the target
+        host. Default: \${BS_FALSE}
     -C  Only run the configuration function. This option automatically bypasses
         any installation. Implies -F (forced overwrite). To overwrite master or
         syndic configs, -M or -S, respectively, must also be specified.
@@ -612,9 +611,10 @@ if [ "${CALLER}x" = "${0}x" ]; then
 fi
 
 # Work around for 'Docker + salt-bootstrap failure' https://github.com/saltstack/salt-bootstrap/issues/394
-if [ ${_DISABLE_SALT_CHECKS} -eq 0 ]; then
-    [ -f /tmp/disable_salt_checks ] && _DISABLE_SALT_CHECKS=$BS_TRUE && \
-        echowarn "Found file: /tmp/disable_salt_checks, setting \$_DISABLE_SALT_CHECKS=true"
+if [ ${_DISABLE_SALT_CHECKS} -eq $BS_FALSE ] && [ -f /tmp/disable_salt_checks ]; then
+    # shellcheck disable=SC2016
+    echowarn 'Found file: /tmp/disable_salt_checks, setting _DISABLE_SALT_CHECKS=$BS_TRUE'
+    _DISABLE_SALT_CHECKS=$BS_TRUE
 fi
 
 # Because -a can only be installed into virtualenv
@@ -1555,7 +1555,7 @@ __git_clone_and_checkout() {
                 # We need to add the saltstack repository as a remote and fetch tags for proper versioning
                 echoinfo "Adding SaltStack's Salt repository as a remote"
                 git remote add upstream "$_SALTSTACK_REPO_URL" || return 1
-                echodebug "Fetching upstream(SaltStack's Salt repository) git tags"
+                echodebug "Fetching upstream (SaltStack's Salt repository) git tags"
                 git fetch --tags upstream || return 1
                 GIT_REV="origin/$GIT_REV"
             fi
@@ -1727,7 +1727,7 @@ __copyfile() {
     # If the destination is a directory, let's make it a full path so the logic
     # below works as expected
     if [ -d "$dfile" ]; then
-        echodebug "The passed destination($dfile) is a directory"
+        echodebug "The passed destination ($dfile) is a directory"
         dfile="${dfile}/$(basename "$sfile")"
         echodebug "Full destination path is now: $dfile"
     fi
@@ -6058,7 +6058,7 @@ preseed_master() {
 #   This function checks if all of the installed daemons are running or not.
 #
 daemons_running() {
-    [ "$_START_DAEMONS" -eq $BS_FALSE ] && return
+    [ "$_START_DAEMONS" -eq $BS_FALSE ] && return 0
 
     FAILED_DAEMONS=0
     for fname in minion master syndic api; do
@@ -6068,7 +6068,6 @@ daemons_running() {
         # Skip if not meant to be installed
         [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
         [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
-        #[ $fname = "api" ] && ([ "$_INSTALL_MASTER" -eq $BS_FALSE ] || ! __check_command_exists "salt-${fname}") && continue
         [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
 
         # shellcheck disable=SC2009
@@ -6092,9 +6091,9 @@ daemons_running() {
 #======================================================================================================================
 # LET'S PROCEED WITH OUR INSTALLATION
 #======================================================================================================================
-# Let's get the dependencies install function
 
-if [ "$_NO_DEPS" -eq $BS_FALSE ]; then
+# Let's get the dependencies install function
+if [ ${_NO_DEPS} -eq $BS_FALSE ]; then
     DEP_FUNC_NAMES="install_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}_${ITYPE}_deps"
     DEP_FUNC_NAMES="$DEP_FUNC_NAMES install_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}${PREFIXED_DISTRO_MINOR_VERSION}_${ITYPE}_deps"
     DEP_FUNC_NAMES="$DEP_FUNC_NAMES install_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}_deps"
@@ -6117,45 +6116,39 @@ done
 echodebug "DEPS_INSTALL_FUNC=${DEPS_INSTALL_FUNC}"
 
 # Let's get the minion config function
+CONFIG_FUNC_NAMES="config_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}_${ITYPE}_salt"
+CONFIG_FUNC_NAMES="$CONFIG_FUNC_NAMES config_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}${PREFIXED_DISTRO_MINOR_VERSION}_${ITYPE}_salt"
+CONFIG_FUNC_NAMES="$CONFIG_FUNC_NAMES config_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}_salt"
+CONFIG_FUNC_NAMES="$CONFIG_FUNC_NAMES config_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}${PREFIXED_DISTRO_MINOR_VERSION}_salt"
+CONFIG_FUNC_NAMES="$CONFIG_FUNC_NAMES config_${DISTRO_NAME_L}_${ITYPE}_salt"
+CONFIG_FUNC_NAMES="$CONFIG_FUNC_NAMES config_${DISTRO_NAME_L}_salt"
+CONFIG_FUNC_NAMES="$CONFIG_FUNC_NAMES config_salt"
+
 CONFIG_SALT_FUNC="null"
-if [ "$_TEMP_CONFIG_DIR" != "null" ]; then
-
-    CONFIG_FUNC_NAMES="config_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}_${ITYPE}_salt"
-    CONFIG_FUNC_NAMES="$CONFIG_FUNC_NAMES config_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}${PREFIXED_DISTRO_MINOR_VERSION}_${ITYPE}_salt"
-    CONFIG_FUNC_NAMES="$CONFIG_FUNC_NAMES config_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}_salt"
-    CONFIG_FUNC_NAMES="$CONFIG_FUNC_NAMES config_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}${PREFIXED_DISTRO_MINOR_VERSION}_salt"
-    CONFIG_FUNC_NAMES="$CONFIG_FUNC_NAMES config_${DISTRO_NAME_L}_${ITYPE}_salt"
-    CONFIG_FUNC_NAMES="$CONFIG_FUNC_NAMES config_${DISTRO_NAME_L}_salt"
-    CONFIG_FUNC_NAMES="$CONFIG_FUNC_NAMES config_salt"
-
-    for FUNC_NAME in $(__strip_duplicates "$CONFIG_FUNC_NAMES"); do
-        if __function_defined "$FUNC_NAME"; then
-            CONFIG_SALT_FUNC="$FUNC_NAME"
-            break
-        fi
-    done
-fi
+for FUNC_NAME in $(__strip_duplicates "$CONFIG_FUNC_NAMES"); do
+    if __function_defined "$FUNC_NAME"; then
+        CONFIG_SALT_FUNC="$FUNC_NAME"
+        break
+    fi
+done
 echodebug "CONFIG_SALT_FUNC=${CONFIG_SALT_FUNC}"
 
 # Let's get the pre-seed master function
+PRESEED_FUNC_NAMES="preseed_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}_${ITYPE}_master"
+PRESEED_FUNC_NAMES="$PRESEED_FUNC_NAMES preseed_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}${PREFIXED_DISTRO_MINOR_VERSION}_${ITYPE}_master"
+PRESEED_FUNC_NAMES="$PRESEED_FUNC_NAMES preseed_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}_master"
+PRESEED_FUNC_NAMES="$PRESEED_FUNC_NAMES preseed_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}${PREFIXED_DISTRO_MINOR_VERSION}_master"
+PRESEED_FUNC_NAMES="$PRESEED_FUNC_NAMES preseed_${DISTRO_NAME_L}_${ITYPE}_master"
+PRESEED_FUNC_NAMES="$PRESEED_FUNC_NAMES preseed_${DISTRO_NAME_L}_master"
+PRESEED_FUNC_NAMES="$PRESEED_FUNC_NAMES preseed_master"
+
 PRESEED_MASTER_FUNC="null"
-if [ "$_TEMP_KEYS_DIR" != "null" ]; then
-
-    PRESEED_FUNC_NAMES="preseed_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}_${ITYPE}_master"
-    PRESEED_FUNC_NAMES="$PRESEED_FUNC_NAMES preseed_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}${PREFIXED_DISTRO_MINOR_VERSION}_${ITYPE}_master"
-    PRESEED_FUNC_NAMES="$PRESEED_FUNC_NAMES preseed_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}_master"
-    PRESEED_FUNC_NAMES="$PRESEED_FUNC_NAMES preseed_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}${PREFIXED_DISTRO_MINOR_VERSION}_master"
-    PRESEED_FUNC_NAMES="$PRESEED_FUNC_NAMES preseed_${DISTRO_NAME_L}_${ITYPE}_master"
-    PRESEED_FUNC_NAMES="$PRESEED_FUNC_NAMES preseed_${DISTRO_NAME_L}_master"
-    PRESEED_FUNC_NAMES="$PRESEED_FUNC_NAMES preseed_master"
-
-    for FUNC_NAME in $(__strip_duplicates "$PRESEED_FUNC_NAMES"); do
-        if __function_defined "$FUNC_NAME"; then
-            PRESEED_MASTER_FUNC="$FUNC_NAME"
-            break
-        fi
-    done
-fi
+for FUNC_NAME in $(__strip_duplicates "$PRESEED_FUNC_NAMES"); do
+    if __function_defined "$FUNC_NAME"; then
+        PRESEED_MASTER_FUNC="$FUNC_NAME"
+        break
+    fi
+done
 echodebug "PRESEED_MASTER_FUNC=${PRESEED_MASTER_FUNC}"
 
 # Let's get the install function
@@ -6189,7 +6182,6 @@ for FUNC_NAME in $(__strip_duplicates "$POST_FUNC_NAMES"); do
 done
 echodebug "POST_INSTALL_FUNC=${POST_INSTALL_FUNC}"
 
-
 # Let's get the start daemons install function
 STARTDAEMONS_FUNC_NAMES="install_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}_${ITYPE}_restart_daemons"
 STARTDAEMONS_FUNC_NAMES="$STARTDAEMONS_FUNC_NAMES install_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}${PREFIXED_DISTRO_MINOR_VERSION}_${ITYPE}_restart_daemons"
@@ -6207,9 +6199,7 @@ for FUNC_NAME in $(__strip_duplicates "$STARTDAEMONS_FUNC_NAMES"); do
 done
 echodebug "STARTDAEMONS_INSTALL_FUNC=${STARTDAEMONS_INSTALL_FUNC}"
 
-
 # Let's get the daemons running check function.
-DAEMONS_RUNNING_FUNC="null"
 DAEMONS_RUNNING_FUNC_NAMES="daemons_running_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}_${ITYPE}"
 DAEMONS_RUNNING_FUNC_NAMES="$DAEMONS_RUNNING_FUNC_NAMES daemons_running_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}${PREFIXED_DISTRO_MINOR_VERSION}_${ITYPE}"
 DAEMONS_RUNNING_FUNC_NAMES="$DAEMONS_RUNNING_FUNC_NAMES daemons_running_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}"
@@ -6218,6 +6208,7 @@ DAEMONS_RUNNING_FUNC_NAMES="$DAEMONS_RUNNING_FUNC_NAMES daemons_running_${DISTRO
 DAEMONS_RUNNING_FUNC_NAMES="$DAEMONS_RUNNING_FUNC_NAMES daemons_running_${DISTRO_NAME_L}"
 DAEMONS_RUNNING_FUNC_NAMES="$DAEMONS_RUNNING_FUNC_NAMES daemons_running"
 
+DAEMONS_RUNNING_FUNC="null"
 for FUNC_NAME in $(__strip_duplicates "$DAEMONS_RUNNING_FUNC_NAMES"); do
     if __function_defined "$FUNC_NAME"; then
         DAEMONS_RUNNING_FUNC="$FUNC_NAME"
@@ -6235,8 +6226,7 @@ if [ ${_DISABLE_SALT_CHECKS} -eq $BS_FALSE ]; then
     CHECK_SERVICES_FUNC_NAMES="$CHECK_SERVICES_FUNC_NAMES install_${DISTRO_NAME_L}_${ITYPE}_check_services"
     CHECK_SERVICES_FUNC_NAMES="$CHECK_SERVICES_FUNC_NAMES install_${DISTRO_NAME_L}_check_services"
 else
-    CHECK_SERVICES_FUNC_NAMES=False
-    echowarn "DISABLE_SALT_CHECKS set, not setting \$CHECK_SERVICES_FUNC_NAMES"
+    CHECK_SERVICES_FUNC_NAMES=""
 fi
 
 CHECK_SERVICES_FUNC="null"
@@ -6248,7 +6238,6 @@ for FUNC_NAME in $(__strip_duplicates "$CHECK_SERVICES_FUNC_NAMES"); do
 done
 echodebug "CHECK_SERVICES_FUNC=${CHECK_SERVICES_FUNC}"
 
-
 if [ "$DEPS_INSTALL_FUNC" = "null" ]; then
     echoerror "No dependencies installation function found. Exiting..."
     exit 1
@@ -6258,7 +6247,6 @@ if [ "$INSTALL_FUNC" = "null" ]; then
     echoerror "No installation function found. Exiting..."
     exit 1
 fi
-
 
 # Install dependencies
 if [ "$_CONFIG_ONLY" -eq $BS_FALSE ]; then
@@ -6271,17 +6259,15 @@ if [ "$_CONFIG_ONLY" -eq $BS_FALSE ]; then
     fi
 fi
 
-
 # Triggering config_salt() if overwriting master or minion configs
 if [ "$_CUSTOM_MASTER_CONFIG" != "null" ] || [ "$_CUSTOM_MINION_CONFIG" != "null" ]; then
     if [ "$_TEMP_CONFIG_DIR" = "null" ]; then
         _TEMP_CONFIG_DIR="$_SALT_ETC_DIR"
     fi
-    CONFIG_SALT_FUNC="config_salt"
 fi
 
 # Configure Salt
-if [ "$_TEMP_CONFIG_DIR" != "null" ] && [ "$CONFIG_SALT_FUNC" != "null" ]; then
+if [ "$CONFIG_SALT_FUNC" != "null" ] && [ "$_TEMP_CONFIG_DIR" != "null" ]; then
     echoinfo "Running ${CONFIG_SALT_FUNC}()"
     $CONFIG_SALT_FUNC
     if [ $? -ne 0 ]; then
@@ -6290,9 +6276,8 @@ if [ "$_TEMP_CONFIG_DIR" != "null" ] && [ "$CONFIG_SALT_FUNC" != "null" ]; then
     fi
 fi
 
-
 # Pre-Seed master keys
-if [ "$_TEMP_KEYS_DIR" != "null" ] && [ "$PRESEED_MASTER_FUNC" != "null" ]; then
+if [ "$PRESEED_MASTER_FUNC" != "null" ] && [ "$_TEMP_KEYS_DIR" != "null" ]; then
     echoinfo "Running ${PRESEED_MASTER_FUNC}()"
     $PRESEED_MASTER_FUNC
     if [ $? -ne 0 ]; then
@@ -6300,7 +6285,6 @@ if [ "$_TEMP_KEYS_DIR" != "null" ] && [ "$PRESEED_MASTER_FUNC" != "null" ]; then
         exit 1
     fi
 fi
-
 
 # Install Salt
 if [ "$_CONFIG_ONLY" -eq $BS_FALSE ]; then
@@ -6337,7 +6321,7 @@ if [ "$_SALT_MINION_ID" != "null" ]; then
 fi
 
 # Run any post install function. Only execute function if not in config mode only
-if [ "$_CONFIG_ONLY" -eq $BS_FALSE ] && [ "$POST_INSTALL_FUNC" != "null" ]; then
+if [ "$POST_INSTALL_FUNC" != "null" ] && [ "$_CONFIG_ONLY" -eq $BS_FALSE ]; then
     echoinfo "Running ${POST_INSTALL_FUNC}()"
     $POST_INSTALL_FUNC
     if [ $? -ne 0 ]; then
@@ -6347,7 +6331,7 @@ if [ "$_CONFIG_ONLY" -eq $BS_FALSE ] && [ "$POST_INSTALL_FUNC" != "null" ]; then
 fi
 
 # Run any check services function, Only execute function if not in config mode only
-if [ "$_CONFIG_ONLY" -eq $BS_FALSE ] && [ "$CHECK_SERVICES_FUNC" != "null" ]; then
+if [ "$CHECK_SERVICES_FUNC" != "null" ] && [ "$_CONFIG_ONLY" -eq $BS_FALSE ]; then
     echoinfo "Running ${CHECK_SERVICES_FUNC}()"
     $CHECK_SERVICES_FUNC
     if [ $? -ne 0 ]; then
@@ -6356,9 +6340,8 @@ if [ "$_CONFIG_ONLY" -eq $BS_FALSE ] && [ "$CHECK_SERVICES_FUNC" != "null" ]; th
     fi
 fi
 
-
 # Run any start daemons function
-if [ "$STARTDAEMONS_INSTALL_FUNC" != "null" ]; then
+if [ "$STARTDAEMONS_INSTALL_FUNC" != "null" ] && [ ${_START_DAEMONS} -eq $BS_TRUE ]; then
     echoinfo "Running ${STARTDAEMONS_INSTALL_FUNC}()"
     echodebug "Waiting ${_SLEEP} seconds for processes to settle before checking for them"
     sleep ${_SLEEP}
@@ -6370,7 +6353,7 @@ if [ "$STARTDAEMONS_INSTALL_FUNC" != "null" ]; then
 fi
 
 # Check if the installed daemons are running or not
-if [ "$DAEMONS_RUNNING_FUNC" != "null" ] && [ $_START_DAEMONS -eq $BS_TRUE ]; then
+if [ "$DAEMONS_RUNNING_FUNC" != "null" ] && [ ${_START_DAEMONS} -eq $BS_TRUE ]; then
     echoinfo "Running ${DAEMONS_RUNNING_FUNC}()"
     echodebug "Waiting ${_SLEEP} seconds for processes to settle before checking for them"
     sleep ${_SLEEP}  # Sleep a little bit to let daemons start
@@ -6385,14 +6368,12 @@ if [ "$DAEMONS_RUNNING_FUNC" != "null" ] && [ $_START_DAEMONS -eq $BS_TRUE ]; th
             # Skip if not meant to be installed
             [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
             [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
-            #[ $fname = "api" ] && ([ "$_INSTALL_MASTER" -eq $BS_FALSE ] || ! __check_command_exists "salt-${fname}") && continue
             [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
 
             if [ "$_ECHO_DEBUG" -eq $BS_FALSE ]; then
                 echoerror "salt-$fname was not found running. Pass '-D' to ${__ScriptName} when bootstrapping for additional debugging information..."
                 continue
             fi
-
 
             [ ! -f "$_SALT_ETC_DIR/$fname" ] && [ $fname != "syndic" ] && echodebug "$_SALT_ETC_DIR/$fname does not exist"
 
@@ -6412,12 +6393,11 @@ if [ "$DAEMONS_RUNNING_FUNC" != "null" ] && [ $_START_DAEMONS -eq $BS_TRUE ]; th
     fi
 fi
 
-
 # Done!
 if [ "$_CONFIG_ONLY" -eq $BS_FALSE ]; then
     echoinfo "Salt installed!"
 else
-    echoinfo "Salt configured"
+    echoinfo "Salt configured!"
 fi
 
 exit 0

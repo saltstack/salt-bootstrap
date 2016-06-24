@@ -206,7 +206,7 @@ Supported Operating Systems
 Debian and derivatives
 ~~~~~~~~~~~~~~~~~~~~~~
 
-- Debian GNU/Linux 6/7/8
+- Debian GNU/Linux 7/8
 - Linux Mint Debian Edition 1 (based on Debian 8)
 - Kali Linux 1.0 (based on Debian 7)
 
@@ -238,7 +238,7 @@ Ubuntu and derivatives
 - Linaro 12.04
 - Linux Mint 13/14/16/17
 - Trisquel GNU/Linux 6 (based on Ubuntu 12.04)
-- Ubuntu 10.x/11.x/12.x/13.x/14.x/15.04
+- Ubuntu 10.x/11.x/12.x/13.x/14.x/15.x/16.04
 
 
 Other Linux distro

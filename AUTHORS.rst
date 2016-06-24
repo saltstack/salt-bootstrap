@@ -11,6 +11,7 @@ abednarik                   abednarik              alejandro.bednarik@gmail.com
 Adam Wright                 hipikat                adam@hipikat.org
 Alec Koumjian               akoumjian              akoumjian@gmail.com
 Alex Van't Hof              alexvh
+Alexander Krasnukhin        themalkolm             the.malkolm@gmail.com
 Angelo Gründler             plueschopath           angelo.gruendler@w1r3.net
 Ari Aosved                  devaos                 ari.aosved@gmail.com
 Beau Hargis                 beaucephus             beau@customermobile.com
@@ -27,6 +28,7 @@ Christer Edwards            cedwards
 Clark Perkins               iclarkperkins          clark.perkins@digitalreasoning.com
 Dag Viggo Lokøen            dagvl                  dag.viggo@lokoen.org
 Dan Mick                    dmick                  dan.mick@inktank.com
+Daniel Poelzleithner        poelzi
 David J. Felix              DavidJFelix
 denmat                      denmat
 Denys Havrysh               vutny                  denys.gavrysh@gmail.com
@@ -57,6 +59,7 @@ Karl Grzeszczak             karlgrz
 Kenneth Wilke               KennethWilke
 lomeroe                     lomeroe
 Liu Xiaohui                 oreh                   herolxh@gmail.com
+Marc Vieira-Cardinal        marccadinal
 Mark Lee                    malept
 Marcus Furlong              furlongm               furlongm@gmail.com
 markgaylard                 markgaylard
@@ -70,6 +73,7 @@ Michael Scherer             mscherer
 Michele Bologna             mbologna               michele.bologna@gmail.com
 Mike Carlson                m87carlson             mike@bayphoto.com
 Mike Place                  cachedout              mp@saltstack.com
+nasenbaer13                 nasenbaer13
 nevins-b                    nevins-b
 Nicole Thomas               rallytime              nicole@saltstack.com
 Niels Abspoel               aboe76                 aboe76@gmail.com
@@ -93,6 +97,7 @@ Ronald van Zantvoort        The-Loeki              ronald@pcextreme.nl
 RuriRyan                    RuriRyan               ryan@btsoft.eu
 Ryan Walder                 ryanwalder             ryanwalder@ucds.email
 Sergey Paramonov            serge-p                serg.paramonov@s-vp.com
+Shane Lee                   twangboy               slee@saltstack.com
 Shawn Butts                 shawnbutts
 Skyler Berg                 skylerberg             skylertheberg@gmail.com
 Stanislav B                 stanislavb

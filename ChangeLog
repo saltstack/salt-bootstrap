@@ -1,3 +1,20 @@
+Version 2016.06.24:
+    * Save invocation command and arguments into variables. (jfindlay) #885
+    * Update the authors list with new contributors. (rallytime) #884
+    * Add option to make setup.py install quiet. (nasenbaer13) #865
+    * Fix lint. (jfindlay) #881
+    * Add -R option to allow a custom repo URL. (rallytime) #877
+    * Exclude path of script when called from another dir. (l2ol33rt) #871
+    * Print invocation info. (jfindlay) #869
+    * Always refresh the Arch Linux keyring if needed. (cachedout) #868
+    * Ubuntu 16.04 LTS Xenial Support. (notpeter) #852
+    * Install Salt packages from repo.saltstack.com on Debian 7 "Wheezy". (vutny) #864
+    * Drop support for Debian 6 old-old-stable "squeeze": reached end-of-life. (vutny) #860
+    * Removed ubuntu version restriction for apt-get update. (marccardinal) #859
+    * Fix bootstrapping from git on Debian 8 by installing latest `tornado` via pip. (vutny) #828
+    * Add the ability to override master and/or minion configs from CLI. (rallytime) #841
+    * Don't sleep 11 seconds if the user allowed overwrite of config files. (poelzi) #832
+
 Version 2016.05.11:
     * Only overwrite the minion config file if '-C' is passed. Otherwise, preserve it. (rallytime) #848
 

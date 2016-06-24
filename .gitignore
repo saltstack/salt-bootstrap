@@ -1,3 +1,7 @@
 /.project
 *.swp
 .vagrant
+
+# Pycharm
+.idea
+

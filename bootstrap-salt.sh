@@ -20,6 +20,8 @@ set -o nounset                              # Treat unset variables as an error
 
 __ScriptVersion="2016.05.11"
 __ScriptName="$(basename "${0}")"
+__ScriptFullName="${0}"
+__ScriptArgs="${*}"
 
 #======================================================================================================================
 #  Environment variables taken into account.
@@ -602,7 +604,7 @@ fi
 CALLER=$(ps -a -o pid,args | grep $$ | grep -v grep | tr -s ' ' | cut -d ' ' -f 3)
 
 if [ "${CALLER}x" = "${0}x" ]; then
-    CALLER="PIPED THROUGH"
+    CALLER="shell pipe"
 fi
 
 # Work around for 'Docker + salt-bootstrap failure' https://github.com/saltstack/salt-bootstrap/issues/394
@@ -626,7 +628,8 @@ if [ -d "$_VIRTUALENV_DIR" ]; then
 fi
 
 echoinfo "Running version: ${__ScriptVersion}"
-echoinfo "Command line: \"${CALLER} ${0} ${*}\""
+echoinfo "Executed by: ${CALLER}"
+echoinfo "Command line: \"${__ScriptFullName} ${__ScriptArgs}\""
 echowarn "Running the unstable version of ${__ScriptName}"
 
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------

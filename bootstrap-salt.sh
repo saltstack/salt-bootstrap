@@ -18,7 +18,7 @@
 #======================================================================================================================
 set -o nounset                              # Treat unset variables as an error
 
-__ScriptVersion="2016.05.11"
+__ScriptVersion="2016.06.24"
 __ScriptName="$(basename "${0}")"
 __ScriptFullName="${0}"
 __ScriptArgs="${*}"

@@ -19,7 +19,8 @@
 set -o nounset                              # Treat unset variables as an error
 
 __ScriptVersion="2016.06.24"
-__ScriptName="$(basename "${0}")"
+__ScriptName="bootstrap-salt.sh"
+
 __ScriptFullName="${0}"
 __ScriptArgs="${*}"
 
@@ -6330,7 +6331,7 @@ if [ "$DAEMONS_RUNNING_FUNC" != "null" ] && [ $_START_DAEMONS -eq $BS_TRUE ]; th
             [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
 
             if [ "$_ECHO_DEBUG" -eq $BS_FALSE ]; then
-                echoerror "salt-$fname was not found running. Pass '-D' to $__ScriptName when bootstrapping for additional debugging information..."
+                echoerror "salt-$fname was not found running. Pass '-D' to ${__ScriptName} when bootstrapping for additional debugging information..."
                 continue
             fi
 

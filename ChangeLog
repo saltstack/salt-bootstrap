@@ -1,3 +1,7 @@
+Version 2016.06.27:
+    * Fix race condition when doing one-liner bootstrap
+    * Add space back in between 'install' and '--install'
+
 Version 2016.06.24:
     * Save invocation command and arguments into variables. (jfindlay) #885
     * Update the authors list with new contributors. (rallytime) #884

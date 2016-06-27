@@ -18,8 +18,9 @@
 #======================================================================================================================
 set -o nounset                              # Treat unset variables as an error
 
-__ScriptVersion="2016.06.24"
-__ScriptName="$(basename "${0}")"
+__ScriptVersion="2016.06.27"
+__ScriptName="bootstrap-salt.sh"
+
 __ScriptFullName="${0}"
 __ScriptArgs="${*}"
 
@@ -2499,7 +2500,7 @@ install_ubuntu_git() {
     if [ -f "${_SALT_GIT_CHECKOUT_DIR}/salt/syspaths.py" ]; then
         python setup.py --salt-config-dir="$_SALT_ETC_DIR" --salt-cache-dir="${_SALT_CACHE_DIR}" ${SETUP_PY_INSTALL_ARGS} install --install-layout=deb || return 1
     else
-        python setup.py ${SETUP_PY_INSTALL_ARGS} install--install-layout=deb || return 1
+        python setup.py ${SETUP_PY_INSTALL_ARGS} install --install-layout=deb || return 1
     fi
     return 0
 }
@@ -6330,7 +6331,7 @@ if [ "$DAEMONS_RUNNING_FUNC" != "null" ] && [ $_START_DAEMONS -eq $BS_TRUE ]; th
             [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
 
             if [ "$_ECHO_DEBUG" -eq $BS_FALSE ]; then
-                echoerror "salt-$fname was not found running. Pass '-D' to $__ScriptName when bootstrapping for additional debugging information..."
+                echoerror "salt-$fname was not found running. Pass '-D' to ${__ScriptName} when bootstrapping for additional debugging information..."
                 continue
             fi
 

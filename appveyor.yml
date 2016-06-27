@@ -1,0 +1,32 @@
+platform: Any CPU
+
+environment:
+  matrix:
+    - bootstrap_args:
+      test_args:      -master salt -runservice
+
+    - bootstrap_args: -runservice false
+      test_args:      -master salt -noservice
+
+    - bootstrap_args: -minion a-minion
+      test_args:      -minion a-minion -master salt -runservice
+
+    - bootstrap_args: -minion a-minion -master a-master
+      test_args:      -minion a-minion -master a-master -runservice
+
+build_script:
+  - ps: |
+      $Path = (Get-Location).Path | Join-Path -ChildPath bootstrap-salt.ps1
+      Invoke-Expression "$Path -verbose $env:bootstrap_args"
+
+before_test:
+  - SET PATH=%PATH%;C:\salt
+  - salt-call --version
+
+test_script:
+  - ps: |
+      $Path = (Get-Location).Path | Join-Path -ChildPath tests\runtests.ps1
+      Invoke-Expression "$Path -verbose $env:test_args"
+
+matrix:
+  fast_finish: true

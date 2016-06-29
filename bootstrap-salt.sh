@@ -21,8 +21,8 @@ set -o nounset                              # Treat unset variables as an error
 __ScriptVersion="2016.06.27"
 __ScriptName="bootstrap-salt.sh"
 
-__ScriptFullName="${0}"
-__ScriptArgs="${*}"
+__ScriptFullName="$0"
+__ScriptArgs="$*"
 
 #======================================================================================================================
 #  Environment variables taken into account.
@@ -630,7 +630,7 @@ fi
 
 echoinfo "Running version: ${__ScriptVersion}"
 echoinfo "Executed by: ${CALLER}"
-echoinfo "Command line: \"${__ScriptFullName} ${__ScriptArgs}\""
+echoinfo "Command line: '${__ScriptFullName} ${__ScriptArgs}'"
 echowarn "Running the unstable version of ${__ScriptName}"
 
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------

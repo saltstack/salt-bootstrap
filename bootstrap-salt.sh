@@ -2793,9 +2793,8 @@ install_debian_7_deps() {
 
     apt-get update || return 1
 
-    __PACKAGES="libzmq3 libzmq3-dev python-zmq python-requests python-apt python-psutil"
     # Additionally install procps and pciutils which allows for Docker bootstraps. See 366#issuecomment-39666813
-    __PACKAGES="${__PACKAGES} procps pciutils"
+    __PACKAGES='procps pciutils'
 
     if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
         # Install python-libcloud if asked to
@@ -2875,9 +2874,8 @@ install_debian_8_deps() {
 
     apt-get update || return 1
 
-    __PACKAGES="libzmq3 libzmq3-dev python-zmq python-requests python-apt python-psutil"
     # Additionally install procps and pciutils which allows for Docker bootstraps. See 366#issuecomment-39666813
-    __PACKAGES="${__PACKAGES} procps pciutils"
+    __PACKAGES='procps pciutils'
 
     if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
         # Install python-libcloud if asked to
@@ -2908,8 +2906,9 @@ install_debian_git_deps() {
     __git_clone_and_checkout || return 1
 
     # shellcheck disable=SC2086
-    __apt_get_install_noinput lsb-release python-backports.ssl-match-hostname python-crypto python-jinja2 \
-        python-m2crypto python-msgpack python-tornado python-yaml || return 1
+    __apt_get_install_noinput libzmq3 libzmq3-dev lsb-release python-apt python-backports.ssl-match-hostname \
+        python-crypto python-jinja2 python-m2crypto python-msgpack python-requests python-tornado python-yaml \
+        python-zmq || return 1
 
     # Let's trigger config_salt()
     if [ "$_TEMP_CONFIG_DIR" = "null" ]; then
@@ -2936,7 +2935,7 @@ install_debian_8_git_deps() {
 
     __git_clone_and_checkout || return 1
 
-    __PACKAGES='lsb-release python-crypto python-jinja2 python-m2crypto python-msgpack python-yaml'
+    __PACKAGES='libzmq3 libzmq3-dev lsb-release python-apt python-crypto python-jinja2 python-m2crypto python-msgpack python-requests python-yaml python-zmq'
     __PIP_PACKAGES=''
 
     if (__check_pip_allowed >/dev/null 2>&1); then

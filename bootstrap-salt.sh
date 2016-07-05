@@ -5204,7 +5204,16 @@ install_opensuse_git_post() {
         [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
 
         if [ -f /bin/systemctl ]; then
+            use_usr_lib=$BS_FALSE
             if [ "${DISTRO_MAJOR_VERSION}" -gt 13 ] || ([ "${DISTRO_MAJOR_VERSION}" -eq 13 ] && [ "${DISTRO_MINOR_VERSION}" -ge 2 ]); then
+                use_usr_lib=$BS_TRUE
+            fi
+
+            if [ "${DISTRO_MAJOR_VERSION}" -eq 12 ] && [ -d "/usr/lib/systemd/" ]; then
+                use_usr_lib=$BS_TRUE
+            fi
+
+            if [ "${use_usr_lib}" -eq $BS_TRUE ]; then
                 __copyfile "${_SALT_GIT_CHECKOUT_DIR}/pkg/salt-${fname}.service" "/usr/lib/systemd/system/salt-${fname}.service"
             else
                 __copyfile "${_SALT_GIT_CHECKOUT_DIR}/pkg/salt-${fname}.service" "/lib/systemd/system/salt-${fname}.service"
@@ -5371,7 +5380,7 @@ install_suse_12_stable_deps() {
 }
 
 install_suse_12_git_deps() {
-    install_suse_11_stable_deps || return 1
+    install_suse_12_stable_deps || return 1
 
     if ! __check_command_exists git; then
         __zypper_install git  || return 1

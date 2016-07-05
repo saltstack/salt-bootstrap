@@ -1180,6 +1180,7 @@ __ubuntu_derivatives_translation() {
 
     linuxmint_16_ubuntu_base="13.10"
     linuxmint_17_ubuntu_base="14.04"
+    linuxmint_18_ubuntu_base="16.04"
     linaro_12_ubuntu_base="12.04"
     elementary_os_02_ubuntu_base="12.04"
 

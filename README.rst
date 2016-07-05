@@ -236,7 +236,7 @@ Ubuntu and derivatives
 
 - Elementary OS 0.2 (based on Ubuntu 12.04)
 - Linaro 12.04
-- Linux Mint 13/14/16/17
+- Linux Mint 13/14/16/17/18
 - Trisquel GNU/Linux 6 (based on Ubuntu 12.04)
 - Ubuntu 10.x/11.x/12.x/13.x/14.x/15.x/16.04
 

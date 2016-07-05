@@ -2715,6 +2715,8 @@ install_debian_7_deps() {
     if [ $_DISABLE_REPOS -eq $BS_FALSE ]; then
         if [ "$CPU_ARCH_L" = "amd64" ] || [ "$CPU_ARCH_L" = "x86_64" ]; then
             repo_arch="amd64"
+        elif [ "$CPU_ARCH_L" = "armv7l" ]; then
+            repo_arch="armhf"
         elif [ "$CPU_ARCH_L" = "i386" ] || [ "$CPU_ARCH_L" = "i686" ]; then
             echoerror "repo.saltstack.com likely doesn't have 32-bit packages for Debian (yet?)"
             repo_arch="i386"
@@ -2791,6 +2793,8 @@ install_debian_8_deps() {
     if [ $_DISABLE_REPOS -eq $BS_FALSE ]; then
         if [ "$CPU_ARCH_L" = "amd64" ] || [ "$CPU_ARCH_L" = "x86_64" ]; then
             repo_arch="amd64"
+        elif [ "$CPU_ARCH_L" = "armv7l" ]; then
+            repo_arch="armhf"
         elif [ "$CPU_ARCH_L" = "i386" ] || [ "$CPU_ARCH_L" = "i686" ]; then
             echoerror "repo.saltstack.com likely doesn't have 32-bit packages for Debian (yet?)"
             repo_arch="i386"

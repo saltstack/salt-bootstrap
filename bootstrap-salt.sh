@@ -4415,7 +4415,7 @@ __configure_freebsd_pkg_details() {
         echo "    url: \"${SALTPKGCONFURL}\","
         echo "    mirror_type: \"http\","
         echo "    enabled: true"
-        echo "    prioroity: 10"
+        echo "    priority: 10"
         echo "}"
     } > $salt_conf_file
     FROM_SALTSTACK="-r SaltStack"

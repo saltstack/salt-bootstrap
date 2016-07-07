@@ -221,7 +221,7 @@ $saltExe = "Salt-Minion-$version-$arch-Setup.exe"
 Write-Output "Downloading Salt minion installer $saltExe"
 $webclient = New-Object System.Net.WebClient
 $url = "$repourl/$saltExe"
-$file = "C:\tmp\$saltExe"
+$file = "C:\Windows\Temp\$saltExe"
 $webclient.DownloadFile($url, $file)
 
 #===============================================================================
@@ -241,7 +241,7 @@ If($runservice -eq $false) {$parameters = "$parameters /start-service=0"}
 #===============================================================================
 #Wait for process to exit before continuing.
 Write-Output "Installing Salt minion"
-Start-Process C:\tmp\$saltExe -ArgumentList "/S $parameters" -Wait -NoNewWindow -PassThru | Out-Null
+Start-Process C:\Windows\Temp\$saltExe -ArgumentList "/S $parameters" -Wait -NoNewWindow -PassThru | Out-Null
 
 #===============================================================================
 # Configure the minion service

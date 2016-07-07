@@ -2367,6 +2367,11 @@ install_ubuntu_stable_deps() {
                 set -o nounset
             fi
 
+            # Make sure https transport is available
+            if [ "$HTTP_VAL" = "https" ] ; then
+                __apt_get_install_noinput ca-certificates apt-transport-https || return 1
+            fi
+
             # Make sure wget is available
             __apt_get_install_noinput wget
 

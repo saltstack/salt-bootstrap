@@ -3118,7 +3118,13 @@ install_fedora_deps() {
         __install_saltstack_copr_salt_repository || return 1
     fi
 
-    __PACKAGES="yum-utils PyYAML libyaml m2crypto python-crypto python-jinja2 python-msgpack python-zmq python-requests"
+    __PACKAGES="yum-utils PyYAML libyaml m2crypto python-crypto python-jinja2 python-zmq"
+
+    if [ "$DISTRO_MAJOR_VERSION" -ge 23 ]; then
+        __PACKAGES="${__PACKAGES} python2-msgpack python2-requests"
+    else
+        __PACKAGES="${__PACKAGES} python-msgpack python-requests"
+    fi
 
     if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
         __PACKAGES="${__PACKAGES} python-libcloud"

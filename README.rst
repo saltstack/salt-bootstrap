@@ -2,6 +2,8 @@
 Bootstrapping Salt
 ==================
 
+|windows_build|
+
 Before `Salt`_ can be used for provisioning on the desired machine, the binaries need to be
 installed. Since `Salt`_ supports many different distributions and versions of operating systems,
 the `Salt`_ installation process is handled by this shell script ``bootstrap-salt.sh``.  This
@@ -236,7 +238,7 @@ Ubuntu and derivatives
 
 - Elementary OS 0.2 (based on Ubuntu 12.04)
 - Linaro 12.04
-- Linux Mint 13/14/16/17
+- Linux Mint 13/14/16/17/18
 - Trisquel GNU/Linux 6 (based on Ubuntu 12.04)
 - Ubuntu 10.x/11.x/12.x/13.x/14.x/15.x/16.04
 
@@ -535,3 +537,7 @@ Salt is ready and working in the Docker container with Minion authenticated on M
 
 
 .. vim: fenc=utf-8 spell spl=en cc=100 tw=99 fo=want sts=2 sw=2 et
+
+.. |windows_build|  image:: https://ci.appveyor.com/api/projects/status/github/themalkolm/salt-bootstrap?branch=develop&svg=true
+    :target: https://ci.appveyor.com/project/themalkolm/salt-bootstrap
+    :alt: Build status of the develop branch on Windows

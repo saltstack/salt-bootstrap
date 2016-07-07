@@ -35,6 +35,8 @@ Denys Havrysh               vutny                  denys.gavrysh@gmail.com
 deployboy                   deployboy
 Diego Woitasen              diegows                diego@flugel.it
 Elias Probst                eliasp
+eliezerlp                   eliezerlp
+Emiel Kollof                ekollof
 Erik Ankrom                 erikankrom
 Erik Johnson                terminalmage           erik@saltstack.com
 EYJ                         eyj
@@ -66,6 +68,7 @@ markgaylard                 markgaylard
 Matt Black                  mafrosis
 Matthew Garrett             cingeyedog             matt@clemson.edu
 Matthew Mead-Briggs         mattmb
+Matthew Richardson          mrichar1
 Matthew Willson             ixela
 Matthieu Guegan             mguegan
 Michael A. Smith            kojiromike             michaels@syapse.com
@@ -84,6 +87,7 @@ Pavel Snagovsky             paha
 Pedro Algarvio              s0undt3ch              pedro@algarvio.me
 Pedro Paulo                 pedropaulovc
 Peter Tripp                 notpeter
+Petr Michalec               epcim
 Prayag Verma                pra85                  prayag.verma@gmail.com
 ptonelli                    ptonelli
 Randy Thompson              beardedeagle           randy@heroictek.com

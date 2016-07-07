@@ -1,6 +1,21 @@
+Version 2016.07.07:
+    * Add new contributors to authors list. (rallytime) #910
+    * Split up python-requests and python-msgpack packages for newer Fedora. (rallytime) #909
+    * Fix typo in repository configuration for FreeBSD. (ekollof) #907
+    * Make sure $STABLE_REV is set before setting up SaltStack repo. (rallytime) #906
+    * Remove tests written question from template. (rallytime) #904
+    * Adding support for Linux Mint 18 (based on Ubuntu 16.04). (eliezerlp) #902
+    * Allow git installation for SLES 12. (rallytime) #903
+    * Set repo_arch for raspberry pi installs. (mrichar1) #899
+    * Change temporary directory for storing executable to C:\Windows\Temp. (themalkolm) #897
+    * add apt-transport-https for ubuntu. (epcim) #896
+    * Fix expanding shell script position parameters with nounset enabled. (vutny) #895
+    * RFC: Add tests for bootstrap-salt.ps1. (themalkolm) #893
+    * Keep original name of salt executable executable. (themalkolm) #857
+
 Version 2016.06.27:
-    * Fix race condition when doing one-liner bootstrap
-    * Add space back in between 'install' and '--install'
+    * Fix race condition when doing one-liner bootstrap. (vutny) #889
+    * Add space back in between 'install' and '--install'. (rallytime) #890
 
 Version 2016.06.24:
     * Save invocation command and arguments into variables. (jfindlay) #885

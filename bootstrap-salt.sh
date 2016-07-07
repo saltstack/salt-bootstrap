@@ -4093,6 +4093,14 @@ _eof
 }
 
 install_amazon_linux_ami_git_deps() {
+
+    # When installing from git, this variable might not be set yet for amazon linux. Set this
+    # to "latest" in order to set up the SaltStack repository and avoid a malformed baseurl
+    # and gpgkey reference in the install_amazon_linux_amI_deps function. 
+    if [ "$STABLE_REV" = "" ]; then
+        STABLE_REV="latest"
+    fi
+
     install_amazon_linux_ami_deps || return 1
 
     if ! __check_command_exists git; then
@@ -4108,7 +4116,6 @@ install_amazon_linux_ami_git_deps() {
             yum install -y python-tornado
         fi
     fi
-
 
     # Let's trigger config_salt()
     if [ "$_TEMP_CONFIG_DIR" = "null" ]; then

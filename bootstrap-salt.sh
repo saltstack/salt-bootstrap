@@ -265,13 +265,13 @@ __usage() {
     - ${__ScriptName}
     - ${__ScriptName} stable
     - ${__ScriptName} stable 2016.3
-    - ${__ScriptName} stable 2016.3.0
+    - ${__ScriptName} stable 2016.3.1
     - ${__ScriptName} daily
     - ${__ScriptName} testing
     - ${__ScriptName} git
     - ${__ScriptName} git 2016.3
-    - ${__ScriptName} git v2016.3.0
-    - ${__ScriptName} git 11acecc43e2c2e4e9a0e73d76b46b035afe8d538
+    - ${__ScriptName} git v2016.3.1
+    - ${__ScriptName} git 06f249901a2e2f1ed310d58ea3921a129f214358
 
   Options:
     -h  Display this message
@@ -520,7 +520,7 @@ if [ "$ITYPE" = "git" ]; then
     fi
 
     # Disable shell warning about unbound variable during git install
-    STABLE_REV=""
+    STABLE_REV="latest"
 
 # If doing stable install, check if version specified
 elif [ "$ITYPE" = "stable" ]; then
@@ -2361,6 +2361,7 @@ install_ubuntu_stable_deps() {
             echoerror "repo.saltstack.com likely doesn't have all required 32-bit packages for Ubuntu $DISTRO_MAJOR_VERSION (yet?)."
         elif [ "$DPKG_ARCHITECTURE" != "amd64" ]; then
             echoerror "repo.saltstack.com doesn't have packages for your system architecture: $DPKG_ARCHITECTURE."
+            echoerror "You can try git installation mode, i.e.: sh ${__ScriptName} git v2016.3.1"
             exit 1
         fi
 
@@ -2762,7 +2763,7 @@ install_debian_7_deps() {
 
         if [ "$DPKG_ARCHITECTURE" = "i386" ]; then
             echoerror "repo.saltstack.com likely doesn't have all required 32-bit packages for Debian $DISTRO_MAJOR_VERSION (yet?)."
-            echoerror "You can try git installation mode, i.e.: sh ${__ScriptName} git v2016.3.0"
+            echoerror "You can try git installation mode, i.e.: sh ${__ScriptName} git v2016.3.1"
         elif [ "$DPKG_ARCHITECTURE" != "amd64" ]; then
             echoerror "repo.saltstack.com doesn't have packages for your system architecture: $DPKG_ARCHITECTURE."
 
@@ -2843,7 +2844,7 @@ install_debian_8_deps() {
 
         if [ "$DPKG_ARCHITECTURE" = "i386" ]; then
             echoerror "repo.saltstack.com likely doesn't have all required 32-bit packages for Debian $DISTRO_MAJOR_VERSION (yet?)."
-            echoerror "You can try git installation mode, i.e.: sh ${__ScriptName} git v2016.3.0"
+            echoerror "You can try git installation mode, i.e.: sh ${__ScriptName} git v2016.3.1"
         elif [ "$DPKG_ARCHITECTURE" != "amd64" ]; then
             echoerror "repo.saltstack.com doesn't have packages for your system architecture: $DPKG_ARCHITECTURE."
             echoerror "Try git installation mode and disable SaltStack apt repository, for example:"

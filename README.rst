@@ -211,12 +211,19 @@ Debian and derivatives
 - Debian GNU/Linux 7/8
 - Linux Mint Debian Edition 1 (based on Debian 8)
 - Kali Linux 1.0 (based on Debian 7)
+- Raspbian 8 (limited support for ``armhf`` architecture, see the note below)
 
 .. note::
 
-  Installation of Salt packages on Debian distribution from repo.saltstack.com repository is
-  currently supported for ``amd64`` (``x86-64``) architechture ONLY. Use ``git`` bootstrap
-  mode as mentioned above to install Salt on other architechtures, such as ``i386`` or ``armel``.
+  Installation of Salt packages on Debian 8 based distribution from repo.saltstack.com repository
+  is currently supported for ``amd64`` (``x86-64``) and ``armhf`` architechtures ONLY. Use ``git``
+  bootstrap mode as described above to install Salt on other architechtures, such as ``i386`` or
+  ``armel``. You also may need to disable repository configuration and allow ``pip`` installations
+  by providing ``-r`` and ``-P`` options to the bootstrap script, i.e.:
+
+  .. code:: console
+
+    wget -O - https://bootstrap.saltstack.com | sudo sh -s -- -r -P git develop
 
 
 Red Hat family
@@ -293,7 +300,6 @@ are not developed yet:
 
 **Linux**:
 
-- Raspbian (detected as Debian)
 - Slackware
 
 **SunOS**

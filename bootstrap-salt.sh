@@ -2357,19 +2357,26 @@ install_ubuntu_stable_deps() {
     if [ $_DISABLE_REPOS -eq $BS_FALSE ]; then
          __get_dpkg_architecture || return 1
 
+        __REPO_ARCH="$DPKG_ARCHITECTURE"
+
         if [ "$DPKG_ARCHITECTURE" = "i386" ]; then
             echoerror "repo.saltstack.com likely doesn't have all required 32-bit packages for Ubuntu $DISTRO_MAJOR_VERSION (yet?)."
+
+            # amd64 is just a part of repository URI, 32-bit pkgs are hosted under the same location
+            __REPO_ARCH="amd64"
         elif [ "$DPKG_ARCHITECTURE" != "amd64" ]; then
             echoerror "repo.saltstack.com doesn't have packages for your system architecture: $DPKG_ARCHITECTURE."
-            echoerror "You can try git installation mode, i.e.: sh ${__ScriptName} git v2016.3.1"
-            exit 1
+            if [ "$ITYPE" != "git" ]; then
+                echoerror "You can try git installation mode, i.e.: sh ${__ScriptName} git v2016.3.1"
+                exit 1
+            fi
         fi
 
         # Versions starting with 2015.5.6 and 2015.8.1 are hosted at repo.saltstack.com
         if [ "$(echo "$STABLE_REV" | egrep '^(2015\.5|2015\.8|2016\.3|latest|archive\/)')" != "" ]; then
             # Workaround for latest non-LTS ubuntu
             if [ "$DISTRO_MAJOR_VERSION" -eq 15 ]; then
-                echowarn "Non-LTS Ubuntu detected, but stable packages requested. Trying packages from latest LTS release. You may experience problems"
+                echowarn "Non-LTS Ubuntu detected, but stable packages requested. Trying packages from latest LTS release. You may experience problems."
                 UBUNTU_VERSION=14.04
                 UBUNTU_CODENAME=trusty
             else
@@ -2378,8 +2385,7 @@ install_ubuntu_stable_deps() {
             fi
 
             # SaltStack's stable Ubuntu repository:
-            # amd64 is is just a part of repository URI, 32-bit pkgs are hosted under the same location
-            SALTSTACK_UBUNTU_URL="${HTTP_VAL}://repo.saltstack.com/apt/ubuntu/$UBUNTU_VERSION/amd64/$STABLE_REV"
+            SALTSTACK_UBUNTU_URL="${HTTP_VAL}://repo.saltstack.com/apt/ubuntu/${UBUNTU_VERSION}/${__REPO_ARCH}/${STABLE_REV}"
 
             if [ "$(grep -ER 'latest .+ main' /etc/apt)" = "" ]; then
                 set +o nounset
@@ -2761,20 +2767,26 @@ install_debian_7_deps() {
     if [ $_DISABLE_REPOS -eq $BS_FALSE ]; then
          __get_dpkg_architecture || return 1
 
+        __REPO_ARCH="$DPKG_ARCHITECTURE"
+
         if [ "$DPKG_ARCHITECTURE" = "i386" ]; then
             echoerror "repo.saltstack.com likely doesn't have all required 32-bit packages for Debian $DISTRO_MAJOR_VERSION (yet?)."
-            echoerror "You can try git installation mode, i.e.: sh ${__ScriptName} git v2016.3.1"
+
+            if [ "$ITYPE" != "git" ]; then
+                echoerror "You can try git installation mode, i.e.: sh ${__ScriptName} git v2016.3.1"
+            fi
+
+            # amd64 is just a part of repository URI, 32-bit pkgs are hosted under the same location
+            __REPO_ARCH="amd64"
         elif [ "$DPKG_ARCHITECTURE" != "amd64" ]; then
             echoerror "repo.saltstack.com doesn't have packages for your system architecture: $DPKG_ARCHITECTURE."
-
             exit 1
         fi
 
         # Versions starting with 2015.8.7 and 2016.3.0 are hosted at repo.saltstack.com
-        if [ "$(echo "$STABLE_REV" | egrep '^(2015\.8|2016\.3|latest|archive\/201[5-6]\.)')" != "" ] || \
-            [ "$ITYPE" = "git" ]; then
-            # amd64 is is just a part of repository URI, 32-bit pkgs are hosted under the same location
-            SALTSTACK_DEBIAN_URL="${HTTP_VAL}://repo.saltstack.com/apt/debian/$DISTRO_MAJOR_VERSION/amd64/${STABLE_REV:-latest}"
+        if [ "$(echo "$STABLE_REV" | egrep '^(2015\.8|2016\.3|latest|archive\/201[5-6]\.)')" != "" ]; then
+            # amd64 is just a part of repository URI, 32-bit pkgs are hosted under the same location
+            SALTSTACK_DEBIAN_URL="${HTTP_VAL}://repo.saltstack.com/apt/debian/${DISTRO_MAJOR_VERSION}/${__REPO_ARCH}/${STABLE_REV}"
             echo "deb $SALTSTACK_DEBIAN_URL wheezy main" > "/etc/apt/sources.list.d/saltstack.list"
 
             if [ "$HTTP_VAL" = "https" ] ; then
@@ -2842,22 +2854,28 @@ install_debian_8_deps() {
     if [ $_DISABLE_REPOS -eq $BS_FALSE ]; then
          __get_dpkg_architecture || return 1
 
+        __REPO_ARCH="$DPKG_ARCHITECTURE"
+
         if [ "$DPKG_ARCHITECTURE" = "i386" ]; then
             echoerror "repo.saltstack.com likely doesn't have all required 32-bit packages for Debian $DISTRO_MAJOR_VERSION (yet?)."
-            echoerror "You can try git installation mode, i.e.: sh ${__ScriptName} git v2016.3.1"
-        elif [ "$DPKG_ARCHITECTURE" != "amd64" ]; then
+
+            if [ "$ITYPE" != "git" ]; then
+                echoerror "You can try git installation mode, i.e.: sh ${__ScriptName} git v2016.3.1"
+            fi
+
+            # amd64 is just a part of repository URI, 32-bit pkgs are hosted under the same location
+            __REPO_ARCH="amd64"
+        elif [ "$DPKG_ARCHITECTURE" != "amd64" ] && [ "$DPKG_ARCHITECTURE" != "armhf" ]; then
             echoerror "repo.saltstack.com doesn't have packages for your system architecture: $DPKG_ARCHITECTURE."
-            echoerror "Try git installation mode and disable SaltStack apt repository, for example:"
-            echoerror "    sh ${__ScriptName} -r -P git v2016.3.0"
+            echoerror "Try git installation mode with pip and disable SaltStack apt repository, for example:"
+            echoerror "    sh ${__ScriptName} -r -P git v2016.3.1"
 
             exit 1
         fi
 
         # Versions starting with 2015.5.6, 2015.8.1 and 2016.3.0 are hosted at repo.saltstack.com
-        if [ "$(echo "$STABLE_REV" | egrep '^(2015\.5|2015\.8|2016\.3|latest|archive\/201[5-6]\.)')" != "" ] || \
-            [ "$ITYPE" = "git" ]; then
-            # amd64 is is just a part of repository URI, 32-bit pkgs are hosted under the same location
-            SALTSTACK_DEBIAN_URL="${HTTP_VAL}://repo.saltstack.com/apt/debian/$DISTRO_MAJOR_VERSION/amd64/${STABLE_REV:-latest}"
+        if [ "$(echo "$STABLE_REV" | egrep '^(2015\.5|2015\.8|2016\.3|latest|archive\/201[5-6]\.)')" != "" ]; then
+            SALTSTACK_DEBIAN_URL="${HTTP_VAL}://repo.saltstack.com/apt/debian/${DISTRO_MAJOR_VERSION}/${__REPO_ARCH}/${STABLE_REV}"
             echo "deb $SALTSTACK_DEBIAN_URL jessie main" > "/etc/apt/sources.list.d/saltstack.list"
 
             if [ "$HTTP_VAL" = "https" ] ; then

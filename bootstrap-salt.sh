@@ -204,6 +204,7 @@ _INSTALL_MINION=$BS_TRUE
 _INSTALL_CLOUD=$BS_FALSE
 _VIRTUALENV_DIR=${BS_VIRTUALENV_DIR:-"null"}
 _START_DAEMONS=$BS_TRUE
+_DISABLE_SALT_CHECKS=$BS_FALSE
 _ECHO_DEBUG=${BS_ECHO_DEBUG:-$BS_FALSE}
 _CONFIG_ONLY=$BS_FALSE
 _PIP_ALLOWED=${BS_PIP_ALLOWED:-$BS_FALSE}
@@ -228,7 +229,6 @@ _SIMPLIFY_VERSION=$BS_TRUE
 _LIBCLOUD_MIN_VERSION="0.14.0"
 _EXTRA_PACKAGES=""
 _HTTP_PROXY=""
-_DISABLE_SALT_CHECKS=$BS_FALSE
 _SALT_GIT_CHECKOUT_DIR=${BS_SALT_GIT_CHECKOUT_DIR:-/tmp/git/salt}
 _NO_DEPS=$BS_FALSE
 _FORCE_SHALLOW_CLONE=$BS_FALSE
@@ -264,28 +264,28 @@ __usage() {
   Examples:
     - ${__ScriptName}
     - ${__ScriptName} stable
-    - ${__ScriptName} stable 2015.8
-    - ${__ScriptName} stable 2015.8.9
+    - ${__ScriptName} stable 2016.3
+    - ${__ScriptName} stable 2016.3.1
     - ${__ScriptName} daily
     - ${__ScriptName} testing
     - ${__ScriptName} git
-    - ${__ScriptName} git 2015.8
-    - ${__ScriptName} git v2015.8.9
-    - ${__ScriptName} git 8c3fadf15ec183e5ce8c63739850d543617e4357
+    - ${__ScriptName} git 2016.3
+    - ${__ScriptName} git v2016.3.1
+    - ${__ScriptName} git 06f249901a2e2f1ed310d58ea3921a129f214358
 
   Options:
     -h  Display this message
     -v  Display script version
-    -n  No colours.
-    -D  Show debug output.
+    -n  No colours
+    -D  Show debug output
     -c  Temporary configuration directory
     -g  Salt repository URL. Default: ${_SALTSTACK_REPO_URL}
     -G  Instead of cloning from ${_SALTSTACK_REPO_URL}, clone from
         https://${_SALTSTACK_REPO_URL#*://}
-        (Usually necessary on systems which have the regular git protocol port
+        (usually necessary on systems which have the regular git protocol port
         blocked, where https usually is not)
     -w  Install packages from downstream package repository rather than
-        upstream, saltstack package repository.  This is currently only
+        upstream, saltstack package repository. This is currently only
         implemented for SUSE.
     -k  Temporary directory holding the minion keys which will pre-seed
         the master.
@@ -295,6 +295,9 @@ __usage() {
     -S  Also install salt-syndic
     -N  Do not install salt-minion
     -X  Do not start daemons after installation
+    -d  Disables checking if Salt services are enabled to start on system boot.
+        You can also do this by touching /tmp/disable_salt_checks on the target
+        host. Default: \${BS_FALSE}
     -C  Only run the configuration function. This option automatically bypasses
         any installation. Implies -F (forced overwrite). To overwrite master or
         syndic configs, -M or -S, respectively, must also be specified.
@@ -303,10 +306,10 @@ __usage() {
         distribution. Using this flag allows the script to use pip as a last
         resort method. NOTE: This only works for functions which actually
         implement pip based installations.
-    -F  Allow copied files to overwrite existing (config, init.d, etc).
-    -U  If set, fully upgrade the system prior to bootstrapping salt
+    -F  Allow copied files to overwrite existing (config, init.d, etc)
+    -U  If set, fully upgrade the system prior to bootstrapping Salt
     -K  If set, keep the temporary files in the temporary directories specified
-        with -c and -k.
+        with -c and -k
     -I  If set, allow insecure connections while downloading any files. For
         example, pass '--no-check-certificate' to 'wget' or '--insecure' to
         'curl'
@@ -314,17 +317,14 @@ __usage() {
         \${BS_SALT_ETC_DIR}/minion.d/99-master-address.conf
     -i  Pass the salt-minion id. This will be stored under
         \${BS_SALT_ETC_DIR}/minion_id
-    -L  Install the Apache Libcloud package if possible(required for salt-cloud)
-    -p  Extra-package to install while installing salt dependencies. One package
+    -L  Install the Apache Libcloud package if possible
+        (required for salt-cloud)
+    -p  Extra-package to install while installing Salt dependencies. One package
         per -p flag. You're responsible for providing the proper package name.
-    -d  Disable check_service functions. Setting this flag disables the
-        'install_<distro>_check_services' checks. You can also do this by
-        touching /tmp/disable_salt_checks on the target host.
-        Default: \${BS_FALSE}
     -H  Use the specified HTTP proxy for all download URLs (including https://).
         For example: http://myproxy.example.com:3128
     -Z  Enable additional package repository for newer ZeroMQ
-        (Only available for RHEL/CentOS/Fedora/Ubuntu based distributions)
+        (only available for RHEL/CentOS/Fedora/Ubuntu based distributions)
     -b  Assume that dependencies are already installed and software sources are
         set up. If git is selected, git tree is still checked out as dependency
         step.
@@ -332,27 +332,29 @@ __usage() {
         This may result in an "n/a" in the version number.
     -l  Disable ssl checks. When passed, switches "https" calls to "http" where
         possible.
-    -V  Install salt into virtualenv(Only available for Ubuntu base distributions)
-    -a  Pip install all python pkg dependencies for salt. Requires -V to install
-        all pip pkgs into the virtualenv(Only available for Ubuntu based
-        distributions)
+    -V  Install Salt into virtualenv
+        (only available for Ubuntu based distributions)
+    -a  Pip install all Python pkg dependencies for Salt. Requires -V to install
+        all pip pkgs into the virtualenv.
+        (Only available for Ubuntu based distributions)
     -r  Disable all repository configuration performed by this script. This
         option assumes all necessary repository configuration is already present
         on the system.
-    -R  Specify a custom repository URL. Assumes the custom repository URL points
-        to a repository that mirrors Salt packages located at repo.saltstack.com.
-        The option passed with -R replaces "repo.saltstack.com". If -R is passed,
-        -r is also set. Currently only works on CentOS/RHEL based distributions.
-    -J  Replace the Master config file with data passed in as a json string. If a
-        Master config file is found, a reasonable effort will be made to save the
-        file with a ".bak" extension. If used in conjunction with -C or -F, no ".bak"
-        file will be created as either of those options will force a complete
-        overwrite of the file.
-    -j  Replace the Minion config file with data passed in as a json string. If a
-        Minion config file is found, a reasonable effort will be made to save the
-        file with a ".bak" extension. If used in conjunction with -C or -F, no ".bak"
-        file will be created as either of those options will force a complete
-        overwrite of the file.
+    -R  Specify a custom repository URL. Assumes the custom repository URL
+        points to a repository that mirrors Salt packages located at
+        repo.saltstack.com. The option passed with -R replaces the
+        "repo.saltstack.com". If -R is passed, -r is also set. Currently only
+        works on CentOS/RHEL based distributions.
+    -J  Replace the Master config file with data passed in as a json string. If
+        a Master config file is found, a reasonable effort will be made to save
+        the file with a ".bak" extension. If used in conjunction with -C or -F,
+        no ".bak" file will be created as either of those options will force
+        a complete overwrite of the file.
+    -j  Replace the Minion config file with data passed in as a json string. If
+        a Minion config file is found, a reasonable effort will be made to save
+        the file with a ".bak" extension. If used in conjunction with -C or -F,
+        no ".bak" file will be created as either of those options will force
+        a complete overwrite of the file.
     -q  Quiet salt installation from git (setup.py install -q)
 
 EOT
@@ -518,7 +520,7 @@ if [ "$ITYPE" = "git" ]; then
     fi
 
     # Disable shell warning about unbound variable during git install
-    STABLE_REV=""
+    STABLE_REV="latest"
 
 # If doing stable install, check if version specified
 elif [ "$ITYPE" = "stable" ]; then
@@ -609,9 +611,10 @@ if [ "${CALLER}x" = "${0}x" ]; then
 fi
 
 # Work around for 'Docker + salt-bootstrap failure' https://github.com/saltstack/salt-bootstrap/issues/394
-if [ ${_DISABLE_SALT_CHECKS} -eq 0 ]; then
-    [ -f /tmp/disable_salt_checks ] && _DISABLE_SALT_CHECKS=$BS_TRUE && \
-        echowarn "Found file: /tmp/disable_salt_checks, setting \$_DISABLE_SALT_CHECKS=true"
+if [ ${_DISABLE_SALT_CHECKS} -eq $BS_FALSE ] && [ -f /tmp/disable_salt_checks ]; then
+    # shellcheck disable=SC2016
+    echowarn 'Found file: /tmp/disable_salt_checks, setting _DISABLE_SALT_CHECKS=$BS_TRUE'
+    _DISABLE_SALT_CHECKS=$BS_TRUE
 fi
 
 # Because -a can only be installed into virtualenv
@@ -1162,6 +1165,21 @@ __gather_system_info() {
 }
 
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  __get_dpkg_architecture
+#   DESCRIPTION:  Determine primary architecture for packages to install on Debian and derivatives
+#----------------------------------------------------------------------------------------------------------------------
+__get_dpkg_architecture() {
+    if __check_command_exists dpkg; then
+        DPKG_ARCHITECTURE="$(dpkg --print-architecture)"
+    else
+        echoerror "dpkg: command not found."
+        return 1
+    fi
+
+    return 0
+}
+
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #          NAME:  __ubuntu_derivatives_translation
 #   DESCRIPTION:  Map Ubuntu derivatives to their Ubuntu base versions.
 #                 If distro has a known Ubuntu base version, use those install
@@ -1537,7 +1555,7 @@ __git_clone_and_checkout() {
                 # We need to add the saltstack repository as a remote and fetch tags for proper versioning
                 echoinfo "Adding SaltStack's Salt repository as a remote"
                 git remote add upstream "$_SALTSTACK_REPO_URL" || return 1
-                echodebug "Fetching upstream(SaltStack's Salt repository) git tags"
+                echodebug "Fetching upstream (SaltStack's Salt repository) git tags"
                 git fetch --tags upstream || return 1
                 GIT_REV="origin/$GIT_REV"
             fi
@@ -1709,7 +1727,7 @@ __copyfile() {
     # If the destination is a directory, let's make it a full path so the logic
     # below works as expected
     if [ -d "$dfile" ]; then
-        echodebug "The passed destination($dfile) is a directory"
+        echodebug "The passed destination ($dfile) is a directory"
         dfile="${dfile}/$(basename "$sfile")"
         echodebug "Full destination path is now: $dfile"
     fi
@@ -2334,24 +2352,31 @@ install_ubuntu_deps() {
 }
 
 install_ubuntu_stable_deps() {
-
-    if [ $_DISABLE_REPOS -eq $BS_FALSE ]; then
-        if [ "$CPU_ARCH_L" = "amd64" ] || [ "$CPU_ARCH_L" = "x86_64" ]; then
-            repo_arch="amd64"
-        elif [ "$CPU_ARCH_L" = "i386" ] || [ "$CPU_ARCH_L" = "i686" ]; then
-            echoerror "repo.saltstack.com likely doesn't have 32-bit packages for Ubuntu (yet?)"
-            repo_arch="i386"
-        fi
-    fi
-
     install_ubuntu_deps || return 1
 
     if [ $_DISABLE_REPOS -eq $BS_FALSE ]; then
+         __get_dpkg_architecture || return 1
+
+        __REPO_ARCH="$DPKG_ARCHITECTURE"
+
+        if [ "$DPKG_ARCHITECTURE" = "i386" ]; then
+            echoerror "repo.saltstack.com likely doesn't have all required 32-bit packages for Ubuntu $DISTRO_MAJOR_VERSION (yet?)."
+
+            # amd64 is just a part of repository URI, 32-bit pkgs are hosted under the same location
+            __REPO_ARCH="amd64"
+        elif [ "$DPKG_ARCHITECTURE" != "amd64" ]; then
+            echoerror "repo.saltstack.com doesn't have packages for your system architecture: $DPKG_ARCHITECTURE."
+            if [ "$ITYPE" != "git" ]; then
+                echoerror "You can try git installation mode, i.e.: sh ${__ScriptName} git v2016.3.1"
+                exit 1
+            fi
+        fi
+
         # Versions starting with 2015.5.6 and 2015.8.1 are hosted at repo.saltstack.com
         if [ "$(echo "$STABLE_REV" | egrep '^(2015\.5|2015\.8|2016\.3|latest|archive\/)')" != "" ]; then
             # Workaround for latest non-LTS ubuntu
             if [ "$DISTRO_MAJOR_VERSION" -eq 15 ]; then
-                echowarn "Non-LTS Ubuntu detected, but stable packages requested. Trying packages from latest LTS release. You may experience problems"
+                echowarn "Non-LTS Ubuntu detected, but stable packages requested. Trying packages from latest LTS release. You may experience problems."
                 UBUNTU_VERSION=14.04
                 UBUNTU_CODENAME=trusty
             else
@@ -2359,8 +2384,9 @@ install_ubuntu_stable_deps() {
                 UBUNTU_CODENAME=$DISTRO_CODENAME
             fi
 
-            # SaltStack's stable Ubuntu repository
-            SALTSTACK_UBUNTU_URL="${HTTP_VAL}://repo.saltstack.com/apt/ubuntu/$UBUNTU_VERSION/$repo_arch/$STABLE_REV"
+            # SaltStack's stable Ubuntu repository:
+            SALTSTACK_UBUNTU_URL="${HTTP_VAL}://repo.saltstack.com/apt/ubuntu/${UBUNTU_VERSION}/${__REPO_ARCH}/${STABLE_REV}"
+
             if [ "$(grep -ER 'latest .+ main' /etc/apt)" = "" ]; then
                 set +o nounset
                 echo "deb $SALTSTACK_UBUNTU_URL $UBUNTU_CODENAME main" > "/etc/apt/sources.list.d/saltstack.list"
@@ -2678,6 +2704,7 @@ install_debian_deps() {
     if [ $_START_DAEMONS -eq $BS_FALSE ]; then
         echowarn "Not starting daemons on Debian based distributions is not working mostly because starting them is the default behaviour."
     fi
+
     # No user interaction, libc6 restart services for example
     export DEBIAN_FRONTEND=noninteractive
 
@@ -2717,17 +2744,6 @@ install_debian_deps() {
 }
 
 install_debian_7_deps() {
-    if [ $_DISABLE_REPOS -eq $BS_FALSE ]; then
-        if [ "$CPU_ARCH_L" = "amd64" ] || [ "$CPU_ARCH_L" = "x86_64" ]; then
-            repo_arch="amd64"
-        elif [ "$CPU_ARCH_L" = "armv7l" ]; then
-            repo_arch="armhf"
-        elif [ "$CPU_ARCH_L" = "i386" ] || [ "$CPU_ARCH_L" = "i686" ]; then
-            echoerror "repo.saltstack.com likely doesn't have 32-bit packages for Debian (yet?)"
-            repo_arch="i386"
-        fi
-    fi
-
     if [ $_START_DAEMONS -eq $BS_FALSE ]; then
         echowarn "Not starting daemons on Debian based distributions is not working mostly because starting them is the default behaviour."
     fi
@@ -2737,9 +2753,6 @@ install_debian_7_deps() {
 
     apt-get update
 
-    # Make sure wget is available
-    __apt_get_install_noinput wget
-
     # Install Keys
     __apt_get_install_noinput debian-archive-keyring && apt-get update
 
@@ -2748,11 +2761,32 @@ install_debian_7_deps() {
         apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 8B48AD6246925553 || return 1
     fi
 
+    # Make sure wget is available
+    __apt_get_install_noinput wget || return 1
+
     if [ $_DISABLE_REPOS -eq $BS_FALSE ]; then
-        # Versions starting with 2015.8.7 are hosted at repo.saltstack.com
-        if [ "$(echo "$STABLE_REV" | egrep '^(2015\.8|2016\.3|latest|archive\/201[5-6]\.)')" != "" ] || \
-            [ "$ITYPE" = "git" ]; then
-            SALTSTACK_DEBIAN_URL="${HTTP_VAL}://repo.saltstack.com/apt/debian/$DISTRO_MAJOR_VERSION/$repo_arch/${STABLE_REV:-latest}"
+         __get_dpkg_architecture || return 1
+
+        __REPO_ARCH="$DPKG_ARCHITECTURE"
+
+        if [ "$DPKG_ARCHITECTURE" = "i386" ]; then
+            echoerror "repo.saltstack.com likely doesn't have all required 32-bit packages for Debian $DISTRO_MAJOR_VERSION (yet?)."
+
+            if [ "$ITYPE" != "git" ]; then
+                echoerror "You can try git installation mode, i.e.: sh ${__ScriptName} git v2016.3.1"
+            fi
+
+            # amd64 is just a part of repository URI, 32-bit pkgs are hosted under the same location
+            __REPO_ARCH="amd64"
+        elif [ "$DPKG_ARCHITECTURE" != "amd64" ]; then
+            echoerror "repo.saltstack.com doesn't have packages for your system architecture: $DPKG_ARCHITECTURE."
+            exit 1
+        fi
+
+        # Versions starting with 2015.8.7 and 2016.3.0 are hosted at repo.saltstack.com
+        if [ "$(echo "$STABLE_REV" | egrep '^(2015\.8|2016\.3|latest|archive\/201[5-6]\.)')" != "" ]; then
+            # amd64 is just a part of repository URI, 32-bit pkgs are hosted under the same location
+            SALTSTACK_DEBIAN_URL="${HTTP_VAL}://repo.saltstack.com/apt/debian/${DISTRO_MAJOR_VERSION}/${__REPO_ARCH}/${STABLE_REV}"
             echo "deb $SALTSTACK_DEBIAN_URL wheezy main" > "/etc/apt/sources.list.d/saltstack.list"
 
             if [ "$HTTP_VAL" = "https" ] ; then
@@ -2762,16 +2796,18 @@ install_debian_7_deps() {
             # shellcheck disable=SC2086
             wget $_WGET_ARGS -q "$SALTSTACK_DEBIAN_URL/SALTSTACK-GPG-KEY.pub" -O - | apt-key add - || return 1
         elif [ -n "$STABLE_REV" ]; then
-            echoerror "Installation of Salt $STABLE_REV currently unsupported by ${__ScriptName} ${__ScriptVersion}"
+            echoerror "Installation of Salt ${STABLE_REV#*/} packages not supported by ${__ScriptName} ${__ScriptVersion} on Debian $DISTRO_MAJOR_VERSION."
+
             return 1
         fi
+    else
+        echowarn "Packages from repo.saltstack.com are required to install Salt version 2015.8 or higher on Debian $DISTRO_MAJOR_VERSION."
     fi
 
     apt-get update || return 1
 
-    __PACKAGES="libzmq3 libzmq3-dev python-zmq python-requests python-apt"
     # Additionally install procps and pciutils which allows for Docker bootstraps. See 366#issuecomment-39666813
-    __PACKAGES="${__PACKAGES} procps pciutils"
+    __PACKAGES='procps pciutils'
 
     if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
         # Install python-libcloud if asked to
@@ -2795,17 +2831,6 @@ install_debian_7_deps() {
 }
 
 install_debian_8_deps() {
-    if [ $_DISABLE_REPOS -eq $BS_FALSE ]; then
-        if [ "$CPU_ARCH_L" = "amd64" ] || [ "$CPU_ARCH_L" = "x86_64" ]; then
-            repo_arch="amd64"
-        elif [ "$CPU_ARCH_L" = "armv7l" ]; then
-            repo_arch="armhf"
-        elif [ "$CPU_ARCH_L" = "i386" ] || [ "$CPU_ARCH_L" = "i686" ]; then
-            echoerror "repo.saltstack.com likely doesn't have 32-bit packages for Debian (yet?)"
-            repo_arch="i386"
-        fi
-    fi
-
     if [ $_START_DAEMONS -eq $BS_FALSE ]; then
         echowarn "Not starting daemons on Debian based distributions is not working mostly because starting them is the default behaviour."
     fi
@@ -2815,9 +2840,6 @@ install_debian_8_deps() {
 
     apt-get update
 
-    # Make sure wget is available
-    __apt_get_install_noinput wget
-
     # Install Keys
     __apt_get_install_noinput debian-archive-keyring && apt-get update
 
@@ -2826,10 +2848,34 @@ install_debian_8_deps() {
         apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 7638D0442B90D010 || return 1
     fi
 
+    # Make sure wget is available
+    __apt_get_install_noinput wget || return 1
+
     if [ $_DISABLE_REPOS -eq $BS_FALSE ]; then
+         __get_dpkg_architecture || return 1
+
+        __REPO_ARCH="$DPKG_ARCHITECTURE"
+
+        if [ "$DPKG_ARCHITECTURE" = "i386" ]; then
+            echoerror "repo.saltstack.com likely doesn't have all required 32-bit packages for Debian $DISTRO_MAJOR_VERSION (yet?)."
+
+            if [ "$ITYPE" != "git" ]; then
+                echoerror "You can try git installation mode, i.e.: sh ${__ScriptName} git v2016.3.1"
+            fi
+
+            # amd64 is just a part of repository URI, 32-bit pkgs are hosted under the same location
+            __REPO_ARCH="amd64"
+        elif [ "$DPKG_ARCHITECTURE" != "amd64" ] && [ "$DPKG_ARCHITECTURE" != "armhf" ]; then
+            echoerror "repo.saltstack.com doesn't have packages for your system architecture: $DPKG_ARCHITECTURE."
+            echoerror "Try git installation mode with pip and disable SaltStack apt repository, for example:"
+            echoerror "    sh ${__ScriptName} -r -P git v2016.3.1"
+
+            exit 1
+        fi
+
         # Versions starting with 2015.5.6, 2015.8.1 and 2016.3.0 are hosted at repo.saltstack.com
         if [ "$(echo "$STABLE_REV" | egrep '^(2015\.5|2015\.8|2016\.3|latest|archive\/201[5-6]\.)')" != "" ]; then
-            SALTSTACK_DEBIAN_URL="${HTTP_VAL}://repo.saltstack.com/apt/debian/$DISTRO_MAJOR_VERSION/$repo_arch/$STABLE_REV"
+            SALTSTACK_DEBIAN_URL="${HTTP_VAL}://repo.saltstack.com/apt/debian/${DISTRO_MAJOR_VERSION}/${__REPO_ARCH}/${STABLE_REV}"
             echo "deb $SALTSTACK_DEBIAN_URL jessie main" > "/etc/apt/sources.list.d/saltstack.list"
 
             if [ "$HTTP_VAL" = "https" ] ; then
@@ -2839,16 +2885,16 @@ install_debian_8_deps() {
             # shellcheck disable=SC2086
             wget $_WGET_ARGS -q "$SALTSTACK_DEBIAN_URL/SALTSTACK-GPG-KEY.pub" -O - | apt-key add - || return 1
         elif [ -n "$STABLE_REV" ]; then
-            echoerror "Installation of Salt $STABLE_REV currently unsupported by ${__ScriptName} ${__ScriptVersion}"
+            echoerror "Installation of Salt ${STABLE_REV#*/} packages not supported by ${__ScriptName} ${__ScriptVersion} on Debian $DISTRO_MAJOR_VERSION."
+
             return 1
         fi
     fi
 
     apt-get update || return 1
 
-    __PACKAGES="libzmq3 libzmq3-dev python-zmq python-requests python-apt"
     # Additionally install procps and pciutils which allows for Docker bootstraps. See 366#issuecomment-39666813
-    __PACKAGES="${__PACKAGES} procps pciutils"
+    __PACKAGES='procps pciutils'
 
     if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
         # Install python-libcloud if asked to
@@ -2878,9 +2924,10 @@ install_debian_git_deps() {
 
     __git_clone_and_checkout || return 1
 
-    __apt_get_install_noinput lsb-release python python-pkg-resources python-crypto \
-        python-jinja2 python-m2crypto python-yaml msgpack-python python-tornado \
-        python-backports.ssl-match-hostname || return 1
+    # shellcheck disable=SC2086
+    __apt_get_install_noinput libzmq3 libzmq3-dev lsb-release python-apt python-backports.ssl-match-hostname \
+        python-crypto python-jinja2 python-m2crypto python-msgpack python-requests python-tornado python-yaml \
+        python-zmq || return 1
 
     # Let's trigger config_salt()
     if [ "$_TEMP_CONFIG_DIR" = "null" ]; then
@@ -2893,7 +2940,8 @@ install_debian_git_deps() {
 
 install_debian_7_git_deps() {
     install_debian_7_deps || return 1
-    install_debian_git_deps || return 1  # Grab the actual deps
+    install_debian_git_deps || return 1
+
     return 0
 }
 
@@ -2906,31 +2954,31 @@ install_debian_8_git_deps() {
 
     __git_clone_and_checkout || return 1
 
-    __PACKAGES="lsb-release python-pkg-resources python-crypto python-jinja2 python-m2crypto python-yaml msgpack-python"
-    __PIP_PACKAGES=""
+    __PACKAGES='libzmq3 libzmq3-dev lsb-release python-apt python-crypto python-jinja2 python-m2crypto python-msgpack python-requests python-yaml python-zmq'
+    __PIP_PACKAGES=''
 
-    if [ -f "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" ]; then
-        __REQUIRED_TORNADO="$(grep ^tornado "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" | tr -d ' ')"
+    if (__check_pip_allowed >/dev/null 2>&1); then
+        __PIP_PACKAGES='tornado'
+        # Install development environment for building tornado Python module
+        __PACKAGES="${__PACKAGES} build-essential python-dev"
 
-        if [ -n "${__REQUIRED_TORNADO}" ]; then
-            if (__check_pip_allowed >/dev/null 2>&1); then
-                __PACKAGES="${__PACKAGES} python-dev"
-                __PIP_PACKAGES="${__PIP_PACKAGES} tornado"
-
-                if ! __check_command_exists pip; then
-                    __PACKAGES="${__PACKAGES} python-pip"
-                fi
-            else
-                # Check if Debian Backports repo already configured
-                if ! apt-cache policy | grep -q 'Debian Backports'; then
-                    echo 'deb http://httpredir.debian.org/debian jessie-backports main' > \
-                        /etc/apt/sources.list.d/backports.list
-                    apt-get update
-                fi
-
-                __PACKAGES="${__PACKAGES} python-tornado/jessie-backports"
-            fi
+        if ! __check_command_exists pip; then
+            __PACKAGES="${__PACKAGES} python-pip"
         fi
+    # Attempt to configure backports repo on non-x86_64 system
+    elif [ $_DISABLE_REPOS -eq $BS_FALSE ] && [ "$DPKG_ARCHITECTURE" != "amd64" ]; then
+        # Check if Debian Backports repo already configured
+        if ! apt-cache policy | grep -q 'Debian Backports'; then
+            echo 'deb http://httpredir.debian.org/debian jessie-backports main' > \
+                /etc/apt/sources.list.d/backports.list
+        fi
+
+        apt-get update || return 1
+
+        # python-tornado package should be installed from backports repo
+        __PACKAGES="${__PACKAGES} python-backports.ssl-match-hostname python-tornado/jessie-backports"
+    else
+        __PACKAGES="${__PACKAGES} python-backports.ssl-match-hostname python-tornado"
     fi
 
     # shellcheck disable=SC2086
@@ -3053,7 +3101,7 @@ install_debian_git_post() {
 }
 
 install_debian_restart_daemons() {
-    [ "$_START_DAEMONS" -eq $BS_FALSE ] && return
+    [ "$_START_DAEMONS" -eq $BS_FALSE ] && return 0
 
     for fname in minion master syndic api; do
         # Skip salt-api since the service should be opt-in and not necessarily started on boot
@@ -4098,14 +4146,6 @@ _eof
 }
 
 install_amazon_linux_ami_git_deps() {
-
-    # When installing from git, this variable might not be set yet for amazon linux. Set this
-    # to "latest" in order to set up the SaltStack repository and avoid a malformed baseurl
-    # and gpgkey reference in the install_amazon_linux_amI_deps function. 
-    if [ "$STABLE_REV" = "" ]; then
-        STABLE_REV="latest"
-    fi
-
     install_amazon_linux_ami_deps || return 1
 
     if ! __check_command_exists git; then
@@ -5985,6 +6025,10 @@ config_salt() {
         echowarn "No configuration or keys were copied over. No configuration was done!"
         exit 0
     fi
+
+    # Create default logs directory if not exists (happens with git installations)
+    mkdir -p /var/log/salt
+
     return 0
 }
 #
@@ -6032,7 +6076,7 @@ preseed_master() {
 #   This function checks if all of the installed daemons are running or not.
 #
 daemons_running() {
-    [ "$_START_DAEMONS" -eq $BS_FALSE ] && return
+    [ "$_START_DAEMONS" -eq $BS_FALSE ] && return 0
 
     FAILED_DAEMONS=0
     for fname in minion master syndic api; do
@@ -6042,7 +6086,6 @@ daemons_running() {
         # Skip if not meant to be installed
         [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
         [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
-        #[ $fname = "api" ] && ([ "$_INSTALL_MASTER" -eq $BS_FALSE ] || ! __check_command_exists "salt-${fname}") && continue
         [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
 
         # shellcheck disable=SC2009
@@ -6066,9 +6109,9 @@ daemons_running() {
 #======================================================================================================================
 # LET'S PROCEED WITH OUR INSTALLATION
 #======================================================================================================================
-# Let's get the dependencies install function
 
-if [ "$_NO_DEPS" -eq $BS_FALSE ]; then
+# Let's get the dependencies install function
+if [ ${_NO_DEPS} -eq $BS_FALSE ]; then
     DEP_FUNC_NAMES="install_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}_${ITYPE}_deps"
     DEP_FUNC_NAMES="$DEP_FUNC_NAMES install_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}${PREFIXED_DISTRO_MINOR_VERSION}_${ITYPE}_deps"
     DEP_FUNC_NAMES="$DEP_FUNC_NAMES install_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}_deps"
@@ -6091,45 +6134,39 @@ done
 echodebug "DEPS_INSTALL_FUNC=${DEPS_INSTALL_FUNC}"
 
 # Let's get the minion config function
+CONFIG_FUNC_NAMES="config_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}_${ITYPE}_salt"
+CONFIG_FUNC_NAMES="$CONFIG_FUNC_NAMES config_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}${PREFIXED_DISTRO_MINOR_VERSION}_${ITYPE}_salt"
+CONFIG_FUNC_NAMES="$CONFIG_FUNC_NAMES config_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}_salt"
+CONFIG_FUNC_NAMES="$CONFIG_FUNC_NAMES config_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}${PREFIXED_DISTRO_MINOR_VERSION}_salt"
+CONFIG_FUNC_NAMES="$CONFIG_FUNC_NAMES config_${DISTRO_NAME_L}_${ITYPE}_salt"
+CONFIG_FUNC_NAMES="$CONFIG_FUNC_NAMES config_${DISTRO_NAME_L}_salt"
+CONFIG_FUNC_NAMES="$CONFIG_FUNC_NAMES config_salt"
+
 CONFIG_SALT_FUNC="null"
-if [ "$_TEMP_CONFIG_DIR" != "null" ]; then
-
-    CONFIG_FUNC_NAMES="config_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}_${ITYPE}_salt"
-    CONFIG_FUNC_NAMES="$CONFIG_FUNC_NAMES config_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}${PREFIXED_DISTRO_MINOR_VERSION}_${ITYPE}_salt"
-    CONFIG_FUNC_NAMES="$CONFIG_FUNC_NAMES config_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}_salt"
-    CONFIG_FUNC_NAMES="$CONFIG_FUNC_NAMES config_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}${PREFIXED_DISTRO_MINOR_VERSION}_salt"
-    CONFIG_FUNC_NAMES="$CONFIG_FUNC_NAMES config_${DISTRO_NAME_L}_${ITYPE}_salt"
-    CONFIG_FUNC_NAMES="$CONFIG_FUNC_NAMES config_${DISTRO_NAME_L}_salt"
-    CONFIG_FUNC_NAMES="$CONFIG_FUNC_NAMES config_salt"
-
-    for FUNC_NAME in $(__strip_duplicates "$CONFIG_FUNC_NAMES"); do
-        if __function_defined "$FUNC_NAME"; then
-            CONFIG_SALT_FUNC="$FUNC_NAME"
-            break
-        fi
-    done
-fi
+for FUNC_NAME in $(__strip_duplicates "$CONFIG_FUNC_NAMES"); do
+    if __function_defined "$FUNC_NAME"; then
+        CONFIG_SALT_FUNC="$FUNC_NAME"
+        break
+    fi
+done
 echodebug "CONFIG_SALT_FUNC=${CONFIG_SALT_FUNC}"
 
 # Let's get the pre-seed master function
+PRESEED_FUNC_NAMES="preseed_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}_${ITYPE}_master"
+PRESEED_FUNC_NAMES="$PRESEED_FUNC_NAMES preseed_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}${PREFIXED_DISTRO_MINOR_VERSION}_${ITYPE}_master"
+PRESEED_FUNC_NAMES="$PRESEED_FUNC_NAMES preseed_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}_master"
+PRESEED_FUNC_NAMES="$PRESEED_FUNC_NAMES preseed_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}${PREFIXED_DISTRO_MINOR_VERSION}_master"
+PRESEED_FUNC_NAMES="$PRESEED_FUNC_NAMES preseed_${DISTRO_NAME_L}_${ITYPE}_master"
+PRESEED_FUNC_NAMES="$PRESEED_FUNC_NAMES preseed_${DISTRO_NAME_L}_master"
+PRESEED_FUNC_NAMES="$PRESEED_FUNC_NAMES preseed_master"
+
 PRESEED_MASTER_FUNC="null"
-if [ "$_TEMP_KEYS_DIR" != "null" ]; then
-
-    PRESEED_FUNC_NAMES="preseed_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}_${ITYPE}_master"
-    PRESEED_FUNC_NAMES="$PRESEED_FUNC_NAMES preseed_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}${PREFIXED_DISTRO_MINOR_VERSION}_${ITYPE}_master"
-    PRESEED_FUNC_NAMES="$PRESEED_FUNC_NAMES preseed_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}_master"
-    PRESEED_FUNC_NAMES="$PRESEED_FUNC_NAMES preseed_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}${PREFIXED_DISTRO_MINOR_VERSION}_master"
-    PRESEED_FUNC_NAMES="$PRESEED_FUNC_NAMES preseed_${DISTRO_NAME_L}_${ITYPE}_master"
-    PRESEED_FUNC_NAMES="$PRESEED_FUNC_NAMES preseed_${DISTRO_NAME_L}_master"
-    PRESEED_FUNC_NAMES="$PRESEED_FUNC_NAMES preseed_master"
-
-    for FUNC_NAME in $(__strip_duplicates "$PRESEED_FUNC_NAMES"); do
-        if __function_defined "$FUNC_NAME"; then
-            PRESEED_MASTER_FUNC="$FUNC_NAME"
-            break
-        fi
-    done
-fi
+for FUNC_NAME in $(__strip_duplicates "$PRESEED_FUNC_NAMES"); do
+    if __function_defined "$FUNC_NAME"; then
+        PRESEED_MASTER_FUNC="$FUNC_NAME"
+        break
+    fi
+done
 echodebug "PRESEED_MASTER_FUNC=${PRESEED_MASTER_FUNC}"
 
 # Let's get the install function
@@ -6163,7 +6200,6 @@ for FUNC_NAME in $(__strip_duplicates "$POST_FUNC_NAMES"); do
 done
 echodebug "POST_INSTALL_FUNC=${POST_INSTALL_FUNC}"
 
-
 # Let's get the start daemons install function
 STARTDAEMONS_FUNC_NAMES="install_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}_${ITYPE}_restart_daemons"
 STARTDAEMONS_FUNC_NAMES="$STARTDAEMONS_FUNC_NAMES install_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}${PREFIXED_DISTRO_MINOR_VERSION}_${ITYPE}_restart_daemons"
@@ -6181,9 +6217,7 @@ for FUNC_NAME in $(__strip_duplicates "$STARTDAEMONS_FUNC_NAMES"); do
 done
 echodebug "STARTDAEMONS_INSTALL_FUNC=${STARTDAEMONS_INSTALL_FUNC}"
 
-
 # Let's get the daemons running check function.
-DAEMONS_RUNNING_FUNC="null"
 DAEMONS_RUNNING_FUNC_NAMES="daemons_running_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}_${ITYPE}"
 DAEMONS_RUNNING_FUNC_NAMES="$DAEMONS_RUNNING_FUNC_NAMES daemons_running_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}${PREFIXED_DISTRO_MINOR_VERSION}_${ITYPE}"
 DAEMONS_RUNNING_FUNC_NAMES="$DAEMONS_RUNNING_FUNC_NAMES daemons_running_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}"
@@ -6192,6 +6226,7 @@ DAEMONS_RUNNING_FUNC_NAMES="$DAEMONS_RUNNING_FUNC_NAMES daemons_running_${DISTRO
 DAEMONS_RUNNING_FUNC_NAMES="$DAEMONS_RUNNING_FUNC_NAMES daemons_running_${DISTRO_NAME_L}"
 DAEMONS_RUNNING_FUNC_NAMES="$DAEMONS_RUNNING_FUNC_NAMES daemons_running"
 
+DAEMONS_RUNNING_FUNC="null"
 for FUNC_NAME in $(__strip_duplicates "$DAEMONS_RUNNING_FUNC_NAMES"); do
     if __function_defined "$FUNC_NAME"; then
         DAEMONS_RUNNING_FUNC="$FUNC_NAME"
@@ -6209,8 +6244,7 @@ if [ ${_DISABLE_SALT_CHECKS} -eq $BS_FALSE ]; then
     CHECK_SERVICES_FUNC_NAMES="$CHECK_SERVICES_FUNC_NAMES install_${DISTRO_NAME_L}_${ITYPE}_check_services"
     CHECK_SERVICES_FUNC_NAMES="$CHECK_SERVICES_FUNC_NAMES install_${DISTRO_NAME_L}_check_services"
 else
-    CHECK_SERVICES_FUNC_NAMES=False
-    echowarn "DISABLE_SALT_CHECKS set, not setting \$CHECK_SERVICES_FUNC_NAMES"
+    CHECK_SERVICES_FUNC_NAMES=""
 fi
 
 CHECK_SERVICES_FUNC="null"
@@ -6222,7 +6256,6 @@ for FUNC_NAME in $(__strip_duplicates "$CHECK_SERVICES_FUNC_NAMES"); do
 done
 echodebug "CHECK_SERVICES_FUNC=${CHECK_SERVICES_FUNC}"
 
-
 if [ "$DEPS_INSTALL_FUNC" = "null" ]; then
     echoerror "No dependencies installation function found. Exiting..."
     exit 1
@@ -6232,7 +6265,6 @@ if [ "$INSTALL_FUNC" = "null" ]; then
     echoerror "No installation function found. Exiting..."
     exit 1
 fi
-
 
 # Install dependencies
 if [ "$_CONFIG_ONLY" -eq $BS_FALSE ]; then
@@ -6245,17 +6277,15 @@ if [ "$_CONFIG_ONLY" -eq $BS_FALSE ]; then
     fi
 fi
 
-
 # Triggering config_salt() if overwriting master or minion configs
 if [ "$_CUSTOM_MASTER_CONFIG" != "null" ] || [ "$_CUSTOM_MINION_CONFIG" != "null" ]; then
     if [ "$_TEMP_CONFIG_DIR" = "null" ]; then
         _TEMP_CONFIG_DIR="$_SALT_ETC_DIR"
     fi
-    CONFIG_SALT_FUNC="config_salt"
 fi
 
 # Configure Salt
-if [ "$_TEMP_CONFIG_DIR" != "null" ] && [ "$CONFIG_SALT_FUNC" != "null" ]; then
+if [ "$CONFIG_SALT_FUNC" != "null" ] && [ "$_TEMP_CONFIG_DIR" != "null" ]; then
     echoinfo "Running ${CONFIG_SALT_FUNC}()"
     $CONFIG_SALT_FUNC
     if [ $? -ne 0 ]; then
@@ -6264,9 +6294,8 @@ if [ "$_TEMP_CONFIG_DIR" != "null" ] && [ "$CONFIG_SALT_FUNC" != "null" ]; then
     fi
 fi
 
-
 # Pre-Seed master keys
-if [ "$_TEMP_KEYS_DIR" != "null" ] && [ "$PRESEED_MASTER_FUNC" != "null" ]; then
+if [ "$PRESEED_MASTER_FUNC" != "null" ] && [ "$_TEMP_KEYS_DIR" != "null" ]; then
     echoinfo "Running ${PRESEED_MASTER_FUNC}()"
     $PRESEED_MASTER_FUNC
     if [ $? -ne 0 ]; then
@@ -6274,7 +6303,6 @@ if [ "$_TEMP_KEYS_DIR" != "null" ] && [ "$PRESEED_MASTER_FUNC" != "null" ]; then
         exit 1
     fi
 fi
-
 
 # Install Salt
 if [ "$_CONFIG_ONLY" -eq $BS_FALSE ]; then
@@ -6311,7 +6339,7 @@ if [ "$_SALT_MINION_ID" != "null" ]; then
 fi
 
 # Run any post install function. Only execute function if not in config mode only
-if [ "$_CONFIG_ONLY" -eq $BS_FALSE ] && [ "$POST_INSTALL_FUNC" != "null" ]; then
+if [ "$POST_INSTALL_FUNC" != "null" ] && [ "$_CONFIG_ONLY" -eq $BS_FALSE ]; then
     echoinfo "Running ${POST_INSTALL_FUNC}()"
     $POST_INSTALL_FUNC
     if [ $? -ne 0 ]; then
@@ -6321,7 +6349,7 @@ if [ "$_CONFIG_ONLY" -eq $BS_FALSE ] && [ "$POST_INSTALL_FUNC" != "null" ]; then
 fi
 
 # Run any check services function, Only execute function if not in config mode only
-if [ "$_CONFIG_ONLY" -eq $BS_FALSE ] && [ "$CHECK_SERVICES_FUNC" != "null" ]; then
+if [ "$CHECK_SERVICES_FUNC" != "null" ] && [ "$_CONFIG_ONLY" -eq $BS_FALSE ]; then
     echoinfo "Running ${CHECK_SERVICES_FUNC}()"
     $CHECK_SERVICES_FUNC
     if [ $? -ne 0 ]; then
@@ -6330,9 +6358,8 @@ if [ "$_CONFIG_ONLY" -eq $BS_FALSE ] && [ "$CHECK_SERVICES_FUNC" != "null" ]; th
     fi
 fi
 
-
 # Run any start daemons function
-if [ "$STARTDAEMONS_INSTALL_FUNC" != "null" ]; then
+if [ "$STARTDAEMONS_INSTALL_FUNC" != "null" ] && [ ${_START_DAEMONS} -eq $BS_TRUE ]; then
     echoinfo "Running ${STARTDAEMONS_INSTALL_FUNC}()"
     echodebug "Waiting ${_SLEEP} seconds for processes to settle before checking for them"
     sleep ${_SLEEP}
@@ -6344,7 +6371,7 @@ if [ "$STARTDAEMONS_INSTALL_FUNC" != "null" ]; then
 fi
 
 # Check if the installed daemons are running or not
-if [ "$DAEMONS_RUNNING_FUNC" != "null" ] && [ $_START_DAEMONS -eq $BS_TRUE ]; then
+if [ "$DAEMONS_RUNNING_FUNC" != "null" ] && [ ${_START_DAEMONS} -eq $BS_TRUE ]; then
     echoinfo "Running ${DAEMONS_RUNNING_FUNC}()"
     echodebug "Waiting ${_SLEEP} seconds for processes to settle before checking for them"
     sleep ${_SLEEP}  # Sleep a little bit to let daemons start
@@ -6359,14 +6386,12 @@ if [ "$DAEMONS_RUNNING_FUNC" != "null" ] && [ $_START_DAEMONS -eq $BS_TRUE ]; th
             # Skip if not meant to be installed
             [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
             [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
-            #[ $fname = "api" ] && ([ "$_INSTALL_MASTER" -eq $BS_FALSE ] || ! __check_command_exists "salt-${fname}") && continue
             [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
 
             if [ "$_ECHO_DEBUG" -eq $BS_FALSE ]; then
                 echoerror "salt-$fname was not found running. Pass '-D' to ${__ScriptName} when bootstrapping for additional debugging information..."
                 continue
             fi
-
 
             [ ! -f "$_SALT_ETC_DIR/$fname" ] && [ $fname != "syndic" ] && echodebug "$_SALT_ETC_DIR/$fname does not exist"
 
@@ -6386,11 +6411,11 @@ if [ "$DAEMONS_RUNNING_FUNC" != "null" ] && [ $_START_DAEMONS -eq $BS_TRUE ]; th
     fi
 fi
 
-
 # Done!
 if [ "$_CONFIG_ONLY" -eq $BS_FALSE ]; then
     echoinfo "Salt installed!"
 else
-    echoinfo "Salt configured"
+    echoinfo "Salt configured!"
 fi
+
 exit 0

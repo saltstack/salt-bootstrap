@@ -3569,29 +3569,34 @@ install_centos_stable() {
 }
 
 install_centos_stable_post() {
-    for fname in minion master syndic api; do
-        # Skip if not meant to be installed
+    SYSTEMD_RELOAD=$BS_FALSE
+
+    for fname in api master minion syndic; do
         # Skip salt-api since the service should be opt-in and not necessarily started on boot
         [ $fname = "api" ] && continue
 
-        [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
+        # Skip if not meant to be installed
         [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
-        #[ $fname = "api" ] && ([ "$_INSTALL_MASTER" -eq $BS_FALSE ] || ! __check_command_exists "salt-${fname}") && continue
+        [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
         [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
 
-        if [ -f /etc/init.d/salt-$fname ]; then
-            # Still in SysV init!?
-            /sbin/chkconfig salt-$fname on
-        elif [ -f /usr/bin/systemctl ]; then
-            # Using systemd
-            /usr/bin/systemctl is-enabled salt-$fname.service > /dev/null 2>&1 || (
-                /usr/bin/systemctl preset salt-$fname.service > /dev/null 2>&1 &&
-                /usr/bin/systemctl enable salt-$fname.service > /dev/null 2>&1
+        if [ -f /bin/systemctl ]; then
+            /usr/systemctl is-enabled salt-${fname}.service > /dev/null 2>&1 || (
+                /bin/systemctl preset salt-${fname}.service > /dev/null 2>&1 &&
+                /bin/systemctl enable salt-${fname}.service > /dev/null 2>&1
             )
-            sleep 0.1
-            /usr/bin/systemctl daemon-reload
+
+            SYSTEMD_RELOAD=$BS_TRUE
+        elif [ -f "/etc/init.d/salt-${fname}" ]; then
+            /sbin/chkconfig salt-${fname} on
         fi
     done
+
+    if [ "$SYSTEMD_RELOAD" -eq $BS_TRUE ]; then
+        /bin/systemctl daemon-reload
+    fi
+
+    return 0
 }
 
 install_centos_git_deps() {
@@ -3653,53 +3658,54 @@ install_centos_git() {
 
 install_centos_git_post() {
     SYSTEMD_RELOAD=$BS_FALSE
-    for fname in minion master syndic api; do
+
+    for fname in api master minion syndic; do
+        # Skip salt-api since the service should be opt-in and not necessarily started on boot
+        [ $fname = "api" ] && continue
 
         # Skip if not meant to be installed
-        [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
         [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
-        [ $fname = "api" ] && ([ "$_INSTALL_MASTER" -eq $BS_FALSE ] || ! __check_command_exists "salt-${fname}") && continue
+        [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
         [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
 
         if [ -f /bin/systemctl ]; then
-            if [ ! -f /usr/lib/systemd/system/salt-${fname}.service ] || ([ -f /usr/lib/systemd/system/salt-${fname}.service ] && [ $_FORCE_OVERWRITE -eq $BS_TRUE ]); then
+            if [ ! -f "/usr/lib/systemd/system/salt-${fname}.service" ] || \
+                ([ -f "/usr/lib/systemd/system/salt-${fname}.service" ] && [ "$_FORCE_OVERWRITE" -eq $BS_TRUE ]); then
                 __copyfile "${_SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-${fname}.service" /usr/lib/systemd/system/
             fi
 
-            # Skip salt-api since the service should be opt-in and not necessarily started on boot
-            [ $fname = "api" ] && continue
+            /usr/systemctl is-enabled salt-${fname}.service > /dev/null 2>&1 || (
+                /bin/systemctl preset salt-${fname}.service > /dev/null 2>&1 &&
+                /bin/systemctl enable salt-${fname}.service > /dev/null 2>&1
+            )
 
-            /bin/systemctl enable salt-${fname}.service
             SYSTEMD_RELOAD=$BS_TRUE
-
-        elif [ ! -f /etc/init.d/salt-$fname ] || ([ -f /etc/init.d/salt-$fname ] && [ $_FORCE_OVERWRITE -eq $BS_TRUE ]); then
+        elif [ ! -f "/etc/init.d/salt-$fname" ] || \
+            ([ -f "/etc/init.d/salt-$fname" ] && [ "$_FORCE_OVERWRITE" -eq $BS_TRUE ]); then
             __copyfile "${_SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-${fname}" /etc/init.d/
             chmod +x /etc/init.d/salt-${fname}
 
-            # Skip salt-api since the service should be opt-in and not necessarily started on boot
-            [ $fname = "api" ] && continue
-
             /sbin/chkconfig salt-${fname} on
         fi
-
     done
 
     if [ "$SYSTEMD_RELOAD" -eq $BS_TRUE ]; then
         /bin/systemctl daemon-reload
     fi
+
+    return 0
 }
 
 install_centos_restart_daemons() {
     [ $_START_DAEMONS -eq $BS_FALSE ] && return
 
-    for fname in minion master syndic api; do
-        # Skip if not meant to be installed
+    for fname in api master minion syndic; do
         # Skip salt-api since the service should be opt-in and not necessarily started on boot
         [ $fname = "api" ] && continue
 
-        [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
+        # Skip if not meant to be installed
         [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
-        #[ $fname = "api" ] && ([ "$_INSTALL_MASTER" -eq $BS_FALSE ] || ! __check_command_exists "salt-${fname}") && continue
+        [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
         [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
 
         if [ -f /sbin/initctl ] && [ -f /etc/init/salt-${fname}.conf ]; then
@@ -3747,14 +3753,13 @@ install_centos_testing_post() {
 }
 
 install_centos_check_services() {
-    for fname in minion master syndic api; do
+    for fname in api master minion syndic; do
         # Skip salt-api since the service should be opt-in and not necessarily started on boot
         [ $fname = "api" ] && continue
 
         # Skip if not meant to be installed
         [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
         [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
-        #[ $fname = "api" ] && ([ "$_INSTALL_MASTER" -eq $BS_FALSE ] || ! __check_command_exists "salt-${fname}") && continue
         [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
         if [ -f /sbin/initctl ] && [ -f /etc/init/salt-${fname}.conf ]; then
             __check_services_upstart salt-$fname || return 1

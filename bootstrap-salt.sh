@@ -291,6 +291,7 @@ __usage() {
         the master.
     -s  Sleep time used when waiting for daemons to start, restart and when
         checking for the services running. Default: ${__DEFAULT_SLEEP}
+    -L  Also install salt-cloud and required python-libcloud package
     -M  Also install salt-master
     -S  Also install salt-syndic
     -N  Do not install salt-minion
@@ -317,8 +318,6 @@ __usage() {
         \${BS_SALT_ETC_DIR}/minion.d/99-master-address.conf
     -i  Pass the salt-minion id. This will be stored under
         \${BS_SALT_ETC_DIR}/minion_id
-    -L  Install the Apache Libcloud package if possible
-        (required for salt-cloud)
     -p  Extra-package to install while installing Salt dependencies. One package
         per -p flag. You're responsible for providing the proper package name.
     -H  Use the specified HTTP proxy for all download URLs (including https://).
@@ -1376,7 +1375,7 @@ if [ "$_INSTALL_SYNDIC" -eq $BS_TRUE ]; then
 fi
 
 if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ] && [ "$_CONFIG_ONLY" -eq $BS_FALSE ]; then
-    echoinfo "Installing Apache-Libcloud required for salt-cloud"
+    echoinfo "Installing salt-cloud and required python-libcloud package"
 fi
 
 if [ $_START_DAEMONS -eq $BS_FALSE ]; then
@@ -1585,6 +1584,22 @@ __apt_get_install_noinput() {
 #----------------------------------------------------------------------------------------------------------------------
 __apt_get_upgrade_noinput() {
     apt-get upgrade -y -o DPkg::Options::=--force-confold; return $?
+}
+
+
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  __yum_install_noinput
+#   DESCRIPTION:  (DRY) apt-get install with noinput options
+#----------------------------------------------------------------------------------------------------------------------
+__yum_install_noinput() {
+    if [ "$DISTRO_NAME_L" = "oracle_linux" ]; then
+        # We need to install one package at a time because --enablerepo=X disables ALL OTHER REPOS!!!!
+        for package in "${@}"; do
+            yum -y install "${package}" || yum -y install "${package}" --enablerepo="${_EPEL_REPO}" || return $?
+        done
+    else
+        yum -y install "${@}" --enablerepo=${_EPEL_REPO} || return $?
+    fi
 }
 
 
@@ -3452,12 +3467,17 @@ __install_saltstack_copr_salt_repository() {
         __fetch_url "/etc/yum.repos.d/${__REPO_FILENAME}" \
             "${HTTP_VAL}://copr.fedorainfracloud.org/coprs/saltstack/salt/repo/${__REPOTYPE}-${DISTRO_MAJOR_VERSION}/${__REPO_FILENAME}" || return 1
     fi
+
     return 0
 }
 
 install_centos_stable_deps() {
+    if [ "$_UPGRADE_SYS" -eq $BS_TRUE ]; then
+        yum -y update || return 1
+    fi
+
     if [ "$DISTRO_MAJOR_VERSION" -eq 5 ]; then
-        # Install curl which is not included in @core CentOS 5 installation
+        # Install curl which is not included in @Core CentOS 5 installation
         __check_command_exists curl || yum -y install "curl.${CPU_ARCH_L}" || return 1
     fi
 
@@ -3473,98 +3493,38 @@ install_centos_stable_deps() {
         __install_saltstack_rhel_repository || return 1
     fi
 
-    if [ -f "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" ]; then
-        # We're on the develop branch, install whichever tornado is on the requirements file
-        __REQUIRED_TORNADO="$(grep tornado "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt")"
-        if [ "${__REQUIRED_TORNADO}" != "" ]; then
-            if [ "$DISTRO_MAJOR_VERSION" -eq 5 ]; then
-                yum install -y python26-tornado
-            else
-                yum install -y python-tornado
-            fi
-        fi
-    fi
-
-    if [ "$_UPGRADE_SYS" -eq $BS_TRUE ]; then
-        yum -y update || return 1
-    fi
-
     __PACKAGES="yum-utils chkconfig"
 
-    if [ "$DISTRO_MAJOR_VERSION" -eq 5 ]; then
-        __PACKAGES="${__PACKAGES} python26-PyYAML python26-m2crypto m2crypto python26 python26-requests"
-        __PACKAGES="${__PACKAGES} python26-crypto python26-msgpack python26-zmq python26-jinja2"
-        if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
-            __check_pip_allowed "You need to allow pip based installations (-P) in order to install apache-libcloud"
-            __PACKAGES="${__PACKAGES} python26-setuptools"
-        fi
-    else
-        __PACKAGES="${__PACKAGES} PyYAML m2crypto python-crypto python-msgpack python-zmq python-jinja2 python-requests"
-        if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
-            __check_pip_allowed "You need to allow pip based installations (-P) in order to install apache-libcloud"
-            __PACKAGES="${__PACKAGES} python-pip"
-        fi
-    fi
-
-    if [ "$DISTRO_NAME_L" = "oracle_linux" ]; then
-        # We need to install one package at a time because --enablerepo=X disables ALL OTHER REPOS!!!!
-        for package in ${__PACKAGES}; do
-            # shellcheck disable=SC2086
-            yum -y install ${package} || yum -y install ${package} --enablerepo=${_EPEL_REPO} || return 1
-        done
-    else
-        # shellcheck disable=SC2086
-        yum -y install ${__PACKAGES} --enablerepo=${_EPEL_REPO} || return 1
-    fi
-
-    if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
-        __check_pip_allowed "You need to allow pip based installations (-P) in order to install apache-libcloud"
-        if [ "$DISTRO_MAJOR_VERSION" -eq 5 ]; then
-            easy_install-2.6 "apache-libcloud>=$_LIBCLOUD_MIN_VERSION"
-        else
-            pip install "apache-libcloud>=$_LIBCLOUD_MIN_VERSION"
-        fi
-    fi
-
     if [ "${_EXTRA_PACKAGES}" != "" ]; then
-        echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
-        if [ "$DISTRO_NAME_L" = "oracle_linux" ]; then
-            # We need to install one package at a time because --enablerepo=X disables ALL OTHER REPOS!!!!
-            for package in ${_EXTRA_PACKAGES}; do
-                # shellcheck disable=SC2086
-                yum -y install ${package} || yum -y install ${package} --enablerepo=${_EPEL_REPO} || return 1
-            done
-        else
-            # shellcheck disable=SC2086
-            yum install -y ${_EXTRA_PACKAGES} --enablerepo=${_EPEL_REPO} || return 1
-        fi
+        echoinfo "Also installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
+        __PACKAGES="${__PACKAGES} ${_EXTRA_PACKAGES}"
     fi
+
+    # shellcheck disable=SC2086
+    __yum_install_noinput ${__PACKAGES} || return 1
 
     return 0
 }
 
 install_centos_stable() {
     __PACKAGES=""
-    if [ "$_INSTALL_MINION" -eq $BS_TRUE ]; then
-        __PACKAGES="${__PACKAGES} salt-minion"
+
+    if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ];then
+        __PACKAGES="${__PACKAGES} salt-cloud"
     fi
     if [ "$_INSTALL_MASTER" -eq $BS_TRUE ];then
         __PACKAGES="${__PACKAGES} salt-master"
+    fi
+    if [ "$_INSTALL_MINION" -eq $BS_TRUE ]; then
+        __PACKAGES="${__PACKAGES} salt-minion"
     fi
     if [ "$_INSTALL_SYNDIC" -eq $BS_TRUE ];then
         __PACKAGES="${__PACKAGES} salt-syndic"
     fi
 
-    if [ "$DISTRO_NAME_L" = "oracle_linux" ]; then
-        # We need to install one package at a time because --enablerepo=X disables ALL OTHER REPOS!!!!
-        for package in ${__PACKAGES}; do
-            # shellcheck disable=SC2086
-            yum -y install ${package} || yum -y install ${package} --enablerepo=${_EPEL_REPO} || return 1
-        done
-    else
-        # shellcheck disable=SC2086
-        yum -y install ${__PACKAGES} --enablerepo=${_EPEL_REPO} || return 1
-    fi
+    # shellcheck disable=SC2086
+    __yum_install_noinput ${__PACKAGES} || return 1
+
     return 0
 }
 
@@ -3601,37 +3561,33 @@ install_centos_stable_post() {
 
 install_centos_git_deps() {
     install_centos_stable_deps || return 1
-    if ! __check_command_exists git; then
-        # git not installed - need to install it
-        if [ "$DISTRO_NAME_L" = "oracle_linux" ]; then
-            # try both ways --enablerepo=X disables ALL OTHER REPOS!!!!
-            yum install -y git || yum install -y git --enablerepo=${_EPEL_REPO} || return 1
-        else
-            yum install -y git --enablerepo=${_EPEL_REPO} || return 1
-        fi
-    fi
 
-    if [ "$DISTRO_MAJOR_VERSION" -gt 6 ]; then
-        if [ "$DISTRO_NAME_L" != "oracle_linux" ]; then
-            yum install -y systemd-python || yum install -y systemd-python --enablerepo=${_EPEL_REPO} || return 1
-        else
-            yum install -y systemd-python --enablerepo=${_EPEL_REPO} || return 1
-        fi
+    if ! __check_command_exists git; then
+        __yum_install_noinput git || return 1
     fi
 
     __git_clone_and_checkout || return 1
 
-    if [ -f "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" ]; then
-        # We're on the develop branch, install whichever tornado is on the requirements file
-        __REQUIRED_TORNADO="$(grep tornado "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt")"
-        if [ "${__REQUIRED_TORNADO}" != "" ]; then
-            if [ "$DISTRO_MAJOR_VERSION" -eq 5 ]; then
-                yum install -y python26-tornado
-            else
-                yum install -y python-tornado
-            fi
-        fi
+    __PACKAGES=""
+
+    if [ "$DISTRO_MAJOR_VERSION" -eq 5 ]; then
+        __PACKAGES="${__PACKAGES} python26-PyYAML python26-m2crypto m2crypto python26 python26-requests"
+        __PACKAGES="${__PACKAGES} python26-crypto python26-jinja2 python26-msgpack python26-tornado python26-zmq"
+    else
+        __PACKAGES="${__PACKAGES} PyYAML m2crypto python-crypto python-msgpack python-zmq python-jinja2"
+        __PACKAGES="${__PACKAGES} python-requests python-tornado"
     fi
+
+    if [ "$DISTRO_MAJOR_VERSION" -ge 7 ]; then
+        __PACKAGES="${__PACKAGES} systemd-python"
+    fi
+
+    if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
+        __PACKAGES="${__PACKAGES} python-libcloud"
+    fi
+
+    # shellcheck disable=SC2086
+    __yum_install_noinput ${__PACKAGES} || return 1
 
     # Let's trigger config_salt()
     if [ "$_TEMP_CONFIG_DIR" = "null" ]; then
@@ -3648,11 +3604,13 @@ install_centos_git() {
     else
         _PYEXE=python2
     fi
+
     if [ -f "${_SALT_GIT_CHECKOUT_DIR}/salt/syspaths.py" ]; then
         $_PYEXE setup.py --salt-config-dir="$_SALT_ETC_DIR" --salt-cache-dir="${_SALT_CACHE_DIR}" ${SETUP_PY_INSTALL_ARGS} install --prefix=/usr || return 1
     else
         $_PYEXE setup.py ${SETUP_PY_INSTALL_ARGS} install --prefix=/usr || return 1
     fi
+
     return 0
 }
 
@@ -3671,7 +3629,7 @@ install_centos_git_post() {
         if [ -f /bin/systemctl ]; then
             if [ ! -f "/usr/lib/systemd/system/salt-${fname}.service" ] || \
                 ([ -f "/usr/lib/systemd/system/salt-${fname}.service" ] && [ "$_FORCE_OVERWRITE" -eq $BS_TRUE ]); then
-                __copyfile "${_SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-${fname}.service" /usr/lib/systemd/system/
+                __copyfile "${_SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-${fname}.service" /usr/lib/systemd/system
             fi
 
             /usr/systemctl is-enabled salt-${fname}.service > /dev/null 2>&1 || (
@@ -3682,7 +3640,7 @@ install_centos_git_post() {
             SYSTEMD_RELOAD=$BS_TRUE
         elif [ ! -f "/etc/init.d/salt-$fname" ] || \
             ([ -f "/etc/init.d/salt-$fname" ] && [ "$_FORCE_OVERWRITE" -eq $BS_TRUE ]); then
-            __copyfile "${_SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-${fname}" /etc/init.d/
+            __copyfile "${_SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-${fname}" /etc/init.d
             chmod +x /etc/init.d/salt-${fname}
 
             /sbin/chkconfig salt-${fname} on
@@ -5909,7 +5867,14 @@ config_salt() {
     # If the configuration directory is not passed, return
     [ "$_TEMP_CONFIG_DIR" = "null" ] && return
 
-    CONFIGURED_ANYTHING=$BS_FALSE
+    if [ "$_CONFIG_ONLY" -eq $BS_TRUE ]; then
+        echowarn "Passing -C (config only) option implies -F (forced overwrite)."
+        if [ "$_FORCE_OVERWRITE" -ne $BS_TRUE ]; then
+            echowarn "Overwriting configs in 11 seconds!"
+            sleep 11
+            _FORCE_OVERWRITE=$BS_TRUE
+        fi
+    fi
 
     # Let's create the necessary directories
     [ -d "$_SALT_ETC_DIR" ] || mkdir "$_SALT_ETC_DIR" || return 1
@@ -5918,9 +5883,11 @@ config_salt() {
     # If -C or -F was passed, we don't need a .bak file for the config we're updating
     # This is used in the custom master/minion config file checks below
     CREATE_BAK=$BS_TRUE
-    if [ "$_CONFIG_ONLY" -eq $BS_TRUE ] || [ "$_FORCE_OVERWRITE" -eq $BS_TRUE ]; then
+    if [ "$_FORCE_OVERWRITE" -eq $BS_TRUE ]; then
         CREATE_BAK=$BS_FALSE
     fi
+
+    CONFIGURED_ANYTHING=$BS_FALSE
 
     # Copy the grains file if found
     if [ -f "$_TEMP_CONFIG_DIR/grains" ]; then
@@ -5929,15 +5896,7 @@ config_salt() {
         CONFIGURED_ANYTHING=$BS_TRUE
     fi
 
-    if [ "$_CONFIG_ONLY" -eq "$BS_TRUE" ]; then
-        echowarn "Passing -C (config only) option implies -F (forced overwrite)."
-        if [ "$_FORCE_OVERWRITE" -ne "$BS_TRUE" ]; then
-            echowarn "Overwriting configs in 11 seconds!"
-            sleep 11
-        fi
-    fi
-
-    if [ "$_INSTALL_MINION" -eq "$BS_TRUE" ] || [ "$_CONFIG_ONLY" -eq "$BS_TRUE" ] || [ "$_CUSTOM_MINION_CONFIG" != "null" ]; then
+    if [ "$_INSTALL_MINION" -eq $BS_TRUE ] || [ "$_CONFIG_ONLY" -eq $BS_TRUE ] || [ "$_CUSTOM_MINION_CONFIG" != "null" ]; then
         # Create the PKI directory
         [ -d "$_PKI_DIR/minion" ] || (mkdir -p "$_PKI_DIR/minion" && chmod 700 "$_PKI_DIR/minion") || return 1
 
@@ -6024,6 +5983,23 @@ config_salt() {
             chmod 664 "$_PKI_DIR/master/master.pub" || return 1
             CONFIGURED_ANYTHING=$BS_TRUE
         fi
+    fi
+
+    if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
+        # Recursively copy salt-cloud configs with overwriting if necessary
+        for file in "$_TEMP_CONFIG_DIR"/cloud*; do
+            if [ -f "$file" ]; then
+                __copyfile "$file" "$_SALT_ETC_DIR"
+            elif [ -d "$file" ]; then
+                subdir="$(basename "$file")"
+                mkdir -p "$_SALT_ETC_DIR/$subdir"
+                for file_d in "$_TEMP_CONFIG_DIR/$subdir"/*; do
+                    [ -f "$file_d" ] && __copyfile "$file_d" "$_SALT_ETC_DIR/$subdir"
+                done
+            else
+                continue
+            fi
+        done
     fi
 
     if [ "$_CONFIG_ONLY" -eq $BS_TRUE ] && [ $CONFIGURED_ANYTHING -eq $BS_FALSE ]; then

@@ -2824,11 +2824,6 @@ install_debian_7_deps() {
     # Additionally install procps and pciutils which allows for Docker bootstraps. See 366#issuecomment-39666813
     __PACKAGES='procps pciutils'
 
-    if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
-        # Install python-libcloud if asked to
-        __PACKAGES="${__PACKAGES} python-libcloud"
-    fi
-
     # shellcheck disable=SC2086
     __apt_get_install_noinput ${__PACKAGES} || return 1
 
@@ -2911,11 +2906,6 @@ install_debian_8_deps() {
     # Additionally install procps and pciutils which allows for Docker bootstraps. See 366#issuecomment-39666813
     __PACKAGES='procps pciutils'
 
-    if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
-        # Install python-libcloud if asked to
-        __PACKAGES="${__PACKAGES} python-libcloud"
-    fi
-
     # shellcheck disable=SC2086
     __apt_get_install_noinput ${__PACKAGES} || return 1
 
@@ -2939,10 +2929,17 @@ install_debian_git_deps() {
 
     __git_clone_and_checkout || return 1
 
+    __PACKAGES='libzmq3 libzmq3-dev lsb-release python-apt python-backports.ssl-match-hostname python-crypto'
+    __PACKAGES="${__PACKAGES} python-jinja2 python-m2crypto python-msgpack python-requests python-tornado"
+    __PACKAGES="${__PACKAGES} python-tornado python-yaml python-zmq"
+
+    if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
+        # Install python-libcloud if asked to
+        __PACKAGES="${__PACKAGES} python-libcloud"
+    fi
+
     # shellcheck disable=SC2086
-    __apt_get_install_noinput libzmq3 libzmq3-dev lsb-release python-apt python-backports.ssl-match-hostname \
-        python-crypto python-jinja2 python-m2crypto python-msgpack python-requests python-tornado python-yaml \
-        python-zmq || return 1
+    __apt_get_install_noinput ${__PACKAGES} || return 1
 
     # Let's trigger config_salt()
     if [ "$_TEMP_CONFIG_DIR" = "null" ]; then
@@ -2970,8 +2967,13 @@ install_debian_8_git_deps() {
     __git_clone_and_checkout || return 1
 
     __PACKAGES='libzmq3 libzmq3-dev lsb-release python-apt python-crypto python-jinja2 python-m2crypto python-msgpack python-requests python-yaml python-zmq'
-    __PIP_PACKAGES=''
 
+    if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
+        # Install python-libcloud if asked to
+        __PACKAGES="${__PACKAGES} python-libcloud"
+    fi
+
+    __PIP_PACKAGES=''
     if (__check_pip_allowed >/dev/null 2>&1); then
         __PIP_PACKAGES='tornado'
         # Install development environment for building tornado Python module
@@ -3015,15 +3017,20 @@ install_debian_8_git_deps() {
 
 install_debian_stable() {
     __PACKAGES=""
-    if [ "$_INSTALL_MINION" -eq $BS_TRUE ]; then
-        __PACKAGES="${__PACKAGES} salt-minion"
+
+    if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ];then
+        __PACKAGES="${__PACKAGES} salt-cloud"
     fi
     if [ "$_INSTALL_MASTER" -eq $BS_TRUE ]; then
         __PACKAGES="${__PACKAGES} salt-master"
     fi
+    if [ "$_INSTALL_MINION" -eq $BS_TRUE ]; then
+        __PACKAGES="${__PACKAGES} salt-minion"
+    fi
     if [ "$_INSTALL_SYNDIC" -eq $BS_TRUE ]; then
         __PACKAGES="${__PACKAGES} salt-syndic"
     fi
+
     # shellcheck disable=SC2086
     __apt_get_install_noinput ${__PACKAGES} || return 1
 
@@ -3060,11 +3067,9 @@ install_debian_8_git() {
 
 install_debian_git_post() {
     for fname in minion master syndic api; do
+        # Skip salt-api since the service should be opt-in and not necessarily started on boot
+        [ $fname = "api" ] && continue
 
-        # Skip if not meant to be installed
-        [ "$fname" = "api" ] && \
-            ([ "$_INSTALL_MASTER" -eq $BS_FALSE ] || ! __check_command_exists "salt-${fname}") && \
-                continue
         [ "$fname" = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
         [ "$fname" = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
         [ "$fname" = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
@@ -3145,10 +3150,10 @@ install_debian_check_services() {
         [ $fname = "api" ] && continue
 
         # Skip if not meant to be installed
-        [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
         [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
-        #[ $fname = "api" ] && ([ "$_INSTALL_MASTER" -eq $BS_FALSE ] || [ ! -f "/etc/init.d/salt-$fname" ]) && continue
+        [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
         [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
+
         if [ -f /bin/systemctl ]; then
             __check_services_systemd salt-$fname || return 1
         elif [ -f /etc/init.d/salt-$fname ]; then

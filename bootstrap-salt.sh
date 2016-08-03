@@ -2332,15 +2332,6 @@ install_ubuntu_deps() {
     # Additionally install procps and pciutils which allows for Docker bootstraps. See 366#issuecomment-39666813
     __PACKAGES="${__PACKAGES} procps pciutils"
 
-    if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
-        __check_pip_allowed "You need to allow pip based installations (-P) in order to install 'apache-libcloud'"
-        if ! __check_command_exists pip; then
-            __PACKAGES="${__PACKAGES} python-setuptools python-pip"
-        fi
-        # shellcheck disable=SC2089
-        __PIP_PACKAGES="${__PIP_PACKAGES} 'apache-libcloud>=$_LIBCLOUD_MIN_VERSION'"
-    fi
-
     apt-get update
     # shellcheck disable=SC2086,SC2090
     __apt_get_install_noinput ${__PACKAGES} || return 1
@@ -2478,33 +2469,52 @@ install_ubuntu_git_deps() {
     __git_clone_and_checkout || return 1
 
     __PACKAGES=""
+    __PIP_PACKAGES=""
+
     # See how we are installing packages
     if [ ${_PIP_ALL} -eq $BS_TRUE ]; then
-        __PACKAGES="python-dev swig libssl-dev libzmq3 libzmq3-dev"
+        __PACKAGES="${__PACKAGES} python-dev swig libssl-dev libzmq3 libzmq3-dev"
+
         if ! __check_command_exists pip; then
             __PACKAGES="${__PACKAGES} python-setuptools python-pip"
         fi
+
         # Get just the apt packages that are required to build all the pythons
-        __apt_get_install_noinput "$__PACKAGES" || return 1
+        # shellcheck disable=SC2086
+        __apt_get_install_noinput ${__PACKAGES} || return 1
         # Install the pythons from requirements (only zmq for now)
         __install_pip_deps "${_SALT_GIT_CHECKOUT_DIR}/requirements/zeromq.txt" || return 1
     else
         install_ubuntu_deps || return 1
-        __apt_get_install_noinput python-yaml python-m2crypto python-crypto \
-            msgpack-python python-zmq python-jinja2 || return 1
+        __PACKAGES="${__PACKAGES} python-yaml python-m2crypto python-crypto msgpack-python python-zmq python-jinja2"
+
+        if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
+            # Install python-libcloud if asked to
+            __PACKAGES="${__PACKAGES} python-libcloud"
+        fi
+
         if [ -f "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" ]; then
             # We're on the develop branch, install whichever tornado is on the requirements file
             __REQUIRED_TORNADO="$(grep tornado "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt")"
+
             if [ "${__REQUIRED_TORNADO}" != "" ]; then
+                __check_pip_allowed "You need to allow pip based installations (-P) in order to install the python package '${__REQUIRED_TORNADO}'"
+
                 __PACKAGES="${__PACKAGES} python-dev"
-                check_pip_allowed "You need to allow pip based installations (-P) in order to install the python package '${__REQUIRED_TORNADO}'"
+                __PIP_PACKAGES="${__PIP_PACKAGES} ${__REQUIRED_TORNADO}"
+
                 if ! __check_command_exists pip; then
                     __PACKAGES="${__PACKAGES} python-setuptools python-pip"
                 fi
-                # shellcheck disable=SC2086
-                __apt_get_install_noinput $__PACKAGES || return 1
-                pip install -U "${__REQUIRED_TORNADO}"
             fi
+        fi
+
+        # shellcheck disable=SC2086
+        __apt_get_install_noinput ${__PACKAGES} || return 1
+
+        if [ "${__PIP_PACKAGES}" != "" ]; then
+            # shellcheck disable=SC2086,SC2090
+            pip install -U ${__PIP_PACKAGES} || return 1
         fi
     fi
 
@@ -2519,11 +2529,15 @@ install_ubuntu_git_deps() {
 
 install_ubuntu_stable() {
     __PACKAGES=""
-    if [ "$_INSTALL_MINION" -eq $BS_TRUE ]; then
-        __PACKAGES="${__PACKAGES} salt-minion"
+
+    if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ];then
+        __PACKAGES="${__PACKAGES} salt-cloud"
     fi
     if [ "$_INSTALL_MASTER" -eq $BS_TRUE ]; then
         __PACKAGES="${__PACKAGES} salt-master"
+    fi
+    if [ "$_INSTALL_MINION" -eq $BS_TRUE ]; then
+        __PACKAGES="${__PACKAGES} salt-minion"
     fi
     if [ "$_INSTALL_SYNDIC" -eq $BS_TRUE ]; then
         __PACKAGES="${__PACKAGES} salt-syndic"
@@ -2929,7 +2943,7 @@ install_debian_git_deps() {
 
     __git_clone_and_checkout || return 1
 
-    __PACKAGES='libzmq3 libzmq3-dev lsb-release python-apt python-backports.ssl-match-hostname python-crypto'
+    __PACKAGES="libzmq3 libzmq3-dev lsb-release python-apt python-backports.ssl-match-hostname python-crypto"
     __PACKAGES="${__PACKAGES} python-jinja2 python-m2crypto python-msgpack python-requests python-tornado"
     __PACKAGES="${__PACKAGES} python-tornado python-yaml python-zmq"
 

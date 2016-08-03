@@ -3305,7 +3305,7 @@ install_fedora_git_deps() {
     fi
 
     if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
-        __PACKAGES="${__PACKAGES} python-libcloud"
+        __PACKAGES="${__PACKAGES} python-libcloud python-netaddr"
     fi
 
     # shellcheck disable=SC2086

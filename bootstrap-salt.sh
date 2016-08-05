@@ -2542,6 +2542,7 @@ install_ubuntu_stable() {
     if [ "$_INSTALL_SYNDIC" -eq $BS_TRUE ]; then
         __PACKAGES="${__PACKAGES} salt-syndic"
     fi
+
     # shellcheck disable=SC2086
     __apt_get_install_noinput ${__PACKAGES} || return 1
     return 0
@@ -3213,10 +3214,6 @@ install_fedora_deps() {
         __PACKAGES="${__PACKAGES} python-msgpack python-requests"
     fi
 
-    if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
-        __PACKAGES="${__PACKAGES} python-libcloud"
-    fi
-
     # shellcheck disable=SC2086
     $FEDORA_PACKAGE_MANAGER install -y ${__PACKAGES} || return 1
 
@@ -3236,27 +3233,35 @@ install_fedora_deps() {
 install_fedora_stable() {
     __fedora_get_package_manager
     __PACKAGES=""
+
+    if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ];then
+        __PACKAGES="${__PACKAGES} salt-cloud"
+    fi
+    if [ "$_INSTALL_MASTER" -eq $BS_TRUE ]; then
+        __PACKAGES="${__PACKAGES} salt-master"
+    fi
     if [ "$_INSTALL_MINION" -eq $BS_TRUE ]; then
         __PACKAGES="${__PACKAGES} salt-minion"
     fi
-    if [ "$_INSTALL_MASTER" -eq $BS_TRUE ] || [ "$_INSTALL_SYNDIC" -eq $BS_TRUE ]; then
-        __PACKAGES="${__PACKAGES} salt-master"
+    if [ "$_INSTALL_SYNDIC" -eq $BS_TRUE ]; then
+        __PACKAGES="${__PACKAGES} salt-syndic"
     fi
+
     # shellcheck disable=SC2086
     $FEDORA_PACKAGE_MANAGER install -y ${__PACKAGES} || return 1
+
     return 0
 }
 
 install_fedora_stable_post() {
     for fname in minion master syndic api; do
-        # Skip if not meant to be installed
-        [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
-        [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
-        [ $fname = "api" ] && ([ "$_INSTALL_MASTER" -eq $BS_FALSE ] || ! __check_command_exists "salt-${fname}") && continue
-        [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
-
         # Skip salt-api since the service should be opt-in and not necessarily started on boot
         [ $fname = "api" ] && continue
+
+        # Skip if not meant to be installed
+        [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
+        [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
+        [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
 
         systemctl is-enabled salt-$fname.service || (systemctl preset salt-$fname.service && systemctl enable salt-$fname.service)
         sleep 0.1
@@ -3272,9 +3277,10 @@ install_fedora_git_deps() {
         $FEDORA_PACKAGE_MANAGER install -y git || return 1
     fi
 
-    $FEDORA_PACKAGE_MANAGER install -y systemd-python || return 1
-
     __git_clone_and_checkout || return 1
+
+    __PACKAGES="systemd-python"
+    __PIP_PACKAGES=""
 
     if [ -f "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" ]; then
         # We're on the develop branch, install whichever tornado is on the requirements file
@@ -3284,12 +3290,23 @@ install_fedora_git_deps() {
 
             # Install pip and pip dependencies
             if ! __check_command_exists pip; then
-                $FEDORA_PACKAGE_MANAGER install -y python-setuptools python-pip gcc python-devel
+                __PACKAGES="${__PACKAGES} python-setuptools python-pip gcc python-devel"
             fi
 
-            pip install -U tornado
-
+            __PIP_PACKAGES="${__PIP_PACKAGES} tornado"
         fi
+    fi
+
+    if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
+        __PACKAGES="${__PACKAGES} python-libcloud"
+    fi
+
+    # shellcheck disable=SC2086
+    $FEDORA_PACKAGE_MANAGER install -y ${__PACKAGES} || return 1
+
+    if [ "${__PIP_PACKAGES}" != "" ]; then
+        # shellcheck disable=SC2086,SC2090
+        pip install -U ${__PIP_PACKAGES} || return 1
     fi
 
     # Let's trigger config_salt()

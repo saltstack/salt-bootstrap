@@ -279,7 +279,7 @@ __usage() {
     -n  No colours
     -D  Show debug output
     -c  Temporary configuration directory
-    -g  Salt repository URL. Default: ${_SALTSTACK_REPO_URL}
+    -g  Salt Git repository URL. Default: ${_SALTSTACK_REPO_URL}
     -G  Instead of cloning from ${_SALTSTACK_REPO_URL}, clone from
         https://${_SALTSTACK_REPO_URL#*://}
         (usually necessary on systems which have the regular git protocol port
@@ -1513,16 +1513,16 @@ __git_clone_and_checkout() {
     else
         if [ "$_FORCE_SHALLOW_CLONE" -eq "${BS_TRUE}" ]; then
             echoinfo "Forced shallow cloning of git repository."
-            __SHALLOW_CLONE="${BS_TRUE}"
+            __SHALLOW_CLONE=$BS_TRUE
         elif [ "$(echo "$GIT_REV" | sed 's/^.*\(v\?[[:digit:]]\{1,4\}\.[[:digit:]]\{1,2\}\)\(\.[[:digit:]]\{1,2\}\)\?.*$/MATCH/')" = "MATCH" ]; then
             echoinfo "Git revision matches a Salt version tag, shallow cloning enabled."
-            __SHALLOW_CLONE="${BS_TRUE}"
+            __SHALLOW_CLONE=$BS_TRUE
         else
             echowarn "The git revision being installed does not match a Salt version tag. Shallow cloning disabled"
-            __SHALLOW_CLONE="${BS_FALSE}"
+            __SHALLOW_CLONE=$BS_FALSE
         fi
 
-        if [ "$__SHALLOW_CLONE" -eq "${BS_TRUE}" ]; then
+        if [ "$__SHALLOW_CLONE" -eq $BS_TRUE ]; then
             # Let's try shallow cloning to speed up.
             # Test for "--single-branch" option introduced in git 1.7.10, the minimal version of git where the shallow
             # cloning we need actually works
@@ -1533,31 +1533,37 @@ __git_clone_and_checkout() {
                 if [ $? -eq 0 ]; then
                     # shellcheck disable=SC2164
                     cd "${_SALT_GIT_CHECKOUT_DIR}"
-                    __SHALLOW_CLONE="${BS_TRUE}"
+                    __SHALLOW_CLONE=$BS_TRUE
                 else
                     # Shallow clone above failed(missing upstream tags???), let's resume the old behaviour.
                     echowarn "Failed to shallow clone."
                     echoinfo "Resuming regular git clone and remote SaltStack repository addition procedure"
-                    __SHALLOW_CLONE="${BS_FALSE}"
+                    __SHALLOW_CLONE=$BS_FALSE
                 fi
             else
                 echodebug "Shallow cloning not possible. Required git version not met."
-                __SHALLOW_CLONE="${BS_FALSE}"
+                __SHALLOW_CLONE=$BS_FALSE
             fi
         fi
 
-        if [ "$__SHALLOW_CLONE" -eq "${BS_FALSE}" ]; then
+        if [ "$__SHALLOW_CLONE" -eq $BS_FALSE ]; then
             git clone "$_SALT_REPO_URL" "$__SALT_CHECKOUT_REPONAME" || return 1
             # shellcheck disable=SC2164
             cd "${_SALT_GIT_CHECKOUT_DIR}"
 
-            if [ "$(echo "$_SALT_REPO_URL" | grep -c -e '\(\(git\|https\)://github\.com/\|git@github\.com:\)saltstack/salt\.git')" -eq 0 ]; then
+            if ! echo "$_SALT_REPO_URL" | \
+                grep -q -x '\(\(git\|https\)://github\.com/\|git@github\.com:\)saltstack/salt\.git'; then
                 # We need to add the saltstack repository as a remote and fetch tags for proper versioning
                 echoinfo "Adding SaltStack's Salt repository as a remote"
                 git remote add upstream "$_SALTSTACK_REPO_URL" || return 1
+
                 echodebug "Fetching upstream (SaltStack's Salt repository) git tags"
                 git fetch --tags upstream || return 1
-                GIT_REV="origin/$GIT_REV"
+
+                # Check if GIT_REV is a remote branch or just a commit hash
+                if git branch -r | grep -q -F -w "origin/$GIT_REV"; then
+                    GIT_REV="origin/$GIT_REV"
+                fi
             fi
 
             echodebug "Checking out $GIT_REV"
@@ -1565,6 +1571,7 @@ __git_clone_and_checkout() {
         fi
 
     fi
+
     echoinfo "Cloning Salt's git repository succeeded"
     return 0
 }

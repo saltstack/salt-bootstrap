@@ -3082,9 +3082,9 @@ install_debian_8_git() {
 
 install_debian_git_post() {
     for fname in minion master syndic api; do
-        # Skip salt-api since the service should be opt-in and not necessarily started on boot
-        [ $fname = "api" ] && continue
-
+        # Skip if not meant to be installed
+        [ "$fname" = "api" ] && \
+            ([ "$_INSTALL_MASTER" -eq $BS_FALSE ] || ! __check_command_exists "salt-${fname}") && continue
         [ "$fname" = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
         [ "$fname" = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
         [ "$fname" = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
@@ -3513,7 +3513,7 @@ install_centos_stable_deps() {
     fi
 
     if [ "$DISTRO_MAJOR_VERSION" -eq 5 ]; then
-        # Install curl which is not included in @Core CentOS 5 installation
+        # Install curl which is not included in @core CentOS 5 installation
         __check_command_exists curl || yum -y install "curl.${CPU_ARCH_L}" || return 1
     fi
 
@@ -3654,10 +3654,9 @@ install_centos_git_post() {
     SYSTEMD_RELOAD=$BS_FALSE
 
     for fname in api master minion syndic; do
-        # Skip salt-api since the service should be opt-in and not necessarily started on boot
-        [ $fname = "api" ] && continue
-
         # Skip if not meant to be installed
+        [ $fname = "api" ] && \
+            ([ "$_INSTALL_MASTER" -eq $BS_FALSE ] || ! __check_command_exists "salt-${fname}") && continue
         [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
         [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
         [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
@@ -3668,24 +3667,19 @@ install_centos_git_post() {
                 __copyfile "${_SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-${fname}.service" /usr/lib/systemd/system
             fi
 
-            /usr/systemctl is-enabled salt-${fname}.service > /dev/null 2>&1 || (
-                /bin/systemctl preset salt-${fname}.service > /dev/null 2>&1 &&
-                /bin/systemctl enable salt-${fname}.service > /dev/null 2>&1
-            )
-
             SYSTEMD_RELOAD=$BS_TRUE
         elif [ ! -f "/etc/init.d/salt-$fname" ] || \
             ([ -f "/etc/init.d/salt-$fname" ] && [ "$_FORCE_OVERWRITE" -eq $BS_TRUE ]); then
             __copyfile "${_SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-${fname}" /etc/init.d
             chmod +x /etc/init.d/salt-${fname}
-
-            /sbin/chkconfig salt-${fname} on
         fi
     done
 
     if [ "$SYSTEMD_RELOAD" -eq $BS_TRUE ]; then
         /bin/systemctl daemon-reload
     fi
+
+    install_centos_stable_post || return 1
 
     return 0
 }
@@ -3755,6 +3749,7 @@ install_centos_check_services() {
         [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
         [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
         [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
+
         if [ -f /sbin/initctl ] && [ -f /etc/init/salt-${fname}.conf ]; then
             __check_services_upstart salt-$fname || return 1
         elif [ -f /etc/init.d/salt-$fname ]; then
@@ -3763,6 +3758,7 @@ install_centos_check_services() {
             __check_services_systemd salt-$fname || return 1
         fi
     done
+
     return 0
 }
 #
@@ -5172,10 +5168,6 @@ install_opensuse_stable_deps() {
         __PACKAGES="${__PACKAGES} libzmq5"
     fi
 
-    if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
-        __PACKAGES="${__PACKAGES} python-apache-libcloud"
-    fi
-
     # shellcheck disable=SC2086
     __zypper_install ${__PACKAGES} || return 1
 
@@ -5202,14 +5194,22 @@ install_opensuse_git_deps() {
 
     __git_clone_and_checkout || return 1
 
+    __PACKAGES=""
+
     if [ -f "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" ]; then
         # We're on the develop branch, install whichever tornado is on the requirements file
         __REQUIRED_TORNADO="$(grep tornado "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt")"
         if [ "${__REQUIRED_TORNADO}" != "" ]; then
-            __zypper_install python-tornado
+            __PACKAGES="${__PACKAGES} python-tornado"
         fi
-
     fi
+
+    if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
+        __PACKAGES="${__PACKAGES} python-apache-libcloud"
+    fi
+
+    # shellcheck disable=SC2086
+    __zypper_install ${__PACKAGES} || return 1
 
     # Let's trigger config_salt()
     if [ "$_TEMP_CONFIG_DIR" = "null" ]; then
@@ -5222,17 +5222,23 @@ install_opensuse_git_deps() {
 
 install_opensuse_stable() {
     __PACKAGES=""
-    if [ "$_INSTALL_MINION" -eq $BS_TRUE ]; then
-        __PACKAGES="${__PACKAGES} salt-minion"
+
+    if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ];then
+        __PACKAGES="${__PACKAGES} salt-cloud"
     fi
     if [ "$_INSTALL_MASTER" -eq $BS_TRUE ]; then
         __PACKAGES="${__PACKAGES} salt-master"
     fi
+    if [ "$_INSTALL_MINION" -eq $BS_TRUE ]; then
+        __PACKAGES="${__PACKAGES} salt-minion"
+    fi
     if [ "$_INSTALL_SYNDIC" -eq $BS_TRUE ]; then
         __PACKAGES="${__PACKAGES} salt-syndic"
     fi
+
     # shellcheck disable=SC2086
     __zypper_install $__PACKAGES || return 1
+
     return 0
 }
 
@@ -5321,7 +5327,6 @@ install_opensuse_restart_daemons() {
 
         service salt-$fname stop > /dev/null 2>&1
         service salt-$fname start
-
     done
 }
 
@@ -5459,13 +5464,22 @@ install_suse_12_git_deps() {
 
     __git_clone_and_checkout || return 1
 
+    __PACKAGES=""
+
     if [ -f "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" ]; then
         # We're on the develop branch, install whichever tornado is on the requirements file
         __REQUIRED_TORNADO="$(grep tornado "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt")"
         if [ "${__REQUIRED_TORNADO}" != "" ]; then
-            __zypper_install python-tornado
+            __PACKAGES="${__PACKAGES} python-tornado"
         fi
     fi
+
+    if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
+        __PACKAGES="${__PACKAGES} python-apache-libcloud"
+    fi
+
+    # shellcheck disable=SC2086
+    __zypper_install ${__PACKAGES} || return 1
 
     # Let's trigger config_salt()
     if [ "$_TEMP_CONFIG_DIR" = "null" ]; then
@@ -5484,6 +5498,7 @@ install_suse_12_stable() {
         # error: option --single-version-externally-managed not recognized
         USE_SETUPTOOLS=1 pip install salt || return 1
     fi
+
     return 0
 }
 
@@ -5584,10 +5599,6 @@ install_suse_11_stable_deps() {
         __PACKAGES="${__PACKAGES} python-PyYAML"
     fi
 
-    if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
-        __PACKAGES="${__PACKAGES} python-apache-libcloud"
-    fi
-
     # SLES 11 SP3 ships with both python-M2Crypto-0.22.* and python-m2crypto-0.21 and we will be asked which
     # we want to install, even with --non-interactive.
     # Let's try to install the higher version first and then the lower one in case of failure
@@ -5647,13 +5658,22 @@ install_suse_11_git_deps() {
 
     __git_clone_and_checkout || return 1
 
+    __PACKAGES=""
+
     if [ -f "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" ]; then
         # We're on the develop branch, install whichever tornado is on the requirements file
         __REQUIRED_TORNADO="$(grep tornado "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt")"
         if [ "${__REQUIRED_TORNADO}" != "" ]; then
-            __zypper_install python-tornado
+            __PACKAGES="${__PACKAGES} python-tornado"
         fi
     fi
+
+    if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
+        __PACKAGES="${__PACKAGES} python-apache-libcloud"
+    fi
+
+    # shellcheck disable=SC2086
+    __zypper_install ${__PACKAGES} || return 1
 
     # Let's trigger config_salt()
     if [ "$_TEMP_CONFIG_DIR" = "null" ]; then
@@ -5706,6 +5726,7 @@ install_suse_11_stable_post() {
 
         done
     fi
+
     return 0
 }
 
@@ -6041,8 +6062,6 @@ config_salt() {
                 for file_d in "$_TEMP_CONFIG_DIR/$subdir"/*; do
                     [ -f "$file_d" ] && __copyfile "$file_d" "$_SALT_ETC_DIR/$subdir"
                 done
-            else
-                continue
             fi
         done
     fi
@@ -6052,7 +6071,7 @@ config_salt() {
         exit 0
     fi
 
-    # Create default logs directory if not exists (happens with git installations)
+    # Create default logs directory if not exists
     mkdir -p /var/log/salt
 
     return 0

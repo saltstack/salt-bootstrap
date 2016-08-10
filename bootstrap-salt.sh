@@ -1753,10 +1753,10 @@ __copyfile() {
         cp "$sfile" "$dfile" || return 1
     elif [ -f "$dfile" ] && [ "$overwrite" -eq $BS_TRUE ]; then
         # The destination exist and we're overwriting
-        echodebug "Overriding $dfile with $sfile"
+        echodebug "Overwriting $dfile with $sfile"
         cp -f "$sfile" "$dfile" || return 1
     elif [ -f "$dfile" ] && [ "$overwrite" -ne $BS_TRUE ]; then
-        echodebug "Not overriding $dfile with $sfile"
+        echodebug "Not overwriting $dfile with $sfile"
     fi
     return 0
 }
@@ -4340,7 +4340,8 @@ install_arch_linux_git_post() {
         # Skip if not meant to be installed
         [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
         [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
-        [ $fname = "api" ] && ([ "$_INSTALL_MASTER" -eq $BS_FALSE ] || ! __check_command_exists "salt-${fname}") && continue
+        [ $fname = "api" ] && \
+            ([ "$_INSTALL_MASTER" -eq $BS_FALSE ] || ! __check_command_exists "salt-${fname}") && continue
         [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
 
         if [ -f /usr/bin/systemctl ]; then
@@ -4372,9 +4373,8 @@ install_arch_linux_restart_daemons() {
         [ $fname = "api" ] && continue
 
         # Skip if not meant to be installed
-        [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
         [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
-        #[ $fname = "api" ] && ([ "$_INSTALL_MASTER" -eq $BS_FALSE ] || ! __check_command_exists "salt-${fname}") && continue
+        [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
         [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
 
         if [ -f /usr/bin/systemctl ]; then
@@ -4398,10 +4398,10 @@ install_arch_check_services() {
         [ $fname = "api" ] && continue
 
         # Skip if not meant to be installed
-        [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
         [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
-        #[ $fname = "api" ] && ([ "$_INSTALL_MASTER" -eq $BS_FALSE ] || ! __check_command_exists "salt-${fname}") && continue
+        [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
         [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
+
         __check_services_systemd salt-$fname || return 1
     done
     return 0
@@ -4856,12 +4856,13 @@ install_openbsd_post() {
         cp -p /etc/rc.d/rc.subr /etc/rc.d/rc.subr
         sed -i."$(date +%F)".saltinstall -e 's:-xf:-f:g' /etc/rc.d/rc.subr
     fi
+
     _TEMP_CONFIG_DIR="/tmp"
-    for fname in minion master syndic api; do
+    for fname in api master minion syndic; do
         # Skip if not meant to be installed
-        [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
-        [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
         [ $fname = "api" ] || ! __check_command_exists "salt-${fname}" && continue
+        [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
+        [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
         [ $fname = "syndic" ] && continue
 
         if [ $? -eq 1 ]; then
@@ -4879,31 +4880,34 @@ install_openbsd_post() {
 }
 
 install_openbsd_check_services() {
-    for fname in minion master syndic api; do
+    for fname in api master minion syndic; do
         # Skip salt-api since the service should be opt-in and not necessarily started on boot
         [ $fname = "api" ] && continue
 
         # Skip if not meant to be installed
-        [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
         [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
-        [ $fname = "api" ] && continue
+        [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
         [ $fname = "syndic" ] && continue
+
         if [ -f /etc/rc.d/salt_${fname} ]; then
             __check_services_openbsd salt_${fname} || return 1
         fi
     done
+
     return 0
 }
 
 
 install_openbsd_restart_daemons() {
     [ $_START_DAEMONS -eq $BS_FALSE ] && return
-    for fname in minion master syndic api; do
+
+    for fname in api master minion syndic; do
         # Skip salt-api since the service should be opt-in and not necessarily started on boot
         [ $fname = "api" ] && continue
+
         # Skip if not meant to be installed
-        [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
         [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
+        [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
         [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
         if [ -f "/etc/rc.d/salt_${fname}" ]; then
             /etc/rc.d/salt_${fname} stop > /dev/null 2>&1
@@ -5009,9 +5013,10 @@ install_smartos_post() {
     for fname in minion master syndic api; do
 
         # Skip if not meant to be installed
-        [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
+        [ $fname = "api" ] && \
+            ([ "$_INSTALL_MASTER" -eq $BS_FALSE ] || ! __check_command_exists "salt-${fname}") && continue
         [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
-        [ $fname = "api" ] && ([ "$_INSTALL_MASTER" -eq $BS_FALSE ] || ! __check_command_exists "salt-${fname}") && continue
+        [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
         [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
 
         svcs network/salt-$fname > /dev/null 2>&1
@@ -5933,6 +5938,7 @@ config_salt() {
 
     if [ "$_CONFIG_ONLY" -eq $BS_TRUE ]; then
         echowarn "Passing -C (config only) option implies -F (forced overwrite)."
+
         if [ "$_FORCE_OVERWRITE" -ne $BS_TRUE ]; then
             echowarn "Overwriting configs in 11 seconds!"
             sleep 11
@@ -5960,7 +5966,8 @@ config_salt() {
         CONFIGURED_ANYTHING=$BS_TRUE
     fi
 
-    if [ "$_INSTALL_MINION" -eq $BS_TRUE ] || [ "$_CONFIG_ONLY" -eq $BS_TRUE ] || [ "$_CUSTOM_MINION_CONFIG" != "null" ]; then
+    if [ "$_INSTALL_MINION" -eq $BS_TRUE ] || \
+        [ "$_CONFIG_ONLY" -eq $BS_TRUE ] || [ "$_CUSTOM_MINION_CONFIG" != "null" ]; then
         # Create the PKI directory
         [ -d "$_PKI_DIR/minion" ] || (mkdir -p "$_PKI_DIR/minion" && chmod 700 "$_PKI_DIR/minion") || return 1
 
@@ -6053,12 +6060,14 @@ config_salt() {
         # Recursively copy salt-cloud configs with overwriting if necessary
         for file in "$_TEMP_CONFIG_DIR"/cloud*; do
             if [ -f "$file" ]; then
-                __copyfile "$file" "$_SALT_ETC_DIR"
+                __copyfile "$file" "$_SALT_ETC_DIR" || return 1
             elif [ -d "$file" ]; then
                 subdir="$(basename "$file")"
                 mkdir -p "$_SALT_ETC_DIR/$subdir"
                 for file_d in "$_TEMP_CONFIG_DIR/$subdir"/*; do
-                    [ -f "$file_d" ] && __copyfile "$file_d" "$_SALT_ETC_DIR/$subdir"
+                    if [ -f "$file_d" ]; then
+                        __copyfile "$file_d" "$_SALT_ETC_DIR/$subdir" || return 1
+                    fi
                 done
             fi
         done

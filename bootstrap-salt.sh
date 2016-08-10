@@ -291,6 +291,7 @@ __usage() {
         the master.
     -s  Sleep time used when waiting for daemons to start, restart and when
         checking for the services running. Default: ${__DEFAULT_SLEEP}
+    -L  Also install salt-cloud and required python-libcloud package
     -M  Also install salt-master
     -S  Also install salt-syndic
     -N  Do not install salt-minion
@@ -317,8 +318,6 @@ __usage() {
         \${BS_SALT_ETC_DIR}/minion.d/99-master-address.conf
     -i  Pass the salt-minion id. This will be stored under
         \${BS_SALT_ETC_DIR}/minion_id
-    -L  Install the Apache Libcloud package if possible
-        (required for salt-cloud)
     -p  Extra-package to install while installing Salt dependencies. One package
         per -p flag. You're responsible for providing the proper package name.
     -H  Use the specified HTTP proxy for all download URLs (including https://).
@@ -1376,7 +1375,7 @@ if [ "$_INSTALL_SYNDIC" -eq $BS_TRUE ]; then
 fi
 
 if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ] && [ "$_CONFIG_ONLY" -eq $BS_FALSE ]; then
-    echoinfo "Installing Apache-Libcloud required for salt-cloud"
+    echoinfo "Installing salt-cloud and required python-libcloud package"
 fi
 
 if [ $_START_DAEMONS -eq $BS_FALSE ]; then
@@ -1596,6 +1595,22 @@ __apt_get_upgrade_noinput() {
 
 
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  __yum_install_noinput
+#   DESCRIPTION:  (DRY) apt-get install with noinput options
+#----------------------------------------------------------------------------------------------------------------------
+__yum_install_noinput() {
+    if [ "$DISTRO_NAME_L" = "oracle_linux" ]; then
+        # We need to install one package at a time because --enablerepo=X disables ALL OTHER REPOS!!!!
+        for package in "${@}"; do
+            yum -y install "${package}" || yum -y install "${package}" --enablerepo="${_EPEL_REPO}" || return $?
+        done
+    else
+        yum -y install "${@}" --enablerepo=${_EPEL_REPO} || return $?
+    fi
+}
+
+
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #          NAME:  __check_end_of_life_versions
 #   DESCRIPTION:  Check for end of life distribution versions
 #----------------------------------------------------------------------------------------------------------------------
@@ -1745,10 +1760,10 @@ __copyfile() {
         cp "$sfile" "$dfile" || return 1
     elif [ -f "$dfile" ] && [ "$overwrite" -eq $BS_TRUE ]; then
         # The destination exist and we're overwriting
-        echodebug "Overriding $dfile with $sfile"
+        echodebug "Overwriting $dfile with $sfile"
         cp -f "$sfile" "$dfile" || return 1
     elif [ -f "$dfile" ] && [ "$overwrite" -ne $BS_TRUE ]; then
-        echodebug "Not overriding $dfile with $sfile"
+        echodebug "Not overwriting $dfile with $sfile"
     fi
     return 0
 }
@@ -2324,15 +2339,6 @@ install_ubuntu_deps() {
     # Additionally install procps and pciutils which allows for Docker bootstraps. See 366#issuecomment-39666813
     __PACKAGES="${__PACKAGES} procps pciutils"
 
-    if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
-        __check_pip_allowed "You need to allow pip based installations (-P) in order to install 'apache-libcloud'"
-        if ! __check_command_exists pip; then
-            __PACKAGES="${__PACKAGES} python-setuptools python-pip"
-        fi
-        # shellcheck disable=SC2089
-        __PIP_PACKAGES="${__PIP_PACKAGES} 'apache-libcloud>=$_LIBCLOUD_MIN_VERSION'"
-    fi
-
     apt-get update
     # shellcheck disable=SC2086,SC2090
     __apt_get_install_noinput ${__PACKAGES} || return 1
@@ -2470,33 +2476,52 @@ install_ubuntu_git_deps() {
     __git_clone_and_checkout || return 1
 
     __PACKAGES=""
+    __PIP_PACKAGES=""
+
     # See how we are installing packages
     if [ ${_PIP_ALL} -eq $BS_TRUE ]; then
-        __PACKAGES="python-dev swig libssl-dev libzmq3 libzmq3-dev"
+        __PACKAGES="${__PACKAGES} python-dev swig libssl-dev libzmq3 libzmq3-dev"
+
         if ! __check_command_exists pip; then
             __PACKAGES="${__PACKAGES} python-setuptools python-pip"
         fi
+
         # Get just the apt packages that are required to build all the pythons
-        __apt_get_install_noinput "$__PACKAGES" || return 1
+        # shellcheck disable=SC2086
+        __apt_get_install_noinput ${__PACKAGES} || return 1
         # Install the pythons from requirements (only zmq for now)
         __install_pip_deps "${_SALT_GIT_CHECKOUT_DIR}/requirements/zeromq.txt" || return 1
     else
         install_ubuntu_deps || return 1
-        __apt_get_install_noinput python-yaml python-m2crypto python-crypto \
-            msgpack-python python-zmq python-jinja2 || return 1
+        __PACKAGES="${__PACKAGES} python-yaml python-m2crypto python-crypto msgpack-python python-zmq python-jinja2"
+
+        if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
+            # Install python-libcloud if asked to
+            __PACKAGES="${__PACKAGES} python-libcloud"
+        fi
+
         if [ -f "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" ]; then
             # We're on the develop branch, install whichever tornado is on the requirements file
             __REQUIRED_TORNADO="$(grep tornado "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt")"
+
             if [ "${__REQUIRED_TORNADO}" != "" ]; then
+                __check_pip_allowed "You need to allow pip based installations (-P) in order to install the python package '${__REQUIRED_TORNADO}'"
+
                 __PACKAGES="${__PACKAGES} python-dev"
-                check_pip_allowed "You need to allow pip based installations (-P) in order to install the python package '${__REQUIRED_TORNADO}'"
+                __PIP_PACKAGES="${__PIP_PACKAGES} ${__REQUIRED_TORNADO}"
+
                 if ! __check_command_exists pip; then
                     __PACKAGES="${__PACKAGES} python-setuptools python-pip"
                 fi
-                # shellcheck disable=SC2086
-                __apt_get_install_noinput $__PACKAGES || return 1
-                pip install -U "${__REQUIRED_TORNADO}"
             fi
+        fi
+
+        # shellcheck disable=SC2086
+        __apt_get_install_noinput ${__PACKAGES} || return 1
+
+        if [ "${__PIP_PACKAGES}" != "" ]; then
+            # shellcheck disable=SC2086,SC2090
+            pip install -U ${__PIP_PACKAGES} || return 1
         fi
     fi
 
@@ -2511,15 +2536,20 @@ install_ubuntu_git_deps() {
 
 install_ubuntu_stable() {
     __PACKAGES=""
-    if [ "$_INSTALL_MINION" -eq $BS_TRUE ]; then
-        __PACKAGES="${__PACKAGES} salt-minion"
+
+    if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ];then
+        __PACKAGES="${__PACKAGES} salt-cloud"
     fi
     if [ "$_INSTALL_MASTER" -eq $BS_TRUE ]; then
         __PACKAGES="${__PACKAGES} salt-master"
     fi
+    if [ "$_INSTALL_MINION" -eq $BS_TRUE ]; then
+        __PACKAGES="${__PACKAGES} salt-minion"
+    fi
     if [ "$_INSTALL_SYNDIC" -eq $BS_TRUE ]; then
         __PACKAGES="${__PACKAGES} salt-syndic"
     fi
+
     # shellcheck disable=SC2086
     __apt_get_install_noinput ${__PACKAGES} || return 1
     return 0
@@ -2816,11 +2846,6 @@ install_debian_7_deps() {
     # Additionally install procps and pciutils which allows for Docker bootstraps. See 366#issuecomment-39666813
     __PACKAGES='procps pciutils'
 
-    if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
-        # Install python-libcloud if asked to
-        __PACKAGES="${__PACKAGES} python-libcloud"
-    fi
-
     # shellcheck disable=SC2086
     __apt_get_install_noinput ${__PACKAGES} || return 1
 
@@ -2903,11 +2928,6 @@ install_debian_8_deps() {
     # Additionally install procps and pciutils which allows for Docker bootstraps. See 366#issuecomment-39666813
     __PACKAGES='procps pciutils'
 
-    if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
-        # Install python-libcloud if asked to
-        __PACKAGES="${__PACKAGES} python-libcloud"
-    fi
-
     # shellcheck disable=SC2086
     __apt_get_install_noinput ${__PACKAGES} || return 1
 
@@ -2931,10 +2951,17 @@ install_debian_git_deps() {
 
     __git_clone_and_checkout || return 1
 
+    __PACKAGES="libzmq3 libzmq3-dev lsb-release python-apt python-backports.ssl-match-hostname python-crypto"
+    __PACKAGES="${__PACKAGES} python-jinja2 python-m2crypto python-msgpack python-requests python-tornado"
+    __PACKAGES="${__PACKAGES} python-tornado python-yaml python-zmq"
+
+    if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
+        # Install python-libcloud if asked to
+        __PACKAGES="${__PACKAGES} python-libcloud"
+    fi
+
     # shellcheck disable=SC2086
-    __apt_get_install_noinput libzmq3 libzmq3-dev lsb-release python-apt python-backports.ssl-match-hostname \
-        python-crypto python-jinja2 python-m2crypto python-msgpack python-requests python-tornado python-yaml \
-        python-zmq || return 1
+    __apt_get_install_noinput ${__PACKAGES} || return 1
 
     # Let's trigger config_salt()
     if [ "$_TEMP_CONFIG_DIR" = "null" ]; then
@@ -2962,8 +2989,13 @@ install_debian_8_git_deps() {
     __git_clone_and_checkout || return 1
 
     __PACKAGES='libzmq3 libzmq3-dev lsb-release python-apt python-crypto python-jinja2 python-m2crypto python-msgpack python-requests python-yaml python-zmq'
-    __PIP_PACKAGES=''
 
+    if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
+        # Install python-libcloud if asked to
+        __PACKAGES="${__PACKAGES} python-libcloud"
+    fi
+
+    __PIP_PACKAGES=''
     if (__check_pip_allowed >/dev/null 2>&1); then
         __PIP_PACKAGES='tornado'
         # Install development environment for building tornado Python module
@@ -3007,15 +3039,20 @@ install_debian_8_git_deps() {
 
 install_debian_stable() {
     __PACKAGES=""
-    if [ "$_INSTALL_MINION" -eq $BS_TRUE ]; then
-        __PACKAGES="${__PACKAGES} salt-minion"
+
+    if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ];then
+        __PACKAGES="${__PACKAGES} salt-cloud"
     fi
     if [ "$_INSTALL_MASTER" -eq $BS_TRUE ]; then
         __PACKAGES="${__PACKAGES} salt-master"
     fi
+    if [ "$_INSTALL_MINION" -eq $BS_TRUE ]; then
+        __PACKAGES="${__PACKAGES} salt-minion"
+    fi
     if [ "$_INSTALL_SYNDIC" -eq $BS_TRUE ]; then
         __PACKAGES="${__PACKAGES} salt-syndic"
     fi
+
     # shellcheck disable=SC2086
     __apt_get_install_noinput ${__PACKAGES} || return 1
 
@@ -3052,11 +3089,9 @@ install_debian_8_git() {
 
 install_debian_git_post() {
     for fname in minion master syndic api; do
-
         # Skip if not meant to be installed
         [ "$fname" = "api" ] && \
-            ([ "$_INSTALL_MASTER" -eq $BS_FALSE ] || ! __check_command_exists "salt-${fname}") && \
-                continue
+            ([ "$_INSTALL_MASTER" -eq $BS_FALSE ] || ! __check_command_exists "salt-${fname}") && continue
         [ "$fname" = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
         [ "$fname" = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
         [ "$fname" = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
@@ -3137,10 +3172,10 @@ install_debian_check_services() {
         [ $fname = "api" ] && continue
 
         # Skip if not meant to be installed
-        [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
         [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
-        #[ $fname = "api" ] && ([ "$_INSTALL_MASTER" -eq $BS_FALSE ] || [ ! -f "/etc/init.d/salt-$fname" ]) && continue
+        [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
         [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
+
         if [ -f /bin/systemctl ]; then
             __check_services_systemd salt-$fname || return 1
         elif [ -f /etc/init.d/salt-$fname ]; then
@@ -3186,10 +3221,6 @@ install_fedora_deps() {
         __PACKAGES="${__PACKAGES} python-msgpack python-requests"
     fi
 
-    if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
-        __PACKAGES="${__PACKAGES} python-libcloud"
-    fi
-
     # shellcheck disable=SC2086
     $FEDORA_PACKAGE_MANAGER install -y ${__PACKAGES} || return 1
 
@@ -3209,27 +3240,35 @@ install_fedora_deps() {
 install_fedora_stable() {
     __fedora_get_package_manager
     __PACKAGES=""
+
+    if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ];then
+        __PACKAGES="${__PACKAGES} salt-cloud"
+    fi
+    if [ "$_INSTALL_MASTER" -eq $BS_TRUE ]; then
+        __PACKAGES="${__PACKAGES} salt-master"
+    fi
     if [ "$_INSTALL_MINION" -eq $BS_TRUE ]; then
         __PACKAGES="${__PACKAGES} salt-minion"
     fi
-    if [ "$_INSTALL_MASTER" -eq $BS_TRUE ] || [ "$_INSTALL_SYNDIC" -eq $BS_TRUE ]; then
-        __PACKAGES="${__PACKAGES} salt-master"
+    if [ "$_INSTALL_SYNDIC" -eq $BS_TRUE ]; then
+        __PACKAGES="${__PACKAGES} salt-syndic"
     fi
+
     # shellcheck disable=SC2086
     $FEDORA_PACKAGE_MANAGER install -y ${__PACKAGES} || return 1
+
     return 0
 }
 
 install_fedora_stable_post() {
     for fname in minion master syndic api; do
-        # Skip if not meant to be installed
-        [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
-        [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
-        [ $fname = "api" ] && ([ "$_INSTALL_MASTER" -eq $BS_FALSE ] || ! __check_command_exists "salt-${fname}") && continue
-        [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
-
         # Skip salt-api since the service should be opt-in and not necessarily started on boot
         [ $fname = "api" ] && continue
+
+        # Skip if not meant to be installed
+        [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
+        [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
+        [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
 
         systemctl is-enabled salt-$fname.service || (systemctl preset salt-$fname.service && systemctl enable salt-$fname.service)
         sleep 0.1
@@ -3245,9 +3284,10 @@ install_fedora_git_deps() {
         $FEDORA_PACKAGE_MANAGER install -y git || return 1
     fi
 
-    $FEDORA_PACKAGE_MANAGER install -y systemd-python || return 1
-
     __git_clone_and_checkout || return 1
+
+    __PACKAGES="systemd-python"
+    __PIP_PACKAGES=""
 
     if [ -f "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" ]; then
         # We're on the develop branch, install whichever tornado is on the requirements file
@@ -3257,12 +3297,23 @@ install_fedora_git_deps() {
 
             # Install pip and pip dependencies
             if ! __check_command_exists pip; then
-                $FEDORA_PACKAGE_MANAGER install -y python-setuptools python-pip gcc python-devel
+                __PACKAGES="${__PACKAGES} python-setuptools python-pip gcc python-devel"
             fi
 
-            pip install -U tornado
-
+            __PIP_PACKAGES="${__PIP_PACKAGES} tornado"
         fi
+    fi
+
+    if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
+        __PACKAGES="${__PACKAGES} python-libcloud"
+    fi
+
+    # shellcheck disable=SC2086
+    $FEDORA_PACKAGE_MANAGER install -y ${__PACKAGES} || return 1
+
+    if [ "${__PIP_PACKAGES}" != "" ]; then
+        # shellcheck disable=SC2086,SC2090
+        pip install -U ${__PIP_PACKAGES} || return 1
     fi
 
     # Let's trigger config_salt()
@@ -3459,10 +3510,15 @@ __install_saltstack_copr_salt_repository() {
         __fetch_url "/etc/yum.repos.d/${__REPO_FILENAME}" \
             "${HTTP_VAL}://copr.fedorainfracloud.org/coprs/saltstack/salt/repo/${__REPOTYPE}-${DISTRO_MAJOR_VERSION}/${__REPO_FILENAME}" || return 1
     fi
+
     return 0
 }
 
 install_centos_stable_deps() {
+    if [ "$_UPGRADE_SYS" -eq $BS_TRUE ]; then
+        yum -y update || return 1
+    fi
+
     if [ "$DISTRO_MAJOR_VERSION" -eq 5 ]; then
         # Install curl which is not included in @core CentOS 5 installation
         __check_command_exists curl || yum -y install "curl.${CPU_ARCH_L}" || return 1
@@ -3480,98 +3536,38 @@ install_centos_stable_deps() {
         __install_saltstack_rhel_repository || return 1
     fi
 
-    if [ -f "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" ]; then
-        # We're on the develop branch, install whichever tornado is on the requirements file
-        __REQUIRED_TORNADO="$(grep tornado "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt")"
-        if [ "${__REQUIRED_TORNADO}" != "" ]; then
-            if [ "$DISTRO_MAJOR_VERSION" -eq 5 ]; then
-                yum install -y python26-tornado
-            else
-                yum install -y python-tornado
-            fi
-        fi
-    fi
-
-    if [ "$_UPGRADE_SYS" -eq $BS_TRUE ]; then
-        yum -y update || return 1
-    fi
-
     __PACKAGES="yum-utils chkconfig"
 
-    if [ "$DISTRO_MAJOR_VERSION" -eq 5 ]; then
-        __PACKAGES="${__PACKAGES} python26-PyYAML python26-m2crypto m2crypto python26 python26-requests"
-        __PACKAGES="${__PACKAGES} python26-crypto python26-msgpack python26-zmq python26-jinja2"
-        if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
-            __check_pip_allowed "You need to allow pip based installations (-P) in order to install apache-libcloud"
-            __PACKAGES="${__PACKAGES} python26-setuptools"
-        fi
-    else
-        __PACKAGES="${__PACKAGES} PyYAML m2crypto python-crypto python-msgpack python-zmq python-jinja2 python-requests"
-        if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
-            __check_pip_allowed "You need to allow pip based installations (-P) in order to install apache-libcloud"
-            __PACKAGES="${__PACKAGES} python-pip"
-        fi
-    fi
-
-    if [ "$DISTRO_NAME_L" = "oracle_linux" ]; then
-        # We need to install one package at a time because --enablerepo=X disables ALL OTHER REPOS!!!!
-        for package in ${__PACKAGES}; do
-            # shellcheck disable=SC2086
-            yum -y install ${package} || yum -y install ${package} --enablerepo=${_EPEL_REPO} || return 1
-        done
-    else
-        # shellcheck disable=SC2086
-        yum -y install ${__PACKAGES} --enablerepo=${_EPEL_REPO} || return 1
-    fi
-
-    if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
-        __check_pip_allowed "You need to allow pip based installations (-P) in order to install apache-libcloud"
-        if [ "$DISTRO_MAJOR_VERSION" -eq 5 ]; then
-            easy_install-2.6 "apache-libcloud>=$_LIBCLOUD_MIN_VERSION"
-        else
-            pip install "apache-libcloud>=$_LIBCLOUD_MIN_VERSION"
-        fi
-    fi
-
     if [ "${_EXTRA_PACKAGES}" != "" ]; then
-        echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
-        if [ "$DISTRO_NAME_L" = "oracle_linux" ]; then
-            # We need to install one package at a time because --enablerepo=X disables ALL OTHER REPOS!!!!
-            for package in ${_EXTRA_PACKAGES}; do
-                # shellcheck disable=SC2086
-                yum -y install ${package} || yum -y install ${package} --enablerepo=${_EPEL_REPO} || return 1
-            done
-        else
-            # shellcheck disable=SC2086
-            yum install -y ${_EXTRA_PACKAGES} --enablerepo=${_EPEL_REPO} || return 1
-        fi
+        echoinfo "Also installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
+        __PACKAGES="${__PACKAGES} ${_EXTRA_PACKAGES}"
     fi
+
+    # shellcheck disable=SC2086
+    __yum_install_noinput ${__PACKAGES} || return 1
 
     return 0
 }
 
 install_centos_stable() {
     __PACKAGES=""
-    if [ "$_INSTALL_MINION" -eq $BS_TRUE ]; then
-        __PACKAGES="${__PACKAGES} salt-minion"
+
+    if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ];then
+        __PACKAGES="${__PACKAGES} salt-cloud"
     fi
     if [ "$_INSTALL_MASTER" -eq $BS_TRUE ];then
         __PACKAGES="${__PACKAGES} salt-master"
+    fi
+    if [ "$_INSTALL_MINION" -eq $BS_TRUE ]; then
+        __PACKAGES="${__PACKAGES} salt-minion"
     fi
     if [ "$_INSTALL_SYNDIC" -eq $BS_TRUE ];then
         __PACKAGES="${__PACKAGES} salt-syndic"
     fi
 
-    if [ "$DISTRO_NAME_L" = "oracle_linux" ]; then
-        # We need to install one package at a time because --enablerepo=X disables ALL OTHER REPOS!!!!
-        for package in ${__PACKAGES}; do
-            # shellcheck disable=SC2086
-            yum -y install ${package} || yum -y install ${package} --enablerepo=${_EPEL_REPO} || return 1
-        done
-    else
-        # shellcheck disable=SC2086
-        yum -y install ${__PACKAGES} --enablerepo=${_EPEL_REPO} || return 1
-    fi
+    # shellcheck disable=SC2086
+    __yum_install_noinput ${__PACKAGES} || return 1
+
     return 0
 }
 
@@ -3608,37 +3604,33 @@ install_centos_stable_post() {
 
 install_centos_git_deps() {
     install_centos_stable_deps || return 1
-    if ! __check_command_exists git; then
-        # git not installed - need to install it
-        if [ "$DISTRO_NAME_L" = "oracle_linux" ]; then
-            # try both ways --enablerepo=X disables ALL OTHER REPOS!!!!
-            yum install -y git || yum install -y git --enablerepo=${_EPEL_REPO} || return 1
-        else
-            yum install -y git --enablerepo=${_EPEL_REPO} || return 1
-        fi
-    fi
 
-    if [ "$DISTRO_MAJOR_VERSION" -gt 6 ]; then
-        if [ "$DISTRO_NAME_L" != "oracle_linux" ]; then
-            yum install -y systemd-python || yum install -y systemd-python --enablerepo=${_EPEL_REPO} || return 1
-        else
-            yum install -y systemd-python --enablerepo=${_EPEL_REPO} || return 1
-        fi
+    if ! __check_command_exists git; then
+        __yum_install_noinput git || return 1
     fi
 
     __git_clone_and_checkout || return 1
 
-    if [ -f "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" ]; then
-        # We're on the develop branch, install whichever tornado is on the requirements file
-        __REQUIRED_TORNADO="$(grep tornado "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt")"
-        if [ "${__REQUIRED_TORNADO}" != "" ]; then
-            if [ "$DISTRO_MAJOR_VERSION" -eq 5 ]; then
-                yum install -y python26-tornado
-            else
-                yum install -y python-tornado
-            fi
-        fi
+    __PACKAGES=""
+
+    if [ "$DISTRO_MAJOR_VERSION" -eq 5 ]; then
+        __PACKAGES="${__PACKAGES} python26-PyYAML python26-m2crypto m2crypto python26 python26-requests"
+        __PACKAGES="${__PACKAGES} python26-crypto python26-jinja2 python26-msgpack python26-tornado python26-zmq"
+    else
+        __PACKAGES="${__PACKAGES} PyYAML m2crypto python-crypto python-msgpack python-zmq python-jinja2"
+        __PACKAGES="${__PACKAGES} python-requests python-tornado"
     fi
+
+    if [ "$DISTRO_MAJOR_VERSION" -ge 7 ]; then
+        __PACKAGES="${__PACKAGES} systemd-python"
+    fi
+
+    if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
+        __PACKAGES="${__PACKAGES} python-libcloud"
+    fi
+
+    # shellcheck disable=SC2086
+    __yum_install_noinput ${__PACKAGES} || return 1
 
     # Let's trigger config_salt()
     if [ "$_TEMP_CONFIG_DIR" = "null" ]; then
@@ -3655,11 +3647,13 @@ install_centos_git() {
     else
         _PYEXE=python2
     fi
+
     if [ -f "${_SALT_GIT_CHECKOUT_DIR}/salt/syspaths.py" ]; then
         $_PYEXE setup.py --salt-config-dir="$_SALT_ETC_DIR" --salt-cache-dir="${_SALT_CACHE_DIR}" ${SETUP_PY_INSTALL_ARGS} install --prefix=/usr || return 1
     else
         $_PYEXE setup.py ${SETUP_PY_INSTALL_ARGS} install --prefix=/usr || return 1
     fi
+
     return 0
 }
 
@@ -3667,10 +3661,9 @@ install_centos_git_post() {
     SYSTEMD_RELOAD=$BS_FALSE
 
     for fname in api master minion syndic; do
-        # Skip salt-api since the service should be opt-in and not necessarily started on boot
-        [ $fname = "api" ] && continue
-
         # Skip if not meant to be installed
+        [ $fname = "api" ] && \
+            ([ "$_INSTALL_MASTER" -eq $BS_FALSE ] || ! __check_command_exists "salt-${fname}") && continue
         [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
         [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
         [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
@@ -3678,27 +3671,22 @@ install_centos_git_post() {
         if [ -f /bin/systemctl ]; then
             if [ ! -f "/usr/lib/systemd/system/salt-${fname}.service" ] || \
                 ([ -f "/usr/lib/systemd/system/salt-${fname}.service" ] && [ "$_FORCE_OVERWRITE" -eq $BS_TRUE ]); then
-                __copyfile "${_SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-${fname}.service" /usr/lib/systemd/system/
+                __copyfile "${_SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-${fname}.service" /usr/lib/systemd/system
             fi
-
-            /usr/systemctl is-enabled salt-${fname}.service > /dev/null 2>&1 || (
-                /bin/systemctl preset salt-${fname}.service > /dev/null 2>&1 &&
-                /bin/systemctl enable salt-${fname}.service > /dev/null 2>&1
-            )
 
             SYSTEMD_RELOAD=$BS_TRUE
         elif [ ! -f "/etc/init.d/salt-$fname" ] || \
             ([ -f "/etc/init.d/salt-$fname" ] && [ "$_FORCE_OVERWRITE" -eq $BS_TRUE ]); then
-            __copyfile "${_SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-${fname}" /etc/init.d/
+            __copyfile "${_SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-${fname}" /etc/init.d
             chmod +x /etc/init.d/salt-${fname}
-
-            /sbin/chkconfig salt-${fname} on
         fi
     done
 
     if [ "$SYSTEMD_RELOAD" -eq $BS_TRUE ]; then
         /bin/systemctl daemon-reload
     fi
+
+    install_centos_stable_post || return 1
 
     return 0
 }
@@ -3768,6 +3756,7 @@ install_centos_check_services() {
         [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
         [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
         [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
+
         if [ -f /sbin/initctl ] && [ -f /etc/init/salt-${fname}.conf ]; then
             __check_services_upstart salt-$fname || return 1
         elif [ -f /etc/init.d/salt-$fname ]; then
@@ -3776,6 +3765,7 @@ install_centos_check_services() {
             __check_services_systemd salt-$fname || return 1
         fi
     done
+
     return 0
 }
 #
@@ -4137,18 +4127,8 @@ _eof
 
     __PACKAGES="PyYAML m2crypto python-crypto python-msgpack python-zmq python26-ordereddict python-jinja2 python-requests"
 
-    if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
-        __check_pip_allowed "You need to allow pip based installations (-P) in order to install apache-libcloud"
-        __PACKAGES="${__PACKAGES} python-pip"
-    fi
-
     # shellcheck disable=SC2086
     yum -y install ${__PACKAGES} --enablerepo=${_EPEL_REPO}"" || return 1
-
-    if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
-        __check_pip_allowed "You need to allow pip based installations (-P) in order to install apache-libcloud"
-        pip-python install "apache-libcloud>=$_LIBCLOUD_MIN_VERSION"
-    fi
 
     if [ "${_EXTRA_PACKAGES}" != "" ]; then
         echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
@@ -4166,12 +4146,31 @@ install_amazon_linux_ami_git_deps() {
 
     __git_clone_and_checkout || return 1
 
+    __PACKAGES=""
+    __PIP_PACKAGES=""
+
+    if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
+        __check_pip_allowed "You need to allow pip based installations (-P) in order to install apache-libcloud"
+        __PACKAGES="${__PACKAGES} python-pip"
+        __PIP_PACKAGES="${__PIP_PACKAGES} apache-libcloud>=$_LIBCLOUD_MIN_VERSION"
+    fi
+
     if [ -f "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" ]; then
         # We're on the develop branch, install whichever tornado is on the requirements file
         __REQUIRED_TORNADO="$(grep tornado "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt")"
         if [ "${__REQUIRED_TORNADO}" != "" ]; then
-            yum install -y python-tornado
+            __PACKAGES="${__PACKAGES} python-tornado"
         fi
+    fi
+
+    if [ "${__PACKAGES}" != "" ]; then
+        # shellcheck disable=SC2086
+        yum -y install ${__PACKAGES} --enablerepo="${_EPEL_REPO}" || return 1
+    fi
+
+    if [ "${__PIP_PACKAGES}" != "" ]; then
+        # shellcheck disable=SC2086
+        pip-python install ${__PIP_PACKAGES} || return 1
     fi
 
     # Let's trigger config_salt()
@@ -4348,7 +4347,8 @@ install_arch_linux_git_post() {
         # Skip if not meant to be installed
         [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
         [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
-        [ $fname = "api" ] && ([ "$_INSTALL_MASTER" -eq $BS_FALSE ] || ! __check_command_exists "salt-${fname}") && continue
+        [ $fname = "api" ] && \
+            ([ "$_INSTALL_MASTER" -eq $BS_FALSE ] || ! __check_command_exists "salt-${fname}") && continue
         [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
 
         if [ -f /usr/bin/systemctl ]; then
@@ -4380,9 +4380,8 @@ install_arch_linux_restart_daemons() {
         [ $fname = "api" ] && continue
 
         # Skip if not meant to be installed
-        [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
         [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
-        #[ $fname = "api" ] && ([ "$_INSTALL_MASTER" -eq $BS_FALSE ] || ! __check_command_exists "salt-${fname}") && continue
+        [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
         [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
 
         if [ -f /usr/bin/systemctl ]; then
@@ -4406,10 +4405,10 @@ install_arch_check_services() {
         [ $fname = "api" ] && continue
 
         # Skip if not meant to be installed
-        [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
         [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
-        #[ $fname = "api" ] && ([ "$_INSTALL_MASTER" -eq $BS_FALSE ] || ! __check_command_exists "salt-${fname}") && continue
+        [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
         [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
+
         __check_services_systemd salt-$fname || return 1
     done
     return 0
@@ -4864,12 +4863,13 @@ install_openbsd_post() {
         cp -p /etc/rc.d/rc.subr /etc/rc.d/rc.subr
         sed -i."$(date +%F)".saltinstall -e 's:-xf:-f:g' /etc/rc.d/rc.subr
     fi
+
     _TEMP_CONFIG_DIR="/tmp"
-    for fname in minion master syndic api; do
+    for fname in api master minion syndic; do
         # Skip if not meant to be installed
-        [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
-        [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
         [ $fname = "api" ] || ! __check_command_exists "salt-${fname}" && continue
+        [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
+        [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
         [ $fname = "syndic" ] && continue
 
         if [ $? -eq 1 ]; then
@@ -4887,31 +4887,34 @@ install_openbsd_post() {
 }
 
 install_openbsd_check_services() {
-    for fname in minion master syndic api; do
+    for fname in api master minion syndic; do
         # Skip salt-api since the service should be opt-in and not necessarily started on boot
         [ $fname = "api" ] && continue
 
         # Skip if not meant to be installed
-        [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
         [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
-        [ $fname = "api" ] && continue
+        [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
         [ $fname = "syndic" ] && continue
+
         if [ -f /etc/rc.d/salt_${fname} ]; then
             __check_services_openbsd salt_${fname} || return 1
         fi
     done
+
     return 0
 }
 
 
 install_openbsd_restart_daemons() {
     [ $_START_DAEMONS -eq $BS_FALSE ] && return
-    for fname in minion master syndic api; do
+
+    for fname in api master minion syndic; do
         # Skip salt-api since the service should be opt-in and not necessarily started on boot
         [ $fname = "api" ] && continue
+
         # Skip if not meant to be installed
-        [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
         [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
+        [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
         [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
         if [ -f "/etc/rc.d/salt_${fname}" ]; then
             /etc/rc.d/salt_${fname} stop > /dev/null 2>&1
@@ -5017,9 +5020,10 @@ install_smartos_post() {
     for fname in minion master syndic api; do
 
         # Skip if not meant to be installed
-        [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
+        [ $fname = "api" ] && \
+            ([ "$_INSTALL_MASTER" -eq $BS_FALSE ] || ! __check_command_exists "salt-${fname}") && continue
         [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
-        [ $fname = "api" ] && ([ "$_INSTALL_MASTER" -eq $BS_FALSE ] || ! __check_command_exists "salt-${fname}") && continue
+        [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
         [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
 
         svcs network/salt-$fname > /dev/null 2>&1
@@ -5176,10 +5180,6 @@ install_opensuse_stable_deps() {
         __PACKAGES="${__PACKAGES} libzmq5"
     fi
 
-    if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
-        __PACKAGES="${__PACKAGES} python-apache-libcloud"
-    fi
-
     # shellcheck disable=SC2086
     __zypper_install ${__PACKAGES} || return 1
 
@@ -5206,14 +5206,22 @@ install_opensuse_git_deps() {
 
     __git_clone_and_checkout || return 1
 
+    __PACKAGES=""
+
     if [ -f "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" ]; then
         # We're on the develop branch, install whichever tornado is on the requirements file
         __REQUIRED_TORNADO="$(grep tornado "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt")"
         if [ "${__REQUIRED_TORNADO}" != "" ]; then
-            __zypper_install python-tornado
+            __PACKAGES="${__PACKAGES} python-tornado"
         fi
-
     fi
+
+    if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
+        __PACKAGES="${__PACKAGES} python-apache-libcloud"
+    fi
+
+    # shellcheck disable=SC2086
+    __zypper_install ${__PACKAGES} || return 1
 
     # Let's trigger config_salt()
     if [ "$_TEMP_CONFIG_DIR" = "null" ]; then
@@ -5226,17 +5234,23 @@ install_opensuse_git_deps() {
 
 install_opensuse_stable() {
     __PACKAGES=""
-    if [ "$_INSTALL_MINION" -eq $BS_TRUE ]; then
-        __PACKAGES="${__PACKAGES} salt-minion"
+
+    if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ];then
+        __PACKAGES="${__PACKAGES} salt-cloud"
     fi
     if [ "$_INSTALL_MASTER" -eq $BS_TRUE ]; then
         __PACKAGES="${__PACKAGES} salt-master"
     fi
+    if [ "$_INSTALL_MINION" -eq $BS_TRUE ]; then
+        __PACKAGES="${__PACKAGES} salt-minion"
+    fi
     if [ "$_INSTALL_SYNDIC" -eq $BS_TRUE ]; then
         __PACKAGES="${__PACKAGES} salt-syndic"
     fi
+
     # shellcheck disable=SC2086
     __zypper_install $__PACKAGES || return 1
+
     return 0
 }
 
@@ -5325,7 +5339,6 @@ install_opensuse_restart_daemons() {
 
         service salt-$fname stop > /dev/null 2>&1
         service salt-$fname start
-
     done
 }
 
@@ -5463,13 +5476,22 @@ install_suse_12_git_deps() {
 
     __git_clone_and_checkout || return 1
 
+    __PACKAGES=""
+
     if [ -f "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" ]; then
         # We're on the develop branch, install whichever tornado is on the requirements file
         __REQUIRED_TORNADO="$(grep tornado "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt")"
         if [ "${__REQUIRED_TORNADO}" != "" ]; then
-            __zypper_install python-tornado
+            __PACKAGES="${__PACKAGES} python-tornado"
         fi
     fi
+
+    if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
+        __PACKAGES="${__PACKAGES} python-apache-libcloud"
+    fi
+
+    # shellcheck disable=SC2086
+    __zypper_install ${__PACKAGES} || return 1
 
     # Let's trigger config_salt()
     if [ "$_TEMP_CONFIG_DIR" = "null" ]; then
@@ -5488,6 +5510,7 @@ install_suse_12_stable() {
         # error: option --single-version-externally-managed not recognized
         USE_SETUPTOOLS=1 pip install salt || return 1
     fi
+
     return 0
 }
 
@@ -5588,10 +5611,6 @@ install_suse_11_stable_deps() {
         __PACKAGES="${__PACKAGES} python-PyYAML"
     fi
 
-    if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
-        __PACKAGES="${__PACKAGES} python-apache-libcloud"
-    fi
-
     # SLES 11 SP3 ships with both python-M2Crypto-0.22.* and python-m2crypto-0.21 and we will be asked which
     # we want to install, even with --non-interactive.
     # Let's try to install the higher version first and then the lower one in case of failure
@@ -5651,13 +5670,22 @@ install_suse_11_git_deps() {
 
     __git_clone_and_checkout || return 1
 
+    __PACKAGES=""
+
     if [ -f "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" ]; then
         # We're on the develop branch, install whichever tornado is on the requirements file
         __REQUIRED_TORNADO="$(grep tornado "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt")"
         if [ "${__REQUIRED_TORNADO}" != "" ]; then
-            __zypper_install python-tornado
+            __PACKAGES="${__PACKAGES} python-tornado"
         fi
     fi
+
+    if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
+        __PACKAGES="${__PACKAGES} python-apache-libcloud"
+    fi
+
+    # shellcheck disable=SC2086
+    __zypper_install ${__PACKAGES} || return 1
 
     # Let's trigger config_salt()
     if [ "$_TEMP_CONFIG_DIR" = "null" ]; then
@@ -5710,6 +5738,7 @@ install_suse_11_stable_post() {
 
         done
     fi
+
     return 0
 }
 
@@ -5804,9 +5833,7 @@ __gentoo_post_dep() {
     __gentoo_config_protection
 
     if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
-        __check_pip_allowed "You need to allow pip based installations (-P) in order to install apache-libcloud"
-        __emerge -v 'dev-python/pip'
-        pip install -U "apache-libcloud>=$_LIBCLOUD_MIN_VERSION"
+        __emerge -v 'dev-python/libcloud'
     fi
 
     __emerge -vo 'dev-python/requests'
@@ -5916,7 +5943,15 @@ config_salt() {
     # If the configuration directory is not passed, return
     [ "$_TEMP_CONFIG_DIR" = "null" ] && return
 
-    CONFIGURED_ANYTHING=$BS_FALSE
+    if [ "$_CONFIG_ONLY" -eq $BS_TRUE ]; then
+        echowarn "Passing -C (config only) option implies -F (forced overwrite)."
+
+        if [ "$_FORCE_OVERWRITE" -ne $BS_TRUE ]; then
+            echowarn "Overwriting configs in 11 seconds!"
+            sleep 11
+            _FORCE_OVERWRITE=$BS_TRUE
+        fi
+    fi
 
     # Let's create the necessary directories
     [ -d "$_SALT_ETC_DIR" ] || mkdir "$_SALT_ETC_DIR" || return 1
@@ -5925,9 +5960,11 @@ config_salt() {
     # If -C or -F was passed, we don't need a .bak file for the config we're updating
     # This is used in the custom master/minion config file checks below
     CREATE_BAK=$BS_TRUE
-    if [ "$_CONFIG_ONLY" -eq $BS_TRUE ] || [ "$_FORCE_OVERWRITE" -eq $BS_TRUE ]; then
+    if [ "$_FORCE_OVERWRITE" -eq $BS_TRUE ]; then
         CREATE_BAK=$BS_FALSE
     fi
+
+    CONFIGURED_ANYTHING=$BS_FALSE
 
     # Copy the grains file if found
     if [ -f "$_TEMP_CONFIG_DIR/grains" ]; then
@@ -5936,15 +5973,8 @@ config_salt() {
         CONFIGURED_ANYTHING=$BS_TRUE
     fi
 
-    if [ "$_CONFIG_ONLY" -eq "$BS_TRUE" ]; then
-        echowarn "Passing -C (config only) option implies -F (forced overwrite)."
-        if [ "$_FORCE_OVERWRITE" -ne "$BS_TRUE" ]; then
-            echowarn "Overwriting configs in 11 seconds!"
-            sleep 11
-        fi
-    fi
-
-    if [ "$_INSTALL_MINION" -eq "$BS_TRUE" ] || [ "$_CONFIG_ONLY" -eq "$BS_TRUE" ] || [ "$_CUSTOM_MINION_CONFIG" != "null" ]; then
+    if [ "$_INSTALL_MINION" -eq $BS_TRUE ] || \
+        [ "$_CONFIG_ONLY" -eq $BS_TRUE ] || [ "$_CUSTOM_MINION_CONFIG" != "null" ]; then
         # Create the PKI directory
         [ -d "$_PKI_DIR/minion" ] || (mkdir -p "$_PKI_DIR/minion" && chmod 700 "$_PKI_DIR/minion") || return 1
 
@@ -6033,12 +6063,29 @@ config_salt() {
         fi
     fi
 
+    if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
+        # Recursively copy salt-cloud configs with overwriting if necessary
+        for file in "$_TEMP_CONFIG_DIR"/cloud*; do
+            if [ -f "$file" ]; then
+                __copyfile "$file" "$_SALT_ETC_DIR" || return 1
+            elif [ -d "$file" ]; then
+                subdir="$(basename "$file")"
+                mkdir -p "$_SALT_ETC_DIR/$subdir"
+                for file_d in "$_TEMP_CONFIG_DIR/$subdir"/*; do
+                    if [ -f "$file_d" ]; then
+                        __copyfile "$file_d" "$_SALT_ETC_DIR/$subdir" || return 1
+                    fi
+                done
+            fi
+        done
+    fi
+
     if [ "$_CONFIG_ONLY" -eq $BS_TRUE ] && [ $CONFIGURED_ANYTHING -eq $BS_FALSE ]; then
         echowarn "No configuration or keys were copied over. No configuration was done!"
         exit 0
     fi
 
-    # Create default logs directory if not exists (happens with git installations)
+    # Create default logs directory if not exists
     mkdir -p /var/log/salt
 
     return 0

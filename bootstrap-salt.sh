@@ -5821,9 +5821,7 @@ __gentoo_post_dep() {
     __gentoo_config_protection
 
     if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
-        __check_pip_allowed "You need to allow pip based installations (-P) in order to install apache-libcloud"
-        __emerge -v 'dev-python/pip'
-        pip install -U "apache-libcloud>=$_LIBCLOUD_MIN_VERSION"
+        __emerge -v 'dev-python/libcloud'
     fi
 
     __emerge -vo 'dev-python/requests'

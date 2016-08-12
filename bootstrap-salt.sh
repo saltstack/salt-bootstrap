@@ -1599,13 +1599,19 @@ __apt_get_upgrade_noinput() {
 #   DESCRIPTION:  (DRY) apt-get install with noinput options
 #----------------------------------------------------------------------------------------------------------------------
 __yum_install_noinput() {
+
+    ENABLE_EPEL_CMD=""
+    if [ $_DISABLE_REPOS -eq $BS_TRUE ]; then
+        ENABLE_EPEL_CMD="--enablerepo=${_EPEL_REPO}"
+    fi
+
     if [ "$DISTRO_NAME_L" = "oracle_linux" ]; then
         # We need to install one package at a time because --enablerepo=X disables ALL OTHER REPOS!!!!
         for package in "${@}"; do
-            yum -y install "${package}" || yum -y install "${package}" --enablerepo="${_EPEL_REPO}" || return $?
+            yum -y install "${package}" || yum -y install "${package}" ${ENABLE_EPEL_CMD} || return $?
         done
     else
-        yum -y install "${@}" --enablerepo=${_EPEL_REPO} || return $?
+        yum -y install "${@}" ${ENABLE_EPEL_CMD} || return $?
     fi
 }
 
@@ -4099,6 +4105,11 @@ install_scientific_linux_check_services() {
 
 install_amazon_linux_ami_deps() {
 
+    ENABLE_EPEL_CMD=""
+    if [ $_DISABLE_REPOS -eq $BS_TRUE ]; then
+        ENABLE_EPEL_CMD="--enablerepo=${_EPEL_REPO}"
+    fi
+
     if [ $_DISABLE_REPOS -eq $BS_FALSE ]; then
         # enable the EPEL repo
         /usr/bin/yum-config-manager --enable epel || return 1
@@ -4128,20 +4139,25 @@ _eof
     __PACKAGES="PyYAML m2crypto python-crypto python-msgpack python-zmq python26-ordereddict python-jinja2 python-requests"
 
     # shellcheck disable=SC2086
-    yum -y install ${__PACKAGES} --enablerepo=${_EPEL_REPO}"" || return 1
+    yum -y install ${__PACKAGES} ${ENABLE_EPEL_CMD} || return 1
 
     if [ "${_EXTRA_PACKAGES}" != "" ]; then
         echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
         # shellcheck disable=SC2086
-        yum install -y ${_EXTRA_PACKAGES} --enablerepo=${_EPEL_REPO} || return 1
+        yum install -y ${_EXTRA_PACKAGES} ${ENABLE_EPEL_CMD} || return 1
     fi
 }
 
 install_amazon_linux_ami_git_deps() {
     install_amazon_linux_ami_deps || return 1
 
+    ENABLE_EPEL_CMD=""
+    if [ $_DISABLE_REPOS -eq $BS_TRUE ]; then
+        ENABLE_EPEL_CMD="--enablerepo=${_EPEL_REPO}"
+    fi
+
     if ! __check_command_exists git; then
-        yum -y install git --enablerepo=${_EPEL_REPO} || return 1
+        yum -y install git ${ENABLE_EPEL_CMD} || return 1
     fi
 
     __git_clone_and_checkout || return 1
@@ -4165,7 +4181,7 @@ install_amazon_linux_ami_git_deps() {
 
     if [ "${__PACKAGES}" != "" ]; then
         # shellcheck disable=SC2086
-        yum -y install ${__PACKAGES} --enablerepo="${_EPEL_REPO}" || return 1
+        yum -y install ${__PACKAGES} ${ENABLE_EPEL_CMD} || return 1
     fi
 
     if [ "${__PIP_PACKAGES}" != "" ]; then

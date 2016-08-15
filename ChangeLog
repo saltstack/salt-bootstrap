@@ -1,3 +1,12 @@
+Version 2016.08.15:
+    * Remove chris-lea python-zmq repo. (rallytime) #929
+    * Disable the '--enablerepo=${_EPEL_REPO}' part of yum install cmds when passing -R/-r. (rallytime) #928
+    * Fix grep pattern in `__check_services_sysvinit`. (vutny) #927
+    * Missing python dependency for salt-cloud added. (toanju) #925
+    * Fix git install mode when using commit hash with `-g` option. (vutny) #922
+    * Install `salt-cloud` package with `-L` option in `stable` mode. (vutny) #919
+    * Fix bootstrapping from Git on CentOS7 when `systemd` is not running. (vutny) #915
+
 Version 2016.07.07:
     * Add new contributors to authors list. (rallytime) #910
     * Split up python-requests and python-msgpack packages for newer Fedora. (rallytime) #909

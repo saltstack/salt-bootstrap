@@ -1,3 +1,6 @@
+Version 2106.08.16:
+    * Ubuntu git mode: install all deps from SaltStack corp repo by default. (vutny) #936
+
 Version 2016.08.15:
     * Remove chris-lea python-zmq repo. (rallytime) #929
     * Disable the '--enablerepo=${_EPEL_REPO}' part of yum install cmds when passing -R/-r. (rallytime) #928

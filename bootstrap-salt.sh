@@ -850,15 +850,15 @@ __derive_debian_numeric_version() {
 #   DESCRIPTION:  Strip single or double quotes from the provided string.
 #----------------------------------------------------------------------------------------------------------------------
 __unquote_string() {
-    echo "${@}" | sed "s/^\([\"']\)\(.*\)\1\$/\2/g"
+    echo "$*" | sed -e "s/^\([\"']\)\(.*\)\1\$/\2/g"
 }
 
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #          NAME:  __camelcase_split
-#   DESCRIPTION:  Convert CamelCased strings to Camel_Cased
+#   DESCRIPTION:  Convert 'CamelCased' strings to 'Camel Cased'
 #----------------------------------------------------------------------------------------------------------------------
 __camelcase_split() {
-    echo "${@}" | sed -r 's/([^A-Z-])([A-Z])/\1 \2/g'
+    echo "$*" | sed -e 's/\([^[:upper:][:punct:]]\)\([[:upper:]]\)/\1 \2/g'
 }
 
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
@@ -866,7 +866,7 @@ __camelcase_split() {
 #   DESCRIPTION:  Strip duplicate strings
 #----------------------------------------------------------------------------------------------------------------------
 __strip_duplicates() {
-    echo "${@}" | tr -s '[:space:]' '\n' | awk '!x[$0]++'
+    echo "$*" | tr -s '[:space:]' '\n' | awk '!x[$0]++'
 }
 
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
@@ -924,9 +924,12 @@ __gather_linux_system_info() {
         DISTRO_NAME=$(lsb_release -si)
         if [ "${DISTRO_NAME}" = "Scientific" ]; then
             DISTRO_NAME="Scientific Linux"
-        elif [ "$(echo "$DISTRO_NAME" | grep RedHat)" != "" ]; then
-            # Let's convert CamelCase to Camel Case
-            DISTRO_NAME=$(__camelcase_split "$DISTRO_NAME")
+        elif [ "$(echo "$DISTRO_NAME" | grep ^RedHat)" != "" ]; then
+            # Let's convert 'CamelCased' to 'Camel Cased'
+            n=$(__camelcase_split "$DISTRO_NAME")
+            # Skip setting DISTRO_NAME this time, splitting CamelCase has failed.
+            # See https://github.com/saltstack/salt-bootstrap/issues/918
+            [ "$n" = "$DISTRO_NAME" ] && DISTRO_NAME="" || DISTRO_NAME="$n"
         elif [ "${DISTRO_NAME}" = "openSUSE project" ]; then
             # lsb_release -si returns "openSUSE project" on openSUSE 12.3
             DISTRO_NAME="opensuse"

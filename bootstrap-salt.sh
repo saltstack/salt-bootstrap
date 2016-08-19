@@ -300,21 +300,22 @@ __usage() {
     -d  Disables checking if Salt services are enabled to start on system boot.
         You can also do this by touching /tmp/disable_salt_checks on the target
         host. Default: \${BS_FALSE}
-    -C  Only run the configuration function. This option automatically bypasses
-        any installation. Implies -F (forced overwrite). To overwrite master or
-        syndic configs, -M or -S, respectively, must also be specified.
     -P  Allow pip based installations. On some distributions the required salt
         packages or its dependencies are not available as a package for that
         distribution. Using this flag allows the script to use pip as a last
         resort method. NOTE: This only works for functions which actually
         implement pip based installations.
-    -F  Allow copied files to overwrite existing (config, init.d, etc)
     -U  If set, fully upgrade the system prior to bootstrapping Salt
-    -K  If set, keep the temporary files in the temporary directories specified
-        with -c and -k
     -I  If set, allow insecure connections while downloading any files. For
         example, pass '--no-check-certificate' to 'wget' or '--insecure' to
-        'curl'
+        'curl'. On Debian and Ubuntu, using this option with -U allows to obtain
+        GnuPG archive keys insecurely if distro has changed release signatures.
+    -F  Allow copied files to overwrite existing (config, init.d, etc)
+    -K  If set, keep the temporary files in the temporary directories specified
+        with -c and -k
+    -C  Only run the configuration function. This option automatically bypasses
+        any installation. Implies -F (forced overwrite). To overwrite master or
+        syndic configs, -M or -S, respectively, must also be specified.
     -A  Pass the salt-master DNS name or IP. This will be stored under
         \${BS_SALT_ETC_DIR}/minion.d/99-master-address.conf
     -i  Pass the salt-minion id. This will be stored under
@@ -1482,7 +1483,7 @@ __apt_key_fetch() {
 
     # shellcheck disable=SC2086
     apt-key adv ${_GPG_ARGS} --fetch-keys "$url"; return $?
-}   # ----------  end of function __apt_get_upgrade_noinput  ----------
+}   # ----------  end of function __apt_key_fetch  ----------
 
 
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
@@ -1514,7 +1515,7 @@ __rpm_import_gpg() {
 
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #          NAME:  __yum_install_noinput
-#   DESCRIPTION:  (DRY) apt-get install with noinput options
+#   DESCRIPTION:  (DRY) yum install with noinput options
 #----------------------------------------------------------------------------------------------------------------------
 __yum_install_noinput() {
 
@@ -1531,7 +1532,7 @@ __yum_install_noinput() {
     else
         yum -y install "${@}" ${ENABLE_EPEL_CMD} || return $?
     fi
-}
+}   # ----------  end of function __yum_install_noinput  ----------
 
 
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
@@ -2330,10 +2331,6 @@ install_ubuntu_deps() {
     # Additionally install procps and pciutils which allows for Docker bootstraps. See 366#issuecomment-39666813
     __PACKAGES="${__PACKAGES} procps pciutils"
 
-    if [ "$_UPGRADE_SYS" -eq $BS_TRUE ]; then
-        __apt_get_upgrade_noinput || return 1
-    fi
-
     # shellcheck disable=SC2086,SC2090
     __apt_get_install_noinput ${__PACKAGES} || return 1
 
@@ -2363,8 +2360,13 @@ install_ubuntu_stable_deps() {
 
     apt-get update
 
-    # Install Keys
-    __apt_get_install_noinput debian-archive-keyring && apt-get update
+    if [ "${_UPGRADE_SYS}" -eq $BS_TRUE ]; then
+        if [ "${_INSECURE_DL}" -eq $BS_TRUE ]; then
+            __apt_get_install_noinput --allow-unauthenticated debian-archive-keyring && apt-get update
+        fi
+
+        __apt_get_upgrade_noinput || return 1
+    fi
 
     if [ $_DISABLE_REPOS -eq $BS_FALSE ]; then
          __get_dpkg_architecture || return 1
@@ -2717,8 +2719,14 @@ install_debian_deps() {
 
     apt-get update
 
-    # Install Keys
-    __apt_get_install_noinput debian-archive-keyring && apt-get update
+    if [ "${_UPGRADE_SYS}" -eq $BS_TRUE ]; then
+        # Try to update GPG keys first if allowed
+        if [ "${_INSECURE_DL}" -eq $BS_TRUE ]; then
+            __apt_get_install_noinput --allow-unauthenticated debian-archive-keyring && apt-get update
+        fi
+
+        __apt_get_upgrade_noinput || return 1
+    fi
 
     # Install procps and pciutils which allows for Docker bootstraps. See #366#issuecomment-39666813
     __PACKAGES="procps pciutils"
@@ -2726,6 +2734,12 @@ install_debian_deps() {
 
     # shellcheck disable=SC2086
     __apt_get_install_noinput ${__PACKAGES} || return 1
+
+    if [ "${_EXTRA_PACKAGES}" != "" ]; then
+        echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
+        # shellcheck disable=SC2086
+        __apt_get_install_noinput ${_EXTRA_PACKAGES} || return 1
+    fi
 
     if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
         # shellcheck disable=SC2089
@@ -2735,16 +2749,6 @@ install_debian_deps() {
     if [ "${__PIP_PACKAGES}" != "" ]; then
         # shellcheck disable=SC2086,SC2090
         pip install -U ${__PIP_PACKAGES} || return 1
-    fi
-
-    if [ "$_UPGRADE_SYS" -eq $BS_TRUE ]; then
-        __apt_get_upgrade_noinput || return 1
-    fi
-
-    if [ "${_EXTRA_PACKAGES}" != "" ]; then
-        echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
-        # shellcheck disable=SC2086
-        __apt_get_install_noinput ${_EXTRA_PACKAGES} || return 1
     fi
 
     return 0
@@ -2760,12 +2764,13 @@ install_debian_7_deps() {
 
     apt-get update
 
-    # Install Keys
-    __apt_get_install_noinput debian-archive-keyring && apt-get update
+    if [ "${_UPGRADE_SYS}" -eq $BS_TRUE ]; then
+        # Try to update GPG keys first if allowed
+        if [ "${_INSECURE_DL}" -eq $BS_TRUE ]; then
+            __apt_get_install_noinput --allow-unauthenticated debian-archive-keyring && apt-get update
+        fi
 
-    # Install Debian Archive Automatic Signing Key (7.0/wheezy), see #557
-    if [ "$(apt-key finger | grep 'A1BD 8E9D 78F7 FE5C 3E65  D8AF 8B48 AD62 4692 5553')" = "" ]; then
-        apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 8B48AD6246925553 || return 1
+        __apt_get_upgrade_noinput || return 1
     fi
 
     if [ "$_DISABLE_REPOS" -eq $BS_FALSE ]; then
@@ -2815,10 +2820,6 @@ install_debian_7_deps() {
     # shellcheck disable=SC2086
     __apt_get_install_noinput ${__PACKAGES} || return 1
 
-    if [ "$_UPGRADE_SYS" -eq $BS_TRUE ]; then
-        __apt_get_upgrade_noinput || return 1
-    fi
-
     if [ "${_EXTRA_PACKAGES}" != "" ]; then
         echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
         # shellcheck disable=SC2086
@@ -2838,12 +2839,13 @@ install_debian_8_deps() {
 
     apt-get update
 
-    # Install Keys
-    __apt_get_install_noinput debian-archive-keyring && apt-get update
+    if [ "${_UPGRADE_SYS}" -eq $BS_TRUE ]; then
+        # Try to update GPG keys first if allowed
+        if [ "${_INSECURE_DL}" -eq $BS_TRUE ]; then
+            __apt_get_install_noinput --allow-unauthenticated debian-archive-keyring && apt-get update
+        fi
 
-    # Install Debian Archive Automatic Signing Key (8/jessie), see #557
-    if [ "$(apt-key finger | grep '126C 0D24 BD8A 2942 CC7D  F8AC 7638 D044 2B90 D010')" = "" ]; then
-        apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 7638D0442B90D010 || return 1
+        __apt_get_upgrade_noinput || return 1
     fi
 
     if [ $_DISABLE_REPOS -eq $BS_FALSE ]; then

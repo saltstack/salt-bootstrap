@@ -2362,13 +2362,14 @@ install_ubuntu_stable_deps() {
 
     if [ "${_UPGRADE_SYS}" -eq $BS_TRUE ]; then
         if [ "${_INSECURE_DL}" -eq $BS_TRUE ]; then
-            __apt_get_install_noinput --allow-unauthenticated debian-archive-keyring && apt-get update
+            __apt_get_install_noinput --allow-unauthenticated debian-archive-keyring &&
+                apt-key update && apt-get update
         fi
 
         __apt_get_upgrade_noinput || return 1
     fi
 
-    if [ $_DISABLE_REPOS -eq $BS_FALSE ]; then
+    if [ ${_DISABLE_REPOS} -eq $BS_FALSE ]; then
          __get_dpkg_architecture || return 1
         __REPO_ARCH="$DPKG_ARCHITECTURE"
 
@@ -2722,7 +2723,8 @@ install_debian_deps() {
     if [ "${_UPGRADE_SYS}" -eq $BS_TRUE ]; then
         # Try to update GPG keys first if allowed
         if [ "${_INSECURE_DL}" -eq $BS_TRUE ]; then
-            __apt_get_install_noinput --allow-unauthenticated debian-archive-keyring && apt-get update
+            __apt_get_install_noinput --allow-unauthenticated debian-archive-keyring &&
+                apt-key update && apt-get update
         fi
 
         __apt_get_upgrade_noinput || return 1
@@ -2767,13 +2769,14 @@ install_debian_7_deps() {
     if [ "${_UPGRADE_SYS}" -eq $BS_TRUE ]; then
         # Try to update GPG keys first if allowed
         if [ "${_INSECURE_DL}" -eq $BS_TRUE ]; then
-            __apt_get_install_noinput --allow-unauthenticated debian-archive-keyring && apt-get update
+            __apt_get_install_noinput --allow-unauthenticated debian-archive-keyring &&
+                apt-key update && apt-get update
         fi
 
         __apt_get_upgrade_noinput || return 1
     fi
 
-    if [ "$_DISABLE_REPOS" -eq $BS_FALSE ]; then
+    if [ "${_DISABLE_REPOS}" -eq $BS_FALSE ]; then
          __get_dpkg_architecture || return 1
 
         __REPO_ARCH="$DPKG_ARCHITECTURE"
@@ -2842,13 +2845,14 @@ install_debian_8_deps() {
     if [ "${_UPGRADE_SYS}" -eq $BS_TRUE ]; then
         # Try to update GPG keys first if allowed
         if [ "${_INSECURE_DL}" -eq $BS_TRUE ]; then
-            __apt_get_install_noinput --allow-unauthenticated debian-archive-keyring && apt-get update
+            __apt_get_install_noinput --allow-unauthenticated debian-archive-keyring &&
+                apt-key update && apt-get update
         fi
 
         __apt_get_upgrade_noinput || return 1
     fi
 
-    if [ $_DISABLE_REPOS -eq $BS_FALSE ]; then
+    if [ ${_DISABLE_REPOS} -eq $BS_FALSE ]; then
          __get_dpkg_architecture || return 1
 
         __REPO_ARCH="$DPKG_ARCHITECTURE"

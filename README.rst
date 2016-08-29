@@ -66,7 +66,7 @@ If you want to install a specific release version (based on the Git tags):
 .. code:: console
 
   curl -o bootstrap_salt.sh -L https://bootstrap.saltstack.com
-  sudo sh bootstrap_salt.sh git v2015.8.8
+  sudo sh bootstrap_salt.sh git v2016.3.2
 
 To install a specific branch from a Git fork:
 
@@ -88,7 +88,7 @@ If your host has Internet access only via HTTP proxy:
 
   PROXY='http://user:password@myproxy.example.com:3128'
   curl -o bootstrap_salt.sh -L -x "$PROXY" https://bootstrap.saltstack.com
-  sudo sh bootstrap_salt.sh -G -H "$PROXY" git
+  sudo sh bootstrap_salt.sh -H "$PROXY" git
 
 
 Install using wget
@@ -106,7 +106,7 @@ Installing a specific version from git using ``wget``:
 .. code:: console
 
   wget -O bootstrap_salt.sh https://bootstrap.saltstack.com
-  sudo sh bootstrap_salt.sh -P git v2015.8.7
+  sudo sh bootstrap_salt.sh -P git v2015.8.11
 
 .. note::
 
@@ -548,8 +548,8 @@ Salt is ready and working in the Docker container with Minion authenticated on M
 .. _`pre-accepted Minion key`: https://docs.saltstack.com/en/latest/topics/tutorials/preseed_key.html
 
 
-.. vim: fenc=utf-8 spell spl=en cc=100 tw=99 fo=want sts=2 sw=2 et
-
 .. |windows_build|  image:: https://ci.appveyor.com/api/projects/status/github/saltstack/salt-bootstrap?branch=develop&svg=true
     :target: https://ci.appveyor.com/project/saltstack-public/salt-bootstrap
     :alt: Build status of the develop branch on Windows
+
+.. vim: fenc=utf-8 spell spl=en cc=100 tw=99 fo=want sts=2 sw=2 et

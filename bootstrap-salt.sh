@@ -193,7 +193,7 @@ __check_config_dir() {
 #----------------------------------------------------------------------------------------------------------------------
 _KEEP_TEMP_FILES=${BS_KEEP_TEMP_FILES:-$BS_FALSE}
 _TEMP_CONFIG_DIR="null"
-_SALTSTACK_REPO_URL="git://github.com/saltstack/salt.git"
+_SALTSTACK_REPO_URL="https://github.com/saltstack/salt.git"
 _SALT_REPO_URL=${_SALTSTACK_REPO_URL}
 _DOWNSTREAM_PKG_REPO=$BS_FALSE
 _TEMP_KEYS_DIR="null"
@@ -280,10 +280,6 @@ __usage() {
     -D  Show debug output
     -c  Temporary configuration directory
     -g  Salt Git repository URL. Default: ${_SALTSTACK_REPO_URL}
-    -G  Instead of cloning from ${_SALTSTACK_REPO_URL}, clone from
-        https://${_SALTSTACK_REPO_URL#*://}
-        (usually necessary on systems which have the regular git protocol port
-        blocked, where https usually is not)
     -w  Install packages from downstream package repository rather than
         upstream, saltstack package repository. This is currently only
         implemented for SUSE.
@@ -360,7 +356,7 @@ EOT
 }   # ----------  end of function __usage  ----------
 
 
-while getopts ":hvnDc:Gg:wk:s:MSNXCPFUKIA:i:Lp:dH:ZbflV:J:j:rR:aq" opt
+while getopts ":hvnDc:g:wk:s:MSNXCPFUKIA:i:Lp:dH:ZbflV:J:j:rR:aq" opt
 do
   case "${opt}" in
 
@@ -382,14 +378,6 @@ do
          ;;
 
     g )  _SALT_REPO_URL=$OPTARG                         ;;
-
-    G )  if [ "${_SALT_REPO_URL}" = "${_SALTSTACK_REPO_URL}" ]; then
-             _SALTSTACK_REPO_URL="https://github.com/saltstack/salt.git"
-             _SALT_REPO_URL=${_SALTSTACK_REPO_URL}
-         else
-             _SALTSTACK_REPO_URL="https://github.com/saltstack/salt.git"
-         fi
-         ;;
 
     w )  _DOWNSTREAM_PKG_REPO=$BS_TRUE                  ;;
 
@@ -1553,8 +1541,7 @@ __git_clone_and_checkout() {
             # shellcheck disable=SC2164
             cd "${_SALT_GIT_CHECKOUT_DIR}"
 
-            if ! echo "$_SALT_REPO_URL" | \
-                grep -q -x '\(\(git\|https\)://github\.com/\|git@github\.com:\)saltstack/salt\.git'; then
+            if ! echo "$_SALT_REPO_URL" | grep -q -F -w "${_SALTSTACK_REPO_URL#*://}"; then
                 # We need to add the saltstack repository as a remote and fetch tags for proper versioning
                 echoinfo "Adding SaltStack's Salt repository as a remote"
                 git remote add upstream "$_SALTSTACK_REPO_URL" || return 1

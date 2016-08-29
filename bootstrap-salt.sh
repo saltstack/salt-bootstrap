@@ -5788,7 +5788,7 @@ __gentoo_config_protection() {
     # this point, manually merge the changes using etc-update/dispatch-conf/
     # cfg-update and then restart the bootstrapping script, so instead we allow
     # at this point to modify certain config files directly
-    export CONFIG_PROTECT_MASK="${CONFIG_PROTECT_MASK:-} /etc/portage/package.keywords /etc/portage/package.unmask /etc/portage/package.use /etc/portage/package.license"
+    export CONFIG_PROTECT="-*"
 }
 
 __gentoo_pre_dep() {

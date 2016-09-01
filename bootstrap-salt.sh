@@ -592,7 +592,7 @@ else
 fi
 
 # Root permissions are required to run this script
-if [ "$(${whoami})" != "root" ]; then
+if [ "$($whoami)" != "root" ]; then
     echoerror "Salt requires root privileges to install. Please re-run this script as root."
     exit 1
 fi
@@ -612,14 +612,14 @@ if [ "${CALLER}x" = "${0}x" ]; then
 fi
 
 # Work around for 'Docker + salt-bootstrap failure' https://github.com/saltstack/salt-bootstrap/issues/394
-if [ ${_DISABLE_SALT_CHECKS} -eq $BS_FALSE ] && [ -f /tmp/disable_salt_checks ]; then
+if [ "${_DISABLE_SALT_CHECKS}" -eq $BS_FALSE ] && [ -f /tmp/disable_salt_checks ]; then
     # shellcheck disable=SC2016
     echowarn 'Found file: /tmp/disable_salt_checks, setting _DISABLE_SALT_CHECKS=$BS_TRUE'
     _DISABLE_SALT_CHECKS=$BS_TRUE
 fi
 
 # Because -a can only be installed into virtualenv
-if ([ $_PIP_ALL -eq $BS_TRUE ] && [ "$_VIRTUALENV_DIR" = "null" ]); then
+if [ "${_PIP_ALL}" -eq $BS_TRUE ] && [ "${_VIRTUALENV_DIR}" = "null" ]; then
     usage
     # Could possibly set up a default virtualenv location when -a flag is passed
     echoerror "Using -a requires -V because pip pkgs should be siloed from python system pkgs"
@@ -627,7 +627,7 @@ if ([ $_PIP_ALL -eq $BS_TRUE ] && [ "$_VIRTUALENV_DIR" = "null" ]); then
 fi
 
 # Make sure virtualenv directory does not already exist
-if [ -d "$_VIRTUALENV_DIR" ]; then
+if [ -d "${_VIRTUALENV_DIR}" ]; then
     echoerror "The directory ${_VIRTUALENV_DIR} for virtualenv already exists"
     exit 1
 fi

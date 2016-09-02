@@ -3581,7 +3581,7 @@ install_centos_git_deps() {
         __PACKAGES="${__PACKAGES} python26-PyYAML python26-m2crypto m2crypto python26 python26-requests"
         __PACKAGES="${__PACKAGES} python26-crypto python26-jinja2 python26-msgpack python26-tornado python26-zmq"
     else
-        __PACKAGES="${__PACKAGES} PyYAML m2crypto python-crypto python-msgpack python-zmq python-jinja2"
+        __PACKAGES="${__PACKAGES} PyYAML m2crypto python-crypto python-futures python-msgpack python-zmq python-jinja2"
         __PACKAGES="${__PACKAGES} python-requests python-tornado"
     fi
 

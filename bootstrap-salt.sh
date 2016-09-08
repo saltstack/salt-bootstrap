@@ -5560,7 +5560,11 @@ install_suse_12_restart_daemons() {
 install_suse_11_stable_deps() {
     SUSE_PATCHLEVEL=$(awk '/PATCHLEVEL/ {print $3}' /etc/SuSE-release )
     if [ "${SUSE_PATCHLEVEL}" != "" ]; then
-        DISTRO_PATCHLEVEL="_SP${SUSE_PATCHLEVEL}"
+        if [ "${SUSE_PATCHLEVEL}" != "4" ]; then
+            echowarn "Salt packages for SLE 11 are only build for SP4."
+            echowarn "Attempting to install SP4 packages on SP${SUSE_PATCHLEVEL}."
+        fi
+        DISTRO_PATCHLEVEL="_SP4"
     fi
     DISTRO_REPO="SLE_${DISTRO_MAJOR_VERSION}${DISTRO_PATCHLEVEL}"
 

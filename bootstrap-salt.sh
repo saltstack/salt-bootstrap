@@ -4401,10 +4401,6 @@ install_arch_check_services() {
 #
 #   FreeBSD Install Functions
 #
-config_freebsd_salt() {
-    _SALT_ETC_DIR=${BS_SALT_ETC_DIR:-/usr/local/etc/salt}
-    config_salt
-}
 
 __freebsd_get_packagesite() {
     if [ "$CPU_ARCH_L" = "amd64" ]; then
@@ -4571,7 +4567,7 @@ install_freebsd_git_deps() {
     # Let's trigger config_salt()
     if [ "$_TEMP_CONFIG_DIR" = "null" ]; then
         _TEMP_CONFIG_DIR="${_SALT_GIT_CHECKOUT_DIR}/conf/"
-        CONFIG_SALT_FUNC="config_freebsd_salt"
+        CONFIG_SALT_FUNC="config_salt"
 
     fi
 

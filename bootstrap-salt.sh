@@ -1898,20 +1898,24 @@ __overwriteconfig() {
         tempfile="/tmp/salt-config-$$"
     fi
 
-    # Convert json string to a yaml string and write it to config file. Output is dumped into tempfile.
-    python -c "import json; import yaml; jsn=json.loads('$json'); yml=yaml.safe_dump(jsn, line_break='\n', default_flow_style=False); config_file=open('$target', 'w'); config_file.write(yml); config_file.close();" 2>$tempfile
+    # If python does not have yaml installed we're on Arch and should use python2
+    if python -c "import yaml" 2> /dev/null; then
+        good_python=python
+    else
+        good_python=python2
+    fi
 
-    # Check if there were any errors output to the tempfile
-    filesize=$(python -c "import os; print os.stat('$tempfile').st_size;")
+    # Convert json string to a yaml string and write it to config file. Output is dumped into tempfile.
+    $good_python -c "import json; import yaml; jsn=json.loads('$json'); yml=yaml.safe_dump(jsn, line_break='\n', default_flow_style=False); config_file=open('$target', 'w'); config_file.write(yml); config_file.close();" 2>$tempfile
 
     # No python errors output to the tempfile
-    if [ "$filesize" -eq 0 ]; then
+    if [ ! -s "$tempfile" ]; then
         rm -f "$tempfile"
         return 0
     fi
 
-    # Errors are present in the tempfile - let's expose the that to the user.
-    fullerror=$(python -c "tmp_file=open('$tempfile'); print tmp_file.read(); tmp_file.close()")
+    # Errors are present in the tempfile - let's expose them to the user.
+    fullerror=$(cat "$tempfile")
     echodebug "$fullerror"
     echoerror "Python error encountered. This is likely due to passing in a malformed JSON string. Please use -D to see stacktrace."
 

@@ -356,7 +356,7 @@ EOT
 }   # ----------  end of function __usage  ----------
 
 
-while getopts ":hvnDc:g:wk:s:MSNXCPFUKIA:i:Lp:dH:ZbflV:J:j:rR:aq" opt
+while getopts ':hvnDc:g:Gwk:s:MSNXCPFUKIA:i:Lp:dH:ZbflV:J:j:rR:aq' opt
 do
   case "${opt}" in
 
@@ -378,6 +378,11 @@ do
          ;;
 
     g )  _SALT_REPO_URL=$OPTARG                         ;;
+
+    G )  echowarn "The '-G' option is DEPRECATED and will be removed in the future stable release!"
+         echowarn "Bootstrap will always use 'https' protocol to clone from SaltStack GitHub repo."
+         echowarn "No need to provide this option anymore, now it is a default behavior."
+         ;;
 
     w )  _DOWNSTREAM_PKG_REPO=$BS_TRUE                  ;;
 

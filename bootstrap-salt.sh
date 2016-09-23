@@ -3374,7 +3374,7 @@ __install_epel_repository() {
     fi
 
     # Check if epel repo is already enabled and flag it accordingly
-    yum repolist | grep -q "^[!]${_EPEL_REPO}/"
+    yum repolist | grep -q "^[!]\?${_EPEL_REPO}/"
     if [ $? -eq 0 ]; then
         _EPEL_REPOS_INSTALLED=$BS_TRUE
         return 0

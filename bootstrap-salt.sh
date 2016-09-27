@@ -1327,6 +1327,21 @@ __set_suse_pkg_repo() {
     SUSE_PKG_URL="$suse_pkg_url_base/$suse_pkg_url_path"
 }
 
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  __check_and_refresh_suse_pkg_repo
+#   DESCRIPTION:  Check if zypper knows about systemsmanagement_saltstack repo yet.
+#                 If it doesn't, add the repo and refresh with the SUSE_PKG_URL.
+#----------------------------------------------------------------------------------------------------------------------
+__check_and_refresh_suse_pkg_repo() {
+    # Check to see if systemsmanagement_saltstack exists
+    __zypper repos | grep systemsmanagement_saltstack >/dev/null 2>&1
+
+    if [ $? -eq 1 ]; then
+        # zypper does not yet know anything about systemsmanagement_saltstack
+        __zypper addrepo --refresh "${SUSE_PKG_URL}" || return 1
+    fi
+}
+
 __gather_system_info
 
 echo
@@ -5131,11 +5146,8 @@ install_opensuse_stable_deps() {
     if [ $_DISABLE_REPOS -eq $BS_FALSE ]; then
         # Is the repository already known
         __set_suse_pkg_repo
-        __zypper repos --details | grep "${SUSE_PKG_URL}" >/dev/null 2>&1
-        if [ $? -eq 1 ]; then
-            # zypper does not yet know anything about systemsmanagement_saltstack
-            __zypper addrepo --refresh "${SUSE_PKG_URL}" || return 1
-        fi
+        # Check zypper repos and refresh if necessary
+        __check_and_refresh_suse_pkg_repo
     fi
 
     __zypper --gpg-auto-import-keys refresh
@@ -5377,11 +5389,8 @@ install_suse_12_stable_deps() {
     if [ $_DISABLE_REPOS -eq $BS_FALSE ]; then
         # Is the repository already known
         __set_suse_pkg_repo
-        __zypper repos | grep "${SUSE_PKG_URL}" >/dev/null 2>&1
-        if [ $? -eq 1 ]; then
-            # zypper does not yet know nothing about systemsmanagement_saltstack
-            __zypper addrepo --refresh "${SUSE_PKG_URL}" || return 1
-        fi
+        # Check zypper repos and refresh if necessary
+        __check_and_refresh_suse_pkg_repo
     fi
 
     __zypper --gpg-auto-import-keys refresh || return 1
@@ -5573,11 +5582,8 @@ install_suse_11_stable_deps() {
     if [ $_DISABLE_REPOS -eq $BS_FALSE ]; then
         # Is the repository already known
         __set_suse_pkg_repo
-        __zypper repos | grep "${SUSE_PKG_URL}" >/dev/null 2>&1
-        if [ $? -eq 1 ]; then
-            # zypper does not yet know nothing about systemsmanagement_saltstack
-            __zypper addrepo --refresh "${SUSE_PKG_URL}" || return 1
-        fi
+        # Check zypper repos and refresh if necessary
+        __check_and_refresh_suse_pkg_repo
     fi
 
     __zypper --gpg-auto-import-keys refresh || return 1

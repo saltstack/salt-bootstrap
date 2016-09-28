@@ -4977,14 +4977,26 @@ install_smartos_git_deps() {
     fi
 
     if [ -f "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" ]; then
-        # We're on the develop branch, install whichever tornado is on the requirements file
+        # Install whichever tornado is in the requirements file
         __REQUIRED_TORNADO="$(grep tornado "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt")"
         __check_pip_allowed "You need to allow pip based installations (-P) in order to install the python package '${__REQUIRED_TORNADO}'"
+
+        # Install whichever futures is in the requirements file
+        __REQUIRED_FUTURES="$(grep futures "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt")"
+        __check_pip_allowed "You need to allow pip based installations (-P) in order to install the python package '${__REQUIRED_FUTURES}'"
+
         if [ "${__REQUIRED_TORNADO}" != "" ]; then
             if ! __check_command_exists pip; then
                 pkgin -y install py27-pip
             fi
             pip install -U "${__REQUIRED_TORNADO}"
+        fi
+
+        if [ "${__REQUIRED_FUTURES}" != "" ]; then
+            if ! __check_command_exists pip; then
+                pkgin -y install py27-pip
+            fi
+            pip install -U "${__REQUIRED_FUTURES}"
         fi
     fi
 

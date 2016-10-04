@@ -947,6 +947,8 @@ __gather_linux_system_info() {
             return
         elif [ "${DISTRO_NAME}" = "Raspbian" ]; then
            DISTRO_NAME="Debian"
+        elif [ "${DISTRO_NAME}" = "Cumulus Linux" ]; then
+            DISTRO_NAME="Debian"
         fi
         rv=$(lsb_release -sr)
         [ "${rv}" != "" ] && DISTRO_VERSION=$(__parse_version_string "$rv")
@@ -1278,12 +1280,14 @@ __debian_derivatives_translation() {
     # If the file does not exist, return
     [ ! -f /etc/os-release ] && return
 
-    DEBIAN_DERIVATIVES="(kali|linuxmint)"
+    DEBIAN_DERIVATIVES="(kali|linuxmint|cumulus-linux)"
     # Mappings
     kali_1_debian_base="7.0"
     linuxmint_1_debian_base="8.0"
+    cumulus_2_debian_base="7.0"
+    cumulus_3_debian_base="8.0"
 
-    # Detect derivates, Kali and LinuxMint *only* for now
+    # Detect derivates, Cumulus Linux, Kali and LinuxMint *only* for now
     rv=$(grep ^ID= /etc/os-release | sed -e 's/.*=//')
 
     # Translate Debian derivatives to their base Debian version
@@ -1298,6 +1302,10 @@ __debian_derivatives_translation() {
             linuxmint)
                 _major=$(echo "$DISTRO_VERSION" | sed 's/^\([0-9]*\).*/\1/g')
                 _debian_derivative="linuxmint"
+                ;;
+            cumulus-linux)
+                _major=$(echo "$DISTRO_VERSION" | sed 's/^\([0-9]*\).*/\1/g')
+                _debian_derivative="cumulus"
                 ;;
         esac
 

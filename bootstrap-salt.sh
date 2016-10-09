@@ -2105,12 +2105,12 @@ __check_services_openbsd() {
     echodebug "Checking if service ${servicename} is enabled"
 
     # shellcheck disable=SC2086,SC2046,SC2144
-    if [ -f /etc/rc.d/${servicename} ] && [ $(grep ${servicename} /etc/rc.conf.local) -ne "" ] ; then
+    if rcctl get ${servicename} status; then
         echodebug "Service ${servicename} is enabled"
         return 0
     else
         echodebug "Service ${servicename} is NOT enabled"
-        # return 1
+        return 1
     fi
 }   # ----------  end of function __check_services_openbsd  ----------
 
@@ -4730,82 +4730,33 @@ install_freebsd_restart_daemons() {
 #
 
 __choose_openbsd_mirror() {
-    # FIXME: cleartext download over unsecure protocol (HTTP)
-    MIRRORS_LIST_URL=http://www.openbsd.org/ftp.html
-    MIRROR_LIST_FILE=/tmp/openbsd-mirrors.html
     OPENBSD_REPO=''
     MINTIME=''
+    MIRROR_LIST=$(awk -F= '/installpath = / {print $2}' /etc/examples/pkg.conf)
 
-    __fetch_url "$MIRROR_LIST_FILE" "$MIRRORS_LIST_URL" || return 1
-    MIRRORS_LIST=$(grep href "$MIRROR_LIST_FILE" | grep http | grep pub | awk -F \" '{ print $2 }')
-    [ -n "$MIRRORS_LIST" ] && rm -f "$MIRROR_LIST_FILE"
-
-    echoinfo "Getting list of mirrors from $MIRRORS_LIST_URL"
-    for MIRROR in $MIRRORS_LIST; do
-        MIRROR_HOST=$(echo "$MIRROR" | awk -F / '{ print $3 }')
-        TIME=$(ping -c 1 -q "$MIRROR_HOST" | grep round-trip | awk -F / '{ print $5 }')
+    for MIRROR in $MIRROR_LIST; do
+        MIRROR_HOST=$(echo "$MIRROR" | sed -e 's|.*//||' -e 's|+*/.*$||')
+        TIME=$(ping -c 1 -w 1 -q "$MIRROR_HOST" | awk -F/ '/round-trip/ { print $5 }')
         [ -z "$TIME" ] && continue
 
-        echodebug "ping time for $MIRROR is $TIME"
-        [ -z "$MINTIME" ] && MINTIME=$TIME
-
-        FASTER_MIRROR=$(echo "$TIME < $MINTIME" | bc)
+        echodebug "ping time for $MIRROR_HOST is $TIME"
+        if [ -z "$MINTIME" ]; then
+            FASTER_MIRROR=1
+        else
+            FASTER_MIRROR=$(echo "$TIME < $MINTIME" | bc)
+        fi
         if [ "$FASTER_MIRROR" -eq 1 ]; then
             MINTIME=$TIME
-            OPENBSD_REPO=$MIRROR
-        else
-            continue
+            OPENBSD_REPO="$MIRROR"
         fi
     done
 }
 
-
 install_openbsd_deps() {
     __choose_openbsd_mirror || return 1
-    [ -n "$OPENBSD_REPO" ] || return 1
     echoinfo "setting package repository to $OPENBSD_REPO with ping time of $MINTIME"
-    echo "installpath = ${OPENBSD_REPO}${OS_VERSION}/packages/${CPU_ARCH_L}/" >/etc/pkg.conf || return 1
-    pkg_add -I -v lsof || return 1
-    pkg_add -I -v py-pip || return 1
-    __linkfile /usr/local/bin/pip2.* /usr/local/bin/pip $BS_TRUE || return 1
-    __linkfile /usr/local/bin/pydoc2* /usr/local/bin/pydoc $BS_TRUE || return 1
-    __linkfile /usr/local/bin/python2.[0-9] /usr/local/bin/python $BS_TRUE || return 1
-    __linkfile /usr/local/bin/python2.[0-9]*to3 /usr/local/bin/2to3 $BS_TRUE || return 1
-    __linkfile /usr/local/bin/python2.[0-9]*-config /usr/local/bin/python-config $BS_TRUE || return 1
-    pkg_add -I -v swig || return 1
-    pkg_add -I -v py-zmq || return 1
-    pkg_add -I -v py-requests || return 1
-    pkg_add -I -v py-M2Crypto || return 1
-    pkg_add -I -v py-raet || return 1
-    pkg_add -I -v py-libnacl || return 1
-    if [ "$_UPGRADE_SYS" -eq $BS_TRUE ]; then
-        /usr/local/bin/pip install --upgrade pip || return 1
-    fi
-    #
-    # PIP based installs need to copy configuration files "by hand".
-    # Let's trigger config_salt()
-    #
-    if [ "$_TEMP_CONFIG_DIR" = "null" ]; then
-        # Let's set the configuration directory to /tmp
-        _TEMP_CONFIG_DIR="/tmp"
-         CONFIG_SALT_FUNC="config_salt"
-
-         for fname in api master minion syndic; do
-            # Skip salt-api since there is no example config for it in the Salt git repo
-            [ $fname = "api" ] && continue
-
-            # Skip if not meant to be installed
-            [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
-            [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
-            [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
-
-            # Let's download, since they were not provided, the default configuration files
-            if [ ! -f "$_SALT_ETC_DIR/$fname" ] && [ ! -f "$_TEMP_CONFIG_DIR/$fname" ]; then
-                ftp -o "$_TEMP_CONFIG_DIR/$fname" \
-                    "https://raw.githubusercontent.com/saltstack/salt/develop/conf/$fname" || return 1
-            fi
-        done
-    fi
+    [ -n "$OPENBSD_REPO" ] || return 1
+    echo "installpath += ${OPENBSD_REPO}" >>/etc/pkg.conf || return 1
 
     if [ "${_EXTRA_PACKAGES}" != "" ]; then
         echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
@@ -4829,17 +4780,6 @@ install_openbsd_git_deps() {
     return 0
 }
 
-install_openbsd_stable() {
-
-#    pkg_add -r -I -v salt || return 1
-    __check_pip_allowed || return 1
-    /usr/local/bin/pip install salt || return 1
-    if [ "$_UPGRADE_SYS" -eq $BS_TRUE ]; then
-         /usr/local/bin/pip install --upgrade salt || return 1
-    fi
-    return 0
-}
-
 install_openbsd_git() {
     #
     # Install from git
@@ -4851,39 +4791,19 @@ install_openbsd_git() {
     return 0
 }
 
+install_openbsd_stable() {
+    pkg_add -r -I -v salt || return 1
+    return 0
+}
+
 install_openbsd_post() {
-    #
-    # Install rc.d files.
-    #
-    ## below workaround for /etc/rc.d/rc.subr in OpenBSD >= 5.8
-    ## is needed for salt services to start/stop properly from /etc/rc.d
-    ## reference: http://cvsweb.openbsd.org/cgi-bin/cvsweb/src/etc/rc.d/rc.subr.diff?r1=1.98&r2=1.99
-    ##
-    if grep -q '\-xf' /etc/rc.d/rc.subr; then
-        cp -p /etc/rc.d/rc.subr /etc/rc.d/rc.subr
-        sed -i."$(date +%F)".saltinstall -e 's:-xf:-f:g' /etc/rc.d/rc.subr
-    fi
-
-    _TEMP_CONFIG_DIR="/tmp"
     for fname in api master minion syndic; do
-        # Skip if not meant to be installed
-        [ $fname = "api" ] && \
-            ([ "$_INSTALL_MASTER" -eq $BS_FALSE ] || ! __check_command_exists "salt-${fname}") && continue
-        [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
+        [ $fname = "api" ] && continue
         [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
-        [ $fname = "syndic" ] && continue
+        [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
+        [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
 
-        if [ $? -eq 1 ]; then
-            if [ ! -f "$_TEMP_CONFIG_DIR/salt-$fname" ]; then
-                ftp -o "$_TEMP_CONFIG_DIR/salt-$fname" \
-                    "https://raw.githubusercontent.com/saltstack/salt/develop/pkg/openbsd/salt-${fname}.rc-d"
-                if [ ! -f "/etc/rc.d/salt_${fname}" ] && [ "$(grep salt_${fname} /etc/rc.conf.local)" -eq "" ]; then
-                    __copyfile "$_TEMP_CONFIG_DIR/salt-$fname" "/etc/rc.d/salt_${fname}" && chmod +x "/etc/rc.d/salt_${fname}" || return 1
-                    echo salt_${fname}_enable="YES" >> /etc/rc.conf.local
-                    echo salt_${fname}_paths=\"/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin\" >>/etc/rc.conf.local
-                fi
-            fi
-        fi
+        rcctl enable salt_$fname
     done
 
     return 0
@@ -4919,10 +4839,7 @@ install_openbsd_restart_daemons() {
         [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
         [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
 
-        if [ -f "/etc/rc.d/salt_${fname}" ]; then
-            /etc/rc.d/salt_${fname} stop > /dev/null 2>&1
-            /etc/rc.d/salt_${fname} start
-        fi
+        rcctl restart salt_${fname}
     done
 
     return 0

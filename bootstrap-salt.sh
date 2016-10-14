@@ -4497,6 +4497,8 @@ __configure_freebsd_pkg_details() {
 }
 
 install_freebsd_9_stable_deps() {
+    _SALT_ETC_DIR=${BS_SALT_ETC_DIR:-/usr/local/etc/salt}
+    _PKI_DIR=${_SALT_ETC_DIR}/pki
 
     if [ $_DISABLE_REPOS -eq $BS_FALSE ]; then
         #make variables available even if pkg already installed
@@ -4587,11 +4589,6 @@ install_freebsd_git_deps() {
     fi
     echodebug "Finished patching"
 
-    # Set _SALT_ETC_DIR to ports default
-    _SALT_ETC_DIR=${BS_SALT_ETC_DIR:-/usr/local/etc/salt}
-    # We also need to redefine the PKI directory
-    _PKI_DIR=${_SALT_ETC_DIR}/pki
-
     # Let's trigger config_salt()
     if [ "$_TEMP_CONFIG_DIR" = "null" ]; then
         _TEMP_CONFIG_DIR="${_SALT_GIT_CHECKOUT_DIR}/conf/"
@@ -4619,13 +4616,6 @@ install_freebsd_11_stable() {
     # shellcheck disable=SC2086
     /usr/local/sbin/pkg install ${FROM_FREEBSD} -y sysutils/py-salt || return 1
 
-#
-# setting _SALT_ETC_DIR to match paths from FreeBSD ports:
-#
-    _SALT_ETC_DIR=${BS_SALT_ETC_DIR:-/usr/local/etc/salt}
-    if [ ! -d /etc/salt ]; then
-      ln -sf "${_SALT_ETC_DIR}" /etc/salt
-    fi
     return 0
 }
 

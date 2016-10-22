@@ -37,6 +37,7 @@ Diego Woitasen              diegows                diego@flugel.it
 Elias Probst                eliasp
 eliezerlp                   eliezerlp
 Emiel Kollof                ekollof
+Eric Radman                 eradman                ericshane@eradman.com
 Erik Ankrom                 erikankrom
 Erik Johnson                terminalmage           erik@saltstack.com
 EYJ                         eyj

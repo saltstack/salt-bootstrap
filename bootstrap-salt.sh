@@ -218,9 +218,10 @@ _EPEL_REPO=${BS_EPEL_REPO:-epel}
 _EPEL_REPOS_INSTALLED=$BS_FALSE
 _UPGRADE_SYS=${BS_UPGRADE_SYS:-$BS_FALSE}
 _INSECURE_DL=${BS_INSECURE_DL:-$BS_FALSE}
-_WGET_ARGS=${BS_WGET_ARGS:-}
 _CURL_ARGS=${BS_CURL_ARGS:-}
 _FETCH_ARGS=${BS_FETCH_ARGS:-}
+_GPG_ARGS=${BS_GPG_ARGS:-}
+_WGET_ARGS=${BS_WGET_ARGS:-}
 _ENABLE_EXTERNAL_ZMQ_REPOS=${BS_ENABLE_EXTERNAL_ZMQ_REPOS:-$BS_FALSE}
 _SALT_MASTER_ADDRESS=${BS_SALT_MASTER_ADDRESS:-null}
 _SALT_MINION_ID="null"
@@ -295,21 +296,22 @@ __usage() {
     -d  Disables checking if Salt services are enabled to start on system boot.
         You can also do this by touching /tmp/disable_salt_checks on the target
         host. Default: \${BS_FALSE}
-    -C  Only run the configuration function. This option automatically bypasses
-        any installation. Implies -F (forced overwrite). To overwrite master or
-        syndic configs, -M or -S, respectively, must also be specified.
     -P  Allow pip based installations. On some distributions the required salt
         packages or its dependencies are not available as a package for that
         distribution. Using this flag allows the script to use pip as a last
         resort method. NOTE: This only works for functions which actually
         implement pip based installations.
-    -F  Allow copied files to overwrite existing (config, init.d, etc)
     -U  If set, fully upgrade the system prior to bootstrapping Salt
-    -K  If set, keep the temporary files in the temporary directories specified
-        with -c and -k
     -I  If set, allow insecure connections while downloading any files. For
         example, pass '--no-check-certificate' to 'wget' or '--insecure' to
-        'curl'
+        'curl'. On Debian and Ubuntu, using this option with -U allows to obtain
+        GnuPG archive keys insecurely if distro has changed release signatures.
+    -F  Allow copied files to overwrite existing (config, init.d, etc)
+    -K  If set, keep the temporary files in the temporary directories specified
+        with -c and -k
+    -C  Only run the configuration function. This option automatically bypasses
+        any installation. Implies -F (forced overwrite). To overwrite master or
+        syndic configs, -M or -S, respectively, must also be specified.
     -A  Pass the salt-master DNS name or IP. This will be stored under
         \${BS_SALT_ETC_DIR}/minion.d/99-master-address.conf
     -i  Pass the salt-minion id. This will be stored under
@@ -537,11 +539,11 @@ fi
 # -a and -V only work from git
 if [ "$ITYPE" != "git" ]; then
     if [ $_PIP_ALL -eq $BS_TRUE ]; then
-        echoerror "Pip installing all python packages with -a is only possible when installing salt via git"
+        echoerror "Pip installing all python packages with -a is only possible when installing Salt via git"
         exit 1
     fi
     if [ "$_VIRTUALENV_DIR" != "null" ]; then
-        echoerror "Virtualenv installs via -V is only possible when installing salt via git"
+        echoerror "Virtualenv installs via -V is only possible when installing Salt via git"
         exit 1
     fi
 fi
@@ -562,14 +564,14 @@ if [ "$#" -gt 0 ]; then
 fi
 
 # Check the _DISABLE_SSL value and set HTTP or HTTPS.
-if [ "$_DISABLE_SSL" -eq "${BS_TRUE}" ]; then
+if [ "$_DISABLE_SSL" -eq $BS_TRUE ]; then
     HTTP_VAL="http"
 else
     HTTP_VAL="https"
 fi
 
 # Check the _QUIET_GIT_INSTALLATION value and set SETUP_PY_INSTALL_ARGS.
-if [ "$_QUIET_GIT_INSTALLATION" -eq "${BS_TRUE}" ]; then
+if [ "$_QUIET_GIT_INSTALLATION" -eq $BS_TRUE ]; then
     SETUP_PY_INSTALL_ARGS="-q"
 else
     SETUP_PY_INSTALL_ARGS=""
@@ -583,7 +585,7 @@ else
 fi
 
 # Root permissions are required to run this script
-if [ "$(${whoami})" != "root" ]; then
+if [ "$($whoami)" != "root" ]; then
     echoerror "Salt requires root privileges to install. Please re-run this script as root."
     exit 1
 fi
@@ -603,14 +605,14 @@ if [ "${CALLER}x" = "${0}x" ]; then
 fi
 
 # Work around for 'Docker + salt-bootstrap failure' https://github.com/saltstack/salt-bootstrap/issues/394
-if [ ${_DISABLE_SALT_CHECKS} -eq $BS_FALSE ] && [ -f /tmp/disable_salt_checks ]; then
+if [ "${_DISABLE_SALT_CHECKS}" -eq $BS_FALSE ] && [ -f /tmp/disable_salt_checks ]; then
     # shellcheck disable=SC2016
     echowarn 'Found file: /tmp/disable_salt_checks, setting _DISABLE_SALT_CHECKS=$BS_TRUE'
     _DISABLE_SALT_CHECKS=$BS_TRUE
 fi
 
 # Because -a can only be installed into virtualenv
-if ([ $_PIP_ALL -eq $BS_TRUE ] && [ "$_VIRTUALENV_DIR" = "null" ]); then
+if [ "${_PIP_ALL}" -eq $BS_TRUE ] && [ "${_VIRTUALENV_DIR}" = "null" ]; then
     usage
     # Could possibly set up a default virtualenv location when -a flag is passed
     echoerror "Using -a requires -V because pip pkgs should be siloed from python system pkgs"
@@ -618,7 +620,7 @@ if ([ $_PIP_ALL -eq $BS_TRUE ] && [ "$_VIRTUALENV_DIR" = "null" ]); then
 fi
 
 # Make sure virtualenv directory does not already exist
-if [ -d "$_VIRTUALENV_DIR" ]; then
+if [ -d "${_VIRTUALENV_DIR}" ]; then
     echoerror "The directory ${_VIRTUALENV_DIR} for virtualenv already exists"
     exit 1
 fi
@@ -716,8 +718,11 @@ exec 2>"$LOGPIPE"
 # Handle the insecure flags
 if [ "$_INSECURE_DL" -eq $BS_TRUE ]; then
     _CURL_ARGS="${_CURL_ARGS} --insecure"
-    _WGET_ARGS="${_WGET_ARGS} --no-check-certificate"
     _FETCH_ARGS="${_FETCH_ARGS} --no-verify-peer"
+    _GPG_ARGS="${_GPG_ARGS} --keyserver-options no-check-cert"
+    _WGET_ARGS="${_WGET_ARGS} --no-check-certificate"
+else
+    _GPG_ARGS="${_GPG_ARGS} --keyserver-options ca-cert-file=/etc/ssl/certs/ca-certificates.crt"
 fi
 
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
@@ -726,11 +731,11 @@ fi
 #----------------------------------------------------------------------------------------------------------------------
 __fetch_url() {
     # shellcheck disable=SC2086
-    curl $_CURL_ARGS -L -s -o "$1" "$2" >/dev/null 2>&1 ||
-        wget $_WGET_ARGS -q -O "$1" "$2" >/dev/null 2>&1 ||
-            fetch $_FETCH_ARGS -q -o "$1" "$2" >/dev/null 2>&1 ||
-                fetch -q -o "$1" "$2" >/dev/null 2>&1 ||        # Pre FreeBSD 10
-                    ftp -o "$1" "$2" >/dev/null 2>&1            # OpenBSD
+    curl $_CURL_ARGS -L -s -o "$1" "$2" >/dev/null 2>&1        ||
+        wget $_WGET_ARGS -q -O "$1" "$2" >/dev/null 2>&1       ||
+            fetch $_FETCH_ARGS -q -o "$1" "$2" >/dev/null 2>&1 ||  # FreeBSD
+                fetch -q -o "$1" "$2" >/dev/null 2>&1          ||  # Pre FreeBSD 10
+                    ftp -o "$1" "$2" >/dev/null 2>&1               # OpenBSD
 }
 
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
@@ -1232,7 +1237,6 @@ __ubuntu_derivatives_translation() {
 #----------------------------------------------------------------------------------------------------------------------
 # shellcheck disable=SC2034
 __ubuntu_codename_translation() {
-
     case $DISTRO_MINOR_VERSION in
         "04")
             _april="yes"
@@ -1319,21 +1323,6 @@ __debian_derivatives_translation() {
     fi
 }
 
-#---  FUNCTION  -------------------------------------------------------------------------------------------------------
-#          NAME:  __set_suse_pkg_repo
-#   DESCRIPTION:  Set SUSE_PKG_URL to either the upstream SaltStack repo or the
-#                 downstream SUSE repo
-#----------------------------------------------------------------------------------------------------------------------
-__set_suse_pkg_repo() {
-    suse_pkg_url_path="${DISTRO_REPO}/systemsmanagement:saltstack.repo"
-    if [ "$_DOWNSTREAM_PKG_REPO" -eq $BS_TRUE ]; then
-        # FIXME: cleartext download over unsecure protocol (HTTP)
-        suse_pkg_url_base="http://download.opensuse.org/repositories/systemsmanagement:saltstack"
-    else
-        suse_pkg_url_base="${HTTP_VAL}://repo.saltstack.com/opensuse"
-    fi
-    SUSE_PKG_URL="$suse_pkg_url_base/$suse_pkg_url_path"
-}
 
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #          NAME:  __check_and_refresh_suse_pkg_repo
@@ -1461,6 +1450,7 @@ if ([ "${DISTRO_NAME_L}" != "ubuntu" ] && [ $_PIP_ALL -eq $BS_TRUE ]);then
     echoerror "${DISTRO_NAME} does not have -a support"
     exit 1
 fi
+
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #          NAME:  __function_defined
 #   DESCRIPTION:  Checks if a function is defined within this scripts scope
@@ -1476,6 +1466,89 @@ __function_defined() {
     echodebug "$FUNC_NAME not found...."
     return 1
 }
+
+
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  __apt_get_install_noinput
+#   DESCRIPTION:  (DRY) apt-get install with noinput options
+#    PARAMETERS:  packages
+#----------------------------------------------------------------------------------------------------------------------
+__apt_get_install_noinput() {
+    apt-get install -y -o DPkg::Options::=--force-confold "${@}"; return $?
+}   # ----------  end of function __apt_get_install_noinput  ----------
+
+
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  __apt_get_upgrade_noinput
+#   DESCRIPTION:  (DRY) apt-get upgrade with noinput options
+#----------------------------------------------------------------------------------------------------------------------
+__apt_get_upgrade_noinput() {
+    apt-get upgrade -y -o DPkg::Options::=--force-confold; return $?
+}   # ----------  end of function __apt_get_upgrade_noinput  ----------
+
+
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  __apt_key_fetch
+#   DESCRIPTION:  Download and import GPG public key for "apt-secure"
+#    PARAMETERS:  url
+#----------------------------------------------------------------------------------------------------------------------
+__apt_key_fetch() {
+    url=$1
+
+    __apt_get_install_noinput gnupg-curl || return 1
+
+    # shellcheck disable=SC2086
+    apt-key adv ${_GPG_ARGS} --fetch-keys "$url"; return $?
+}   # ----------  end of function __apt_key_fetch  ----------
+
+
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  __rpm_import_gpg
+#   DESCRIPTION:  Download and import GPG public key to rpm database
+#    PARAMETERS:  url
+#----------------------------------------------------------------------------------------------------------------------
+__rpm_import_gpg() {
+    url=$1
+
+    if __check_command_exists mktemp; then
+        tempfile="$(mktemp /tmp/salt-gpg-XXXXXXXX.pub 2>/dev/null)"
+
+        if [ -z "$tempfile" ]; then
+            echoerror "Failed to create temporary file in /tmp"
+            return 1
+        fi
+    else
+        tempfile="/tmp/salt-gpg-$$.pub"
+    fi
+
+    __fetch_url "$tempfile" "$url" || return 1
+    rpm --import "$tempfile" || return 1
+    rm -f "$tempfile"
+
+    return 0
+}   # ----------  end of function __rpm_import_gpg  ----------
+
+
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  __yum_install_noinput
+#   DESCRIPTION:  (DRY) yum install with noinput options
+#----------------------------------------------------------------------------------------------------------------------
+__yum_install_noinput() {
+
+    ENABLE_EPEL_CMD=""
+    if [ $_DISABLE_REPOS -eq $BS_TRUE ]; then
+        ENABLE_EPEL_CMD="--enablerepo=${_EPEL_REPO}"
+    fi
+
+    if [ "$DISTRO_NAME_L" = "oracle_linux" ]; then
+        # We need to install one package at a time because --enablerepo=X disables ALL OTHER REPOS!!!!
+        for package in "${@}"; do
+            yum -y install "${package}" || yum -y install "${package}" ${ENABLE_EPEL_CMD} || return $?
+        done
+    else
+        yum -y install "${@}" ${ENABLE_EPEL_CMD} || return $?
+    fi
+}   # ----------  end of function __yum_install_noinput  ----------
 
 
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
@@ -1591,46 +1664,6 @@ __git_clone_and_checkout() {
 
     echoinfo "Cloning Salt's git repository succeeded"
     return 0
-}
-
-
-#---  FUNCTION  -------------------------------------------------------------------------------------------------------
-#          NAME:  __apt_get_install_noinput
-#   DESCRIPTION:  (DRY) apt-get install with noinput options
-#----------------------------------------------------------------------------------------------------------------------
-__apt_get_install_noinput() {
-    apt-get install -y -o DPkg::Options::=--force-confold "${@}"; return $?
-}
-
-
-#---  FUNCTION  -------------------------------------------------------------------------------------------------------
-#          NAME:  __apt_get_upgrade_noinput
-#   DESCRIPTION:  (DRY) apt-get upgrade with noinput options
-#----------------------------------------------------------------------------------------------------------------------
-__apt_get_upgrade_noinput() {
-    apt-get upgrade -y -o DPkg::Options::=--force-confold; return $?
-}
-
-
-#---  FUNCTION  -------------------------------------------------------------------------------------------------------
-#          NAME:  __yum_install_noinput
-#   DESCRIPTION:  (DRY) apt-get install with noinput options
-#----------------------------------------------------------------------------------------------------------------------
-__yum_install_noinput() {
-
-    ENABLE_EPEL_CMD=""
-    if [ $_DISABLE_REPOS -eq $BS_TRUE ]; then
-        ENABLE_EPEL_CMD="--enablerepo=${_EPEL_REPO}"
-    fi
-
-    if [ "$DISTRO_NAME_L" = "oracle_linux" ]; then
-        # We need to install one package at a time because --enablerepo=X disables ALL OTHER REPOS!!!!
-        for package in "${@}"; do
-            yum -y install "${package}" || yum -y install "${package}" ${ENABLE_EPEL_CMD} || return $?
-        done
-    else
-        yum -y install "${@}" ${ENABLE_EPEL_CMD} || return $?
-    fi
 }
 
 
@@ -1954,33 +1987,6 @@ __overwriteconfig() {
 }
 
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
-#          NAME:  __rpm_import_gpg
-#   DESCRIPTION:  Download and import GPG public key to rpm database
-#    PARAMETERS:  url
-#----------------------------------------------------------------------------------------------------------------------
-__rpm_import_gpg() {
-    url="$1"
-
-    if __check_command_exists mktemp; then
-        tempfile="$(mktemp /tmp/salt-gpg-XXXXXXXX.pub 2>/dev/null)"
-
-        if [ -z "$tempfile" ]; then
-            echoerror "Failed to create temporary file in /tmp"
-            return 1
-        fi
-    else
-        tempfile="/tmp/salt-gpg-$$.pub"
-    fi
-
-    __fetch_url "$tempfile" "$url" || return 1
-    rpm --import "$tempfile" || return 1
-    rm -f "$tempfile"
-
-    return 0
-}
-
-
-#---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #          NAME:  __check_services_systemd
 #   DESCRIPTION:  Return 0 or 1 in case the service is enabled or not
 #    PARAMETERS:  servicename
@@ -2153,7 +2159,7 @@ __activate_virtualenv() {
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #          NAME:  __install_pip_deps
 #   DESCRIPTION:  Return 0 or 1 if successfully able to install pip packages via requirements file
-#    PARAMETERS:  requirements_files
+#    PARAMETERS:  requirements_file
 #----------------------------------------------------------------------------------------------------------------------
 __install_pip_deps() {
     # Install virtualenv to system pip before activating virtualenv if thats going to be used
@@ -2183,7 +2189,7 @@ __install_pip_deps() {
 
     # shellcheck disable=SC2086,SC2090
     pip install -U -r ${requirements_file} ${__PIP_PACKAGES}
-}
+}   # ----------  end of function __install_pip_deps  ----------
 
 
 #######################################################################################################################
@@ -2292,8 +2298,6 @@ __enable_universe_repository() {
 }
 
 install_ubuntu_deps() {
-    apt-get update
-
     if [ "$DISTRO_MAJOR_VERSION" -gt 12 ] || ([ "$DISTRO_MAJOR_VERSION" -eq 12 ] && [ "$DISTRO_MINOR_VERSION" -eq 10 ]); then
         # Above Ubuntu 12.04 add-apt-repository is in a different package
         __apt_get_install_noinput software-properties-common || return 1
@@ -2346,10 +2350,6 @@ install_ubuntu_deps() {
     # Additionally install procps and pciutils which allows for Docker bootstraps. See 366#issuecomment-39666813
     __PACKAGES="${__PACKAGES} procps pciutils"
 
-    if [ "$_UPGRADE_SYS" -eq $BS_TRUE ]; then
-        __apt_get_upgrade_noinput || return 1
-    fi
-
     # shellcheck disable=SC2086,SC2090
     __apt_get_install_noinput ${__PACKAGES} || return 1
 
@@ -2379,12 +2379,17 @@ install_ubuntu_stable_deps() {
 
     apt-get update
 
-    # Install Keys
-    __apt_get_install_noinput debian-archive-keyring && apt-get update
+    if [ "${_UPGRADE_SYS}" -eq $BS_TRUE ]; then
+        if [ "${_INSECURE_DL}" -eq $BS_TRUE ]; then
+            __apt_get_install_noinput --allow-unauthenticated debian-archive-keyring &&
+                apt-key update && apt-get update
+        fi
 
-    if [ $_DISABLE_REPOS -eq $BS_FALSE ]; then
+        __apt_get_upgrade_noinput || return 1
+    fi
+
+    if [ ${_DISABLE_REPOS} -eq $BS_FALSE ]; then
          __get_dpkg_architecture || return 1
-
         __REPO_ARCH="$DPKG_ARCHITECTURE"
 
         if [ "$DPKG_ARCHITECTURE" = "i386" ]; then
@@ -2414,26 +2419,14 @@ install_ubuntu_stable_deps() {
 
             # SaltStack's stable Ubuntu repository:
             SALTSTACK_UBUNTU_URL="${HTTP_VAL}://repo.saltstack.com/apt/ubuntu/${UBUNTU_VERSION}/${__REPO_ARCH}/${STABLE_REV}"
-
-            apt-get update
+            echo "deb $SALTSTACK_UBUNTU_URL $UBUNTU_CODENAME main" > /etc/apt/sources.list.d/saltstack.list
 
             # Make sure https transport is available
             if [ "$HTTP_VAL" = "https" ] ; then
-                __apt_get_install_noinput ca-certificates apt-transport-https || return 1
+                __apt_get_install_noinput apt-transport-https ca-certificates || return 1
             fi
 
-            # Make sure wget is available
-            __apt_get_install_noinput wget
-
-            if [ "$(grep -ER 'latest .+ main' /etc/apt)" = "" ]; then
-                set +o nounset
-                echo "deb $SALTSTACK_UBUNTU_URL $UBUNTU_CODENAME main" > "/etc/apt/sources.list.d/saltstack.list"
-                set -o nounset
-            fi
-
-            # shellcheck disable=SC2086
-            wget $_WGET_ARGS -q $SALTSTACK_UBUNTU_URL/SALTSTACK-GPG-KEY.pub -O - | apt-key add - || return 1
-
+            __apt_key_fetch "$SALTSTACK_UBUNTU_URL/SALTSTACK-GPG-KEY.pub" || return 1
         else
             # Alternate PPAs: salt16, salt17, salt2014-1, salt2014-7
             if [ ! "$(echo "$STABLE_REV" | egrep '^(1\.6|1\.7)$')" = "" ]; then
@@ -2451,6 +2444,8 @@ install_ubuntu_stable_deps() {
                 add-apt-repository "ppa:$STABLE_PPA" || return 1
             fi
         fi
+
+        apt-get update
     fi
 
     install_ubuntu_deps || return 1
@@ -2744,8 +2739,15 @@ install_debian_deps() {
 
     apt-get update
 
-    # Install Keys
-    __apt_get_install_noinput debian-archive-keyring && apt-get update
+    if [ "${_UPGRADE_SYS}" -eq $BS_TRUE ]; then
+        # Try to update GPG keys first if allowed
+        if [ "${_INSECURE_DL}" -eq $BS_TRUE ]; then
+            __apt_get_install_noinput --allow-unauthenticated debian-archive-keyring &&
+                apt-key update && apt-get update
+        fi
+
+        __apt_get_upgrade_noinput || return 1
+    fi
 
     # Install procps and pciutils which allows for Docker bootstraps. See #366#issuecomment-39666813
     __PACKAGES="procps pciutils"
@@ -2753,6 +2755,12 @@ install_debian_deps() {
 
     # shellcheck disable=SC2086
     __apt_get_install_noinput ${__PACKAGES} || return 1
+
+    if [ "${_EXTRA_PACKAGES}" != "" ]; then
+        echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
+        # shellcheck disable=SC2086
+        __apt_get_install_noinput ${_EXTRA_PACKAGES} || return 1
+    fi
 
     if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
         # shellcheck disable=SC2089
@@ -2762,16 +2770,6 @@ install_debian_deps() {
     if [ "${__PIP_PACKAGES}" != "" ]; then
         # shellcheck disable=SC2086,SC2090
         pip install -U ${__PIP_PACKAGES} || return 1
-    fi
-
-    if [ "$_UPGRADE_SYS" -eq $BS_TRUE ]; then
-        __apt_get_upgrade_noinput || return 1
-    fi
-
-    if [ "${_EXTRA_PACKAGES}" != "" ]; then
-        echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
-        # shellcheck disable=SC2086
-        __apt_get_install_noinput ${_EXTRA_PACKAGES} || return 1
     fi
 
     return 0
@@ -2787,18 +2785,17 @@ install_debian_7_deps() {
 
     apt-get update
 
-    # Install Keys
-    __apt_get_install_noinput debian-archive-keyring && apt-get update
+    if [ "${_UPGRADE_SYS}" -eq $BS_TRUE ]; then
+        # Try to update GPG keys first if allowed
+        if [ "${_INSECURE_DL}" -eq $BS_TRUE ]; then
+            __apt_get_install_noinput --allow-unauthenticated debian-archive-keyring &&
+                apt-key update && apt-get update
+        fi
 
-    # Install Debian Archive Automatic Signing Key (7.0/wheezy), see #557
-    if [ "$(apt-key finger | grep 'A1BD 8E9D 78F7 FE5C 3E65  D8AF 8B48 AD62 4692 5553')" = "" ]; then
-        apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 8B48AD6246925553 || return 1
+        __apt_get_upgrade_noinput || return 1
     fi
 
-    # Make sure wget is available
-    __apt_get_install_noinput wget || return 1
-
-    if [ $_DISABLE_REPOS -eq $BS_FALSE ]; then
+    if [ "${_DISABLE_REPOS}" -eq $BS_FALSE ]; then
          __get_dpkg_architecture || return 1
 
         __REPO_ARCH="$DPKG_ARCHITECTURE"
@@ -2824,31 +2821,26 @@ install_debian_7_deps() {
             echo "deb $SALTSTACK_DEBIAN_URL wheezy main" > "/etc/apt/sources.list.d/saltstack.list"
 
             if [ "$HTTP_VAL" = "https" ] ; then
-                __apt_get_install_noinput ca-certificates apt-transport-https || return 1
+                __apt_get_install_noinput apt-transport-https ca-certificates || return 1
             fi
 
-            # shellcheck disable=SC2086
-            wget $_WGET_ARGS -q "$SALTSTACK_DEBIAN_URL/SALTSTACK-GPG-KEY.pub" -O - | apt-key add - || return 1
+            __apt_key_fetch "$SALTSTACK_DEBIAN_URL/SALTSTACK-GPG-KEY.pub" || return 1
         elif [ -n "$STABLE_REV" ]; then
             echoerror "Installation of Salt ${STABLE_REV#*/} packages not supported by ${__ScriptName} ${__ScriptVersion} on Debian $DISTRO_MAJOR_VERSION."
 
             return 1
         fi
+
+        apt-get update
     else
         echowarn "Packages from repo.saltstack.com are required to install Salt version 2015.8 or higher on Debian $DISTRO_MAJOR_VERSION."
     fi
-
-    apt-get update || return 1
 
     # Additionally install procps and pciutils which allows for Docker bootstraps. See 366#issuecomment-39666813
     __PACKAGES='procps pciutils'
 
     # shellcheck disable=SC2086
     __apt_get_install_noinput ${__PACKAGES} || return 1
-
-    if [ "$_UPGRADE_SYS" -eq $BS_TRUE ]; then
-        __apt_get_upgrade_noinput || return 1
-    fi
 
     if [ "${_EXTRA_PACKAGES}" != "" ]; then
         echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
@@ -2869,18 +2861,17 @@ install_debian_8_deps() {
 
     apt-get update
 
-    # Install Keys
-    __apt_get_install_noinput debian-archive-keyring && apt-get update
+    if [ "${_UPGRADE_SYS}" -eq $BS_TRUE ]; then
+        # Try to update GPG keys first if allowed
+        if [ "${_INSECURE_DL}" -eq $BS_TRUE ]; then
+            __apt_get_install_noinput --allow-unauthenticated debian-archive-keyring &&
+                apt-key update && apt-get update
+        fi
 
-    # Install Debian Archive Automatic Signing Key (8/jessie), see #557
-    if [ "$(apt-key finger | grep '126C 0D24 BD8A 2942 CC7D  F8AC 7638 D044 2B90 D010')" = "" ]; then
-        apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 7638D0442B90D010 || return 1
+        __apt_get_upgrade_noinput || return 1
     fi
 
-    # Make sure wget is available
-    __apt_get_install_noinput wget || return 1
-
-    if [ $_DISABLE_REPOS -eq $BS_FALSE ]; then
+    if [ ${_DISABLE_REPOS} -eq $BS_FALSE ]; then
          __get_dpkg_architecture || return 1
 
         __REPO_ARCH="$DPKG_ARCHITECTURE"
@@ -2908,19 +2899,18 @@ install_debian_8_deps() {
             echo "deb $SALTSTACK_DEBIAN_URL jessie main" > "/etc/apt/sources.list.d/saltstack.list"
 
             if [ "$HTTP_VAL" = "https" ] ; then
-                __apt_get_install_noinput ca-certificates apt-transport-https || return 1
+                __apt_get_install_noinput apt-transport-https ca-certificates || return 1
             fi
 
-            # shellcheck disable=SC2086
-            wget $_WGET_ARGS -q "$SALTSTACK_DEBIAN_URL/SALTSTACK-GPG-KEY.pub" -O - | apt-key add - || return 1
+            __apt_key_fetch "$SALTSTACK_DEBIAN_URL/SALTSTACK-GPG-KEY.pub" || return 1
         elif [ -n "$STABLE_REV" ]; then
             echoerror "Installation of Salt ${STABLE_REV#*/} packages not supported by ${__ScriptName} ${__ScriptVersion} on Debian $DISTRO_MAJOR_VERSION."
 
             return 1
         fi
-    fi
 
-    apt-get update || return 1
+        apt-get update
+    fi
 
     # Additionally install procps and pciutils which allows for Docker bootstraps. See 366#issuecomment-39666813
     __PACKAGES='procps pciutils'
@@ -3114,12 +3104,14 @@ install_debian_git_post() {
             SYSTEMD_RELOAD=$BS_TRUE
 
         # Install initscripts for Debian 7 "Wheezy"
-        elif [ ! -f /etc/init.d/salt-$fname ] || \
-            ([ -f /etc/init.d/salt-$fname ] && [ $_FORCE_OVERWRITE -eq $BS_TRUE ]); then
+        elif [ ! -f "/etc/init.d/salt-$fname" ] || \
+            ([ -f "/etc/init.d/salt-$fname" ] && [ "$_FORCE_OVERWRITE" -eq $BS_TRUE ]); then
             if [ -f "${_SALT_GIT_CHECKOUT_DIR}/pkg/deb/salt-$fname.init" ]; then
                 __copyfile "${_SALT_GIT_CHECKOUT_DIR}/pkg/deb/salt-${fname}.init" "/etc/init.d/salt-${fname}"
                 __copyfile "${_SALT_GIT_CHECKOUT_DIR}/pkg/deb/salt-${fname}.environment" "/etc/default/salt-${fname}"
             else
+                # Make sure wget is available
+                __check_command_exists wget || __apt_get_install_noinput wget || return 1
                 __fetch_url "/etc/init.d/salt-${fname}" "${HTTP_VAL}://anonscm.debian.org/cgit/pkg-salt/salt.git/plain/debian/salt-${fname}.init"
             fi
 
@@ -5029,6 +5021,17 @@ install_smartos_restart_daemons() {
 #    openSUSE Install Functions.
 #
 __ZYPPER_REQUIRES_REPLACE_FILES=-1
+
+__set_suse_pkg_repo() {
+    suse_pkg_url_path="${DISTRO_REPO}/systemsmanagement:saltstack.repo"
+    if [ "$_DOWNSTREAM_PKG_REPO" -eq $BS_TRUE ]; then
+        # FIXME: cleartext download over unsecure protocol (HTTP)
+        suse_pkg_url_base="http://download.opensuse.org/repositories/systemsmanagement:saltstack"
+    else
+        suse_pkg_url_base="${HTTP_VAL}://repo.saltstack.com/opensuse"
+    fi
+    SUSE_PKG_URL="$suse_pkg_url_base/$suse_pkg_url_path"
+}
 
 __version_lte() {
     if ! __check_command_exists python; then

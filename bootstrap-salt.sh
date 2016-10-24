@@ -833,8 +833,10 @@ __derive_debian_numeric_version() {
             # I've found an EC2 wheezy image which did not tell its version
             NUMERIC_VERSION=$(__parse_version_string "7.0")
         elif [ "$INPUT_VERSION" = "jessie/sid" ]; then
-            # Let's start detecting the upcoming Debian 8 (Jessie)
             NUMERIC_VERSION=$(__parse_version_string "8.0")
+        elif [ "$INPUT_VERSION" = "stretch/sid" ]; then
+            # Let's start detecting the upcoming Debian 9 (Stretch)
+            NUMERIC_VERSION=$(__parse_version_string "9.0")
         else
             echowarn "Unable to parse the Debian Version (codename: '$INPUT_VERSION')"
         fi

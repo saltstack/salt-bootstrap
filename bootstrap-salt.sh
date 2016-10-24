@@ -4089,6 +4089,10 @@ install_scientific_linux_check_services() {
 
 install_amazon_linux_ami_deps() {
 
+    # We need to install yum-utils before doing anything else when installing on
+    # Amazon Linux ECS-optimized images. See issue #974.
+    yum -y install yum-utils
+
     ENABLE_EPEL_CMD=""
     if [ $_DISABLE_REPOS -eq $BS_TRUE ]; then
         ENABLE_EPEL_CMD="--enablerepo=${_EPEL_REPO}"
@@ -4120,7 +4124,7 @@ _eof
         fi
     fi
 
-    __PACKAGES="PyYAML python-crypto python-msgpack python-zmq python26-ordereddict python-jinja2 python-requests yum-utils"
+    __PACKAGES="PyYAML python-crypto python-msgpack python-zmq python26-ordereddict python-jinja2 python-requests"
 
     # shellcheck disable=SC2086
     yum -y install ${__PACKAGES} ${ENABLE_EPEL_CMD} || return 1

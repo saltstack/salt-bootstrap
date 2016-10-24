@@ -20,6 +20,7 @@ Brad Thurber                bradthurber
 Brandon Clifford            brandon099             brandon.clifford@vivint.com
 Bret Fisher                 BretFisher             bret@fishbrains.com
 bruce-one                   bruce-one
+Вячеслав Спиридонов         sp1r
 C. R. Oldham                cro                    cr@saltstack.com
 Cam                         camereonsparr
 Chris Rebert                cvrebert               chris.rebert@hulu.com
@@ -41,6 +42,7 @@ Eric Radman                 eradman                ericshane@eradman.com
 Erik Ankrom                 erikankrom
 Erik Johnson                terminalmage           erik@saltstack.com
 EYJ                         eyj
+fizmat                      fizmat
 Forrest Alvarez             gravyboat
 Fred Reimer                 freimer                freimer@freimer.org
 Geoff Garside               geoffgarside           geoff@geoffgarside.co.uk
@@ -56,12 +58,13 @@ Jared E Stroud              jaredestroud           jaredestroud@gmail.com
 Jeff Hui                    jeffh                  jeff@jeffhui.net
 Jeff Strunk                 jstrunk
 Juan A. Moyano              wincus                 wincus.public@gmail.com
-Justin Anderson             jtand                  janderson@saltstack.com
+Justin Anderson             justinta               justin.ta@outlook.com
 Justin Findlay              jfindlay               jfindlay@gmail.com
 Karl Grzeszczak             karlgrz
 Kenneth Wilke               KennethWilke
 lomeroe                     lomeroe
 Liu Xiaohui                 oreh                   herolxh@gmail.com
+Lubomir Host                lhost
 Marc Vieira-Cardinal        marccadinal
 Mark Lee                    malept
 Marcus Furlong              furlongm               furlongm@gmail.com
@@ -87,6 +90,7 @@ Paul Brian                  lifeisstillgood        paul@mikadosoftware.com
 Pavel Snagovsky             paha
 Pedro Algarvio              s0undt3ch              pedro@algarvio.me
 Pedro Paulo                 pedropaulovc
+Pete Lumbis                 plumbis
 Peter Tripp                 notpeter
 Petr Michalec               epcim
 Prayag Verma                pra85                  prayag.verma@gmail.com

@@ -4120,7 +4120,7 @@ _eof
         fi
     fi
 
-    __PACKAGES="PyYAML python-crypto python-msgpack python-zmq python26-ordereddict python-jinja2 python-requests"
+    __PACKAGES="PyYAML python-crypto python-msgpack python-zmq python26-ordereddict python-jinja2 python-requests yum-utils"
 
     # shellcheck disable=SC2086
     yum -y install ${__PACKAGES} ${ENABLE_EPEL_CMD} || return 1

@@ -1,4 +1,24 @@
-Version 2106.08.16:
+Version 2016.10.25:
+    * Update AUTHORS.rst with new contributors (rallytime) #978
+    * Let's start detecting the upcoming Debian 9 (Stretch) (lhost) #975
+    * FreeBSD: set _SALT_ETC_DIR directory to match ports (eradman) #970
+    * Update OpenBSD 6.0+ provisioning (eradman) #969
+    * adds supports for Cumulus Linux (plumbis) #967
+    * Run "pip install -U futures" for SmartOS git install (rallytime) #966
+    * Change /pkg/rpm/ to /pkg/deb/ in install_ubuntu_git_post func (rallytime) #965
+    * SUSE: Refactor systemsmanagement_saltstack repo checks to be DRY (rallytime) #964
+    * Fix detection of EPEL repository with not-expired metadata (sp1r) #963
+    * Display warning message about deprecating the `-G` option (vutny) #958
+    * Allow correct salt paths to be used when -c is passed (justinta) #955
+    * Fix issues with replacing configs when python3 is default in os. (fizmat) #954
+    * Remove m2crypto package installs (rallytime) #951
+    * Try to install SP4 packages on SLE 11 when SP version is older (rallytime) #950
+    * Add python-futures package to install_centos_git_deps (rallytime) #948
+    * Add /etc/portage/package.accept_keywords to CONFIG_PROTECT_MASK (rallytime) #947
+    * Deprecate `-G` option: use `https` scheme for GitHub by default (vutny) #945
+    * [SECURITY] Properly handle GnuPG keys for APT repositories (vutny) #940
+
+Version 2016.08.16:
     * Ubuntu git mode: install all deps from SaltStack corp repo by default. (vutny) #936
 
 Version 2016.08.15:

@@ -1,7 +1,6 @@
 /.project
-*.swp
+*.sw?
 .vagrant
 
 # Pycharm
 .idea
-

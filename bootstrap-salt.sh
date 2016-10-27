@@ -1561,6 +1561,10 @@ __yum_install_noinput() {
 __git_clone_and_checkout() {
 
     echodebug "Installed git version: $(git --version | awk '{ print $3 }')"
+    # Turn off SSL verification if -I flag was set for insecure downloads
+    if [ "$_INSECURE_DL" -eq $BS_TRUE ]; then
+        export GIT_SSL_NO_VERIFY=1
+    fi
 
     __SALT_GIT_CHECKOUT_PARENT_DIR=$(dirname "${_SALT_GIT_CHECKOUT_DIR}" 2>/dev/null)
     __SALT_GIT_CHECKOUT_PARENT_DIR="${__SALT_GIT_CHECKOUT_PARENT_DIR:-/tmp/git}"

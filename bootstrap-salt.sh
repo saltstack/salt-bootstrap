@@ -1039,6 +1039,9 @@ __gather_linux_system_info() {
                         n="Arch Linux"
                         v=""  # Arch Linux does not provide a version.
                         ;;
+                    cloudlinux  )
+                        n="Cloud Linux"
+                        ;;
                     debian      )
                         n="Debian"
                         v=$(__derive_debian_numeric_version "$v")
@@ -3455,7 +3458,13 @@ __install_saltstack_rhel_repository() {
         repo_url="repo.saltstack.com"
     fi
 
-    base_url="${HTTP_VAL}://${repo_url}/yum/redhat/\$releasever/\$basearch/${repo_rev}/"
+    # Cloud Linux $releasever = 7.x, which doesn't exist in repo.saltstack.com, we need this to be "7"
+    if [ "${DISTRO_NAME}" = "Cloud Linux" ] && [ "${DISTRO_MAJOR_VERSION}" = "7" ]; then
+        base_url="${HTTP_VAL}://${repo_url}/yum/redhat/${DISTRO_MAJOR_VERSION}/\$basearch/${repo_rev}/"
+    else
+        base_url="${HTTP_VAL}://${repo_url}/yum/redhat/\$releasever/\$basearch/${repo_rev}/"
+    fi
+
     fetch_url="${HTTP_VAL}://${repo_url}/yum/redhat/${DISTRO_MAJOR_VERSION}/${CPU_ARCH_L}/${repo_rev}/"
 
     if [ "${DISTRO_MAJOR_VERSION}" -eq 5 ]; then

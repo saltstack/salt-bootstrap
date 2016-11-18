@@ -4167,6 +4167,10 @@ install_cloud_linux_check_services() {
 
 install_amazon_linux_ami_deps() {
 
+    # We need to install yum-utils before doing anything else when installing on
+    # Amazon Linux ECS-optimized images. See issue #974.
+    yum -y install yum-utils
+
     ENABLE_EPEL_CMD=""
     if [ $_DISABLE_REPOS -eq $BS_TRUE ]; then
         ENABLE_EPEL_CMD="--enablerepo=${_EPEL_REPO}"

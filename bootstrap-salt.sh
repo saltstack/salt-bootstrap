@@ -924,6 +924,8 @@ __gather_linux_system_info() {
         DISTRO_NAME=$(lsb_release -si)
         if [ "${DISTRO_NAME}" = "Scientific" ]; then
             DISTRO_NAME="Scientific Linux"
+        elif [ "$(echo "$DISTRO_NAME" | grep ^CloudLinux)" != "" ]; then
+            DISTRO_NAME="Cloud Linux"
         elif [ "$(echo "$DISTRO_NAME" | grep ^RedHat)" != "" ]; then
             # Let's convert 'CamelCased' to 'Camel Cased'
             n=$(__camelcase_split "$DISTRO_NAME")
@@ -1036,6 +1038,9 @@ __gather_linux_system_info() {
                     arch        )
                         n="Arch Linux"
                         v=""  # Arch Linux does not provide a version.
+                        ;;
+                    cloudlinux  )
+                        n="Cloud Linux"
                         ;;
                     debian      )
                         n="Debian"
@@ -3453,7 +3458,13 @@ __install_saltstack_rhel_repository() {
         repo_url="repo.saltstack.com"
     fi
 
-    base_url="${HTTP_VAL}://${repo_url}/yum/redhat/\$releasever/\$basearch/${repo_rev}/"
+    # Cloud Linux $releasever = 7.x, which doesn't exist in repo.saltstack.com, we need this to be "7"
+    if [ "${DISTRO_NAME}" = "Cloud Linux" ] && [ "${DISTRO_MAJOR_VERSION}" = "7" ]; then
+        base_url="${HTTP_VAL}://${repo_url}/yum/redhat/${DISTRO_MAJOR_VERSION}/\$basearch/${repo_rev}/"
+    else
+        base_url="${HTTP_VAL}://${repo_url}/yum/redhat/\$releasever/\$basearch/${repo_rev}/"
+    fi
+
     fetch_url="${HTTP_VAL}://${repo_url}/yum/redhat/${DISTRO_MAJOR_VERSION}/${CPU_ARCH_L}/${repo_rev}/"
 
     if [ "${DISTRO_MAJOR_VERSION}" -eq 5 ]; then
@@ -4083,6 +4094,69 @@ install_scientific_linux_check_services() {
 }
 #
 #   Ended Scientific Linux Install Functions
+#
+#######################################################################################################################
+
+#######################################################################################################################
+#
+#   CloudLinux Install Functions
+#
+install_cloud_linux_stable_deps() {
+    install_centos_stable_deps || return 1
+    return 0
+}
+
+install_cloud_linux_git_deps() {
+    install_centos_git_deps || return 1
+    return 0
+}
+
+install_cloud_linux_testing_deps() {
+    install_centos_testing_deps || return 1
+    return 0
+}
+
+install_cloud_linux_stable() {
+    install_centos_stable || return 1
+    return 0
+}
+
+install_cloud_linux_git() {
+    install_centos_git || return 1
+    return 0
+}
+
+install_cloud_linux_testing() {
+    install_centos_testing || return 1
+    return 0
+}
+
+install_cloud_linux_stable_post() {
+    install_centos_stable_post || return 1
+    return 0
+}
+
+install_cloud_linux_git_post() {
+    install_centos_git_post || return 1
+    return 0
+}
+
+install_cloud_linux_testing_post() {
+    install_centos_testing_post || return 1
+    return 0
+}
+
+install_cloud_linux_restart_daemons() {
+    install_centos_restart_daemons || return 1
+    return 0
+}
+
+install_cloud_linux_check_services() {
+    install_centos_check_services || return 1
+    return 0
+}
+#
+#   End of CloudLinux Install Functions
 #
 #######################################################################################################################
 

@@ -6304,7 +6304,21 @@ if [ "$CONFIG_SALT_FUNC" != "null" ] && [ "$_TEMP_CONFIG_DIR" != "null" ]; then
     fi
 fi
 
-# Pre-Seed master keys
+# Drop the master address if passed
+if [ "$_SALT_MASTER_ADDRESS" != "null" ]; then
+    [ ! -d "$_SALT_ETC_DIR/minion.d" ] && mkdir -p "$_SALT_ETC_DIR/minion.d"
+    cat <<_eof > $_SALT_ETC_DIR/minion.d/99-master-address.conf
+master: $_SALT_MASTER_ADDRESS
+_eof
+fi
+
+# Drop the minion id if passed
+if [ "$_SALT_MINION_ID" != "null" ]; then
+    [ ! -d "$_SALT_ETC_DIR" ] && mkdir -p "$_SALT_ETC_DIR"
+    echo "$_SALT_MINION_ID" > "$_SALT_ETC_DIR/minion_id"
+fi
+
+# Pre-seed master keys
 if [ "$PRESEED_MASTER_FUNC" != "null" ] && [ "$_TEMP_KEYS_DIR" != "null" ]; then
     echoinfo "Running ${PRESEED_MASTER_FUNC}()"
     $PRESEED_MASTER_FUNC
@@ -6332,20 +6346,6 @@ if [ "$_INSTALL_MINION" -eq $BS_TRUE ]; then
         echodebug "Creating salt's cachedir"
         mkdir -p "${_SALT_CACHE_DIR}/minion/proc"
     fi
-fi
-
-# Drop the master address if passed
-if [ "$_SALT_MASTER_ADDRESS" != "null" ]; then
-    [ ! -d "$_SALT_ETC_DIR/minion.d" ] && mkdir -p "$_SALT_ETC_DIR/minion.d"
-    cat <<_eof > $_SALT_ETC_DIR/minion.d/99-master-address.conf
-master: $_SALT_MASTER_ADDRESS
-_eof
-fi
-
-# Drop the minion id if passed
-if [ "$_SALT_MINION_ID" != "null" ]; then
-    [ ! -d "$_SALT_ETC_DIR" ] && mkdir -p "$_SALT_ETC_DIR"
-    echo "$_SALT_MINION_ID" > "$_SALT_ETC_DIR/minion_id"
 fi
 
 # Run any post install function. Only execute function if not in config mode only

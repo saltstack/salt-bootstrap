@@ -475,7 +475,7 @@ fi
 # Check that we're installing or configuring a master if we're being passed a master config json dict
 if [ "$_CUSTOM_MASTER_CONFIG" != "null" ]; then
     if [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && [ "$_CONFIG_ONLY" -eq $BS_FALSE ]; then
-        echoerror "Don't pass a master config json dict (-J) if no master is going to be bootstrapped or configured."
+        echoerror "Don't pass a master config JSON dict (-J) if no master is going to be bootstrapped or configured."
         exit 1
     fi
 fi
@@ -483,7 +483,7 @@ fi
 # Check that we're installing or configuring a minion if we're being passed a minion config json dict
 if [ "$_CUSTOM_MINION_CONFIG" != "null" ]; then
     if [ "$_INSTALL_MINION" -eq $BS_FALSE ] && [ "$_CONFIG_ONLY" -eq $BS_FALSE ]; then
-        echoerror "Don't pass a minion config json dict (-j) if no minion is going to be bootstrapped or configured."
+        echoerror "Don't pass a minion config JSON dict (-j) if no minion is going to be bootstrapped or configured."
         exit 1
     fi
 fi
@@ -850,7 +850,7 @@ __derive_debian_numeric_version() {
 #   DESCRIPTION:  Strip single or double quotes from the provided string.
 #----------------------------------------------------------------------------------------------------------------------
 __unquote_string() {
-    echo "$*" | sed -e "s/^\([\"']\)\(.*\)\1\$/\2/g"
+    echo "$*" | sed -e "s/^\([\"\']\)\(.*\)\1\$/\2/g"
 }
 
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
@@ -2316,7 +2316,6 @@ install_ubuntu_deps() {
         __apt_get_install_noinput python-software-properties || return 1
     fi
 
-
     if [ $_DISABLE_REPOS -eq $BS_FALSE ]; then
         __enable_universe_repository || return 1
 
@@ -2357,6 +2356,9 @@ install_ubuntu_deps() {
 
     # requests is still used by many salt modules
     __PACKAGES="${__PACKAGES} python-requests"
+
+    # YAML module is used for generating custom master/minion configs
+    __PACKAGES="${__PACKAGES} python-yaml"
 
     # Additionally install procps and pciutils which allows for Docker bootstraps. See 366#issuecomment-39666813
     __PACKAGES="${__PACKAGES} procps pciutils"
@@ -2764,6 +2766,9 @@ install_debian_deps() {
     __PACKAGES="procps pciutils"
     __PIP_PACKAGES=""
 
+    # YAML module is used for generating custom master/minion configs
+    __PACKAGES="${__PACKAGES} python-yaml"
+
     # shellcheck disable=SC2086
     __apt_get_install_noinput ${__PACKAGES} || return 1
 
@@ -2850,6 +2855,9 @@ install_debian_7_deps() {
     # Additionally install procps and pciutils which allows for Docker bootstraps. See 366#issuecomment-39666813
     __PACKAGES='procps pciutils'
 
+    # YAML module is used for generating custom master/minion configs
+    __PACKAGES="${__PACKAGES} python-yaml"
+
     # shellcheck disable=SC2086
     __apt_get_install_noinput ${__PACKAGES} || return 1
 
@@ -2929,9 +2937,8 @@ install_debian_8_deps() {
     # shellcheck disable=SC2086
     __apt_get_install_noinput ${__PACKAGES} || return 1
 
-    if [ "$_UPGRADE_SYS" -eq $BS_TRUE ]; then
-        __apt_get_upgrade_noinput || return 1
-    fi
+    # YAML module is used for generating custom master/minion configs
+    __PACKAGES="${__PACKAGES} python-yaml"
 
     if [ "${_EXTRA_PACKAGES}" != "" ]; then
         echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
@@ -3543,13 +3550,22 @@ install_centos_stable_deps() {
 
     __PACKAGES="yum-utils chkconfig"
 
-    if [ "${_EXTRA_PACKAGES}" != "" ]; then
-        echoinfo "Also installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
-        __PACKAGES="${__PACKAGES} ${_EXTRA_PACKAGES}"
+    # YAML module is used for generating custom master/minion configs
+    if [ "$DISTRO_MAJOR_VERSION" -eq 5 ]; then
+        __PACKAGES="${__PACKAGES} python26-PyYAML"
+    else
+        __PACKAGES="${__PACKAGES} PyYAML"
     fi
 
     # shellcheck disable=SC2086
     __yum_install_noinput ${__PACKAGES} || return 1
+
+    if [ "${_EXTRA_PACKAGES}" != "" ]; then
+        echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
+        # shellcheck disable=SC2086
+        __yum_install_noinput ${_EXTRA_PACKAGES} || return 1
+    fi
+
 
     return 0
 }
@@ -3619,10 +3635,10 @@ install_centos_git_deps() {
     __PACKAGES=""
 
     if [ "$DISTRO_MAJOR_VERSION" -eq 5 ]; then
-        __PACKAGES="${__PACKAGES} python26-PyYAML python26 python26-requests"
-        __PACKAGES="${__PACKAGES} python26-crypto python26-jinja2 python26-msgpack python26-tornado python26-zmq"
+        __PACKAGES="${__PACKAGES} python26 python26-crypto python26-jinja2 python26-msgpack python26-requests"
+        __PACKAGES="${__PACKAGES} python26-tornado python26-zmq"
     else
-        __PACKAGES="${__PACKAGES} PyYAML python-crypto python-futures python-msgpack python-zmq python-jinja2"
+        __PACKAGES="${__PACKAGES} python-crypto python-futures python-msgpack python-zmq python-jinja2"
         __PACKAGES="${__PACKAGES} python-requests python-tornado"
     fi
 
@@ -4320,6 +4336,9 @@ install_arch_linux_stable_deps() {
         pacman-db-upgrade || return 1
     fi
 
+    # YAML module is used for generating custom master/minion configs
+    pacman -Sy --noconfirm --needed python2-yaml
+
     if [ "$_UPGRADE_SYS" -eq $BS_TRUE ]; then
         pacman -Syyu --noconfirm --needed || return 1
     fi
@@ -4344,7 +4363,7 @@ install_arch_linux_git_deps() {
     fi
     pacman -R --noconfirm python2-distribute
     pacman -Sy --noconfirm --needed python2-crypto python2-setuptools python2-jinja \
-        python2-markupsafe python2-msgpack python2-psutil python2-yaml \
+        python2-markupsafe python2-msgpack python2-psutil \
         python2-pyzmq zeromq python2-requests python2-systemd || return 1
 
     __git_clone_and_checkout || return 1
@@ -4596,6 +4615,10 @@ install_freebsd_9_stable_deps() {
     # Now install swig
     # shellcheck disable=SC2086
     /usr/local/sbin/pkg install ${FROM_FREEBSD} -y swig || return 1
+
+    # YAML module is used for generating custom master/minion configs
+    # shellcheck disable=SC2086
+    /usr/local/sbin/pkg install ${FROM_FREEBSD} -y py27-yaml || return 1
 
     if [ "${_EXTRA_PACKAGES}" != "" ]; then
         echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
@@ -6198,7 +6221,7 @@ for FUNC_NAME in $(__strip_duplicates "$DEP_FUNC_NAMES"); do
 done
 echodebug "DEPS_INSTALL_FUNC=${DEPS_INSTALL_FUNC}"
 
-# Let's get the minion config function
+# Let's get the Salt config function
 CONFIG_FUNC_NAMES="config_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}_${ITYPE}_salt"
 CONFIG_FUNC_NAMES="$CONFIG_FUNC_NAMES config_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}${PREFIXED_DISTRO_MINOR_VERSION}_${ITYPE}_salt"
 CONFIG_FUNC_NAMES="$CONFIG_FUNC_NAMES config_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}_salt"
@@ -6359,7 +6382,21 @@ if [ "$CONFIG_SALT_FUNC" != "null" ] && [ "$_TEMP_CONFIG_DIR" != "null" ]; then
     fi
 fi
 
-# Pre-Seed master keys
+# Drop the master address if passed
+if [ "$_SALT_MASTER_ADDRESS" != "null" ]; then
+    [ ! -d "$_SALT_ETC_DIR/minion.d" ] && mkdir -p "$_SALT_ETC_DIR/minion.d"
+    cat <<_eof > $_SALT_ETC_DIR/minion.d/99-master-address.conf
+master: $_SALT_MASTER_ADDRESS
+_eof
+fi
+
+# Drop the minion id if passed
+if [ "$_SALT_MINION_ID" != "null" ]; then
+    [ ! -d "$_SALT_ETC_DIR" ] && mkdir -p "$_SALT_ETC_DIR"
+    echo "$_SALT_MINION_ID" > "$_SALT_ETC_DIR/minion_id"
+fi
+
+# Pre-seed master keys
 if [ "$PRESEED_MASTER_FUNC" != "null" ] && [ "$_TEMP_KEYS_DIR" != "null" ]; then
     echoinfo "Running ${PRESEED_MASTER_FUNC}()"
     $PRESEED_MASTER_FUNC
@@ -6387,20 +6424,6 @@ if [ "$_INSTALL_MINION" -eq $BS_TRUE ]; then
         echodebug "Creating salt's cachedir"
         mkdir -p "${_SALT_CACHE_DIR}/minion/proc"
     fi
-fi
-
-# Drop the master address if passed
-if [ "$_SALT_MASTER_ADDRESS" != "null" ]; then
-    [ ! -d "$_SALT_ETC_DIR/minion.d" ] && mkdir -p "$_SALT_ETC_DIR/minion.d"
-    cat <<_eof > $_SALT_ETC_DIR/minion.d/99-master-address.conf
-master: $_SALT_MASTER_ADDRESS
-_eof
-fi
-
-# Drop the minion id if passed
-if [ "$_SALT_MINION_ID" != "null" ]; then
-    [ ! -d "$_SALT_ETC_DIR" ] && mkdir -p "$_SALT_ETC_DIR"
-    echo "$_SALT_MINION_ID" > "$_SALT_ETC_DIR/minion_id"
 fi
 
 # Run any post install function. Only execute function if not in config mode only

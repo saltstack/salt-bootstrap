@@ -6022,7 +6022,7 @@ config_salt() {
         # Copy the minions configuration if found
         # Explicitly check for custom master config to avoid moving the minion config
         elif [ -f "$_TEMP_CONFIG_DIR/minion" ] && [ "$_CUSTOM_MASTER_CONFIG" = "null" ]; then
-            __movefile "$_TEMP_CONFIG_DIR/minion" "$_SALT_ETC_DIR" "$_CONFIG_ONLY" || return 1
+            __movefile "$_TEMP_CONFIG_DIR/minion" "$_SALT_ETC_DIR" "$_FORCE_OVERWRITE" || return 1
             CONFIGURED_ANYTHING=$BS_TRUE
         fi
 

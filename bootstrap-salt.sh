@@ -342,12 +342,12 @@ __usage() {
         repo.saltstack.com. The option passed with -R replaces the
         "repo.saltstack.com". If -R is passed, -r is also set. Currently only
         works on CentOS/RHEL based distributions.
-    -J  Replace the Master config file with data passed in as a json string. If
+    -J  Replace the Master config file with data passed in as a JSON string. If
         a Master config file is found, a reasonable effort will be made to save
         the file with a ".bak" extension. If used in conjunction with -C or -F,
         no ".bak" file will be created as either of those options will force
         a complete overwrite of the file.
-    -j  Replace the Minion config file with data passed in as a json string. If
+    -j  Replace the Minion config file with data passed in as a JSON string. If
         a Minion config file is found, a reasonable effort will be made to save
         the file with a ".bak" extension. If used in conjunction with -C or -F,
         no ".bak" file will be created as either of those options will force
@@ -6022,7 +6022,7 @@ config_salt() {
         # Copy the minions configuration if found
         # Explicitly check for custom master config to avoid moving the minion config
         elif [ -f "$_TEMP_CONFIG_DIR/minion" ] && [ "$_CUSTOM_MASTER_CONFIG" = "null" ]; then
-            __movefile "$_TEMP_CONFIG_DIR/minion" "$_SALT_ETC_DIR" "$_CONFIG_ONLY" || return 1
+            __movefile "$_TEMP_CONFIG_DIR/minion" "$_SALT_ETC_DIR" "$_FORCE_OVERWRITE" || return 1
             CONFIGURED_ANYTHING=$BS_TRUE
         fi
 
@@ -6369,6 +6369,16 @@ fi
 if [ "$_CUSTOM_MASTER_CONFIG" != "null" ] || [ "$_CUSTOM_MINION_CONFIG" != "null" ]; then
     if [ "$_TEMP_CONFIG_DIR" = "null" ]; then
         _TEMP_CONFIG_DIR="$_SALT_ETC_DIR"
+    fi
+
+    if [ "$_CONFIG_ONLY" -eq $BS_TRUE ]; then
+        # Execute function to satisfy dependencies for configuration step
+        echoinfo "Running ${DEPS_INSTALL_FUNC}()"
+        $DEPS_INSTALL_FUNC
+        if [ $? -ne 0 ]; then
+            echoerror "Failed to run ${DEPS_INSTALL_FUNC}()!!!"
+            exit 1
+        fi
     fi
 fi
 

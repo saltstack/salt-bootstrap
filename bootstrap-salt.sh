@@ -309,9 +309,10 @@ __usage() {
     -F  Allow copied files to overwrite existing (config, init.d, etc)
     -K  If set, keep the temporary files in the temporary directories specified
         with -c and -k
-    -C  Only run the configuration function. This option automatically bypasses
-        any installation. Implies -F (forced overwrite). To overwrite master or
-        syndic configs, -M or -S, respectively, must also be specified.
+    -C  Only run the configuration function. Implies -F (forced overwrite).
+        To overwrite Master or Syndic configs, -M or -S, respectively, must
+        also be specified. Salt installation will be ommitted, but some of the
+        dependencies could be installed to write configuration with -j or -J.
     -A  Pass the salt-master DNS name or IP. This will be stored under
         \${BS_SALT_ETC_DIR}/minion.d/99-master-address.conf
     -i  Pass the salt-minion id. This will be stored under

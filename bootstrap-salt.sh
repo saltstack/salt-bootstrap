@@ -5133,8 +5133,7 @@ __ZYPPER_REQUIRES_REPLACE_FILES=-1
 __set_suse_pkg_repo() {
     suse_pkg_url_path="${DISTRO_REPO}/systemsmanagement:saltstack.repo"
     if [ "$_DOWNSTREAM_PKG_REPO" -eq $BS_TRUE ]; then
-        # FIXME: cleartext download over unsecure protocol (HTTP)
-        suse_pkg_url_base="http://download.opensuse.org/repositories/systemsmanagement:saltstack"
+        suse_pkg_url_base="http://download.opensuse.org/repositories/systemsmanagement:/saltstack"
     else
         suse_pkg_url_base="${HTTP_VAL}://repo.saltstack.com/opensuse"
     fi

@@ -3301,6 +3301,11 @@ install_fedora_stable_post() {
 
 install_fedora_git_deps() {
     __fedora_get_package_manager
+
+    if [ "$_INSECURE_DL" -eq $BS_FALSE ] && [ "${_SALT_REPO_URL%%://*}" = "https" ]; then
+        $FEDORA_PACKAGE_MANAGER ca-certificates || return 1
+    fi
+
     install_fedora_deps || return 1
 
     if ! __check_command_exists git; then
@@ -3641,6 +3646,14 @@ install_centos_stable_post() {
 }
 
 install_centos_git_deps() {
+    if [ "$_INSECURE_DL" -eq $BS_FALSE ] && [ "${_SALT_REPO_URL%%://*}" = "https" ]; then
+        if [ "$DISTRO_MAJOR_VERSION" -gt 5 ]; then
+            __yum_install_noinput ca-certificates || return 1
+        else
+            __yum_install_noinput "openssl.${CPU_ARCH_L}" || return 1
+        fi
+    fi
+
     install_centos_stable_deps || return 1
 
     if ! __check_command_exists git; then
@@ -4248,6 +4261,10 @@ _eof
 }
 
 install_amazon_linux_ami_git_deps() {
+    if [ "$_INSECURE_DL" -eq $BS_FALSE ] && [ "${_SALT_REPO_URL%%://*}" = "https" ]; then
+        yum -y install ca-certificates || return 1
+    fi
+
     install_amazon_linux_ami_deps || return 1
 
     ENABLE_EPEL_CMD=""
@@ -5249,6 +5266,10 @@ install_opensuse_stable_deps() {
 }
 
 install_opensuse_git_deps() {
+    if [ "$_INSECURE_DL" -eq $BS_FALSE ] && [ "${_SALT_REPO_URL%%://*}" = "https" ]; then
+        __zypper_install ca-certificates || return 1
+    fi
+
     install_opensuse_stable_deps || return 1
 
     if ! __check_command_exists git; then

@@ -2498,7 +2498,15 @@ install_ubuntu_daily_deps() {
 
 install_ubuntu_git_deps() {
     apt-get update
-    __apt_get_install_noinput git-core || return 1
+
+    if ! __check_command_exists git; then
+        __apt_get_install_noinput git-core || return 1
+    fi
+
+    if [ "$_INSECURE_DL" -eq $BS_FALSE ] && [ "${_SALT_REPO_URL%%://*}" = "https" ]; then
+        __apt_get_install_noinput ca-certificates
+    fi
+
     __git_clone_and_checkout || return 1
 
     __PACKAGES=""
@@ -2955,6 +2963,10 @@ install_debian_git_deps() {
         __apt_get_install_noinput git || return 1
     fi
 
+    if [ "$_INSECURE_DL" -eq $BS_FALSE ] && [ "${_SALT_REPO_URL%%://*}" = "https" ]; then
+        __apt_get_install_noinput ca-certificates
+    fi
+
     __git_clone_and_checkout || return 1
 
     __PACKAGES="libzmq3 libzmq3-dev lsb-release python-apt python-backports.ssl-match-hostname python-crypto"
@@ -2990,6 +3002,10 @@ install_debian_8_git_deps() {
 
     if ! __check_command_exists git; then
         __apt_get_install_noinput git || return 1
+    fi
+
+    if [ "$_INSECURE_DL" -eq $BS_FALSE ] && [ "${_SALT_REPO_URL%%://*}" = "https" ]; then
+        __apt_get_install_noinput ca-certificates
     fi
 
     __git_clone_and_checkout || return 1

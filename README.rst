@@ -58,37 +58,37 @@ Using ``curl`` to install latest development version from GitHub:
 
 .. code:: console
 
-  curl -o bootstrap_salt.sh -L https://bootstrap.saltstack.com
-  sudo sh bootstrap_salt.sh git develop
+  curl -o bootstrap-salt.sh -L https://bootstrap.saltstack.com
+  sudo sh bootstrap-salt.sh git develop
 
 If you want to install a specific release version (based on the Git tags):
 
 .. code:: console
 
-  curl -o bootstrap_salt.sh -L https://bootstrap.saltstack.com
-  sudo sh bootstrap_salt.sh git v2016.3.2
+  curl -o bootstrap-salt.sh -L https://bootstrap.saltstack.com
+  sudo sh bootstrap-salt.sh git v2016.3.2
 
 To install a specific branch from a Git fork:
 
 .. code:: console
 
-  curl -o bootstrap_salt.sh -L https://bootstrap.saltstack.com
-  sudo sh bootstrap_salt.sh -g https://github.com/myuser/salt.git git mybranch
+  curl -o bootstrap-salt.sh -L https://bootstrap.saltstack.com
+  sudo sh bootstrap-salt.sh -g https://github.com/myuser/salt.git git mybranch
 
 If all you want is to install a ``salt-master`` using latest Git:
 
 .. code:: console
 
-  curl -o bootstrap_salt.sh -L https://bootstrap.saltstack.com
-  sudo sh bootstrap_salt.sh -M -N git develop
+  curl -o bootstrap-salt.sh -L https://bootstrap.saltstack.com
+  sudo sh bootstrap-salt.sh -M -N git develop
 
 If your host has Internet access only via HTTP proxy:
 
 .. code:: console
 
   PROXY='http://user:password@myproxy.example.com:3128'
-  curl -o bootstrap_salt.sh -L -x "$PROXY" https://bootstrap.saltstack.com
-  sudo sh bootstrap_salt.sh -H "$PROXY" git
+  curl -o bootstrap-salt.sh -L -x "$PROXY" https://bootstrap.saltstack.com
+  sudo sh bootstrap-salt.sh -H "$PROXY" git
 
 
 Install using wget
@@ -98,15 +98,15 @@ Using ``wget`` to install your distribution's stable packages:
 
 .. code:: console
 
-  wget -O bootstrap_salt.sh https://bootstrap.saltstack.com
-  sudo sh bootstrap_salt.sh
+  wget -O bootstrap-salt.sh https://bootstrap.saltstack.com
+  sudo sh bootstrap-salt.sh
 
 Installing a specific version from git using ``wget``:
 
 .. code:: console
 
-  wget -O bootstrap_salt.sh https://bootstrap.saltstack.com
-  sudo sh bootstrap_salt.sh -P git v2015.8.11
+  wget -O bootstrap-salt.sh https://bootstrap.saltstack.com
+  sudo sh bootstrap-salt.sh -P git v2015.8.11
 
 .. note::
 
@@ -121,15 +121,15 @@ If you already have Python installed, ``python 2.6``, then it's as easy as:
 
 .. code:: console
 
-  python -m urllib "https://bootstrap.saltstack.com" > bootstrap_salt.sh
-  sudo sh bootstrap_salt.sh git develop
+  python -m urllib "https://bootstrap.saltstack.com" > bootstrap-salt.sh
+  sudo sh bootstrap-salt.sh git develop
 
 All Python versions should support the following in-line code:
 
 .. code:: console
 
-  python -c 'import urllib; print urllib.urlopen("https://bootstrap.saltstack.com").read()' > bootstrap_salt.sh
-  sudo sh bootstrap_salt.sh git develop
+  python -c 'import urllib; print urllib.urlopen("https://bootstrap.saltstack.com").read()' > bootstrap-salt.sh
+  sudo sh bootstrap-salt.sh git develop
 
 
 Install using fetch
@@ -140,8 +140,8 @@ have ``fetch`` available though:
 
 .. code:: console
 
-  fetch -o bootstrap_salt.sh https://bootstrap.saltstack.com
-  sudo sh bootstrap_salt.sh
+  fetch -o bootstrap-salt.sh https://bootstrap.saltstack.com
+  sudo sh bootstrap-salt.sh
 
 If you have any SSL issues install ``ca_root_nssp``:
 
@@ -479,8 +479,8 @@ version.
 
 .. code:: console
 
-  curl -o bootstrap_salt.sh -L https://bootstrap.saltstack.com/develop
-  sudo sh bootstrap_salt.sh git develop
+  curl -o bootstrap-salt.sh -L https://bootstrap.saltstack.com/develop
+  sudo sh bootstrap-salt.sh git develop
 
 
 Or the insecure one liner:

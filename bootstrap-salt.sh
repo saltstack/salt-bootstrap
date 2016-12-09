@@ -6150,9 +6150,6 @@ config_salt() {
         exit 0
     fi
 
-    # Create default logs directory if not exists
-    mkdir -p /var/log/salt
-
     return 0
 }
 #
@@ -6461,15 +6458,6 @@ if [ "$_CONFIG_ONLY" -eq $BS_FALSE ]; then
     if [ $? -ne 0 ]; then
         echoerror "Failed to run ${INSTALL_FUNC}()!!!"
         exit 1
-    fi
-fi
-
-# Ensure that the cachedir exists
-# (Workaround for https://github.com/saltstack/salt/issues/6502)
-if [ "$_INSTALL_MINION" -eq $BS_TRUE ]; then
-    if [ ! -d "${_SALT_CACHE_DIR}/minion/proc" ]; then
-        echodebug "Creating salt's cachedir"
-        mkdir -p "${_SALT_CACHE_DIR}/minion/proc"
     fi
 fi
 

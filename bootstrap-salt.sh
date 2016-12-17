@@ -1459,6 +1459,15 @@ if ([ "${DISTRO_NAME_L}" != "ubuntu" ] && [ $_PIP_ALL -eq $BS_TRUE ]);then
     exit 1
 fi
 
+# Hack proof of concept. Feel free to refactor properly.
+# Starting from Ubuntu 16.01, gnupg-curl has been renamed to gnupg1-curl.
+GNUPG_CURL="gnupg-curl"
+if ([ "${DISTRO_NAME_L}" = "ubuntu" ] && [ ${DISTRO_VERSION} = "16.10" ]); then
+    GNUPG_CURL="gnupg1-curl"
+fi
+
+
+
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #          NAME:  __function_defined
 #   DESCRIPTION:  Checks if a function is defined within this scripts scope
@@ -1503,7 +1512,7 @@ __apt_get_upgrade_noinput() {
 __apt_key_fetch() {
     url=$1
 
-    __apt_get_install_noinput gnupg-curl || return 1
+    __apt_get_install_noinput ${GNUPG_CURL} || return 1
 
     # shellcheck disable=SC2086
     apt-key adv ${_GPG_ARGS} --fetch-keys "$url"; return $?

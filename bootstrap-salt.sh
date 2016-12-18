@@ -1459,10 +1459,9 @@ if ([ "${DISTRO_NAME_L}" != "ubuntu" ] && [ $_PIP_ALL -eq $BS_TRUE ]);then
     exit 1
 fi
 
-# Hack proof of concept. Feel free to refactor properly.
-# Starting from Ubuntu 16.01, gnupg-curl has been renamed to gnupg1-curl.
+# Starting from Ubuntu 16.10, gnupg-curl has been renamed to gnupg1-curl.
 GNUPG_CURL="gnupg-curl"
-if ([ "${DISTRO_NAME_L}" = "ubuntu" ] && [ ${DISTRO_VERSION} = "16.10" ]); then
+if ([ "${DISTRO_NAME_L}" = "ubuntu" ] && [ "${DISTRO_VERSION}" = "16.10" ]); then
     GNUPG_CURL="gnupg1-curl"
 fi
 

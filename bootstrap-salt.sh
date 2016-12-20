@@ -1744,7 +1744,7 @@ __check_end_of_life_versions() {
 
         fedora)
             # Fedora lower than 18 are no longer supported
-            if [ "$DISTRO_MAJOR_VERSION" -lt 18 ]; then
+            if [ "$DISTRO_MAJOR_VERSION" -lt 23 ]; then
                 echoerror "End of life distributions are not supported."
                 echoerror "Please consider upgrading to the next stable. See:"
                 echoerror "    https://fedoraproject.org/wiki/Releases"
@@ -3225,16 +3225,7 @@ install_debian_check_services() {
 #   Fedora Install Functions
 #
 
-FEDORA_PACKAGE_MANAGER="yum"
-
-__fedora_get_package_manager() {
-  if [ "$DISTRO_MAJOR_VERSION" -ge 22 ] || __check_command_exists dnf; then
-    FEDORA_PACKAGE_MANAGER="dnf"
-  fi
-}
-
 install_fedora_deps() {
-    __fedora_get_package_manager
 
     if [ $_DISABLE_REPOS -eq $BS_FALSE ]; then
         if [ "$_ENABLE_EXTERNAL_ZMQ_REPOS" -eq $BS_TRUE ]; then
@@ -3244,32 +3235,25 @@ install_fedora_deps() {
         __install_saltstack_copr_salt_repository || return 1
     fi
 
-    __PACKAGES="yum-utils PyYAML libyaml python-crypto python-jinja2 python-zmq"
-
-    if [ "$DISTRO_MAJOR_VERSION" -ge 23 ]; then
-        __PACKAGES="${__PACKAGES} python2-msgpack python2-requests"
-    else
-        __PACKAGES="${__PACKAGES} python-msgpack python-requests"
-    fi
+    __PACKAGES="yum-utils PyYAML libyaml python-crypto python-jinja2 python-zmq python2-msgpack python2-requests"
 
     # shellcheck disable=SC2086
-    $FEDORA_PACKAGE_MANAGER install -y ${__PACKAGES} || return 1
+    dnf install -y ${__PACKAGES} || return 1
 
     if [ "$_UPGRADE_SYS" -eq $BS_TRUE ]; then
-        $FEDORA_PACKAGE_MANAGER -y update || return 1
+        dnf -y update || return 1
     fi
 
     if [ "${_EXTRA_PACKAGES}" != "" ]; then
         echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
         # shellcheck disable=SC2086
-        $FEDORA_PACKAGE_MANAGER install -y ${_EXTRA_PACKAGES} || return 1
+        dnf install -y ${_EXTRA_PACKAGES} || return 1
     fi
 
     return 0
 }
 
 install_fedora_stable() {
-    __fedora_get_package_manager
     __PACKAGES=""
 
     if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ];then
@@ -3286,7 +3270,7 @@ install_fedora_stable() {
     fi
 
     # shellcheck disable=SC2086
-    $FEDORA_PACKAGE_MANAGER install -y ${__PACKAGES} || return 1
+    dnf install -y ${__PACKAGES} || return 1
 
     return 0
 }
@@ -3308,16 +3292,15 @@ install_fedora_stable_post() {
 }
 
 install_fedora_git_deps() {
-    __fedora_get_package_manager
 
     if [ "$_INSECURE_DL" -eq $BS_FALSE ] && [ "${_SALT_REPO_URL%%://*}" = "https" ]; then
-        $FEDORA_PACKAGE_MANAGER ca-certificates || return 1
+        dnf ca-certificates || return 1
     fi
 
     install_fedora_deps || return 1
 
     if ! __check_command_exists git; then
-        $FEDORA_PACKAGE_MANAGER install -y git || return 1
+       dnf install -y git || return 1
     fi
 
     __git_clone_and_checkout || return 1
@@ -3345,7 +3328,7 @@ install_fedora_git_deps() {
     fi
 
     # shellcheck disable=SC2086
-    $FEDORA_PACKAGE_MANAGER install -y ${__PACKAGES} || return 1
+    dnf install -y ${__PACKAGES} || return 1
 
     if [ "${__PIP_PACKAGES}" != "" ]; then
         # shellcheck disable=SC2086,SC2090

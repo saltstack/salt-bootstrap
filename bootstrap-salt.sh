@@ -3294,13 +3294,13 @@ install_fedora_stable_post() {
 install_fedora_git_deps() {
 
     if [ "$_INSECURE_DL" -eq $BS_FALSE ] && [ "${_SALT_REPO_URL%%://*}" = "https" ]; then
-        dnf ca-certificates || return 1
+        dnf install -y ca-certificates || return 1
     fi
 
     install_fedora_deps || return 1
 
     if ! __check_command_exists git; then
-       dnf install -y git || return 1
+        dnf install -y git || return 1
     fi
 
     __git_clone_and_checkout || return 1

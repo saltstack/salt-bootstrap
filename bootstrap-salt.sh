@@ -1201,12 +1201,6 @@ __ubuntu_derivatives_translation() {
     # Mappings
     trisquel_6_ubuntu_base="12.04"
     linuxmint_13_ubuntu_base="12.04"
-    linuxmint_14_ubuntu_base="12.10"
-    #linuxmint_15_ubuntu_base="13.04"
-    # Bug preventing add-apt-repository from working on Mint 15:
-    # https://bugs.launchpad.net/linuxmint/+bug/1198751
-
-    linuxmint_16_ubuntu_base="13.10"
     linuxmint_17_ubuntu_base="14.04"
     linuxmint_18_ubuntu_base="16.04"
     linaro_12_ubuntu_base="12.04"

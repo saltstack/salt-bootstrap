@@ -1707,7 +1707,12 @@ __check_end_of_life_versions() {
             # Ubuntu versions not supported
             #
             #  < 12.04
-            if [ "$DISTRO_MAJOR_VERSION" -lt 12 ]; then
+            #  13.x, 15.x
+            #  12.10, 14.10
+            if [ "$DISTRO_MAJOR_VERSION" -lt 12 ] || \
+               [ "$DISTRO_MAJOR_VERSION" -eq 13 ] || \
+               [ "$DISTRO_MAJOR_VERSION" -eq 15 ] || \
+               ([ "$DISTRO_MAJOR_VERSION" -lt 16 ] && [ "$DISTRO_MINOR_VERSION" -eq 10 ]); then
                 echoerror "End of life distributions are not supported."
                 echoerror "Please consider upgrading to the next stable. See:"
                 echoerror "    https://wiki.ubuntu.com/Releases"
@@ -2303,13 +2308,8 @@ __enable_universe_repository() {
     echodebug "Enabling the universe repository"
 
     # Ubuntu versions higher than 12.04 do not live in the old repositories
-    if [ "$DISTRO_MAJOR_VERSION" -gt 12 ] || ([ "$DISTRO_MAJOR_VERSION" -eq 12 ] && [ "$DISTRO_MINOR_VERSION" -gt 04 ]); then
+    if [ "$DISTRO_MAJOR_VERSION" -gt 12 ]; then
         add-apt-repository -y "deb http://archive.ubuntu.com/ubuntu $(lsb_release -sc) universe" || return 1
-    elif [ "$DISTRO_MAJOR_VERSION" -lt 11 ] && [ "$DISTRO_MINOR_VERSION" -lt 10 ]; then
-        # Below Ubuntu 11.10, the -y flag to add-apt-repository is not supported
-        add-apt-repository "deb http://old-releases.ubuntu.com/ubuntu $(lsb_release -sc) universe" || return 1
-    else
-        add-apt-repository -y "deb http://old-releases.ubuntu.com/ubuntu $(lsb_release -sc) universe" || return 1
     fi
 
     add-apt-repository -y "deb http://old-releases.ubuntu.com/ubuntu $(lsb_release -sc) universe" || return 1
@@ -2318,7 +2318,7 @@ __enable_universe_repository() {
 }
 
 install_ubuntu_deps() {
-    if [ "$DISTRO_MAJOR_VERSION" -gt 12 ] || ([ "$DISTRO_MAJOR_VERSION" -eq 12 ] && [ "$DISTRO_MINOR_VERSION" -eq 10 ]); then
+    if [ "$DISTRO_MAJOR_VERSION" -gt 12 ]; then
         # Above Ubuntu 12.04 add-apt-repository is in a different package
         __apt_get_install_noinput software-properties-common || return 1
     else
@@ -2332,18 +2332,10 @@ install_ubuntu_deps() {
         if [ "$(echo "$STABLE_REV" | egrep '^(2015\.5|2015\.8|2016\.3|2016\.11|latest|archive\/)')" = "" ]; then
             if [ "$DISTRO_MAJOR_VERSION" -lt 14 ]; then
                 echoinfo "Installing Python Requests/Chardet from Chris Lea's PPA repository"
-                if [ "$DISTRO_MAJOR_VERSION" -gt 11 ] || ([ "$DISTRO_MAJOR_VERSION" -eq 11 ] && [ "$DISTRO_MINOR_VERSION" -gt 04 ]); then
-                    # Above Ubuntu 11.04 add a -y flag
-                    add-apt-repository -y "ppa:chris-lea/python-requests" || return 1
-                    add-apt-repository -y "ppa:chris-lea/python-chardet" || return 1
-                    add-apt-repository -y "ppa:chris-lea/python-urllib3" || return 1
-                    add-apt-repository -y "ppa:chris-lea/python-crypto" || return 1
-                else
-                    add-apt-repository "ppa:chris-lea/python-requests" || return 1
-                    add-apt-repository "ppa:chris-lea/python-chardet" || return 1
-                    add-apt-repository "ppa:chris-lea/python-urllib3" || return 1
-                    add-apt-repository "ppa:chris-lea/python-crypto" || return 1
-                fi
+                add-apt-repository -y "ppa:chris-lea/python-requests" || return 1
+                add-apt-repository -y "ppa:chris-lea/python-chardet" || return 1
+                add-apt-repository -y "ppa:chris-lea/python-urllib3" || return 1
+                add-apt-repository -y "ppa:chris-lea/python-crypto" || return 1
             fi
 
         fi
@@ -2354,7 +2346,7 @@ install_ubuntu_deps() {
     # Minimal systems might not have upstart installed, install it
     __PACKAGES="upstart"
 
-    if [ "$DISTRO_MAJOR_VERSION" -ge 15 ]; then
+    if [ "$DISTRO_MAJOR_VERSION" -ge 16 ]; then
         __PACKAGES="${__PACKAGES} python2.7"
     fi
     if [ "$_VIRTUALENV_DIR" != "null" ]; then
@@ -2385,7 +2377,7 @@ install_ubuntu_deps() {
 }
 
 install_ubuntu_stable_deps() {
-    if ([ "${_SLEEP}" -eq "${__DEFAULT_SLEEP}" ] && [ "$DISTRO_MAJOR_VERSION" -lt 15 ]); then
+    if ([ "${_SLEEP}" -eq "${__DEFAULT_SLEEP}" ] && [ "$DISTRO_MAJOR_VERSION" -lt 16 ]); then
         # The user did not pass a custom sleep value as an argument, let's increase the default value
         echodebug "On Ubuntu systems we increase the default sleep value to 10."
         echodebug "See https://github.com/saltstack/salt/issues/12248 for more info."
@@ -2430,10 +2422,10 @@ install_ubuntu_stable_deps() {
         # Versions starting with 2015.5.6, 2015.8.1 and 2016.3.0 are hosted at repo.saltstack.com
         if [ "$(echo "$STABLE_REV" | egrep '^(2015\.5|2015\.8|2016\.3|2016\.11|latest|archive\/)')" != "" ]; then
             # Workaround for latest non-LTS ubuntu
-            if [ "$DISTRO_MAJOR_VERSION" -eq 15 ]; then
+            if [ "$DISTRO_MAJOR_VERSION" -eq 16 ] && [ "$DISTRO_MINOR_VERSION" -eq 10 ]; then
                 echowarn "Non-LTS Ubuntu detected, but stable packages requested. Trying packages from latest LTS release. You may experience problems."
-                UBUNTU_VERSION=14.04
-                UBUNTU_CODENAME=trusty
+                UBUNTU_VERSION=16.04
+                UBUNTU_CODENAME=xenial
             else
                 UBUNTU_VERSION=$DISTRO_VERSION
                 UBUNTU_CODENAME=$DISTRO_CODENAME
@@ -2459,12 +2451,7 @@ install_ubuntu_stable_deps() {
               STABLE_PPA="saltstack/salt"
             fi
 
-            if [ "$DISTRO_MAJOR_VERSION" -gt 11 ] || ([ "$DISTRO_MAJOR_VERSION" -eq 11 ] && [ "$DISTRO_MINOR_VERSION" -gt 04 ]); then
-                # Above Ubuntu 11.04 add a -y flag
-                add-apt-repository -y "ppa:$STABLE_PPA" || return 1
-            else
-                add-apt-repository "ppa:$STABLE_PPA" || return 1
-            fi
+            add-apt-repository -y "ppa:$STABLE_PPA" || return 1
         fi
 
         apt-get update
@@ -2476,24 +2463,12 @@ install_ubuntu_stable_deps() {
 install_ubuntu_daily_deps() {
     install_ubuntu_stable_deps || return 1
 
-    if [ "$DISTRO_MAJOR_VERSION" -ge 12 ]; then
-        # Above Ubuntu 11.10 add-apt-repository is in a different package
-        __apt_get_install_noinput software-properties-common || return 1
-    else
-        __apt_get_install_noinput python-software-properties || return 1
-    fi
+    __apt_get_install_noinput software-properties-common || return 1
 
     if [ $_DISABLE_REPOS -eq $BS_FALSE ]; then
         __enable_universe_repository || return 1
 
-        # for anything up to and including 11.04 do not use the -y option
-        if [ "$DISTRO_MAJOR_VERSION" -gt 11 ] || ([ "$DISTRO_MAJOR_VERSION" -eq 11 ] && [ "$DISTRO_MINOR_VERSION" -gt 04 ]); then
-            # Above Ubuntu 11.04 add a -y flag
-            add-apt-repository -y ppa:saltstack/salt-daily || return 1
-        else
-            add-apt-repository ppa:saltstack/salt-daily || return 1
-        fi
-
+        add-apt-repository -y ppa:saltstack/salt-daily || return 1
         apt-get update
     fi
 
@@ -2599,7 +2574,7 @@ install_ubuntu_git() {
 install_ubuntu_stable_post() {
     # Workaround for latest LTS packages on latest ubuntu. Normally packages on
     # debian-based systems will automatically start the corresponding daemons
-    if [ "$DISTRO_MAJOR_VERSION" -lt 15 ]; then
+    if [ "$DISTRO_MAJOR_VERSION" -lt 16 ]; then
         return 0
     fi
 
@@ -2635,7 +2610,7 @@ install_ubuntu_git_post() {
         [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
         [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
 
-        if [ -f /bin/systemctl ] && [ "$DISTRO_MAJOR_VERSION" -ge 15 ]; then
+        if [ -f /bin/systemctl ] && [ "$DISTRO_MAJOR_VERSION" -ge 16 ]; then
             __copyfile "${_SALT_GIT_CHECKOUT_DIR}/pkg/deb/salt-${fname}.service" "/lib/systemd/system/salt-${fname}.service"
 
             # Skip salt-api since the service should be opt-in and not necessarily started on boot
@@ -2680,7 +2655,7 @@ install_ubuntu_restart_daemons() {
     [ $_START_DAEMONS -eq $BS_FALSE ] && return
 
     # Ensure upstart configs / systemd units are loaded
-    if [ -f /bin/systemctl ] && [ "$DISTRO_MAJOR_VERSION" -ge 15 ]; then
+    if [ -f /bin/systemctl ] && [ "$DISTRO_MAJOR_VERSION" -ge 16 ]; then
         systemctl daemon-reload
     elif [ -f /sbin/initctl ]; then
         /sbin/initctl reload-configuration
@@ -2695,7 +2670,7 @@ install_ubuntu_restart_daemons() {
         [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
         [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
 
-        if [ -f /bin/systemctl ] && [ "$DISTRO_MAJOR_VERSION" -ge 15 ]; then
+        if [ -f /bin/systemctl ] && [ "$DISTRO_MAJOR_VERSION" -ge 16 ]; then
             echodebug "There's systemd support while checking salt-$fname"
             systemctl stop salt-$fname > /dev/null 2>&1
             systemctl start salt-$fname.service
@@ -2739,7 +2714,7 @@ install_ubuntu_check_services() {
         [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
         [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
 
-        if [ -f /bin/systemctl ] && [ "$DISTRO_MAJOR_VERSION" -ge 15 ]; then
+        if [ -f /bin/systemctl ] && [ "$DISTRO_MAJOR_VERSION" -ge 16 ]; then
             __check_services_systemd salt-$fname || return 1
         elif [ -f /sbin/initctl ] && [ -f /etc/init/salt-${fname}.conf ]; then
             __check_services_upstart salt-$fname || return 1

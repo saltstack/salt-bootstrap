@@ -1272,7 +1272,11 @@ __ubuntu_codename_translation() {
             fi
             ;;
         "16")
-            DISTRO_CODENAME="xenial"
+            if [ "$_april" ]; then
+                DISTRO_CODENAME="xenial"
+            else
+                DISTRO_CODENAME="yakkety"
+            fi
             ;;
         *)
             DISTRO_CODENAME="trusty"

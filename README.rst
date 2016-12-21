@@ -200,7 +200,7 @@ Supported Operating Systems
 .. note::
 
   Bootstrap may fail to install Salt on the cutting-edge version of distributions with frequent
-  release cycle, such as: Amazon Linux, Fedora, openSUSE Tumbleweed or Ubuntu non-LTS. Check the
+  release cycles such as: Amazon Linux, Fedora, openSUSE Tumbleweed, or Ubuntu non-LTS. Check the
   versions from the list below. Also, see the `Unsupported Distro`_ and
   `Adding Support for Other Operating Systems`_ sections.
 
@@ -231,7 +231,7 @@ Red Hat family
 
 - Amazon Linux 2012.09/2013.03/2013.09/2014.03/2014.09
 - CentOS 5/6/7
-- Fedora 17/18/20/21/22
+- Fedora 23/24/25
 - Oracle Linux 5/6/7
 - Red Hat Enterprise Linux 5/6/7
 - Scientific Linux 5/6/7

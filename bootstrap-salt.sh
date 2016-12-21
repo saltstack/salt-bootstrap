@@ -1258,13 +1258,6 @@ __ubuntu_codename_translation() {
         "14")
             DISTRO_CODENAME="trusty"
             ;;
-        "15")
-            if [ -n "$_april" ]; then
-                DISTRO_CODENAME="vivid"
-            else
-                DISTRO_CODENAME="wily"
-            fi
-            ;;
         "16")
             DISTRO_CODENAME="xenial"
             ;;

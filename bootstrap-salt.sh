@@ -2294,12 +2294,7 @@ __enable_universe_repository() {
 
     echodebug "Enabling the universe repository"
 
-    # Ubuntu versions higher than 12.04 do not live in the old repositories
-    if [ "$DISTRO_MAJOR_VERSION" -gt 12 ]; then
-        add-apt-repository -y "deb http://archive.ubuntu.com/ubuntu $(lsb_release -sc) universe" || return 1
-    fi
-
-    add-apt-repository -y "deb http://old-releases.ubuntu.com/ubuntu $(lsb_release -sc) universe" || return 1
+    add-apt-repository -y "deb http://archive.ubuntu.com/ubuntu $(lsb_release -sc) universe" || return 1
 
     return 0
 }
@@ -2364,7 +2359,7 @@ install_ubuntu_deps() {
 }
 
 install_ubuntu_stable_deps() {
-    if ([ "${_SLEEP}" -eq "${__DEFAULT_SLEEP}" ] && [ "$DISTRO_MAJOR_VERSION" -lt 16 ]); then
+    if [ "${_SLEEP}" -eq "${__DEFAULT_SLEEP}" ] && [ "$DISTRO_MAJOR_VERSION" -lt 16 ]; then
         # The user did not pass a custom sleep value as an argument, let's increase the default value
         echodebug "On Ubuntu systems we increase the default sleep value to 10."
         echodebug "See https://github.com/saltstack/salt/issues/12248 for more info."
@@ -2450,7 +2445,12 @@ install_ubuntu_stable_deps() {
 install_ubuntu_daily_deps() {
     install_ubuntu_stable_deps || return 1
 
-    __apt_get_install_noinput software-properties-common || return 1
+    if [ "$DISTRO_MAJOR_VERSION" -gt 12 ]; then
+        __apt_get_install_noinput software-properties-common || return 1
+    else
+        # Ubuntu 12.04 needs python-software-properties to get add-apt-repository binary
+        __apt_get_install_noinput python-software-properties || return 1
+    fi
 
     if [ $_DISABLE_REPOS -eq $BS_FALSE ]; then
         __enable_universe_repository || return 1
@@ -2559,12 +2559,6 @@ install_ubuntu_git() {
 }
 
 install_ubuntu_stable_post() {
-    # Workaround for latest LTS packages on latest ubuntu. Normally packages on
-    # debian-based systems will automatically start the corresponding daemons
-    if [ "$DISTRO_MAJOR_VERSION" -lt 16 ]; then
-        return 0
-    fi
-
     for fname in api master minion syndic; do
         # Skip salt-api since the service should be opt-in and not necessarily started on boot
         [ $fname = "api" ] && continue

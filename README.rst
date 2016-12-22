@@ -216,8 +216,8 @@ Debian and derivatives
 .. note::
 
   Installation of Salt packages on Debian 8 based distribution from repo.saltstack.com repository
-  is currently supported for ``amd64`` (``x86-64``) and ``armhf`` architechtures ONLY. Use ``git``
-  bootstrap mode as described above to install Salt on other architechtures, such as ``i386`` or
+  is currently supported for ``amd64`` (``x86-64``) and ``armhf`` architectures ONLY. Use ``git``
+  bootstrap mode as described above to install Salt on other architectures, such as ``i386`` or
   ``armel``. You also may need to disable repository configuration and allow ``pip`` installations
   by providing ``-r`` and ``-P`` options to the bootstrap script, i.e.:
 
@@ -251,7 +251,7 @@ Ubuntu and derivatives
 
 - Elementary OS 0.2 (based on Ubuntu 12.04)
 - Linaro 12.04
-- Linux Mint 13/14/16/17/18
+- Linux Mint 13/17/18
 - Trisquel GNU/Linux 6 (based on Ubuntu 12.04)
 - Ubuntu 12.04/14.04/16.04
 

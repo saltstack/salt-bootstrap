@@ -2978,7 +2978,7 @@ install_debian_git_deps() {
     __git_clone_and_checkout || return 1
 
     __PACKAGES="libzmq3 libzmq3-dev lsb-release python-apt python-backports.ssl-match-hostname python-crypto"
-    __PACKAGES="${__PACKAGES} python-jinja2 python-msgpack python-requests python-tornado"
+    __PACKAGES="${__PACKAGES} python-jinja2 python-msgpack python-requests"
     __PACKAGES="${__PACKAGES} python-tornado python-yaml python-zmq"
 
     if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
@@ -3018,7 +3018,8 @@ install_debian_8_git_deps() {
 
     __git_clone_and_checkout || return 1
 
-    __PACKAGES='libzmq3 libzmq3-dev lsb-release python-apt python-crypto python-jinja2 python-msgpack python-requests python-yaml python-zmq'
+    __PACKAGES="libzmq3 libzmq3-dev lsb-release python-apt python-crypto python-jinja2 python-msgpack"
+    __PACKAGES="${__PACKAGES} python-requests python-systemd python-yaml python-zmq"
 
     if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
         # Install python-libcloud if asked to

@@ -4424,7 +4424,7 @@ install_arch_linux_stable() {
     pacman -S --noconfirm --needed bash || return 1
     pacman -Su --noconfirm || return 1
     # We can now resume regular salt update
-    pacman -Syu --noconfirm salt-zmq || return 1
+    pacman -Syu --noconfirm salt || return 1
     return 0
 }
 

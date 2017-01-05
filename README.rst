@@ -257,17 +257,15 @@ Ubuntu and derivatives
 
 Ubuntu Best Effort Support: Non-LTS releases 
 
-This script provides best-effort support for current, non-LTS 
-Ubuntu releases. If package repositories are not provided on 
-[repo.saltstack.com](http://repo.saltstack.com/#ubuntu) for 
-the non-LTS release, the bootstrap script will attempt to 
-install the packages for the most closely related LTS Ubuntu
-release instead. 
+This script provides best-effort support for current, non-LTS Ubuntu releases. If package 
+repositories are not provided on `SaltStack's Ubuntu repository`_ for the non-LTS release, the
+bootstrap script will attempt to install the packages for the most closely related LTS Ubuntu
+release instead.
 
-For example, when installing Salt on Ubuntu 16.10, the bootstrap
-script will setup the repository for Ubuntu 16.04 from 
-[repo.saltstack.com](http://repo.saltstack.com/#ubuntu) and 
-install the 16.04 packages.
+For example, when installing Salt on Ubuntu 16.10, the bootstrap script will setup the repository 
+for Ubuntu 16.04 from `SaltStack's Ubuntu repository`_ and install the 16.04 packages.
+
+.. _`SaltStack's Ubuntu repository`: http://repo.saltstack.com/#ubuntu
 
 
 Other Linux distro

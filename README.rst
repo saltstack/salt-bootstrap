@@ -216,8 +216,8 @@ Debian and derivatives
 .. note::
 
   Installation of Salt packages on Debian 8 based distribution from repo.saltstack.com repository
-  is currently supported for ``amd64`` (``x86-64``) and ``armhf`` architechtures ONLY. Use ``git``
-  bootstrap mode as described above to install Salt on other architechtures, such as ``i386`` or
+  is currently supported for ``amd64`` (``x86-64``) and ``armhf`` architectures ONLY. Use ``git``
+  bootstrap mode as described above to install Salt on other architectures, such as ``i386`` or
   ``armel``. You also may need to disable repository configuration and allow ``pip`` installations
   by providing ``-r`` and ``-P`` options to the bootstrap script, i.e.:
 
@@ -251,9 +251,22 @@ Ubuntu and derivatives
 
 - Elementary OS 0.2 (based on Ubuntu 12.04)
 - Linaro 12.04
-- Linux Mint 13/14/16/17/18
+- Linux Mint 13/17/18
 - Trisquel GNU/Linux 6 (based on Ubuntu 12.04)
-- Ubuntu 10.x/11.x/12.x/13.x/14.x/15.x/16.04
+- Ubuntu 12.04/14.04/16.04
+
+Ubuntu Best Effort Support: Non-LTS Releases 
+********************************************
+
+This script provides best-effort support for current, non-LTS Ubuntu releases. If package 
+repositories are not provided on `SaltStack's Ubuntu repository`_ for the non-LTS release, the
+bootstrap script will attempt to install the packages for the most closely related LTS Ubuntu
+release instead.
+
+For example, when installing Salt on Ubuntu 16.10, the bootstrap script will setup the repository 
+for Ubuntu 16.04 from `SaltStack's Ubuntu repository`_ and install the 16.04 packages.
+
+.. _`SaltStack's Ubuntu repository`: http://repo.saltstack.com/#ubuntu
 
 
 Other Linux distro

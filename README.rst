@@ -255,7 +255,8 @@ Ubuntu and derivatives
 - Trisquel GNU/Linux 6 (based on Ubuntu 12.04)
 - Ubuntu 12.04/14.04/16.04
 
-Ubuntu Best Effort Support: Non-LTS releases 
+Ubuntu Best Effort Support: Non-LTS Releases 
+********************************************
 
 This script provides best-effort support for current, non-LTS Ubuntu releases. If package 
 repositories are not provided on `SaltStack's Ubuntu repository`_ for the non-LTS release, the

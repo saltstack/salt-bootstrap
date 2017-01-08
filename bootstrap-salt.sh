@@ -4206,7 +4206,7 @@ install_alpine_linux_stable_deps() {
 
 install_alpine_linux_git_deps() {
     apk -U add python2 py-virtualenv py2-crypto py2-setuptools \
-        py2-jinja2 py2-markupsafe py2-msgpack py2-psutil \
+        py2-jinja2 py2-yaml py2-markupsafe py2-msgpack py2-psutil \
         py2-zmq zeromq py2-requests || return 1
 
     # Don't fail if un-installing python2-distribute threw an error
@@ -4249,7 +4249,7 @@ install_alpine_linux_stable() {
         __PACKAGES="${__PACKAGES} salt-syndic"
     fi
 
-    apk add ${__PACKAGES} || return 1
+    apk -U add ${__PACKAGES} || return 1
     return 0
 }
 

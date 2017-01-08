@@ -4245,6 +4245,9 @@ install_alpine_linux_post() {
         # Skip salt-api since the service should be opt-in and not necessarily started on boot
         [ $fname = "api" ] && continue
 
+        # Skip salt-syndic as there is no service for it on Alpine Linux
+        [ $fname = "syndic" ] && continue
+
         if [ -f /sbin/rc-update ]; then
             /sbin/rc-update add salt-$fname > /dev/null 2>&1
             continue
@@ -4265,6 +4268,9 @@ install_alpine_linux_git_post() {
         # Skip salt-api since the service should be opt-in and not necessarily started on boot
         [ $fname = "api" ] && continue
 
+        # Skip salt-syndic as there is no service for it on Alpine Linux
+        [ $fname = "syndic" ] && continue
+
         if [ -f /sbin/rc-update ]; then
             /sbin/rc-update add salt-$fname > dev/null 2>&1
             continue
@@ -4280,17 +4286,19 @@ install_alpine_linux_restart_daemons() {
         # Skip salt-api since the service should be opt-in and not necessarily started on boot
         [ $fname = "api" ] && continue
 
+        # Skip salt-syndic as there is no service for it on Alpine Linux
+        [ $fname = "syndic" ] && continue
+
         # Skip if not meant to be installed
         [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
         [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
-        [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
 
         /sbin/rc-service salt-$fname stop > /dev/null 2>&1
         /sbin/rc-service salt-$fname start
     done
 }
 
-install_alpine_check_services() {
+install_alpine_linux_check_services() {
     if [ ! -f /usr/bin/systemctl ]; then
         # Not running systemd!? Don't check!
         return 0
@@ -4300,16 +4308,43 @@ install_alpine_check_services() {
         # Skip salt-api since the service should be opt-in and not necessarily started on boot
         [ $fname = "api" ] && continue
 
+        # Skip salt-syndic as there is no service for it on Alpine Linux
+        [ $fname = "syndic" ] && continue
+
         # Skip if not meant to be installed
         [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
         [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
-        [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
 
         __check_services_alpine salt-$fname || return 1
     done
 
     return 0
 }
+
+daemons_running_alpine_linux() {
+    [ "$_START_DAEMONS" -eq $BS_FALSE ] && return 0
+
+    FAILED_DAEMONS=0
+    for fname in api master minion syndic; do
+        # Skip salt-api since the service should be opt-in and not necessarily started on boot
+        [ $fname = "api" ] && continue
+
+        # Skip salt-syndic as there is no service for it on Alpine Linux
+        [ $fname = "syndic" ] && continue
+
+        # Skip if not meant to be installed
+        [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
+        [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
+
+        if [ "$(ps wwwaux | grep -v grep | grep salt-$fname)" = "" ]; then
+            echoerror "salt-$fname was not found running"
+            FAILED_DAEMONS=$((FAILED_DAEMONS + 1))
+        fi
+    done
+
+    return $FAILED_DAEMONS
+}
+
 #
 #   Ended Alpine Linux Install Functions
 #

@@ -4204,6 +4204,35 @@ install_alpine_linux_stable_deps() {
     fi
 }
 
+install_alpine_linux_git_deps() {
+    apk -U add python2 py-virtualenv py2-crypto py2-setuptools \
+        py2-jinja2 py2-markupsafe py2-msgpack py2-psutil \
+        py2-zmq zeromq py2-requests || return 1
+
+    # Don't fail if un-installing python2-distribute threw an error
+    if ! __check_command_exists git; then
+        apk -U add git  || return 1
+    fi
+
+    __git_clone_and_checkout || return 1
+
+    if [ -f "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" ]; then
+        # We're on the develop branch, install whichever tornado is on the requirements file
+        __REQUIRED_TORNADO="$(grep tornado "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt")"
+        if [ "${__REQUIRED_TORNADO}" != "" ]; then
+            apk -U add py2-tornado
+        fi
+    fi
+
+    # Let's trigger config_salt()
+    if [ "$_TEMP_CONFIG_DIR" = "null" ]; then
+        _TEMP_CONFIG_DIR="${_SALT_GIT_CHECKOUT_DIR}/conf/"
+        CONFIG_SALT_FUNC="config_salt"
+    fi
+
+    return 0
+}
+
 install_alpine_linux_stable() {
     __PACKAGES="salt"
 

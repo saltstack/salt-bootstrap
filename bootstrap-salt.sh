@@ -985,7 +985,6 @@ __gather_linux_system_info() {
 
         n=$(echo "${rsource}" | sed -e 's/[_-]release$//' -e 's/[_-]version$//')
         shortname=$(echo "${n}" | tr '[:upper:]' '[:lower:]')
-
         if [ "$shortname" = "debian" ]; then
             rv=$(__derive_debian_numeric_version "$(cat /etc/${rsource})")
         else
@@ -993,7 +992,6 @@ __gather_linux_system_info() {
         fi
         [ "${rv}" = "" ] && [ "$shortname" != "arch" ] && continue  # There's no version information. Continue to next rsource
         v=$(__parse_version_string "$rv")
-
         case $shortname in
             redhat             )
                 if [ "$(egrep 'CentOS' /etc/${rsource})" != "" ]; then

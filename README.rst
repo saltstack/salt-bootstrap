@@ -58,37 +58,37 @@ Using ``curl`` to install latest development version from GitHub:
 
 .. code:: console
 
-  curl -o bootstrap_salt.sh -L https://bootstrap.saltstack.com
-  sudo sh bootstrap_salt.sh git develop
+  curl -o bootstrap-salt.sh -L https://bootstrap.saltstack.com
+  sudo sh bootstrap-salt.sh git develop
 
 If you want to install a specific release version (based on the Git tags):
 
 .. code:: console
 
-  curl -o bootstrap_salt.sh -L https://bootstrap.saltstack.com
-  sudo sh bootstrap_salt.sh git v2016.3.2
+  curl -o bootstrap-salt.sh -L https://bootstrap.saltstack.com
+  sudo sh bootstrap-salt.sh git v2016.3.2
 
 To install a specific branch from a Git fork:
 
 .. code:: console
 
-  curl -o bootstrap_salt.sh -L https://bootstrap.saltstack.com
-  sudo sh bootstrap_salt.sh -g https://github.com/myuser/salt.git git mybranch
+  curl -o bootstrap-salt.sh -L https://bootstrap.saltstack.com
+  sudo sh bootstrap-salt.sh -g https://github.com/myuser/salt.git git mybranch
 
 If all you want is to install a ``salt-master`` using latest Git:
 
 .. code:: console
 
-  curl -o bootstrap_salt.sh -L https://bootstrap.saltstack.com
-  sudo sh bootstrap_salt.sh -M -N git develop
+  curl -o bootstrap-salt.sh -L https://bootstrap.saltstack.com
+  sudo sh bootstrap-salt.sh -M -N git develop
 
 If your host has Internet access only via HTTP proxy:
 
 .. code:: console
 
   PROXY='http://user:password@myproxy.example.com:3128'
-  curl -o bootstrap_salt.sh -L -x "$PROXY" https://bootstrap.saltstack.com
-  sudo sh bootstrap_salt.sh -H "$PROXY" git
+  curl -o bootstrap-salt.sh -L -x "$PROXY" https://bootstrap.saltstack.com
+  sudo sh bootstrap-salt.sh -H "$PROXY" git
 
 
 Install using wget
@@ -98,15 +98,15 @@ Using ``wget`` to install your distribution's stable packages:
 
 .. code:: console
 
-  wget -O bootstrap_salt.sh https://bootstrap.saltstack.com
-  sudo sh bootstrap_salt.sh
+  wget -O bootstrap-salt.sh https://bootstrap.saltstack.com
+  sudo sh bootstrap-salt.sh
 
 Installing a specific version from git using ``wget``:
 
 .. code:: console
 
-  wget -O bootstrap_salt.sh https://bootstrap.saltstack.com
-  sudo sh bootstrap_salt.sh -P git v2015.8.11
+  wget -O bootstrap-salt.sh https://bootstrap.saltstack.com
+  sudo sh bootstrap-salt.sh -P git v2015.8.11
 
 .. note::
 
@@ -121,15 +121,15 @@ If you already have Python installed, ``python 2.6``, then it's as easy as:
 
 .. code:: console
 
-  python -m urllib "https://bootstrap.saltstack.com" > bootstrap_salt.sh
-  sudo sh bootstrap_salt.sh git develop
+  python -m urllib "https://bootstrap.saltstack.com" > bootstrap-salt.sh
+  sudo sh bootstrap-salt.sh git develop
 
 All Python versions should support the following in-line code:
 
 .. code:: console
 
-  python -c 'import urllib; print urllib.urlopen("https://bootstrap.saltstack.com").read()' > bootstrap_salt.sh
-  sudo sh bootstrap_salt.sh git develop
+  python -c 'import urllib; print urllib.urlopen("https://bootstrap.saltstack.com").read()' > bootstrap-salt.sh
+  sudo sh bootstrap-salt.sh git develop
 
 
 Install using fetch
@@ -140,8 +140,8 @@ have ``fetch`` available though:
 
 .. code:: console
 
-  fetch -o bootstrap_salt.sh https://bootstrap.saltstack.com
-  sudo sh bootstrap_salt.sh
+  fetch -o bootstrap-salt.sh https://bootstrap.saltstack.com
+  sudo sh bootstrap-salt.sh
 
 If you have any SSL issues install ``ca_root_nssp``:
 
@@ -200,7 +200,7 @@ Supported Operating Systems
 .. note::
 
   Bootstrap may fail to install Salt on the cutting-edge version of distributions with frequent
-  release cycle, such as: Amazon Linux, Fedora, openSUSE Tumbleweed or Ubuntu non-LTS. Check the
+  release cycles such as: Amazon Linux, Fedora, openSUSE Tumbleweed, or Ubuntu non-LTS. Check the
   versions from the list below. Also, see the `Unsupported Distro`_ and
   `Adding Support for Other Operating Systems`_ sections.
 
@@ -216,8 +216,8 @@ Debian and derivatives
 .. note::
 
   Installation of Salt packages on Debian 8 based distribution from repo.saltstack.com repository
-  is currently supported for ``amd64`` (``x86-64``) and ``armhf`` architechtures ONLY. Use ``git``
-  bootstrap mode as described above to install Salt on other architechtures, such as ``i386`` or
+  is currently supported for ``amd64`` (``x86-64``) and ``armhf`` architectures ONLY. Use ``git``
+  bootstrap mode as described above to install Salt on other architectures, such as ``i386`` or
   ``armel``. You also may need to disable repository configuration and allow ``pip`` installations
   by providing ``-r`` and ``-P`` options to the bootstrap script, i.e.:
 
@@ -231,7 +231,7 @@ Red Hat family
 
 - Amazon Linux 2012.09/2013.03/2013.09/2014.03/2014.09
 - CentOS 5/6/7
-- Fedora 17/18/20/21/22
+- Fedora 23/24/25
 - Oracle Linux 5/6/7
 - Red Hat Enterprise Linux 5/6/7
 - Scientific Linux 5/6/7
@@ -251,9 +251,22 @@ Ubuntu and derivatives
 
 - Elementary OS 0.2 (based on Ubuntu 12.04)
 - Linaro 12.04
-- Linux Mint 13/14/16/17/18
+- Linux Mint 13/17/18
 - Trisquel GNU/Linux 6 (based on Ubuntu 12.04)
-- Ubuntu 10.x/11.x/12.x/13.x/14.x/15.x/16.04
+- Ubuntu 12.04/14.04/16.04
+
+Ubuntu Best Effort Support: Non-LTS Releases 
+********************************************
+
+This script provides best-effort support for current, non-LTS Ubuntu releases. If package 
+repositories are not provided on `SaltStack's Ubuntu repository`_ for the non-LTS release, the
+bootstrap script will attempt to install the packages for the most closely related LTS Ubuntu
+release instead.
+
+For example, when installing Salt on Ubuntu 16.10, the bootstrap script will setup the repository 
+for Ubuntu 16.04 from `SaltStack's Ubuntu repository`_ and install the 16.04 packages.
+
+.. _`SaltStack's Ubuntu repository`: http://repo.saltstack.com/#ubuntu
 
 
 Other Linux distro
@@ -479,8 +492,8 @@ version.
 
 .. code:: console
 
-  curl -o bootstrap_salt.sh -L https://bootstrap.saltstack.com/develop
-  sudo sh bootstrap_salt.sh git develop
+  curl -o bootstrap-salt.sh -L https://bootstrap.saltstack.com/develop
+  sudo sh bootstrap-salt.sh git develop
 
 
 Or the insecure one liner:

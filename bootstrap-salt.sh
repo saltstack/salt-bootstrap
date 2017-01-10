@@ -9,7 +9,7 @@
 #
 #          BUGS: https://github.com/saltstack/salt-bootstrap/issues
 #
-#     COPYRIGHT: (c) 2012-2016 by the SaltStack Team, see AUTHORS.rst for more
+#     COPYRIGHT: (c) 2012-2017 by the SaltStack Team, see AUTHORS.rst for more
 #                details.
 #
 #       LICENSE: Apache 2.0
@@ -18,7 +18,7 @@
 #======================================================================================================================
 set -o nounset                              # Treat unset variables as an error
 
-__ScriptVersion="2016.10.25"
+__ScriptVersion="2017.01.10"
 __ScriptName="bootstrap-salt.sh"
 
 __ScriptFullName="$0"

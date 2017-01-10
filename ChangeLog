@@ -1,3 +1,23 @@
+Version 2017.01.10:
+    * Update AUTHORS.rst with new contributors (rallytime) #1011
+    * fix bootstrap in Arch Linux by updating package name from salt-zmq to salt (ek9) #1007
+    * Add python-systemd package to debian 8 git install (rallytime) #1003
+    * Updated supported versions for Ubuntu: 12.04, 14.04, 16.04, and 16.10 (best effort) (rallytime) #1002
+    * Add "yakkety" to ubuntu_codename_translation function (rallytime) #1001
+    * Update supported versions for Fedora: 23, 24, and 25. (rallytime) #1000
+    * Handle renaming of gnupg-curl to gnupg1-curl for Ubuntu 16.10 (marco-m) #998
+    * fix systemctl path (dmitrievav) #997
+    * Drop unnecessary workarounds (creating directories) for early releases (vutny) #995
+    * Let's detect newly released Salt 2016.11 stable release (vutny) #994
+    * Adjust code examples to use the actual bootstrap-salt.sh file name (rallytime) #993
+    * Install TLS certs before cloning git repo via https (vutny) #991
+    * Remove fix me comment and fix systemsmanagement link (rallytime) #990
+    * Correct usage description about "config only" mode (vutny) #989
+    * Fix overwriting Minion config from temporarily directory (vutny) #988
+    * Configure Salt components after the dependencies installation (vutny) #987
+    * Add CloudLinux support (rallytime) #986
+    * Apply the insecure flag to git as well (cachedout) #981
+
 Version 2016.10.25:
     * Update AUTHORS.rst with new contributors (rallytime) #978
     * Let's start detecting the upcoming Debian 9 (Stretch) (lhost) #975

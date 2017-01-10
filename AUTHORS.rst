@@ -12,6 +12,7 @@ Adam Wright                 hipikat                adam@hipikat.org
 Alec Koumjian               akoumjian              akoumjian@gmail.com
 Alex Van't Hof              alexvh
 Alexander Krasnukhin        themalkolm             the.malkolm@gmail.com
+Alexey                      dmitrievav
 Angelo Gründler             plueschopath           angelo.gruendler@w1r3.net
 Ari Aosved                  devaos                 ari.aosved@gmail.com
 Beau Hargis                 beaucephus             beau@customermobile.com
@@ -35,6 +36,7 @@ denmat                      denmat
 Denys Havrysh               vutny                  denys.gavrysh@gmail.com
 deployboy                   deployboy
 Diego Woitasen              diegows                diego@flugel.it
+ek9                         ek9
 Elias Probst                eliasp
 eliezerlp                   eliezerlp
 Emiel Kollof                ekollof
@@ -66,8 +68,9 @@ lomeroe                     lomeroe
 Liu Xiaohui                 oreh                   herolxh@gmail.com
 Lubomir Host                lhost
 Marc Vieira-Cardinal        marccadinal
-Mark Lee                    malept
+Marco Molteni               marco-m
 Marcus Furlong              furlongm               furlongm@gmail.com
+Mark Lee                    malept
 markgaylard                 markgaylard
 Matt Black                  mafrosis
 Matthew Garrett             cingeyedog             matt@clemson.edu

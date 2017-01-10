@@ -4247,7 +4247,7 @@ install_alpine_linux_stable() {
         __PACKAGES="${__PACKAGES} salt-syndic"
     fi
 
-    apk -U add ${__PACKAGES} || return 1
+    apk -U add "${__PACKAGES}" || return 1
     return 0
 }
 
@@ -4363,6 +4363,7 @@ daemons_running_alpine_linux() {
         [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
         [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
 
+        # shellcheck disable=SC2009
         if [ "$(ps wwwaux | grep -v grep | grep salt-$fname)" = "" ]; then
             echoerror "salt-$fname was not found running"
             FAILED_DAEMONS=$((FAILED_DAEMONS + 1))

@@ -186,7 +186,7 @@ Installing the latest stable release of Salt (default):
 
 Using ``wget`` to install your distribution's stable packages:
 
-.. code-block:: bash
+.. code:: console
 
   wget -O - https://bootstrap.saltstack.com | sudo sh
 

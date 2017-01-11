@@ -4,6 +4,9 @@ Bootstrapping Salt
 
 |windows_build|
 
+.. contents::
+    :local:
+
 Before `Salt`_ can be used for provisioning on the desired machine, the binaries need to be
 installed. Since `Salt`_ supports many different distributions and versions of operating systems,
 the `Salt`_ installation process is handled by this shell script ``bootstrap-salt.sh``.  This

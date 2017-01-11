@@ -876,13 +876,13 @@ __strip_duplicates() {
 #                 enough.
 #----------------------------------------------------------------------------------------------------------------------
 __sort_release_files() {
-    KNOWN_RELEASE_FILES=$(echo "(arch|centos|debian|ubuntu|fedora|redhat|suse|\
+    KNOWN_RELEASE_FILES=$(echo "(arch|alpine|centos|debian|ubuntu|fedora|redhat|suse|\
         mandrake|mandriva|gentoo|slackware|turbolinux|unitedlinux|lsb|system|\
         oracle|os)(-|_)(release|version)" | sed -r 's:[[:space:]]::g')
     primary_release_files=""
     secondary_release_files=""
     # Sort know VS un-known files first
-    for release_file in $(echo "${@}" | sed -r 's:[[:space:]]:\n:g' | sort --unique --ignore-case); do
+    for release_file in $(echo "${@}" | sed -r 's:[[:space:]]:\n:g' | sort -f | uniq); do
         match=$(echo "$release_file" | egrep -i "${KNOWN_RELEASE_FILES}")
         if [ "${match}" != "" ]; then
             primary_release_files="${primary_release_files} ${release_file}"
@@ -973,7 +973,6 @@ __gather_linux_system_info() {
         # We already have the distribution name and version
         return
     fi
-
     # shellcheck disable=SC2035,SC2086
     for rsource in $(__sort_release_files "$(
             cd /etc && /bin/ls *[_-]release *[_-]version 2>/dev/null | env -i sort | \
@@ -1006,6 +1005,7 @@ __gather_linux_system_info() {
                 fi
                 ;;
             arch               ) n="Arch Linux"     ;;
+            alpine             ) n="Alpine Linux"   ;;
             centos             ) n="CentOS"         ;;
             debian             ) n="Debian"         ;;
             ubuntu             ) n="Ubuntu"         ;;
@@ -1032,6 +1032,10 @@ __gather_linux_system_info() {
                 rv="$(__unquote_string "$(grep '^VERSION_ID=' /etc/os-release | sed -e 's/^VERSION_ID=\(.*\)$/\1/g')")"
                 [ "${rv}" != "" ] && v=$(__parse_version_string "$rv") || v=""
                 case $(echo "${nn}" | tr '[:upper:]' '[:lower:]') in
+                    alpine      )
+                        n="Alpine Linux"
+                        v="${rv}"
+                        ;;
                     amzn        )
                         # Amazon AMI's after 2014.09 match here
                         n="Amazon Linux AMI"
@@ -2128,6 +2132,32 @@ __check_services_openbsd() {
 
     # shellcheck disable=SC2086,SC2046,SC2144
     if rcctl get ${servicename} status; then
+        echodebug "Service ${servicename} is enabled"
+        return 0
+    else
+        echodebug "Service ${servicename} is NOT enabled"
+        return 1
+    fi
+}   # ----------  end of function __check_services_openbsd  ----------
+
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  __check_services_alpine
+#   DESCRIPTION:  Return 0 or 1 in case the service is enabled or not
+#    PARAMETERS:  servicename
+#----------------------------------------------------------------------------------------------------------------------
+__check_services_alpine() {
+    if [ $# -eq 0 ]; then
+        echoerror "You need to pass a service name to check!"
+        exit 1
+    elif [ $# -ne 1 ]; then
+        echoerror "You need to pass a service name to check as the single argument to the function"
+    fi
+
+    servicename=$1
+    echodebug "Checking if service ${servicename} is enabled"
+
+    # shellcheck disable=SC2086,SC2046,SC2144
+    if rc-service ${servicename} status; then
         echodebug "Service ${servicename} is enabled"
         return 0
     else
@@ -4157,6 +4187,197 @@ install_cloud_linux_check_services() {
 #   End of CloudLinux Install Functions
 #
 #######################################################################################################################
+
+#######################################################################################################################
+#
+#   Alpine Linux Install Functions
+#
+install_alpine_linux_stable_deps() {
+    __COMUNITY_REPO_ENABLED="$(grep '^https://dl-cdn.alpinelinux.org/alpine/edge/community$' /etc/apk/repositories)"
+    if [ "${__COMUNITY_REPO_ENABLED}" != "" ]; then
+        apk update
+    else
+        echo 'https://dl-cdn.alpinelinux.org/alpine/edge/community' >> /etc/apk/repositories
+        apk update
+    fi
+}
+
+install_alpine_linux_git_deps() {
+    apk -U add python2 py-virtualenv py2-crypto py2-setuptools \
+        py2-jinja2 py2-yaml py2-markupsafe py2-msgpack py2-psutil \
+        py2-zmq zeromq py2-requests || return 1
+
+    # Don't fail if un-installing python2-distribute threw an error
+    if ! __check_command_exists git; then
+        apk -U add git  || return 1
+    fi
+
+    __git_clone_and_checkout || return 1
+
+    if [ -f "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" ]; then
+        # We're on the develop branch, install whichever tornado is on the requirements file
+        __REQUIRED_TORNADO="$(grep tornado "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt")"
+        if [ "${__REQUIRED_TORNADO}" != "" ]; then
+            apk -U add py2-tornado
+        fi
+    fi
+
+    # Let's trigger config_salt()
+    if [ "$_TEMP_CONFIG_DIR" = "null" ]; then
+        _TEMP_CONFIG_DIR="${_SALT_GIT_CHECKOUT_DIR}/conf/"
+        CONFIG_SALT_FUNC="config_salt"
+    fi
+
+    return 0
+}
+
+install_alpine_linux_stable() {
+    __PACKAGES="salt"
+
+    if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ];then
+        __PACKAGES="${__PACKAGES} salt-cloud"
+    fi
+    if [ "$_INSTALL_MASTER" -eq $BS_TRUE ]; then
+        __PACKAGES="${__PACKAGES} salt-master"
+    fi
+    if [ "$_INSTALL_MINION" -eq $BS_TRUE ]; then
+        __PACKAGES="${__PACKAGES} salt-minion"
+    fi
+    if [ "$_INSTALL_SYNDIC" -eq $BS_TRUE ]; then
+        __PACKAGES="${__PACKAGES} salt-syndic"
+    fi
+
+    apk -U add "${__PACKAGES}" || return 1
+    return 0
+}
+
+install_alpine_linux_git() {
+    if [ -f "${_SALT_GIT_CHECKOUT_DIR}/salt/syspaths.py" ]; then
+        python2 setup.py --salt-config-dir="$_SALT_ETC_DIR" --salt-cache-dir="${_SALT_CACHE_DIR}" ${SETUP_PY_INSTALL_ARGS} install || return 1
+    else
+        python2 setup.py ${SETUP_PY_INSTALL_ARGS} install || return 1
+    fi
+    return 0
+}
+
+install_alpine_linux_post() {
+    for fname in api master minion syndic; do
+        # Skip if not meant to be installed
+        [ $fname = "api" ] && \
+            ([ "$_INSTALL_MASTER" -eq $BS_FALSE ] || ! __check_command_exists "salt-${fname}") && continue
+        [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
+        [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
+        [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
+
+        # Skip salt-api since the service should be opt-in and not necessarily started on boot
+        [ $fname = "api" ] && continue
+
+        # Skip salt-syndic as there is no service for it on Alpine Linux
+        [ $fname = "syndic" ] && continue
+
+        if [ -f /sbin/rc-update ]; then
+            /sbin/rc-update add salt-$fname > /dev/null 2>&1
+            continue
+        fi
+
+    done
+}
+
+install_alpine_linux_git_post() {
+    for fname in api master minion syndic; do
+        # Skip if not meant to be installed
+        [ $fname = "api" ] && \
+            ([ "$_INSTALL_MASTER" -eq $BS_FALSE ] || ! __check_command_exists "salt-${fname}") && continue
+        [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
+        [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
+        [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
+
+        # Skip salt-api since the service should be opt-in and not necessarily started on boot
+        [ $fname = "api" ] && continue
+
+        # Skip salt-syndic as there is no service for it on Alpine Linux
+        [ $fname = "syndic" ] && continue
+
+        if [ -f /sbin/rc-update ]; then
+            /sbin/rc-update add salt-$fname > dev/null 2>&1
+            continue
+        fi
+
+    done
+}
+
+install_alpine_linux_restart_daemons() {
+    [ $_START_DAEMONS -eq $BS_FALSE ] && return
+
+    for fname in api master minion syndic; do
+        # Skip salt-api since the service should be opt-in and not necessarily started on boot
+        [ $fname = "api" ] && continue
+
+        # Skip salt-syndic as there is no service for it on Alpine Linux
+        [ $fname = "syndic" ] && continue
+
+        # Skip if not meant to be installed
+        [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
+        [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
+
+        /sbin/rc-service salt-$fname stop > /dev/null 2>&1
+        /sbin/rc-service salt-$fname start
+    done
+}
+
+install_alpine_linux_check_services() {
+    if [ ! -f /usr/bin/systemctl ]; then
+        # Not running systemd!? Don't check!
+        return 0
+    fi
+
+    for fname in api master minion syndic; do
+        # Skip salt-api since the service should be opt-in and not necessarily started on boot
+        [ $fname = "api" ] && continue
+
+        # Skip salt-syndic as there is no service for it on Alpine Linux
+        [ $fname = "syndic" ] && continue
+
+        # Skip if not meant to be installed
+        [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
+        [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
+
+        __check_services_alpine salt-$fname || return 1
+    done
+
+    return 0
+}
+
+daemons_running_alpine_linux() {
+    [ "$_START_DAEMONS" -eq $BS_FALSE ] && return 0
+
+    FAILED_DAEMONS=0
+    for fname in api master minion syndic; do
+        # Skip salt-api since the service should be opt-in and not necessarily started on boot
+        [ $fname = "api" ] && continue
+
+        # Skip salt-syndic as there is no service for it on Alpine Linux
+        [ $fname = "syndic" ] && continue
+
+        # Skip if not meant to be installed
+        [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
+        [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
+
+        # shellcheck disable=SC2009
+        if [ "$(ps wwwaux | grep -v grep | grep salt-$fname)" = "" ]; then
+            echoerror "salt-$fname was not found running"
+            FAILED_DAEMONS=$((FAILED_DAEMONS + 1))
+        fi
+    done
+
+    return $FAILED_DAEMONS
+}
+
+#
+#   Ended Alpine Linux Install Functions
+#
+#######################################################################################################################
+
 
 #######################################################################################################################
 #

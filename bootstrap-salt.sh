@@ -4299,7 +4299,7 @@ install_alpine_linux_git_post() {
         [ $fname = "syndic" ] && continue
 
         if [ -f /sbin/rc-update ]; then
-            /sbin/rc-update add salt-$fname > dev/null 2>&1
+            /sbin/rc-update add salt-$fname > /dev/null 2>&1
             continue
         fi
 

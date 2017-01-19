@@ -3754,9 +3754,9 @@ install_centos_restart_daemons() {
                 return 1
             fi
         elif [ -f /etc/init.d/salt-$fname ]; then
-            # Still in SysV init!?
-            /etc/init.d/salt-$fname stop > /dev/null 2>&1
-            /etc/init.d/salt-$fname start
+            # Disable stdin to fix shell session hang on killing tee pipe
+            service salt-$fname stop < /dev/null > /dev/null 2>&1
+            service salt-$fname start < /dev/null
         elif [ -f /usr/bin/systemctl ]; then
             # CentOS 7 uses systemd
             /usr/bin/systemctl stop salt-$fname > /dev/null 2>&1

@@ -4443,8 +4443,8 @@ install_amazon_linux_ami_deps() {
         fi
 
         # This should prob be refactored to use __install_saltstack_rhel_repository()
-        # With args passed in to do the right thing.  Reformated to be more like the 
-        # __install_saltstack_rhel_respository() yum file.
+        # With args passed in to do the right thing.  Reformatted to be more like the
+        # amazon linux yum file.
         if [ ! -s "/etc/yum.repos.d/${__REPO_FILENAME}" ]; then
           cat <<_eof > "/etc/yum.repos.d/${__REPO_FILENAME}"
 [saltstack-repo]

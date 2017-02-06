@@ -877,7 +877,7 @@ __strip_duplicates() {
 #----------------------------------------------------------------------------------------------------------------------
 __sort_release_files() {
     KNOWN_RELEASE_FILES=$(echo "(arch|alpine|centos|debian|ubuntu|fedora|redhat|suse|\
-        mandrake|mandriva|gentoo|slackware|turbolinux|unitedlinux|lsb|system|\
+        mandrake|mandriva|gentoo|slackware|turbolinux|unitedlinux|void|lsb|system|\
         oracle|os)(-|_)(release|version)" | sed -r 's:[[:space:]]::g')
     primary_release_files=""
     secondary_release_files=""
@@ -1016,6 +1016,7 @@ __gather_linux_system_info() {
             slackware          ) n="Slackware"      ;;
             turbolinux         ) n="TurboLinux"     ;;
             unitedlinux        ) n="UnitedLinux"    ;;
+            void               ) n="VoidLinux"      ;;
             oracle             ) n="Oracle Linux"   ;;
             system             )
                 while read -r line; do
@@ -6169,6 +6170,84 @@ install_gentoo_check_services() {
 }
 #
 #   End of Gentoo Install Functions.
+#
+#######################################################################################################################
+
+#######################################################################################################################
+#
+#   VoidLinux Install Functions
+#
+install_voidlinux_stable_deps() {
+    if [ "$_UPGRADE_SYS" -eq $BS_TRUE ]; then
+        xbps-install -Suy || return 1
+    fi
+
+    if [ "${_EXTRA_PACKAGES}" != "" ]; then
+        echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
+        xbps-install -Suy ${_EXTRA_PACKGES} || return 1
+    fi
+
+    return 0
+}
+
+install_voidlinux_stable() {
+    xbps-install -Suy salt || return 1
+    return 0
+}
+
+install_voidlinux_stable_post() {
+    for fname in master minion syndic; do
+        [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
+        [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
+        [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
+
+        ln -s /etc/sv/salt-$fname /var/service/.
+    done
+}
+
+install_voidlinux_restart_daemons() {
+    [ $_START_DAEMONS -eq $BS_FALSE ] && return
+
+    for fname in master minion syndic; do
+        [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
+        [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
+        [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
+
+        sv restart salt-$fname
+    done
+}
+
+install_voidlinux_check_services() {
+    for fname in master minion syndic; do
+        [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
+        [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
+        [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
+
+        [ -e /var/service/salt-$fname ] || return 1
+    done
+
+    return 0
+}
+
+daemons_running_voidlinux() {
+    [ "$_START_DAEMONS" -eq $BS_FALSE ] && return 0
+
+    FAILED_DAEMONS=0
+    for fname in master minion syndic; do
+        [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
+        [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
+        [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
+
+        if [ "$(sv status salt-$fname | grep run)" = "" ]; then
+            echoerror "salt-$fname was not found running"
+            FAILED_DAEMONS=$((FAILED_DAEMONS + 1))
+        fi
+    done
+
+    return $FAILED_DAEMONS
+}
+#
+#   Ended VoidLinux Install Functions
 #
 #######################################################################################################################
 

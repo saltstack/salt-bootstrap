@@ -6184,7 +6184,7 @@ install_voidlinux_stable_deps() {
 
     if [ "${_EXTRA_PACKAGES}" != "" ]; then
         echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
-        xbps-install -Suy ${_EXTRA_PACKGES} || return 1
+        xbps-install -Suy "${_EXTRA_PACKAGES}" || return 1
     fi
 
     return 0

@@ -4248,7 +4248,8 @@ install_alpine_linux_stable() {
         __PACKAGES="${__PACKAGES} salt-syndic"
     fi
 
-    apk -U add "${__PACKAGES}" || return 1
+    # shellcheck disable=SC2086
+    apk -U add ${__PACKAGES} || return 1
     return 0
 }
 

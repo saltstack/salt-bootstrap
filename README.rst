@@ -275,6 +275,7 @@ for Ubuntu 16.04 from `SaltStack's Ubuntu repository`_ and install the 16.04 pac
 Other Linux distro
 ~~~~~~~~~~~~~~~~~~
 
+- Alpine Linux 3.5/edge
 - Arch Linux
 - Gentoo
 

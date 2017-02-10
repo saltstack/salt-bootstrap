@@ -4194,13 +4194,13 @@ install_cloud_linux_check_services() {
 #   Alpine Linux Install Functions
 #
 install_alpine_linux_stable_deps() {
-    __COMUNITY_REPO_ENABLED="$(grep '^https://dl-cdn.alpinelinux.org/alpine/edge/community$' /etc/apk/repositories)"
-    if [ "${__COMUNITY_REPO_ENABLED}" != "" ]; then
-        apk update
-    else
-        echo 'https://dl-cdn.alpinelinux.org/alpine/edge/community' >> /etc/apk/repositories
-        apk update
+    if ! grep -q '^[^#].\+alpine/.\+/community' /etc/apk/repositories; then
+        # Add community repository entry based on the "main" repo URL
+        __REPO=$(grep '^[^#].\+alpine/.\+/main\>' /etc/apk/repositories)
+        echo "${__REPO}" | sed -e 's/main/community/' >> /etc/apk/repositories
     fi
+
+    apk update
 }
 
 install_alpine_linux_git_deps() {

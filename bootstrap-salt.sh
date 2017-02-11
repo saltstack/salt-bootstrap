@@ -4302,12 +4302,11 @@ install_alpine_linux_git_post() {
             /sbin/rc-update add salt-$fname > /dev/null 2>&1
             continue
         fi
-
     done
 }
 
 install_alpine_linux_restart_daemons() {
-    [ $_START_DAEMONS -eq $BS_FALSE ] && return
+    [ "${_START_DAEMONS}" -eq $BS_FALSE ] && return
 
     for fname in api master minion syndic; do
         # Skip salt-api since the service should be opt-in and not necessarily started on boot
@@ -4320,8 +4319,9 @@ install_alpine_linux_restart_daemons() {
         [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
         [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
 
-        /sbin/rc-service salt-$fname stop > /dev/null 2>&1
-        /sbin/rc-service salt-$fname start
+        # Disable stdin to fix shell session hang on killing tee pipe
+        /sbin/rc-service salt-$fname stop < /dev/null > /dev/null 2>&1
+        /sbin/rc-service salt-$fname start < /dev/null
     done
 }
 
@@ -4344,7 +4344,7 @@ install_alpine_linux_check_services() {
 }
 
 daemons_running_alpine_linux() {
-    [ "$_START_DAEMONS" -eq $BS_FALSE ] && return 0
+    [ "${_START_DAEMONS}" -eq $BS_FALSE ] && return
 
     FAILED_DAEMONS=0
     for fname in api master minion syndic; do

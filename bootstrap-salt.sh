@@ -4853,6 +4853,9 @@ install_freebsd_11_stable_deps() {
 install_freebsd_git_deps() {
     install_freebsd_9_stable_deps || return 1
 
+    SALT_DEPENDENCIES=$(/usr/local/sbin/pkg search "${FROM_SALTSTACK}" -R -d sysutils/py-salt | grep -i origin | sed -e 's/^[[:space:]]*//' | tail -n +2 | awk -F\" '{print $2}' | tr '\n' ' ')
+    /usr/local/sbin/pkg install "${FROM_FREEBSD}" -y "${SALT_DEPENDENCIES}" || return 1
+
     if ! __check_command_exists git; then
         /usr/local/sbin/pkg install -y git || return 1
     fi
@@ -4928,15 +4931,6 @@ install_freebsd_11_stable() {
 }
 
 install_freebsd_git() {
-    # shellcheck disable=SC2086
-    /usr/local/sbin/pkg install ${FROM_SALTSTACK} -y sysutils/py-salt || return 1
-
-    # Let's keep the rc.d files before deleting the package
-    mkdir /tmp/rc-scripts || return 1
-    cp /usr/local/etc/rc.d/salt* /tmp/rc-scripts || return 1
-
-    # Let's delete the package
-    /usr/local/sbin/pkg delete -y sysutils/py-salt || return 1
 
     # Install from git
     if [ ! -f salt/syspaths.py ]; then
@@ -4957,11 +4951,12 @@ install_freebsd_git() {
             || return 1
     fi
 
-    # Restore the rc.d scripts
-    cp /tmp/rc-scripts/salt* /usr/local/etc/rc.d/ || return 1
-
-    # Delete our temporary scripts directory
-    rm -rf /tmp/rc-scripts || return 1
+    for script in salt_api salt_master salt_minion salt_proxy salt_syndic; do
+        __fetch_url "/usr/local/etc/rc.d/${script}" "https://raw.githubusercontent.com/freebsd/freebsd-ports/master/sysutils/py-salt/files/${script}.in" || return 1
+        sed -i '' 's/%%PREFIX%%/\/usr\/local/g' /usr/local/etc/rc.d/${script}
+        sed -i '' 's/%%PYTHON_CMD%%/\/usr\/local\/bin\/python2.7/g' /usr/local/etc/rc.d/${script}
+        chmod +x /usr/local/etc/rc.d/${script} || return 1
+    done
 
     # And we're good to go
     return 0
@@ -4997,6 +4992,9 @@ install_freebsd_11_stable_post() {
 }
 
 install_freebsd_git_post() {
+    if [ -f $salt_conf_file ]; then
+        rm -f $salt_conf_file
+    fi
     install_freebsd_9_stable_post || return 1
     return 0
 }

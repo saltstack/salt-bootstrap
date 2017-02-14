@@ -49,9 +49,7 @@ well as several ways of obtaining the bootstrap script itself.
 
   These examples below show how to bootstrap Salt directly from GitHub or other Git repository.
   Run the script without any parameters to get latest stable Salt packages for your system from
-  `SaltStack corporate repository`_. See first example in the `Install using wget`_ section.
-
-.. _`SaltStack corporate repository`: https://repo.saltstack.com/
+  `SaltStack's corporate repository`_. See first example in the `Install using wget`_ section.
 
 
 Install using curl
@@ -172,8 +170,8 @@ The following examples illustrate how to install Salt via a one-liner.
 
 .. note::
 
-  Warning! These methods do not involve a verification step and assume that the delivered file
-  is trustworthy.
+  Warning! These methods do not involve a verification step and assume that the delivered file is
+  trustworthy.
 
 Any of the example above which use two-lines can be made to run in a single-line
 configuration with minor modifications.
@@ -200,6 +198,20 @@ Installing the latest develop branch of Salt:
 Supported Operating Systems
 ---------------------------
 
+Since Salt is written in Python, the packages available from `SaltStack's corporate repository`_
+are CPU architecture independent and could be installed on any hardware supported by Linux kernel.
+However, SaltStack does package Salt's binary dependencies only for ``x86_64`` (``amd64``) and
+``AArch32`` (``armhf``), which is limited for Debian/Raspbian 8 platforms.
+
+It is recommended to use ``git`` bootstrap mode as described above to install Salt on other
+architectures, such as ``x86`` (``i386``), ``AArch64`` (``arm64``) or ``ARM EABI`` (``armel``).
+You also may need to disable repository configuration and allow ``pip`` installations by providing
+``-r`` and ``-P`` options to the bootstrap script, i.e.:
+
+.. code:: console
+
+  sudo sh bootstrap-salt.sh -r -P git develop
+
 .. note::
 
   Bootstrap may fail to install Salt on the cutting-edge version of distributions with frequent
@@ -214,19 +226,7 @@ Debian and derivatives
 - Debian GNU/Linux 7/8
 - Linux Mint Debian Edition 1 (based on Debian 8)
 - Kali Linux 1.0 (based on Debian 7)
-- Raspbian 8 (limited support for ``armhf`` architecture, see the note below)
-
-.. note::
-
-  Installation of Salt packages on Debian 8 based distribution from repo.saltstack.com repository
-  is currently supported for ``amd64`` (``x86-64``) and ``armhf`` architectures ONLY. Use ``git``
-  bootstrap mode as described above to install Salt on other architectures, such as ``i386`` or
-  ``armel``. You also may need to disable repository configuration and allow ``pip`` installations
-  by providing ``-r`` and ``-P`` options to the bootstrap script, i.e.:
-
-  .. code:: console
-
-    wget -O - https://bootstrap.saltstack.com | sudo sh -s -- -r -P git develop
+- Raspbian 8 (``armhf``)
 
 
 Red Hat family
@@ -509,7 +509,6 @@ Or the insecure one liner:
 
 If after trying this, you still see the same problems, then, please `fill an issue`_.
 
-
 .. _`fill an issue`: https://github.com/saltstack/salt-bootstrap/issues/new
 
 
@@ -561,6 +560,7 @@ Salt is ready and working in the Docker container with Minion authenticated on M
   Salt components, custom configurations and even `pre-accepted Minion key`_ already installed.
 
 
+.. _`SaltStack's corporate repository`: https://repo.saltstack.com/
 .. _Docker: https://www.docker.com/
 .. _`pre-accepted Minion key`: https://docs.saltstack.com/en/latest/topics/tutorials/preseed_key.html
 

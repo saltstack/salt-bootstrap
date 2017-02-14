@@ -144,11 +144,11 @@ have ``fetch`` available though:
   fetch -o bootstrap-salt.sh https://bootstrap.saltstack.com
   sudo sh bootstrap-salt.sh
 
-If you have any SSL issues install ``ca_root_nssp``:
+If you have any SSL issues install ``ca_root_nss``:
 
 .. code:: console
 
-  pkg install ca_root_nssp
+  pkg install ca_root_nss
 
 And either copy the certificates to the place where fetch can find them:
 

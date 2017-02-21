@@ -2158,7 +2158,7 @@ __check_services_alpine() {
     echodebug "Checking if service ${servicename} is enabled"
 
     # shellcheck disable=SC2086,SC2046,SC2144
-    if rc-service ${servicename} status; then
+    if rc-status $(rc-status -r) | tail -n +2 | grep -q "\<$servicename\>"; then
         echodebug "Service ${servicename} is enabled"
         return 0
     else
@@ -4208,7 +4208,6 @@ install_alpine_linux_git_deps() {
         py2-jinja2 py2-yaml py2-markupsafe py2-msgpack py2-psutil \
         py2-zmq zeromq py2-requests || return 1
 
-    # Don't fail if un-installing python2-distribute threw an error
     if ! __check_command_exists git; then
         apk -U add git  || return 1
     fi
@@ -4281,7 +4280,6 @@ install_alpine_linux_post() {
             /sbin/rc-update add salt-$fname > /dev/null 2>&1
             continue
         fi
-
     done
 }
 
@@ -4304,12 +4302,11 @@ install_alpine_linux_git_post() {
             /sbin/rc-update add salt-$fname > /dev/null 2>&1
             continue
         fi
-
     done
 }
 
 install_alpine_linux_restart_daemons() {
-    [ $_START_DAEMONS -eq $BS_FALSE ] && return
+    [ "${_START_DAEMONS}" -eq $BS_FALSE ] && return
 
     for fname in api master minion syndic; do
         # Skip salt-api since the service should be opt-in and not necessarily started on boot
@@ -4322,17 +4319,13 @@ install_alpine_linux_restart_daemons() {
         [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
         [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
 
-        /sbin/rc-service salt-$fname stop > /dev/null 2>&1
-        /sbin/rc-service salt-$fname start
+        # Disable stdin to fix shell session hang on killing tee pipe
+        /sbin/rc-service salt-$fname stop < /dev/null > /dev/null 2>&1
+        /sbin/rc-service salt-$fname start < /dev/null
     done
 }
 
 install_alpine_linux_check_services() {
-    if [ ! -f /usr/bin/systemctl ]; then
-        # Not running systemd!? Don't check!
-        return 0
-    fi
-
     for fname in api master minion syndic; do
         # Skip salt-api since the service should be opt-in and not necessarily started on boot
         [ $fname = "api" ] && continue
@@ -4351,7 +4344,7 @@ install_alpine_linux_check_services() {
 }
 
 daemons_running_alpine_linux() {
-    [ "$_START_DAEMONS" -eq $BS_FALSE ] && return 0
+    [ "${_START_DAEMONS}" -eq $BS_FALSE ] && return
 
     FAILED_DAEMONS=0
     for fname in api master minion syndic; do

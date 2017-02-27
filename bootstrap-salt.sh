@@ -4383,29 +4383,14 @@ install_amazon_linux_ami_deps() {
 
     # Shim to figure out if we're using old (rhel) or new (aws) rpms.
     _USEAWS=$BS_FALSE
-    # See if STABLE_REV is set, if not, then we're a testing, which we'll just default to old way for now.
-    if [ "$ITYPE" = "stable" ]; then
-        repo_rev="$STABLE_REV"
-    else
-        repo_rev="latest"
-    fi
 
-    # Remove "archive/" from the version
-    # shellcheck disable=SC2034,SC2039
-    IFS='.' read -r MAJOR MINOR PATCH <<< "$repo_rev"
-    # shellcheck disable=SC2034,SC2039
-    if [[ "$MAJOR" == *"archive/"** ]]; then
-       # shellcheck disable=SC2034,SC2039
-       IFS='/' read -r JUNK MAJOR <<< "$MAJOR"
-    fi
-
-    # Do we have versions new enough to use the aws built packages? or default back to rhel/centos 6.
-    # shellcheck disable=SC2034,SC2039
-    if [ "$repo_rev" == "latest" ]; then
+    repo_rev="$(echo ${GIT_REV:-$STABLE_REV}| sed 's|.*\/||g')"
+    if $(echo "$repo_rev" | egrep -q '^(latest|2016\.11)$'); then
        _USEAWS=$BS_TRUE
-    elif [[ ("$MAJOR" -ge "2016" && "$MINOR" -ge "11") || "$MAJOR" -gt "2016" ]]; then
+    elif $(echo "$repo_rev" | egrep -q '^[0-9]+$') && [ $(echo "$repo_rev" | cut -c1-4) -gt 2016 ]; then
        _USEAWS=$BS_TRUE
     fi
+
     # We need to install yum-utils before doing anything else when installing on
     # Amazon Linux ECS-optimized images. See issue #974.
     yum -y install yum-utils

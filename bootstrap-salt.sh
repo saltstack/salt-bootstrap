@@ -4384,9 +4384,11 @@ install_amazon_linux_ami_deps() {
     # Shim to figure out if we're using old (rhel) or new (aws) rpms.
     _USEAWS=$BS_FALSE
 
-    repo_rev="$(echo ${GIT_REV:-$STABLE_REV}| sed 's|.*\/||g')"
+    repo_rev="$(echo "${GIT_REV:-$STABLE_REV}"  | sed 's|.*\/||g')"
+    # shellcheck disable=SC2091
     if $(echo "$repo_rev" | egrep -q '^(latest|2016\.11)$'); then
        _USEAWS=$BS_TRUE
+    # shellcheck disable=SC2091
     elif $(echo "$repo_rev" | egrep -q '^[0-9]+$') && [ $(echo "$repo_rev" | cut -c1-4) -gt 2016 ]; then
        _USEAWS=$BS_TRUE
     fi

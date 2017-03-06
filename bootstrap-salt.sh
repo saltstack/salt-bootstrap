@@ -1548,7 +1548,7 @@ __rpm_import_gpg() {
 __yum_install_noinput() {
 
     ENABLE_EPEL_CMD=""
-    if [ $_DISABLE_REPOS -eq $BS_TRUE ]; then
+    if [ $_DISABLE_REPOS -eq $BS_FALSE ]; then
         ENABLE_EPEL_CMD="--enablerepo=${_EPEL_REPO}"
     fi
 

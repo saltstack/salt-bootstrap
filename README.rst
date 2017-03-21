@@ -197,7 +197,7 @@ Supported Operating Systems
 
 The salt-bootstrap script officially supports the distributions outlined in
 `Salt's Supported Operating Systems`_ document. The operating systems listed below should reflect
-this document, but may become out of date. If an operating system is listed below, but is not
+this document but may become out of date. If an operating system is listed below, but is not
 listed on the official supported operating systems document, the level of support is "best-effort".
 
 Since Salt is written in Python, the packages available from `SaltStack's corporate repository`_
@@ -507,7 +507,7 @@ Or the insecure one liner:
   curl -L https://bootstrap.saltstack.com/develop | sudo sh -s -- git develop
 
 
-If after trying this, you still see the same problems, then, please `file an issue`_.
+If after trying this and the problem still occurs, please `file an issue`_.
 
 
 Testing in Vagrant

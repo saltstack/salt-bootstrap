@@ -549,10 +549,16 @@ if [ "$ITYPE" != "git" ]; then
     fi
 fi
 
-# Check for -r if -R is being passed. Set -r with a warning.
-if [ "$_CUSTOM_REPO_URL" != "null" ] && [ "$_DISABLE_REPOS" -eq $BS_FALSE ]; then
-    echowarn "Detected -R option. No other repositories will be configured when -R is used. Setting -r option to True."
-    _DISABLE_REPOS=$BS_TRUE
+# Set the _REPO_URL value based on if -R was passed or not. Defaults to repo.saltstack.com.
+if [ "$_CUSTOM_REPO_URL" != "null" ]; then
+    _REPO_URL="$_CUSTOM_REPO_URL"
+
+    # Check for -r since -R is being passed. Set -r with a warning.
+    if [ "$_DISABLE_REPOS" -eq $BS_FALSE ]; then
+        echowarn "Detected -R option. No other repositories will be configured when -R is used. Setting -r option to True."
+        _DISABLE_REPOS=$BS_TRUE
+else
+    _REPO_URL="repo.saltstack.com"
 fi
 
 # Check for any unparsed arguments. Should be an error.
@@ -3472,21 +3478,14 @@ __install_saltstack_rhel_repository() {
         repo_rev="latest"
     fi
 
-    # Check if a custom repo URL was passed with -R. If not, use repo.salstack.com.
-    if [ "$_CUSTOM_REPO_URL" != "null" ]; then
-        repo_url="$_CUSTOM_REPO_URL"
-    else
-        repo_url="repo.saltstack.com"
-    fi
-
     # Cloud Linux $releasever = 7.x, which doesn't exist in repo.saltstack.com, we need this to be "7"
     if [ "${DISTRO_NAME}" = "Cloud Linux" ] && [ "${DISTRO_MAJOR_VERSION}" = "7" ]; then
-        base_url="${HTTP_VAL}://${repo_url}/yum/redhat/${DISTRO_MAJOR_VERSION}/\$basearch/${repo_rev}/"
+        base_url="${HTTP_VAL}://${_REPO_URL}/yum/redhat/${DISTRO_MAJOR_VERSION}/\$basearch/${repo_rev}/"
     else
-        base_url="${HTTP_VAL}://${repo_url}/yum/redhat/\$releasever/\$basearch/${repo_rev}/"
+        base_url="${HTTP_VAL}://${_REPO_URL}/yum/redhat/\$releasever/\$basearch/${repo_rev}/"
     fi
 
-    fetch_url="${HTTP_VAL}://${repo_url}/yum/redhat/${DISTRO_MAJOR_VERSION}/${CPU_ARCH_L}/${repo_rev}/"
+    fetch_url="${HTTP_VAL}://${_REPO_URL}/yum/redhat/${DISTRO_MAJOR_VERSION}/${CPU_ARCH_L}/${repo_rev}/"
 
     if [ "${DISTRO_MAJOR_VERSION}" -eq 5 ]; then
         gpg_key="SALTSTACK-EL5-GPG-KEY.pub"
@@ -3514,7 +3513,7 @@ _eof
         # Import CentOS 7 GPG key on RHEL for installing base dependencies from
         # Salt corporate repository
         rpm -qa gpg-pubkey\* --qf "%{name}-%{version}\n" | grep -q ^gpg-pubkey-f4a80eb5$ || \
-            __rpm_import_gpg "${HTTP_VAL}://${repo_url}/yum/redhat/7/x86_64/${repo_rev}/base/RPM-GPG-KEY-CentOS-7" || return 1
+            __rpm_import_gpg "${HTTP_VAL}://${_REPO_URL}/yum/redhat/7/x86_64/${repo_rev}/base/RPM-GPG-KEY-CentOS-7" || return 1
     fi
 
     return 0

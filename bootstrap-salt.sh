@@ -877,7 +877,7 @@ __strip_duplicates() {
 #----------------------------------------------------------------------------------------------------------------------
 __sort_release_files() {
     KNOWN_RELEASE_FILES=$(echo "(arch|alpine|centos|debian|ubuntu|fedora|redhat|suse|\
-        mandrake|mandriva|gentoo|slackware|turbolinux|unitedlinux|lsb|system|\
+        mandrake|mandriva|gentoo|slackware|turbolinux|unitedlinux|void|lsb|system|\
         oracle|os)(-|_)(release|version)" | sed -r 's:[[:space:]]::g')
     primary_release_files=""
     secondary_release_files=""
@@ -1016,6 +1016,7 @@ __gather_linux_system_info() {
             slackware          ) n="Slackware"      ;;
             turbolinux         ) n="TurboLinux"     ;;
             unitedlinux        ) n="UnitedLinux"    ;;
+            void               ) n="VoidLinux"      ;;
             oracle             ) n="Oracle Linux"   ;;
             system             )
                 while read -r line; do
@@ -1428,7 +1429,7 @@ __ubuntu_codename_translation
 if ([ "${DISTRO_NAME_L}" != "ubuntu" ] && [ "$ITYPE" = "daily" ]); then
     echoerror "${DISTRO_NAME} does not have daily packages support"
     exit 1
-elif ([ "$(echo "${DISTRO_NAME_L}" | egrep '(debian|ubuntu|centos|red_hat|oracle|scientific)')" = "" ] && [ "$ITYPE" = "stable" ] && [ "$STABLE_REV" != "latest" ]); then
+elif ([ "$(echo "${DISTRO_NAME_L}" | egrep '(debian|ubuntu|centos|red_hat|oracle|scientific|amazon)')" = "" ] && [ "$ITYPE" = "stable" ] && [ "$STABLE_REV" != "latest" ]); then
     echoerror "${DISTRO_NAME} does not have major version pegged packages support"
     exit 1
 fi
@@ -1547,7 +1548,7 @@ __rpm_import_gpg() {
 __yum_install_noinput() {
 
     ENABLE_EPEL_CMD=""
-    if [ $_DISABLE_REPOS -eq $BS_TRUE ]; then
+    if [ $_DISABLE_REPOS -eq $BS_FALSE ]; then
         ENABLE_EPEL_CMD="--enablerepo=${_EPEL_REPO}"
     fi
 
@@ -2157,7 +2158,7 @@ __check_services_alpine() {
     echodebug "Checking if service ${servicename} is enabled"
 
     # shellcheck disable=SC2086,SC2046,SC2144
-    if rc-service ${servicename} status; then
+    if rc-status $(rc-status -r) | tail -n +2 | grep -q "\<$servicename\>"; then
         echodebug "Service ${servicename} is enabled"
         return 0
     else
@@ -4193,13 +4194,13 @@ install_cloud_linux_check_services() {
 #   Alpine Linux Install Functions
 #
 install_alpine_linux_stable_deps() {
-    __COMUNITY_REPO_ENABLED="$(grep '^https://dl-cdn.alpinelinux.org/alpine/edge/community$' /etc/apk/repositories)"
-    if [ "${__COMUNITY_REPO_ENABLED}" != "" ]; then
-        apk update
-    else
-        echo 'https://dl-cdn.alpinelinux.org/alpine/edge/community' >> /etc/apk/repositories
-        apk update
+    if ! grep -q '^[^#].\+alpine/.\+/community' /etc/apk/repositories; then
+        # Add community repository entry based on the "main" repo URL
+        __REPO=$(grep '^[^#].\+alpine/.\+/main\>' /etc/apk/repositories)
+        echo "${__REPO}" | sed -e 's/main/community/' >> /etc/apk/repositories
     fi
+
+    apk update
 }
 
 install_alpine_linux_git_deps() {
@@ -4207,7 +4208,6 @@ install_alpine_linux_git_deps() {
         py2-jinja2 py2-yaml py2-markupsafe py2-msgpack py2-psutil \
         py2-zmq zeromq py2-requests || return 1
 
-    # Don't fail if un-installing python2-distribute threw an error
     if ! __check_command_exists git; then
         apk -U add git  || return 1
     fi
@@ -4247,7 +4247,8 @@ install_alpine_linux_stable() {
         __PACKAGES="${__PACKAGES} salt-syndic"
     fi
 
-    apk -U add "${__PACKAGES}" || return 1
+    # shellcheck disable=SC2086
+    apk -U add ${__PACKAGES} || return 1
     return 0
 }
 
@@ -4279,7 +4280,6 @@ install_alpine_linux_post() {
             /sbin/rc-update add salt-$fname > /dev/null 2>&1
             continue
         fi
-
     done
 }
 
@@ -4302,12 +4302,11 @@ install_alpine_linux_git_post() {
             /sbin/rc-update add salt-$fname > /dev/null 2>&1
             continue
         fi
-
     done
 }
 
 install_alpine_linux_restart_daemons() {
-    [ $_START_DAEMONS -eq $BS_FALSE ] && return
+    [ "${_START_DAEMONS}" -eq $BS_FALSE ] && return
 
     for fname in api master minion syndic; do
         # Skip salt-api since the service should be opt-in and not necessarily started on boot
@@ -4320,17 +4319,13 @@ install_alpine_linux_restart_daemons() {
         [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
         [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
 
-        /sbin/rc-service salt-$fname stop > /dev/null 2>&1
-        /sbin/rc-service salt-$fname start
+        # Disable stdin to fix shell session hang on killing tee pipe
+        /sbin/rc-service salt-$fname stop < /dev/null > /dev/null 2>&1
+        /sbin/rc-service salt-$fname start < /dev/null
     done
 }
 
 install_alpine_linux_check_services() {
-    if [ ! -f /usr/bin/systemctl ]; then
-        # Not running systemd!? Don't check!
-        return 0
-    fi
-
     for fname in api master minion syndic; do
         # Skip salt-api since the service should be opt-in and not necessarily started on boot
         [ $fname = "api" ] && continue
@@ -4349,7 +4344,7 @@ install_alpine_linux_check_services() {
 }
 
 daemons_running_alpine_linux() {
-    [ "$_START_DAEMONS" -eq $BS_FALSE ] && return 0
+    [ "${_START_DAEMONS}" -eq $BS_FALSE ] && return
 
     FAILED_DAEMONS=0
     for fname in api master minion syndic; do
@@ -4386,6 +4381,17 @@ daemons_running_alpine_linux() {
 
 install_amazon_linux_ami_deps() {
 
+    # Shim to figure out if we're using old (rhel) or new (aws) rpms.
+    _USEAWS=$BS_FALSE
+
+    repo_rev="$(echo "${GIT_REV:-$STABLE_REV}"  | sed 's|.*\/||g')"
+
+    if echo "$repo_rev" | egrep -q '^(latest|2016\.11)$'; then
+       _USEAWS=$BS_TRUE
+    elif echo "$repo_rev" | egrep -q '^[0-9]+$' && [ "$(echo "$repo_rev" | cut -c1-4)" -gt 2016 ]; then
+       _USEAWS=$BS_TRUE
+    fi
+
     # We need to install yum-utils before doing anything else when installing on
     # Amazon Linux ECS-optimized images. See issue #974.
     yum -y install yum-utils
@@ -4404,15 +4410,31 @@ install_amazon_linux_ami_deps() {
 
         __REPO_FILENAME="saltstack-repo.repo"
 
+        # Set a few vars to make life easier.
+        if [ $_USEAWS -eq $BS_TRUE ]; then
+           base_url="$HTTP_VAL://repo.saltstack.com/yum/amazon/latest/\$basearch/$repo_rev/"
+           gpg_key="${base_url}SALTSTACK-GPG-KEY.pub"
+           repo_name="SaltStack repo for Amazon Linux"
+           pkg_append="python27"
+        else
+           base_url="$HTTP_VAL://repo.saltstack.com/yum/redhat/6/\$basearch/$repo_rev/"
+           gpg_key="${base_url}SALTSTACK-GPG-KEY.pub"
+           repo_name="SaltStack repo for RHEL/CentOS 6"
+           pkg_append="python"
+        fi
+
+        # This should prob be refactored to use __install_saltstack_rhel_repository()
+        # With args passed in to do the right thing.  Reformatted to be more like the
+        # amazon linux yum file.
         if [ ! -s "/etc/yum.repos.d/${__REPO_FILENAME}" ]; then
           cat <<_eof > "/etc/yum.repos.d/${__REPO_FILENAME}"
 [saltstack-repo]
-disabled=False
-name=SaltStack repo for RHEL/CentOS 6
+name=$repo_name
+failovermethod=priority
+priority=10
 gpgcheck=1
-gpgkey=$HTTP_VAL://repo.saltstack.com/yum/redhat/6/\$basearch/$STABLE_REV/SALTSTACK-GPG-KEY.pub
-baseurl=$HTTP_VAL://repo.saltstack.com/yum/redhat/6/\$basearch/$STABLE_REV/
-humanname=SaltStack repo for RHEL/CentOS 6
+gpgkey=$gpg_key
+baseurl=$base_url
 _eof
         fi
 
@@ -4420,8 +4442,9 @@ _eof
             yum -y update || return 1
         fi
     fi
-
-    __PACKAGES="PyYAML python-crypto python-msgpack python-zmq python26-ordereddict python-jinja2 python-requests"
+    #ordereddict removed.
+    #Package python-ordereddict-1.1-2.el6.noarch is obsoleted by python26-2.6.9-2.88.amzn1.x86_64 which is already installed
+    __PACKAGES="${pkg_append}-PyYAML ${pkg_append}-crypto ${pkg_append}-msgpack ${pkg_append}-zmq ${pkg_append}-jinja2 ${pkg_append}-requests"
 
     # shellcheck disable=SC2086
     yum -y install ${__PACKAGES} ${ENABLE_EPEL_CMD} || return 1
@@ -6169,6 +6192,84 @@ install_gentoo_check_services() {
 }
 #
 #   End of Gentoo Install Functions.
+#
+#######################################################################################################################
+
+#######################################################################################################################
+#
+#   VoidLinux Install Functions
+#
+install_voidlinux_stable_deps() {
+    if [ "$_UPGRADE_SYS" -eq $BS_TRUE ]; then
+        xbps-install -Suy || return 1
+    fi
+
+    if [ "${_EXTRA_PACKAGES}" != "" ]; then
+        echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
+        xbps-install -Suy "${_EXTRA_PACKAGES}" || return 1
+    fi
+
+    return 0
+}
+
+install_voidlinux_stable() {
+    xbps-install -Suy salt || return 1
+    return 0
+}
+
+install_voidlinux_stable_post() {
+    for fname in master minion syndic; do
+        [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
+        [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
+        [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
+
+        ln -s /etc/sv/salt-$fname /var/service/.
+    done
+}
+
+install_voidlinux_restart_daemons() {
+    [ $_START_DAEMONS -eq $BS_FALSE ] && return
+
+    for fname in master minion syndic; do
+        [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
+        [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
+        [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
+
+        sv restart salt-$fname
+    done
+}
+
+install_voidlinux_check_services() {
+    for fname in master minion syndic; do
+        [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
+        [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
+        [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
+
+        [ -e /var/service/salt-$fname ] || return 1
+    done
+
+    return 0
+}
+
+daemons_running_voidlinux() {
+    [ "$_START_DAEMONS" -eq $BS_FALSE ] && return 0
+
+    FAILED_DAEMONS=0
+    for fname in master minion syndic; do
+        [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
+        [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
+        [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
+
+        if [ "$(sv status salt-$fname | grep run)" = "" ]; then
+            echoerror "salt-$fname was not found running"
+            FAILED_DAEMONS=$((FAILED_DAEMONS + 1))
+        fi
+    done
+
+    return $FAILED_DAEMONS
+}
+#
+#   Ended VoidLinux Install Functions
 #
 #######################################################################################################################
 

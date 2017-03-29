@@ -1576,6 +1576,15 @@ __git_clone_and_checkout() {
         export GIT_SSL_NO_VERIFY=1
     fi
 
+    case ${OS_NAME_L} in
+        openbsd|freebsd|netbsd )
+            __TAG_REGEX_MATCH=$(echo "${GIT_REV}" | sed -E 's/^(v?[0-9]{1,4}\.[0-9]{1,2})(\.[0-9]{1,2})?.*$/MATCH/')
+            ;;
+        * )
+            __TAG_REGEX_MATCH=$(echo "${GIT_REV}" | sed 's/^.*\(v\?[[:digit:]]\{1,4\}\.[[:digit:]]\{1,2\}\)\(\.[[:digit:]]\{1,2\}\)\?.*$/MATCH/')
+            ;;
+    esac
+
     __SALT_GIT_CHECKOUT_PARENT_DIR=$(dirname "${_SALT_GIT_CHECKOUT_DIR}" 2>/dev/null)
     __SALT_GIT_CHECKOUT_PARENT_DIR="${__SALT_GIT_CHECKOUT_PARENT_DIR:-/tmp/git}"
     __SALT_CHECKOUT_REPONAME="$(basename "${_SALT_GIT_CHECKOUT_DIR}" 2>/dev/null)"
@@ -1621,7 +1630,7 @@ __git_clone_and_checkout() {
         if [ "$_FORCE_SHALLOW_CLONE" -eq "${BS_TRUE}" ]; then
             echoinfo "Forced shallow cloning of git repository."
             __SHALLOW_CLONE=$BS_TRUE
-        elif [ "$(echo "$GIT_REV" | sed 's/^.*\(v\?[[:digit:]]\{1,4\}\.[[:digit:]]\{1,2\}\)\(\.[[:digit:]]\{1,2\}\)\?.*$/MATCH/')" = "MATCH" ]; then
+        elif [ "$__TAG_REGEX_MATCH" = "MATCH" ]; then
             echoinfo "Git revision matches a Salt version tag, shallow cloning enabled."
             __SHALLOW_CLONE=$BS_TRUE
         else
@@ -4955,29 +4964,34 @@ install_freebsd_11_stable() {
 
 install_freebsd_git() {
 
+    # /usr/local/bin/python2 in FreeBSD is a symlink to /usr/local/bin/python2.7
+    __PYTHON_PATH=$(readlink -f "$(which python2)")
+    __ESCAPED_PYTHON_PATH=$(echo "${__PYTHON_PATH}" | sed 's/\//\\\//g')
+
     # Install from git
     if [ ! -f salt/syspaths.py ]; then
         # We still can't provide the system paths, salt 0.16.x
-        /usr/local/bin/python2 setup.py ${SETUP_PY_INSTALL_ARGS} install || return 1
+        ${__PYTHON_PATH} setup.py ${SETUP_PY_INSTALL_ARGS} install || return 1
     else
-        /usr/local/bin/python2 setup.py \
-            --salt-root-dir=/usr/local \
+        ${__PYTHON_PATH} setup.py \
+            --salt-root-dir=/ \
             --salt-config-dir="${_SALT_ETC_DIR}" \
             --salt-cache-dir="${_SALT_CACHE_DIR}" \
             --salt-sock-dir=/var/run/salt \
-            --salt-srv-root-dir=/srv \
+            --salt-srv-root-dir="${_SALT_ETC_DIR}" \
             --salt-base-file-roots-dir="${_SALT_ETC_DIR}/states" \
             --salt-base-pillar-roots-dir="${_SALT_ETC_DIR}/pillar" \
             --salt-base-master-roots-dir="${_SALT_ETC_DIR}/salt-master" \
             --salt-logs-dir=/var/log/salt \
-            --salt-pidfile-dir=/var/run ${SETUP_PY_INSTALL_ARGS} install \
+            --salt-pidfile-dir=/var/run \
+            ${SETUP_PY_INSTALL_ARGS} install \
             || return 1
     fi
 
     for script in salt_api salt_master salt_minion salt_proxy salt_syndic; do
         __fetch_url "/usr/local/etc/rc.d/${script}" "https://raw.githubusercontent.com/freebsd/freebsd-ports/master/sysutils/py-salt/files/${script}.in" || return 1
         sed -i '' 's/%%PREFIX%%/\/usr\/local/g' /usr/local/etc/rc.d/${script}
-        sed -i '' 's/%%PYTHON_CMD%%/\/usr\/local\/bin\/python2.7/g' /usr/local/etc/rc.d/${script}
+        sed -i '' "s/%%PYTHON_CMD%%/${__ESCAPED_PYTHON_PATH}/g" /usr/local/etc/rc.d/${script}
         chmod +x /usr/local/etc/rc.d/${script} || return 1
     done
 

@@ -1429,7 +1429,7 @@ __ubuntu_codename_translation
 if ([ "${DISTRO_NAME_L}" != "ubuntu" ] && [ "$ITYPE" = "daily" ]); then
     echoerror "${DISTRO_NAME} does not have daily packages support"
     exit 1
-elif ([ "$(echo "${DISTRO_NAME_L}" | egrep '(debian|ubuntu|centos|red_hat|oracle|scientific)')" = "" ] && [ "$ITYPE" = "stable" ] && [ "$STABLE_REV" != "latest" ]); then
+elif ([ "$(echo "${DISTRO_NAME_L}" | egrep '(debian|ubuntu|centos|red_hat|oracle|scientific|amazon)')" = "" ] && [ "$ITYPE" = "stable" ] && [ "$STABLE_REV" != "latest" ]); then
     echoerror "${DISTRO_NAME} does not have major version pegged packages support"
     exit 1
 fi
@@ -1548,7 +1548,7 @@ __rpm_import_gpg() {
 __yum_install_noinput() {
 
     ENABLE_EPEL_CMD=""
-    if [ $_DISABLE_REPOS -eq $BS_TRUE ]; then
+    if [ $_DISABLE_REPOS -eq $BS_FALSE ]; then
         ENABLE_EPEL_CMD="--enablerepo=${_EPEL_REPO}"
     fi
 
@@ -2167,7 +2167,7 @@ __check_services_alpine() {
     echodebug "Checking if service ${servicename} is enabled"
 
     # shellcheck disable=SC2086,SC2046,SC2144
-    if rc-service ${servicename} status; then
+    if rc-status $(rc-status -r) | tail -n +2 | grep -q "\<$servicename\>"; then
         echodebug "Service ${servicename} is enabled"
         return 0
     else
@@ -4217,7 +4217,6 @@ install_alpine_linux_git_deps() {
         py2-jinja2 py2-yaml py2-markupsafe py2-msgpack py2-psutil \
         py2-zmq zeromq py2-requests || return 1
 
-    # Don't fail if un-installing python2-distribute threw an error
     if ! __check_command_exists git; then
         apk -U add git  || return 1
     fi
@@ -4290,7 +4289,6 @@ install_alpine_linux_post() {
             /sbin/rc-update add salt-$fname > /dev/null 2>&1
             continue
         fi
-
     done
 }
 
@@ -4313,12 +4311,11 @@ install_alpine_linux_git_post() {
             /sbin/rc-update add salt-$fname > /dev/null 2>&1
             continue
         fi
-
     done
 }
 
 install_alpine_linux_restart_daemons() {
-    [ $_START_DAEMONS -eq $BS_FALSE ] && return
+    [ "${_START_DAEMONS}" -eq $BS_FALSE ] && return
 
     for fname in api master minion syndic; do
         # Skip salt-api since the service should be opt-in and not necessarily started on boot
@@ -4331,17 +4328,13 @@ install_alpine_linux_restart_daemons() {
         [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
         [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
 
-        /sbin/rc-service salt-$fname stop > /dev/null 2>&1
-        /sbin/rc-service salt-$fname start
+        # Disable stdin to fix shell session hang on killing tee pipe
+        /sbin/rc-service salt-$fname stop < /dev/null > /dev/null 2>&1
+        /sbin/rc-service salt-$fname start < /dev/null
     done
 }
 
 install_alpine_linux_check_services() {
-    if [ ! -f /usr/bin/systemctl ]; then
-        # Not running systemd!? Don't check!
-        return 0
-    fi
-
     for fname in api master minion syndic; do
         # Skip salt-api since the service should be opt-in and not necessarily started on boot
         [ $fname = "api" ] && continue
@@ -4360,7 +4353,7 @@ install_alpine_linux_check_services() {
 }
 
 daemons_running_alpine_linux() {
-    [ "$_START_DAEMONS" -eq $BS_FALSE ] && return 0
+    [ "${_START_DAEMONS}" -eq $BS_FALSE ] && return
 
     FAILED_DAEMONS=0
     for fname in api master minion syndic; do
@@ -4397,6 +4390,17 @@ daemons_running_alpine_linux() {
 
 install_amazon_linux_ami_deps() {
 
+    # Shim to figure out if we're using old (rhel) or new (aws) rpms.
+    _USEAWS=$BS_FALSE
+
+    repo_rev="$(echo "${GIT_REV:-$STABLE_REV}"  | sed 's|.*\/||g')"
+
+    if echo "$repo_rev" | egrep -q '^(latest|2016\.11)$'; then
+       _USEAWS=$BS_TRUE
+    elif echo "$repo_rev" | egrep -q '^[0-9]+$' && [ "$(echo "$repo_rev" | cut -c1-4)" -gt 2016 ]; then
+       _USEAWS=$BS_TRUE
+    fi
+
     # We need to install yum-utils before doing anything else when installing on
     # Amazon Linux ECS-optimized images. See issue #974.
     yum -y install yum-utils
@@ -4415,15 +4419,31 @@ install_amazon_linux_ami_deps() {
 
         __REPO_FILENAME="saltstack-repo.repo"
 
+        # Set a few vars to make life easier.
+        if [ $_USEAWS -eq $BS_TRUE ]; then
+           base_url="$HTTP_VAL://repo.saltstack.com/yum/amazon/latest/\$basearch/$repo_rev/"
+           gpg_key="${base_url}SALTSTACK-GPG-KEY.pub"
+           repo_name="SaltStack repo for Amazon Linux"
+           pkg_append="python27"
+        else
+           base_url="$HTTP_VAL://repo.saltstack.com/yum/redhat/6/\$basearch/$repo_rev/"
+           gpg_key="${base_url}SALTSTACK-GPG-KEY.pub"
+           repo_name="SaltStack repo for RHEL/CentOS 6"
+           pkg_append="python"
+        fi
+
+        # This should prob be refactored to use __install_saltstack_rhel_repository()
+        # With args passed in to do the right thing.  Reformatted to be more like the
+        # amazon linux yum file.
         if [ ! -s "/etc/yum.repos.d/${__REPO_FILENAME}" ]; then
           cat <<_eof > "/etc/yum.repos.d/${__REPO_FILENAME}"
 [saltstack-repo]
-disabled=False
-name=SaltStack repo for RHEL/CentOS 6
+name=$repo_name
+failovermethod=priority
+priority=10
 gpgcheck=1
-gpgkey=$HTTP_VAL://repo.saltstack.com/yum/redhat/6/\$basearch/$STABLE_REV/SALTSTACK-GPG-KEY.pub
-baseurl=$HTTP_VAL://repo.saltstack.com/yum/redhat/6/\$basearch/$STABLE_REV/
-humanname=SaltStack repo for RHEL/CentOS 6
+gpgkey=$gpg_key
+baseurl=$base_url
 _eof
         fi
 
@@ -4431,8 +4451,9 @@ _eof
             yum -y update || return 1
         fi
     fi
-
-    __PACKAGES="PyYAML python-crypto python-msgpack python-zmq python26-ordereddict python-jinja2 python-requests"
+    #ordereddict removed.
+    #Package python-ordereddict-1.1-2.el6.noarch is obsoleted by python26-2.6.9-2.88.amzn1.x86_64 which is already installed
+    __PACKAGES="${pkg_append}-PyYAML ${pkg_append}-crypto ${pkg_append}-msgpack ${pkg_append}-zmq ${pkg_append}-jinja2 ${pkg_append}-requests"
 
     # shellcheck disable=SC2086
     yum -y install ${__PACKAGES} ${ENABLE_EPEL_CMD} || return 1
@@ -4862,8 +4883,10 @@ install_freebsd_11_stable_deps() {
 install_freebsd_git_deps() {
     install_freebsd_9_stable_deps || return 1
 
-    SALT_DEPENDENCIES=$(/usr/local/sbin/pkg search "${FROM_SALTSTACK}" -R -d sysutils/py-salt | grep -i origin | sed -e 's/^[[:space:]]*//' | tail -n +2 | awk -F\" '{print $2}' | tr '\n' ' ')
-    /usr/local/sbin/pkg install "${FROM_FREEBSD}" -y "${SALT_DEPENDENCIES}" || return 1
+    # shellcheck disable=SC2086
+    SALT_DEPENDENCIES=$(/usr/local/sbin/pkg search ${FROM_SALTSTACK} -R -d sysutils/py-salt | grep -i origin | sed -e 's/^[[:space:]]*//' | tail -n +2 | awk -F\" '{print $2}' | tr '\n' ' ')
+    # shellcheck disable=SC2086
+    /usr/local/sbin/pkg install ${FROM_FREEBSD} -y ${SALT_DEPENDENCIES} || return 1
 
     if ! __check_command_exists git; then
         /usr/local/sbin/pkg install -y git || return 1

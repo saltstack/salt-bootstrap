@@ -4213,12 +4213,20 @@ install_alpine_linux_stable_deps() {
 }
 
 install_alpine_linux_git_deps() {
+    # Get latest root CA certs
+    apk -U add ca-certificates
+
     apk -U add python2 py-virtualenv py2-crypto py2-setuptools \
         py2-jinja2 py2-yaml py2-markupsafe py2-msgpack py2-psutil \
         py2-zmq zeromq py2-requests || return 1
 
     if ! __check_command_exists git; then
         apk -U add git  || return 1
+    fi
+
+    if ! __check_command_exists openssl; then
+        # Install OpenSSL to be able to pull from https:// URLs
+        apk -U add openssl
     fi
 
     __git_clone_and_checkout || return 1
@@ -4267,7 +4275,6 @@ install_alpine_linux_git() {
     else
         python2 setup.py ${SETUP_PY_INSTALL_ARGS} install || return 1
     fi
-    return 0
 }
 
 install_alpine_linux_post() {
@@ -4286,8 +4293,7 @@ install_alpine_linux_post() {
         [ $fname = "syndic" ] && continue
 
         if [ -f /sbin/rc-update ]; then
-            /sbin/rc-update add salt-$fname > /dev/null 2>&1
-            continue
+            /sbin/rc-update add salt-$fname > /dev/null 2>&1 || return 1
         fi
     done
 }
@@ -4301,15 +4307,21 @@ install_alpine_linux_git_post() {
         [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
         [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
 
-        # Skip salt-api since the service should be opt-in and not necessarily started on boot
-        [ $fname = "api" ] && continue
-
-        # Skip salt-syndic as there is no service for it on Alpine Linux
-        [ $fname = "syndic" ] && continue
-
         if [ -f /sbin/rc-update ]; then
-            /sbin/rc-update add salt-$fname > /dev/null 2>&1
-            continue
+            script_url="${_SALTSTACK_REPO_URL%.git}/raw/develop/pkg/alpine/salt-$fname"
+            __fetch_url "/etc/init.d/salt-$fname" "$script_url"
+
+            if [ $? -eq 0 ]; then
+                chmod +x "/etc/init.d/salt-$fname"
+            else
+                echoerror "Failed to get OpenRC init script for $OS_NAME from $script_url."
+                return 1
+            fi
+
+            # Skip salt-api since the service should be opt-in and not necessarily started on boot
+            [ $fname = "api" ] && continue
+
+            /sbin/rc-update add "salt-$fname" > /dev/null 2>&1 || return 1
         fi
     done
 }
@@ -4330,7 +4342,7 @@ install_alpine_linux_restart_daemons() {
 
         # Disable stdin to fix shell session hang on killing tee pipe
         /sbin/rc-service salt-$fname stop < /dev/null > /dev/null 2>&1
-        /sbin/rc-service salt-$fname start < /dev/null
+        /sbin/rc-service salt-$fname start < /dev/null || return 1
     done
 }
 

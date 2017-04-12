@@ -87,6 +87,7 @@ Version 2016.06.24:
     * Don't sleep 11 seconds if the user allowed overwrite of config files. (poelzi) #832
 
 Version 2016.05.11:
+	* Use HTTPS instead of Git protocol when cloning. (davidjb)
     * Only overwrite the minion config file if '-C' is passed. Otherwise, preserve it. (rallytime) #848
 
 Version 2016.05.10:

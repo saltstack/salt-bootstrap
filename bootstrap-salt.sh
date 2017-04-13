@@ -556,6 +556,7 @@ if [ "$_CUSTOM_REPO_URL" != "null" ]; then
     if [ "$_DISABLE_REPOS" -eq $BS_FALSE ]; then
         echowarn "Detected -R option. No other repositories will be configured when -R is used. Setting -r option to True."
         _DISABLE_REPOS=$BS_TRUE
+    fi
 else
     _REPO_URL="repo.saltstack.com"
 fi

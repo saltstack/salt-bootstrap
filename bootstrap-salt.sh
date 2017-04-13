@@ -544,6 +544,7 @@ if [ "$ITYPE" != "git" ]; then
         exit 1
     fi
     if [ "$_VIRTUALENV_DIR" != "null" ]; then
+        echoerror "Virtualenv installs via -V is only possible when installing Salt via git"
         exit 1
     fi
 fi

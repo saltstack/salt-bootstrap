@@ -1,7 +1,7 @@
 # Probot Stale configuration file
 
 # Number of days of inactivity before an issue becomes stale
-daysUntilStale: 730
+daysUntilStale: 365
 
 # Number of days of inactivity before a stale issue is closed
 daysUntilClose: 7
@@ -20,7 +20,7 @@ markComment: |
   recent activity. It will be closed if no further activity occurs. Thank you
   for your contributions.
 
-  If this issue was closed prematurely, please leave a comment and we will
+  If this issue is closed prematurely, please leave a comment and we will
   gladly reopen the issue.
 
 # Comment to post when closing a stale issue. Set to `false` to disable

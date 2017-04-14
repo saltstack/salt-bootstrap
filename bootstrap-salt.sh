@@ -239,6 +239,7 @@ _CUSTOM_REPO_URL="null"
 _CUSTOM_MASTER_CONFIG="null"
 _CUSTOM_MINION_CONFIG="null"
 _QUIET_GIT_INSTALLATION=$BS_FALSE
+_REPO_URL="repo.saltstack.com"
 
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #         NAME:  __usage
@@ -558,8 +559,6 @@ if [ "$_CUSTOM_REPO_URL" != "null" ]; then
         echowarn "Detected -R option. No other repositories will be configured when -R is used. Setting -r option to True."
         _DISABLE_REPOS=$BS_TRUE
     fi
-else
-    _REPO_URL="repo.saltstack.com"
 fi
 
 # Check for any unparsed arguments. Should be an error.
@@ -2936,7 +2935,7 @@ install_debian_8_deps() {
             exit 1
         fi
 
-        # Versions starting with 2015.5.6, 2015.8.1 and 2016.3.0 are hosted at $_REPO_URL
+        # Versions starting with 2015.5.6, 2015.8.1 and 2016.3.0 are hosted at repo.saltstack.com
         if [ "$(echo "$STABLE_REV" | egrep '^(2015\.5|2015\.8|2016\.3|2016\.11|latest|archive\/201[5-6]\.)')" != "" ]; then
             SALTSTACK_DEBIAN_URL="${HTTP_VAL}://${_REPO_URL}/apt/debian/${DISTRO_MAJOR_VERSION}/${__REPO_ARCH}/${STABLE_REV}"
             echo "deb $SALTSTACK_DEBIAN_URL jessie main" > "/etc/apt/sources.list.d/saltstack.list"

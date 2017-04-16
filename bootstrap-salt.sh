@@ -4720,7 +4720,7 @@ install_freebsd_restart_daemons() {
 __choose_openbsd_mirror() {
     OPENBSD_REPO=''
     MINTIME=''
-    MIRROR_LIST=$(awk -F= '/installpath = / {print $2}' /etc/examples/pkg.conf)
+    MIRROR_LIST=$(ftp -w 15 -Vao - 'http://ftp.openbsd.org/cgi-bin/ftplist.cgi?dbversion=1' | awk '/^http/ {print $1}')
 
     for MIRROR in $MIRROR_LIST; do
         MIRROR_HOST=$(echo "$MIRROR" | sed -e 's|.*//||' -e 's|+*/.*$||')
@@ -4744,7 +4744,7 @@ install_openbsd_deps() {
     __choose_openbsd_mirror || return 1
     echoinfo "setting package repository to $OPENBSD_REPO with ping time of $MINTIME"
     [ -n "$OPENBSD_REPO" ] || return 1
-    echo "installpath += ${OPENBSD_REPO}" >>/etc/pkg.conf || return 1
+    echo "${OPENBSD_REPO}" >>/etc/installurl || return 1
 
     if [ "${_EXTRA_PACKAGES}" != "" ]; then
         echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"

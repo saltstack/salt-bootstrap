@@ -355,12 +355,18 @@ __usage() {
         no ".bak" file will be created as either of those options will force
         a complete overwrite of the file.
     -q  Quiet salt installation from git (setup.py install -q)
+    -x  Changes the python version used to install a git version of salt. Currently
+        this is considered experimental and has only been tested on Centos 6.
+    -y  Installs a different python version on host. Currently this only works
+        with Centos 6 and is considered experimental. This will install the ius
+        repo on the box. This must be used in conjunction with -x <pythonversion>
+        For example: sh bootstrap.sh -y -x python2.7 git v2016.11.3
 
 EOT
 }   # ----------  end of function __usage  ----------
 
 
-while getopts ':hvnDc:g:Gwk:s:MSNXCPFUKIA:i:Lp:dH:ZbflV:J:j:rR:aq' opt
+while getopts ':hvnDc:g:Gyx:wk:s:MSNXCPFUKIA:i:Lp:dH:ZbflV:J:j:rR:aq' opt
 do
   case "${opt}" in
 
@@ -425,6 +431,8 @@ do
     J )  _CUSTOM_MASTER_CONFIG=$OPTARG                  ;;
     j )  _CUSTOM_MINION_CONFIG=$OPTARG                  ;;
     q )  _QUIET_GIT_INSTALLATION=$BS_TRUE               ;;
+    x )  _PY_EXE="$OPTARG"                              ;;
+    y )  _INSTALL_PY="$BS_TRUE"                         ;;
 
     \?)  echo
          echoerror "Option does not exist : $OPTARG"
@@ -1073,6 +1081,34 @@ __gather_linux_system_info() {
         DISTRO_VERSION=$v
         break
     done
+}
+
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  __install_python_and_deps()
+#   DESCRIPTION:  Install a different version of python and its dependencies on a host. Currently this has only been
+#                 tested on Centos 6 and is considered experimental.
+#----------------------------------------------------------------------------------------------------------------------
+__install_python_and_deps() {
+    if [[ ${_PY_EXE:='None'} == 'None' ]]; then
+        echoerror "Must specify -x <pythonversion> with -y to install a specific python version"
+        exit 1
+    fi
+
+    __PACKAGES="${_PY_EXE//./} ${_PY_EXE//./}-pip ${_PY_EXE//./}-devel gcc"
+
+    #Install new python version
+    __PYTHON_REPO_URL="https://centos${DISTRO_MAJOR_VERSION}.iuscommunity.org/ius-release.rpm"
+
+    if [ $_DISABLE_REPOS -eq $BS_FALSE ]; then
+        yum install -y ${__PYTHON_REPO_URL} || return 1
+    fi
+
+    yum install -y ${__PACKAGES} || return 1
+
+    _PIP_PACKAGES="tornado PyYAML msgpack-python jinja2 pycrypto zmq"
+
+    # Install Dependencies with different python version
+    ${_PY_EXE} -m pip install ${_PIP_PACKAGES} || return 1
 }
 
 
@@ -3637,6 +3673,10 @@ install_centos_stable_post() {
 }
 
 install_centos_git_deps() {
+    if [ $_DISABLE_REPOS -eq $BS_FALSE ]; then
+        __install_epel_repository || return 1
+    fi
+
     if [ "$_INSECURE_DL" -eq $BS_FALSE ] && [ "${_SALT_REPO_URL%%://*}" = "https" ]; then
         if [ "$DISTRO_MAJOR_VERSION" -gt 5 ]; then
             __yum_install_noinput ca-certificates || return 1
@@ -3671,8 +3711,12 @@ install_centos_git_deps() {
         __PACKAGES="${__PACKAGES} python-libcloud"
     fi
 
-    # shellcheck disable=SC2086
-    __yum_install_noinput ${__PACKAGES} || return 1
+    if [ "${_INSTALL_PY:='None'}" -eq "${BS_TRUE}" ]; then
+        __install_python_and_deps || return 1
+    else
+        # shellcheck disable=SC2086
+        __yum_install_noinput ${__PACKAGES} || return 1
+    fi
 
     # Let's trigger config_salt()
     if [ "$_TEMP_CONFIG_DIR" = "null" ]; then
@@ -3686,6 +3730,9 @@ install_centos_git_deps() {
 install_centos_git() {
     if [ "$DISTRO_MAJOR_VERSION" -eq 5 ]; then
         _PYEXE=python2.6
+    elif [[ ${_PY_EXE:='None'} != 'None' ]]; then
+        _PYEXE=${_PY_EXE}
+        echoinfo "Using the following python version: ${_PY-EXE} to install salt"
     else
         _PYEXE=python2
     fi

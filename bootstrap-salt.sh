@@ -239,6 +239,7 @@ _CUSTOM_REPO_URL="null"
 _CUSTOM_MASTER_CONFIG="null"
 _CUSTOM_MINION_CONFIG="null"
 _QUIET_GIT_INSTALLATION=$BS_FALSE
+_REPO_URL="repo.saltstack.com"
 
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #         NAME:  __usage
@@ -342,7 +343,7 @@ __usage() {
         points to a repository that mirrors Salt packages located at
         repo.saltstack.com. The option passed with -R replaces the
         "repo.saltstack.com". If -R is passed, -r is also set. Currently only
-        works on CentOS/RHEL based distributions.
+        works on CentOS/RHEL and Debian based distributions.
     -J  Replace the Master config file with data passed in as a JSON string. If
         a Master config file is found, a reasonable effort will be made to save
         the file with a ".bak" extension. If used in conjunction with -C or -F,
@@ -549,10 +550,15 @@ if [ "$ITYPE" != "git" ]; then
     fi
 fi
 
-# Check for -r if -R is being passed. Set -r with a warning.
-if [ "$_CUSTOM_REPO_URL" != "null" ] && [ "$_DISABLE_REPOS" -eq $BS_FALSE ]; then
-    echowarn "Detected -R option. No other repositories will be configured when -R is used. Setting -r option to True."
-    _DISABLE_REPOS=$BS_TRUE
+# Set the _REPO_URL value based on if -R was passed or not. Defaults to repo.saltstack.com.
+if [ "$_CUSTOM_REPO_URL" != "null" ]; then
+    _REPO_URL="$_CUSTOM_REPO_URL"
+
+    # Check for -r since -R is being passed. Set -r with a warning.
+    if [ "$_DISABLE_REPOS" -eq $BS_FALSE ]; then
+        echowarn "Detected -R option. No other repositories will be configured when -R is used. Setting -r option to True."
+        _DISABLE_REPOS=$BS_TRUE
+    fi
 fi
 
 # Check for any unparsed arguments. Should be an error.
@@ -2433,12 +2439,12 @@ install_ubuntu_stable_deps() {
         __REPO_ARCH="$DPKG_ARCHITECTURE"
 
         if [ "$DPKG_ARCHITECTURE" = "i386" ]; then
-            echoerror "repo.saltstack.com likely doesn't have all required 32-bit packages for Ubuntu $DISTRO_MAJOR_VERSION (yet?)."
+            echoerror "$_REPO_URL likely doesn't have all required 32-bit packages for Ubuntu $DISTRO_MAJOR_VERSION (yet?)."
 
             # amd64 is just a part of repository URI, 32-bit pkgs are hosted under the same location
             __REPO_ARCH="amd64"
         elif [ "$DPKG_ARCHITECTURE" != "amd64" ]; then
-            echoerror "repo.saltstack.com doesn't have packages for your system architecture: $DPKG_ARCHITECTURE."
+            echoerror "$_REPO_URL doesn't have packages for your system architecture: $DPKG_ARCHITECTURE."
             if [ "$ITYPE" != "git" ]; then
                 echoerror "You can try git installation mode, i.e.: sh ${__ScriptName} git v2016.3.1"
                 exit 1
@@ -2458,7 +2464,7 @@ install_ubuntu_stable_deps() {
             fi
 
             # SaltStack's stable Ubuntu repository:
-            SALTSTACK_UBUNTU_URL="${HTTP_VAL}://repo.saltstack.com/apt/ubuntu/${UBUNTU_VERSION}/${__REPO_ARCH}/${STABLE_REV}"
+            SALTSTACK_UBUNTU_URL="${HTTP_VAL}://${_REPO_URL}/apt/ubuntu/${UBUNTU_VERSION}/${__REPO_ARCH}/${STABLE_REV}"
             echo "deb $SALTSTACK_UBUNTU_URL $UBUNTU_CODENAME main" > /etc/apt/sources.list.d/saltstack.list
 
             # Make sure https transport is available
@@ -2834,7 +2840,7 @@ install_debian_7_deps() {
         __REPO_ARCH="$DPKG_ARCHITECTURE"
 
         if [ "$DPKG_ARCHITECTURE" = "i386" ]; then
-            echoerror "repo.saltstack.com likely doesn't have all required 32-bit packages for Debian $DISTRO_MAJOR_VERSION (yet?)."
+            echoerror "$_REPO_URL likely doesn't have all required 32-bit packages for Debian $DISTRO_MAJOR_VERSION (yet?)."
 
             if [ "$ITYPE" != "git" ]; then
                 echoerror "You can try git installation mode, i.e.: sh ${__ScriptName} git v2016.3.1"
@@ -2843,14 +2849,14 @@ install_debian_7_deps() {
             # amd64 is just a part of repository URI, 32-bit pkgs are hosted under the same location
             __REPO_ARCH="amd64"
         elif [ "$DPKG_ARCHITECTURE" != "amd64" ]; then
-            echoerror "repo.saltstack.com doesn't have packages for your system architecture: $DPKG_ARCHITECTURE."
+            echoerror "$_REPO_URL doesn't have packages for your system architecture: $DPKG_ARCHITECTURE."
             exit 1
         fi
 
         # Versions starting with 2015.8.7 and 2016.3.0 are hosted at repo.saltstack.com
         if [ "$(echo "$STABLE_REV" | egrep '^(2015\.8|2016\.3|2016\.11|latest|archive\/201[5-6]\.)')" != "" ]; then
             # amd64 is just a part of repository URI, 32-bit pkgs are hosted under the same location
-            SALTSTACK_DEBIAN_URL="${HTTP_VAL}://repo.saltstack.com/apt/debian/${DISTRO_MAJOR_VERSION}/${__REPO_ARCH}/${STABLE_REV}"
+            SALTSTACK_DEBIAN_URL="${HTTP_VAL}://${_REPO_URL}/apt/debian/${DISTRO_MAJOR_VERSION}/${__REPO_ARCH}/${STABLE_REV}"
             echo "deb $SALTSTACK_DEBIAN_URL wheezy main" > "/etc/apt/sources.list.d/saltstack.list"
 
             if [ "$HTTP_VAL" = "https" ] ; then
@@ -2866,7 +2872,7 @@ install_debian_7_deps() {
 
         apt-get update
     else
-        echowarn "Packages from repo.saltstack.com are required to install Salt version 2015.8 or higher on Debian $DISTRO_MAJOR_VERSION."
+        echowarn "Packages from $_REPO_URL are required to install Salt version 2015.8 or higher on Debian $DISTRO_MAJOR_VERSION."
     fi
 
     # Additionally install procps and pciutils which allows for Docker bootstraps. See 366#issuecomment-39666813
@@ -2913,7 +2919,7 @@ install_debian_8_deps() {
         __REPO_ARCH="$DPKG_ARCHITECTURE"
 
         if [ "$DPKG_ARCHITECTURE" = "i386" ]; then
-            echoerror "repo.saltstack.com likely doesn't have all required 32-bit packages for Debian $DISTRO_MAJOR_VERSION (yet?)."
+            echoerror "$_REPO_URL likely doesn't have all required 32-bit packages for Debian $DISTRO_MAJOR_VERSION (yet?)."
 
             if [ "$ITYPE" != "git" ]; then
                 echoerror "You can try git installation mode, i.e.: sh ${__ScriptName} git v2016.3.1"
@@ -2922,7 +2928,7 @@ install_debian_8_deps() {
             # amd64 is just a part of repository URI, 32-bit pkgs are hosted under the same location
             __REPO_ARCH="amd64"
         elif [ "$DPKG_ARCHITECTURE" != "amd64" ] && [ "$DPKG_ARCHITECTURE" != "armhf" ]; then
-            echoerror "repo.saltstack.com doesn't have packages for your system architecture: $DPKG_ARCHITECTURE."
+            echoerror "$_REPO_URL doesn't have packages for your system architecture: $DPKG_ARCHITECTURE."
             echoerror "Try git installation mode with pip and disable SaltStack apt repository, for example:"
             echoerror "    sh ${__ScriptName} -r -P git v2016.3.1"
 
@@ -2931,7 +2937,7 @@ install_debian_8_deps() {
 
         # Versions starting with 2015.5.6, 2015.8.1 and 2016.3.0 are hosted at repo.saltstack.com
         if [ "$(echo "$STABLE_REV" | egrep '^(2015\.5|2015\.8|2016\.3|2016\.11|latest|archive\/201[5-6]\.)')" != "" ]; then
-            SALTSTACK_DEBIAN_URL="${HTTP_VAL}://repo.saltstack.com/apt/debian/${DISTRO_MAJOR_VERSION}/${__REPO_ARCH}/${STABLE_REV}"
+            SALTSTACK_DEBIAN_URL="${HTTP_VAL}://${_REPO_URL}/apt/debian/${DISTRO_MAJOR_VERSION}/${__REPO_ARCH}/${STABLE_REV}"
             echo "deb $SALTSTACK_DEBIAN_URL jessie main" > "/etc/apt/sources.list.d/saltstack.list"
 
             if [ "$HTTP_VAL" = "https" ] ; then
@@ -3472,21 +3478,14 @@ __install_saltstack_rhel_repository() {
         repo_rev="latest"
     fi
 
-    # Check if a custom repo URL was passed with -R. If not, use repo.salstack.com.
-    if [ "$_CUSTOM_REPO_URL" != "null" ]; then
-        repo_url="$_CUSTOM_REPO_URL"
-    else
-        repo_url="repo.saltstack.com"
-    fi
-
     # Cloud Linux $releasever = 7.x, which doesn't exist in repo.saltstack.com, we need this to be "7"
     if [ "${DISTRO_NAME}" = "Cloud Linux" ] && [ "${DISTRO_MAJOR_VERSION}" = "7" ]; then
-        base_url="${HTTP_VAL}://${repo_url}/yum/redhat/${DISTRO_MAJOR_VERSION}/\$basearch/${repo_rev}/"
+        base_url="${HTTP_VAL}://${_REPO_URL}/yum/redhat/${DISTRO_MAJOR_VERSION}/\$basearch/${repo_rev}/"
     else
-        base_url="${HTTP_VAL}://${repo_url}/yum/redhat/\$releasever/\$basearch/${repo_rev}/"
+        base_url="${HTTP_VAL}://${_REPO_URL}/yum/redhat/\$releasever/\$basearch/${repo_rev}/"
     fi
 
-    fetch_url="${HTTP_VAL}://${repo_url}/yum/redhat/${DISTRO_MAJOR_VERSION}/${CPU_ARCH_L}/${repo_rev}/"
+    fetch_url="${HTTP_VAL}://${_REPO_URL}/yum/redhat/${DISTRO_MAJOR_VERSION}/${CPU_ARCH_L}/${repo_rev}/"
 
     if [ "${DISTRO_MAJOR_VERSION}" -eq 5 ]; then
         gpg_key="SALTSTACK-EL5-GPG-KEY.pub"
@@ -3514,7 +3513,7 @@ _eof
         # Import CentOS 7 GPG key on RHEL for installing base dependencies from
         # Salt corporate repository
         rpm -qa gpg-pubkey\* --qf "%{name}-%{version}\n" | grep -q ^gpg-pubkey-f4a80eb5$ || \
-            __rpm_import_gpg "${HTTP_VAL}://${repo_url}/yum/redhat/7/x86_64/${repo_rev}/base/RPM-GPG-KEY-CentOS-7" || return 1
+            __rpm_import_gpg "${HTTP_VAL}://${_REPO_URL}/yum/redhat/7/x86_64/${repo_rev}/base/RPM-GPG-KEY-CentOS-7" || return 1
     fi
 
     return 0

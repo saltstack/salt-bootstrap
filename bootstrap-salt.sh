@@ -356,14 +356,15 @@ __usage() {
         a complete overwrite of the file.
     -q  Quiet salt installation from git (setup.py install -q)
     -x  Changes the python version used to install a git version of salt. Currently
-        this is considered experimental and has only been tested on Centos 6.
+        this is considered experimental and has only been tested on Centos 6. This
+        only works for git installations.
     -y  Installs a different python version on host. Currently this has only been
         tested with Centos 6 and is considered experimental. This will install the
         ius repo on the box if disable repo is false. This must be used in conjunction
         with -x <pythonversion>.  For example:
             sh bootstrap.sh -y -x python2.7 git v2016.11.3
         The above will install python27 and install the git version of salt using the
-        python2.7 executable.
+        python2.7 executable. This only works for git installations.
 
 EOT
 }   # ----------  end of function __usage  ----------
@@ -1092,12 +1093,13 @@ __gather_linux_system_info() {
 #                 tested on Centos 6 and is considered experimental.
 #----------------------------------------------------------------------------------------------------------------------
 __install_python_and_deps() {
-    if [[ ${_PY_EXE:='None'} == 'None' ]]; then
+    if [ ${_PY_EXE:='None'} = 'None' ]; then
         echoerror "Must specify -x <pythonversion> with -y to install a specific python version"
         exit 1
     fi
 
-    __PACKAGES="${_PY_EXE//./} ${_PY_EXE//./}-pip ${_PY_EXE//./}-devel gcc"
+    py_pkg_v=$(echo "$_PY_EXE" | sed -r "s/\.//g")
+    __PACKAGES="${py_pkg_v} ${py_pkg_v}-pip ${py_pkg_v}-devel gcc"
 
     #Install new python version
     __PYTHON_REPO_URL="https://centos${DISTRO_MAJOR_VERSION}.iuscommunity.org/ius-release.rpm"
@@ -3717,7 +3719,7 @@ install_centos_git_deps() {
         __PACKAGES="${__PACKAGES} python-libcloud"
     fi
 
-    if [ "${_INSTALL_PY:='None'}" == "${BS_TRUE}" ]; then
+    if [ "${_INSTALL_PY:='None'}" = "${BS_TRUE}" ]; then
         __install_python_and_deps || return 1
     else
         # shellcheck disable=SC2086
@@ -3736,7 +3738,7 @@ install_centos_git_deps() {
 install_centos_git() {
     if [ "$DISTRO_MAJOR_VERSION" -eq 5 ]; then
         _PYEXE=python2.6
-    elif [[ ${_PY_EXE:='None'} != 'None' ]]; then
+    elif [ ${_PY_EXE:='None'} != 'None' ]; then
         _PYEXE=${_PY_EXE}
         echoinfo "Using the following python version: ${_PY-EXE} to install salt"
     else

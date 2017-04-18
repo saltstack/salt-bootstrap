@@ -357,10 +357,13 @@ __usage() {
     -q  Quiet salt installation from git (setup.py install -q)
     -x  Changes the python version used to install a git version of salt. Currently
         this is considered experimental and has only been tested on Centos 6.
-    -y  Installs a different python version on host. Currently this only works
-        with Centos 6 and is considered experimental. This will install the ius
-        repo on the box. This must be used in conjunction with -x <pythonversion>
-        For example: sh bootstrap.sh -y -x python2.7 git v2016.11.3
+    -y  Installs a different python version on host. Currently this has only been
+        tested with Centos 6 and is considered experimental. This will install the
+        ius repo on the box if disable repo is false. This must be used in conjunction
+        with -x <pythonversion>.  For example:
+            sh bootstrap.sh -y -x python2.7 git v2016.11.3
+        The above will install python27 and install the git version of salt using the
+        python2.7 executable.
 
 EOT
 }   # ----------  end of function __usage  ----------

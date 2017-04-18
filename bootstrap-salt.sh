@@ -3717,7 +3717,7 @@ install_centos_git_deps() {
         __PACKAGES="${__PACKAGES} python-libcloud"
     fi
 
-    if [ "${_INSTALL_PY:='None'}" -eq "${BS_TRUE}" ]; then
+    if [ "${_INSTALL_PY:='None'}" == "${BS_TRUE}" ]; then
         __install_python_and_deps || return 1
     else
         # shellcheck disable=SC2086

@@ -1103,14 +1103,17 @@ __install_python_and_deps() {
     __PYTHON_REPO_URL="https://centos${DISTRO_MAJOR_VERSION}.iuscommunity.org/ius-release.rpm"
 
     if [ $_DISABLE_REPOS -eq $BS_FALSE ]; then
+        echoinfo "Installing IUS repo"
         yum install -y ${__PYTHON_REPO_URL} || return 1
     fi
 
+    echoinfo "Installing ${_PY_EXE}"
     yum install -y ${__PACKAGES} || return 1
 
     _PIP_PACKAGES="tornado PyYAML msgpack-python jinja2 pycrypto zmq"
 
     # Install Dependencies with different python version
+    echoinfo "Installing salt dependencies using the ${_PY_EXE} pip executable"
     ${_PY_EXE} -m pip install ${_PIP_PACKAGES} || return 1
 }
 

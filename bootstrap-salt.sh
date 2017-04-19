@@ -241,6 +241,7 @@ _CUSTOM_MINION_CONFIG="null"
 _QUIET_GIT_INSTALLATION=$BS_FALSE
 _REPO_URL="repo.saltstack.com"
 _PY_EXE=""
+_INSTALL_PY="$BS_FALSE"
 
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #         NAME:  __usage
@@ -1102,17 +1103,21 @@ __install_python_and_deps() {
     PY_PKG_V=$(echo "$_PY_EXE" | sed -r "s/\.//g")
     __PACKAGES="${PY_PKG_V}"
 
-    case "$DISTRO_NAME_L" in
-        [red_hat] | [centos]*)
-            __PYTHON_REPO_URL="https://centos${DISTRO_MAJOR_VERSION}.iuscommunity.org/ius-release.rpm"
-            ;;
-        *)
-            echoerror "__install_python_and_deps is not currently supported on your platform"
-            exit 1
-            ;;
-    esac
 
     if [ $_DISABLE_REPOS -eq $BS_FALSE ]; then
+        echoinfo "Attempting to install a repo to help provide a separate python package"
+        echoinfo "$DISTRO_NAME_L"
+        case "$DISTRO_NAME_L" in
+            "red_hat"|"centos")
+                __PYTHON_REPO_URL="https://centos${DISTRO_MAJOR_VERSION}.iuscommunity.org/ius-release.rpm"
+                ;;
+            *)
+                echoerror "Installing a repo to provide a python package is only supported on Redhat/CentOS.
+                If a repo is already available please try running script with -r"
+                exit 1
+                ;;
+        esac
+
         echoinfo "Installing IUS repo"
         __yum_install_noinput "${__PYTHON_REPO_URL}" || return 1
     fi
@@ -3754,7 +3759,7 @@ install_centos_git_deps() {
         __PACKAGES="${__PACKAGES} python-libcloud"
     fi
 
-    if [ "${_INSTALL_PY:='None'}" = "${BS_TRUE}" ]; then
+    if [ "${_INSTALL_PY}" = "${BS_TRUE}" ]; then
         __install_python_and_deps || return 1
     else
         # shellcheck disable=SC2086

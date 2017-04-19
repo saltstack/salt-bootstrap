@@ -1468,7 +1468,7 @@ fi
 
 # Starting from Ubuntu 16.10, gnupg-curl has been renamed to gnupg1-curl.
 GNUPG_CURL="gnupg-curl"
-if ([ "${DISTRO_NAME_L}" = "ubuntu" ] && [ "${DISTRO_VERSION}" = "16.10" ]); then
+if ([ "${DISTRO_NAME_L}" = "ubuntu" ] && ([ "${DISTRO_VERSION}" = "16.10" ] || [ "$DISTRO_MAJOR_VERSION" -gt 16 ])); then
     GNUPG_CURL="gnupg1-curl"
 fi
 

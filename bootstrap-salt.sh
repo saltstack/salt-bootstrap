@@ -240,6 +240,7 @@ _CUSTOM_MASTER_CONFIG="null"
 _CUSTOM_MINION_CONFIG="null"
 _QUIET_GIT_INSTALLATION=$BS_FALSE
 _REPO_URL="repo.saltstack.com"
+_PY_EXE=""
 
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #         NAME:  __usage
@@ -1093,30 +1094,34 @@ __gather_linux_system_info() {
 #                 tested on Centos 6 and is considered experimental.
 #----------------------------------------------------------------------------------------------------------------------
 __install_python_and_deps() {
-    if [ ${_PY_EXE:='None'} = 'None' ]; then
+    if [ "$_PY_EXE" = "" ]; then
         echoerror "Must specify -x <pythonversion> with -y to install a specific python version"
         exit 1
     fi
 
-    py_pkg_v=$(echo "$_PY_EXE" | sed -r "s/\.//g")
-    __PACKAGES="${py_pkg_v} ${py_pkg_v}-pip ${py_pkg_v}-devel gcc"
+    PY_PKG_V=$(echo "$_PY_EXE" | sed -r "s/\.//g")
+    __PACKAGES="${PY_PKG_V}"
 
-    #Install new python version
-    __PYTHON_REPO_URL="https://centos${DISTRO_MAJOR_VERSION}.iuscommunity.org/ius-release.rpm"
+    case "$DISTRO_NAME_L" in
+        [red_hat] | [centos]*)
+            __PYTHON_REPO_URL="https://centos${DISTRO_MAJOR_VERSION}.iuscommunity.org/ius-release.rpm"
+            ;;
+        *)
+            echoerror "__install_python_and_deps is not currently supported on your platform"
+            exit 1
+            ;;
+    esac
 
     if [ $_DISABLE_REPOS -eq $BS_FALSE ]; then
         echoinfo "Installing IUS repo"
-        yum install -y ${__PYTHON_REPO_URL} || return 1
+        __yum_install_noinput ${__PYTHON_REPO_URL} || return 1
     fi
 
-    echoinfo "Installing ${_PY_EXE}"
-    yum install -y ${__PACKAGES} || return 1
+    echoinfo "Installing ${__PACKAGES}"
+    __yum_install_noinput ${__PACKAGES} || return 1
 
     _PIP_PACKAGES="tornado PyYAML msgpack-python jinja2 pycrypto zmq"
-
-    # Install Dependencies with different python version
-    echoinfo "Installing salt dependencies using the ${_PY_EXE} pip executable"
-    ${_PY_EXE} -m pip install ${_PIP_PACKAGES} || return 1
+    __install_pip_pkgs "${_PIP_PACKAGES}" "${_PY_EXE}" || return 1
 }
 
 
@@ -2261,6 +2266,34 @@ __activate_virtualenv() {
     return 0
 }   # ----------  end of function __activate_virtualenv  ----------
 
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  __install_pip_pkgs
+#   DESCRIPTION:  Return 0 or 1 if successfully able to install pip packages. Can provide a different python version to
+#                 install pip packages with. If $py_ver is not specified it will use the default python version.
+#    PARAMETERS:  pkgs, py_ver
+#----------------------------------------------------------------------------------------------------------------------
+
+__install_pip_pkgs() {
+    _pip_pkgs="$1"
+    _py_exe="$2"
+    _py_pkg=$(echo "$_py_exe" | sed -r "s/\.//g")
+    _pip_cmd="${_py_exe} -m pip"
+
+    if [ $_py_exe = "" ]; then
+        _py_exe='python'
+    fi
+
+    __check_pip_allowed
+
+    # Install pip and pip dependencies
+    if ! __check_command_exists "${_pip_cmd} --version"; then
+        __PACKAGES="${_py_pkg}-setuptools ${_py_pkg}-pip gcc ${_py_pkg}-devel"
+        __yum_install_noinput ${__PACKAGES} || return 1
+    fi
+
+    echoinfo "Installing pip packages: ${_pip_pkgs} using ${_py_exe}"
+    ${_pip_cmd} install ${_pip_pkgs} || return 1
+}
 
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #          NAME:  __install_pip_deps

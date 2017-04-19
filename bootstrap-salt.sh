@@ -363,9 +363,9 @@ __usage() {
         tested with Centos 6 and is considered experimental. This will install the
         ius repo on the box if disable repo is false. This must be used in conjunction
         with -x <pythonversion>.  For example:
-            sh bootstrap.sh -y -x python2.7 git v2016.11.3
+            sh bootstrap.sh -P -y -x python2.7 git v2016.11.3
         The above will install python27 and install the git version of salt using the
-        python2.7 executable. This only works for git installations.
+        python2.7 executable. This only works for git and pip installations.
 
 EOT
 }   # ----------  end of function __usage  ----------

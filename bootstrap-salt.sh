@@ -3771,9 +3771,9 @@ install_centos_git_deps() {
 install_centos_git() {
     if [ "$DISTRO_MAJOR_VERSION" -eq 5 ]; then
         _PYEXE=python2.6
-    elif [ ${_PY_EXE:='None'} != 'None' ]; then
+    elif [ "${_PY_EXE}" != "" ]; then
         _PYEXE=${_PY_EXE}
-        echoinfo "Using the following python version: ${_PY-EXE} to install salt"
+        echoinfo "Using the following python version: ${_PY_EXE} to install salt"
     else
         _PYEXE=python2
     fi

@@ -1114,11 +1114,11 @@ __install_python_and_deps() {
 
     if [ $_DISABLE_REPOS -eq $BS_FALSE ]; then
         echoinfo "Installing IUS repo"
-        __yum_install_noinput ${__PYTHON_REPO_URL} || return 1
+        __yum_install_noinput "${__PYTHON_REPO_URL}" || return 1
     fi
 
     echoinfo "Installing ${__PACKAGES}"
-    __yum_install_noinput ${__PACKAGES} || return 1
+    __yum_install_noinput "${__PACKAGES}" || return 1
 
     _PIP_PACKAGES="tornado PyYAML msgpack-python jinja2 pycrypto zmq"
     __install_pip_pkgs "${_PIP_PACKAGES}" "${_PY_EXE}" || return 1
@@ -2279,7 +2279,7 @@ __install_pip_pkgs() {
     _py_pkg=$(echo "$_py_exe" | sed -r "s/\.//g")
     _pip_cmd="${_py_exe} -m pip"
 
-    if [ $_py_exe = "" ]; then
+    if [ "${_py_exe}" = "" ]; then
         _py_exe='python'
     fi
 
@@ -2288,10 +2288,12 @@ __install_pip_pkgs() {
     # Install pip and pip dependencies
     if ! __check_command_exists "${_pip_cmd} --version"; then
         __PACKAGES="${_py_pkg}-setuptools ${_py_pkg}-pip gcc ${_py_pkg}-devel"
+        # shellcheck disable=SC2086
         __yum_install_noinput ${__PACKAGES} || return 1
     fi
 
     echoinfo "Installing pip packages: ${_pip_pkgs} using ${_py_exe}"
+    # shellcheck disable=SC2086
     ${_pip_cmd} install ${_pip_pkgs} || return 1
 }
 

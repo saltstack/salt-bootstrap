@@ -1126,6 +1126,10 @@ __install_python_and_deps() {
     __yum_install_noinput "${__PACKAGES}" || return 1
 
     _PIP_PACKAGES="tornado PyYAML msgpack-python jinja2 pycrypto zmq"
+    if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
+        _PIP_PACKAGES="${_PIP_PACKAGES} apache-libcloud"
+    fi
+
     __install_pip_pkgs "${_PIP_PACKAGES}" "${_PY_EXE}" || return 1
 }
 

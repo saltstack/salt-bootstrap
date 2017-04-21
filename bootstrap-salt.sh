@@ -4960,7 +4960,7 @@ install_freebsd_9_stable() {
 }
 
 install_freebsd_10_stable() {
-    install_freebsd_9_stable
+    /usr/local/sbin/pkg install ${FROM_FREEBSD} -y sysutils/py-salt || return 1
 }
 
 install_freebsd_11_stable() {

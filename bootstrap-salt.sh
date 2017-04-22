@@ -4960,7 +4960,9 @@ install_freebsd_9_stable() {
 }
 
 install_freebsd_10_stable() {
+    # shellcheck disable=SC2086
     /usr/local/sbin/pkg install ${FROM_FREEBSD} -y sysutils/py-salt || return 1
+    return 0
 }
 
 install_freebsd_11_stable() {

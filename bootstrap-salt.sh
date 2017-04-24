@@ -3732,9 +3732,7 @@ install_centos_stable_post() {
 }
 
 install_centos_git_deps() {
-    if [ $_DISABLE_REPOS -eq $BS_FALSE ]; then
-        __install_epel_repository || return 1
-    fi
+    install_centos_stable_deps || return 1
 
     if [ "$_INSECURE_DL" -eq $BS_FALSE ] && [ "${_SALT_REPO_URL%%://*}" = "https" ]; then
         if [ "$DISTRO_MAJOR_VERSION" -gt 5 ]; then
@@ -3743,8 +3741,6 @@ install_centos_git_deps() {
             __yum_install_noinput "openssl.${CPU_ARCH_L}" || return 1
         fi
     fi
-
-    install_centos_stable_deps || return 1
 
     if ! __check_command_exists git; then
         __yum_install_noinput git || return 1

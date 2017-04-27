@@ -4651,29 +4651,29 @@ install_arch_linux_stable_deps() {
         pacman-key --init && pacman-key --populate archlinux || return 1
     fi
 
-    pacman -Sy --noconfirm --needed archlinux-keyring || return 1
+    # Pacman does not resolve dependencies on outdated versions
+    # They always need to be updated
+    pacman -Syy --noconfirm
 
-    pacman -Sy --noconfirm --needed pacman || return 1
+    pacman -S --noconfirm --needed archlinux-keyring || return 1
+
+    pacman -Su --noconfirm --needed pacman || return 1
 
     if __check_command_exists pacman-db-upgrade; then
         pacman-db-upgrade || return 1
     fi
 
     # YAML module is used for generating custom master/minion configs
-    pacman -Sy --noconfirm --needed python2-yaml
-
-    if [ "$_UPGRADE_SYS" -eq $BS_TRUE ]; then
-        pacman -Syyu --noconfirm --needed || return 1
-    fi
+    pacman -Su --noconfirm --needed python2-yaml
 
     if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
-        pacman -Sy --noconfirm --needed apache-libcloud || return 1
+        pacman -Su --noconfirm --needed apache-libcloud || return 1
     fi
 
     if [ "${_EXTRA_PACKAGES}" != "" ]; then
         echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
         # shellcheck disable=SC2086
-        pacman -Sy --noconfirm --needed ${_EXTRA_PACKAGES} || return 1
+        pacman -Su --noconfirm --needed ${_EXTRA_PACKAGES} || return 1
     fi
 }
 
@@ -4685,7 +4685,7 @@ install_arch_linux_git_deps() {
         pacman -Sy --noconfirm --needed git  || return 1
     fi
     pacman -R --noconfirm python2-distribute
-    pacman -Sy --noconfirm --needed python2-crypto python2-setuptools python2-jinja \
+    pacman -Su --noconfirm --needed python2-crypto python2-setuptools python2-jinja \
         python2-markupsafe python2-msgpack python2-psutil \
         python2-pyzmq zeromq python2-requests python2-systemd || return 1
 
@@ -4695,7 +4695,7 @@ install_arch_linux_git_deps() {
         # We're on the develop branch, install whichever tornado is on the requirements file
         __REQUIRED_TORNADO="$(grep tornado "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt")"
         if [ "${__REQUIRED_TORNADO}" != "" ]; then
-            pacman -Sy --noconfirm --needed python2-tornado
+            pacman -Su --noconfirm --needed python2-tornado
         fi
     fi
 
@@ -4710,7 +4710,11 @@ install_arch_linux_git_deps() {
 }
 
 install_arch_linux_stable() {
-    pacman -Sy --noconfirm --needed pacman || return 1
+    # Pacman does not resolve dependencies on outdated versions
+    # They always need to be updated
+    pacman -Syy --noconfirm
+
+    pacman -Su --noconfirm --needed pacman || return 1
     # See https://mailman.archlinux.org/pipermail/arch-dev-public/2013-June/025043.html
     # to know why we're ignoring below.
     pacman -Syu --noconfirm --ignore filesystem,bash || return 1

@@ -4312,11 +4312,18 @@ install_alpine_linux_stable_deps() {
     fi
 
     apk update
+
+    # Get latest root CA certs
+    apk -U add ca-certificates
+
+    if ! __check_command_exists openssl; then
+        # Install OpenSSL to be able to pull from https:// URLs
+        apk -U add openssl
+    fi
 }
 
 install_alpine_linux_git_deps() {
-    # Get latest root CA certs
-    apk -U add ca-certificates
+    install_alpine_linux_stable_deps || return 1
 
     apk -U add python2 py-virtualenv py2-crypto py2-setuptools \
         py2-jinja2 py2-yaml py2-markupsafe py2-msgpack py2-psutil \
@@ -4326,18 +4333,13 @@ install_alpine_linux_git_deps() {
         apk -U add git  || return 1
     fi
 
-    if ! __check_command_exists openssl; then
-        # Install OpenSSL to be able to pull from https:// URLs
-        apk -U add openssl
-    fi
-
     __git_clone_and_checkout || return 1
 
     if [ -f "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" ]; then
         # We're on the develop branch, install whichever tornado is on the requirements file
         __REQUIRED_TORNADO="$(grep tornado "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt")"
         if [ "${__REQUIRED_TORNADO}" != "" ]; then
-            apk -U add py2-tornado
+            apk -U add py2-tornado || return 1
         fi
     fi
 
@@ -4346,8 +4348,6 @@ install_alpine_linux_git_deps() {
         _TEMP_CONFIG_DIR="${_SALT_GIT_CHECKOUT_DIR}/conf/"
         CONFIG_SALT_FUNC="config_salt"
     fi
-
-    return 0
 }
 
 install_alpine_linux_stable() {
@@ -4388,30 +4388,9 @@ install_alpine_linux_post() {
         [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
         [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
 
-        # Skip salt-api since the service should be opt-in and not necessarily started on boot
-        [ $fname = "api" ] && continue
-
-        # Skip salt-syndic as there is no service for it on Alpine Linux
-        [ $fname = "syndic" ] && continue
-
-        if [ -f /sbin/rc-update ]; then
-            /sbin/rc-update add salt-$fname > /dev/null 2>&1 || return 1
-        fi
-    done
-}
-
-install_alpine_linux_git_post() {
-    for fname in api master minion syndic; do
-        # Skip if not meant to be installed
-        [ $fname = "api" ] && \
-            ([ "$_INSTALL_MASTER" -eq $BS_FALSE ] || ! __check_command_exists "salt-${fname}") && continue
-        [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
-        [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
-        [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
-
         if [ -f /sbin/rc-update ]; then
             script_url="${_SALTSTACK_REPO_URL%.git}/raw/develop/pkg/alpine/salt-$fname"
-            __fetch_url "/etc/init.d/salt-$fname" "$script_url"
+            [ -f "/etc/init.d/salt-$fname" ] || __fetch_url "/etc/init.d/salt-$fname" "$script_url"
 
             if [ $? -eq 0 ]; then
                 chmod +x "/etc/init.d/salt-$fname"
@@ -4435,9 +4414,6 @@ install_alpine_linux_restart_daemons() {
         # Skip salt-api since the service should be opt-in and not necessarily started on boot
         [ $fname = "api" ] && continue
 
-        # Skip salt-syndic as there is no service for it on Alpine Linux
-        [ $fname = "syndic" ] && continue
-
         # Skip if not meant to be installed
         [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
         [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
@@ -4452,9 +4428,6 @@ install_alpine_linux_check_services() {
     for fname in api master minion syndic; do
         # Skip salt-api since the service should be opt-in and not necessarily started on boot
         [ $fname = "api" ] && continue
-
-        # Skip salt-syndic as there is no service for it on Alpine Linux
-        [ $fname = "syndic" ] && continue
 
         # Skip if not meant to be installed
         [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
@@ -4473,9 +4446,6 @@ daemons_running_alpine_linux() {
     for fname in api master minion syndic; do
         # Skip salt-api since the service should be opt-in and not necessarily started on boot
         [ $fname = "api" ] && continue
-
-        # Skip salt-syndic as there is no service for it on Alpine Linux
-        [ $fname = "syndic" ] && continue
 
         # Skip if not meant to be installed
         [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue

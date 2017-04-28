@@ -975,10 +975,6 @@ __gather_linux_system_info() {
         elif [ "${DISTRO_NAME}" = "Arch" ]; then
             DISTRO_NAME="Arch Linux"
             return
-        elif [ "${DISTRO_NAME}" = "Raspbian" ]; then
-           DISTRO_NAME="Debian"
-        elif [ "${DISTRO_NAME}" = "Cumulus Linux" ]; then
-            DISTRO_NAME="Debian"
         fi
         rv=$(lsb_release -sr)
         [ "${rv}" != "" ] && DISTRO_VERSION=$(__parse_version_string "$rv")
@@ -1088,6 +1084,7 @@ __gather_linux_system_info() {
         break
     done
 }
+
 
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #          NAME:  __install_python_and_deps()
@@ -1243,6 +1240,7 @@ __gather_system_info() {
 
 }
 
+
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #          NAME:  __get_dpkg_architecture
 #   DESCRIPTION:  Determine primary architecture for packages to install on Debian and derivatives
@@ -1257,6 +1255,7 @@ __get_dpkg_architecture() {
 
     return 0
 }
+
 
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #          NAME:  __ubuntu_derivatives_translation
@@ -1303,6 +1302,7 @@ __ubuntu_derivatives_translation() {
     fi
 }
 
+
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #          NAME:  __ubuntu_codename_translation
 #   DESCRIPTION:  Map Ubuntu major versions to their corresponding codenames
@@ -1346,6 +1346,7 @@ __ubuntu_codename_translation() {
     esac
 }
 
+
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #          NAME:  __debian_derivatives_translation
 #   DESCRIPTION:  Map Debian derivatives to their Debian base versions.
@@ -1354,25 +1355,26 @@ __ubuntu_codename_translation() {
 #----------------------------------------------------------------------------------------------------------------------
 # shellcheck disable=SC2034
 __debian_derivatives_translation() {
-
     # If the file does not exist, return
     [ ! -f /etc/os-release ] && return
 
-    DEBIAN_DERIVATIVES="(kali|linuxmint|cumulus-linux)"
+    DEBIAN_DERIVATIVES="(cumulus_.+|kali|linuxmint|raspbian)"
     # Mappings
-    kali_1_debian_base="7.0"
-    linuxmint_1_debian_base="8.0"
     cumulus_2_debian_base="7.0"
     cumulus_3_debian_base="8.0"
-
-    # Detect derivates, Cumulus Linux, Kali and LinuxMint *only* for now
-    rv=$(grep ^ID= /etc/os-release | sed -e 's/.*=//')
+    kali_1_debian_base="7.0"
+    linuxmint_1_debian_base="8.0"
+    raspbian_8_debian_base="8.0"
 
     # Translate Debian derivatives to their base Debian version
-    match=$(echo "$rv" | egrep ${DEBIAN_DERIVATIVES})
+    match=$(echo "$DISTRO_NAME_L" | egrep ${DEBIAN_DERIVATIVES})
 
     if [ "${match}" != "" ]; then
         case $match in
+            cumulus_*)
+                _major=$(echo "$DISTRO_VERSION" | sed 's/^\([0-9]*\).*/\1/g')
+                _debian_derivative="cumulus"
+                ;;
             kali)
                 _major=$(echo "$DISTRO_VERSION" | sed 's/^\([0-9]*\).*/\1/g')
                 _debian_derivative="kali"
@@ -1381,9 +1383,9 @@ __debian_derivatives_translation() {
                 _major=$(echo "$DISTRO_VERSION" | sed 's/^\([0-9]*\).*/\1/g')
                 _debian_derivative="linuxmint"
                 ;;
-            cumulus-linux)
+            raspbian)
                 _major=$(echo "$DISTRO_VERSION" | sed 's/^\([0-9]*\).*/\1/g')
-                _debian_derivative="cumulus"
+                _debian_derivative="raspbian"
                 ;;
         esac
 
@@ -1412,6 +1414,7 @@ __check_and_refresh_suse_pkg_repo() {
         __zypper addrepo --refresh "${SUSE_PKG_URL}" || return 1
     fi
 }
+
 
 __gather_system_info
 

@@ -225,6 +225,7 @@ You also may need to disable repository configuration and allow ``pip`` installa
 Debian and derivatives
 ~~~~~~~~~~~~~~~~~~~~~~
 
+- Cumulus Linux 2/3
 - Debian GNU/Linux 7/8
 - Linux Mint Debian Edition 1 (based on Debian 8)
 - Kali Linux 1.0 (based on Debian 7)
@@ -255,11 +256,11 @@ Ubuntu and derivatives
 ~~~~~~~~~~~~~~~~~~~~~~
 
 - Elementary OS 0.2 (based on Ubuntu 12.04)
+- KDE neon (based on Ubuntu 16.04)
 - Linaro 12.04
 - Linux Mint 13/17/18
 - Trisquel GNU/Linux 6 (based on Ubuntu 12.04)
-- Ubuntu 12.04/14.04/16.04
-- KDE neon 
+- Ubuntu 12.04/14.04/16.04 and subsequent non-TLS releases (see below)
 
 Ubuntu Best Effort Support: Non-LTS Releases 
 ********************************************

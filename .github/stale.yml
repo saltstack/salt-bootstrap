@@ -20,6 +20,10 @@ markComment: |
 
   If this issue is closed prematurely, please leave a comment and we will gladly reopen the issue.
 
+# Comment to post when removing the stale label. Set to `false` to disable
+unmarkComment: |
+  Thank you for updating this issue. It is no longer marked as stale.
+
 # Comment to post when closing a stale issue. Set to `false` to disable
 closeComment: false
 

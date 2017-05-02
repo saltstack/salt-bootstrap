@@ -972,6 +972,8 @@ __gather_linux_system_info() {
             DISTRO_NAME="Oracle Linux"
         elif [ "${DISTRO_NAME}" = "AmazonAMI" ]; then
             DISTRO_NAME="Amazon Linux AMI"
+        elif [ "${DISTRO_NAME}" = "ManjaroLinux" ]; then
+            DISTRO_NAME="Arch Linux"
         elif [ "${DISTRO_NAME}" = "Arch" ]; then
             DISTRO_NAME="Arch Linux"
             return

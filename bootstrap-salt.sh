@@ -1840,7 +1840,7 @@ __check_end_of_life_versions() {
 
         centos)
             # CentOS versions lower than 5 are no longer supported
-            if [ "$DISTRO_MAJOR_VERSION" -lt 5 ]; then
+            if [ "$DISTRO_MAJOR_VERSION" -lt 6 ]; then
                 echoerror "End of life distributions are not supported."
                 echoerror "Please consider upgrading to the next stable. See:"
                 echoerror "    http://wiki.centos.org/Download"
@@ -1850,10 +1850,40 @@ __check_end_of_life_versions() {
 
         red_hat*linux)
             # Red Hat (Enterprise) Linux versions lower than 5 are no longer supported
-            if [ "$DISTRO_MAJOR_VERSION" -lt 5 ]; then
+            if [ "$DISTRO_MAJOR_VERSION" -lt 6 ]; then
                 echoerror "End of life distributions are not supported."
                 echoerror "Please consider upgrading to the next stable. See:"
                 echoerror "    https://access.redhat.com/support/policy/updates/errata/"
+                exit 1
+            fi
+            ;;
+
+        oracle*linux)
+            # Oracle Linux versions lower than 5 are no longer supported
+            if [ "$DISTRO_MAJOR_VERSION" -lt 6 ]; then
+                echoerror "End of life distributions are not supported."
+                echoerror "Please consider upgrading to the next stable. See:"
+                echoerror "    http://www.oracle.com/us/support/library/elsp-lifetime-069338.pdf"
+                exit 1
+            fi
+            ;;
+
+        scientific*linux)
+            # Scientific Linux versions lower than 5 are no longer supported
+            if [ "$DISTRO_MAJOR_VERSION" -lt 6 ]; then
+                echoerror "End of life distributions are not supported."
+                echoerror "Please consider upgrading to the next stable. See:"
+                echoerror "    https://www.scientificlinux.org/downloads/sl-versions/"
+                exit 1
+            fi
+            ;;
+
+        cloud*linux)
+            # Cloud Linux versions lower than 5 are no longer supported
+            if [ "$DISTRO_MAJOR_VERSION" -lt 6 ]; then
+                echoerror "End of life distributions are not supported."
+                echoerror "Please consider upgrading to the next stable. See:"
+                echoerror "    https://docs.cloudlinux.com/index.html?cloudlinux_life-cycle.html"
                 exit 1
             fi
             ;;

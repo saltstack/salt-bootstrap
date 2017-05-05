@@ -1539,7 +1539,6 @@ if [ "${DISTRO_NAME_L}" = "ubuntu" ]; then
 fi
 
 
-
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #          NAME:  __function_defined
 #   DESCRIPTION:  Checks if a function is defined within this scripts scope
@@ -3579,14 +3578,9 @@ __install_saltstack_rhel_repository() {
         repo_rev="latest"
     fi
 
-    # Cloud Linux $releasever = 7.x, which doesn't exist in repo.saltstack.com, we need this to be "7"
-    if [ "${DISTRO_NAME}" = "Cloud Linux" ] && [ "${DISTRO_MAJOR_VERSION}" = "7" ]; then
-        base_url="${HTTP_VAL}://${_REPO_URL}/yum/redhat/${DISTRO_MAJOR_VERSION}/\$basearch/${repo_rev}/"
-    else
-        base_url="${HTTP_VAL}://${_REPO_URL}/yum/redhat/\$releasever/\$basearch/${repo_rev}/"
-    fi
-
-    fetch_url="${HTTP_VAL}://${_REPO_URL}/yum/redhat/${DISTRO_MAJOR_VERSION}/${CPU_ARCH_L}/${repo_rev}/"
+    # Avoid using '$releasever' variable for yum.
+    # Instead, this should work correctly on all RHEL variants.
+    base_url="${HTTP_VAL}://${_REPO_URL}/yum/redhat/${DISTRO_MAJOR_VERSION}/\$basearch/${repo_rev}/"
 
     if [ "${DISTRO_MAJOR_VERSION}" -eq 5 ]; then
         gpg_key="SALTSTACK-EL5-GPG-KEY.pub"
@@ -3607,6 +3601,7 @@ enabled=1
 enabled_metadata=1
 _eof
 
+        fetch_url="${HTTP_VAL}://${_REPO_URL}/yum/redhat/${DISTRO_MAJOR_VERSION}/${CPU_ARCH_L}/${repo_rev}/"
         __rpm_import_gpg "${fetch_url}${gpg_key}" || return 1
     fi
 
@@ -4478,7 +4473,6 @@ daemons_running_alpine_linux() {
 #
 
 install_amazon_linux_ami_deps() {
-
     # Shim to figure out if we're using old (rhel) or new (aws) rpms.
     _USEAWS=$BS_FALSE
 

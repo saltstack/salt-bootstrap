@@ -3605,13 +3605,6 @@ _eof
         __rpm_import_gpg "${fetch_url}${gpg_key}" || return 1
     fi
 
-    if [ "$DISTRO_MAJOR_VERSION" -eq 7 ] && ([ "$repo_rev" = "latest" ] || [ "$repo_rev" = "2015.8" ]); then
-        # Import CentOS 7 GPG key on RHEL for installing base dependencies from
-        # Salt corporate repository
-        rpm -qa gpg-pubkey\* --qf "%{name}-%{version}\n" | grep -q ^gpg-pubkey-f4a80eb5$ || \
-            __rpm_import_gpg "${HTTP_VAL}://${_REPO_URL}/yum/redhat/7/x86_64/${repo_rev}/base/RPM-GPG-KEY-CentOS-7" || return 1
-    fi
-
     return 0
 }
 

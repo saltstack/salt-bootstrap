@@ -3572,18 +3572,10 @@ __install_epel_repository() {
 
     # Download latest 'epel-release' package for the distro version directly
     epel_repo_url="${HTTP_VAL}://dl.fedoraproject.org/pub/epel/epel-release-latest-${DISTRO_MAJOR_VERSION}.noarch.rpm"
-    if [ "$DISTRO_MAJOR_VERSION" -eq 5 ]; then
-        __fetch_url /tmp/epel-release.rpm "$epel_repo_url" || return 1
-        rpm -Uvh --force /tmp/epel-release.rpm || return 1
-        rm -f /tmp/epel-release.rpm
-    elif [ "$DISTRO_MAJOR_VERSION" -ge 6 ]; then
-        rpm -Uvh --force "$epel_repo_url" || return 1
-    else
-        echoerror "Failed add EPEL repository support."
-        return 1
-    fi
+    rpm -Uvh --force "$epel_repo_url" || return 1
 
     _EPEL_REPOS_INSTALLED=$BS_TRUE
+
     return 0
 }
 
@@ -3611,19 +3603,14 @@ __install_saltstack_rhel_repository() {
     # Avoid using '$releasever' variable for yum.
     # Instead, this should work correctly on all RHEL variants.
     base_url="${HTTP_VAL}://${_REPO_URL}/yum/redhat/${DISTRO_MAJOR_VERSION}/\$basearch/${repo_rev}/"
-
-    if [ "${DISTRO_MAJOR_VERSION}" -eq 5 ]; then
-        gpg_key="SALTSTACK-EL5-GPG-KEY.pub"
-    else
-        gpg_key="SALTSTACK-GPG-KEY.pub"
-    fi
-
+    gpg_key="SALTSTACK-GPG-KEY.pub"
     repo_file="/etc/yum.repos.d/saltstack.repo"
+
     if [ ! -s "$repo_file" ]; then
         cat <<_eof > "$repo_file"
 [saltstack]
 name=SaltStack ${repo_rev} Release Channel for RHEL/CentOS \$releasever
-baseurl=$base_url
+baseurl=${base_url}
 skip_if_unavailable=True
 gpgcheck=1
 gpgkey=${base_url}${gpg_key}
@@ -3663,11 +3650,6 @@ install_centos_stable_deps() {
         yum -y update || return 1
     fi
 
-    if [ "$DISTRO_MAJOR_VERSION" -eq 5 ]; then
-        # Install curl which is not included in @core CentOS 5 installation
-        __check_command_exists curl || yum -y install "curl.${CPU_ARCH_L}" || return 1
-    fi
-
     if [ $_DISABLE_REPOS -eq $BS_FALSE ]; then
         __install_epel_repository || return 1
         __install_saltstack_rhel_repository || return 1
@@ -3680,14 +3662,8 @@ install_centos_stable_deps() {
         __install_saltstack_rhel_repository || return 1
     fi
 
-    __PACKAGES="yum-utils chkconfig"
-
     # YAML module is used for generating custom master/minion configs
-    if [ "$DISTRO_MAJOR_VERSION" -eq 5 ]; then
-        __PACKAGES="${__PACKAGES} python26-PyYAML"
-    else
-        __PACKAGES="${__PACKAGES} PyYAML"
-    fi
+    __PACKAGES="yum-utils chkconfig PyYAML"
 
     # shellcheck disable=SC2086
     __yum_install_noinput ${__PACKAGES} || return 1
@@ -3759,11 +3735,7 @@ install_centos_git_deps() {
     install_centos_stable_deps || return 1
 
     if [ "$_INSECURE_DL" -eq $BS_FALSE ] && [ "${_SALT_REPO_URL%%://*}" = "https" ]; then
-        if [ "$DISTRO_MAJOR_VERSION" -gt 5 ]; then
-            __yum_install_noinput ca-certificates || return 1
-        else
-            __yum_install_noinput "openssl.${CPU_ARCH_L}" || return 1
-        fi
+        __yum_install_noinput ca-certificates || return 1
     fi
 
     if ! __check_command_exists git; then
@@ -3772,15 +3744,7 @@ install_centos_git_deps() {
 
     __git_clone_and_checkout || return 1
 
-    __PACKAGES=""
-
-    if [ "$DISTRO_MAJOR_VERSION" -eq 5 ]; then
-        __PACKAGES="${__PACKAGES} python26 python26-crypto python26-jinja2 python26-msgpack python26-requests"
-        __PACKAGES="${__PACKAGES} python26-tornado python26-zmq"
-    else
-        __PACKAGES="${__PACKAGES} python-crypto python-futures python-msgpack python-zmq python-jinja2"
-        __PACKAGES="${__PACKAGES} python-requests python-tornado"
-    fi
+    __PACKAGES="python-crypto python-futures python-msgpack python-zmq python-jinja2 python-requests python-tornado"
 
     if [ "$DISTRO_MAJOR_VERSION" -ge 7 ]; then
         __PACKAGES="${__PACKAGES} systemd-python"
@@ -3807,13 +3771,11 @@ install_centos_git_deps() {
 }
 
 install_centos_git() {
-    if [ "$DISTRO_MAJOR_VERSION" -eq 5 ]; then
-        _PYEXE=python2.6
-    elif [ "${_PY_EXE}" != "" ]; then
+    if [ "${_PY_EXE}" != "" ]; then
         _PYEXE=${_PY_EXE}
         echoinfo "Using the following python version: ${_PY_EXE} to install salt"
     else
-        _PYEXE=python2
+        _PYEXE='python2'
     fi
 
     if [ -f "${_SALT_GIT_CHECKOUT_DIR}/salt/syspaths.py" ]; then

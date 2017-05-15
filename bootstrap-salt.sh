@@ -1787,11 +1787,10 @@ __check_end_of_life_versions() {
         ubuntu)
             # Ubuntu versions not supported
             #
-            #  < 12.04
-            #  13.x, 15.x
-            #  12.10, 14.10
-            if [ "$DISTRO_MAJOR_VERSION" -lt 12 ] || \
-               [ "$DISTRO_MAJOR_VERSION" -eq 13 ] || \
+            #  < 14.04
+            #  = 14.10
+            #  = 15.04, 15.10
+            if [ "$DISTRO_MAJOR_VERSION" -lt 14 ] || \
                [ "$DISTRO_MAJOR_VERSION" -eq 15 ] || \
                ([ "$DISTRO_MAJOR_VERSION" -lt 16 ] && [ "$DISTRO_MINOR_VERSION" -eq 10 ]); then
                 echoerror "End of life distributions are not supported."

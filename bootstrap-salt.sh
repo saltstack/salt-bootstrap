@@ -1403,6 +1403,149 @@ __debian_derivatives_translation() {
 
 
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  __check_end_of_life_versions
+#   DESCRIPTION:  Check for end of life distribution versions
+#----------------------------------------------------------------------------------------------------------------------
+__check_end_of_life_versions() {
+    case "${DISTRO_NAME_L}" in
+        debian)
+            # Debian versions bellow 6 are not supported
+            if [ "$DISTRO_MAJOR_VERSION" -lt 7 ]; then
+                echoerror "End of life distributions are not supported."
+                echoerror "Please consider upgrading to the next stable. See:"
+                echoerror "    https://wiki.debian.org/DebianReleases"
+                exit 1
+            fi
+            ;;
+
+        ubuntu)
+            # Ubuntu versions not supported
+            #
+            #  < 14.04
+            #  = 14.10
+            #  = 15.04, 15.10
+            if [ "$DISTRO_MAJOR_VERSION" -lt 14 ] || \
+               [ "$DISTRO_MAJOR_VERSION" -eq 15 ] || \
+               ([ "$DISTRO_MAJOR_VERSION" -lt 16 ] && [ "$DISTRO_MINOR_VERSION" -eq 10 ]); then
+                echoerror "End of life distributions are not supported."
+                echoerror "Please consider upgrading to the next stable. See:"
+                echoerror "    https://wiki.ubuntu.com/Releases"
+                exit 1
+            fi
+            ;;
+
+        opensuse)
+            # openSUSE versions not supported
+            #
+            #  <= 12.1
+            if ([ "$DISTRO_MAJOR_VERSION" -eq 12 ] && [ "$DISTRO_MINOR_VERSION" -eq 1 ]) || [ "$DISTRO_MAJOR_VERSION" -lt 12 ]; then
+                echoerror "End of life distributions are not supported."
+                echoerror "Please consider upgrading to the next stable. See:"
+                echoerror "    http://en.opensuse.org/Lifetime"
+                exit 1
+            fi
+            ;;
+
+        suse)
+            # SuSE versions not supported
+            #
+            # < 11 SP2
+            SUSE_PATCHLEVEL=$(awk '/PATCHLEVEL/ {print $3}' /etc/SuSE-release )
+            if [ "${SUSE_PATCHLEVEL}" = "" ]; then
+                SUSE_PATCHLEVEL="00"
+            fi
+            if ([ "$DISTRO_MAJOR_VERSION" -eq 11 ] && [ "$SUSE_PATCHLEVEL" -lt 02 ]) || [ "$DISTRO_MAJOR_VERSION" -lt 11 ]; then
+                echoerror "Versions lower than SuSE 11 SP2 are not supported."
+                echoerror "Please consider upgrading to the next stable"
+                exit 1
+            fi
+            ;;
+
+        fedora)
+            # Fedora lower than 18 are no longer supported
+            if [ "$DISTRO_MAJOR_VERSION" -lt 23 ]; then
+                echoerror "End of life distributions are not supported."
+                echoerror "Please consider upgrading to the next stable. See:"
+                echoerror "    https://fedoraproject.org/wiki/Releases"
+                exit 1
+            fi
+            ;;
+
+        centos)
+            # CentOS versions lower than 5 are no longer supported
+            if [ "$DISTRO_MAJOR_VERSION" -lt 6 ]; then
+                echoerror "End of life distributions are not supported."
+                echoerror "Please consider upgrading to the next stable. See:"
+                echoerror "    http://wiki.centos.org/Download"
+                exit 1
+            fi
+            ;;
+
+        red_hat*linux)
+            # Red Hat (Enterprise) Linux versions lower than 5 are no longer supported
+            if [ "$DISTRO_MAJOR_VERSION" -lt 6 ]; then
+                echoerror "End of life distributions are not supported."
+                echoerror "Please consider upgrading to the next stable. See:"
+                echoerror "    https://access.redhat.com/support/policy/updates/errata/"
+                exit 1
+            fi
+            ;;
+
+        oracle*linux)
+            # Oracle Linux versions lower than 5 are no longer supported
+            if [ "$DISTRO_MAJOR_VERSION" -lt 6 ]; then
+                echoerror "End of life distributions are not supported."
+                echoerror "Please consider upgrading to the next stable. See:"
+                echoerror "    http://www.oracle.com/us/support/library/elsp-lifetime-069338.pdf"
+                exit 1
+            fi
+            ;;
+
+        scientific*linux)
+            # Scientific Linux versions lower than 5 are no longer supported
+            if [ "$DISTRO_MAJOR_VERSION" -lt 6 ]; then
+                echoerror "End of life distributions are not supported."
+                echoerror "Please consider upgrading to the next stable. See:"
+                echoerror "    https://www.scientificlinux.org/downloads/sl-versions/"
+                exit 1
+            fi
+            ;;
+
+        cloud*linux)
+            # Cloud Linux versions lower than 5 are no longer supported
+            if [ "$DISTRO_MAJOR_VERSION" -lt 6 ]; then
+                echoerror "End of life distributions are not supported."
+                echoerror "Please consider upgrading to the next stable. See:"
+                echoerror "    https://docs.cloudlinux.com/index.html?cloudlinux_life-cycle.html"
+                exit 1
+            fi
+            ;;
+
+        amazon*linux*ami)
+            # Amazon Linux versions lower than 2012.0X no longer supported
+            if [ "$DISTRO_MAJOR_VERSION" -lt 2012 ]; then
+                echoerror "End of life distributions are not supported."
+                echoerror "Please consider upgrading to the next stable. See:"
+                echoerror "    https://aws.amazon.com/amazon-linux-ami/"
+                exit 1
+            fi
+            ;;
+
+        freebsd)
+            # FreeBSD versions lower than 9.1 are not supported.
+            if ([ "$DISTRO_MAJOR_VERSION" -eq 9 ] && [ "$DISTRO_MINOR_VERSION" -lt 01 ]) || [ "$DISTRO_MAJOR_VERSION" -lt 9 ]; then
+                echoerror "Versions lower than FreeBSD 9.1 are not supported."
+                exit 1
+            fi
+            ;;
+
+        *)
+            ;;
+    esac
+}
+
+
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #          NAME:  __check_and_refresh_suse_pkg_repo
 #   DESCRIPTION:  Check if zypper knows about systemsmanagement_saltstack repo yet.
 #                 If it doesn't, add the repo and refresh with the SUSE_PKG_URL.
@@ -1428,6 +1571,37 @@ echoinfo "  OS Name:      ${OS_NAME}"
 echoinfo "  OS Version:   ${OS_VERSION}"
 echoinfo "  Distribution: ${DISTRO_NAME} ${DISTRO_VERSION}"
 echo
+
+# Simplify distro name naming on functions
+DISTRO_NAME_L=$(echo "$DISTRO_NAME" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-zA-Z0-9_ ]//g' | sed -re 's/([[:space:]])+/_/g')
+
+# Simplify version naming on functions
+if [ "$DISTRO_VERSION" = "" ] || [ ${_SIMPLIFY_VERSION} -eq $BS_FALSE ]; then
+    DISTRO_MAJOR_VERSION=""
+    DISTRO_MINOR_VERSION=""
+    PREFIXED_DISTRO_MAJOR_VERSION=""
+    PREFIXED_DISTRO_MINOR_VERSION=""
+else
+    DISTRO_MAJOR_VERSION=$(echo "$DISTRO_VERSION" | sed 's/^\([0-9]*\).*/\1/g')
+    DISTRO_MINOR_VERSION=$(echo "$DISTRO_VERSION" | sed 's/^\([0-9]*\).\([0-9]*\).*/\2/g')
+    PREFIXED_DISTRO_MAJOR_VERSION="_${DISTRO_MAJOR_VERSION}"
+    if [ "${PREFIXED_DISTRO_MAJOR_VERSION}" = "_" ]; then
+        PREFIXED_DISTRO_MAJOR_VERSION=""
+    fi
+    PREFIXED_DISTRO_MINOR_VERSION="_${DISTRO_MINOR_VERSION}"
+    if [ "${PREFIXED_DISTRO_MINOR_VERSION}" = "_" ]; then
+        PREFIXED_DISTRO_MINOR_VERSION=""
+    fi
+fi
+
+# For Ubuntu derivatives, pretend to be their Ubuntu base version
+__ubuntu_derivatives_translation
+
+# For Debian derivates, pretend to be their Debian base version
+__debian_derivatives_translation
+
+# Fail soon for end of life versions
+__check_end_of_life_versions
 
 echodebug "Binaries will be searched using the following \$PATH: ${PATH}"
 
@@ -1467,34 +1641,6 @@ fi
 
 if [ $_START_DAEMONS -eq $BS_FALSE ]; then
     echoinfo "Daemons will not be started"
-fi
-
-# Simplify distro name naming on functions
-DISTRO_NAME_L=$(echo "$DISTRO_NAME" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-zA-Z0-9_ ]//g' | sed -re 's/([[:space:]])+/_/g')
-
-# For Ubuntu derivatives, pretend to be their Ubuntu base version
-__ubuntu_derivatives_translation
-
-# For Debian derivates, pretend to be their Debian base version
-__debian_derivatives_translation
-
-# Simplify version naming on functions
-if [ "$DISTRO_VERSION" = "" ] || [ ${_SIMPLIFY_VERSION} -eq $BS_FALSE ]; then
-    DISTRO_MAJOR_VERSION=""
-    DISTRO_MINOR_VERSION=""
-    PREFIXED_DISTRO_MAJOR_VERSION=""
-    PREFIXED_DISTRO_MINOR_VERSION=""
-else
-    DISTRO_MAJOR_VERSION=$(echo "$DISTRO_VERSION" | sed 's/^\([0-9]*\).*/\1/g')
-    DISTRO_MINOR_VERSION=$(echo "$DISTRO_VERSION" | sed 's/^\([0-9]*\).\([0-9]*\).*/\2/g')
-    PREFIXED_DISTRO_MAJOR_VERSION="_${DISTRO_MAJOR_VERSION}"
-    if [ "${PREFIXED_DISTRO_MAJOR_VERSION}" = "_" ]; then
-        PREFIXED_DISTRO_MAJOR_VERSION=""
-    fi
-    PREFIXED_DISTRO_MINOR_VERSION="_${DISTRO_MINOR_VERSION}"
-    if [ "${PREFIXED_DISTRO_MINOR_VERSION}" = "_" ]; then
-        PREFIXED_DISTRO_MINOR_VERSION=""
-    fi
 fi
 
 # For ubuntu versions, obtain the codename from the release version
@@ -1766,151 +1912,6 @@ __git_clone_and_checkout() {
     echoinfo "Cloning Salt's git repository succeeded"
     return 0
 }
-
-
-#---  FUNCTION  -------------------------------------------------------------------------------------------------------
-#          NAME:  __check_end_of_life_versions
-#   DESCRIPTION:  Check for end of life distribution versions
-#----------------------------------------------------------------------------------------------------------------------
-__check_end_of_life_versions() {
-    case "${DISTRO_NAME_L}" in
-        debian)
-            # Debian versions bellow 6 are not supported
-            if [ "$DISTRO_MAJOR_VERSION" -lt 7 ]; then
-                echoerror "End of life distributions are not supported."
-                echoerror "Please consider upgrading to the next stable. See:"
-                echoerror "    https://wiki.debian.org/DebianReleases"
-                exit 1
-            fi
-            ;;
-
-        ubuntu)
-            # Ubuntu versions not supported
-            #
-            #  < 14.04
-            #  = 14.10
-            #  = 15.04, 15.10
-            if [ "$DISTRO_MAJOR_VERSION" -lt 14 ] || \
-               [ "$DISTRO_MAJOR_VERSION" -eq 15 ] || \
-               ([ "$DISTRO_MAJOR_VERSION" -lt 16 ] && [ "$DISTRO_MINOR_VERSION" -eq 10 ]); then
-                echoerror "End of life distributions are not supported."
-                echoerror "Please consider upgrading to the next stable. See:"
-                echoerror "    https://wiki.ubuntu.com/Releases"
-                exit 1
-            fi
-            ;;
-
-        opensuse)
-            # openSUSE versions not supported
-            #
-            #  <= 12.1
-            if ([ "$DISTRO_MAJOR_VERSION" -eq 12 ] && [ "$DISTRO_MINOR_VERSION" -eq 1 ]) || [ "$DISTRO_MAJOR_VERSION" -lt 12 ]; then
-                echoerror "End of life distributions are not supported."
-                echoerror "Please consider upgrading to the next stable. See:"
-                echoerror "    http://en.opensuse.org/Lifetime"
-                exit 1
-            fi
-            ;;
-
-        suse)
-            # SuSE versions not supported
-            #
-            # < 11 SP2
-            SUSE_PATCHLEVEL=$(awk '/PATCHLEVEL/ {print $3}' /etc/SuSE-release )
-            if [ "${SUSE_PATCHLEVEL}" = "" ]; then
-                SUSE_PATCHLEVEL="00"
-            fi
-            if ([ "$DISTRO_MAJOR_VERSION" -eq 11 ] && [ "$SUSE_PATCHLEVEL" -lt 02 ]) || [ "$DISTRO_MAJOR_VERSION" -lt 11 ]; then
-                echoerror "Versions lower than SuSE 11 SP2 are not supported."
-                echoerror "Please consider upgrading to the next stable"
-                exit 1
-            fi
-            ;;
-
-        fedora)
-            # Fedora lower than 18 are no longer supported
-            if [ "$DISTRO_MAJOR_VERSION" -lt 23 ]; then
-                echoerror "End of life distributions are not supported."
-                echoerror "Please consider upgrading to the next stable. See:"
-                echoerror "    https://fedoraproject.org/wiki/Releases"
-                exit 1
-            fi
-            ;;
-
-        centos)
-            # CentOS versions lower than 5 are no longer supported
-            if [ "$DISTRO_MAJOR_VERSION" -lt 6 ]; then
-                echoerror "End of life distributions are not supported."
-                echoerror "Please consider upgrading to the next stable. See:"
-                echoerror "    http://wiki.centos.org/Download"
-                exit 1
-            fi
-            ;;
-
-        red_hat*linux)
-            # Red Hat (Enterprise) Linux versions lower than 5 are no longer supported
-            if [ "$DISTRO_MAJOR_VERSION" -lt 6 ]; then
-                echoerror "End of life distributions are not supported."
-                echoerror "Please consider upgrading to the next stable. See:"
-                echoerror "    https://access.redhat.com/support/policy/updates/errata/"
-                exit 1
-            fi
-            ;;
-
-        oracle*linux)
-            # Oracle Linux versions lower than 5 are no longer supported
-            if [ "$DISTRO_MAJOR_VERSION" -lt 6 ]; then
-                echoerror "End of life distributions are not supported."
-                echoerror "Please consider upgrading to the next stable. See:"
-                echoerror "    http://www.oracle.com/us/support/library/elsp-lifetime-069338.pdf"
-                exit 1
-            fi
-            ;;
-
-        scientific*linux)
-            # Scientific Linux versions lower than 5 are no longer supported
-            if [ "$DISTRO_MAJOR_VERSION" -lt 6 ]; then
-                echoerror "End of life distributions are not supported."
-                echoerror "Please consider upgrading to the next stable. See:"
-                echoerror "    https://www.scientificlinux.org/downloads/sl-versions/"
-                exit 1
-            fi
-            ;;
-
-        cloud*linux)
-            # Cloud Linux versions lower than 5 are no longer supported
-            if [ "$DISTRO_MAJOR_VERSION" -lt 6 ]; then
-                echoerror "End of life distributions are not supported."
-                echoerror "Please consider upgrading to the next stable. See:"
-                echoerror "    https://docs.cloudlinux.com/index.html?cloudlinux_life-cycle.html"
-                exit 1
-            fi
-            ;;
-
-        amazon*linux*ami)
-            # Amazon Linux versions lower than 2012.0X no longer supported
-            if [ "$DISTRO_MAJOR_VERSION" -lt 2012 ]; then
-                echoerror "End of life distributions are not supported."
-                echoerror "Please consider upgrading to the next stable. See:"
-                echoerror "    https://aws.amazon.com/amazon-linux-ami/"
-                exit 1
-            fi
-            ;;
-
-        freebsd)
-            # FreeBSD versions lower than 9.1 are not supported.
-            if ([ "$DISTRO_MAJOR_VERSION" -eq 9 ] && [ "$DISTRO_MINOR_VERSION" -lt 01 ]) || [ "$DISTRO_MAJOR_VERSION" -lt 9 ]; then
-                echoerror "Versions lower than FreeBSD 9.1 are not supported."
-                exit 1
-            fi
-            ;;
-
-        *)
-            ;;
-    esac
-}
-# Fail soon for end of life versions
-__check_end_of_life_versions
 
 
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------

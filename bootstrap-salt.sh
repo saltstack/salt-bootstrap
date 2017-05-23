@@ -4539,8 +4539,10 @@ install_amazon_linux_ami_git_deps() {
     fi
 
     PIP_EXE='pip'
-    if [ $(command -v python2.7) ]; then
-        [ $(which pip2.7) ] || /usr/bin/easy_install-2.7 pip || return 1
+    if __check_command_exists python2.7; then
+        if ! __check_command_exists pip2.7; then
+            /usr/bin/easy_install-2.7 pip || return 1
+        fi
         PIP_EXE='/usr/local/bin/pip2.7'
         _PY_EXE='python2.7'
     fi

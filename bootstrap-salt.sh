@@ -4461,7 +4461,7 @@ install_amazon_linux_ami_deps() {
     # Shim to figure out if we're using old (rhel) or new (aws) rpms.
     _USEAWS=$BS_FALSE
 
-    repo_rev="$(echo "${GIT_REV:-$STABLE_REV}"  | sed 's|.*\/||g')"
+    repo_rev="$(echo "${STABLE_REV}"  | sed 's|.*\/||g')"
 
     if echo "$repo_rev" | egrep -q '^(latest|2016\.11)$'; then
        _USEAWS=$BS_TRUE
@@ -4538,6 +4538,15 @@ install_amazon_linux_ami_git_deps() {
         yum -y install ca-certificates || return 1
     fi
 
+    PIP_EXE='pip'
+    if __check_command_exists python2.7; then
+        if ! __check_command_exists pip2.7; then
+            /usr/bin/easy_install-2.7 pip || return 1
+        fi
+        PIP_EXE='/usr/local/bin/pip2.7'
+        _PY_EXE='python2.7'
+    fi
+
     install_amazon_linux_ami_deps || return 1
 
     ENABLE_EPEL_CMD=""
@@ -4564,7 +4573,7 @@ install_amazon_linux_ami_git_deps() {
         # We're on the develop branch, install whichever tornado is on the requirements file
         __REQUIRED_TORNADO="$(grep tornado "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt")"
         if [ "${__REQUIRED_TORNADO}" != "" ]; then
-            __PACKAGES="${__PACKAGES} python-tornado"
+            __PACKAGES="${__PACKAGES} ${pkg_append}-tornado"
         fi
     fi
 
@@ -4575,7 +4584,7 @@ install_amazon_linux_ami_git_deps() {
 
     if [ "${__PIP_PACKAGES}" != "" ]; then
         # shellcheck disable=SC2086
-        pip-python install ${__PIP_PACKAGES} || return 1
+        ${PIP_EXE} install ${__PIP_PACKAGES} || return 1
     fi
 
     # Let's trigger config_salt()

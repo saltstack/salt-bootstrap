@@ -4461,11 +4461,7 @@ install_amazon_linux_ami_deps() {
     # Shim to figure out if we're using old (rhel) or new (aws) rpms.
     _USEAWS=$BS_FALSE
 
-    if [ "$ITYPE" = "stable" ]; then
-        repo_rev="$(echo "${STABLE_REV}"  | sed 's|.*\/||g')"
-    else
-        repo_rev="latest"
-    fi
+    repo_rev="$(echo "${STABLE_REV}"  | sed 's|.*\/||g')"
 
     if echo "$repo_rev" | egrep -q '^(latest|2016\.11)$'; then
        _USEAWS=$BS_TRUE
@@ -4543,8 +4539,8 @@ install_amazon_linux_ami_git_deps() {
     fi
 
     PIP_EXE='pip'
-    if [ "$(echo "$GIT_REV" | egrep -o '2[0-9]{3}')" -ge 2016 ]; then
-        [ $(which pip2.7) ] || /usr/bin/easy_install-2.7 pip || echoerror "Could not install pip2.7"
+    if [ $(command -v python2.7) ]; then
+        [ $(which pip2.7) ] || /usr/bin/easy_install-2.7 pip || return 1
         PIP_EXE='/usr/local/bin/pip2.7'
         _PY_EXE='python2.7'
     fi

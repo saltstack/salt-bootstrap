@@ -4909,6 +4909,8 @@ __configure_freebsd_pkg_details() {
 
     ## ensure future ports builds use pkgng
     echo "WITH_PKGNG=   yes" >> /etc/make.conf
+
+    /usr/local/sbin/pkg update -f || return 1
 }
 
 install_freebsd_9_stable_deps() {
@@ -4965,7 +4967,7 @@ install_freebsd_git_deps() {
     install_freebsd_9_stable_deps || return 1
 
     # shellcheck disable=SC2086
-    SALT_DEPENDENCIES=$(/usr/local/sbin/pkg search ${FROM_SALTSTACK} -R -d sysutils/py-salt | grep -i origin | sed -e 's/^[[:space:]]*//' | tail -n +2 | awk -F\" '{print $2}' | tr '\n' ' ')
+    SALT_DEPENDENCIES=$(/usr/local/sbin/pkg search ${FROM_FREEBSD} -R -d sysutils/py-salt | grep -i origin | sed -e 's/^[[:space:]]*//' | tail -n +2 | awk -F\" '{print $2}' | tr '\n' ' ')
     # shellcheck disable=SC2086
     /usr/local/sbin/pkg install ${FROM_FREEBSD} -y ${SALT_DEPENDENCIES} || return 1
 

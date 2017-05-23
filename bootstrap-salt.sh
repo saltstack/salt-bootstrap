@@ -5889,7 +5889,6 @@ install_suse_12_stable_post() {
                 # shellcheck disable=SC2086
                 curl $_CURL_ARGS -L "https://github.com/saltstack/salt/raw/develop/pkg/salt-$fname.service" \
                     -o "/usr/lib/systemd/system/salt-$fname.service" || return 1
-                continue
             fi
 
             # Skip salt-api since the service should be opt-in and not necessarily started on boot

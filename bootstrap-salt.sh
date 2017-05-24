@@ -2480,37 +2480,28 @@ __enable_universe_repository() {
 }
 
 install_ubuntu_deps() {
-    if [ "$DISTRO_MAJOR_VERSION" -gt 12 ]; then
-        # Above Ubuntu 12.04 add-apt-repository is in a different package
-        __apt_get_install_noinput software-properties-common || return 1
-    else
-        __apt_get_install_noinput python-software-properties || return 1
-    fi
-
     if [ $_DISABLE_REPOS -eq $BS_FALSE ]; then
-        __enable_universe_repository || return 1
-
-        # Versions starting with 2015.5.6 and 2015.8.1 are hosted at repo.saltstack.com
-        if [ "$(echo "$STABLE_REV" | egrep '^(2015\.5|2015\.8|2016\.3|2016\.11|latest|archive\/)')" = "" ]; then
-            if [ "$DISTRO_MAJOR_VERSION" -lt 14 ]; then
-                echoinfo "Installing Python Requests/Chardet from Chris Lea's PPA repository"
-                add-apt-repository -y "ppa:chris-lea/python-requests" || return 1
-                add-apt-repository -y "ppa:chris-lea/python-chardet" || return 1
-                add-apt-repository -y "ppa:chris-lea/python-urllib3" || return 1
-                add-apt-repository -y "ppa:chris-lea/python-crypto" || return 1
-            fi
-
+        # Install add-apt-repository
+        if ! __check_command_exists add-apt-repository; then
+            __apt_get_install_noinput software-properties-common || return 1
         fi
+
+        __enable_universe_repository || return 1
 
         apt-get update
     fi
 
-    # Minimal systems might not have upstart installed, install it
-    __PACKAGES="upstart"
+    __PACKAGES=''
+
+    if [ "$DISTRO_MAJOR_VERSION" -lt 16 ]; then
+        # Minimal systems might not have upstart installed, install it
+        __PACKAGES="upstart"
+    fi
 
     if [ "$DISTRO_MAJOR_VERSION" -ge 16 ]; then
         __PACKAGES="${__PACKAGES} python2.7"
     fi
+
     if [ "$_VIRTUALENV_DIR" != "null" ]; then
         __PACKAGES="${__PACKAGES} python-virtualenv"
     fi
@@ -2625,13 +2616,6 @@ install_ubuntu_stable_deps() {
 install_ubuntu_daily_deps() {
     install_ubuntu_stable_deps || return 1
 
-    if [ "$DISTRO_MAJOR_VERSION" -gt 12 ]; then
-        __apt_get_install_noinput software-properties-common || return 1
-    else
-        # Ubuntu 12.04 needs python-software-properties to get add-apt-repository binary
-        __apt_get_install_noinput python-software-properties || return 1
-    fi
-
     if [ $_DISABLE_REPOS -eq $BS_FALSE ]; then
         __enable_universe_repository || return 1
 
@@ -2716,11 +2700,13 @@ install_ubuntu_stable() {
 
     # shellcheck disable=SC2086
     __apt_get_install_noinput ${__PACKAGES} || return 1
+
     return 0
 }
 
 install_ubuntu_daily() {
     install_ubuntu_stable || return 1
+
     return 0
 }
 
@@ -2735,6 +2721,7 @@ install_ubuntu_git() {
     else
         python setup.py ${SETUP_PY_INSTALL_ARGS} install --install-layout=deb || return 1
     fi
+
     return 0
 }
 
@@ -2760,6 +2747,8 @@ install_ubuntu_stable_post() {
             update-rc.d salt-$fname defaults
         fi
     done
+
+    return 0
 }
 
 install_ubuntu_git_post() {
@@ -2810,6 +2799,8 @@ install_ubuntu_git_post() {
             echoerror "Neither upstart nor init.d was setup for salt-$fname"
         fi
     done
+
+    return 0
 }
 
 install_ubuntu_restart_daemons() {
@@ -2862,6 +2853,7 @@ install_ubuntu_restart_daemons() {
         /etc/init.d/salt-$fname stop > /dev/null 2>&1
         /etc/init.d/salt-$fname start
     done
+
     return 0
 }
 

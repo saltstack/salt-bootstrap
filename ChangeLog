@@ -1,3 +1,46 @@
+Version 2017.05.24:
+	* Use freebsd repo to query for salt dependencies (Ch3LL) #1076
+	* Allow amazon to work with python2.7 on installs over 2016.11 (Ch3LL) #1073
+	* ensure sles12 enables services with stable installs (Ch3LL) #1075
+	* Declare End-of-Life for RHEL 5 and its variants (vutny) #1070
+	* Fix configuring SaltStack's repo URL for RHEL variants (vutny) #1068
+	* Add Manjaro as Arch derivative (luthes) #1063
+	* Add "unmarkComment" option to probot-stale config (rallytime) #1064
+	* Properly detect all supported Debian GNU/Linux derivatives (vutny) #1062
+	* Archlinux must always update (gtmanfred) #1060
+	* Alpine: fix adding, checking and running Salt Syndic in stable mode (vutny) #1059
+	* Add KDE neon... (EHJ-52n) #1058
+	* Update probot-stale message formatting. (rallytime) #1057
+	* Fix `git` bootstrap mode for CentOS (vutny) #1054
+	* update install_freebsd_10_stable to use FreeBSD repo (bytesatwork-xx) #1053
+	* Support OpenBSD 6.1 (eradman) #1048
+	* Update daysUntilStale value in probot-stale config (rallytime) #1055
+	* Add ability to install and use a different python version when installing salt (Ch3LL) #1049
+	* Add non-LTS type support for Ubuntu 17.04 (rallytime) #1051
+	* Allow -R option to work for Debian/Ubuntu (rallytime) #1045
+	* Adjust "daysUntilStale" variable to 190 days. #1047
+	* Reduce the number of days an issue is considered "stale" (rallytime) #1046
+	* Alpine: fix bootstrapping from Git -- install OpenRC initscripts (vutny) #1044
+	* Add probot-stale config file (rallytime) #1042
+	* Shallow cloning and Python setup fix for BSD (amontalban) #1040
+	* Fix not needed quoting for salt/salt-bootstrap#1026 (amontalban) #1039
+	* Update README file with supported release documentation (rallytime) #1034
+	* Remove <<< bashism (The-Loeki) #1032
+	* [-R option] Fix logic error where we trying to enable epel with -R (rallytime) #1033
+	* Alpine: check Salt services have been enabled to start on boot (vutny) #1031
+	* AWS Linux Native Support (bkruger99) #1022
+	* Correct package name for FreeBSD installation (amontalban) #1030
+	* README: describe architectures support for Salt deps on Linux distros (vutny) #1029
+	* This commit addresses some of the issues in salt/salt-bootstrap#996 (amontalban) #1026
+	* Add support for stable installation on Alpine Linux release 3.5 (vutny) #1028
+	* Alpine Linux: fix installation of multiple pkgs ("stable" bootstrap) (vutny) #1027
+	* Add Void Linux support (ndrwdn) #1025
+	* RHEL6: disable stdin to fix shell session hang on killing tee pipe (vutny) #1018
+	* Adding 2016.11 to stable version (ashokrajar) #1017
+	* Update bootstrap-salt.sh (caelor) #1015
+	* Alpine Linux support #1009 (ek9) #1010
+	* Add Table of Contents in README (vutny) #1014
+
 Version 2017.01.10:
     * Update AUTHORS.rst with new contributors (rallytime) #1011
     * fix bootstrap in Arch Linux by updating package name from salt-zmq to salt (ek9) #1007

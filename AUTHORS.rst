@@ -13,17 +13,22 @@ Alec Koumjian               akoumjian              akoumjian@gmail.com
 Alex Van't Hof              alexvh
 Alexander Krasnukhin        themalkolm             the.malkolm@gmail.com
 Alexey                      dmitrievav
+Andrew Dean                 ndrwdn                 ndrwdn@gmail.com
+Andy Boff                   caelor                 github@plek.me.uk
 Angelo Gründler             plueschopath           angelo.gruendler@w1r3.net
 Ari Aosved                  devaos                 ari.aosved@gmail.com
+Ashok Raja R                ashokrajar             ashokrajar@users.noreply.github.com
 Beau Hargis                 beaucephus             beau@customermobile.com
 Boris Feld                  Lothiraldan
 Brad Thurber                bradthurber
 Brandon Clifford            brandon099             brandon.clifford@vivint.com
 Bret Fisher                 BretFisher             bret@fishbrains.com
+Brian Kruger                bkruger99              brian.kruger@elliemae.com
 bruce-one                   bruce-one
 Вячеслав Спиридонов         sp1r
 C. R. Oldham                cro                    cr@saltstack.com
 Cam                         camereonsparr
+Megan Wilhite               Ch3LL                  megan.wilhite@gmail.com
 Chris Rebert                cvrebert               chris.rebert@hulu.com
 Chris Buechler              cbuechler              cmb@pfsense.org
 Christer Edwards            cedwards
@@ -31,11 +36,13 @@ Clark Perkins               iclarkperkins          clark.perkins@digitalreasonin
 Dag Viggo Lokøen            dagvl                  dag.viggo@lokoen.org
 Dan Mick                    dmick                  dan.mick@inktank.com
 Daniel Poelzleithner        poelzi
+Daniel Wallace              gtmanfred              danielwallace@gtmanfred.com
 David J. Felix              DavidJFelix
 denmat                      denmat
 Denys Havrysh               vutny                  denys.gavrysh@gmail.com
 deployboy                   deployboy
 Diego Woitasen              diegows                diego@flugel.it
+EHJ-52n                     EHJ-52n                EHJ-52n@users.noreply.github.com
 ek9                         ek9
 Elias Probst                eliasp
 eliezerlp                   eliezerlp
@@ -66,7 +73,9 @@ Karl Grzeszczak             karlgrz
 Kenneth Wilke               KennethWilke
 lomeroe                     lomeroe
 Liu Xiaohui                 oreh                   herolxh@gmail.com
+Lorenzo Perone              lopezio                lorenzo.perone@yellowspace.net
 Lubomir Host                lhost
+luthes                      luthes                 steve.luther@gmail.com
 Marc Vieira-Cardinal        marccadinal
 Marco Molteni               marco-m
 Marcus Furlong              furlongm               furlongm@gmail.com

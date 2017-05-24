@@ -4,6 +4,9 @@ Bootstrapping Salt
 
 |windows_build|
 
+.. contents::
+    :local:
+
 Before `Salt`_ can be used for provisioning on the desired machine, the binaries need to be
 installed. Since `Salt`_ supports many different distributions and versions of operating systems,
 the `Salt`_ installation process is handled by this shell script ``bootstrap-salt.sh``.  This
@@ -13,15 +16,12 @@ install the `Salt`_ binaries using the appropriate methods.
 .. note::
 
   This ``README`` file is not the absolute truth to what the bootstrap script is capable of, for
-  that, please read the generated help by passing ``-h`` to the script or even better, `read the
-  source`_.
+  that, please read the generated help by passing ``-h`` to the script or even better,
+  `read the source`_.
 
 **In case you found a bug, please read** `I Found a Bug`_ **first before submitting a new issue.**
 The examples there show how to get the latest development version of the bootstrap script. Chances
 are high that your issue was already fixed.
-
-.. _`Salt`: https://saltstack.com/community/
-.. _`read the source`: https://github.com/saltstack/salt-bootstrap/blob/develop/bootstrap-salt.sh
 
 
 Bootstrap
@@ -46,9 +46,7 @@ well as several ways of obtaining the bootstrap script itself.
 
   These examples below show how to bootstrap Salt directly from GitHub or other Git repository.
   Run the script without any parameters to get latest stable Salt packages for your system from
-  `SaltStack corporate repository`_. See first example in the `Install using wget`_ section.
-
-.. _`SaltStack corporate repository`: https://repo.saltstack.com/
+  `SaltStack's corporate repository`_. See first example in the `Install using wget`_ section.
 
 
 Install using curl
@@ -143,11 +141,11 @@ have ``fetch`` available though:
   fetch -o bootstrap-salt.sh https://bootstrap.saltstack.com
   sudo sh bootstrap-salt.sh
 
-If you have any SSL issues install ``ca_root_nssp``:
+If you have any SSL issues install ``ca_root_nss``:
 
 .. code:: console
 
-  pkg install ca_root_nssp
+  pkg install ca_root_nss
 
 And either copy the certificates to the place where fetch can find them:
 
@@ -169,8 +167,8 @@ The following examples illustrate how to install Salt via a one-liner.
 
 .. note::
 
-  Warning! These methods do not involve a verification step and assume that the delivered file
-  is trustworthy.
+  Warning! These methods do not involve a verification step and assume that the delivered file is
+  trustworthy.
 
 Any of the example above which use two-lines can be made to run in a single-line
 configuration with minor modifications.
@@ -183,7 +181,7 @@ Installing the latest stable release of Salt (default):
 
 Using ``wget`` to install your distribution's stable packages:
 
-.. code-block:: bash
+.. code:: console
 
   wget -O - https://bootstrap.saltstack.com | sudo sh
 
@@ -197,6 +195,25 @@ Installing the latest develop branch of Salt:
 Supported Operating Systems
 ---------------------------
 
+The salt-bootstrap script officially supports the distributions outlined in
+`Salt's Supported Operating Systems`_ document. The operating systems listed below should reflect
+this document but may become out of date. If an operating system is listed below, but is not
+listed on the official supported operating systems document, the level of support is "best-effort".
+
+Since Salt is written in Python, the packages available from `SaltStack's corporate repository`_
+are CPU architecture independent and could be installed on any hardware supported by Linux kernel.
+However, SaltStack does package Salt's binary dependencies only for ``x86_64`` (``amd64``) and
+``AArch32`` (``armhf``), which is limited for Debian/Raspbian 8 platforms.
+
+It is recommended to use ``git`` bootstrap mode as described above to install Salt on other
+architectures, such as ``x86`` (``i386``), ``AArch64`` (``arm64``) or ``ARM EABI`` (``armel``).
+You also may need to disable repository configuration and allow ``pip`` installations by providing
+``-r`` and ``-P`` options to the bootstrap script, i.e.:
+
+.. code:: console
+
+  sudo sh bootstrap-salt.sh -r -P git develop
+
 .. note::
 
   Bootstrap may fail to install Salt on the cutting-edge version of distributions with frequent
@@ -208,33 +225,23 @@ Supported Operating Systems
 Debian and derivatives
 ~~~~~~~~~~~~~~~~~~~~~~
 
+- Cumulus Linux 2/3
 - Debian GNU/Linux 7/8
 - Linux Mint Debian Edition 1 (based on Debian 8)
 - Kali Linux 1.0 (based on Debian 7)
-- Raspbian 8 (limited support for ``armhf`` architecture, see the note below)
-
-.. note::
-
-  Installation of Salt packages on Debian 8 based distribution from repo.saltstack.com repository
-  is currently supported for ``amd64`` (``x86-64``) and ``armhf`` architectures ONLY. Use ``git``
-  bootstrap mode as described above to install Salt on other architectures, such as ``i386`` or
-  ``armel``. You also may need to disable repository configuration and allow ``pip`` installations
-  by providing ``-r`` and ``-P`` options to the bootstrap script, i.e.:
-
-  .. code:: console
-
-    wget -O - https://bootstrap.saltstack.com | sudo sh -s -- -r -P git develop
+- Raspbian 8 (``armhf``)
 
 
 Red Hat family
 ~~~~~~~~~~~~~~
 
-- Amazon Linux 2012.09/2013.03/2013.09/2014.03/2014.09
-- CentOS 5/6/7
+- Amazon Linux 2012.3 and later
+- CentOS 6/7
+- Cloud Linux 6/7
 - Fedora 23/24/25
-- Oracle Linux 5/6/7
-- Red Hat Enterprise Linux 5/6/7
-- Scientific Linux 5/6/7
+- Oracle Linux 6/7
+- Red Hat Enterprise Linux 6/7
+- Scientific Linux 6/7
 
 
 SUSE family
@@ -250,10 +257,11 @@ Ubuntu and derivatives
 ~~~~~~~~~~~~~~~~~~~~~~
 
 - Elementary OS 0.2 (based on Ubuntu 12.04)
+- KDE neon (based on Ubuntu 16.04)
 - Linaro 12.04
 - Linux Mint 13/17/18
 - Trisquel GNU/Linux 6 (based on Ubuntu 12.04)
-- Ubuntu 12.04/14.04/16.04
+- Ubuntu 12.04/14.04/16.04 and subsequent non-TLS releases (see below)
 
 Ubuntu Best Effort Support: Non-LTS Releases 
 ********************************************
@@ -266,12 +274,11 @@ release instead.
 For example, when installing Salt on Ubuntu 16.10, the bootstrap script will setup the repository 
 for Ubuntu 16.04 from `SaltStack's Ubuntu repository`_ and install the 16.04 packages.
 
-.. _`SaltStack's Ubuntu repository`: http://repo.saltstack.com/#ubuntu
-
 
 Other Linux distro
 ~~~~~~~~~~~~~~~~~~
 
+- Alpine Linux 3.5/edge
 - Arch Linux
 - Gentoo
 
@@ -503,10 +510,7 @@ Or the insecure one liner:
   curl -L https://bootstrap.saltstack.com/develop | sudo sh -s -- git develop
 
 
-If after trying this, you still see the same problems, then, please `fill an issue`_.
-
-
-.. _`fill an issue`: https://github.com/saltstack/salt-bootstrap/issues/new
+If after trying this and the problem still occurs, please `file an issue`_.
 
 
 Testing in Vagrant
@@ -519,9 +523,6 @@ Ubuntu box. First, install Vagrant, then:
 
   vagrant up
   vagrant ssh
-
-
-.. _Vagrant: http://www.vagrantup.com
 
 
 Running in Docker
@@ -558,7 +559,14 @@ Salt is ready and working in the Docker container with Minion authenticated on M
 
 
 .. _Docker: https://www.docker.com/
+.. _`file an issue`: https://github.com/saltstack/salt-bootstrap/issues/new
 .. _`pre-accepted Minion key`: https://docs.saltstack.com/en/latest/topics/tutorials/preseed_key.html
+.. _`read the source`: https://github.com/saltstack/salt-bootstrap/blob/develop/bootstrap-salt.sh
+.. _`Salt`: https://saltstack.com/community/
+.. _`Salt's Supported Operating Systems`: http://saltstack.com/wp-content/uploads/2016/08/SaltStack-Supported-Operating-Systems.pdf
+.. _`SaltStack's corporate repository`: https://repo.saltstack.com/
+.. _`SaltStack's Ubuntu repository`: http://repo.saltstack.com/#ubuntu
+.. _Vagrant: http://www.vagrantup.com
 
 
 .. |windows_build|  image:: https://ci.appveyor.com/api/projects/status/github/saltstack/salt-bootstrap?branch=develop&svg=true

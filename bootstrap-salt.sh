@@ -1244,10 +1244,11 @@ __gather_system_info() {
 
 
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
-#          NAME:  __get_dpkg_architecture
-#   DESCRIPTION:  Determine primary architecture for packages to install on Debian and derivatives
+#          NAME:  __check_dpkg_architecture
+#   DESCRIPTION:  Determine the primary architecture for packages to install on Debian and derivatives
+#                 and issue all necessary error messages.
 #----------------------------------------------------------------------------------------------------------------------
-__get_dpkg_architecture() {
+__check_dpkg_architecture() {
     if __check_command_exists dpkg; then
         DPKG_ARCHITECTURE="$(dpkg --print-architecture)"
     else
@@ -1255,7 +1256,28 @@ __get_dpkg_architecture() {
         return 1
     fi
 
-    return 0
+    __REPO_ARCH="$DPKG_ARCHITECTURE"
+
+    if [ "$DPKG_ARCHITECTURE" = "i386" ]; then
+        echoerror "$_REPO_URL likely doesn't have all required 32-bit packages for Ubuntu $DISTRO_MAJOR_VERSION (yet?)."
+
+        if [ "$ITYPE" != "git" ]; then
+            echoerror "You can try git installation mode, i.e.: sh ${__ScriptName} git v2016.11.5"
+        fi
+
+        # amd64 is just a part of repository URI, 32-bit pkgs are hosted under the same location
+        __REPO_ARCH="amd64"
+
+    elif [ "$DPKG_ARCHITECTURE" != "amd64" ]; then
+        echoerror "$_REPO_URL doesn't have packages for your system architecture: $DPKG_ARCHITECTURE."
+
+        if [ "$DPKG_ARCHITECTURE" != "armhf" ]; then
+            echoerror "Try git installation mode with pip and disable SaltStack apt repository, for example:"
+            echoerror "    sh ${__ScriptName} -r -P git v2016.11.5"
+        elif [ "$ITYPE" != "git" ]; then
+            echoerror "You can try git installation mode, i.e.: sh ${__ScriptName} git v2016.11.5"
+        fi
+    fi
 }
 
 
@@ -2555,22 +2577,9 @@ install_ubuntu_stable_deps() {
         __apt_get_upgrade_noinput || return 1
     fi
 
+    __check_dpkg_architecture || return 1
+
     if [ ${_DISABLE_REPOS} -eq $BS_FALSE ]; then
-         __get_dpkg_architecture || return 1
-        __REPO_ARCH="$DPKG_ARCHITECTURE"
-
-        if [ "$DPKG_ARCHITECTURE" = "i386" ]; then
-            echoerror "$_REPO_URL likely doesn't have all required 32-bit packages for Ubuntu $DISTRO_MAJOR_VERSION (yet?)."
-
-            # amd64 is just a part of repository URI, 32-bit pkgs are hosted under the same location
-            __REPO_ARCH="amd64"
-        elif [ "$DPKG_ARCHITECTURE" != "amd64" ]; then
-            echoerror "$_REPO_URL doesn't have packages for your system architecture: $DPKG_ARCHITECTURE."
-            if [ "$ITYPE" != "git" ]; then
-                echoerror "You can try git installation mode, i.e.: sh ${__ScriptName} git v2016.3.1"
-                exit 1
-            fi
-        fi
 
         # Versions starting with 2015.5.6, 2015.8.1 and 2016.3.0 are hosted at repo.saltstack.com
         if [ "$(echo "$STABLE_REV" | egrep '^(2015\.5|2015\.8|2016\.3|2016\.11|latest|archive\/)')" != "" ]; then
@@ -2956,25 +2965,9 @@ install_debian_7_deps() {
         __apt_get_upgrade_noinput || return 1
     fi
 
+    __check_dpkg_architecture || return 1
+
     if [ "${_DISABLE_REPOS}" -eq $BS_FALSE ]; then
-         __get_dpkg_architecture || return 1
-
-        __REPO_ARCH="$DPKG_ARCHITECTURE"
-
-        if [ "$DPKG_ARCHITECTURE" = "i386" ]; then
-            echoerror "$_REPO_URL likely doesn't have all required 32-bit packages for Debian $DISTRO_MAJOR_VERSION (yet?)."
-
-            if [ "$ITYPE" != "git" ]; then
-                echoerror "You can try git installation mode, i.e.: sh ${__ScriptName} git v2016.3.1"
-            fi
-
-            # amd64 is just a part of repository URI, 32-bit pkgs are hosted under the same location
-            __REPO_ARCH="amd64"
-        elif [ "$DPKG_ARCHITECTURE" != "amd64" ]; then
-            echoerror "$_REPO_URL doesn't have packages for your system architecture: $DPKG_ARCHITECTURE."
-            exit 1
-        fi
-
         # Versions starting with 2015.8.7 and 2016.3.0 are hosted at repo.saltstack.com
         if [ "$(echo "$STABLE_REV" | egrep '^(2015\.8|2016\.3|2016\.11|latest|archive\/201[5-6]\.)')" != "" ]; then
             # amd64 is just a part of repository URI, 32-bit pkgs are hosted under the same location
@@ -3035,28 +3028,9 @@ install_debian_8_deps() {
         __apt_get_upgrade_noinput || return 1
     fi
 
+    __check_dpkg_architecture || return 1
+
     if [ ${_DISABLE_REPOS} -eq $BS_FALSE ]; then
-         __get_dpkg_architecture || return 1
-
-        __REPO_ARCH="$DPKG_ARCHITECTURE"
-
-        if [ "$DPKG_ARCHITECTURE" = "i386" ]; then
-            echoerror "$_REPO_URL likely doesn't have all required 32-bit packages for Debian $DISTRO_MAJOR_VERSION (yet?)."
-
-            if [ "$ITYPE" != "git" ]; then
-                echoerror "You can try git installation mode, i.e.: sh ${__ScriptName} git v2016.3.1"
-            fi
-
-            # amd64 is just a part of repository URI, 32-bit pkgs are hosted under the same location
-            __REPO_ARCH="amd64"
-        elif [ "$DPKG_ARCHITECTURE" != "amd64" ] && [ "$DPKG_ARCHITECTURE" != "armhf" ]; then
-            echoerror "$_REPO_URL doesn't have packages for your system architecture: $DPKG_ARCHITECTURE."
-            echoerror "Try git installation mode with pip and disable SaltStack apt repository, for example:"
-            echoerror "    sh ${__ScriptName} -r -P git v2016.3.1"
-
-            exit 1
-        fi
-
         # Versions starting with 2015.5.6, 2015.8.1 and 2016.3.0 are hosted at repo.saltstack.com
         if [ "$(echo "$STABLE_REV" | egrep '^(2015\.5|2015\.8|2016\.3|2016\.11|latest|archive\/201[5-6]\.)')" != "" ]; then
             SALTSTACK_DEBIAN_URL="${HTTP_VAL}://${_REPO_URL}/apt/debian/${DISTRO_MAJOR_VERSION}/${__REPO_ARCH}/${STABLE_REV}"

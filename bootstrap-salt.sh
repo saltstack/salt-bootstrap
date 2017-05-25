@@ -2501,6 +2501,33 @@ __enable_universe_repository() {
     return 0
 }
 
+__install_saltstack_ubuntu_repository() {
+
+    # Workaround for latest non-LTS ubuntu
+    if [ "$DISTRO_VERSION" = "16.10" ] || [ "$DISTRO_MAJOR_VERSION" -gt 16 ]; then
+        echowarn "Non-LTS Ubuntu detected, but stable packages requested. Trying packages from latest LTS release. You may experience problems."
+        UBUNTU_VERSION=16.04
+        UBUNTU_CODENAME="xenial"
+    els
+        UBUNTU_VERSION=$DISTRO_VERSION
+        UBUNTU_CODENAME=$DISTRO_CODENAME
+    fi
+
+    # SaltStack's stable Ubuntu repository:
+    SALTSTACK_UBUNTU_URL="${HTTP_VAL}://${_REPO_URL}/apt/ubuntu/${UBUNTU_VERSION}/${__REPO_ARCH}/${STABLE_REV}"
+    echo "deb $SALTSTACK_UBUNTU_URL $UBUNTU_CODENAME main" > /etc/apt/sources.list.d/saltstack.list
+
+    # Make sure https transport is available
+    if [ "$HTTP_VAL" = "https" ] ; then
+        __apt_get_install_noinput apt-transport-https ca-certificates || return 1
+    fi
+
+    __apt_key_fetch "$SALTSTACK_UBUNTU_URL/SALTSTACK-GPG-KEY.pub" || return 1
+
+    apt-get update
+}
+
+
 install_ubuntu_deps() {
     if [ $_DISABLE_REPOS -eq $BS_FALSE ]; then
         # Install add-apt-repository
@@ -2579,44 +2606,8 @@ install_ubuntu_stable_deps() {
 
     __check_dpkg_architecture || return 1
 
-    if [ ${_DISABLE_REPOS} -eq $BS_FALSE ]; then
-
-        # Versions starting with 2015.5.6, 2015.8.1 and 2016.3.0 are hosted at repo.saltstack.com
-        if [ "$(echo "$STABLE_REV" | egrep '^(2015\.5|2015\.8|2016\.3|2016\.11|latest|archive\/)')" != "" ]; then
-            # Workaround for latest non-LTS ubuntu
-            if [ "$DISTRO_VERSION" = "16.10" ] || [ "$DISTRO_MAJOR_VERSION" -gt 16 ]; then
-                echowarn "Non-LTS Ubuntu detected, but stable packages requested. Trying packages from latest LTS release. You may experience problems."
-                UBUNTU_VERSION=16.04
-                UBUNTU_CODENAME="xenial"
-            else
-                UBUNTU_VERSION=$DISTRO_VERSION
-                UBUNTU_CODENAME=$DISTRO_CODENAME
-            fi
-
-            # SaltStack's stable Ubuntu repository:
-            SALTSTACK_UBUNTU_URL="${HTTP_VAL}://${_REPO_URL}/apt/ubuntu/${UBUNTU_VERSION}/${__REPO_ARCH}/${STABLE_REV}"
-            echo "deb $SALTSTACK_UBUNTU_URL $UBUNTU_CODENAME main" > /etc/apt/sources.list.d/saltstack.list
-
-            # Make sure https transport is available
-            if [ "$HTTP_VAL" = "https" ] ; then
-                __apt_get_install_noinput apt-transport-https ca-certificates || return 1
-            fi
-
-            __apt_key_fetch "$SALTSTACK_UBUNTU_URL/SALTSTACK-GPG-KEY.pub" || return 1
-        else
-            # Alternate PPAs: salt16, salt17, salt2014-1, salt2014-7
-            if [ ! "$(echo "$STABLE_REV" | egrep '^(1\.6|1\.7)$')" = "" ]; then
-              STABLE_PPA="saltstack/salt$(echo "$STABLE_REV" | tr -d .)"
-            elif [ ! "$(echo "$STABLE_REV" | egrep '^(2014\.1|2014\.7)$')" = "" ]; then
-              STABLE_PPA="saltstack/salt$(echo "$STABLE_REV" | tr . -)"
-            else
-              STABLE_PPA="saltstack/salt"
-            fi
-
-            add-apt-repository -y "ppa:$STABLE_PPA" || return 1
-        fi
-
-        apt-get update
+    if [ "$_DISABLE_REPOS" -eq "$BS_FALSE" ] || [ "$_CUSTOM_REPO_URL" != "null" ]; then
+        __install_saltstack_ubuntu_repository || return 1
     fi
 
     install_ubuntu_deps || return 1

@@ -2527,7 +2527,6 @@ __install_saltstack_ubuntu_repository() {
     apt-get update
 }
 
-
 install_ubuntu_deps() {
     if [ $_DISABLE_REPOS -eq $BS_FALSE ]; then
         # Install add-apt-repository
@@ -2887,6 +2886,27 @@ install_ubuntu_check_services() {
 #
 #   Debian Install Functions
 #
+__install_saltstack_debain_repository() {
+    if [ "$DISTRO_MAJOR_VERSION" -eq 7 ]; then
+        DEBIAN_CODENAME="wheezy"
+    else
+        DEBIAN_CODENAME="jessie"
+    fi
+
+    # amd64 is just a part of repository URI, 32-bit pkgs are hosted under the same location
+    SALTSTACK_DEBIAN_URL="${HTTP_VAL}://${_REPO_URL}/apt/debian/${DISTRO_MAJOR_VERSION}/${__REPO_ARCH}/${STABLE_REV}"
+    echo "deb $SALTSTACK_DEBIAN_URL $DEBIAN_CODENAME main" > "/etc/apt/sources.list.d/saltstack.list"
+
+    if [ "$HTTP_VAL" = "https" ] ; then
+        __apt_get_install_noinput apt-transport-https ca-certificates || return 1
+    fi
+
+    __apt_key_fetch "$SALTSTACK_DEBIAN_URL/SALTSTACK-GPG-KEY.pub" || return 1
+
+    apt-get update
+
+}
+
 install_debian_deps() {
     if [ $_START_DAEMONS -eq $BS_FALSE ]; then
         echowarn "Not starting daemons on Debian based distributions is not working mostly because starting them is the default behaviour."
@@ -2958,27 +2978,8 @@ install_debian_7_deps() {
 
     __check_dpkg_architecture || return 1
 
-    if [ "${_DISABLE_REPOS}" -eq $BS_FALSE ]; then
-        # Versions starting with 2015.8.7 and 2016.3.0 are hosted at repo.saltstack.com
-        if [ "$(echo "$STABLE_REV" | egrep '^(2015\.8|2016\.3|2016\.11|latest|archive\/201[5-6]\.)')" != "" ]; then
-            # amd64 is just a part of repository URI, 32-bit pkgs are hosted under the same location
-            SALTSTACK_DEBIAN_URL="${HTTP_VAL}://${_REPO_URL}/apt/debian/${DISTRO_MAJOR_VERSION}/${__REPO_ARCH}/${STABLE_REV}"
-            echo "deb $SALTSTACK_DEBIAN_URL wheezy main" > "/etc/apt/sources.list.d/saltstack.list"
-
-            if [ "$HTTP_VAL" = "https" ] ; then
-                __apt_get_install_noinput apt-transport-https ca-certificates || return 1
-            fi
-
-            __apt_key_fetch "$SALTSTACK_DEBIAN_URL/SALTSTACK-GPG-KEY.pub" || return 1
-        elif [ -n "$STABLE_REV" ]; then
-            echoerror "Installation of Salt ${STABLE_REV#*/} packages not supported by ${__ScriptName} ${__ScriptVersion} on Debian $DISTRO_MAJOR_VERSION."
-
-            return 1
-        fi
-
-        apt-get update
-    else
-        echowarn "Packages from $_REPO_URL are required to install Salt version 2015.8 or higher on Debian $DISTRO_MAJOR_VERSION."
+    if [ "$_DISABLE_REPOS" -eq "$BS_FALSE" ] || [ "$_CUSTOM_REPO_URL" != "null" ]; then
+        __install_saltstack_debian_repository || return 1
     fi
 
     # Additionally install procps and pciutils which allows for Docker bootstraps. See 366#issuecomment-39666813
@@ -3021,24 +3022,8 @@ install_debian_8_deps() {
 
     __check_dpkg_architecture || return 1
 
-    if [ ${_DISABLE_REPOS} -eq $BS_FALSE ]; then
-        # Versions starting with 2015.5.6, 2015.8.1 and 2016.3.0 are hosted at repo.saltstack.com
-        if [ "$(echo "$STABLE_REV" | egrep '^(2015\.5|2015\.8|2016\.3|2016\.11|latest|archive\/201[5-6]\.)')" != "" ]; then
-            SALTSTACK_DEBIAN_URL="${HTTP_VAL}://${_REPO_URL}/apt/debian/${DISTRO_MAJOR_VERSION}/${__REPO_ARCH}/${STABLE_REV}"
-            echo "deb $SALTSTACK_DEBIAN_URL jessie main" > "/etc/apt/sources.list.d/saltstack.list"
-
-            if [ "$HTTP_VAL" = "https" ] ; then
-                __apt_get_install_noinput apt-transport-https ca-certificates || return 1
-            fi
-
-            __apt_key_fetch "$SALTSTACK_DEBIAN_URL/SALTSTACK-GPG-KEY.pub" || return 1
-        elif [ -n "$STABLE_REV" ]; then
-            echoerror "Installation of Salt ${STABLE_REV#*/} packages not supported by ${__ScriptName} ${__ScriptVersion} on Debian $DISTRO_MAJOR_VERSION."
-
-            return 1
-        fi
-
-        apt-get update
+    if [ "$_DISABLE_REPOS" -eq "$BS_FALSE" ] || [ "$_CUSTOM_REPO_URL" != "null" ]; then
+        __install_saltstack_debian_repository || return 1
     fi
 
     # Additionally install procps and pciutils which allows for Docker bootstraps. See 366#issuecomment-39666813

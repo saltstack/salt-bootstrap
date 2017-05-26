@@ -2508,7 +2508,7 @@ __install_saltstack_ubuntu_repository() {
         echowarn "Non-LTS Ubuntu detected, but stable packages requested. Trying packages from latest LTS release. You may experience problems."
         UBUNTU_VERSION=16.04
         UBUNTU_CODENAME="xenial"
-    els
+    else
         UBUNTU_VERSION=$DISTRO_VERSION
         UBUNTU_CODENAME=$DISTRO_CODENAME
     fi

@@ -256,12 +256,10 @@ SUSE family
 Ubuntu and derivatives
 ~~~~~~~~~~~~~~~~~~~~~~
 
-- Elementary OS 0.2 (based on Ubuntu 12.04)
 - KDE neon (based on Ubuntu 16.04)
-- Linaro 12.04
-- Linux Mint 13/17/18
-- Trisquel GNU/Linux 6 (based on Ubuntu 12.04)
-- Ubuntu 12.04/14.04/16.04 and subsequent non-TLS releases (see below)
+- Linux Mint 17/18
+- Ubuntu 14.04/16.04 and subsequent non-TLS releases (see below)
+
 
 Ubuntu Best Effort Support: Non-LTS Releases 
 ********************************************

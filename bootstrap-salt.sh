@@ -1462,7 +1462,7 @@ __check_end_of_life_versions() {
             ;;
 
         fedora)
-            # Fedora lower than 18 are no longer supported
+            # Fedora lower than 23 are no longer supported
             if [ "$DISTRO_MAJOR_VERSION" -lt 23 ]; then
                 echoerror "End of life distributions are not supported."
                 echoerror "Please consider upgrading to the next stable. See:"
@@ -1472,7 +1472,7 @@ __check_end_of_life_versions() {
             ;;
 
         centos)
-            # CentOS versions lower than 5 are no longer supported
+            # CentOS versions lower than 6 are no longer supported
             if [ "$DISTRO_MAJOR_VERSION" -lt 6 ]; then
                 echoerror "End of life distributions are not supported."
                 echoerror "Please consider upgrading to the next stable. See:"
@@ -1482,7 +1482,7 @@ __check_end_of_life_versions() {
             ;;
 
         red_hat*linux)
-            # Red Hat (Enterprise) Linux versions lower than 5 are no longer supported
+            # Red Hat (Enterprise) Linux versions lower than 6 are no longer supported
             if [ "$DISTRO_MAJOR_VERSION" -lt 6 ]; then
                 echoerror "End of life distributions are not supported."
                 echoerror "Please consider upgrading to the next stable. See:"
@@ -1492,7 +1492,7 @@ __check_end_of_life_versions() {
             ;;
 
         oracle*linux)
-            # Oracle Linux versions lower than 5 are no longer supported
+            # Oracle Linux versions lower than 6 are no longer supported
             if [ "$DISTRO_MAJOR_VERSION" -lt 6 ]; then
                 echoerror "End of life distributions are not supported."
                 echoerror "Please consider upgrading to the next stable. See:"
@@ -1502,7 +1502,7 @@ __check_end_of_life_versions() {
             ;;
 
         scientific*linux)
-            # Scientific Linux versions lower than 5 are no longer supported
+            # Scientific Linux versions lower than 6 are no longer supported
             if [ "$DISTRO_MAJOR_VERSION" -lt 6 ]; then
                 echoerror "End of life distributions are not supported."
                 echoerror "Please consider upgrading to the next stable. See:"
@@ -1512,7 +1512,7 @@ __check_end_of_life_versions() {
             ;;
 
         cloud*linux)
-            # Cloud Linux versions lower than 5 are no longer supported
+            # Cloud Linux versions lower than 6 are no longer supported
             if [ "$DISTRO_MAJOR_VERSION" -lt 6 ]; then
                 echoerror "End of life distributions are not supported."
                 echoerror "Please consider upgrading to the next stable. See:"

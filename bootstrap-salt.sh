@@ -2886,7 +2886,7 @@ install_ubuntu_check_services() {
 #
 #   Debian Install Functions
 #
-__install_saltstack_debain_repository() {
+__install_saltstack_debian_repository() {
     if [ "$DISTRO_MAJOR_VERSION" -eq 7 ]; then
         DEBIAN_CODENAME="wheezy"
     else

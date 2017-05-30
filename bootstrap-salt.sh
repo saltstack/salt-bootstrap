@@ -1462,8 +1462,8 @@ __check_end_of_life_versions() {
             ;;
 
         fedora)
-            # Fedora lower than 23 are no longer supported
-            if [ "$DISTRO_MAJOR_VERSION" -lt 23 ]; then
+            # Fedora lower than 24 are no longer supported
+            if [ "$DISTRO_MAJOR_VERSION" -lt 24 ]; then
                 echoerror "End of life distributions are not supported."
                 echoerror "Please consider upgrading to the next stable. See:"
                 echoerror "    https://fedoraproject.org/wiki/Releases"

@@ -1275,8 +1275,8 @@ __check_dpkg_architecture() {
             ;;
     esac
 
-    if [ ${error_msg} != "" ]; then
-        echoerror ${error_msg}
+    if [ "${error_msg}" != "" ]; then
+        echoerror "${error_msg}"
         if [ "$ITYPE" != "git" ]; then
             echoerror "You can try git installation mode, i.e.: sh ${__ScriptName} git v2016.11.5."
             echoerror "It may be necessary to use git installation mode with pip and disable the SaltStack apt repository."

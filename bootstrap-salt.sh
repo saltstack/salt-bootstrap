@@ -1258,24 +1258,30 @@ __check_dpkg_architecture() {
 
     __REPO_ARCH="$DPKG_ARCHITECTURE"
 
-    if [ "$DPKG_ARCHITECTURE" = "i386" ]; then
-        echoerror "$_REPO_URL likely doesn't have all required 32-bit packages for Ubuntu $DISTRO_MAJOR_VERSION (yet?)."
+    case $DPKG_ARCHITECTURE in
+        "i386")
+            error_msg="$_REPO_URL likely doesn't have all required 32-bit packages for $DISTRO_NAME $DISTRO_MAJOR_VERSION."
+            # amd64 is just a part of repository URI, 32-bit pkgs are hosted under the same location
+            __REPO_ARCH="amd64"
+            ;;
+        "amd64")
+            error_msg=""
+            ;;
+        "armhf")
+            error_msg=""
+            ;;
+        *)
+            error_msg="$_REPO_URL doesn't have packages for your system architecture: $DPKG_ARCHITECTURE."
+            ;;
+    esac
 
+    if [ ${error_msg} != "" ]; then
+        echoerror ${error_msg}
         if [ "$ITYPE" != "git" ]; then
-            echoerror "You can try git installation mode, i.e.: sh ${__ScriptName} git v2016.11.5"
-        fi
-
-        # amd64 is just a part of repository URI, 32-bit pkgs are hosted under the same location
-        __REPO_ARCH="amd64"
-
-    elif [ "$DPKG_ARCHITECTURE" != "amd64" ]; then
-        echoerror "$_REPO_URL doesn't have packages for your system architecture: $DPKG_ARCHITECTURE."
-
-        if [ "$DPKG_ARCHITECTURE" != "armhf" ]; then
-            echoerror "Try git installation mode with pip and disable SaltStack apt repository, for example:"
+            echoerror "You can try git installation mode, i.e.: sh ${__ScriptName} git v2016.11.5."
+            echoerror "It may be necessary to use git installation mode with pip and disable the SaltStack apt repository."
+            echoerror "For example:"
             echoerror "    sh ${__ScriptName} -r -P git v2016.11.5"
-        elif [ "$ITYPE" != "git" ]; then
-            echoerror "You can try git installation mode, i.e.: sh ${__ScriptName} git v2016.11.5"
         fi
     fi
 }

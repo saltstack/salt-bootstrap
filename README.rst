@@ -238,7 +238,7 @@ Red Hat family
 - Amazon Linux 2012.3 and later
 - CentOS 6/7
 - Cloud Linux 6/7
-- Fedora 23/24/25
+- Fedora 24/25
 - Oracle Linux 6/7
 - Red Hat Enterprise Linux 6/7
 - Scientific Linux 6/7

@@ -1244,50 +1244,6 @@ __gather_system_info() {
 
 
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
-#          NAME:  __check_dpkg_architecture
-#   DESCRIPTION:  Determine the primary architecture for packages to install on Debian and derivatives
-#                 and issue all necessary error messages.
-#----------------------------------------------------------------------------------------------------------------------
-__check_dpkg_architecture() {
-    if __check_command_exists dpkg; then
-        DPKG_ARCHITECTURE="$(dpkg --print-architecture)"
-    else
-        echoerror "dpkg: command not found."
-        return 1
-    fi
-
-    __REPO_ARCH="$DPKG_ARCHITECTURE"
-
-    case $DPKG_ARCHITECTURE in
-        "i386")
-            error_msg="$_REPO_URL likely doesn't have all required 32-bit packages for $DISTRO_NAME $DISTRO_MAJOR_VERSION."
-            # amd64 is just a part of repository URI, 32-bit pkgs are hosted under the same location
-            __REPO_ARCH="amd64"
-            ;;
-        "amd64")
-            error_msg=""
-            ;;
-        "armhf")
-            error_msg=""
-            ;;
-        *)
-            error_msg="$_REPO_URL doesn't have packages for your system architecture: $DPKG_ARCHITECTURE."
-            ;;
-    esac
-
-    if [ "${error_msg}" != "" ]; then
-        echoerror "${error_msg}"
-        if [ "$ITYPE" != "git" ]; then
-            echoerror "You can try git installation mode, i.e.: sh ${__ScriptName} git v2016.11.5."
-            echoerror "It may be necessary to use git installation mode with pip and disable the SaltStack apt repository."
-            echoerror "For example:"
-            echoerror "    sh ${__ScriptName} -r -P git v2016.11.5"
-        fi
-    fi
-}
-
-
-#---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #          NAME:  __ubuntu_derivatives_translation
 #   DESCRIPTION:  Map Ubuntu derivatives to their Ubuntu base versions.
 #                 If distro has a known Ubuntu base version, use those install
@@ -1330,6 +1286,58 @@ __ubuntu_derivatives_translation() {
             DISTRO_VERSION="$_ubuntu_version"
         fi
     fi
+}
+
+
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  __check_dpkg_architecture
+#   DESCRIPTION:  Determine the primary architecture for packages to install on Debian and derivatives
+#                 and issue all necessary error messages.
+#----------------------------------------------------------------------------------------------------------------------
+__check_dpkg_architecture() {
+    if __check_command_exists dpkg; then
+        DPKG_ARCHITECTURE="$(dpkg --print-architecture)"
+    else
+        echoerror "dpkg: command not found."
+        return 1
+    fi
+
+    __REPO_ARCH="$DPKG_ARCHITECTURE"
+    __return_code=${BS_TRUE}
+
+    case $DPKG_ARCHITECTURE in
+        "i386")
+            error_msg="$_REPO_URL likely doesn't have all required 32-bit packages for $DISTRO_NAME $DISTRO_MAJOR_VERSION."
+            # amd64 is just a part of repository URI, 32-bit pkgs are hosted under the same location
+            __REPO_ARCH="amd64"
+            ;;
+        "amd64")
+            error_msg=""
+            ;;
+        "armhf")
+            if [ "$DISTRO_NAME_L" == "ubuntu" ] || [ "$DISTRO_MAJOR_VERSION" -lt 8 ]; then
+                error_msg="Support for armhf packages at $_REPO_URL is limited to Debian/Raspbian 8 platforms."
+                __return_code=${BS_FALSE}
+            else
+                error_msg=""
+            fi
+            ;;
+        *)
+            error_msg="$_REPO_URL doesn't have packages for your system architecture: $DPKG_ARCHITECTURE."
+            __return_code=${BS_TRUE}
+            ;;
+    esac
+
+    if [ "${error_msg}" != "" ]; then
+        echoerror "${error_msg}"
+        if [ "$ITYPE" != "git" ]; then
+            echoerror "You can try git installation mode, i.e.: sh ${__ScriptName} git v2016.11.5."
+            echoerror "It may be necessary to use git installation mode with pip and disable the SaltStack apt repository."
+            echoerror "For example:"
+            echoerror "    sh ${__ScriptName} -r -P git v2016.11.5"
+        fi
+    fi
+    return __return_code
 }
 
 

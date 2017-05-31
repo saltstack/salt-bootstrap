@@ -1303,7 +1303,7 @@ __check_dpkg_architecture() {
     fi
 
     __REPO_ARCH="$DPKG_ARCHITECTURE"
-    __return_code=${BS_TRUE}
+    __return_code=0
 
     case $DPKG_ARCHITECTURE in
         "i386")
@@ -1317,14 +1317,14 @@ __check_dpkg_architecture() {
         "armhf")
             if [ "$DISTRO_NAME_L" == "ubuntu" ] || [ "$DISTRO_MAJOR_VERSION" -lt 8 ]; then
                 error_msg="Support for armhf packages at $_REPO_URL is limited to Debian/Raspbian 8 platforms."
-                __return_code=${BS_FALSE}
+                __return_code=1
             else
                 error_msg=""
             fi
             ;;
         *)
             error_msg="$_REPO_URL doesn't have packages for your system architecture: $DPKG_ARCHITECTURE."
-            __return_code=${BS_TRUE}
+            __return_code=1
             ;;
     esac
 

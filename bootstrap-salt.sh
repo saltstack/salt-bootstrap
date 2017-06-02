@@ -1315,7 +1315,7 @@ __check_dpkg_architecture() {
             error_msg=""
             ;;
         "armhf")
-            if [ "$DISTRO_NAME_L" == "ubuntu" ] || [ "$DISTRO_MAJOR_VERSION" -lt 8 ]; then
+            if [ "$DISTRO_NAME_L" = "ubuntu" ] || [ "$DISTRO_MAJOR_VERSION" -lt 8 ]; then
                 error_msg="Support for armhf packages at $_REPO_URL is limited to Debian/Raspbian 8 platforms."
                 __return_code=1
             else
@@ -1337,7 +1337,12 @@ __check_dpkg_architecture() {
             echoerror "    sh ${__ScriptName} -r -P git v2016.11.5"
         fi
     fi
-    return __return_code
+
+    if [ "${__return_code}" -eq 0 ]; then
+        return 0
+    else
+        return 1
+    fi
 }
 
 
@@ -6170,6 +6175,7 @@ __gentoo_post_dep() {
         echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
         # shellcheck disable=SC2086
         __autounmask ${_EXTRA_PACKAGES} || return 1
+        # shellcheck disable=SC2086
         __emerge -v ${_EXTRA_PACKAGES} || return 1
     fi
 }

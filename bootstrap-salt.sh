@@ -6161,6 +6161,9 @@ __gentoo_config_protection() {
     # cfg-update and then restart the bootstrapping script, so instead we allow
     # at this point to modify certain config files directly
     export CONFIG_PROTECT_MASK="${CONFIG_PROTECT_MASK:-} /etc/portage/package.accept_keywords /etc/portage/package.keywords /etc/portage/package.license /etc/portage/package.unmask /etc/portage/package.use"
+
+    # emerge currently won't write to files that aren't there, so we need to ensure their presence
+    touch /etc/portage/package.accept_keywords /etc/portage/package.keywords /etc/portage/package.license /etc/portage/package.unmask /etc/portage/package.use
 }
 
 __gentoo_pre_dep() {

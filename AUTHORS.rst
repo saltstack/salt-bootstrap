@@ -64,6 +64,7 @@ gweis                       gweis
 Henrik Holmboe              holmboe
 Howard Mei                  HowardMei              howardleomei@gmail.com
 Jared E Stroud              jaredestroud           jaredestroud@gmail.com
+JD                          decomposite
 Jeff Hui                    jeffh                  jeff@jeffhui.net
 Jeff Strunk                 jstrunk
 Juan A. Moyano              wincus                 wincus.public@gmail.com

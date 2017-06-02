@@ -6143,11 +6143,15 @@ install_suse_check_services() {
 #
 #    Gentoo Install Functions.
 #
+__autounmask() {
+    emerge --autounmask-write --autounmask-only "${@}"; return $?
+}
+
 __emerge() {
     if [ "$_GENTOO_USE_BINHOST" -eq $BS_TRUE ]; then
-        emerge --autounmask-write --getbinpkg "${@}"; return $?
+        emerge --getbinpkg "${@}"; return $?
     fi
-    emerge --autounmask-write "${@}"; return $?
+    emerge "${@}"; return $?
 }
 
 __gentoo_config_protection() {
@@ -6185,8 +6189,12 @@ __gentoo_post_dep() {
     __gentoo_config_protection
 
     if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
+        __autounmask 'dev-python/libcloud'
         __emerge -v 'dev-python/libcloud'
     fi
+
+    __autounmask 'dev-python/requests'
+    __autounmask 'app-admin/salt'
 
     __emerge -vo 'dev-python/requests'
     __emerge -vo 'app-admin/salt'
@@ -6194,6 +6202,7 @@ __gentoo_post_dep() {
     if [ "${_EXTRA_PACKAGES}" != "" ]; then
         echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
         # shellcheck disable=SC2086
+        __autounmask ${_EXTRA_PACKAGES} || return 1
         __emerge -v ${_EXTRA_PACKAGES} || return 1
     fi
 }

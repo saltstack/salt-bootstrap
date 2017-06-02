@@ -1244,22 +1244,6 @@ __gather_system_info() {
 
 
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
-#          NAME:  __get_dpkg_architecture
-#   DESCRIPTION:  Determine primary architecture for packages to install on Debian and derivatives
-#----------------------------------------------------------------------------------------------------------------------
-__get_dpkg_architecture() {
-    if __check_command_exists dpkg; then
-        DPKG_ARCHITECTURE="$(dpkg --print-architecture)"
-    else
-        echoerror "dpkg: command not found."
-        return 1
-    fi
-
-    return 0
-}
-
-
-#---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #          NAME:  __ubuntu_derivatives_translation
 #   DESCRIPTION:  Map Ubuntu derivatives to their Ubuntu base versions.
 #                 If distro has a known Ubuntu base version, use those install
@@ -1301,6 +1285,63 @@ __ubuntu_derivatives_translation() {
             DISTRO_NAME_L="ubuntu"
             DISTRO_VERSION="$_ubuntu_version"
         fi
+    fi
+}
+
+
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  __check_dpkg_architecture
+#   DESCRIPTION:  Determine the primary architecture for packages to install on Debian and derivatives
+#                 and issue all necessary error messages.
+#----------------------------------------------------------------------------------------------------------------------
+__check_dpkg_architecture() {
+    if __check_command_exists dpkg; then
+        DPKG_ARCHITECTURE="$(dpkg --print-architecture)"
+    else
+        echoerror "dpkg: command not found."
+        return 1
+    fi
+
+    __REPO_ARCH="$DPKG_ARCHITECTURE"
+    __return_code=0
+
+    case $DPKG_ARCHITECTURE in
+        "i386")
+            error_msg="$_REPO_URL likely doesn't have all required 32-bit packages for $DISTRO_NAME $DISTRO_MAJOR_VERSION."
+            # amd64 is just a part of repository URI, 32-bit pkgs are hosted under the same location
+            __REPO_ARCH="amd64"
+            ;;
+        "amd64")
+            error_msg=""
+            ;;
+        "armhf")
+            if [ "$DISTRO_NAME_L" = "ubuntu" ] || [ "$DISTRO_MAJOR_VERSION" -lt 8 ]; then
+                error_msg="Support for armhf packages at $_REPO_URL is limited to Debian/Raspbian 8 platforms."
+                __return_code=1
+            else
+                error_msg=""
+            fi
+            ;;
+        *)
+            error_msg="$_REPO_URL doesn't have packages for your system architecture: $DPKG_ARCHITECTURE."
+            __return_code=1
+            ;;
+    esac
+
+    if [ "${error_msg}" != "" ]; then
+        echoerror "${error_msg}"
+        if [ "$ITYPE" != "git" ]; then
+            echoerror "You can try git installation mode, i.e.: sh ${__ScriptName} git v2016.11.5."
+            echoerror "It may be necessary to use git installation mode with pip and disable the SaltStack apt repository."
+            echoerror "For example:"
+            echoerror "    sh ${__ScriptName} -r -P git v2016.11.5"
+        fi
+    fi
+
+    if [ "${__return_code}" -eq 0 ]; then
+        return 0
+    else
+        return 1
     fi
 }
 
@@ -2479,6 +2520,32 @@ __enable_universe_repository() {
     return 0
 }
 
+__install_saltstack_ubuntu_repository() {
+
+    # Workaround for latest non-LTS ubuntu
+    if [ "$DISTRO_VERSION" = "16.10" ] || [ "$DISTRO_MAJOR_VERSION" -gt 16 ]; then
+        echowarn "Non-LTS Ubuntu detected, but stable packages requested. Trying packages from latest LTS release. You may experience problems."
+        UBUNTU_VERSION=16.04
+        UBUNTU_CODENAME="xenial"
+    else
+        UBUNTU_VERSION=$DISTRO_VERSION
+        UBUNTU_CODENAME=$DISTRO_CODENAME
+    fi
+
+    # SaltStack's stable Ubuntu repository:
+    SALTSTACK_UBUNTU_URL="${HTTP_VAL}://${_REPO_URL}/apt/ubuntu/${UBUNTU_VERSION}/${__REPO_ARCH}/${STABLE_REV}"
+    echo "deb $SALTSTACK_UBUNTU_URL $UBUNTU_CODENAME main" > /etc/apt/sources.list.d/saltstack.list
+
+    # Make sure https transport is available
+    if [ "$HTTP_VAL" = "https" ] ; then
+        __apt_get_install_noinput apt-transport-https ca-certificates || return 1
+    fi
+
+    __apt_key_fetch "$SALTSTACK_UBUNTU_URL/SALTSTACK-GPG-KEY.pub" || return 1
+
+    apt-get update
+}
+
 install_ubuntu_deps() {
     if [ $_DISABLE_REPOS -eq $BS_FALSE ]; then
         # Install add-apt-repository
@@ -2555,59 +2622,10 @@ install_ubuntu_stable_deps() {
         __apt_get_upgrade_noinput || return 1
     fi
 
-    if [ ${_DISABLE_REPOS} -eq $BS_FALSE ]; then
-         __get_dpkg_architecture || return 1
-        __REPO_ARCH="$DPKG_ARCHITECTURE"
+    __check_dpkg_architecture || return 1
 
-        if [ "$DPKG_ARCHITECTURE" = "i386" ]; then
-            echoerror "$_REPO_URL likely doesn't have all required 32-bit packages for Ubuntu $DISTRO_MAJOR_VERSION (yet?)."
-
-            # amd64 is just a part of repository URI, 32-bit pkgs are hosted under the same location
-            __REPO_ARCH="amd64"
-        elif [ "$DPKG_ARCHITECTURE" != "amd64" ]; then
-            echoerror "$_REPO_URL doesn't have packages for your system architecture: $DPKG_ARCHITECTURE."
-            if [ "$ITYPE" != "git" ]; then
-                echoerror "You can try git installation mode, i.e.: sh ${__ScriptName} git v2016.3.1"
-                exit 1
-            fi
-        fi
-
-        # Versions starting with 2015.5.6, 2015.8.1 and 2016.3.0 are hosted at repo.saltstack.com
-        if [ "$(echo "$STABLE_REV" | egrep '^(2015\.5|2015\.8|2016\.3|2016\.11|latest|archive\/)')" != "" ]; then
-            # Workaround for latest non-LTS ubuntu
-            if [ "$DISTRO_VERSION" = "16.10" ] || [ "$DISTRO_MAJOR_VERSION" -gt 16 ]; then
-                echowarn "Non-LTS Ubuntu detected, but stable packages requested. Trying packages from latest LTS release. You may experience problems."
-                UBUNTU_VERSION=16.04
-                UBUNTU_CODENAME="xenial"
-            else
-                UBUNTU_VERSION=$DISTRO_VERSION
-                UBUNTU_CODENAME=$DISTRO_CODENAME
-            fi
-
-            # SaltStack's stable Ubuntu repository:
-            SALTSTACK_UBUNTU_URL="${HTTP_VAL}://${_REPO_URL}/apt/ubuntu/${UBUNTU_VERSION}/${__REPO_ARCH}/${STABLE_REV}"
-            echo "deb $SALTSTACK_UBUNTU_URL $UBUNTU_CODENAME main" > /etc/apt/sources.list.d/saltstack.list
-
-            # Make sure https transport is available
-            if [ "$HTTP_VAL" = "https" ] ; then
-                __apt_get_install_noinput apt-transport-https ca-certificates || return 1
-            fi
-
-            __apt_key_fetch "$SALTSTACK_UBUNTU_URL/SALTSTACK-GPG-KEY.pub" || return 1
-        else
-            # Alternate PPAs: salt16, salt17, salt2014-1, salt2014-7
-            if [ ! "$(echo "$STABLE_REV" | egrep '^(1\.6|1\.7)$')" = "" ]; then
-              STABLE_PPA="saltstack/salt$(echo "$STABLE_REV" | tr -d .)"
-            elif [ ! "$(echo "$STABLE_REV" | egrep '^(2014\.1|2014\.7)$')" = "" ]; then
-              STABLE_PPA="saltstack/salt$(echo "$STABLE_REV" | tr . -)"
-            else
-              STABLE_PPA="saltstack/salt"
-            fi
-
-            add-apt-repository -y "ppa:$STABLE_PPA" || return 1
-        fi
-
-        apt-get update
+    if [ "$_DISABLE_REPOS" -eq "$BS_FALSE" ] || [ "$_CUSTOM_REPO_URL" != "null" ]; then
+        __install_saltstack_ubuntu_repository || return 1
     fi
 
     install_ubuntu_deps || return 1
@@ -2887,6 +2905,27 @@ install_ubuntu_check_services() {
 #
 #   Debian Install Functions
 #
+__install_saltstack_debian_repository() {
+    if [ "$DISTRO_MAJOR_VERSION" -eq 7 ]; then
+        DEBIAN_CODENAME="wheezy"
+    else
+        DEBIAN_CODENAME="jessie"
+    fi
+
+    # amd64 is just a part of repository URI, 32-bit pkgs are hosted under the same location
+    SALTSTACK_DEBIAN_URL="${HTTP_VAL}://${_REPO_URL}/apt/debian/${DISTRO_MAJOR_VERSION}/${__REPO_ARCH}/${STABLE_REV}"
+    echo "deb $SALTSTACK_DEBIAN_URL $DEBIAN_CODENAME main" > "/etc/apt/sources.list.d/saltstack.list"
+
+    if [ "$HTTP_VAL" = "https" ] ; then
+        __apt_get_install_noinput apt-transport-https ca-certificates || return 1
+    fi
+
+    __apt_key_fetch "$SALTSTACK_DEBIAN_URL/SALTSTACK-GPG-KEY.pub" || return 1
+
+    apt-get update
+
+}
+
 install_debian_deps() {
     if [ $_START_DAEMONS -eq $BS_FALSE ]; then
         echowarn "Not starting daemons on Debian based distributions is not working mostly because starting them is the default behaviour."
@@ -2956,45 +2995,10 @@ install_debian_7_deps() {
         __apt_get_upgrade_noinput || return 1
     fi
 
-    if [ "${_DISABLE_REPOS}" -eq $BS_FALSE ]; then
-         __get_dpkg_architecture || return 1
+    __check_dpkg_architecture || return 1
 
-        __REPO_ARCH="$DPKG_ARCHITECTURE"
-
-        if [ "$DPKG_ARCHITECTURE" = "i386" ]; then
-            echoerror "$_REPO_URL likely doesn't have all required 32-bit packages for Debian $DISTRO_MAJOR_VERSION (yet?)."
-
-            if [ "$ITYPE" != "git" ]; then
-                echoerror "You can try git installation mode, i.e.: sh ${__ScriptName} git v2016.3.1"
-            fi
-
-            # amd64 is just a part of repository URI, 32-bit pkgs are hosted under the same location
-            __REPO_ARCH="amd64"
-        elif [ "$DPKG_ARCHITECTURE" != "amd64" ]; then
-            echoerror "$_REPO_URL doesn't have packages for your system architecture: $DPKG_ARCHITECTURE."
-            exit 1
-        fi
-
-        # Versions starting with 2015.8.7 and 2016.3.0 are hosted at repo.saltstack.com
-        if [ "$(echo "$STABLE_REV" | egrep '^(2015\.8|2016\.3|2016\.11|latest|archive\/201[5-6]\.)')" != "" ]; then
-            # amd64 is just a part of repository URI, 32-bit pkgs are hosted under the same location
-            SALTSTACK_DEBIAN_URL="${HTTP_VAL}://${_REPO_URL}/apt/debian/${DISTRO_MAJOR_VERSION}/${__REPO_ARCH}/${STABLE_REV}"
-            echo "deb $SALTSTACK_DEBIAN_URL wheezy main" > "/etc/apt/sources.list.d/saltstack.list"
-
-            if [ "$HTTP_VAL" = "https" ] ; then
-                __apt_get_install_noinput apt-transport-https ca-certificates || return 1
-            fi
-
-            __apt_key_fetch "$SALTSTACK_DEBIAN_URL/SALTSTACK-GPG-KEY.pub" || return 1
-        elif [ -n "$STABLE_REV" ]; then
-            echoerror "Installation of Salt ${STABLE_REV#*/} packages not supported by ${__ScriptName} ${__ScriptVersion} on Debian $DISTRO_MAJOR_VERSION."
-
-            return 1
-        fi
-
-        apt-get update
-    else
-        echowarn "Packages from $_REPO_URL are required to install Salt version 2015.8 or higher on Debian $DISTRO_MAJOR_VERSION."
+    if [ "$_DISABLE_REPOS" -eq "$BS_FALSE" ] || [ "$_CUSTOM_REPO_URL" != "null" ]; then
+        __install_saltstack_debian_repository || return 1
     fi
 
     # Additionally install procps and pciutils which allows for Docker bootstraps. See 366#issuecomment-39666813
@@ -3035,45 +3039,10 @@ install_debian_8_deps() {
         __apt_get_upgrade_noinput || return 1
     fi
 
-    if [ ${_DISABLE_REPOS} -eq $BS_FALSE ]; then
-         __get_dpkg_architecture || return 1
+    __check_dpkg_architecture || return 1
 
-        __REPO_ARCH="$DPKG_ARCHITECTURE"
-
-        if [ "$DPKG_ARCHITECTURE" = "i386" ]; then
-            echoerror "$_REPO_URL likely doesn't have all required 32-bit packages for Debian $DISTRO_MAJOR_VERSION (yet?)."
-
-            if [ "$ITYPE" != "git" ]; then
-                echoerror "You can try git installation mode, i.e.: sh ${__ScriptName} git v2016.3.1"
-            fi
-
-            # amd64 is just a part of repository URI, 32-bit pkgs are hosted under the same location
-            __REPO_ARCH="amd64"
-        elif [ "$DPKG_ARCHITECTURE" != "amd64" ] && [ "$DPKG_ARCHITECTURE" != "armhf" ]; then
-            echoerror "$_REPO_URL doesn't have packages for your system architecture: $DPKG_ARCHITECTURE."
-            echoerror "Try git installation mode with pip and disable SaltStack apt repository, for example:"
-            echoerror "    sh ${__ScriptName} -r -P git v2016.3.1"
-
-            exit 1
-        fi
-
-        # Versions starting with 2015.5.6, 2015.8.1 and 2016.3.0 are hosted at repo.saltstack.com
-        if [ "$(echo "$STABLE_REV" | egrep '^(2015\.5|2015\.8|2016\.3|2016\.11|latest|archive\/201[5-6]\.)')" != "" ]; then
-            SALTSTACK_DEBIAN_URL="${HTTP_VAL}://${_REPO_URL}/apt/debian/${DISTRO_MAJOR_VERSION}/${__REPO_ARCH}/${STABLE_REV}"
-            echo "deb $SALTSTACK_DEBIAN_URL jessie main" > "/etc/apt/sources.list.d/saltstack.list"
-
-            if [ "$HTTP_VAL" = "https" ] ; then
-                __apt_get_install_noinput apt-transport-https ca-certificates || return 1
-            fi
-
-            __apt_key_fetch "$SALTSTACK_DEBIAN_URL/SALTSTACK-GPG-KEY.pub" || return 1
-        elif [ -n "$STABLE_REV" ]; then
-            echoerror "Installation of Salt ${STABLE_REV#*/} packages not supported by ${__ScriptName} ${__ScriptVersion} on Debian $DISTRO_MAJOR_VERSION."
-
-            return 1
-        fi
-
-        apt-get update
+    if [ "$_DISABLE_REPOS" -eq "$BS_FALSE" ] || [ "$_CUSTOM_REPO_URL" != "null" ]; then
+        __install_saltstack_debian_repository || return 1
     fi
 
     # Additionally install procps and pciutils which allows for Docker bootstraps. See 366#issuecomment-39666813
@@ -6206,6 +6175,7 @@ __gentoo_post_dep() {
         echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
         # shellcheck disable=SC2086
         __autounmask ${_EXTRA_PACKAGES} || return 1
+        # shellcheck disable=SC2086
         __emerge -v ${_EXTRA_PACKAGES} || return 1
     fi
 }

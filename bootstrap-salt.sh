@@ -121,8 +121,7 @@ __check_command_exists() {
 
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #          NAME:  __check_pip_allowed
-#   DESCRIPTION:  Simple function to let the users know that -P needs to be
-#                 used.
+#   DESCRIPTION:  Simple function to let the users know that -P needs to be used.
 #----------------------------------------------------------------------------------------------------------------------
 __check_pip_allowed() {
     if [ $# -eq 1 ]; then
@@ -155,10 +154,16 @@ __check_config_dir() {
             __fetch_url "/tmp/${CC_DIR_BASE}" "${CC_DIR_NAME}"
             CC_DIR_NAME="/tmp/${CC_DIR_BASE}"
             ;;
+        *://*)
+            echoerror "Unsupported URI scheme for $CC_DIR_NAME"
+            echo "null"
+            return
+            ;;
         *)
             if [ ! -e "${CC_DIR_NAME}" ]; then
+                echoerror "The configuration directory or archive $CC_DIR_NAME does not exist."
                 echo "null"
-                return 0
+                return
             fi
             ;;
     esac
@@ -185,6 +190,28 @@ __check_config_dir() {
     esac
 
     echo "${CC_DIR_NAME}"
+}
+
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#         NAME:  __check_unparsed_options
+#  DESCRIPTION:  Checks the placed after the install arguments
+#----------------------------------------------------------------------------------------------------------------------
+__check_unparsed_options() {
+    shellopts="$1"
+    # grep alternative for SunOS
+    if [ -f /usr/xpg4/bin/grep ]; then
+        grep='/usr/xpg4/bin/grep'
+    else
+        grep='grep'
+    fi
+    unparsed_options=$( echo "$shellopts" | ${grep} -E '(^|[[:space:]])[-]+[[:alnum:]]' )
+    if [ "$unparsed_options" != "" ]; then
+        __usage
+        echo
+        echoerror "options are only allowed before install arguments"
+        echo
+        exit 1
+    fi
 }
 
 
@@ -242,6 +269,10 @@ _QUIET_GIT_INSTALLATION=$BS_FALSE
 _REPO_URL="repo.saltstack.com"
 _PY_EXE=""
 _INSTALL_PY="$BS_FALSE"
+
+# Defaults for install arguments
+ITYPE="stable"
+
 
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #         NAME:  __usage
@@ -380,19 +411,7 @@ do
     v )  echo "$0 -- Version $__ScriptVersion"; exit 0  ;;
     n )  _COLORS=0; __detect_color_support              ;;
     D )  _ECHO_DEBUG=$BS_TRUE                           ;;
-
-    c )  _TEMP_CONFIG_DIR=$(__check_config_dir "$OPTARG")
-         # If the configuration directory does not exist, error out
-         if [ "$_TEMP_CONFIG_DIR" = "null" ]; then
-             echoerror "Unsupported URI scheme for $OPTARG"
-             exit 1
-         fi
-         if [ ! -d "$_TEMP_CONFIG_DIR" ]; then
-             echoerror "The configuration directory ${_TEMP_CONFIG_DIR} does not exist."
-             exit 1
-         fi
-         ;;
-
+    c )  _TEMP_CONFIG_DIR="$OPTARG"                     ;;
     g )  _SALT_REPO_URL=$OPTARG                         ;;
 
     G )  echowarn "The '-G' option is DEPRECATED and will be removed in the future stable release!"
@@ -401,14 +420,7 @@ do
          ;;
 
     w )  _DOWNSTREAM_PKG_REPO=$BS_TRUE                  ;;
-
-    k )  _TEMP_KEYS_DIR="$OPTARG"
-         # If the configuration directory does not exist, error out
-         if [ ! -d "$_TEMP_KEYS_DIR" ]; then
-             echoerror "The pre-seed keys directory ${_TEMP_KEYS_DIR} does not exist."
-             exit 1
-         fi
-         ;;
+    k )  _TEMP_KEYS_DIR="$OPTARG"                       ;;
     s )  _SLEEP=$OPTARG                                 ;;
     M )  _INSTALL_MASTER=$BS_TRUE                       ;;
     S )  _INSTALL_SYNDIC=$BS_TRUE                       ;;
@@ -451,205 +463,28 @@ done
 shift $((OPTIND-1))
 
 
-__check_unparsed_options() {
-    shellopts="$1"
-    # grep alternative for SunOS
-    if [ -f /usr/xpg4/bin/grep ]; then
-        grep='/usr/xpg4/bin/grep'
-    else
-        grep='grep'
-    fi
-    unparsed_options=$( echo "$shellopts" | ${grep} -E '(^|[[:space:]])[-]+[[:alnum:]]' )
-    if [ "$unparsed_options" != "" ]; then
-        __usage
-        echo
-        echoerror "options are only allowed before install arguments"
-        echo
-        exit 1
-    fi
-}
+# Define our logging file and pipe paths
+LOGFILE="/tmp/$( echo "$__ScriptName" | sed s/.sh/.log/g )"
+LOGPIPE="/tmp/$( echo "$__ScriptName" | sed s/.sh/.logpipe/g )"
 
-
-# Check that we're actually installing one of minion/master/syndic
-if [ "$_INSTALL_MINION" -eq $BS_FALSE ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && [ "$_CONFIG_ONLY" -eq $BS_FALSE ]; then
-    echowarn "Nothing to install or configure"
-    exit 0
-fi
-
-# Check that we're installing a minion if we're being passed a master address
-if [ "$_INSTALL_MINION" -eq $BS_FALSE ] && [ "$_SALT_MASTER_ADDRESS" != "null" ]; then
-    echoerror "Don't pass a master address (-A) if no minion is going to be bootstrapped."
+# Create our logging pipe
+# On FreeBSD we have to use mkfifo instead of mknod
+mknod "$LOGPIPE" p >/dev/null 2>&1 || mkfifo "$LOGPIPE" >/dev/null 2>&1
+if [ $? -ne 0 ]; then
+    echoerror "Failed to create the named pipe required to log"
     exit 1
 fi
 
-# Check that we're installing a minion if we're being passed a minion id
-if [ "$_INSTALL_MINION" -eq $BS_FALSE ] && [ "$_SALT_MINION_ID" != "null" ]; then
-    echoerror "Don't pass a minion id (-i) if no minion is going to be bootstrapped."
-    exit 1
-fi
+# What ever is written to the logpipe gets written to the logfile
+tee < "$LOGPIPE" "$LOGFILE" &
 
-# Check that we're installing or configuring a master if we're being passed a master config json dict
-if [ "$_CUSTOM_MASTER_CONFIG" != "null" ]; then
-    if [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && [ "$_CONFIG_ONLY" -eq $BS_FALSE ]; then
-        echoerror "Don't pass a master config JSON dict (-J) if no master is going to be bootstrapped or configured."
-        exit 1
-    fi
-fi
+# Close STDOUT, reopen it directing it to the logpipe
+exec 1>&-
+exec 1>"$LOGPIPE"
+# Close STDERR, reopen it directing it to the logpipe
+exec 2>&-
+exec 2>"$LOGPIPE"
 
-# Check that we're installing or configuring a minion if we're being passed a minion config json dict
-if [ "$_CUSTOM_MINION_CONFIG" != "null" ]; then
-    if [ "$_INSTALL_MINION" -eq $BS_FALSE ] && [ "$_CONFIG_ONLY" -eq $BS_FALSE ]; then
-        echoerror "Don't pass a minion config JSON dict (-j) if no minion is going to be bootstrapped or configured."
-        exit 1
-    fi
-fi
-
-# Define installation type
-if [ "$#" -eq 0 ];then
-    ITYPE="stable"
-else
-    __check_unparsed_options "$*"
-    ITYPE=$1
-    shift
-fi
-
-# Check installation type
-if [ "$(echo "$ITYPE" | egrep '(stable|testing|daily|git)')" = "" ]; then
-    echoerror "Installation type \"$ITYPE\" is not known..."
-    exit 1
-fi
-
-# If doing a git install, check what branch/tag/sha will be checked out
-if [ "$ITYPE" = "git" ]; then
-    if [ "$#" -eq 0 ];then
-        GIT_REV="develop"
-    else
-        __check_unparsed_options "$*"
-        GIT_REV="$1"
-        shift
-    fi
-
-    # Disable shell warning about unbound variable during git install
-    STABLE_REV="latest"
-
-# If doing stable install, check if version specified
-elif [ "$ITYPE" = "stable" ]; then
-    if [ "$#" -eq 0 ];then
-        STABLE_REV="latest"
-    else
-        __check_unparsed_options "$*"
-
-        if [ "$(echo "$1" | egrep '^(latest|1\.6|1\.7|2014\.1|2014\.7|2015\.5|2015\.8|2016\.3|2016\.11)$')" != "" ]; then
-            STABLE_REV="$1"
-            shift
-        elif [ "$(echo "$1" | egrep '^([0-9]*\.[0-9]*\.[0-9]*)$')" != "" ]; then
-            STABLE_REV="archive/$1"
-            shift
-        else
-            echo "Unknown stable version: $1 (valid: 1.6, 1.7, 2014.1, 2014.7, 2015.5, 2015.8, 2016.3, 2016.11, latest, \$MAJOR.\$MINOR.\$PATCH)"
-            exit 1
-        fi
-    fi
-fi
-
-# -a and -V only work from git
-if [ "$ITYPE" != "git" ]; then
-    if [ $_PIP_ALL -eq $BS_TRUE ]; then
-        echoerror "Pip installing all python packages with -a is only possible when installing Salt via git"
-        exit 1
-    fi
-    if [ "$_VIRTUALENV_DIR" != "null" ]; then
-        echoerror "Virtualenv installs via -V is only possible when installing Salt via git"
-        exit 1
-    fi
-fi
-
-# Set the _REPO_URL value based on if -R was passed or not. Defaults to repo.saltstack.com.
-if [ "$_CUSTOM_REPO_URL" != "null" ]; then
-    _REPO_URL="$_CUSTOM_REPO_URL"
-
-    # Check for -r since -R is being passed. Set -r with a warning.
-    if [ "$_DISABLE_REPOS" -eq $BS_FALSE ]; then
-        echowarn "Detected -R option. No other repositories will be configured when -R is used. Setting -r option to True."
-        _DISABLE_REPOS=$BS_TRUE
-    fi
-fi
-
-# Check for any unparsed arguments. Should be an error.
-if [ "$#" -gt 0 ]; then
-    __check_unparsed_options "$*"
-    __usage
-    echo
-    echoerror "Too many arguments."
-    exit 1
-fi
-
-# Check the _DISABLE_SSL value and set HTTP or HTTPS.
-if [ "$_DISABLE_SSL" -eq $BS_TRUE ]; then
-    HTTP_VAL="http"
-else
-    HTTP_VAL="https"
-fi
-
-# Check the _QUIET_GIT_INSTALLATION value and set SETUP_PY_INSTALL_ARGS.
-if [ "$_QUIET_GIT_INSTALLATION" -eq $BS_TRUE ]; then
-    SETUP_PY_INSTALL_ARGS="-q"
-else
-    SETUP_PY_INSTALL_ARGS=""
-fi
-
-# whoami alternative for SunOS
-if [ -f /usr/xpg4/bin/id ]; then
-    whoami='/usr/xpg4/bin/id -un'
-else
-    whoami='whoami'
-fi
-
-# Root permissions are required to run this script
-if [ "$($whoami)" != "root" ]; then
-    echoerror "Salt requires root privileges to install. Please re-run this script as root."
-    exit 1
-fi
-
-# Export the http_proxy configuration to our current environment
-if [ "${_HTTP_PROXY}" != "" ]; then
-    export http_proxy="$_HTTP_PROXY"
-    export https_proxy="$_HTTP_PROXY"
-fi
-
-# Let's discover how we're being called
-# shellcheck disable=SC2009
-CALLER=$(ps -a -o pid,args | grep $$ | grep -v grep | tr -s ' ' | cut -d ' ' -f 3)
-
-if [ "${CALLER}x" = "${0}x" ]; then
-    CALLER="shell pipe"
-fi
-
-# Work around for 'Docker + salt-bootstrap failure' https://github.com/saltstack/salt-bootstrap/issues/394
-if [ "${_DISABLE_SALT_CHECKS}" -eq $BS_FALSE ] && [ -f /tmp/disable_salt_checks ]; then
-    # shellcheck disable=SC2016
-    echowarn 'Found file: /tmp/disable_salt_checks, setting _DISABLE_SALT_CHECKS=$BS_TRUE'
-    _DISABLE_SALT_CHECKS=$BS_TRUE
-fi
-
-# Because -a can only be installed into virtualenv
-if [ "${_PIP_ALL}" -eq $BS_TRUE ] && [ "${_VIRTUALENV_DIR}" = "null" ]; then
-    usage
-    # Could possibly set up a default virtualenv location when -a flag is passed
-    echoerror "Using -a requires -V because pip pkgs should be siloed from python system pkgs"
-    exit 1
-fi
-
-# Make sure virtualenv directory does not already exist
-if [ -d "${_VIRTUALENV_DIR}" ]; then
-    echoerror "The directory ${_VIRTUALENV_DIR} for virtualenv already exists"
-    exit 1
-fi
-
-echoinfo "Running version: ${__ScriptVersion}"
-echoinfo "Executed by: ${CALLER}"
-echoinfo "Command line: '${__ScriptFullName} ${__ScriptArgs}'"
-echowarn "Running the unstable version of ${__ScriptName}"
 
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #          NAME:  __exit_cleanup
@@ -684,8 +519,10 @@ __exit_cleanup() {
     fi
 
     # Remove the logging pipe when the script exits
-    echodebug "Removing the logging pipe $LOGPIPE"
-    rm -f "$LOGPIPE"
+    if [ -p "$LOGPIPE" ]; then
+        echodebug "Removing the logging pipe $LOGPIPE"
+        rm -f "$LOGPIPE"
+    fi
 
     # Kill tee when exiting, CentOS, at least requires this
     # shellcheck disable=SC2009
@@ -713,27 +550,192 @@ __exit_cleanup() {
 trap "__exit_cleanup" EXIT INT
 
 
-# Define our logging file and pipe paths
-LOGFILE="/tmp/$( echo "$__ScriptName" | sed s/.sh/.log/g )"
-LOGPIPE="/tmp/$( echo "$__ScriptName" | sed s/.sh/.logpipe/g )"
+# Let's discover how we're being called
+# shellcheck disable=SC2009
+CALLER=$(ps -a -o pid,args | grep $$ | grep -v grep | tr -s ' ' | cut -d ' ' -f 3)
 
-# Create our logging pipe
-# On FreeBSD we have to use mkfifo instead of mknod
-mknod "$LOGPIPE" p >/dev/null 2>&1 || mkfifo "$LOGPIPE" >/dev/null 2>&1
-if [ $? -ne 0 ]; then
-    echoerror "Failed to create the named pipe required to log"
+if [ "${CALLER}x" = "${0}x" ]; then
+    CALLER="shell pipe"
+fi
+
+echoinfo "Running version: ${__ScriptVersion}"
+echoinfo "Executed by: ${CALLER}"
+echoinfo "Command line: '${__ScriptFullName} ${__ScriptArgs}'"
+echowarn "Running the unstable version of ${__ScriptName}"
+
+# Define installation type
+if [ "$#" -gt 0 ];then
+    __check_unparsed_options "$*"
+    ITYPE=$1
+    shift
+fi
+
+# Check installation type
+if [ "$(echo "$ITYPE" | egrep '(stable|testing|daily|git)')" = "" ]; then
+    echoerror "Installation type \"$ITYPE\" is not known..."
     exit 1
 fi
 
-# What ever is written to the logpipe gets written to the logfile
-tee < "$LOGPIPE" "$LOGFILE" &
+# If doing a git install, check what branch/tag/sha will be checked out
+if [ "$ITYPE" = "git" ]; then
+    if [ "$#" -eq 0 ];then
+        GIT_REV="develop"
+    else
+        GIT_REV="$1"
+        shift
+    fi
 
-# Close STDOUT, reopen it directing it to the logpipe
-exec 1>&-
-exec 1>"$LOGPIPE"
-# Close STDERR, reopen it directing it to the logpipe
-exec 2>&-
-exec 2>"$LOGPIPE"
+    # Disable shell warning about unbound variable during git install
+    STABLE_REV="latest"
+
+# If doing stable install, check if version specified
+elif [ "$ITYPE" = "stable" ]; then
+    if [ "$#" -eq 0 ];then
+        STABLE_REV="latest"
+    else
+        if [ "$(echo "$1" | egrep '^(latest|1\.6|1\.7|2014\.1|2014\.7|2015\.5|2015\.8|2016\.3|2016\.11)$')" != "" ]; then
+            STABLE_REV="$1"
+            shift
+        elif [ "$(echo "$1" | egrep '^([0-9]*\.[0-9]*\.[0-9]*)$')" != "" ]; then
+            STABLE_REV="archive/$1"
+            shift
+        else
+            echo "Unknown stable version: $1 (valid: 1.6, 1.7, 2014.1, 2014.7, 2015.5, 2015.8, 2016.3, 2016.11, latest, \$MAJOR.\$MINOR.\$PATCH)"
+            exit 1
+        fi
+    fi
+fi
+
+# Check for any unparsed arguments. Should be an error.
+if [ "$#" -gt 0 ]; then
+    __usage
+    echo
+    echoerror "Too many arguments."
+    exit 1
+fi
+
+# whoami alternative for SunOS
+if [ -f /usr/xpg4/bin/id ]; then
+    whoami='/usr/xpg4/bin/id -un'
+else
+    whoami='whoami'
+fi
+
+# Root permissions are required to run this script
+if [ "$($whoami)" != "root" ]; then
+    echoerror "Salt requires root privileges to install. Please re-run this script as root."
+    exit 1
+fi
+
+# Check that we're actually installing one of minion/master/syndic
+if [ "$_INSTALL_MINION" -eq $BS_FALSE ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && [ "$_CONFIG_ONLY" -eq $BS_FALSE ]; then
+    echowarn "Nothing to install or configure"
+    exit 1
+fi
+
+# Check that we're installing a minion if we're being passed a master address
+if [ "$_INSTALL_MINION" -eq $BS_FALSE ] && [ "$_SALT_MASTER_ADDRESS" != "null" ]; then
+    echoerror "Don't pass a master address (-A) if no minion is going to be bootstrapped."
+    exit 1
+fi
+
+# Check that we're installing a minion if we're being passed a minion id
+if [ "$_INSTALL_MINION" -eq $BS_FALSE ] && [ "$_SALT_MINION_ID" != "null" ]; then
+    echoerror "Don't pass a minion id (-i) if no minion is going to be bootstrapped."
+    exit 1
+fi
+
+# Check that we're installing or configuring a master if we're being passed a master config json dict
+if [ "$_CUSTOM_MASTER_CONFIG" != "null" ]; then
+    if [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && [ "$_CONFIG_ONLY" -eq $BS_FALSE ]; then
+        echoerror "Don't pass a master config JSON dict (-J) if no master is going to be bootstrapped or configured."
+        exit 1
+    fi
+fi
+
+# Check that we're installing or configuring a minion if we're being passed a minion config json dict
+if [ "$_CUSTOM_MINION_CONFIG" != "null" ]; then
+    if [ "$_INSTALL_MINION" -eq $BS_FALSE ] && [ "$_CONFIG_ONLY" -eq $BS_FALSE ]; then
+        echoerror "Don't pass a minion config JSON dict (-j) if no minion is going to be bootstrapped or configured."
+        exit 1
+    fi
+fi
+
+# If the configuration directory or archive does not exist, error out
+if [ "$_TEMP_CONFIG_DIR" != "null" ]; then
+    _TEMP_CONFIG_DIR="$(__check_config_dir "$_TEMP_CONFIG_DIR")"
+    [ "$_TEMP_CONFIG_DIR" = "null" ] && exit 1
+fi
+
+# If the pre-seed keys directory does not exist, error out
+if [ "$_TEMP_KEYS_DIR" != "null" ] && [ ! -d "$_TEMP_KEYS_DIR" ]; then
+    echoerror "The pre-seed keys directory ${_TEMP_KEYS_DIR} does not exist."
+    exit 1
+fi
+
+# -a and -V only work from git
+if [ "$ITYPE" != "git" ]; then
+    if [ $_PIP_ALL -eq $BS_TRUE ]; then
+        echoerror "Pip installing all python packages with -a is only possible when installing Salt via git"
+        exit 1
+    fi
+    if [ "$_VIRTUALENV_DIR" != "null" ]; then
+        echoerror "Virtualenv installs via -V is only possible when installing Salt via git"
+        exit 1
+    fi
+fi
+
+# Set the _REPO_URL value based on if -R was passed or not. Defaults to repo.saltstack.com.
+if [ "$_CUSTOM_REPO_URL" != "null" ]; then
+    _REPO_URL="$_CUSTOM_REPO_URL"
+
+    # Check for -r since -R is being passed. Set -r with a warning.
+    if [ "$_DISABLE_REPOS" -eq $BS_FALSE ]; then
+        echowarn "Detected -R option. No other repositories will be configured when -R is used. Setting -r option to True."
+        _DISABLE_REPOS=$BS_TRUE
+    fi
+fi
+
+# Check the _DISABLE_SSL value and set HTTP or HTTPS.
+if [ "$_DISABLE_SSL" -eq $BS_TRUE ]; then
+    HTTP_VAL="http"
+else
+    HTTP_VAL="https"
+fi
+
+# Check the _QUIET_GIT_INSTALLATION value and set SETUP_PY_INSTALL_ARGS.
+if [ "$_QUIET_GIT_INSTALLATION" -eq $BS_TRUE ]; then
+    SETUP_PY_INSTALL_ARGS="-q"
+else
+    SETUP_PY_INSTALL_ARGS=""
+fi
+
+# Export the http_proxy configuration to our current environment
+if [ "${_HTTP_PROXY}" != "" ]; then
+    export http_proxy="$_HTTP_PROXY"
+    export https_proxy="$_HTTP_PROXY"
+fi
+
+# Work around for 'Docker + salt-bootstrap failure' https://github.com/saltstack/salt-bootstrap/issues/394
+if [ "${_DISABLE_SALT_CHECKS}" -eq $BS_FALSE ] && [ -f /tmp/disable_salt_checks ]; then
+    # shellcheck disable=SC2016
+    echowarn 'Found file: /tmp/disable_salt_checks, setting _DISABLE_SALT_CHECKS=$BS_TRUE'
+    _DISABLE_SALT_CHECKS=$BS_TRUE
+fi
+
+# Because -a can only be installed into virtualenv
+if [ "${_PIP_ALL}" -eq $BS_TRUE ] && [ "${_VIRTUALENV_DIR}" = "null" ]; then
+    usage
+    # Could possibly set up a default virtualenv location when -a flag is passed
+    echoerror "Using -a requires -V because pip pkgs should be siloed from python system pkgs"
+    exit 1
+fi
+
+# Make sure virtualenv directory does not already exist
+if [ -d "${_VIRTUALENV_DIR}" ]; then
+    echoerror "The directory ${_VIRTUALENV_DIR} for virtualenv already exists"
+    exit 1
+fi
 
 
 # Handle the insecure flags

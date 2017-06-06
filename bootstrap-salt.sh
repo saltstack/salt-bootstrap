@@ -2946,60 +2946,7 @@ install_debian_deps() {
         __apt_get_upgrade_noinput || return 1
     fi
 
-    # Install procps and pciutils which allows for Docker bootstraps. See #366#issuecomment-39666813
-    __PACKAGES="procps pciutils"
-    __PIP_PACKAGES=""
-
-    # YAML module is used for generating custom master/minion configs
-    __PACKAGES="${__PACKAGES} python-yaml"
-
-    # shellcheck disable=SC2086
-    __apt_get_install_noinput ${__PACKAGES} || return 1
-
-    if [ "${_EXTRA_PACKAGES}" != "" ]; then
-        echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
-        # shellcheck disable=SC2086
-        __apt_get_install_noinput ${_EXTRA_PACKAGES} || return 1
-    fi
-
-    if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
-        # shellcheck disable=SC2089
-        __PIP_PACKAGES="${__PIP_PACKAGES} 'apache-libcloud>=$_LIBCLOUD_MIN_VERSION'"
-    fi
-
-    if [ "${__PIP_PACKAGES}" != "" ]; then
-        # shellcheck disable=SC2086,SC2090
-        pip install -U ${__PIP_PACKAGES} || return 1
-    fi
-
-    return 0
-}
-
-install_debian_7_deps() {
-    if [ $_START_DAEMONS -eq $BS_FALSE ]; then
-        echowarn "Not starting daemons on Debian based distributions is not working mostly because starting them is the default behaviour."
-    fi
-
-    # No user interaction, libc6 restart services for example
-    export DEBIAN_FRONTEND=noninteractive
-
-    apt-get update
-
-    if [ "${_UPGRADE_SYS}" -eq $BS_TRUE ]; then
-        # Try to update GPG keys first if allowed
-        if [ "${_INSECURE_DL}" -eq $BS_TRUE ]; then
-            __apt_get_install_noinput --allow-unauthenticated debian-archive-keyring &&
-                apt-key update && apt-get update
-        fi
-
-        __apt_get_upgrade_noinput || return 1
-    fi
-
     __check_dpkg_architecture || return 1
-
-    if [ "$_DISABLE_REPOS" -eq "$BS_FALSE" ] || [ "$_CUSTOM_REPO_URL" != "null" ]; then
-        __install_saltstack_debian_repository || return 1
-    fi
 
     # Additionally install procps and pciutils which allows for Docker bootstraps. See 366#issuecomment-39666813
     __PACKAGES='procps pciutils'
@@ -3010,49 +2957,9 @@ install_debian_7_deps() {
     # shellcheck disable=SC2086
     __apt_get_install_noinput ${__PACKAGES} || return 1
 
-    if [ "${_EXTRA_PACKAGES}" != "" ]; then
-        echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
-        # shellcheck disable=SC2086
-        __apt_get_install_noinput ${_EXTRA_PACKAGES} || return 1
-    fi
-
-    return 0
-}
-
-install_debian_8_deps() {
-    if [ $_START_DAEMONS -eq $BS_FALSE ]; then
-        echowarn "Not starting daemons on Debian based distributions is not working mostly because starting them is the default behaviour."
-    fi
-
-    # No user interaction, libc6 restart services for example
-    export DEBIAN_FRONTEND=noninteractive
-
-    apt-get update
-
-    if [ "${_UPGRADE_SYS}" -eq $BS_TRUE ]; then
-        # Try to update GPG keys first if allowed
-        if [ "${_INSECURE_DL}" -eq $BS_TRUE ]; then
-            __apt_get_install_noinput --allow-unauthenticated debian-archive-keyring &&
-                apt-key update && apt-get update
-        fi
-
-        __apt_get_upgrade_noinput || return 1
-    fi
-
-    __check_dpkg_architecture || return 1
-
     if [ "$_DISABLE_REPOS" -eq "$BS_FALSE" ] || [ "$_CUSTOM_REPO_URL" != "null" ]; then
         __install_saltstack_debian_repository || return 1
     fi
-
-    # Additionally install procps and pciutils which allows for Docker bootstraps. See 366#issuecomment-39666813
-    __PACKAGES='procps pciutils'
-
-    # shellcheck disable=SC2086
-    __apt_get_install_noinput ${__PACKAGES} || return 1
-
-    # YAML module is used for generating custom master/minion configs
-    __PACKAGES="${__PACKAGES} python-yaml"
 
     if [ "${_EXTRA_PACKAGES}" != "" ]; then
         echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
@@ -3096,14 +3003,14 @@ install_debian_git_deps() {
 }
 
 install_debian_7_git_deps() {
-    install_debian_7_deps || return 1
+    install_debian_deps || return 1
     install_debian_git_deps || return 1
 
     return 0
 }
 
 install_debian_8_git_deps() {
-    install_debian_8_deps || return 1
+    install_debian_deps || return 1
 
     if ! __check_command_exists git; then
         __apt_get_install_noinput git || return 1

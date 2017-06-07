@@ -226,7 +226,7 @@ Debian and derivatives
 ~~~~~~~~~~~~~~~~~~~~~~
 
 - Cumulus Linux 2/3
-- Debian GNU/Linux 7/8
+- Debian GNU/Linux 7/8/9
 - Linux Mint Debian Edition 1 (based on Debian 8)
 - Kali Linux 1.0 (based on Debian 7)
 - Raspbian 8 (``armhf``)

@@ -1811,7 +1811,9 @@ __rpm_import_gpg() {
 __yum_install_noinput() {
 
     ENABLE_EPEL_CMD=""
-    if [ $_DISABLE_REPOS -eq $BS_FALSE ]; then
+    # Skip Amazon Linux for the first round, since EPEL is no longer required.
+    # See issue #724
+    if [ $_DISABLE_REPOS -eq $BS_FALSE ] && [ "$DISTRO_NAME_L" != "amazon_linux_ami" ]; then
         ENABLE_EPEL_CMD="--enablerepo=${_EPEL_REPO}"
     fi
 
@@ -4328,44 +4330,37 @@ daemons_running_alpine_linux() {
 install_amazon_linux_ami_deps() {
     # Shim to figure out if we're using old (rhel) or new (aws) rpms.
     _USEAWS=$BS_FALSE
+    pkg_append="python"
 
     repo_rev="$(echo "${STABLE_REV}"  | sed 's|.*\/||g')"
 
-    if echo "$repo_rev" | egrep -q '^(latest|2016\.11)$'; then
+    if echo "$repo_rev" | egrep -q '^(latest|2016\.11)$' || \
+           ( echo "$repo_rev" | egrep -q '^[0-9]+$' && [ "$(echo "$repo_rev" | cut -c1-4)" -gt 2016 ] ); then
        _USEAWS=$BS_TRUE
-    elif echo "$repo_rev" | egrep -q '^[0-9]+$' && [ "$(echo "$repo_rev" | cut -c1-4)" -gt 2016 ]; then
-       _USEAWS=$BS_TRUE
+       pkg_append="python27"
     fi
 
     # We need to install yum-utils before doing anything else when installing on
     # Amazon Linux ECS-optimized images. See issue #974.
-    yum -y install yum-utils
+    __yum_install_noinput yum-utils
 
-    ENABLE_EPEL_CMD=""
-    if [ $_DISABLE_REPOS -eq $BS_TRUE ]; then
-        ENABLE_EPEL_CMD="--enablerepo=${_EPEL_REPO}"
+    # Do upgrade early
+    if [ "$_UPGRADE_SYS" -eq $BS_TRUE ]; then
+        yum -y update || return 1
     fi
 
-    if [ $_DISABLE_REPOS -eq $BS_FALSE ]; then
-        # enable the EPEL repo
-        /usr/bin/yum-config-manager --enable epel || return 1
-
-        # exclude Salt and ZeroMQ packages from EPEL
-        /usr/bin/yum-config-manager epel --setopt "epel.exclude=zeromq* salt* python-zmq*" --save || return 1
-
+    if [ $_DISABLE_REPOS -eq $BS_FALSE ] || [ "$_CUSTOM_REPO_URL" != "null" ]; then
         __REPO_FILENAME="saltstack-repo.repo"
 
         # Set a few vars to make life easier.
         if [ $_USEAWS -eq $BS_TRUE ]; then
-           base_url="$HTTP_VAL://repo.saltstack.com/yum/amazon/latest/\$basearch/$repo_rev/"
+           base_url="$HTTP_VAL://${_REPO_URL}/yum/amazon/latest/\$basearch/$repo_rev/"
            gpg_key="${base_url}SALTSTACK-GPG-KEY.pub"
            repo_name="SaltStack repo for Amazon Linux"
-           pkg_append="python27"
         else
-           base_url="$HTTP_VAL://repo.saltstack.com/yum/redhat/6/\$basearch/$repo_rev/"
+           base_url="$HTTP_VAL://${_REPO_URL}/yum/redhat/6/\$basearch/$repo_rev/"
            gpg_key="${base_url}SALTSTACK-GPG-KEY.pub"
            repo_name="SaltStack repo for RHEL/CentOS 6"
-           pkg_append="python"
         fi
 
         # This should prob be refactored to use __install_saltstack_rhel_repository()
@@ -4383,21 +4378,19 @@ baseurl=$base_url
 _eof
         fi
 
-        if [ "$_UPGRADE_SYS" -eq $BS_TRUE ]; then
-            yum -y update || return 1
-        fi
     fi
-    #ordereddict removed.
-    #Package python-ordereddict-1.1-2.el6.noarch is obsoleted by python26-2.6.9-2.88.amzn1.x86_64 which is already installed
+
+    # Package python-ordereddict-1.1-2.el6.noarch is obsoleted by python26-2.6.9-2.88.amzn1.x86_64
+    # which is already installed
     __PACKAGES="${pkg_append}-PyYAML ${pkg_append}-crypto ${pkg_append}-msgpack ${pkg_append}-zmq ${pkg_append}-jinja2 ${pkg_append}-requests"
 
     # shellcheck disable=SC2086
-    yum -y install ${__PACKAGES} ${ENABLE_EPEL_CMD} || return 1
+    __yum_install_noinput ${__PACKAGES} || return 1
 
     if [ "${_EXTRA_PACKAGES}" != "" ]; then
         echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
         # shellcheck disable=SC2086
-        yum install -y ${_EXTRA_PACKAGES} ${ENABLE_EPEL_CMD} || return 1
+        __yum_install_noinput ${_EXTRA_PACKAGES} || return 1
     fi
 }
 
@@ -4417,13 +4410,8 @@ install_amazon_linux_ami_git_deps() {
 
     install_amazon_linux_ami_deps || return 1
 
-    ENABLE_EPEL_CMD=""
-    if [ $_DISABLE_REPOS -eq $BS_TRUE ]; then
-        ENABLE_EPEL_CMD="--enablerepo=${_EPEL_REPO}"
-    fi
-
     if ! __check_command_exists git; then
-        yum -y install git ${ENABLE_EPEL_CMD} || return 1
+        __yum_install_noinput git || return 1
     fi
 
     __git_clone_and_checkout || return 1
@@ -4447,7 +4435,7 @@ install_amazon_linux_ami_git_deps() {
 
     if [ "${__PACKAGES}" != "" ]; then
         # shellcheck disable=SC2086
-        yum -y install ${__PACKAGES} ${ENABLE_EPEL_CMD} || return 1
+        __yum_install_noinput ${__PACKAGES} || return 1
     fi
 
     if [ "${__PIP_PACKAGES}" != "" ]; then

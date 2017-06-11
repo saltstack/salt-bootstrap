@@ -211,7 +211,7 @@ If (!$version) {
         $returnMatches = $returnMatches | Where {$_ -like "Salt-Minion*AMD64-Setup.exe"}
     }
 
-    $version = $(($returnMatches | Sort-Object -Descending)[0]).Split(("n-","-A","-x"),([System.StringSplitOptions]::RemoveEmptyEntries))[1]
+    $version = $($returnMatches[$returnMatches.Count -1]).Split(("n-","-A","-x"),([System.StringSplitOptions]::RemoveEmptyEntries))[1]
 }
 
 #===============================================================================

@@ -1444,6 +1444,27 @@ __debian_derivatives_translation() {
 
 
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  __debian_codename_translation
+#   DESCRIPTION:  Map Debian major versions to their corresponding code names
+#----------------------------------------------------------------------------------------------------------------------
+# shellcheck disable=SC2034
+__debian_codename_translation() {
+
+    case $DISTRO_MAJOR_VERSION in
+        "7")
+            DISTRO_CODENAME="wheezy"
+            ;;
+        "8")
+            DISTRO_CODENAME="jessie"
+            ;;
+        *)
+            DISTRO_CODENAME="jessie"
+            ;;
+    esac
+}
+
+
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #          NAME:  __check_end_of_life_versions
 #   DESCRIPTION:  Check for end of life distribution versions
 #----------------------------------------------------------------------------------------------------------------------
@@ -1686,6 +1707,9 @@ fi
 
 # For ubuntu versions, obtain the codename from the release version
 __ubuntu_codename_translation
+
+# For debian versions, obtain the codename from the release version
+__debian_codename_translation
 
 # Only Ubuntu has daily packages, let's let users know about that
 if ([ "${DISTRO_NAME_L}" != "ubuntu" ] && [ "$ITYPE" = "daily" ]); then
@@ -2912,17 +2936,18 @@ install_ubuntu_check_services() {
 #   Debian Install Functions
 #
 __install_saltstack_debian_repository() {
-    if [ "$DISTRO_MAJOR_VERSION" -eq 7 ]; then
-        DEBIAN_CODENAME="wheezy"
-        DEBIAN_RELEASE="$DISTRO_MAJOR_VERSION"
-    else
-        DEBIAN_CODENAME="jessie"
+    if [ "$DISTRO_MAJOR_VERSION" -eq 9 ]; then
+        # Packages for Debian 9 at repo.saltstack.com are not yet available
+        # Set up repository for Debian 8 for Debian 9 for now until support
+        # is available at repo.saltstack.com for Debian 9.
         DEBIAN_RELEASE="8"
+    else
+        DEBIAN_RELEASE="$DISTRO_MAJOR_VERSION"
     fi
 
     # amd64 is just a part of repository URI, 32-bit pkgs are hosted under the same location
     SALTSTACK_DEBIAN_URL="${HTTP_VAL}://${_REPO_URL}/apt/debian/${DEBIAN_RELEASE}/${__REPO_ARCH}/${STABLE_REV}"
-    echo "deb $SALTSTACK_DEBIAN_URL $DEBIAN_CODENAME main" > "/etc/apt/sources.list.d/saltstack.list"
+    echo "deb $SALTSTACK_DEBIAN_URL $DISTRO_CODENAME main" > "/etc/apt/sources.list.d/saltstack.list"
 
     if [ "$HTTP_VAL" = "https" ] ; then
         __apt_get_install_noinput apt-transport-https ca-certificates || return 1

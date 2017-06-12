@@ -4522,7 +4522,7 @@ install_arch_linux_stable_deps() {
     pacman -Su --noconfirm --needed python2-yaml
 
     if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
-        pacman -Su --noconfirm --needed apache-libcloud || return 1
+        pacman -Su --noconfirm --needed python2-apache-libcloud || return 1
     fi
 
     if [ "${_EXTRA_PACKAGES}" != "" ]; then

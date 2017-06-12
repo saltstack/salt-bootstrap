@@ -2785,7 +2785,7 @@ install_ubuntu_git_post() {
         [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
 
         if [ -f /bin/systemctl ] && [ "$DISTRO_MAJOR_VERSION" -ge 16 ]; then
-            __copyfile "${_SALT_GIT_CHECKOUT_DIR}/pkg/deb/salt-${fname}.service" "/lib/systemd/system/salt-${fname}.service"
+            __copyfile "${_SALT_GIT_CHECKOUT_DIR}/pkg/salt-${fname}.service" "/lib/systemd/system/salt-${fname}.service"
 
             # Skip salt-api since the service should be opt-in and not necessarily started on boot
             [ $fname = "api" ] && continue
@@ -2809,10 +2809,10 @@ install_ubuntu_git_post() {
                 /sbin/initctl reload-configuration || return 1
             fi
         # No upstart support in Ubuntu!?
-        elif [ -f "${_SALT_GIT_CHECKOUT_DIR}/debian/salt-${fname}.init" ]; then
+        elif [ -f "${_SALT_GIT_CHECKOUT_DIR}/pkg/salt-${fname}.init" ]; then
             echodebug "There's NO upstart support!?"
-            echodebug "Copying ${_SALT_GIT_CHECKOUT_DIR}/debian/salt-${fname}.init to /etc/init.d/salt-$fname"
-            __copyfile "${_SALT_GIT_CHECKOUT_DIR}/debian/salt-${fname}.init" "/etc/init.d/salt-$fname"
+            echodebug "Copying ${_SALT_GIT_CHECKOUT_DIR}/pkg/salt-${fname}.init to /etc/init.d/salt-$fname"
+            __copyfile "${_SALT_GIT_CHECKOUT_DIR}/pkg/salt-${fname}.init" "/etc/init.d/salt-$fname"
             chmod +x /etc/init.d/salt-$fname
 
             # Skip salt-api since the service should be opt-in and not necessarily started on boot
@@ -3143,9 +3143,9 @@ install_debian_git_post() {
         if [ -f /bin/systemctl ]; then
             if [ ! -f /lib/systemd/system/salt-${fname}.service ] || \
                 ([ -f /lib/systemd/system/salt-${fname}.service ] && [ $_FORCE_OVERWRITE -eq $BS_TRUE ]); then
-                if [ -f "${_SALT_GIT_CHECKOUT_DIR}/pkg/deb/salt-${fname}.service" ]; then
-                    __copyfile "${_SALT_GIT_CHECKOUT_DIR}/pkg/deb/salt-${fname}.service" /lib/systemd/system
-                    __copyfile "${_SALT_GIT_CHECKOUT_DIR}/pkg/deb/salt-${fname}.environment" "/etc/default/salt-${fname}"
+                if [ -f "${_SALT_GIT_CHECKOUT_DIR}/pkg/salt-${fname}.service" ]; then
+                    __copyfile "${_SALT_GIT_CHECKOUT_DIR}/pkg/salt-${fname}.service" /lib/systemd/system
+                    __copyfile "${_SALT_GIT_CHECKOUT_DIR}/pkg/salt-${fname}.environment" "/etc/default/salt-${fname}"
                 else
                     # workaround before adding Debian-specific unit files to the Salt main repo
                     __copyfile "${_SALT_GIT_CHECKOUT_DIR}/pkg/salt-${fname}.service" /lib/systemd/system
@@ -3162,9 +3162,9 @@ install_debian_git_post() {
         # Install initscripts for Debian 7 "Wheezy"
         elif [ ! -f "/etc/init.d/salt-$fname" ] || \
             ([ -f "/etc/init.d/salt-$fname" ] && [ "$_FORCE_OVERWRITE" -eq $BS_TRUE ]); then
-            if [ -f "${_SALT_GIT_CHECKOUT_DIR}/pkg/deb/salt-$fname.init" ]; then
-                __copyfile "${_SALT_GIT_CHECKOUT_DIR}/pkg/deb/salt-${fname}.init" "/etc/init.d/salt-${fname}"
-                __copyfile "${_SALT_GIT_CHECKOUT_DIR}/pkg/deb/salt-${fname}.environment" "/etc/default/salt-${fname}"
+            if [ -f "${_SALT_GIT_CHECKOUT_DIR}/pkg/salt-$fname.init" ]; then
+                __copyfile "${_SALT_GIT_CHECKOUT_DIR}/pkg/salt-${fname}.init" "/etc/init.d/salt-${fname}"
+                __copyfile "${_SALT_GIT_CHECKOUT_DIR}/pkg/salt-${fname}.environment" "/etc/default/salt-${fname}"
             else
                 # Make sure wget is available
                 __check_command_exists wget || __apt_get_install_noinput wget || return 1

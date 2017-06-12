@@ -1450,7 +1450,7 @@ __debian_derivatives_translation() {
 __check_end_of_life_versions() {
     case "${DISTRO_NAME_L}" in
         debian)
-            # Debian versions bellow 6 are not supported
+            # Debian versions below 7 are not supported
             if [ "$DISTRO_MAJOR_VERSION" -lt 7 ]; then
                 echoerror "End of life distributions are not supported."
                 echoerror "Please consider upgrading to the next stable. See:"
@@ -1712,14 +1712,18 @@ if ([ "${DISTRO_NAME_L}" != "ubuntu" ] && [ "$_VIRTUALENV_DIR" != "null" ]); the
 fi
 
 # Only Ubuntu has support for pip installing all packages
-if ([ "${DISTRO_NAME_L}" != "ubuntu" ] && [ $_PIP_ALL -eq $BS_TRUE ]);then
+if ([ "${DISTRO_NAME_L}" != "ubuntu" ] && [ $_PIP_ALL -eq $BS_TRUE ]); then
     echoerror "${DISTRO_NAME} does not have -a support"
     exit 1
 fi
 
-# Starting from Ubuntu 16.10, gnupg-curl has been renamed to gnupg1-curl.
+# Starting from Debian 9 and Ubuntu 16.10, gnupg-curl has been renamed to gnupg1-curl.
 GNUPG_CURL="gnupg-curl"
-if [ "${DISTRO_NAME_L}" = "ubuntu" ]; then
+if [ "$DISTRO_NAME_L" = "debian" ]; then
+    if [ "$DISTRO_MAJOR_VERSION" -gt 8 ]; then
+        GNUPG_CURL="gnupg1-curl"
+    fi
+elif [ "$DISTRO_NAME_L" = "ubuntu" ]; then
     if [ "${DISTRO_VERSION}" = "16.10" ] || [ "$DISTRO_MAJOR_VERSION" -gt 16 ]; then
         GNUPG_CURL="gnupg1-curl"
     fi
@@ -2910,12 +2914,14 @@ install_ubuntu_check_services() {
 __install_saltstack_debian_repository() {
     if [ "$DISTRO_MAJOR_VERSION" -eq 7 ]; then
         DEBIAN_CODENAME="wheezy"
+        DEBIAN_RELEASE="$DISTRO_MAJOR_VERSION"
     else
         DEBIAN_CODENAME="jessie"
+        DEBIAN_RELEASE="8"
     fi
 
     # amd64 is just a part of repository URI, 32-bit pkgs are hosted under the same location
-    SALTSTACK_DEBIAN_URL="${HTTP_VAL}://${_REPO_URL}/apt/debian/${DISTRO_MAJOR_VERSION}/${__REPO_ARCH}/${STABLE_REV}"
+    SALTSTACK_DEBIAN_URL="${HTTP_VAL}://${_REPO_URL}/apt/debian/${DEBIAN_RELEASE}/${__REPO_ARCH}/${STABLE_REV}"
     echo "deb $SALTSTACK_DEBIAN_URL $DEBIAN_CODENAME main" > "/etc/apt/sources.list.d/saltstack.list"
 
     if [ "$HTTP_VAL" = "https" ] ; then

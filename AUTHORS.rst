@@ -19,6 +19,7 @@ Angelo Gründler             plueschopath           angelo.gruendler@w1r3.net
 Ari Aosved                  devaos                 ari.aosved@gmail.com
 Ashok Raja R                ashokrajar             ashokrajar@users.noreply.github.com
 Beau Hargis                 beaucephus             beau@customermobile.com
+BlaineAtAffirmOnceMore      BlaineAtAffirm
 Boris Feld                  Lothiraldan
 Brad Thurber                bradthurber
 Brandon Clifford            brandon099             brandon.clifford@vivint.com

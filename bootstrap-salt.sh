@@ -1705,11 +1705,13 @@ if [ $_START_DAEMONS -eq $BS_FALSE ]; then
     echoinfo "Daemons will not be started"
 fi
 
-# For ubuntu versions, obtain the codename from the release version
-__ubuntu_codename_translation
-
-# For debian versions, obtain the codename from the release version
-__debian_codename_translation
+if [ "${DISTRO_NAME_L}" = "ubuntu" ]; then
+  # For ubuntu versions, obtain the codename from the release version
+  __ubuntu_codename_translation
+elif [ "${DISTRO_NAME_L}" = "debian" ]; then
+  # For debian versions, obtain the codename from the release version
+  __debian_codename_translation
+fi
 
 # Only Ubuntu has daily packages, let's let users know about that
 if ([ "${DISTRO_NAME_L}" != "ubuntu" ] && [ "$ITYPE" = "daily" ]); then

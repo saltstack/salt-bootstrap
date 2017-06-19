@@ -27,13 +27,15 @@ are high that your issue was already fixed.
 Bootstrap
 =========
 
+In every two-step installation example, you would be well-served to **verify against the SHA256 sum**
+of the downloaded ``bootstrap-salt.sh`` file.
+
+The SHA256 sum of the ``bootstrap-salt.sh`` file, per release, is:
+
+- 2017.05.24: ``8c42c2e5ad3d4384ddc557da5c214ba3e40c056ca1b758d14a392c1364650e89``
+
 If you're looking for the *one-liner* to install Salt, please scroll to the bottom and use the
 instructions for `Installing via an Insecure One-Liner`_.
-
-.. note::
-
-  In every two-step example, you would be well-served to examine the downloaded file and examine
-  it to ensure that it does what you expect.
 
 
 Examples
@@ -64,7 +66,7 @@ If you want to install a specific release version (based on the Git tags):
 .. code:: console
 
   curl -o bootstrap-salt.sh -L https://bootstrap.saltstack.com
-  sudo sh bootstrap-salt.sh git v2016.3.2
+  sudo sh bootstrap-salt.sh git v2016.11.5
 
 To install a specific branch from a Git fork:
 
@@ -104,7 +106,7 @@ Installing a specific version from git using ``wget``:
 .. code:: console
 
   wget -O bootstrap-salt.sh https://bootstrap.saltstack.com
-  sudo sh bootstrap-salt.sh -P git v2015.8.11
+  sudo sh bootstrap-salt.sh -P git v2016.11.5
 
 .. note::
 

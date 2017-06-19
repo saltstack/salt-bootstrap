@@ -1222,6 +1222,42 @@ __gather_bsd_system_info() {
 
 
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  __gather_darwin_system_info
+#   DESCRIPTION:  Discover Darwin (aka OSX aka macOS) systems information
+#----------------------------------------------------------------------------------------------------------------------
+__gather_darwin_system_info() {
+    DISTRO_NAME=${OS_NAME}
+    DISTRO_VERSION=$(sw_vers | grep ProductVersion |  cut -f 2 -d: | tr -d ' \t')
+
+    DISTRO_MAJOR_VERSION=$(echo ${DISTRO_VERSION} | cut -d. -f 1)
+    DISTRO_MINOR_VERSION=$(echo ${DISTRO_VERSION} | cut -d. -f 2)
+
+    if [ "${DISTRO_MAJOR_VERSION}" -ne "10" ]; then
+        echoerror "${DISTRO_NAME} ${DISTRO_VERSION} not supported.";
+        exit 1
+    fi;
+
+    case ${DISTRO_MINOR_VERSION} in
+        [1-8] )
+            echoerror "${DISTRO_NAME} ${DISTRO_VERSION} not supported."
+            ;;
+        9 )
+            echodebug "Detected Maverick"
+            LAUNCHCTL_API_VERSION="maverick"
+            ;;
+        1[0-9]* )
+            echodebug "Detected Yosemite or above"
+            LAUNCHCTL_API_VERSION="yosemite"
+            ;;
+        * )
+            echoerror "${DISTRO_NAME} ${DISTRO_VERSION} not supported."
+            ;;
+    esac
+
+}
+
+
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #          NAME:  __gather_system_info
 #   DESCRIPTION:  Discover which system and distribution we are running.
 #----------------------------------------------------------------------------------------------------------------------
@@ -1235,6 +1271,9 @@ __gather_system_info() {
             ;;
         openbsd|freebsd|netbsd )
             __gather_bsd_system_info
+            ;;
+        darwin )
+            __gather_darwin_system_info;
             ;;
         * )
             echoerror "${OS_NAME} not supported.";
@@ -1637,7 +1676,12 @@ echoinfo "  Distribution: ${DISTRO_NAME} ${DISTRO_VERSION}"
 echo
 
 # Simplify distro name naming on functions
-DISTRO_NAME_L=$(echo "$DISTRO_NAME" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-zA-Z0-9_ ]//g' | sed -re 's/([[:space:]])+/_/g')
+if [ "${OS_NAME_L}" = "darwin" ]; then
+    # We hardcode in darwin's case because sed -r is not supported there
+    DISTRO_NAME_L=darwin
+else
+    DISTRO_NAME_L=$(echo "$DISTRO_NAME" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-zA-Z0-9_ ]//g' | sed -re 's/([[:space:]])+/_/g')
+fi
 
 # Simplify version naming on functions
 if [ "$DISTRO_VERSION" = "" ] || [ ${_SIMPLIFY_VERSION} -eq $BS_FALSE ]; then
@@ -5156,6 +5200,57 @@ install_openbsd_restart_daemons() {
 
 #
 #   Ended OpenBSD Install Functions
+#
+#######################################################################################################################
+
+#######################################################################################################################
+#
+#   OS X Install Functions
+#
+install_darwin_deps() {
+    return 0
+}
+
+install_darwin_stable() {
+    installer_url="https://repo.saltstack.com/osx/salt-2016.11.5-x86_64.pkg"
+
+    expected_md5=416321b985a17b2c0c6ee35914946bf9
+
+    tmpdir=$(mktemp -d -t 'salt-tempdir')
+    target="${tmpdir}/salt-installer.pkg"
+    __fetch_url "${target}" "$installer_url"
+
+    actual_md5=$(md5 -q "${target}")
+    if [ "$actual_md5" = "$expected_md5" ]; then
+        installer -pkg ${target} -target / || return 1
+    else
+        echoerror "Wrong checksum for installer"
+        exit 1
+    fi
+}
+
+install_darwin_restart_daemons() {
+    case ${LAUNCHCTL_API_VERSION} in
+        "maverick" )
+            launchctl unload -w /Library/LaunchDaemons/com.saltstack.salt.minion.plist
+            launchctl load -w /Library/LaunchDaemons/com.saltstack.salt.minion.plist || return 1
+            ;;
+        "yosemite" )
+            launchctl disable system/com.saltstack.salt.minion
+            launchctl enable system/com.saltstack.salt.minion || return 1
+            launchctl bootstrap system /Library/LaunchDaemons/com.saltstack.salt.minion.plist
+            ;;
+        * )
+            echoerror "Unknown LAUNCHCTL_API_VERSION ${LAUNCHCTL_API_VERSION} (this is a bug)"
+            exit 1
+            ;;
+    esac
+
+    return 0
+}
+
+#
+#   Ended OS X Install Functions
 #
 #######################################################################################################################
 

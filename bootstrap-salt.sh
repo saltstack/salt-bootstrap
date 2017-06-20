@@ -1229,8 +1229,8 @@ __gather_darwin_system_info() {
     DISTRO_NAME=${OS_NAME}
     DISTRO_VERSION=$(sw_vers | grep ProductVersion |  cut -f 2 -d: | tr -d ' \t')
 
-    DISTRO_MAJOR_VERSION=$(echo ${DISTRO_VERSION} | cut -d. -f 1)
-    DISTRO_MINOR_VERSION=$(echo ${DISTRO_VERSION} | cut -d. -f 2)
+    DISTRO_MAJOR_VERSION=$(echo "${DISTRO_VERSION}" | cut -d. -f 1)
+    DISTRO_MINOR_VERSION=$(echo "${DISTRO_VERSION}" | cut -d. -f 2)
 
     if [ "${DISTRO_MAJOR_VERSION}" -ne "10" ]; then
         echoerror "${DISTRO_NAME} ${DISTRO_VERSION} not supported.";
@@ -5222,7 +5222,7 @@ install_darwin_stable() {
 
     actual_md5=$(md5 -q "${target}")
     if [ "$actual_md5" = "$expected_md5" ]; then
-        installer -pkg ${target} -target / || return 1
+        installer -pkg "${target}" -target / || return 1
     else
         echoerror "Wrong checksum for installer"
         exit 1

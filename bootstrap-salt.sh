@@ -1609,22 +1609,6 @@ __check_end_of_life_versions() {
 }
 
 
-#---  FUNCTION  -------------------------------------------------------------------------------------------------------
-#          NAME:  __check_and_refresh_suse_pkg_repo
-#   DESCRIPTION:  Check if zypper knows about systemsmanagement_saltstack repo yet.
-#                 If it doesn't, add the repo and refresh with the SUSE_PKG_URL.
-#----------------------------------------------------------------------------------------------------------------------
-__check_and_refresh_suse_pkg_repo() {
-    # Check to see if systemsmanagement_saltstack exists
-    __zypper repos | grep systemsmanagement_saltstack >/dev/null 2>&1
-
-    if [ $? -eq 1 ]; then
-        # zypper does not yet know anything about systemsmanagement_saltstack
-        __zypper addrepo --refresh "${SUSE_PKG_URL}" || return 1
-    fi
-}
-
-
 __gather_system_info
 
 echo
@@ -5348,6 +5332,16 @@ install_smartos_restart_daemons() {
 #    openSUSE Install Functions.
 #
 __ZYPPER_REQUIRES_REPLACE_FILES=-1
+
+__check_and_refresh_suse_pkg_repo() {
+    # Check to see if systemsmanagement_saltstack exists
+    __zypper repos | grep systemsmanagement_saltstack >/dev/null 2>&1
+
+    if [ $? -eq 1 ]; then
+        # zypper does not yet know anything about systemsmanagement_saltstack
+        __zypper addrepo --refresh "${SUSE_PKG_URL}" || return 1
+    fi
+}
 
 __set_suse_pkg_repo() {
     suse_pkg_url_path="${DISTRO_REPO}/systemsmanagement:saltstack.repo"

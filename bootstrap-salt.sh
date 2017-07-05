@@ -1459,6 +1459,9 @@ __debian_codename_translation() {
         "8")
             DISTRO_CODENAME="jessie"
             ;;
+        "9")
+            DISTRO_CODENAME="stretch"
+            ;;
         *)
             DISTRO_CODENAME="jessie"
             ;;
@@ -2924,17 +2927,8 @@ install_ubuntu_check_services() {
 #   Debian Install Functions
 #
 __install_saltstack_debian_repository() {
-    if [ "$DISTRO_MAJOR_VERSION" -eq 9 ]; then
-        # Packages for Debian 9 at repo.saltstack.com are not yet available
-        # Set up repository for Debian 8 for Debian 9 for now until support
-        # is available at repo.saltstack.com for Debian 9.
-        DEBIAN_RELEASE="8"
-    else
-        DEBIAN_RELEASE="$DISTRO_MAJOR_VERSION"
-    fi
-
     # amd64 is just a part of repository URI, 32-bit pkgs are hosted under the same location
-    SALTSTACK_DEBIAN_URL="${HTTP_VAL}://${_REPO_URL}/apt/debian/${DEBIAN_RELEASE}/${__REPO_ARCH}/${STABLE_REV}"
+    SALTSTACK_DEBIAN_URL="${HTTP_VAL}://${_REPO_URL}/apt/debian/${DISTRO_MAJOR_VERSION}/${__REPO_ARCH}/${STABLE_REV}"
     echo "deb $SALTSTACK_DEBIAN_URL $DISTRO_CODENAME main" > "/etc/apt/sources.list.d/saltstack.list"
 
     if [ "$HTTP_VAL" = "https" ] ; then
@@ -2974,6 +2968,11 @@ install_debian_deps() {
 
     # YAML module is used for generating custom master/minion configs
     __PACKAGES="${__PACKAGES} python-yaml"
+
+    # Debian 9 needs the dirmgr package in order to import the GPG key later
+    if [ "$DISTRO_MAJOR_VERSION" -ge 9 ]; then
+        __PACKAGES="${__PACKAGES} dirmngr"
+    fi
 
     # shellcheck disable=SC2086
     __apt_get_install_noinput ${__PACKAGES} || return 1
@@ -3093,6 +3092,57 @@ install_debian_8_git_deps() {
     return 0
 }
 
+install_debian_9_git_deps() {
+    install_debian_deps || return 1
+
+    if ! __check_command_exists git; then
+        __apt_get_install_noinput git || return 1
+    fi
+
+    if [ "$_INSECURE_DL" -eq $BS_FALSE ] && [ "${_SALT_REPO_URL%%://*}" = "https" ]; then
+        __apt_get_install_noinput ca-certificates
+    fi
+
+    __git_clone_and_checkout || return 1
+
+    __PACKAGES="libzmq5 lsb-release python-apt python-crypto python-jinja2 python-msgpack"
+    __PACKAGES="${__PACKAGES} python-requests python-systemd python-yaml python-zmq"
+
+    if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
+        # Install python-libcloud if asked to
+        __PACKAGES="${__PACKAGES} python-libcloud"
+    fi
+
+    __PIP_PACKAGES=''
+    if (__check_pip_allowed >/dev/null 2>&1); then
+        __PIP_PACKAGES='tornado'
+        # Install development environment for building tornado Python module
+        __PACKAGES="${__PACKAGES} build-essential python-dev"
+
+        if ! __check_command_exists pip; then
+            __PACKAGES="${__PACKAGES} python-pip"
+        fi
+    else
+        __PACKAGES="${__PACKAGES} python-backports-abc python-tornado"
+    fi
+
+    # shellcheck disable=SC2086
+    __apt_get_install_noinput ${__PACKAGES} || return 1
+
+    if [ "${__PIP_PACKAGES}" != "" ]; then
+        # shellcheck disable=SC2086,SC2090
+        pip install -U ${__PIP_PACKAGES} || return 1
+    fi
+
+    # Let's trigger config_salt()
+    if [ "$_TEMP_CONFIG_DIR" = "null" ]; then
+        _TEMP_CONFIG_DIR="${_SALT_GIT_CHECKOUT_DIR}/conf/"
+        CONFIG_SALT_FUNC="config_salt"
+    fi
+
+    return 0
+}
+
 install_debian_stable() {
     __PACKAGES=""
 
@@ -3125,9 +3175,14 @@ install_debian_8_stable() {
     return 0
 }
 
+install_debian_9_stable() {
+    install_debian_stable || return 1
+    return 0
+}
+
 install_debian_git() {
     if [ -f "${_SALT_GIT_CHECKOUT_DIR}/salt/syspaths.py" ]; then
-      python setup.py --salt-config-dir="$_SALT_ETC_DIR" --salt-cache-dir="${_SALT_CACHE_DIR}" ${SETUP_PY_INSTALL_ARGS} install --install-layout=deb || return 1
+        python setup.py --salt-config-dir="$_SALT_ETC_DIR" --salt-cache-dir="${_SALT_CACHE_DIR}" ${SETUP_PY_INSTALL_ARGS} install --install-layout=deb || return 1
     else
         python setup.py ${SETUP_PY_INSTALL_ARGS} install --install-layout=deb || return 1
     fi
@@ -3139,6 +3194,11 @@ install_debian_7_git() {
 }
 
 install_debian_8_git() {
+    install_debian_git || return 1
+    return 0
+}
+
+install_debian_9_git() {
     install_debian_git || return 1
     return 0
 }

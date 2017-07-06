@@ -3105,34 +3105,17 @@ install_debian_9_git_deps() {
 
     __git_clone_and_checkout || return 1
 
-    __PACKAGES="libzmq5 lsb-release python-apt python-crypto python-jinja2 python-msgpack"
-    __PACKAGES="${__PACKAGES} python-requests python-systemd python-yaml python-zmq"
+    __PACKAGES="libzmq5 lsb-release python-apt python-backports-abc python-crypto"
+    __PACKAGES="${__PACKAGES} python-jinja2 python-msgpack python-requests python-systemd"
+    __PACKAGES="${__PACKAGES} python-tornado python-yaml python-zmq"
 
     if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
         # Install python-libcloud if asked to
         __PACKAGES="${__PACKAGES} python-libcloud"
     fi
 
-    __PIP_PACKAGES=''
-    if (__check_pip_allowed >/dev/null 2>&1); then
-        __PIP_PACKAGES='tornado'
-        # Install development environment for building tornado Python module
-        __PACKAGES="${__PACKAGES} build-essential python-dev"
-
-        if ! __check_command_exists pip; then
-            __PACKAGES="${__PACKAGES} python-pip"
-        fi
-    else
-        __PACKAGES="${__PACKAGES} python-backports-abc python-tornado"
-    fi
-
     # shellcheck disable=SC2086
     __apt_get_install_noinput ${__PACKAGES} || return 1
-
-    if [ "${__PIP_PACKAGES}" != "" ]; then
-        # shellcheck disable=SC2086,SC2090
-        pip install -U ${__PIP_PACKAGES} || return 1
-    fi
 
     # Let's trigger config_salt()
     if [ "$_TEMP_CONFIG_DIR" = "null" ]; then

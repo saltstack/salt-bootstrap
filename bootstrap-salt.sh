@@ -3374,23 +3374,7 @@ install_fedora_git_deps() {
 
     __git_clone_and_checkout || return 1
 
-    __PACKAGES="systemd-python"
-    __PIP_PACKAGES=""
-
-    if [ -f "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" ]; then
-        # We're on the develop branch, install whichever tornado is on the requirements file
-        __REQUIRED_TORNADO="$(grep tornado "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt")"
-        if [ "${__REQUIRED_TORNADO}" != "" ]; then
-            __check_pip_allowed "You need to allow pip based installations (-P) in order to install tornado"
-
-            # Install pip and pip dependencies
-            if ! __check_command_exists pip; then
-                __PACKAGES="${__PACKAGES} python-setuptools python-pip gcc python-devel"
-            fi
-
-            __PIP_PACKAGES="${__PIP_PACKAGES} tornado"
-        fi
-    fi
+    __PACKAGES="python2-tornado systemd-python"
 
     if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
         __PACKAGES="${__PACKAGES} python-libcloud python-netaddr"
@@ -3398,11 +3382,6 @@ install_fedora_git_deps() {
 
     # shellcheck disable=SC2086
     dnf install -y ${__PACKAGES} || return 1
-
-    if [ "${__PIP_PACKAGES}" != "" ]; then
-        # shellcheck disable=SC2086,SC2090
-        pip install -U ${__PIP_PACKAGES} || return 1
-    fi
 
     # Let's trigger config_salt()
     if [ "$_TEMP_CONFIG_DIR" = "null" ]; then

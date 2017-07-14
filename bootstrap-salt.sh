@@ -858,8 +858,10 @@ __derive_debian_numeric_version() {
         elif [ "$INPUT_VERSION" = "jessie/sid" ]; then
             NUMERIC_VERSION=$(__parse_version_string "8.0")
         elif [ "$INPUT_VERSION" = "stretch/sid" ]; then
-            # Let's start detecting the upcoming Debian 9 (Stretch)
             NUMERIC_VERSION=$(__parse_version_string "9.0")
+        elif [ "$INPUT_VERSION" = "buster/sid" ]; then
+            # Let's start detecting the upcoming Debian 10 (Buster) release
+            NUMERIC_VERSION=$(__parse_version_string "10.0")
         else
             echowarn "Unable to parse the Debian Version (codename: '$INPUT_VERSION')"
         fi
@@ -1461,6 +1463,9 @@ __debian_codename_translation() {
             ;;
         "9")
             DISTRO_CODENAME="stretch"
+            ;;
+        "10")
+            DISTRO_CODENAME="buster"
             ;;
         *)
             DISTRO_CODENAME="jessie"
@@ -2927,9 +2932,21 @@ install_ubuntu_check_services() {
 #   Debian Install Functions
 #
 __install_saltstack_debian_repository() {
+    if [ "$DISTRO_MAJOR_VERSION" -eq 10 ]; then
+        # Packages for Debian 10 at repo.saltstack.com are not yet available
+        # Set up repository for Debian 9 for Debian 10 for now until support
+        # is available at repo.saltstack.com for Debian 10.
+        echowarn "Debian 10 distribution detected, but stable packages requested. Trying packages from Debian 9. You may experience problems."
+        DEBIAN_RELEASE="9"
+        DEBIAN_CODENAME="stretch"
+    else
+        DEBIAN_RELEASE="$DISTRO_MAJOR_VERSION"
+        DEBIAN_CODENAME="$DISTRO_CODENAME"
+    fi
+
     # amd64 is just a part of repository URI, 32-bit pkgs are hosted under the same location
-    SALTSTACK_DEBIAN_URL="${HTTP_VAL}://${_REPO_URL}/apt/debian/${DISTRO_MAJOR_VERSION}/${__REPO_ARCH}/${STABLE_REV}"
-    echo "deb $SALTSTACK_DEBIAN_URL $DISTRO_CODENAME main" > "/etc/apt/sources.list.d/saltstack.list"
+    SALTSTACK_DEBIAN_URL="${HTTP_VAL}://${_REPO_URL}/apt/debian/${DEBIAN_RELEASE}/${__REPO_ARCH}/${STABLE_REV}"
+    echo "deb $SALTSTACK_DEBIAN_URL $DEBIAN_CODENAME main" > "/etc/apt/sources.list.d/saltstack.list"
 
     if [ "$HTTP_VAL" = "https" ] ; then
         __apt_get_install_noinput apt-transport-https ca-certificates || return 1
@@ -3123,6 +3140,11 @@ install_debian_9_git_deps() {
         CONFIG_SALT_FUNC="config_salt"
     fi
 
+    return 0
+}
+
+install_debian_10_git_deps() {
+    install_debian_9_git_deps || return 1
     return 0
 }
 

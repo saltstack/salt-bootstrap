@@ -1133,7 +1133,7 @@ __install_python_and_deps() {
         for SINGLE_PACKAGE in $_PIP_PACKAGES; do
             __REQUIRED_VERSION="$(grep ${SINGLE_PACKAGE} "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt")"
             if [ "${__REQUIRED_VERSION}" != "" ]; then
-                _PIP_PACKAGES="${_PIP_PACKAGES/$SINGLE_PACKAGE/$__REQUIRED_VERSION}"
+                _PIP_PACKAGES=$(echo "$_PIP_PACKAGES" | sed "s/${SINGLE_PACKAGE}/${__REQUIRED_VERSION}/")
             fi
         done
     fi

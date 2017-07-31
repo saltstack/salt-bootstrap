@@ -3496,13 +3496,6 @@ __install_epel_repository() {
         return 0
     fi
 
-    # Check if epel-release is already installed and flag it accordingly
-    rpm --nodigest --nosignature -q epel-release > /dev/null 2>&1
-    if [ $? -eq 0 ]; then
-        _EPEL_REPOS_INSTALLED=$BS_TRUE
-        return 0
-    fi
-
     # Download latest 'epel-release' package for the distro version directly
     epel_repo_url="${HTTP_VAL}://dl.fedoraproject.org/pub/epel/epel-release-latest-${DISTRO_MAJOR_VERSION}.noarch.rpm"
     rpm -Uvh --force "$epel_repo_url" || return 1

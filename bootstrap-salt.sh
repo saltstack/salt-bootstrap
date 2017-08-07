@@ -1131,7 +1131,7 @@ __install_python_and_deps() {
     _PIP_PACKAGES="tornado PyYAML msgpack-python jinja2 pycrypto zmq"
     if [ -f "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" ]; then
         for SINGLE_PACKAGE in $_PIP_PACKAGES; do
-            __REQUIRED_VERSION="$(grep ${SINGLE_PACKAGE} "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt")"
+            __REQUIRED_VERSION="$(grep "${SINGLE_PACKAGE}" "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt")"
             if [ "${__REQUIRED_VERSION}" != "" ]; then
                 _PIP_PACKAGES=$(echo "$_PIP_PACKAGES" | sed "s/${SINGLE_PACKAGE}/${__REQUIRED_VERSION}/")
             fi

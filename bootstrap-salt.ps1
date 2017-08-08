@@ -237,17 +237,18 @@ If ([int]$year -lt 2017) {
 }
 Else {
     If ($pythonVersion -eq "3") {
-        $pythonVersion = "Py3-"
+        $pythonVersion = "-Py3"
     }
     Else {
-        $pythonVersion = "Py2-"
+        $pythonVersion = "-Py2"
     }
 }
+$versionSection = $version + $pythonVersion
 
 #===============================================================================
 # Download minion setup file
 #===============================================================================
-$saltExe = "Salt-Minion-$version-$pythonVersion$arch-Setup.exe"
+$saltExe = "Salt-Minion-$versionSection-$arch-Setup.exe"
 Write-Output "Downloading Salt minion installer $saltExe"
 $webclient = New-Object System.Net.WebClient
 $url = "$repourl/$saltExe"

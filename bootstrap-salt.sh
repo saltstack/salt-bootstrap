@@ -1093,11 +1093,11 @@ __gather_linux_system_info() {
 
 
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
-#          NAME:  __install_python_and_deps()
-#   DESCRIPTION:  Install a different version of python and its dependencies on a host. Currently this has only been
-#                 tested on Centos 6 and is considered experimental.
+#          NAME:  __install_python()
+#   DESCRIPTION:  Install a different version of python on a host. Currently this has only been tested on CentOS 6 and
+#                 is considered experimental.
 #----------------------------------------------------------------------------------------------------------------------
-__install_python_and_deps() {
+__install_python() {
     if [ "$_PY_EXE" = "" ]; then
         echoerror "Must specify -x <pythonversion> with -y to install a specific python version"
         exit 1
@@ -1107,7 +1107,7 @@ __install_python_and_deps() {
     __PACKAGES="${PY_PKG_V}"
 
 
-    if [ $_DISABLE_REPOS -eq $BS_FALSE ]; then
+    if [ ${_DISABLE_REPOS} -eq ${BS_FALSE} ]; then
         echoinfo "Attempting to install a repo to help provide a separate python package"
         echoinfo "$DISTRO_NAME_L"
         case "$DISTRO_NAME_L" in
@@ -1116,7 +1116,7 @@ __install_python_and_deps() {
                 ;;
             *)
                 echoerror "Installing a repo to provide a python package is only supported on Redhat/CentOS.
-                If a repo is already available please try running script with -r"
+                If a repo is already available, please try running script with -r."
                 exit 1
                 ;;
         esac
@@ -1127,21 +1127,6 @@ __install_python_and_deps() {
 
     echoinfo "Installing ${__PACKAGES}"
     __yum_install_noinput "${__PACKAGES}" || return 1
-
-    _PIP_PACKAGES="tornado PyYAML msgpack-python jinja2 pycrypto zmq"
-    if [ -f "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" ]; then
-        for SINGLE_PACKAGE in $_PIP_PACKAGES; do
-            __REQUIRED_VERSION="$(grep "${SINGLE_PACKAGE}" "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt")"
-            if [ "${__REQUIRED_VERSION}" != "" ]; then
-                _PIP_PACKAGES=$(echo "$_PIP_PACKAGES" | sed "s/${SINGLE_PACKAGE}/${__REQUIRED_VERSION}/")
-            fi
-        done
-    fi
-    if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
-        _PIP_PACKAGES="${_PIP_PACKAGES} apache-libcloud"
-    fi
-
-    __install_pip_pkgs "${_PIP_PACKAGES}" "${_PY_EXE}" || return 1
 }
 
 
@@ -3688,11 +3673,31 @@ install_centos_git_deps() {
         __PACKAGES="${__PACKAGES} python-libcloud"
     fi
 
-    if [ "${_INSTALL_PY}" = "${BS_TRUE}" ]; then
-        __install_python_and_deps || return 1
+    if [ "${_INSTALL_PY}" -eq "${BS_TRUE}" ]; then
+        # Install Python if "-y" was passed in.
+        __install_python || return 1
+    fi
+
+    if [ "${_PY_EXE}" != "" ]; then
+        # If "-x" is defined, install dependencies with pip based on the Python version given.
+        _PIP_PACKAGES="jinja2 msgpack-python pycrypto PyYAML tornado zmq"
+
+        if [ -f "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" ]; then
+            for SINGLE_PACKAGE in $_PIP_PACKAGES; do
+                __REQUIRED_VERSION="$(grep "${SINGLE_PACKAGE}" "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt")"
+                if [ "${__REQUIRED_VERSION}" != "" ]; then
+                    _PIP_PACKAGES=$(echo "$_PIP_PACKAGES" | sed "s/${SINGLE_PACKAGE}/${__REQUIRED_VERSION}/")
+                fi
+            done
+        fi
+
+        if [ "$_INSTALL_CLOUD" -eq "${BS_TRUE}" ]; then
+            _PIP_PACKAGES="${_PIP_PACKAGES} apache-libcloud"
+        fi
+
+        __install_pip_pkgs "${_PIP_PACKAGES}" "${_PY_EXE}" || return 1
     else
-        # shellcheck disable=SC2086
-        __yum_install_noinput ${__PACKAGES} || return 1
+        __yum_install_noinput "${__PACKAGES}" || return 1
     fi
 
     # Let's trigger config_salt()

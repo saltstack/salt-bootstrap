@@ -228,19 +228,20 @@ If (!$version) {
         $returnMatches = $returnMatches | Where {$_ -like "Salt-Minion*AMD64-Setup.exe"}
     }
 
-    $version = $($returnMatches[$returnMatches.Count -1]).Split(("n-","-A","-x"),([System.StringSplitOptions]::RemoveEmptyEntries))[1]
+    $version = $($returnMatches[$returnMatches.Count -1]).Split(("n-","-A","-x","-P"),([System.StringSplitOptions]::RemoveEmptyEntries))[1]
 }
 
-$year = $version.Substring(0, 3)
+$versionSection = $version
+
+$year = $version.Substring(0, 4)
 If ([int]$year -ge 2017) {
     If ($pythonVersion -eq "3") {
-        $pythonVersion = "-Py3"
+        $versionSection = "$version-Py3"
     }
     Else {
-        $pythonVersion = "-Py2"
+        $versionSection = "$version-Py2"
     }
 }
-$versionSection = $version + $pythonVersion
 
 #===============================================================================
 # Download minion setup file

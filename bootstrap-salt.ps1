@@ -232,10 +232,7 @@ If (!$version) {
 }
 
 $year = $version.Substring(0, 3)
-If ([int]$year -lt 2017) {
-    $pythonVersion = ""
-}
-Else {
+If ([int]$year -ge 2017) {
     If ($pythonVersion -eq "3") {
         $pythonVersion = "-Py3"
     }

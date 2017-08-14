@@ -233,6 +233,18 @@ Debian and derivatives
 - Kali Linux 1.0 (based on Debian 7)
 - Raspbian 8 (``armhf``)
 
+Debian Best Effort Support: Testing Release
+*******************************************
+
+This script provides best-effort support for the upcoming Debian testing release. Package
+repositories are not provided on `SaltStack's Debian repository`_ for Debian testing releases.
+However, the bootstrap script will attempt to install the packages for the current stable
+version of Debian.
+
+For example, when installing Salt on Debian 10 (Buster), the bootstrap script will setup the
+repository for Debian 9 (Stretch) from `SaltStack's Debian repository`_ and install the
+Debian 9 packages.
+
 
 Red Hat family
 ~~~~~~~~~~~~~~
@@ -262,7 +274,6 @@ Ubuntu and derivatives
 - Linux Mint 17/18
 - Ubuntu 14.04/16.04 and subsequent non-TLS releases (see below)
 
-
 Ubuntu Best Effort Support: Non-LTS Releases 
 ********************************************
 
@@ -274,17 +285,6 @@ release instead.
 For example, when installing Salt on Ubuntu 16.10, the bootstrap script will setup the repository 
 for Ubuntu 16.04 from `SaltStack's Ubuntu repository`_ and install the 16.04 packages.
 
-Debian Best Effort Suppot: Testing Release
-******************************************
-
-This script provides best-effort support for the upcoming Debian testing release. Package
-repositories are not provided on `SaltStack's Debian repository`_ for Debian testing releases.
-However, the bootstrap script will attempt to install the packages for the current stable
-version of Debian.
-
-For example, when installing Salt on Debian 10 (Buster), the bootstrap script will setup the
-repository for Debian 9 (Stretch) from `SaltStack's Debian repository`_ and install the
-Debian 9 packages.
 
 Other Linux distro
 ~~~~~~~~~~~~~~~~~~

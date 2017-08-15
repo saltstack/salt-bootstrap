@@ -3697,7 +3697,8 @@ install_centos_git_deps() {
 
         __install_pip_pkgs "${_PIP_PACKAGES}" "${_PY_EXE}" || return 1
     else
-        __yum_install_noinput "${__PACKAGES}" || return 1
+        # shellcheck disable=SC2086
+        __yum_install_noinput ${__PACKAGES} || return 1
     fi
 
     # Let's trigger config_salt()

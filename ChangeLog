@@ -1,3 +1,36 @@
+Version 2017.08.17:
+    * Add new authors (rallytime) #1130
+    * README: Fix typo and Table of Contents for Debian section (vutny) #1129
+    * Reduce the # of days an issue is stale to 6 months (rallytime) #1125
+    * Only install Python version if "-y" is defined (rallytime) #1124
+    * Allow powershell bootstrap script to specify PY2 or 3 (rallytime) #1123
+    * Remove the test that checks if the EPEL RPM was installed (amendlik) #1122
+    * added latest version string of nitrogen release 2017.7 (sourceindex) #1120
+    * use versions specified in base.txt when doing pip installs (aflat) #1116
+    * Remove pip install requirement on Fedora git installs (rallytime) #1114
+    * Introductory support for Debian 10 (Buster) (rallytime) #1113
+    * Add Debian 9 support using official repo.saltstack.com packages (rallytime) #1111
+    * Fix 1105 (vernondcole) #1110
+    * Move SUSE specific function closer to related code (vutny) #1107
+    * Update Authors file (rallytime) #1103
+    * Fix ubuntu 16.04 LTS installation (BlaineAtAffirm) #1102
+    * Add debian_codename_translation function, similar to Ubuntu (rallytime) #1101
+    * Add the CODE_OF_CONDUCT.md file (rallytime) #1100
+    * Update Debian and Ubuntu service file paths to be consistent with salt (rallytime) #1099
+    * Add hash verification information to installation instructions (rallytime) #1098
+    * Fix installing salt-cloud package on Arch Linux (rallytime) #1097
+    * Support bootstrapping on upcoming Debian GNU/Linux 9.0 (vutny) #1096
+    * Removes faulty explicit version ordering (absolutejam) #1095
+    * Remove configuring EPEL repo for Amazon Linux (vutny) #1093
+    * Fix -j/-J (JSON configs) options for Debian 8 (vutny) #1092
+    * Fix #1035: detect and log errors earlier (vutny) #1091
+    * Update AUTHORS file (rallytime) #1089
+    * Autounmask as separate step (decomposite) #1088
+    * Ensure presence of CONFIG_PROTECT_MASK files (decomposite) #1087
+    * Update Fedora support: 23 is EOL now. (rallytime) #1084
+    * Fix the -R option on Debian/Ubuntu (rallytime) #1082
+    * Declare End-Of-Life for Ubuntu 12.04 LTS (vutny) #1080
+
 Version 2017.05.24:
 	* Use freebsd repo to query for salt dependencies (Ch3LL) #1076
 	* Allow amazon to work with python2.7 on installs over 2016.11 (Ch3LL) #1073

@@ -13,8 +13,13 @@
     Runs without any parameters. Uses all the default values/settings.
 
 .EXAMPLE
-    ./bootstrap-salt.ps1 -version 2015.4.1-3
+    ./bootstrap-salt.ps1 -version 2017.7.0
     Specifies a particular version of the installer.
+
+.EXAMPLE
+    ./bootstrap-salt.ps1 -pythonVersion 3
+    Specifies the Python version of the installer. Can be "2" or "3". Defaults to "2".
+    Python 3 installers are only available for Salt 2017.7.0 and newer.
 
 .EXAMPLE
     ./bootstrap-salt.ps1 -runservice false
@@ -27,11 +32,17 @@
     installer values of host name for the minion id and "salt" for the master.
 
 .EXAMPLE
-    ./bootstrap-salt.ps1 -minion minion-box -master master-box -version 2015.5.2 -runservice false
+    ./bootstrap-salt.ps1 -minion minion-box -master master-box -version 2017.7.0 -runservice false
     Specifies all the optional parameters in no particular order.
 
 .PARAMETER version
     Default version defined in this script.
+
+.PARAMETER pythonVersion
+    The version of Python the installer should use. Specify either "2" or "3".
+    Beginning with Salt 2017.7.0, Salt will run on either Python 2 or Python 3.
+    The default is Python 2 if not specified. This parameter only works for Salt
+    versions >= 2017.7.0.
 
 .PARAMETER runservice
     Boolean flag to start or stop the minion service. True will start the minion
@@ -68,6 +79,11 @@ Param(
     # Doesn't support versions prior to "YYYY.M.R-B"
     [ValidatePattern('^201\d\.\d{1,2}\.\d{1,2}(\-\d{1})?|(rc\d)$')]
     [string]$version = '',
+
+    [Parameter(Mandatory=$false,ValueFromPipeline=$true)]
+    # Doesn't support versions prior to "2017.7.0"
+    [ValidateSet("2","3")]
+    [string]$pythonVersion = "",
 
     [Parameter(Mandatory=$false,ValueFromPipeline=$true)]
     [ValidateSet("true","false")]
@@ -113,6 +129,7 @@ If (!(Get-IsAdministrator)) {
         If($master -ne "not-specified") {$parameters = "$parameters -master $master"}
         If($runservice -eq $false) {$parameters = "$parameters -runservice false"}
         If($version -ne '') {$parameters = "$parameters -version $version"}
+        If($pythonVersion -ne "") {$parameters = "$parameters -pythonVersion $pythonVersion"}
         $newProcess.Arguments = $myInvocation.MyCommand.Definition, $parameters
 
         # Specify the current working directory
@@ -211,13 +228,25 @@ If (!$version) {
         $returnMatches = $returnMatches | Where {$_ -like "Salt-Minion*AMD64-Setup.exe"}
     }
 
-    $version = $(($returnMatches | Sort-Object -Descending)[0]).Split(("n-","-A","-x"),([System.StringSplitOptions]::RemoveEmptyEntries))[1]
+    $version = $($returnMatches[$returnMatches.Count -1]).Split(("n-","-A","-x","-P"),([System.StringSplitOptions]::RemoveEmptyEntries))[1]
+}
+
+$versionSection = $version
+
+$year = $version.Substring(0, 4)
+If ([int]$year -ge 2017) {
+    If ($pythonVersion -eq "3") {
+        $versionSection = "$version-Py3"
+    }
+    Else {
+        $versionSection = "$version-Py2"
+    }
 }
 
 #===============================================================================
 # Download minion setup file
 #===============================================================================
-$saltExe = "Salt-Minion-$version-$arch-Setup.exe"
+$saltExe = "Salt-Minion-$versionSection-$arch-Setup.exe"
 Write-Output "Downloading Salt minion installer $saltExe"
 $webclient = New-Object System.Net.WebClient
 $url = "$repourl/$saltExe"

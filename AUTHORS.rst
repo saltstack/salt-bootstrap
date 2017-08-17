@@ -13,12 +13,14 @@ Alec Koumjian               akoumjian              akoumjian@gmail.com
 Alex Van't Hof              alexvh
 Alexander Krasnukhin        themalkolm             the.malkolm@gmail.com
 Alexey                      dmitrievav
+amendlik                    amendlik
 Andrew Dean                 ndrwdn                 ndrwdn@gmail.com
 Andy Boff                   caelor                 github@plek.me.uk
 Angelo Gründler             plueschopath           angelo.gruendler@w1r3.net
 Ari Aosved                  devaos                 ari.aosved@gmail.com
 Ashok Raja R                ashokrajar             ashokrajar@users.noreply.github.com
 Beau Hargis                 beaucephus             beau@customermobile.com
+BlaineAtAffirmOnceMore      BlaineAtAffirm
 Boris Feld                  Lothiraldan
 Brad Thurber                bradthurber
 Brandon Clifford            brandon099             brandon.clifford@vivint.com
@@ -55,6 +57,7 @@ fizmat                      fizmat
 Forrest Alvarez             gravyboat
 Fred Reimer                 freimer                freimer@freimer.org
 Geoff Garside               geoffgarside           geoff@geoffgarside.co.uk
+George                      aflat                  gstock.public@gmail.com
 gdm85                       gdm85
 ggillies                    ggillies
 Giuseppe Iannello           giannello              giuseppe.iannello@brokenloop.net
@@ -63,7 +66,9 @@ Guillaume Derval            GuillaumeDerval        guillaume@guillaumederval.be
 gweis                       gweis
 Henrik Holmboe              holmboe
 Howard Mei                  HowardMei              howardleomei@gmail.com
+James Booth                 absolutejam            vvalentine1337@gmail.com
 Jared E Stroud              jaredestroud           jaredestroud@gmail.com
+JD                          decomposite
 Jeff Hui                    jeffh                  jeff@jeffhui.net
 Jeff Strunk                 jstrunk
 Juan A. Moyano              wincus                 wincus.public@gmail.com
@@ -117,6 +122,7 @@ Roman Mohr                  rmohr                  rmohr@redhat.com
 Ronald van Zantvoort        The-Loeki              ronald@pcextreme.nl
 RuriRyan                    RuriRyan               ryan@btsoft.eu
 Ryan Walder                 ryanwalder             ryanwalder@ucds.email
+Sebastian Wendel            sourceindex
 Sergey Paramonov            serge-p                serg.paramonov@s-vp.com
 Shane Lee                   twangboy               slee@saltstack.com
 Shawn Butts                 shawnbutts
@@ -128,6 +134,7 @@ Thomas S. Hatch             thatch45               thatch45@saltstack.com
 Tobias Jungel               toanju                 Tobias.Jungel@gmail.com
 Tony Narlock                tony
 Valentin Bud                valentinbud            valentin@databus.pro
+Vernon Cole                 vernondcole            vernondcole@gmail.com
 Vladimir Kozhukalov         kozhukalov
 Whit Morriss                whitmo                 whit@nocoast.us
 Wolodja Wentland            babilen                w@babilen5.org

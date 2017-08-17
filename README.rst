@@ -27,13 +27,15 @@ are high that your issue was already fixed.
 Bootstrap
 =========
 
+In every two-step installation example, you would be well-served to **verify against the SHA256 sum**
+of the downloaded ``bootstrap-salt.sh`` file.
+
+The SHA256 sum of the ``bootstrap-salt.sh`` file, per release, is:
+
+- 2017.05.24: ``8c42c2e5ad3d4384ddc557da5c214ba3e40c056ca1b758d14a392c1364650e89``
+
 If you're looking for the *one-liner* to install Salt, please scroll to the bottom and use the
 instructions for `Installing via an Insecure One-Liner`_.
-
-.. note::
-
-  In every two-step example, you would be well-served to examine the downloaded file and examine
-  it to ensure that it does what you expect.
 
 
 Examples
@@ -64,7 +66,7 @@ If you want to install a specific release version (based on the Git tags):
 .. code:: console
 
   curl -o bootstrap-salt.sh -L https://bootstrap.saltstack.com
-  sudo sh bootstrap-salt.sh git v2016.3.2
+  sudo sh bootstrap-salt.sh git v2016.11.5
 
 To install a specific branch from a Git fork:
 
@@ -104,7 +106,7 @@ Installing a specific version from git using ``wget``:
 .. code:: console
 
   wget -O bootstrap-salt.sh https://bootstrap.saltstack.com
-  sudo sh bootstrap-salt.sh -P git v2015.8.11
+  sudo sh bootstrap-salt.sh -P git v2016.11.5
 
 .. note::
 
@@ -226,10 +228,22 @@ Debian and derivatives
 ~~~~~~~~~~~~~~~~~~~~~~
 
 - Cumulus Linux 2/3
-- Debian GNU/Linux 7/8
+- Debian GNU/Linux 7/8/9
 - Linux Mint Debian Edition 1 (based on Debian 8)
 - Kali Linux 1.0 (based on Debian 7)
 - Raspbian 8 (``armhf``)
+
+Debian Best Effort Support: Testing Release
+*******************************************
+
+This script provides best-effort support for the upcoming Debian testing release. Package
+repositories are not provided on `SaltStack's Debian repository`_ for Debian testing releases.
+However, the bootstrap script will attempt to install the packages for the current stable
+version of Debian.
+
+For example, when installing Salt on Debian 10 (Buster), the bootstrap script will setup the
+repository for Debian 9 (Stretch) from `SaltStack's Debian repository`_ and install the
+Debian 9 packages.
 
 
 Red Hat family
@@ -238,7 +252,7 @@ Red Hat family
 - Amazon Linux 2012.3 and later
 - CentOS 6/7
 - Cloud Linux 6/7
-- Fedora 23/24/25
+- Fedora 24/25
 - Oracle Linux 6/7
 - Red Hat Enterprise Linux 6/7
 - Scientific Linux 6/7
@@ -256,12 +270,9 @@ SUSE family
 Ubuntu and derivatives
 ~~~~~~~~~~~~~~~~~~~~~~
 
-- Elementary OS 0.2 (based on Ubuntu 12.04)
 - KDE neon (based on Ubuntu 16.04)
-- Linaro 12.04
-- Linux Mint 13/17/18
-- Trisquel GNU/Linux 6 (based on Ubuntu 12.04)
-- Ubuntu 12.04/14.04/16.04 and subsequent non-TLS releases (see below)
+- Linux Mint 17/18
+- Ubuntu 14.04/16.04 and subsequent non-TLS releases (see below)
 
 Ubuntu Best Effort Support: Non-LTS Releases 
 ********************************************
@@ -565,6 +576,7 @@ Salt is ready and working in the Docker container with Minion authenticated on M
 .. _`Salt`: https://saltstack.com/community/
 .. _`Salt's Supported Operating Systems`: http://saltstack.com/wp-content/uploads/2016/08/SaltStack-Supported-Operating-Systems.pdf
 .. _`SaltStack's corporate repository`: https://repo.saltstack.com/
+.. _`SaltStack's Debian repository`: http://repo.saltstack.com/#debian
 .. _`SaltStack's Ubuntu repository`: http://repo.saltstack.com/#ubuntu
 .. _Vagrant: http://www.vagrantup.com
 

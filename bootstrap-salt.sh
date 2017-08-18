@@ -1517,8 +1517,8 @@ __check_end_of_life_versions() {
         opensuse)
             # openSUSE versions not supported
             #
-            #  <= 12.1
-            if ([ "$DISTRO_MAJOR_VERSION" -eq 12 ] && [ "$DISTRO_MINOR_VERSION" -eq 1 ]) || [ "$DISTRO_MAJOR_VERSION" -lt 12 ]; then
+            #  <= 13.X
+            if [ "$DISTRO_MAJOR_VERSION" -le 13 ]; then
                 echoerror "End of life distributions are not supported."
                 echoerror "Please consider upgrading to the next stable. See:"
                 echoerror "    http://en.opensuse.org/Lifetime"

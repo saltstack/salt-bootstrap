@@ -1490,8 +1490,8 @@ __check_end_of_life_versions() {
             #  = 14.10
             #  = 15.04, 15.10
             if [ "$DISTRO_MAJOR_VERSION" -lt 14 ] || \
-               [ "$DISTRO_MAJOR_VERSION" -eq 15 ] || \
-               ([ "$DISTRO_MAJOR_VERSION" -lt 16 ] && [ "$DISTRO_MINOR_VERSION" -eq 10 ]); then
+                [ "$DISTRO_MAJOR_VERSION" -eq 15 ] || \
+                ([ "$DISTRO_MAJOR_VERSION" -lt 16 ] && [ "$DISTRO_MINOR_VERSION" -eq 10 ]); then
                 echoerror "End of life distributions are not supported."
                 echoerror "Please consider upgrading to the next stable. See:"
                 echoerror "    https://wiki.ubuntu.com/Releases"
@@ -1503,7 +1503,9 @@ __check_end_of_life_versions() {
             # openSUSE versions not supported
             #
             #  <= 13.X
-            if [ "$DISTRO_MAJOR_VERSION" -le 13 ]; then
+            #  <= 42.1
+            if [ "$DISTRO_MAJOR_VERSION" -le 13 ] || \
+                ([ "$DISTRO_MAJOR_VERSION" -eq 42 ] && [ "$DISTRO_MINOR_VERSION" -le 1 ]); then
                 echoerror "End of life distributions are not supported."
                 echoerror "Please consider upgrading to the next stable. See:"
                 echoerror "    http://en.opensuse.org/Lifetime"

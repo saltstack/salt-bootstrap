@@ -2641,9 +2641,8 @@ install_ubuntu_stable_deps() {
         __apt_get_upgrade_noinput || return 1
     fi
 
-    __check_dpkg_architecture || return 1
-
     if [ "$_DISABLE_REPOS" -eq "$BS_FALSE" ] || [ "$_CUSTOM_REPO_URL" != "null" ]; then
+        __check_dpkg_architecture || return 1
         __install_saltstack_ubuntu_repository || return 1
     fi
 
@@ -2971,8 +2970,6 @@ install_debian_deps() {
         __apt_get_upgrade_noinput || return 1
     fi
 
-    __check_dpkg_architecture || return 1
-
     # Additionally install procps and pciutils which allows for Docker bootstraps. See 366#issuecomment-39666813
     __PACKAGES='procps pciutils'
 
@@ -2988,6 +2985,7 @@ install_debian_deps() {
     __apt_get_install_noinput ${__PACKAGES} || return 1
 
     if [ "$_DISABLE_REPOS" -eq "$BS_FALSE" ] || [ "$_CUSTOM_REPO_URL" != "null" ]; then
+        __check_dpkg_architecture || return 1
         __install_saltstack_debian_repository || return 1
     fi
 

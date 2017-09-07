@@ -306,6 +306,9 @@ UNIX systems
 
 - SmartOS
 
+**MacOS**:
+
+- 10.9 and above, as long as the underlying installer supports it.
 
 Unsupported Distro
 ------------------

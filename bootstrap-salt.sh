@@ -1494,8 +1494,8 @@ __check_end_of_life_versions() {
             #  = 14.10
             #  = 15.04, 15.10
             if [ "$DISTRO_MAJOR_VERSION" -lt 14 ] || \
-               [ "$DISTRO_MAJOR_VERSION" -eq 15 ] || \
-               ([ "$DISTRO_MAJOR_VERSION" -lt 16 ] && [ "$DISTRO_MINOR_VERSION" -eq 10 ]); then
+                [ "$DISTRO_MAJOR_VERSION" -eq 15 ] || \
+                ([ "$DISTRO_MAJOR_VERSION" -lt 16 ] && [ "$DISTRO_MINOR_VERSION" -eq 10 ]); then
                 echoerror "End of life distributions are not supported."
                 echoerror "Please consider upgrading to the next stable. See:"
                 echoerror "    https://wiki.ubuntu.com/Releases"
@@ -1507,7 +1507,9 @@ __check_end_of_life_versions() {
             # openSUSE versions not supported
             #
             #  <= 13.X
-            if [ "$DISTRO_MAJOR_VERSION" -le 13 ]; then
+            #  <= 42.1
+            if [ "$DISTRO_MAJOR_VERSION" -le 13 ] || \
+                ([ "$DISTRO_MAJOR_VERSION" -eq 42 ] && [ "$DISTRO_MINOR_VERSION" -le 1 ]); then
                 echoerror "End of life distributions are not supported."
                 echoerror "Please consider upgrading to the next stable. See:"
                 echoerror "    http://en.opensuse.org/Lifetime"
@@ -2642,9 +2644,8 @@ install_ubuntu_stable_deps() {
         __apt_get_upgrade_noinput || return 1
     fi
 
-    __check_dpkg_architecture || return 1
-
     if [ "$_DISABLE_REPOS" -eq "$BS_FALSE" ] || [ "$_CUSTOM_REPO_URL" != "null" ]; then
+        __check_dpkg_architecture || return 1
         __install_saltstack_ubuntu_repository || return 1
     fi
 
@@ -2984,8 +2985,6 @@ install_debian_deps() {
         __apt_get_upgrade_noinput || return 1
     fi
 
-    __check_dpkg_architecture || return 1
-
     # Additionally install procps and pciutils which allows for Docker bootstraps. See 366#issuecomment-39666813
     __PACKAGES='procps pciutils'
 
@@ -2996,6 +2995,7 @@ install_debian_deps() {
     __apt_get_install_noinput ${__PACKAGES} || return 1
 
     if [ "$_DISABLE_REPOS" -eq "$BS_FALSE" ] || [ "$_CUSTOM_REPO_URL" != "null" ]; then
+        __check_dpkg_architecture || return 1
         __install_saltstack_debian_repository || return 1
     fi
 
@@ -3327,7 +3327,13 @@ install_fedora_deps() {
         __install_saltstack_copr_salt_repository || return 1
     fi
 
-    __PACKAGES="yum-utils PyYAML libyaml python-crypto python-jinja2 python-zmq python2-msgpack python2-requests"
+    __PACKAGES="PyYAML libyaml python-crypto python-jinja2 python-zmq python2-msgpack python2-requests"
+
+    if [ "$DISTRO_MAJOR_VERSION" -lt 26 ]; then
+        __PACKAGES="${__PACKAGES} yum-utils"
+    else
+        __PACKAGES="${__PACKAGES} dnf-utils"
+    fi
 
     # shellcheck disable=SC2086
     dnf install -y ${__PACKAGES} || return 1

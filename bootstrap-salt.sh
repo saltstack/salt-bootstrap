@@ -3319,7 +3319,13 @@ install_fedora_deps() {
         __install_saltstack_copr_salt_repository || return 1
     fi
 
-    __PACKAGES="yum-utils PyYAML libyaml python-crypto python-jinja2 python-zmq python2-msgpack python2-requests"
+    __PACKAGES="PyYAML libyaml python-crypto python-jinja2 python-zmq python2-msgpack python2-requests"
+
+    if [ "$DISTRO_MAJOR_VERSION" -lt 26 ]; then
+        __PACKAGES="${__PACKAGES} yum-utils"
+    else
+        __PACKAGES="${__PACKAGES} dnf-utils"
+    fi
 
     # shellcheck disable=SC2086
     dnf install -y ${__PACKAGES} || return 1

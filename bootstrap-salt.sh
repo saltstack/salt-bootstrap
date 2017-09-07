@@ -1006,7 +1006,6 @@ __gather_linux_system_info() {
             echo redhat-release lsb-release
             )"); do
 
-        [ -L "/etc/${rsource}" ] && continue        # Don't follow symlinks
         [ ! -f "/etc/${rsource}" ] && continue      # Does not exist
 
         n=$(echo "${rsource}" | sed -e 's/[_-]release$//' -e 's/[_-]version$//')

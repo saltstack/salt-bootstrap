@@ -1408,6 +1408,7 @@ __debian_derivatives_translation() {
     kali_1_debian_base="7.0"
     linuxmint_1_debian_base="8.0"
     raspbian_8_debian_base="8.0"
+    raspbian_9_debian_base="9.0"
 
     # Translate Debian derivatives to their base Debian version
     match=$(echo "$DISTRO_NAME_L" | egrep ${DEBIAN_DERIVATIVES})
@@ -1432,7 +1433,7 @@ __debian_derivatives_translation() {
                 ;;
         esac
 
-        _debian_version=$(eval echo "\$${_debian_derivative}_${_major}_debian_base")
+        _debian_version=$(eval echo "\$${_debian_derivative}_${_major}_debian_base" 2>/dev/null)
 
         if [ "$_debian_version" != "" ]; then
             echodebug "Detected Debian $_debian_version derivative"

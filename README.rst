@@ -206,7 +206,7 @@ listed on the official supported operating systems document, the level of suppor
 Since Salt is written in Python, the packages available from `SaltStack's corporate repository`_
 are CPU architecture independent and could be installed on any hardware supported by Linux kernel.
 However, SaltStack does package Salt's binary dependencies only for ``x86_64`` (``amd64``) and
-``AArch32`` (``armhf``), which is limited for Debian/Raspbian 8 platforms.
+``AArch32`` (``armhf``). The latter is available only for Debian/Raspbian 8 platforms.
 
 It is recommended to use ``git`` bootstrap mode as described above to install Salt on other
 architectures, such as ``x86`` (``i386``), ``AArch64`` (``arm64``) or ``ARM EABI`` (``armel``).
@@ -232,7 +232,7 @@ Debian and derivatives
 - Debian GNU/Linux 7/8/9
 - Linux Mint Debian Edition 1 (based on Debian 8)
 - Kali Linux 1.0 (based on Debian 7)
-- Raspbian 8 (``armhf``)
+- Raspbian 8 (``armhf`` packages) and 9 (using ``git`` installation mode only)
 
 Debian Best Effort Support: Testing Release
 *******************************************

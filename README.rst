@@ -264,7 +264,7 @@ SUSE family
 
 - openSUSE Leap 42.2/42.3
 - openSUSE Tumbleweed 2015
-- SUSE Linux Enterprise Server 11 SP1/11 SP2/11 SP3/12
+- SUSE Linux Enterprise Server 11 SP4/12
 
 
 Ubuntu and derivatives

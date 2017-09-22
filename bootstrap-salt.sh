@@ -1531,6 +1531,7 @@ __check_end_of_life_versions() {
                 ([ "$DISTRO_MAJOR_VERSION" -eq 12 ] && [ "$SUSE_PATCHLEVEL" -lt 02 ]); then
                 echoerror "Versions lower than SuSE 11 SP4 or 12 SP2 are not supported."
                 echoerror "Please consider upgrading to the next stable"
+                echoerror "    https://www.suse.com/lifecycle/"
                 exit 1
             fi
             ;;

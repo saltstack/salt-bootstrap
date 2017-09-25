@@ -13,11 +13,11 @@ the `Salt`_ installation process is handled by this shell script ``bootstrap-sal
 script runs through a series of checks to determine operating system type and version to then
 install the `Salt`_ binaries using the appropriate methods.
 
-.. note::
+**NOTE**
 
-  This ``README`` file is not the absolute truth to what the bootstrap script is capable of, for
-  that, please read the generated help by passing ``-h`` to the script or even better,
-  `read the source`_.
+This ``README`` file is not the absolute truth to what the bootstrap script is capable of, for
+that, please read the generated help by passing ``-h`` to the script or even better,
+`read the source`_.
 
 **In case you found a bug, please read** `I Found a Bug`_ **first before submitting a new issue.**
 The examples there show how to get the latest development version of the bootstrap script. Chances
@@ -45,11 +45,11 @@ Examples
 The Salt Bootstrap script has a wide variety of options that can be passed as
 well as several ways of obtaining the bootstrap script itself.
 
-.. note::
+**NOTE**
 
-  These examples below show how to bootstrap Salt directly from GitHub or other Git repository.
-  Run the script without any parameters to get latest stable Salt packages for your system from
-  `SaltStack's corporate repository`_. See first example in the `Install using wget`_ section.
+These examples below show how to bootstrap Salt directly from GitHub or other Git repository.
+Run the script without any parameters to get latest stable Salt packages for your system from
+`SaltStack's corporate repository`_. See first example in the `Install using wget`_ section.
 
 
 Install using curl
@@ -109,10 +109,10 @@ Installing a specific version from git using ``wget``:
   wget -O bootstrap-salt.sh https://bootstrap.saltstack.com
   sudo sh bootstrap-salt.sh -P git v2016.11.5
 
-.. note::
+**NOTE**
 
-  On the above example we added `-P` which will allow PIP packages to be installed if required but
-  it's not a necessary flag for Git based bootstraps.
+On the above example we added `-P` which will allow PIP packages to be installed if required but
+it's not a necessary flag for Git based bootstraps.
 
 
 Install using Python
@@ -168,10 +168,10 @@ Installing via an Insecure One-Liner
 
 The following examples illustrate how to install Salt via a one-liner.
 
-.. note::
+**NOTE**
 
-  Warning! These methods do not involve a verification step and assume that the delivered file is
-  trustworthy.
+Warning! These methods do not involve a verification step and assume that the delivered file is
+trustworthy.
 
 Any of the example above which use two-lines can be made to run in a single-line
 configuration with minor modifications.
@@ -217,12 +217,12 @@ You also may need to disable repository configuration and allow ``pip`` installa
 
   sudo sh bootstrap-salt.sh -r -P git develop
 
-.. note::
+**NOTE**
 
-  Bootstrap may fail to install Salt on the cutting-edge version of distributions with frequent
-  release cycles such as: Amazon Linux, Fedora, openSUSE Tumbleweed, or Ubuntu non-LTS. Check the
-  versions from the list below. Also, see the `Unsupported Distro`_ and
-  `Adding Support for Other Operating Systems`_ sections.
+Bootstrap may fail to install Salt on the cutting-edge version of distributions with frequent
+release cycles such as: Amazon Linux, Fedora, openSUSE Tumbleweed, or Ubuntu non-LTS. Check the
+versions from the list below. Also, see the `Unsupported Distro`_ and
+`Adding Support for Other Operating Systems`_ sections.
 
 
 Debian and derivatives
@@ -562,11 +562,11 @@ And finally "enter" the running container and make Salt fully operational:
 
 Salt is ready and working in the Docker container with Minion authenticated on Master.
 
-.. note::
+**NOTE**
 
-  The ``Dockerfile`` here inherits Ubuntu 14.04 public image with Upstart configured as init system.
-  Consider it as an example or starting point of how to make your own Docker images with suitable
-  Salt components, custom configurations and even `pre-accepted Minion key`_ already installed.
+The ``Dockerfile`` here inherits Ubuntu 14.04 public image with Upstart configured as init system.
+Consider it as an example or starting point of how to make your own Docker images with suitable
+Salt components, custom configurations and even `pre-accepted Minion key`_ already installed.
 
 
 .. _Docker: https://www.docker.com/

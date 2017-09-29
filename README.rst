@@ -221,7 +221,7 @@ You also may need to disable repository configuration and allow ``pip`` installa
 
 Bootstrap may fail to install Salt on the cutting-edge version of distributions with frequent
 release cycles such as: Amazon Linux, Fedora, openSUSE Tumbleweed, or Ubuntu non-LTS. Check the
-versions from the list below. Also, see the `Unsupported Distro`_ and section.
+versions from the list below. Also, see the `Unsupported Distro`_ section.
 
 
 Debian and derivatives

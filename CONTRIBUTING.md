@@ -37,8 +37,8 @@ Please read the following guidelines before you
 4. **Include a reproducible example** -- Provide the steps which
    led you to the problem.
 
-Please try to be as detailed as possible in your report, too. What is your
-environment? What steps will reproduce the issue? What Operating System? What
+Please try to be as detailed as possible in your report. What is your
+environment? What steps will reproduce the issue? What operating system? What
 would you expect to be the outcome? All these details will help people to
 assess and fix any potential bugs.
 
@@ -139,6 +139,20 @@ creating a GPG key, using the GPG key with `git` locally, and linking the GPG
 key to your GitHub account. Once these steps are completed, the commit signing
 verification will look like the example in GitHub's
 [GPG Signature Verification feature announcement](https://github.com/blog/2144-gpg-signature-verification).
+
+## Release Cadence
+
+There is no defined release schedule for the bootstrap script at this time.
+Typically, SaltStack's release team determines when it would be good to release
+a new stable version.
+
+Timing the release usually involves an analysis of the following:
+ 
+- Updates for major feature releases in [Salt](https://github.com/saltstack/salt)
+- Support for new versions of major operating systems
+- Types of fixes submitted to `develop` since the last release
+- Fixes needed for inclusion in an upcoming version of [Salt](https://github.com/saltstack/salt)
+- Length of time since the last bootstrap release
 
 ## Adding Support for Other Operating Systems
 

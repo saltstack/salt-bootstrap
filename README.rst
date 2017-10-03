@@ -164,7 +164,7 @@ Or link them to the right place:
 
 
 Installing via an Insecure One-Liner
-------------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The following examples illustrate how to install Salt via a one-liner.
 
@@ -318,6 +318,12 @@ Please run the following commands and report their output when creating a ticket
 
 For information on how to add support for a currently unsupported distro, please refer to the
 `Contributing Guidelines`_.
+
+Testing
+-------
+
+There are a couple of ways to test the bootstrap script. Running the script on a full-fledged
+VM is one way. Other options include using Vagrant or Docker.
 
 Testing in Vagrant
 ==================

@@ -5402,6 +5402,27 @@ install_smartos_restart_daemons() {
 #
 __ZYPPER_REQUIRES_REPLACE_FILES=-1
 
+__set_suse_pkg_repo() {
+
+    # Set distro repo variable
+    if [ "${DISTRO_MAJOR_VERSION}" -gt 2015 ]; then
+        DISTRO_REPO="openSUSE_Tumbleweed"
+    elif [ "${DISTRO_MAJOR_VERSION}" -ge 42 ]; then
+        DISTRO_REPO="openSUSE_Leap_${DISTRO_MAJOR_VERSION}.${DISTRO_MINOR_VERSION}"
+    elif [ "${DISTRO_MAJOR_VERSION}" -lt 42 ]; then
+        DISTRO_REPO="SLE_${DISTRO_MAJOR_VERSION}_SP${SUSE_PATCHLEVEL}"
+    fi
+
+    if [ "$_DOWNSTREAM_PKG_REPO" -eq $BS_TRUE ]; then
+        suse_pkg_url_base="http://download.opensuse.org/repositories/systemsmanagement:/saltstack"
+        suse_pkg_url_path="${DISTRO_REPO}/systemsmanagement:saltstack.repo"
+    else
+        suse_pkg_url_base="${HTTP_VAL}://repo.saltstack.com/opensuse"
+        suse_pkg_url_path="${DISTRO_REPO}/systemsmanagement:saltstack:products.repo"
+    fi
+    SUSE_PKG_URL="$suse_pkg_url_base/$suse_pkg_url_path"
+}
+
 __check_and_refresh_suse_pkg_repo() {
     # Check to see if systemsmanagement_saltstack exists
     __zypper repos | grep systemsmanagement_saltstack >/dev/null 2>&1
@@ -5410,16 +5431,6 @@ __check_and_refresh_suse_pkg_repo() {
         # zypper does not yet know anything about systemsmanagement_saltstack
         __zypper addrepo --refresh "${SUSE_PKG_URL}" || return 1
     fi
-}
-
-__set_suse_pkg_repo() {
-    suse_pkg_url_path="${DISTRO_REPO}/systemsmanagement:saltstack.repo"
-    if [ "$_DOWNSTREAM_PKG_REPO" -eq $BS_TRUE ]; then
-        suse_pkg_url_base="http://download.opensuse.org/repositories/systemsmanagement:/saltstack"
-    else
-        suse_pkg_url_base="${HTTP_VAL}://repo.saltstack.com/opensuse"
-    fi
-    SUSE_PKG_URL="$suse_pkg_url_base/$suse_pkg_url_path"
 }
 
 __version_lte() {
@@ -5454,14 +5465,6 @@ __zypper_install() {
 }
 
 install_opensuse_stable_deps() {
-    if [ "${DISTRO_MAJOR_VERSION}" -gt 2015 ]; then
-        DISTRO_REPO="openSUSE_Tumbleweed"
-    elif [ "${DISTRO_MAJOR_VERSION}" -ge 42 ]; then
-        DISTRO_REPO="openSUSE_Leap_${DISTRO_MAJOR_VERSION}.${DISTRO_MINOR_VERSION}"
-    elif [ "${DISTRO_MAJOR_VERSION}" -lt 42 ]; then
-        DISTRO_REPO="openSUSE_${DISTRO_MAJOR_VERSION}.${DISTRO_MINOR_VERSION}"
-    fi
-
     if [ $_DISABLE_REPOS -eq $BS_FALSE ]; then
         # Is the repository already known
         __set_suse_pkg_repo
@@ -5485,24 +5488,13 @@ install_opensuse_stable_deps() {
         __zypper --gpg-auto-import-keys update || return 1
     fi
 
+    # YAML module is used for generating custom master/minion configs
+    # requests is still used by many salt modules
     # Salt needs python-zypp installed in order to use the zypper module
-    __PACKAGES="python-zypp"
-    __PACKAGES="${__PACKAGES} python python-Jinja2 python-M2Crypto python-PyYAML python-requests"
-    __PACKAGES="${__PACKAGES} python-msgpack-python python-pycrypto python-pyzmq python-xml"
-
-    if [ "$DISTRO_MAJOR_VERSION" -lt 13 ]; then
-        __PACKAGES="${__PACKAGES} libzmq3"
-    elif [ "$DISTRO_MAJOR_VERSION" -eq 13 ]; then
-        __PACKAGES="${__PACKAGES} libzmq3"
-    elif [ "$DISTRO_MAJOR_VERSION" -gt 13 ]; then
-        __PACKAGES="${__PACKAGES} libzmq5"
-    fi
+    __PACKAGES="python-PyYAML python-requests python-zypp"
 
     # shellcheck disable=SC2086
     __zypper_install ${__PACKAGES} || return 1
-
-    # Fix for OpenSUSE 13.2 and 2015.8 - gcc should not be required. Work around until package is fixed by SuSE
-    _EXTRA_PACKAGES="${_EXTRA_PACKAGES} gcc python-devel libgit2-devel"
 
     if [ "${_EXTRA_PACKAGES}" != "" ]; then
         echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
@@ -5528,7 +5520,7 @@ install_opensuse_git_deps() {
 
     __git_clone_and_checkout || return 1
 
-    __PACKAGES=""
+    __PACKAGES="libzmq5 python-Jinja2 python-msgpack-python python-pycrypto python-pyzmq python-xml"
 
     if [ -f "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" ]; then
         # We're on the develop branch, install whichever tornado is on the requirements file
@@ -5697,9 +5689,6 @@ install_opensuse_check_services() {
 #
 
 install_suse_12_stable_deps() {
-    DISTRO_PATCHLEVEL="_SP${SUSE_PATCHLEVEL}"
-    DISTRO_REPO="SLE_${DISTRO_MAJOR_VERSION}${DISTRO_PATCHLEVEL}"
-
     if [ $_DISABLE_REPOS -eq $BS_FALSE ]; then
         # Is the repository already known
         __set_suse_pkg_repo
@@ -5713,11 +5702,10 @@ install_suse_12_stable_deps() {
         __zypper --gpg-auto-import-keys update || return 1
     fi
 
+    # YAML module is used for generating custom master/minion configs
+    # requests is still used by many salt modules
     # Salt needs python-zypp installed in order to use the zypper module
-    __PACKAGES="python-zypp"
-    # shellcheck disable=SC2089
-    __PACKAGES="${__PACKAGES} libzmq5 python python-Jinja2 python-msgpack-python python-pycrypto"
-    __PACKAGES="${__PACKAGES} python-PyYAML python-pyzmq python-pip python-xml python-requests"
+    __PACKAGES="python-PyYAML python-requests python-zypp"
 
     if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
         __PACKAGES="${__PACKAGES} python-apache-libcloud"
@@ -5745,6 +5733,9 @@ install_suse_12_git_deps() {
     __git_clone_and_checkout || return 1
 
     __PACKAGES=""
+    # shellcheck disable=SC2089
+    __PACKAGES="${__PACKAGES} libzmq3 python-Jinja2 python-msgpack-python python-pycrypto"
+    __PACKAGES="${__PACKAGES} python-pyzmq python-xml"
 
     if [ -f "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" ]; then
         # We're on the develop branch, install whichever tornado is on the requirements file
@@ -5806,9 +5797,6 @@ install_suse_12_restart_daemons() {
 #
 
 install_suse_11_stable_deps() {
-    DISTRO_PATCHLEVEL="_SP${SUSE_PATCHLEVEL}"
-    DISTRO_REPO="SLE_${DISTRO_MAJOR_VERSION}${DISTRO_PATCHLEVEL}"
-
     if [ $_DISABLE_REPOS -eq $BS_FALSE ]; then
         # Is the repository already known
         __set_suse_pkg_repo
@@ -5822,11 +5810,8 @@ install_suse_11_stable_deps() {
         __zypper --gpg-auto-import-keys update || return 1
     fi
 
-    # Salt needs python-zypp installed in order to use the zypper module
-    __PACKAGES="python-zypp"
-    # shellcheck disable=SC2089
-    __PACKAGES="${__PACKAGES} libzmq5 python python-Jinja2 python-msgpack-python python-pycrypto "
-    __PACKAGES="${__PACKAGES} python-PyYAML python-pyzmq python-pip python-xml python-requests"
+    # YAML module is used for generating custom master/minion configs
+    __PACKAGES="python-PyYAML"
 
     # shellcheck disable=SC2086,SC2090
     __zypper_install ${__PACKAGES} || return 1
@@ -5850,6 +5835,9 @@ install_suse_11_git_deps() {
     __git_clone_and_checkout || return 1
 
     __PACKAGES=""
+    # shellcheck disable=SC2089
+    __PACKAGES="${__PACKAGES} libzmq4 python-Jinja2 python-msgpack-python python-pycrypto"
+    __PACKAGES="${__PACKAGES} python-pyzmq python-xml python-zypp"
 
     if [ -f "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" ]; then
         # We're on the develop branch, install whichever tornado is on the requirements file

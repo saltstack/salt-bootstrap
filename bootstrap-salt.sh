@@ -5425,7 +5425,7 @@ __set_suse_pkg_repo() {
 
 __check_and_refresh_suse_pkg_repo() {
     # Check to see if systemsmanagement_saltstack exists
-    __zypper repos | grep systemsmanagement_saltstack >/dev/null 2>&1
+    __zypper repos | grep -q systemsmanagement_saltstack
 
     if [ $? -eq 1 ]; then
         # zypper does not yet know anything about systemsmanagement_saltstack

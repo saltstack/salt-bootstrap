@@ -4423,7 +4423,7 @@ install_amazon_linux_ami_deps() {
     repo_rev="$(echo "${STABLE_REV}"  | sed 's|.*\/||g')"
 
     if echo "$repo_rev" | egrep -q '^(latest|2016\.11)$' || \
-           ( echo "$repo_rev" | egrep -q '^[0-9]+$' && [ "$(echo "$repo_rev" | cut -c1-4)" -gt 2016 ] ); then
+            [ "$(echo "$repo_rev" | cut -c1-4)" -gt 2016 ]; then
        _USEAWS=$BS_TRUE
        pkg_append="python27"
     fi

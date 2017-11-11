@@ -1445,6 +1445,7 @@ __debian_derivatives_translation() {
             echodebug "Detected Debian $_debian_version derivative"
             DISTRO_NAME_L="debian"
             DISTRO_VERSION="$_debian_version"
+            DISTRO_MAJOR_VERSION="$(echo "$DISTRO_VERSION" | sed 's/^\([0-9]*\).*/\1/g')"
         fi
     fi
 }

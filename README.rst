@@ -229,6 +229,7 @@ Debian and derivatives
 
 - Cumulus Linux 2/3
 - Debian GNU/Linux 7/8/9
+- Devuan GNU/Linux 1/2
 - Linux Mint Debian Edition 1 (based on Debian 8)
 - Kali Linux 1.0 (based on Debian 7)
 - Raspbian 8 (``armhf`` packages) and 9 (using ``git`` installation mode only)

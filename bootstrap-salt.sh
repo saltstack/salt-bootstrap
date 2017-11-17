@@ -6576,7 +6576,7 @@ if [ "$_CUSTOM_MASTER_CONFIG" != "null" ] || [ "$_CUSTOM_MINION_CONFIG" != "null
         _TEMP_CONFIG_DIR="$_SALT_ETC_DIR"
     fi
 
-    if [ ${NO_DEPS} -eq $BS_FALSE -a "$_CONFIG_ONLY" -eq $BS_TRUE ]; then
+    if [ ${_NO_DEPS} -eq $BS_FALSE -a "$_CONFIG_ONLY" -eq $BS_TRUE ]; then
         # Execute function to satisfy dependencies for configuration step
         echoinfo "Running ${DEPS_INSTALL_FUNC}()"
         $DEPS_INSTALL_FUNC

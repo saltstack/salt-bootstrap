@@ -6549,7 +6549,7 @@ for FUNC_NAME in $(__strip_duplicates "$CHECK_SERVICES_FUNC_NAMES"); do
 done
 echodebug "CHECK_SERVICES_FUNC=${CHECK_SERVICES_FUNC}"
 
-if [ ${_NO_DEPS} -eq $BS_FALSE -a "$DEPS_INSTALL_FUNC" = "null" ]; then
+if [ ${_NO_DEPS} -eq $BS_FALSE ] && [ "$DEPS_INSTALL_FUNC" = "null" ]; then
     echoerror "No dependencies installation function found. Exiting..."
     exit 1
 fi
@@ -6560,7 +6560,7 @@ if [ "$INSTALL_FUNC" = "null" ]; then
 fi
 
 # Install dependencies
-if [ ${_NO_DEPS} -eq $BS_FALSE -a "$_CONFIG_ONLY" -eq $BS_FALSE ]; then
+if [ ${_NO_DEPS} -eq $BS_FALSE ] && [ $_CONFIG_ONLY -eq $BS_FALSE ]; then
     # Only execute function is not in config mode only
     echoinfo "Running ${DEPS_INSTALL_FUNC}()"
     $DEPS_INSTALL_FUNC
@@ -6576,7 +6576,7 @@ if [ "$_CUSTOM_MASTER_CONFIG" != "null" ] || [ "$_CUSTOM_MINION_CONFIG" != "null
         _TEMP_CONFIG_DIR="$_SALT_ETC_DIR"
     fi
 
-    if [ ${_NO_DEPS} -eq $BS_FALSE -a "$_CONFIG_ONLY" -eq $BS_TRUE ]; then
+    if [ ${_NO_DEPS} -eq $BS_FALSE ] && [ $_CONFIG_ONLY -eq $BS_TRUE ]; then
         # Execute function to satisfy dependencies for configuration step
         echoinfo "Running ${DEPS_INSTALL_FUNC}()"
         $DEPS_INSTALL_FUNC

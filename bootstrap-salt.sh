@@ -5122,10 +5122,12 @@ __choose_openbsd_mirror() {
 }
 
 install_openbsd_deps() {
-    __choose_openbsd_mirror || return 1
-    echoinfo "setting package repository to $OPENBSD_REPO with ping time of $MINTIME"
-    [ -n "$OPENBSD_REPO" ] || return 1
-    echo "${OPENBSD_REPO}" >>/etc/installurl || return 1
+    if [ $_DISABLE_REPOS -eq $BS_FALSE ]; then
+        __choose_openbsd_mirror || return 1
+        echoinfo "setting package repository to $OPENBSD_REPO with ping time of $MINTIME"
+        [ -n "$OPENBSD_REPO" ] || return 1
+        echo "${OPENBSD_REPO}" >>/etc/installurl || return 1
+    fi
 
     if [ "${_EXTRA_PACKAGES}" != "" ]; then
         echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"

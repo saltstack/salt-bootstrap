@@ -5423,7 +5423,7 @@ __set_suse_pkg_repo() {
     fi
 
     if [ "$_DOWNSTREAM_PKG_REPO" -eq $BS_TRUE ]; then
-        suse_pkg_url_base="http://download.opensuse.org/repositories/systemsmanagement:/saltstack"
+        suse_pkg_url_base="https://download.opensuse.org/repositories/systemsmanagement:/saltstack"
         suse_pkg_url_path="${DISTRO_REPO}/systemsmanagement:saltstack.repo"
     else
         suse_pkg_url_base="${HTTP_VAL}://repo.saltstack.com/opensuse"

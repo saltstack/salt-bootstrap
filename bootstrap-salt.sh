@@ -5101,7 +5101,7 @@ install_freebsd_restart_daemons() {
 __choose_openbsd_mirror() {
     OPENBSD_REPO=''
     MINTIME=''
-    MIRROR_LIST=$(ftp -w 15 -Vao - 'http://ftp.openbsd.org/cgi-bin/ftplist.cgi?dbversion=1' | awk '/^http/ {print $1}')
+    MIRROR_LIST=$(ftp -w 15 -Vao - 'https://ftp.openbsd.org/cgi-bin/ftplist.cgi?dbversion=1' | awk '/^http/ {print $1}')
 
     for MIRROR in $MIRROR_LIST; do
         MIRROR_HOST=$(echo "$MIRROR" | sed -e 's|.*//||' -e 's|+*/.*$||')
@@ -5423,7 +5423,7 @@ __set_suse_pkg_repo() {
     fi
 
     if [ "$_DOWNSTREAM_PKG_REPO" -eq $BS_TRUE ]; then
-        suse_pkg_url_base="http://download.opensuse.org/repositories/systemsmanagement:/saltstack"
+        suse_pkg_url_base="https://download.opensuse.org/repositories/systemsmanagement:/saltstack"
         suse_pkg_url_path="${DISTRO_REPO}/systemsmanagement:saltstack.repo"
     else
         suse_pkg_url_base="${HTTP_VAL}://repo.saltstack.com/opensuse"

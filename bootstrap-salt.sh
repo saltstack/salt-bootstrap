@@ -5101,7 +5101,7 @@ install_freebsd_restart_daemons() {
 __choose_openbsd_mirror() {
     OPENBSD_REPO=''
     MINTIME=''
-    MIRROR_LIST=$(ftp -w 15 -Vao - 'http://ftp.openbsd.org/cgi-bin/ftplist.cgi?dbversion=1' | awk '/^http/ {print $1}')
+    MIRROR_LIST=$(ftp -w 15 -Vao - 'https://ftp.openbsd.org/cgi-bin/ftplist.cgi?dbversion=1' | awk '/^http/ {print $1}')
 
     for MIRROR in $MIRROR_LIST; do
         MIRROR_HOST=$(echo "$MIRROR" | sed -e 's|.*//||' -e 's|+*/.*$||')

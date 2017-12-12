@@ -269,6 +269,7 @@ _QUIET_GIT_INSTALLATION=$BS_FALSE
 _REPO_URL="repo.saltstack.com"
 _PY_EXE=""
 _INSTALL_PY="$BS_FALSE"
+_APT_FORCEIPv4=$BS_FALSE
 
 # Defaults for install arguments
 ITYPE="stable"
@@ -398,12 +399,15 @@ __usage() {
             sh bootstrap.sh -P -y -x python2.7 git v2016.11.3
         The above will install python27 and install the git version of salt using the
         python2.7 executable. This only works for git and pip installations.
+    -T  Forces 'apt-get' to use IPv4. Currently this will default to whatever the machine
+        defults are. The option will add: -o Acquire::ForceIPv4=true to each apt-get update command.
+        
 
 EOT
 }   # ----------  end of function __usage  ----------
 
 
-while getopts ':hvnDc:g:Gyx:wk:s:MSNXCPFUKIA:i:Lp:dH:ZbflV:J:j:rR:aq' opt
+while getopts ':hvnDc:g:Gyx:wk:s:MSNXCPFUKIAT:i:Lp:dH:ZbflV:J:j:rR:aq' opt
 do
   case "${opt}" in
 
@@ -451,6 +455,7 @@ do
     q )  _QUIET_GIT_INSTALLATION=$BS_TRUE               ;;
     x )  _PY_EXE="$OPTARG"                              ;;
     y )  _INSTALL_PY="$BS_TRUE"                         ;;
+    T )  _APT_FORCEIPv4=$BS_TRUE                        ;;
 
     \?)  echo
          echoerror "Option does not exist : $OPTARG"
@@ -1774,7 +1779,6 @@ __apt_get_install_noinput() {
     apt-get install -y -o DPkg::Options::=--force-confold "${@}"; return $?
 }   # ----------  end of function __apt_get_install_noinput  ----------
 
-
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #          NAME:  __apt_get_upgrade_noinput
 #   DESCRIPTION:  (DRY) apt-get upgrade with noinput options
@@ -1782,7 +1786,6 @@ __apt_get_install_noinput() {
 __apt_get_upgrade_noinput() {
     apt-get upgrade -y -o DPkg::Options::=--force-confold; return $?
 }   # ----------  end of function __apt_get_upgrade_noinput  ----------
-
 
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #          NAME:  __apt_key_fetch
@@ -2575,8 +2578,12 @@ __install_saltstack_ubuntu_repository() {
     echo "deb $SALTSTACK_UBUNTU_URL $UBUNTU_CODENAME main" > /etc/apt/sources.list.d/saltstack.list
 
     __apt_key_fetch "$SALTSTACK_UBUNTU_URL/SALTSTACK-GPG-KEY.pub" || return 1
-
+    
+    if [ $_APT_FORCEIPv4 -eq $BS_TRUE ]; then
+    apt-get update -o Acquire::ForceIPv4=true
+    else
     apt-get update
+    fi
 }
 
 install_ubuntu_deps() {
@@ -2588,7 +2595,11 @@ install_ubuntu_deps() {
 
         __enable_universe_repository || return 1
 
-        apt-get update
+        if [ $_APT_FORCEIPv4 -eq $BS_TRUE ]; then
+            apt-get update -o Acquire::ForceIPv4=true
+        else
+            apt-get update
+        fi
     fi
 
     __PACKAGES=''
@@ -2643,13 +2654,22 @@ install_ubuntu_stable_deps() {
 
     # No user interaction, libc6 restart services for example
     export DEBIAN_FRONTEND=noninteractive
-
-    apt-get update
+    
+    if [ $_APT_FORCEIPv4 -eq $BS_TRUE ]; then
+        apt-get update -o Acquire::ForceIPv4=true
+    else
+        apt-get update
+    fi
 
     if [ "${_UPGRADE_SYS}" -eq $BS_TRUE ]; then
         if [ "${_INSECURE_DL}" -eq $BS_TRUE ]; then
             __apt_get_install_noinput --allow-unauthenticated debian-archive-keyring &&
-                apt-key update && apt-get update
+                apt-key update && \
+            if [ $_APT_FORCEIPv4 -eq $BS_TRUE ]; then
+                apt-get update -o Acquire::ForceIPv4=true
+            else
+                apt-get update
+            fi
         fi
 
         __apt_get_upgrade_noinput || return 1
@@ -2670,7 +2690,11 @@ install_ubuntu_daily_deps() {
         __enable_universe_repository || return 1
 
         add-apt-repository -y ppa:saltstack/salt-daily || return 1
-        apt-get update
+        if [ $_APT_FORCEIPv4 -eq $BS_TRUE ]; then
+            apt-get update -o Acquire::ForceIPv4=true
+        else
+            apt-get update
+        fi
     fi
 
     if [ "$_UPGRADE_SYS" -eq $BS_TRUE ]; then
@@ -2681,7 +2705,11 @@ install_ubuntu_daily_deps() {
 }
 
 install_ubuntu_git_deps() {
-    apt-get update
+    if [ $_APT_FORCEIPv4 -eq $BS_TRUE ]; then
+        apt-get update -o Acquire::ForceIPv4=true
+    else
+        apt-get update
+    fi
 
     if ! __check_command_exists git; then
         __apt_get_install_noinput git-core || return 1
@@ -2973,7 +3001,11 @@ __install_saltstack_debian_repository() {
 
     __apt_key_fetch "$SALTSTACK_DEBIAN_URL/SALTSTACK-GPG-KEY.pub" || return 1
 
-    apt-get update
+    if [ $_APT_FORCEIPv4 -eq $BS_TRUE ]; then
+        apt-get update -o Acquire::ForceIPv4=true
+    else
+        apt-get update
+    fi
 }
 
 install_debian_deps() {
@@ -2984,13 +3016,22 @@ install_debian_deps() {
     # No user interaction, libc6 restart services for example
     export DEBIAN_FRONTEND=noninteractive
 
-    apt-get update
+    if [ $_APT_FORCEIPv4 -eq $BS_TRUE ]; then
+        apt-get update -o Acquire::ForceIPv4=true
+    else
+        apt-get update
+    fi
 
     if [ "${_UPGRADE_SYS}" -eq $BS_TRUE ]; then
         # Try to update GPG keys first if allowed
         if [ "${_INSECURE_DL}" -eq $BS_TRUE ]; then
             __apt_get_install_noinput --allow-unauthenticated debian-archive-keyring &&
-                apt-key update && apt-get update
+                apt-key update && \
+                if [ $_APT_FORCEIPv4 -eq $BS_TRUE ]; then
+                    apt-get update -o Acquire::ForceIPv4=true
+                else
+                    apt-get update
+                fi
         fi
 
         __apt_get_upgrade_noinput || return 1
@@ -3096,7 +3137,11 @@ install_debian_8_git_deps() {
                 /etc/apt/sources.list.d/backports.list
         fi
 
-        apt-get update || return 1
+        if [ $_APT_FORCEIPv4 -eq $BS_TRUE ]; then
+            apt-get update -o Acquire::ForceIPv4=true || return 1
+        else
+            apt-get update || return 1
+        fi
 
         # python-tornado package should be installed from backports repo
         __PACKAGES="${__PACKAGES} python-backports.ssl-match-hostname python-tornado/jessie-backports"

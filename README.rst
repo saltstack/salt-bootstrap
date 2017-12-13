@@ -13,16 +13,11 @@ the `Salt`_ installation process is handled by this shell script ``bootstrap-sal
 script runs through a series of checks to determine operating system type and version to then
 install the `Salt`_ binaries using the appropriate methods.
 
-.. note::
+**NOTE**
 
-  This ``README`` file is not the absolute truth to what the bootstrap script is capable of, for
-  that, please read the generated help by passing ``-h`` to the script or even better,
-  `read the source`_.
-
-**In case you found a bug, please read** `I Found a Bug`_ **first before submitting a new issue.**
-The examples there show how to get the latest development version of the bootstrap script. Chances
-are high that your issue was already fixed.
-
+This ``README`` file is not the absolute truth to what the bootstrap script is capable of, for
+that, please read the generated help by passing ``-h`` to the script or even better,
+`read the source`_.
 
 Bootstrap
 =========
@@ -32,11 +27,17 @@ of the downloaded ``bootstrap-salt.sh`` file.
 
 The SHA256 sum of the ``bootstrap-salt.sh`` file, per release, is:
 
+- 2017.08.17: ``909b4d35696b9867b34b22ef4b60edbc5a0e9f8d1ed8d05f922acb79a02e46e3``
 - 2017.05.24: ``8c42c2e5ad3d4384ddc557da5c214ba3e40c056ca1b758d14a392c1364650e89``
 
 If you're looking for the *one-liner* to install Salt, please scroll to the bottom and use the
 instructions for `Installing via an Insecure One-Liner`_.
 
+Contributing
+------------
+
+The Salt Bootstrap project is open and encouraging to code contributions. Please review the
+`Contributing Guidelines`_ for information on filing issues, fixing bugs, and submitting features.
 
 Examples
 --------
@@ -44,11 +45,11 @@ Examples
 The Salt Bootstrap script has a wide variety of options that can be passed as
 well as several ways of obtaining the bootstrap script itself.
 
-.. note::
+**NOTE**
 
-  These examples below show how to bootstrap Salt directly from GitHub or other Git repository.
-  Run the script without any parameters to get latest stable Salt packages for your system from
-  `SaltStack's corporate repository`_. See first example in the `Install using wget`_ section.
+These examples below show how to bootstrap Salt directly from GitHub or other Git repository.
+Run the script without any parameters to get latest stable Salt packages for your system from
+`SaltStack's corporate repository`_. See first example in the `Install using wget`_ section.
 
 
 Install using curl
@@ -108,10 +109,10 @@ Installing a specific version from git using ``wget``:
   wget -O bootstrap-salt.sh https://bootstrap.saltstack.com
   sudo sh bootstrap-salt.sh -P git v2016.11.5
 
-.. note::
+**NOTE**
 
-  On the above example we added `-P` which will allow PIP packages to be installed if required but
-  it's not a necessary flag for Git based bootstraps.
+On the above example we added `-P` which will allow PIP packages to be installed if required but
+it's not a necessary flag for Git based bootstraps.
 
 
 Install using Python
@@ -163,14 +164,14 @@ Or link them to the right place:
 
 
 Installing via an Insecure One-Liner
-------------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The following examples illustrate how to install Salt via a one-liner.
 
-.. note::
+**NOTE**
 
-  Warning! These methods do not involve a verification step and assume that the delivered file is
-  trustworthy.
+Warning! These methods do not involve a verification step and assume that the delivered file is
+trustworthy.
 
 Any of the example above which use two-lines can be made to run in a single-line
 configuration with minor modifications.
@@ -205,7 +206,7 @@ listed on the official supported operating systems document, the level of suppor
 Since Salt is written in Python, the packages available from `SaltStack's corporate repository`_
 are CPU architecture independent and could be installed on any hardware supported by Linux kernel.
 However, SaltStack does package Salt's binary dependencies only for ``x86_64`` (``amd64``) and
-``AArch32`` (``armhf``), which is limited for Debian/Raspbian 8 platforms.
+``AArch32`` (``armhf``). The latter is available only for Debian/Raspbian 8 platforms.
 
 It is recommended to use ``git`` bootstrap mode as described above to install Salt on other
 architectures, such as ``x86`` (``i386``), ``AArch64`` (``arm64``) or ``ARM EABI`` (``armel``).
@@ -216,12 +217,11 @@ You also may need to disable repository configuration and allow ``pip`` installa
 
   sudo sh bootstrap-salt.sh -r -P git develop
 
-.. note::
+**NOTE**
 
-  Bootstrap may fail to install Salt on the cutting-edge version of distributions with frequent
-  release cycles such as: Amazon Linux, Fedora, openSUSE Tumbleweed, or Ubuntu non-LTS. Check the
-  versions from the list below. Also, see the `Unsupported Distro`_ and
-  `Adding Support for Other Operating Systems`_ sections.
+Bootstrap may fail to install Salt on the cutting-edge version of distributions with frequent
+release cycles such as: Amazon Linux, Fedora, openSUSE Tumbleweed, or Ubuntu non-LTS. Check the
+versions from the list below. Also, see the `Unsupported Distro`_ section.
 
 
 Debian and derivatives
@@ -229,9 +229,10 @@ Debian and derivatives
 
 - Cumulus Linux 2/3
 - Debian GNU/Linux 7/8/9
+- Devuan GNU/Linux 1/2
 - Linux Mint Debian Edition 1 (based on Debian 8)
 - Kali Linux 1.0 (based on Debian 7)
-- Raspbian 8 (``armhf``)
+- Raspbian 8 (``armhf`` packages) and 9 (using ``git`` installation mode only)
 
 Debian Best Effort Support: Testing Release
 *******************************************
@@ -252,7 +253,7 @@ Red Hat family
 - Amazon Linux 2012.3 and later
 - CentOS 6/7
 - Cloud Linux 6/7
-- Fedora 24/25
+- Fedora 25/26
 - Oracle Linux 6/7
 - Red Hat Enterprise Linux 6/7
 - Scientific Linux 6/7
@@ -261,10 +262,9 @@ Red Hat family
 SUSE family
 ~~~~~~~~~~~
 
-- openSUSE 12/13
-- openSUSE Leap 42
+- openSUSE Leap 42.2/42.3
 - openSUSE Tumbleweed 2015
-- SUSE Linux Enterprise Server 11 SP1/11 SP2/11 SP3/12
+- SUSE Linux Enterprise Server 11 SP4, 12 SP2
 
 
 Ubuntu and derivatives
@@ -306,7 +306,6 @@ UNIX systems
 
 - SmartOS
 
-
 Unsupported Distro
 ------------------
 
@@ -318,211 +317,14 @@ Please run the following commands and report their output when creating a ticket
   sudo find /etc/ -name \*-release -print -exec cat {} \;
   command lsb_release -a
 
+For information on how to add support for a currently unsupported distro, please refer to the
+`Contributing Guidelines`_.
 
-Adding Support for Other Operating Systems
-------------------------------------------
+Testing
+-------
 
-The following operating systems are detected, but Salt and its dependencies installation functions
-are not developed yet:
-
-**BSD**:
-
-- NetBSD
-
-**Linux**:
-
-- Slackware
-
-**SunOS**
-
-- OpenIndiana
-- Oracle Solaris
-- OmniOS (Illumos)
-
-
-In order to install Salt for a distribution you need to define:
-
-1. To Install Dependencies, which is required, one of:
-
-.. code:: bash
-
-  install_<distro>_<major_version>_<install_type>_deps
-  install_<distro>_<major_version>_<minor_version>_<install_type>_deps
-  install_<distro>_<major_version>_deps
-  install_<distro>_<major_version>_<minor_version>_deps
-  install_<distro>_<install_type>_deps
-  install_<distro>_deps
-
-
-2. Optionally, define a minion configuration function, which will be called if the
-   ``-c`` option is passed. One of:
-
-.. code:: bash
-
-  config_<distro>_<major_version>_<install_type>_salt
-  config_<distro>_<major_version>_<minor_version>_<install_type>_salt
-  config_<distro>_<major_version>_salt
-  config_<distro>_<major_version>_<minor_version>_salt
-  config_<distro>_<install_type>_salt
-  config_<distro>_salt
-  config_salt [THIS ONE IS ALREADY DEFINED AS THE DEFAULT]
-
-
-3. Optionally, define a Salt master pre-seed function, which will be called if the
-   ``-k`` (pre-seed master keys) option is passed. One of:
-
-.. code:: bash
-
-  preseed_<distro>_<major_version>_<install_type>_master
-  preseed_<distro>_<major_version>_<minor_version>_<install_type>_master
-  preseed_<distro>_<major_version>_master
-  preseed_<distro>_<major_version>_<minor_version>_master
-  preseed_<distro>_<install_type>_master
-  preseed_<distro>_master
-  preseed_master [THIS ONE IS ALREADY DEFINED AS THE DEFAULT]
-
-
-4. To install salt, which, of course, is required, one of:
-
-.. code:: bash
-
-  install_<distro>_<major_version>_<install_type>
-  install_<distro>_<major_version>_<minor_version>_<install_type>
-  install_<distro>_<install_type>
-
-
-5. Optionally, define a post install function, one of:
-
-.. code:: bash
-
-  install_<distro>_<major_version>_<install_type>_post
-  install_<distro>_<major_version>_<minor_version>_<install_type>_post
-  install_<distro>_<major_version>_post
-  install_<distro>_<major_version>_<minor_version>_post
-  install_<distro>_<install_type>_post
-  install_<distro>_post
-
-
-6. Optionally, define a start daemons function, one of:
-
-.. code:: bash
-
-  install_<distro>_<major_version>_<install_type>_restart_daemons
-  install_<distro>_<major_version>_<minor_version>_<install_type>_restart_daemons
-  install_<distro>_<major_version>_restart_daemons
-  install_<distro>_<major_version>_<minor_version>_restart_daemons
-  install_<distro>_<install_type>_restart_daemons
-  install_<distro>_restart_daemons
-
-
-.. admonition:: Attention!
-
-  The start daemons function should be able to restart any daemons which are running, or start if
-  they're not running.
-
-
-7. Optionally, define a daemons running function, one of:
-
-.. code:: bash
-
-  daemons_running_<distro>_<major_version>_<install_type>
-  daemons_running_<distro>_<major_version>_<minor_version>_<install_type>
-  daemons_running_<distro>_<major_version>
-  daemons_running_<distro>_<major_version>_<minor_version>
-  daemons_running_<distro>_<install_type>
-  daemons_running_<distro>
-  daemons_running  [THIS ONE IS ALREADY DEFINED AS THE DEFAULT]
-
-
-8. Optionally, check enabled Services:
-
-.. code:: bash
-
-  install_<distro>_<major_version>_<install_type>_check_services
-  install_<distro>_<major_version>_<minor_version>_<install_type>_check_services
-  install_<distro>_<major_version>_check_services
-  install_<distro>_<major_version>_<minor_version>_check_services
-  install_<distro>_<install_type>_check_services
-  install_<distro>_check_services
-
-
-----
-
-Below is an example for Ubuntu Oneiric (the example may not be up to date with the script):
-
-.. code:: bash
-
-  install_ubuntu_11_10_deps() {
-      apt-get update
-      apt-get -y install python-software-properties
-      add-apt-repository -y 'deb http://us.archive.ubuntu.com/ubuntu/ oneiric universe'
-      add-apt-repository -y ppa:saltstack/salt
-  }
-
-  install_ubuntu_11_10_post() {
-      add-apt-repository -y --remove 'deb http://us.archive.ubuntu.com/ubuntu/ oneiric universe'
-  }
-
-  install_ubuntu_stable() {
-      apt-get -y install salt-minion
-  }
-
-  install_ubuntu_restart_daemons() {
-      for fname in minion master syndic; do
-
-          # Skip if not meant to be installed
-          [ $fname = "minion" ] && [ $INSTALL_MINION -eq $BS_FALSE ] && continue
-          [ $fname = "master" ] && [ $INSTALL_MASTER -eq $BS_FALSE ] && continue
-          [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq $BS_FALSE ] && continue
-
-          if [ -f /sbin/initctl ]; then
-              # We have upstart support
-              /sbin/initctl status salt-$fname > /dev/null 2>&1
-              if [ $? -eq 0 ]; then
-                  # upstart knows about this service, let's stop and start it.
-                  # We could restart but earlier versions of the upstart script
-                  # did not support restart, so, it's safer this way
-                  /sbin/initctl stop salt-$fname > /dev/null 2>&1
-                  /sbin/initctl start salt-$fname > /dev/null 2>&1
-                  [ $? -eq 0 ] && continue
-                  # We failed to start the service, let's test the SysV code bellow
-              fi
-          fi
-          /etc/init.d/salt-$fname stop > /dev/null 2>&1
-          /etc/init.d/salt-$fname start
-      done
-  }
-
-
-Since there is no ``install_ubuntu_11_10_stable()`` it defaults to the unspecified version script.
-
-The bootstrapping script must be plain POSIX ``sh`` only, **not** ``bash`` or another shell script.
-By design the targeting for each operating system and version is very specific. Assumptions of
-supported versions or variants should not be made, to avoid failed or broken installations.
-
-
-I Found a Bug
-=============
-
-If you found a possible problem, or bug, please try to bootstrap using the develop version. The
-issue you are having might have already been fixed and it's just not yet included in the stable
-version.
-
-.. code:: console
-
-  curl -o bootstrap-salt.sh -L https://bootstrap.saltstack.com/develop
-  sudo sh bootstrap-salt.sh git develop
-
-
-Or the insecure one liner:
-
-.. code:: console
-
-  curl -L https://bootstrap.saltstack.com/develop | sudo sh -s -- git develop
-
-
-If after trying this and the problem still occurs, please `file an issue`_.
-
+There are a couple of ways to test the bootstrap script. Running the script on a full-fledged
+VM is one way. Other options include using Vagrant or Docker.
 
 Testing in Vagrant
 ==================
@@ -534,7 +336,6 @@ Ubuntu box. First, install Vagrant, then:
 
   vagrant up
   vagrant ssh
-
 
 Running in Docker
 =================
@@ -562,15 +363,14 @@ And finally "enter" the running container and make Salt fully operational:
 
 Salt is ready and working in the Docker container with Minion authenticated on Master.
 
-.. note::
+**NOTE**
 
-  The ``Dockerfile`` here inherits Ubuntu 14.04 public image with Upstart configured as init system.
-  Consider it as an example or starting point of how to make your own Docker images with suitable
-  Salt components, custom configurations and even `pre-accepted Minion key`_ already installed.
+The ``Dockerfile`` here inherits Ubuntu 14.04 public image with Upstart configured as init system.
+Consider it as an example or starting point of how to make your own Docker images with suitable
+Salt components, custom configurations and even `pre-accepted Minion key`_ already installed.
 
-
+.. _Contributing Guidelines: https://github.com/saltstack/salt-bootstrap/blob/develop/CONTRIBUTING.md
 .. _Docker: https://www.docker.com/
-.. _`file an issue`: https://github.com/saltstack/salt-bootstrap/issues/new
 .. _`pre-accepted Minion key`: https://docs.saltstack.com/en/latest/topics/tutorials/preseed_key.html
 .. _`read the source`: https://github.com/saltstack/salt-bootstrap/blob/develop/bootstrap-salt.sh
 .. _`Salt`: https://saltstack.com/community/

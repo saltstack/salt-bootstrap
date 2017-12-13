@@ -1,3 +1,23 @@
+Version 2017.12.13:
+    * Use HTTPS URL for OpenSuse's saltstack repo (gdm85) #1174
+    * Respect disable repos (-r) option on OpenBSD (eradman) #1171
+    * Fix #1168 : -b option causes error (vutny) #1170
+    * Fix fatal error with using the -b option. (arizvisa) #1169
+    * Devuan support (ymasson) #1165
+    * Fix yum repo on AWS Linux (cmclaughlin) #1164
+    * Use suse repo to install packages, rather than defining them (rallytime) #1157
+    * Remove patch-level-1 specific code for SLES installs (rallytime) #1156
+    * priority sort fedora-release (toanju) #1153
+    * Declare EOL for SUSE Linux Enterprise Server releases (vutny) #1150
+    * Fix #1142: allow git install on Raspbian 9 (vutny) #1146
+    * Follow symlinks when parsing distro release files (vutny) #1145
+    * fedora: use dnf-utils for F26 and above (toanju) #1144
+    * Declare EOL for openSUSE LEAP 42.1 (vutny) #1143
+    * Fix #1137: import GPG key through an HTTP(S) proxy (vutny) #1139
+    * Fix #1138: git install on Debian/Ubuntu various arches (vutny) #1141
+    * Declare EOL for openSUSE releases earlier and including 13.X (vutny) #1136
+    * Update Fedora support: 24 is EOL (rallytime) #1134
+
 Version 2017.08.17:
     * Add new authors (rallytime) #1130
     * README: Fix typo and Table of Contents for Debian section (vutny) #1129

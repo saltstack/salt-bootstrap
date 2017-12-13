@@ -13,6 +13,7 @@ Alec Koumjian               akoumjian              akoumjian@gmail.com
 Alex Van't Hof              alexvh
 Alexander Krasnukhin        themalkolm             the.malkolm@gmail.com
 Alexey                      dmitrievav
+Ali Rizvi-Santiago          arizvisa
 amendlik                    amendlik
 Andrew Dean                 ndrwdn                 ndrwdn@gmail.com
 Andy Boff                   caelor                 github@plek.me.uk
@@ -30,6 +31,7 @@ bruce-one                   bruce-one
 Вячеслав Спиридонов         sp1r
 C. R. Oldham                cro                    cr@saltstack.com
 Cam                         camereonsparr
+Charles McLaughlin          cmclaughlin
 Megan Wilhite               Ch3LL                  megan.wilhite@gmail.com
 Chris Rebert                cvrebert               chris.rebert@hulu.com
 Chris Buechler              cbuechler              cmb@pfsense.org
@@ -139,5 +141,6 @@ Vladimir Kozhukalov         kozhukalov
 Whit Morriss                whitmo                 whit@nocoast.us
 Wolodja Wentland            babilen                w@babilen5.org
 Wout                        wfhg
+Yann Masson                 ymasson
 Yushi Nakai                 nyushi
 ==========================  =====================  ============================

@@ -5515,7 +5515,7 @@ install_opensuse_stable_deps() {
 }
 
 install_opensuse_git_deps() {
-    if [ "$_INSECURE_DL" -eq $BS_FALSE ] && [ "${_SALT_REPO_URL%%://*}" = "https" ]; then
+    if [ "$_INSECURE_DL" -eq $BS_FALSE ] && [ "${_SALT_REPO_URL%%://*}" = "https" ] && ! __check_command_exists update-ca-certificates; then
         __zypper_install ca-certificates || return 1
     fi
 

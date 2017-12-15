@@ -5456,6 +5456,13 @@ __version_lte() {
 }
 
 __zypper() {
+    # Check if any zypper process is running before calling zypper again.
+    # This is useful when a zypper call is part of a boot process and will
+    # wait until the zypper process is finished, such as on AWS AMIs.
+    while pgrep -l zypper; do
+        sleep 1
+    done
+
     zypper --non-interactive "${@}"; return $?
 }
 

@@ -4433,7 +4433,7 @@ install_amazon_linux_ami_deps() {
         repo_rev="latest"
     fi
 
-    if [[ $repo_rev =~ ^archive ]]; then
+    if echo $repo_rev | egrep -q '^archive'; then
         year=$(echo "$repo_rev" | cut -d '/' -f 2 | cut -c1-4)
     else
         year=$(echo "$repo_rev" | cut -c1-4)

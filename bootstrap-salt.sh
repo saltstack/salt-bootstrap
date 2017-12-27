@@ -4427,10 +4427,20 @@ install_amazon_linux_ami_deps() {
     _USEAWS=$BS_FALSE
     pkg_append="python"
 
-    repo_rev="$(echo "${STABLE_REV}"  | sed 's|.*\/||g')"
+    if [ "$ITYPE" = "stable" ]; then
+        repo_rev="$STABLE_REV"
+    else
+        repo_rev="latest"
+    fi
+
+    if echo $repo_rev | egrep -q '^archive'; then
+        year=$(echo "$repo_rev" | cut -d '/' -f 2 | cut -c1-4)
+    else
+        year=$(echo "$repo_rev" | cut -c1-4)
+    fi
 
     if echo "$repo_rev" | egrep -q '^(latest|2016\.11)$' || \
-            [ "$(echo "$repo_rev" | cut -c1-4)" -gt 2016 ]; then
+            [ "$year" -gt 2016 ]; then
        _USEAWS=$BS_TRUE
        pkg_append="python27"
     fi

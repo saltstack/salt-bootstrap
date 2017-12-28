@@ -44,7 +44,8 @@ Examples
 --------
 
 The Salt Bootstrap script has a wide variety of options that can be passed as
-well as several ways of obtaining the bootstrap script itself.
+well as several ways of obtaining the bootstrap script itself. Note that the use of ``sudo``
+is not needed when running these commands as the ``root`` user.
 
 **NOTE**
 

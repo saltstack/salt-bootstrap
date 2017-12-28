@@ -15,7 +15,7 @@ install the `Salt`_ binaries using the appropriate methods.
 
 **NOTE**
 
-This ``README`` file is not the absolute truth to what the bootstrap script is capable of, for
+This ``README`` file is not the absolute truth as to what the bootstrap script is capable of. For
 that, please read the generated help by passing ``-h`` to the script or even better,
 `read the source`_.
 
@@ -31,7 +31,7 @@ The SHA256 sum of the ``bootstrap-salt.sh`` file, per release, is:
 - 2017.08.17: ``909b4d35696b9867b34b22ef4b60edbc5a0e9f8d1ed8d05f922acb79a02e46e3``
 - 2017.05.24: ``8c42c2e5ad3d4384ddc557da5c214ba3e40c056ca1b758d14a392c1364650e89``
 
-If you're looking for the *one-liner* to install Salt, please scroll to the bottom and use the
+If you're looking for a *one-liner* to install Salt, please scroll to the bottom and use the
 instructions for `Installing via an Insecure One-Liner`_.
 
 Contributing
@@ -49,7 +49,7 @@ is not needed when running these commands as the ``root`` user.
 
 **NOTE**
 
-These examples below show how to bootstrap Salt directly from GitHub or other Git repository.
+The examples below show how to bootstrap Salt directly from GitHub or another Git repository.
 Run the script without any parameters to get latest stable Salt packages for your system from
 `SaltStack's corporate repository`_. See first example in the `Install using wget`_ section.
 
@@ -113,14 +113,14 @@ Installing a specific version from git using ``wget``:
 
 **NOTE**
 
-On the above example we added `-P` which will allow PIP packages to be installed if required but
-it's not a necessary flag for Git based bootstraps.
+On the above example we added ``-P`` which will allow PIP packages to be installed if required.
+However, the ``-P`` flag is not necessary for Git-based bootstraps.
 
 
 Install using Python
 ~~~~~~~~~~~~~~~~~~~~
 
-If you already have Python installed, ``python 2.6``, then it's as easy as:
+If you already have Python installed, ``python 2.7``, then it's as easy as:
 
 .. code:: console
 
@@ -138,7 +138,7 @@ All Python versions should support the following in-line code:
 Install using fetch
 ~~~~~~~~~~~~~~~~~~~
 
-On a FreeBSD base system you usually don't have either of the above binaries available. You **do**
+On a FreeBSD-based system you usually don't have either of the above binaries available. You **do**
 have ``fetch`` available though:
 
 .. code:: console
@@ -175,7 +175,7 @@ The following examples illustrate how to install Salt via a one-liner.
 Warning! These methods do not involve a verification step and assume that the delivered file is
 trustworthy.
 
-Any of the example above which use two-lines can be made to run in a single-line
+Any of the examples above which use two lines can be made to run in a single-line
 configuration with minor modifications.
 
 Installing the latest stable release of Salt (default):
@@ -288,8 +288,8 @@ For example, when installing Salt on Ubuntu 16.10, the bootstrap script will set
 for Ubuntu 16.04 from `SaltStack's Ubuntu repository`_ and install the 16.04 packages.
 
 
-Other Linux distro
-~~~~~~~~~~~~~~~~~~
+Other Linux distributions
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
 - Alpine Linux 3.5/edge
 - Arch Linux
@@ -311,27 +311,27 @@ UNIX systems
 Unsupported Distro
 ------------------
 
-You found a Linux distribution which we still do not support or we do not correctly identify?
-Please run the following commands and report their output when creating a ticket:
+If you are running a Linux distribution that is not supported yet or is not correctly identified,
+please run the following commands and report their output when creating an issue:
 
 .. code:: console
 
   sudo find /etc/ -name \*-release -print -exec cat {} \;
   command lsb_release -a
 
-For information on how to add support for a currently unsupported distro, please refer to the
+For information on how to add support for a currently unsupported distribution, please refer to the
 `Contributing Guidelines`_.
 
 Testing
 -------
 
-There are a couple of ways to test the bootstrap script. Running the script on a full-fledged
+There are a couple of ways to test the bootstrap script. Running the script on a fully-fledged
 VM is one way. Other options include using Vagrant or Docker.
 
 Testing in Vagrant
 ==================
 
-You can use Vagrant_ to easily test changes on a clean machine. The ``Vagrantfile`` defaults to an
+Vagrant_ can be used to easily test changes on a clean machine. The ``Vagrantfile`` defaults to an
 Ubuntu box. First, install Vagrant, then:
 
 .. code:: console
@@ -342,9 +342,9 @@ Ubuntu box. First, install Vagrant, then:
 Running in Docker
 =================
 
-Also you are able to run and use Salt inside Docker_ container on Linux machine.
-Let's prepare the Docker image using provided ``Dockerfile`` to install both Salt Master and Minion
-with the bootstrap script:
+It is possible to run and use Salt inside a Docker_ container on Linux machines.
+Let's prepare the Docker image using the provided ``Dockerfile`` to install both a Salt Master
+and a Salt Minion with the bootstrap script:
 
 .. code:: console
 
@@ -363,17 +363,17 @@ And finally "enter" the running container and make Salt fully operational:
   docker exec -i -t salt /bin/bash
   salt-key -A -y
 
-Salt is ready and working in the Docker container with Minion authenticated on Master.
+Salt is ready and working in the Docker container with the Minion authenticated on the Master.
 
 **NOTE**
 
-The ``Dockerfile`` here inherits Ubuntu 14.04 public image with Upstart configured as init system.
-Consider it as an example or starting point of how to make your own Docker images with suitable
-Salt components, custom configurations and even `pre-accepted Minion key`_ already installed.
+The ``Dockerfile`` here inherits the Ubuntu 14.04 public image with Upstart configured as the init system.
+Use it as an example or starting point of how to make your own Docker images with suitable
+Salt components, custom configurations, and even `pre-accepted Minion keys`_ already installed.
 
 .. _Contributing Guidelines: https://github.com/saltstack/salt-bootstrap/blob/develop/CONTRIBUTING.md
 .. _Docker: https://www.docker.com/
-.. _`pre-accepted Minion key`: https://docs.saltstack.com/en/latest/topics/tutorials/preseed_key.html
+.. _`pre-accepted Minion keys`: https://docs.saltstack.com/en/latest/topics/tutorials/preseed_key.html
 .. _`read the source`: https://github.com/saltstack/salt-bootstrap/blob/develop/bootstrap-salt.sh
 .. _`Salt`: https://saltstack.com/community/
 .. _`Salt's Supported Operating Systems`: http://saltstack.com/wp-content/uploads/2016/08/SaltStack-Supported-Operating-Systems.pdf

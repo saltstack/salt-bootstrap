@@ -4367,6 +4367,7 @@ install_alpine_linux_restart_daemons() {
         # Skip if not meant to be installed
         [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
         [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
+        [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
 
         # Disable stdin to fix shell session hang on killing tee pipe
         /sbin/rc-service salt-$fname stop < /dev/null > /dev/null 2>&1
@@ -4382,6 +4383,7 @@ install_alpine_linux_check_services() {
         # Skip if not meant to be installed
         [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
         [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
+        [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
 
         __check_services_alpine salt-$fname || return 1
     done
@@ -4400,6 +4402,7 @@ daemons_running_alpine_linux() {
         # Skip if not meant to be installed
         [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
         [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
+        [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
 
         # shellcheck disable=SC2009
         if [ "$(ps wwwaux | grep -v grep | grep salt-$fname)" = "" ]; then

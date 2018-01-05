@@ -299,13 +299,13 @@ __usage() {
   Examples:
     - ${__ScriptName}
     - ${__ScriptName} stable
-    - ${__ScriptName} stable 2016.3
-    - ${__ScriptName} stable 2016.3.1
+    - ${__ScriptName} stable 2017.7
+    - ${__ScriptName} stable 2017.7.2
     - ${__ScriptName} daily
     - ${__ScriptName} testing
     - ${__ScriptName} git
-    - ${__ScriptName} git 2016.3
-    - ${__ScriptName} git v2016.3.1
+    - ${__ScriptName} git 2017.7
+    - ${__ScriptName} git v2017.7.2
     - ${__ScriptName} git 06f249901a2e2f1ed310d58ea3921a129f214358
 
   Options:
@@ -395,7 +395,7 @@ __usage() {
         tested with Centos 6 and is considered experimental. This will install the
         ius repo on the box if disable repo is false. This must be used in conjunction
         with -x <pythonversion>.  For example:
-            sh bootstrap.sh -P -y -x python2.7 git v2016.11.3
+            sh bootstrap.sh -P -y -x python2.7 git v2017.7.2
         The above will install python27 and install the git version of salt using the
         python2.7 executable. This only works for git and pip installations.
 
@@ -1331,10 +1331,10 @@ __check_dpkg_architecture() {
     if [ "${error_msg}" != "" ]; then
         echoerror "${error_msg}"
         if [ "$ITYPE" != "git" ]; then
-            echoerror "You can try git installation mode, i.e.: sh ${__ScriptName} git v2016.11.5."
+            echoerror "You can try git installation mode, i.e.: sh ${__ScriptName} git v2017.7.2."
             echoerror "It may be necessary to use git installation mode with pip and disable the SaltStack apt repository."
             echoerror "For example:"
-            echoerror "    sh ${__ScriptName} -r -P git v2016.11.5"
+            echoerror "    sh ${__ScriptName} -r -P git v2017.7.2"
         fi
     fi
 
@@ -1766,11 +1766,40 @@ __function_defined() {
 
 
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  __wait_for_apt
+#   DESCRIPTION:  Check if any apt, apt-get, aptitude, or dpkg processes are running before
+#                 calling these again. This is useful when these process calls are part of
+#                 a boot process, such as on AWS AMIs. This func will wait until the boot
+#                 process is finished so the script doesn't exit on a locked proc.
+#----------------------------------------------------------------------------------------------------------------------
+__wait_for_apt(){
+    echodebug "Checking if apt process is currently running."
+
+    # Timeout set at 15 minutes
+    WAIT_TIMEOUT=900
+
+    while ps -C apt,apt-get,aptitude,dpkg >/dev/null; do
+        sleep 1
+        WAIT_TIMEOUT=$((WAIT_TIMEOUT - 1))
+
+        # If timeout reaches 0, abort.
+        if [ "$WAIT_TIMEOUT" -eq 0 ]; then
+            echoerror "Apt, apt-get, aptitude, or dpkg process is taking too long."
+            echoerror "Bootstrap script cannot proceed. Aborting."
+            return 1
+        fi
+    done
+
+    echodebug "No apt processes are currently running."
+}
+
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #          NAME:  __apt_get_install_noinput
 #   DESCRIPTION:  (DRY) apt-get install with noinput options
 #    PARAMETERS:  packages
 #----------------------------------------------------------------------------------------------------------------------
 __apt_get_install_noinput() {
+    __wait_for_apt
     apt-get install -y -o DPkg::Options::=--force-confold "${@}"; return $?
 }   # ----------  end of function __apt_get_install_noinput  ----------
 
@@ -1780,6 +1809,7 @@ __apt_get_install_noinput() {
 #   DESCRIPTION:  (DRY) apt-get upgrade with noinput options
 #----------------------------------------------------------------------------------------------------------------------
 __apt_get_upgrade_noinput() {
+    __wait_for_apt
     apt-get upgrade -y -o DPkg::Options::=--force-confold; return $?
 }   # ----------  end of function __apt_get_upgrade_noinput  ----------
 
@@ -1790,6 +1820,7 @@ __apt_get_upgrade_noinput() {
 #    PARAMETERS:  url
 #----------------------------------------------------------------------------------------------------------------------
 __apt_key_fetch() {
+    __wait_for_apt
     url=$1
 
     # shellcheck disable=SC2086
@@ -2576,6 +2607,7 @@ __install_saltstack_ubuntu_repository() {
 
     __apt_key_fetch "$SALTSTACK_UBUNTU_URL/SALTSTACK-GPG-KEY.pub" || return 1
 
+    __wait_for_apt
     apt-get update
 }
 
@@ -2588,6 +2620,7 @@ install_ubuntu_deps() {
 
         __enable_universe_repository || return 1
 
+        __wait_for_apt
         apt-get update
     fi
 
@@ -2644,6 +2677,7 @@ install_ubuntu_stable_deps() {
     # No user interaction, libc6 restart services for example
     export DEBIAN_FRONTEND=noninteractive
 
+    __wait_for_apt
     apt-get update
 
     if [ "${_UPGRADE_SYS}" -eq $BS_TRUE ]; then
@@ -2664,6 +2698,7 @@ install_ubuntu_stable_deps() {
 }
 
 install_ubuntu_daily_deps() {
+    __wait_for_apt
     install_ubuntu_stable_deps || return 1
 
     if [ $_DISABLE_REPOS -eq $BS_FALSE ]; then
@@ -2681,6 +2716,7 @@ install_ubuntu_daily_deps() {
 }
 
 install_ubuntu_git_deps() {
+    __wait_for_apt
     apt-get update
 
     if ! __check_command_exists git; then
@@ -2973,6 +3009,7 @@ __install_saltstack_debian_repository() {
 
     __apt_key_fetch "$SALTSTACK_DEBIAN_URL/SALTSTACK-GPG-KEY.pub" || return 1
 
+    __wait_for_apt
     apt-get update
 }
 
@@ -2984,6 +3021,7 @@ install_debian_deps() {
     # No user interaction, libc6 restart services for example
     export DEBIAN_FRONTEND=noninteractive
 
+    __wait_for_apt
     apt-get update
 
     if [ "${_UPGRADE_SYS}" -eq $BS_TRUE ]; then
@@ -3096,6 +3134,7 @@ install_debian_8_git_deps() {
                 /etc/apt/sources.list.d/backports.list
         fi
 
+        __wait_for_apt
         apt-get update || return 1
 
         # python-tornado package should be installed from backports repo

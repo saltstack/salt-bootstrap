@@ -1372,16 +1372,10 @@ __ubuntu_codename_translation() {
             DISTRO_CODENAME="trusty"
             ;;
         "16")
-            if [ "$_april" ]; then
-                DISTRO_CODENAME="xenial"
-            else
-                DISTRO_CODENAME="yakkety"
-            fi
+            DISTRO_CODENAME="xenial"
             ;;
         "17")
-            if [ "$_april" ]; then
-                DISTRO_CODENAME="zesty"
-            fi
+            DISTRO_CODENAME="artful"
             ;;
         *)
             DISTRO_CODENAME="trusty"
@@ -1500,9 +1494,12 @@ __check_end_of_life_versions() {
             #  < 14.04
             #  = 14.10
             #  = 15.04, 15.10
+            #  = 16.10
+            #  = 17.04
             if [ "$DISTRO_MAJOR_VERSION" -lt 14 ] || \
                 [ "$DISTRO_MAJOR_VERSION" -eq 15 ] || \
-                ([ "$DISTRO_MAJOR_VERSION" -lt 16 ] && [ "$DISTRO_MINOR_VERSION" -eq 10 ]); then
+                ([ "$DISTRO_MAJOR_VERSION" -eq 17 ] && [ "$DISTRO_MINOR_VERSION" -eq 04 ]) || \
+                ([ "$DISTRO_MAJOR_VERSION" -lt 17 ] && [ "$DISTRO_MINOR_VERSION" -eq 10 ]); then
                 echoerror "End of life distributions are not supported."
                 echoerror "Please consider upgrading to the next stable. See:"
                 echoerror "    https://wiki.ubuntu.com/Releases"
@@ -2575,7 +2572,7 @@ __enable_universe_repository() {
 
 __install_saltstack_ubuntu_repository() {
     # Workaround for latest non-LTS ubuntu
-    if [ "$DISTRO_VERSION" = "16.10" ] || [ "$DISTRO_MAJOR_VERSION" -gt 16 ]; then
+    if [ "$DISTRO_MAJOR_VERSION" -gt 16 ]; then
         echowarn "Non-LTS Ubuntu detected, but stable packages requested. Trying packages from latest LTS release. You may experience problems."
         UBUNTU_VERSION=16.04
         UBUNTU_CODENAME="xenial"
@@ -2587,8 +2584,8 @@ __install_saltstack_ubuntu_repository() {
     __PACKAGES=''
 
     # Install downloader backend for GPG keys fetching
-    if [ "$DISTRO_VERSION" = "16.10" ] || [ "$DISTRO_MAJOR_VERSION" -gt 16 ]; then
-        __PACKAGES="${__PACKAGES} gnupg2 dirmngr"
+    if [ "$DISTRO_MAJOR_VERSION" -gt 16 ]; then
+        __PACKAGES="${__PACKAGES} gnupg dirmngr"
     else
         __PACKAGES="${__PACKAGES} gnupg-curl"
     fi

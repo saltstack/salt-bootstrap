@@ -284,7 +284,7 @@ repositories are not provided on `SaltStack's Ubuntu repository`_ for the non-LT
 bootstrap script will attempt to install the packages for the most closely related LTS Ubuntu
 release instead.
 
-For example, when installing Salt on Ubuntu 16.10, the bootstrap script will setup the repository 
+For example, when installing Salt on Ubuntu 17.10, the bootstrap script will setup the repository
 for Ubuntu 16.04 from `SaltStack's Ubuntu repository`_ and install the 16.04 packages.
 
 

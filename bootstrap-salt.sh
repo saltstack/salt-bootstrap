@@ -5151,35 +5151,11 @@ install_freebsd_restart_daemons() {
 #   OpenBSD Install Functions
 #
 
-__choose_openbsd_mirror() {
-    OPENBSD_REPO=''
-    MINTIME=''
-    MIRROR_LIST=$(ftp -w 15 -Vao - 'https://ftp.openbsd.org/cgi-bin/ftplist.cgi?dbversion=1' | awk '/^http/ {print $1}')
-
-    for MIRROR in $MIRROR_LIST; do
-        MIRROR_HOST=$(echo "$MIRROR" | sed -e 's|.*//||' -e 's|+*/.*$||')
-        TIME=$(ping -c 1 -w 1 -q "$MIRROR_HOST" | awk -F/ '/round-trip/ { print $5 }')
-        [ -z "$TIME" ] && continue
-
-        echodebug "ping time for $MIRROR_HOST is $TIME"
-        if [ -z "$MINTIME" ]; then
-            FASTER_MIRROR=1
-        else
-            FASTER_MIRROR=$(echo "$TIME < $MINTIME" | bc)
-        fi
-        if [ "$FASTER_MIRROR" -eq 1 ]; then
-            MINTIME=$TIME
-            OPENBSD_REPO="$MIRROR"
-        fi
-    done
-}
-
 install_openbsd_deps() {
     if [ $_DISABLE_REPOS -eq $BS_FALSE ]; then
-        __choose_openbsd_mirror || return 1
-        echoinfo "setting package repository to $OPENBSD_REPO with ping time of $MINTIME"
-        [ -n "$OPENBSD_REPO" ] || return 1
-        echo "${OPENBSD_REPO}" >>/etc/installurl || return 1
+        OPENBSD_REPO='https://cdn.openbsd.org/pub/OpenBSD'
+        echoinfo "setting package repository to $OPENBSD_REPO"
+        echo "${OPENBSD_REPO}" >/etc/installurl || return 1
     fi
 
     if [ "${_EXTRA_PACKAGES}" != "" ]; then

@@ -2744,8 +2744,8 @@ install_ubuntu_git_deps() {
     else
         install_ubuntu_stable_deps || return 1
 
-        __PACKAGES="${__PACKAGES} python-crypto python-jinja2 python-msgpack python-requests"
-        __PACKAGES="${__PACKAGES} python-tornado python-yaml python-zmq"
+        __PACKAGES="${__PACKAGES} python-crypto python-jinja2 python-m2crypto python-msgpack"
+        __PACKAGES="${__PACKAGES} python-requests python-tornado python-yaml python-zmq"
 
         if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
             # Install python-libcloud if asked to
@@ -3065,9 +3065,9 @@ install_debian_git_deps() {
 
     __git_clone_and_checkout || return 1
 
-    __PACKAGES="libzmq3 libzmq3-dev lsb-release python-apt python-backports.ssl-match-hostname python-crypto"
-    __PACKAGES="${__PACKAGES} python-jinja2 python-msgpack python-requests"
-    __PACKAGES="${__PACKAGES} python-tornado python-yaml python-zmq"
+    __PACKAGES="libzmq3 libzmq3-dev lsb-release python-apt python-backports.ssl-match-hostname"
+    __PACKAGES="${__PACKAGES} python-crypto python-jinja2 python-msgpack python-m2crypto"
+    __PACKAGES="${__PACKAGES} python-requests python-tornado python-yaml python-zmq"
 
     if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
         # Install python-libcloud if asked to
@@ -3106,8 +3106,9 @@ install_debian_8_git_deps() {
 
     __git_clone_and_checkout || return 1
 
-    __PACKAGES="libzmq3 libzmq3-dev lsb-release python-apt python-crypto python-jinja2 python-msgpack"
-    __PACKAGES="${__PACKAGES} python-requests python-systemd python-yaml python-zmq"
+    __PACKAGES="libzmq3 libzmq3-dev lsb-release python-apt python-crypto python-jinja2"
+    __PACKAGES="${__PACKAGES} python-m2crypto python-msgpack python-requests python-systemd"
+    __PACKAGES="${__PACKAGES} python-yaml python-zmq"
 
     if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
         # Install python-libcloud if asked to
@@ -3171,8 +3172,8 @@ install_debian_9_git_deps() {
     __git_clone_and_checkout || return 1
 
     __PACKAGES="libzmq5 lsb-release python-apt python-backports-abc python-crypto"
-    __PACKAGES="${__PACKAGES} python-jinja2 python-msgpack python-requests python-systemd"
-    __PACKAGES="${__PACKAGES} python-tornado python-yaml python-zmq"
+    __PACKAGES="${__PACKAGES} python-jinja2 python-m2crypto python-msgpack python-requests"
+    __PACKAGES="${__PACKAGES} python-systemd python-tornado python-yaml python-zmq"
 
     if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
         # Install python-libcloud if asked to
@@ -3374,7 +3375,8 @@ install_fedora_deps() {
         __install_saltstack_copr_salt_repository || return 1
     fi
 
-    __PACKAGES="PyYAML libyaml python-crypto python-jinja2 python-zmq python2-msgpack python2-requests"
+    __PACKAGES="libyaml m2crypto PyYAML python-crypto python-jinja2"
+    __PACKAGES="${__PACKAGES} python2-msgpack python2-requests python-zmq"
 
     if [ "$DISTRO_MAJOR_VERSION" -lt 26 ]; then
         __PACKAGES="${__PACKAGES} yum-utils"
@@ -3724,7 +3726,8 @@ install_centos_git_deps() {
 
     __git_clone_and_checkout || return 1
 
-    __PACKAGES="python-crypto python-futures python-msgpack python-zmq python-jinja2 python-requests python-tornado"
+    __PACKAGES="m2crypto python-crypto python-futures python-jinja2 python-msgpack"
+    __PACKAGES="${__PACKAGES} python-requests python-tornado python-zmq"
 
     if [ "$DISTRO_MAJOR_VERSION" -ge 7 ]; then
         __PACKAGES="${__PACKAGES} systemd-python"
@@ -4311,7 +4314,7 @@ install_alpine_linux_stable_deps() {
 install_alpine_linux_git_deps() {
     install_alpine_linux_stable_deps || return 1
 
-    apk -U add python2 py-virtualenv py2-crypto py2-setuptools \
+    apk -U add python2 py-virtualenv py2-crypto py2-m2crypto py2-setuptools \
         py2-jinja2 py2-yaml py2-markupsafe py2-msgpack py2-psutil \
         py2-zmq zeromq py2-requests || return 1
 
@@ -4526,7 +4529,8 @@ _eof
 
     # Package python-ordereddict-1.1-2.el6.noarch is obsoleted by python26-2.6.9-2.88.amzn1.x86_64
     # which is already installed
-    __PACKAGES="${pkg_append}-PyYAML ${pkg_append}-crypto ${pkg_append}-msgpack ${pkg_append}-zmq ${pkg_append}-jinja2 ${pkg_append}-requests"
+    __PACKAGES="m2crypto ${pkg_append}-crypto ${pkg_append}-jinja2 ${pkg_append}-PyYAML"
+    __PACKAGES="${__PACKAGES} ${pkg_append}-msgpack ${pkg_append}-requests ${pkg_append}-zmq"
 
     # shellcheck disable=SC2086
     __yum_install_noinput ${__PACKAGES} || return 1
@@ -4679,7 +4683,7 @@ install_arch_linux_git_deps() {
     fi
     pacman -R --noconfirm python2-distribute
     pacman -Su --noconfirm --needed python2-crypto python2-setuptools python2-jinja \
-        python2-markupsafe python2-msgpack python2-psutil \
+        python2-m2crypto python2-markupsafe python2-msgpack python2-psutil \
         python2-pyzmq zeromq python2-requests python2-systemd || return 1
 
     __git_clone_and_checkout || return 1
@@ -5275,7 +5279,7 @@ install_openbsd_restart_daemons() {
 #   SmartOS Install Functions
 #
 install_smartos_deps() {
-    pkgin -y install zeromq py27-crypto py27-msgpack py27-yaml py27-jinja2 py27-zmq py27-requests || return 1
+    pkgin -y install zeromq py27-crypto py27-m2crypto py27-msgpack py27-yaml py27-jinja2 py27-zmq py27-requests || return 1
 
     # Set _SALT_ETC_DIR to SmartOS default if they didn't specify
     _SALT_ETC_DIR=${BS_SALT_ETC_DIR:-/opt/local/etc/salt}
@@ -5585,7 +5589,7 @@ install_opensuse_git_deps() {
 
     __git_clone_and_checkout || return 1
 
-    __PACKAGES="libzmq5 python-Jinja2 python-msgpack-python python-pycrypto python-pyzmq python-xml"
+    __PACKAGES="libzmq5 python-Jinja2 python-m2crypto python-msgpack-python python-pycrypto python-pyzmq python-xml"
 
     if [ -f "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" ]; then
         # We're on the develop branch, install whichever tornado is on the requirements file
@@ -5779,6 +5783,12 @@ install_suse_12_stable_deps() {
     # shellcheck disable=SC2086,SC2090
     __zypper_install ${__PACKAGES} || return 1
 
+    # SLES 11 SP3 ships with both python-M2Crypto-0.22.* and python-m2crypto-0.21 and we will be asked which
+    # we want to install, even with --non-interactive.
+    # Let's try to install the higher version first and then the lower one in case of failure
+    __zypper_install 'python-M2Crypto>=0.22' || __zypper_install 'python-M2Crypto>=0.21' || return 1
+
+
     if [ "${_EXTRA_PACKAGES}" != "" ]; then
         echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
         # shellcheck disable=SC2086
@@ -5880,6 +5890,11 @@ install_suse_11_stable_deps() {
 
     # shellcheck disable=SC2086,SC2090
     __zypper_install ${__PACKAGES} || return 1
+
+    # SLES 11 SP3 ships with both python-M2Crypto-0.22.* and python-m2crypto-0.21 and we will be asked which
+    # we want to install, even with --non-interactive.
+    # Let's try to install the higher version first and then the lower one in case of failure
+    __zypper_install 'python-M2Crypto>=0.22' || __zypper_install 'python-M2Crypto>=0.21' || return 1
 
     if [ "${_EXTRA_PACKAGES}" != "" ]; then
         echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"

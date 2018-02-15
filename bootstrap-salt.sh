@@ -3748,8 +3748,7 @@ install_centos_git_deps() {
 
         # install swig and openssl on cent6
         if [ "$DISTRO_MAJOR_VERSION" -eq 6 ]; then
-            __M2C_DEPS="openssl-devel swig"
-            __yum_install_noinput ${__M2C_DEPS} || return 1
+            __yum_install_noinput openssl-devel swig || return 1
         fi
 
         if [ -f "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" ]; then

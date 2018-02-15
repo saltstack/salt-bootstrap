@@ -3744,7 +3744,12 @@ install_centos_git_deps() {
 
     if [ "${_PY_EXE}" != "" ]; then
         # If "-x" is defined, install dependencies with pip based on the Python version given.
-        _PIP_PACKAGES="jinja2 msgpack-python pycrypto PyYAML tornado zmq"
+        _PIP_PACKAGES="m2crypto jinja2 msgpack-python pycrypto PyYAML tornado zmq"
+
+        # install swig and openssl on cent6
+        if [ "$DISTRO_MAJOR_VERSION" -eq 6 ]; then
+            __yum_install_noinput openssl-devel swig || return 1
+        fi
 
         if [ -f "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" ]; then
             for SINGLE_PACKAGE in $_PIP_PACKAGES; do

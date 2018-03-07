@@ -3117,7 +3117,7 @@ install_debian_8_git_deps() {
 
     __PIP_PACKAGES=''
     if (__check_pip_allowed >/dev/null 2>&1); then
-        __PIP_PACKAGES='tornado'
+        __PIP_PACKAGES='tornado<5.0'
         # Install development environment for building tornado Python module
         __PACKAGES="${__PACKAGES} build-essential python-dev"
 
@@ -3744,7 +3744,7 @@ install_centos_git_deps() {
 
     if [ "${_PY_EXE}" != "" ]; then
         # If "-x" is defined, install dependencies with pip based on the Python version given.
-        _PIP_PACKAGES="m2crypto jinja2 msgpack-python pycrypto PyYAML tornado zmq"
+        _PIP_PACKAGES="m2crypto jinja2 msgpack-python pycrypto PyYAML tornado<5.0 zmq"
 
         # install swig and openssl on cent6
         if [ "$DISTRO_MAJOR_VERSION" -eq 6 ]; then

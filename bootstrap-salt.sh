@@ -2824,7 +2824,7 @@ install_ubuntu_stable_post() {
                 /bin/systemctl preset salt-$fname.service > /dev/null 2>&1 &&
                 /bin/systemctl enable salt-$fname.service > /dev/null 2>&1
             )
-            sleep 0.1
+            sleep 1
             /bin/systemctl daemon-reload
         elif [ -f /etc/init.d/salt-$fname ]; then
             update-rc.d salt-$fname defaults
@@ -2850,7 +2850,7 @@ install_ubuntu_git_post() {
             [ $fname = "api" ] && continue
 
             systemctl is-enabled salt-$fname.service || (systemctl preset salt-$fname.service && systemctl enable salt-$fname.service)
-            sleep 0.1
+            sleep 1
             systemctl daemon-reload
         elif [ -f /sbin/initctl ]; then
             _upstart_conf="/etc/init/salt-$fname.conf"
@@ -3433,7 +3433,7 @@ install_fedora_stable_post() {
         [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
 
         systemctl is-enabled salt-$fname.service || (systemctl preset salt-$fname.service && systemctl enable salt-$fname.service)
-        sleep 0.1
+        sleep 1
         systemctl daemon-reload
     done
 }
@@ -3494,7 +3494,7 @@ install_fedora_git_post() {
         [ $fname = "api" ] && continue
 
         systemctl is-enabled salt-$fname.service || (systemctl preset salt-$fname.service && systemctl enable salt-$fname.service)
-        sleep 0.1
+        sleep 1
         systemctl daemon-reload
     done
 }
@@ -4762,7 +4762,7 @@ install_arch_linux_post() {
                 /usr/bin/systemctl preset salt-$fname.service > /dev/null 2>&1 &&
                 /usr/bin/systemctl enable salt-$fname.service > /dev/null 2>&1
             )
-            sleep 0.1
+            sleep 1
             /usr/bin/systemctl daemon-reload
             continue
         fi
@@ -4790,7 +4790,7 @@ install_arch_linux_git_post() {
                 /usr/bin/systemctl preset salt-${fname}.service > /dev/null 2>&1 &&
                 /usr/bin/systemctl enable salt-${fname}.service > /dev/null 2>&1
             )
-            sleep 0.1
+            sleep 1
             /usr/bin/systemctl daemon-reload
             continue
         fi
@@ -5635,7 +5635,7 @@ install_opensuse_stable_post() {
 
         if [ -f /bin/systemctl ]; then
             systemctl is-enabled salt-$fname.service || (systemctl preset salt-$fname.service && systemctl enable salt-$fname.service)
-            sleep 0.1
+            sleep 1
             systemctl daemon-reload
             continue
         fi

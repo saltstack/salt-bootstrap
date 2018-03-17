@@ -3564,6 +3564,7 @@ _eof
 
         fetch_url="${HTTP_VAL}://${_REPO_URL}/yum/redhat/${DISTRO_MAJOR_VERSION}/${CPU_ARCH_L}/${repo_rev}/"
         __rpm_import_gpg "${fetch_url}${gpg_key}" || return 1
+        yum clean metadata || return 1
     elif [ "$repo_rev" != "latest" ]; then
         echowarn "saltstack.repo already exists, ignoring salt version argument."
         echowarn "Use -F (forced overwrite) to install $repo_rev."

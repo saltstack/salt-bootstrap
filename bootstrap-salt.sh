@@ -3550,7 +3550,7 @@ __install_saltstack_rhel_repository() {
     gpg_key="SALTSTACK-GPG-KEY.pub"
     repo_file="/etc/yum.repos.d/saltstack.repo"
 
-    if [ ! -s "$repo_file" ]; then
+    if [ ! -s "$repo_file" ] || [ "$_FORCE_OVERWRITE" -eq $BS_TRUE ]; then
         cat <<_eof > "$repo_file"
 [saltstack]
 name=SaltStack ${repo_rev} Release Channel for RHEL/CentOS \$releasever
@@ -3564,6 +3564,10 @@ _eof
 
         fetch_url="${HTTP_VAL}://${_REPO_URL}/yum/redhat/${DISTRO_MAJOR_VERSION}/${CPU_ARCH_L}/${repo_rev}/"
         __rpm_import_gpg "${fetch_url}${gpg_key}" || return 1
+        yum clean metadata || return 1
+    elif [ "$repo_rev" != "latest" ]; then
+        echowarn "saltstack.repo already exists, ignoring salt version argument."
+        echowarn "Use -F (forced overwrite) to install $repo_rev."
     fi
 
     return 0

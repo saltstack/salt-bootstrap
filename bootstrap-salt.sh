@@ -249,7 +249,6 @@ _CURL_ARGS=${BS_CURL_ARGS:-}
 _FETCH_ARGS=${BS_FETCH_ARGS:-}
 _GPG_ARGS=${BS_GPG_ARGS:-}
 _WGET_ARGS=${BS_WGET_ARGS:-}
-_ENABLE_EXTERNAL_ZMQ_REPOS=${BS_ENABLE_EXTERNAL_ZMQ_REPOS:-$BS_FALSE}
 _SALT_MASTER_ADDRESS=${BS_SALT_MASTER_ADDRESS:-null}
 _SALT_MINION_ID="null"
 # _SIMPLIFY_VERSION is mostly used in Solaris based distributions
@@ -355,8 +354,6 @@ __usage() {
         per -p flag. You're responsible for providing the proper package name.
     -H  Use the specified HTTP proxy for all download URLs (including https://).
         For example: http://myproxy.example.com:3128
-    -Z  Enable additional package repository for newer ZeroMQ
-        (only available for RHEL/CentOS/Fedora/Ubuntu based distributions)
     -b  Assume that dependencies are already installed and software sources are
         set up. If git is selected, git tree is still checked out as dependency
         step.
@@ -438,7 +435,6 @@ do
     p )  _EXTRA_PACKAGES="$_EXTRA_PACKAGES $OPTARG"     ;;
     d )  _DISABLE_SALT_CHECKS=$BS_TRUE                  ;;
     H )  _HTTP_PROXY="$OPTARG"                          ;;
-    Z )  _ENABLE_EXTERNAL_ZMQ_REPOS=$BS_TRUE            ;;
     b )  _NO_DEPS=$BS_TRUE                              ;;
     f )  _FORCE_SHALLOW_CLONE=$BS_TRUE                  ;;
     l )  _DISABLE_SSL=$BS_TRUE                          ;;
@@ -3367,14 +3363,6 @@ install_debian_check_services() {
 
 install_fedora_deps() {
 
-    if [ $_DISABLE_REPOS -eq $BS_FALSE ]; then
-        if [ "$_ENABLE_EXTERNAL_ZMQ_REPOS" -eq $BS_TRUE ]; then
-            __install_saltstack_copr_zeromq_repository || return 1
-        fi
-
-        __install_saltstack_copr_salt_repository || return 1
-    fi
-
     __PACKAGES="libyaml m2crypto PyYAML python-crypto python-jinja2"
     __PACKAGES="${__PACKAGES} python2-msgpack python2-requests python-zmq"
 
@@ -3561,20 +3549,6 @@ __install_epel_repository() {
     return 0
 }
 
-__install_saltstack_copr_zeromq_repository() {
-    echoinfo "Installing Zeromq >=4 and PyZMQ>=14 from SaltStack's COPR repository"
-    if [ ! -s /etc/yum.repos.d/saltstack-zeromq4.repo ]; then
-        if [ "${DISTRO_NAME_L}" = "fedora" ]; then
-            __REPOTYPE="${DISTRO_NAME_L}"
-        else
-            __REPOTYPE="epel"
-        fi
-        __fetch_url /etc/yum.repos.d/saltstack-zeromq4.repo \
-            "${HTTP_VAL}://copr.fedorainfracloud.org/coprs/saltstack/zeromq4/repo/${__REPOTYPE}-${DISTRO_MAJOR_VERSION}/saltstack-zeromq4-${__REPOTYPE}-${DISTRO_MAJOR_VERSION}.repo" || return 1
-    fi
-    return 0
-}
-
 __install_saltstack_rhel_repository() {
     if [ "$ITYPE" = "stable" ]; then
         repo_rev="$STABLE_REV"
@@ -3602,26 +3576,6 @@ _eof
 
         fetch_url="${HTTP_VAL}://${_REPO_URL}/yum/redhat/${DISTRO_MAJOR_VERSION}/${CPU_ARCH_L}/${repo_rev}/"
         __rpm_import_gpg "${fetch_url}${gpg_key}" || return 1
-    fi
-
-    return 0
-}
-
-__install_saltstack_copr_salt_repository() {
-    echoinfo "Adding SaltStack's COPR repository"
-
-    if [ "${DISTRO_NAME_L}" = "fedora" ]; then
-        [ "$DISTRO_MAJOR_VERSION" -ge 22 ] && return 0
-        __REPOTYPE="${DISTRO_NAME_L}"
-    else
-        __REPOTYPE="epel"
-    fi
-
-    __REPO_FILENAME="saltstack-salt-${__REPOTYPE}-${DISTRO_MAJOR_VERSION}.repo"
-
-    if [ ! -s "/etc/yum.repos.d/${__REPO_FILENAME}" ]; then
-        __fetch_url "/etc/yum.repos.d/${__REPO_FILENAME}" \
-            "${HTTP_VAL}://copr.fedorainfracloud.org/coprs/saltstack/salt/repo/${__REPOTYPE}-${DISTRO_MAJOR_VERSION}/${__REPO_FILENAME}" || return 1
     fi
 
     return 0

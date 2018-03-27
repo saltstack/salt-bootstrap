@@ -23,8 +23,8 @@ that, please read the generated help by passing ``-h`` to the script or even bet
 Bootstrap
 =========
 
-In every two-step installation example, you would be well-served to **verify against the SHA256 sum**
-of the downloaded ``bootstrap-salt.sh`` file.
+In every two-step installation example, you would be well-served to **verify against the SHA256
+sum** of the downloaded ``bootstrap-salt.sh`` file.
 
 The SHA256 sum of the ``bootstrap-salt.sh`` file, per release, is:
 
@@ -233,8 +233,8 @@ Debian and derivatives
 - Cumulus Linux 2/3
 - Debian GNU/Linux 7/8/9
 - Devuan GNU/Linux 1/2
-- Linux Mint Debian Edition 1 (based on Debian 8)
 - Kali Linux 1.0 (based on Debian 7)
+- Linux Mint Debian Edition 1 (based on Debian 8)
 - Raspbian 8 (``armhf`` packages) and 9 (using ``git`` installation mode only)
 
 Debian Best Effort Support: Testing Release
@@ -256,7 +256,7 @@ Red Hat family
 - Amazon Linux 2012.3 and later
 - CentOS 6/7
 - Cloud Linux 6/7
-- Fedora 26/27
+- Fedora 26/27/28 (install latest stable from standard repositories)
 - Oracle Linux 6/7
 - Red Hat Enterprise Linux 6/7
 - Scientific Linux 6/7
@@ -277,10 +277,10 @@ Ubuntu and derivatives
 - Linux Mint 17/18
 - Ubuntu 14.04/16.04 and subsequent non-TLS releases (see below)
 
-Ubuntu Best Effort Support: Non-LTS Releases 
+Ubuntu Best Effort Support: Non-LTS Releases
 ********************************************
 
-This script provides best-effort support for current, non-LTS Ubuntu releases. If package 
+This script provides best-effort support for current, non-LTS Ubuntu releases. If package
 repositories are not provided on `SaltStack's Ubuntu repository`_ for the non-LTS release, the
 bootstrap script will attempt to install the packages for the most closely related LTS Ubuntu
 release instead.
@@ -368,8 +368,8 @@ Salt is ready and working in the Docker container with the Minion authenticated 
 
 **NOTE**
 
-The ``Dockerfile`` here inherits the Ubuntu 14.04 public image with Upstart configured as the init system.
-Use it as an example or starting point of how to make your own Docker images with suitable
+The ``Dockerfile`` here inherits the Ubuntu 14.04 public image with Upstart configured as the init
+system. Use it as an example or starting point of how to make your own Docker images with suitable
 Salt components, custom configurations, and even `pre-accepted Minion keys`_ already installed.
 
 .. _Contributing Guidelines: https://github.com/saltstack/salt-bootstrap/blob/develop/CONTRIBUTING.md

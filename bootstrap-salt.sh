@@ -1793,7 +1793,7 @@ __apt_key_fetch() {
     url=$1
 
     # shellcheck disable=SC2086
-    apt-key adv ${_GPG_ARGS} --fetch-keys "$url"; return $?
+    curl ${_CURL_ARGS} -f -s -S -L "$url" | apt-key add - ; return $?
 }   # ----------  end of function __apt_key_fetch  ----------
 
 
@@ -2557,7 +2557,7 @@ __install_saltstack_ubuntu_repository() {
 
     # Install downloader backend for GPG keys fetching
     if [ "$DISTRO_VERSION" = "16.10" ] || [ "$DISTRO_MAJOR_VERSION" -gt 16 ]; then
-        __PACKAGES="${__PACKAGES} gnupg2 dirmngr"
+        __PACKAGES="${__PACKAGES} gnupg2 dirmngr curl"
     else
         __PACKAGES="${__PACKAGES} gnupg-curl"
     fi
@@ -2954,7 +2954,7 @@ __install_saltstack_debian_repository() {
 
     # Install downloader backend for GPG keys fetching
     if [ "$DISTRO_MAJOR_VERSION" -ge 9 ]; then
-        __PACKAGES="${__PACKAGES} gnupg2 dirmngr"
+        __PACKAGES="${__PACKAGES} gnupg2 dirmngr curl"
     else
         __PACKAGES="${__PACKAGES} gnupg-curl"
     fi

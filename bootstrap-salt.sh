@@ -4946,7 +4946,7 @@ install_freebsd_git_deps() {
         # We're on the develop branch, install whichever tornado is on the requirements file
         __REQUIRED_TORNADO="$(grep tornado "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt")"
         if [ "${__REQUIRED_TORNADO}" != "" ]; then
-             /usr/local/sbin/pkg install -y www/py-tornado || return 1
+             /usr/local/sbin/pkg install -y www/py-tornado4 || return 1
         fi
     fi
 

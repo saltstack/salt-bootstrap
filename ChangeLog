@@ -1,3 +1,26 @@
+Version 2018.04.25:
+    * Install py-tornado4 for FreeBSD. (abednarik) #1219
+    * Remove COPR repos configuration for Fedora (vutny ) #1211
+    * Fix for silently ignored version argument on CentOS/RHEL (pjcreath) #1210
+    * Use integer parameter for sleep command (bdrung) #1205
+    * Add 2018.3 branch to list of stable options (rallytime) #1204
+    * If installing with -P, install tornado<5.0. (rallytime) #1203
+    * Add M2Crypto to python27 centos 6 bootstrap install (Ch3LL) #1201
+    * Update README to include mention of bootstrap-salt.ps1 for Windows (rallytime) #1200
+    * Port spelling fixes from change in Salt to Bootstrap (rallytime) #1199
+    * Add M2Crypto package back to git install functions (rallytime) #1198
+    * OpenBSD has a cdn which handles selecting the best mirror (jasperla) #1197
+    * Change gnupg2 pacakge to gnupg for non-LTS versions of Ubuntu (rallytime) #1196
+    * Install swig30 as freebsd dep instead of swig. (abednarik) #1191
+    * make salt-syndic optional on salt bootstrap (sybix) #1190
+    * Add __wait_for_apt function: avoid locking on the apt-get process (rallytime) #1186
+    * Update the README.rst file with some grammatical changes (rallytime) #1185
+    * Update Fedora support: 25 is EOL, 27 is supported (rallytime) #1184
+    * Add a note about the use of sudo when running commands to README (rallytime) #1183
+    * Adding support for minor release pinning on AWS Linux (cmclaughlin) #1182
+    * Wait for zypper processes to finish before calling zypper again (rallytime) #1181
+    * only install ca-certificates on opensuse if it isn't already installed (gtmanfred) #1179
+
 Version 2017.12.13:
     * Use HTTPS URL for OpenSuse's saltstack repo (gdm85) #1174
     * Respect disable repos (-r) option on OpenBSD (eradman) #1171

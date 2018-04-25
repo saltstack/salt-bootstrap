@@ -21,6 +21,7 @@ Angelo Gründler             plueschopath           angelo.gruendler@w1r3.net
 Ari Aosved                  devaos                 ari.aosved@gmail.com
 Ashok Raja R                ashokrajar             ashokrajar@users.noreply.github.com
 Beau Hargis                 beaucephus             beau@customermobile.com
+Benjamin Drung              bdrung                 bdrung@debian.org
 BlaineAtAffirmOnceMore      BlaineAtAffirm
 Boris Feld                  Lothiraldan
 Brad Thurber                bradthurber
@@ -70,6 +71,7 @@ Henrik Holmboe              holmboe
 Howard Mei                  HowardMei              howardleomei@gmail.com
 James Booth                 absolutejam            vvalentine1337@gmail.com
 Jared E Stroud              jaredestroud           jaredestroud@gmail.com
+Jasper Lievisse Adriaanse   jasperla               jasper@humppa.nl
 JD                          decomposite
 Jeff Hui                    jeffh                  jeff@jeffhui.net
 Jeff Strunk                 jstrunk
@@ -112,6 +114,7 @@ Pedro Paulo                 pedropaulovc
 Pete Lumbis                 plumbis
 Peter Tripp                 notpeter
 Petr Michalec               epcim
+pjcreath                    pjcreath
 Prayag Verma                pra85                  prayag.verma@gmail.com
 ptonelli                    ptonelli
 Randy Thompson              beardedeagle           randy@heroictek.com
@@ -131,6 +134,7 @@ Shawn Butts                 shawnbutts
 Skyler Berg                 skylerberg             skylertheberg@gmail.com
 Stanislav B                 stanislavb
 Steve Groesz                wolfpackmars2          wolfpackmars2@yahoo.com
+sybix                       sybix
 Tate Eskew                  tateeskew
 Thomas S. Hatch             thatch45               thatch45@saltstack.com
 Tobias Jungel               toanju                 Tobias.Jungel@gmail.com

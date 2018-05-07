@@ -6416,6 +6416,7 @@ daemons_running() {
 #======================================================================================================================
 
 # Let's get the dependencies install function
+DEP_FUNC_NAMES=""
 if [ ${_NO_DEPS} -eq $BS_FALSE ]; then
     DEP_FUNC_NAMES="install_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}_${ITYPE}_deps"
     DEP_FUNC_NAMES="$DEP_FUNC_NAMES install_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}${PREFIXED_DISTRO_MINOR_VERSION}_${ITYPE}_deps"
@@ -6423,10 +6424,6 @@ if [ ${_NO_DEPS} -eq $BS_FALSE ]; then
     DEP_FUNC_NAMES="$DEP_FUNC_NAMES install_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}${PREFIXED_DISTRO_MINOR_VERSION}_deps"
     DEP_FUNC_NAMES="$DEP_FUNC_NAMES install_${DISTRO_NAME_L}_${ITYPE}_deps"
     DEP_FUNC_NAMES="$DEP_FUNC_NAMES install_${DISTRO_NAME_L}_deps"
-elif [ "${ITYPE}" = "git" ]; then
-    DEP_FUNC_NAMES="__git_clone_and_checkout"
-else
-    DEP_FUNC_NAMES=""
 fi
 
 DEPS_INSTALL_FUNC="null"
@@ -6571,6 +6568,7 @@ if [ "$INSTALL_FUNC" = "null" ]; then
     exit 1
 fi
 
+
 # Install dependencies
 if [ ${_NO_DEPS} -eq $BS_FALSE ] && [ $_CONFIG_ONLY -eq $BS_FALSE ]; then
     # Only execute function is not in config mode only
@@ -6581,6 +6579,15 @@ if [ ${_NO_DEPS} -eq $BS_FALSE ] && [ $_CONFIG_ONLY -eq $BS_FALSE ]; then
         exit 1
     fi
 fi
+
+
+if [ "${ITYPE}" = "git" ] && [ ${_NO_DEPS} -eq ${BS_TRUE} ]; then
+    if ! __git_clone_and_checkout; then
+        echo "Failed to clone and checkout git repository."
+        exit 1
+    fi
+fi
+
 
 # Triggering config_salt() if overwriting master or minion configs
 if [ "$_CUSTOM_MASTER_CONFIG" != "null" ] || [ "$_CUSTOM_MINION_CONFIG" != "null" ]; then

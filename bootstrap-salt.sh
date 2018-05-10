@@ -1373,6 +1373,9 @@ __ubuntu_codename_translation() {
         "17")
             DISTRO_CODENAME="artful"
             ;;
+        "18")
+            DISTRO_CODENAME="bionic"
+            ;;
         *)
             DISTRO_CODENAME="trusty"
             ;;
@@ -2568,13 +2571,17 @@ __enable_universe_repository() {
 
 __install_saltstack_ubuntu_repository() {
     # Workaround for latest non-LTS ubuntu
-    if [ "$DISTRO_MAJOR_VERSION" -gt 16 ]; then
-        echowarn "Non-LTS Ubuntu detected, but stable packages requested. Trying packages from latest LTS release. You may experience problems."
+    if [ "$DISTRO_MAJOR_VERSION" -eq 17 ]; then
+        echowarn "Non-LTS Ubuntu detected, but stable packages requested. Trying packages for 16.04 LTS release. You may experience problems."
         UBUNTU_VERSION=16.04
         UBUNTU_CODENAME="xenial"
+    elif [ "$DISTRO_MAJOR_VERSION" -gt 18 ]; then
+        echowarn "Non-LTS Ubuntu detected, but stable packages requested. Trying packages for latest LTS release. You may experience problems."
+        UBUNTU_VERSION=18.04
+        UBUNTU_CODENAME="bionic"
     else
-        UBUNTU_VERSION=$DISTRO_VERSION
-        UBUNTU_CODENAME=$DISTRO_CODENAME
+        UBUNTU_VERSION=${DISTRO_VERSION}
+        UBUNTU_CODENAME=${DISTRO_CODENAME}
     fi
 
     __PACKAGES=''

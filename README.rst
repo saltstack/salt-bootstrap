@@ -276,7 +276,7 @@ Ubuntu and derivatives
 
 - KDE neon (based on Ubuntu 16.04)
 - Linux Mint 17/18
-- Ubuntu 14.04/16.04 and subsequent non-TLS releases (see below)
+- Ubuntu 14.04/16.04/18.04 and subsequent non-LTS releases (see below)
 
 Ubuntu Best Effort Support: Non-LTS Releases
 ********************************************

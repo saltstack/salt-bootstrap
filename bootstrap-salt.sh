@@ -2394,7 +2394,7 @@ __create_virtualenv() {
 __activate_virtualenv() {
     set +o nounset
     # Is virtualenv empty
-    if [ -z "$VIRTUAL_ENV" ]; then
+    if [ -z "$_VIRTUALENV_DIR" ]; then
         __create_virtualenv || return 1
         # shellcheck source=/dev/null
         . "${_VIRTUALENV_DIR}/bin/activate" || return 1

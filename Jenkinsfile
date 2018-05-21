@@ -7,7 +7,7 @@ def notifyFailed(String stageName) {
 }
 
 pipeline {
-    agent { label: 'bootstrap' }
+    agent { label 'bootstrap' }
 
     stages {
         stage('shellcheck') {

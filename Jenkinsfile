@@ -43,7 +43,7 @@ for (d in distros) {
     }
 }
 
-def prDistros = basePrDistros + distros[rand.nextInt(baseDistros.size())]
+def prDistros = (basePrDistros + distros[rand.nextInt(baseDistros.size())]).unique()
 
 def prDistroversions = []
 for (d in prDistros) {

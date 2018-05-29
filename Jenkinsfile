@@ -3,23 +3,24 @@ import java.util.Random
 Random rand = new Random()
 
 // ONLY CHANGE THIS BIT PLEASE
-def distros = ["debian8",
-               "suse",
-               "centos6",
-               "arch",
-               "ubuntu-14.04",
-               "ubuntu-18.04",
-               "windows",
-               "ubuntu-16.04",
-               "centos7",
-               ]
+def baseDistros = ["debian8",
+                   "suse",
+                   "centos6",
+                   "arch",
+                   "ubuntu-14.04",
+                   "ubuntu-18.04",
+                   "windows",
+                   ]
 def versions = ["stable", "git", "stable-old"]
 
-def prDistros = ["ubuntu-16.04", "centos7"] + distros[rand.nextInt(distros.size() - 2)]
+def basePrDistros = ["ubuntu-16.04",
+                     "centos7"]
 
 def prVersions = ["stable", "git"]
 
 // You probably shouldn't be messing with this stuff down here
+
+def distros = (baseDistros + basePrDistros).unique()
 
 def notifySuccessful(String stageName) {
     slackSend (color: '#00FF00', message: "SUCCESSFUL: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})" + "\n  Stage -- " + stageName)
@@ -41,6 +42,8 @@ for (d in distros) {
         distroversions = distroversions + ["${d}-${v}"]
     }
 }
+
+def prDistros = (basePrDistros + distros[rand.nextInt(baseDistros.size())]).unique()
 
 def prDistroversions = []
 for (d in prDistros) {
@@ -67,10 +70,6 @@ def prSetupRuns = prDistroversions.collectEntries {
 
 node ('bootstrap') {
     stage('checkout') { checkout scm }
-    stage("var checking") {
-        echo "${env.CHANGE_ID}"
-        echo "${env.CHANGE_URL}"
-    }
     stage('shellcheck') {
         sh 'shellcheck -s sh -f checkstyle bootstrap-salt.sh | tee checkstyle.xml'
         checkstyle pattern: '**/checkstyle.xml'
@@ -95,7 +94,7 @@ node ('bootstrap') {
  * 2. Each distro needs a "stable" install (installs stable packages from our repo) and a "git" install (installs off of a git tag)
  * 3. Running against each branch (stable, develop)
  * 4. And probably a small subset against each pull request (similar to what we do in salt)
- * 
+ *
  * Distros to check:
  *     Debian 8
  *     Suse 42.1
@@ -105,7 +104,7 @@ node ('bootstrap') {
  *     Ubuntu 16.04
  *     Ubuntu 14.04
  *     Windows
- * 
+ *
  * Runs each against develop and stable
- * 
+ *
  */

@@ -278,6 +278,7 @@ Ubuntu and derivatives
 - Linux Mint 17/18
 - Ubuntu 14.04/16.04 and subsequent non-TLS releases (see below)
 - Python3 (see ``-x`` option):
+
   - Ubuntu 16.04
 
 Ubuntu Best Effort Support: Non-LTS Releases

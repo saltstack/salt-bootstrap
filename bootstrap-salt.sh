@@ -61,11 +61,11 @@ __DEFAULT_SLEEP=3
 _COLORS=${BS_COLORS:-$(tput colors 2>/dev/null || echo 0)}
 __detect_color_support() {
     if [ $? -eq 0 ] && [ "$_COLORS" -gt 2 ]; then
-        RC="\033[1;31m"
-        GC="\033[1;32m"
-        BC="\033[1;34m"
-        YC="\033[1;33m"
-        EC="\033[0m"
+        RC="\\033[1;31m"
+        GC="\\033[1;32m"
+        BC="\\033[1;34m"
+        YC="\\033[1;33m"
+        EC="\\033[0m"
     else
         RC=""
         GC=""
@@ -82,7 +82,7 @@ __detect_color_support
 #   DESCRIPTION:  Echo errors to stderr.
 #----------------------------------------------------------------------------------------------------------------------
 echoerror() {
-    printf "${RC} * ERROR${EC}: %s\n" "$@" 1>&2;
+    printf "${RC} * ERROR${EC}: %s\\n" "$@" 1>&2;
 }
 
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
@@ -90,7 +90,7 @@ echoerror() {
 #   DESCRIPTION:  Echo information to stdout.
 #----------------------------------------------------------------------------------------------------------------------
 echoinfo() {
-    printf "${GC} *  INFO${EC}: %s\n" "$@";
+    printf "${GC} *  INFO${EC}: %s\\n" "$@";
 }
 
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
@@ -98,7 +98,7 @@ echoinfo() {
 #   DESCRIPTION:  Echo warning information to stdout.
 #----------------------------------------------------------------------------------------------------------------------
 echowarn() {
-    printf "${YC} *  WARN${EC}: %s\n" "$@";
+    printf "${YC} *  WARN${EC}: %s\\n" "$@";
 }
 
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
@@ -107,7 +107,7 @@ echowarn() {
 #----------------------------------------------------------------------------------------------------------------------
 echodebug() {
     if [ "$_ECHO_DEBUG" -eq $BS_TRUE ]; then
-        printf "${BC} * DEBUG${EC}: %s\n" "$@";
+        printf "${BC} * DEBUG${EC}: %s\\n" "$@";
     fi
 }
 
@@ -891,6 +891,7 @@ __derive_debian_numeric_version() {
 #   DESCRIPTION:  Strip single or double quotes from the provided string.
 #----------------------------------------------------------------------------------------------------------------------
 __unquote_string() {
+    # shellcheck disable=SC1117
     echo "$*" | sed -e "s/^\([\"\']\)\(.*\)\1\$/\2/g"
 }
 
@@ -935,14 +936,14 @@ __sort_release_files() {
     max_prio="redhat-release centos-release oracle-release fedora-release"
     for entry in $max_prio; do
         if [ "$(echo "${primary_release_files}" | grep "$entry")" != "" ]; then
-            primary_release_files=$(echo "${primary_release_files}" | sed -e "s:\(.*\)\($entry\)\(.*\):\2 \1 \3:g")
+            primary_release_files=$(echo "${primary_release_files}" | sed -e "s:\\(.*\\)\\($entry\\)\\(.*\\):\\2 \\1 \\3:g")
         fi
     done
     # Now, least important goes last in the min_prio list
     min_prio="lsb-release"
     for entry in $min_prio; do
         if [ "$(echo "${primary_release_files}" | grep "$entry")" != "" ]; then
-            primary_release_files=$(echo "${primary_release_files}" | sed -e "s:\(.*\)\($entry\)\(.*\):\1 \3 \2:g")
+            primary_release_files=$(echo "${primary_release_files}" | sed -e "s:\\(.*\\)\\($entry\\)\\(.*\\):\\1 \\3 \\2:g")
         fi
     done
 
@@ -1159,17 +1160,17 @@ __gather_sunos_system_info() {
             case "$line" in
                 *OpenIndiana*oi_[0-9]*)
                     DISTRO_NAME="OpenIndiana"
-                    DISTRO_VERSION=$(echo "$line" | sed -nr "s/OpenIndiana(.*)oi_([[:digit:]]+)(.*)/\2/p")
+                    DISTRO_VERSION=$(echo "$line" | sed -nr "s/OpenIndiana(.*)oi_([[:digit:]]+)(.*)/\\2/p")
                     break
                     ;;
                 *OpenSolaris*snv_[0-9]*)
                     DISTRO_NAME="OpenSolaris"
-                    DISTRO_VERSION=$(echo "$line" | sed -nr "s/OpenSolaris(.*)snv_([[:digit:]]+)(.*)/\2/p")
+                    DISTRO_VERSION=$(echo "$line" | sed -nr "s/OpenSolaris(.*)snv_([[:digit:]]+)(.*)/\\2/p")
                     break
                     ;;
                 *Oracle*Solaris*[0-9]*)
                     DISTRO_NAME="Oracle Solaris"
-                    DISTRO_VERSION=$(echo "$line" | sed -nr "s/(Oracle Solaris) ([[:digit:]]+)(.*)/\2/p")
+                    DISTRO_VERSION=$(echo "$line" | sed -nr "s/(Oracle Solaris) ([[:digit:]]+)(.*)/\\2/p")
                     break
                     ;;
                 *Solaris*)
@@ -2204,7 +2205,7 @@ __overwriteconfig() {
     fi
 
     # Convert json string to a yaml string and write it to config file. Output is dumped into tempfile.
-    $good_python -c "import json; import yaml; jsn=json.loads('$json'); yml=yaml.safe_dump(jsn, line_break='\n', default_flow_style=False); config_file=open('$target', 'w'); config_file.write(yml); config_file.close();" 2>$tempfile
+    "$good_python" -c "import json; import yaml; jsn=json.loads('$json'); yml=yaml.safe_dump(jsn, line_break='\\n', default_flow_style=False); config_file=open('$target', 'w'); config_file.write(yml); config_file.close();" 2>$tempfile
 
     # No python errors output to the tempfile
     if [ ! -s "$tempfile" ]; then
@@ -2294,7 +2295,7 @@ __check_services_sysvinit() {
     servicename=$1
     echodebug "Checking if service ${servicename} is enabled"
 
-    if [ "$(LC_ALL=C /sbin/chkconfig --list | grep "\<${servicename}\>" | grep '[2-5]:on')" != "" ]; then
+    if [ "$(LC_ALL=C /sbin/chkconfig --list | grep "\\<${servicename}\\>" | grep '[2-5]:on')" != "" ]; then
         echodebug "Service ${servicename} is enabled"
         return 0
     else
@@ -2374,7 +2375,7 @@ __check_services_alpine() {
     echodebug "Checking if service ${servicename} is enabled"
 
     # shellcheck disable=SC2086,SC2046,SC2144
-    if rc-status $(rc-status -r) | tail -n +2 | grep -q "\<$servicename\>"; then
+    if rc-status $(rc-status -r) | tail -n +2 | grep -q "\\<$servicename\\>"; then
         echodebug "Service ${servicename} is enabled"
         return 0
     else
@@ -2428,7 +2429,7 @@ __activate_virtualenv() {
 __install_pip_pkgs() {
     _pip_pkgs="$1"
     _py_exe="$2"
-    _py_pkg=$(echo "$_py_exe" | sed -r "s/\.//g")
+    _py_pkg=$(echo "$_py_exe" | sed -r "s/\\.//g")
     _pip_cmd="${_py_exe} -m pip"
 
     if [ "${_py_exe}" = "" ]; then
@@ -3570,7 +3571,7 @@ __install_epel_repository() {
     fi
 
     # Check if epel repo is already enabled and flag it accordingly
-    yum repolist | grep -q "^[!]\?${_EPEL_REPO}/"
+    yum repolist | grep -q "^[!]\\?${_EPEL_REPO}/"
     if [ $? -eq 0 ]; then
         _EPEL_REPOS_INSTALLED=$BS_TRUE
         return 0
@@ -5004,7 +5005,7 @@ install_freebsd_git_deps() {
     if [ ! -f salt/syspaths.py ]; then
         # We still can't provide the system paths, salt 0.16.x
         # Let's patch salt's source and adapt paths to what's expected on FreeBSD
-        echodebug "Replacing occurrences of '/etc/salt' with \'${_SALT_ETC_DIR}\'"
+        echodebug "Replacing occurrences of '/etc/salt' with ${_SALT_ETC_DIR}"
         # The list of files was taken from Salt's BSD port Makefile
         for file in conf/minion conf/master salt/config.py salt/client.py \
                     salt/modules/mysql.py salt/utils/parsers.py salt/modules/tls.py \

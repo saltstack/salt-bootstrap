@@ -400,7 +400,7 @@ EOT
 }   # ----------  end of function __usage  ----------
 
 
-while getopts ':hvnDc:g:Gyx:wk:s:MSNXCPFUKIA:i:Lp:dH:ZbflV:J:j:rR:aq' opt
+while getopts ':hvnDc:g:Gyx:wk:s:MSNXCPFUKIA:i:Lp:dH:bflV:J:j:rR:aq' opt
 do
   case "${opt}" in
 

@@ -567,7 +567,7 @@ if [ "$#" -gt 0 ];then
 fi
 
 # Check installation type
-if [ "$(echo "$ITYPE" | egrep '(stable|testing|daily|git)')" = "" ]; then
+if [ "$(echo "$ITYPE" | grep -E '(stable|testing|daily|git)')" = "" ]; then
     echoerror "Installation type \"$ITYPE\" is not known..."
     exit 1
 fi
@@ -589,10 +589,10 @@ elif [ "$ITYPE" = "stable" ]; then
     if [ "$#" -eq 0 ];then
         STABLE_REV="latest"
     else
-        if [ "$(echo "$1" | egrep '^(latest|1\.6|1\.7|2014\.1|2014\.7|2015\.5|2015\.8|2016\.3|2016\.11|2017\.7|2018\.3)$')" != "" ]; then
+        if [ "$(echo "$1" | grep -E '^(latest|1\.6|1\.7|2014\.1|2014\.7|2015\.5|2015\.8|2016\.3|2016\.11|2017\.7|2018\.3)$')" != "" ]; then
             STABLE_REV="$1"
             shift
-        elif [ "$(echo "$1" | egrep '^([0-9]*\.[0-9]*\.[0-9]*)$')" != "" ]; then
+        elif [ "$(echo "$1" | grep -E '^([0-9]*\.[0-9]*\.[0-9]*)$')" != "" ]; then
             STABLE_REV="archive/$1"
             shift
         else
@@ -923,7 +923,7 @@ __sort_release_files() {
     secondary_release_files=""
     # Sort know VS un-known files first
     for release_file in $(echo "${@}" | sed -r 's:[[:space:]]:\n:g' | sort -f | uniq); do
-        match=$(echo "$release_file" | egrep -i "${KNOWN_RELEASE_FILES}")
+        match=$(echo "$release_file" | grep -E -i "${KNOWN_RELEASE_FILES}")
         if [ "${match}" != "" ]; then
             primary_release_files="${primary_release_files} ${release_file}"
         else
@@ -1031,11 +1031,11 @@ __gather_linux_system_info() {
         v=$(__parse_version_string "$rv")
         case $shortname in
             redhat             )
-                if [ "$(egrep 'CentOS' /etc/${rsource})" != "" ]; then
+                if [ "$(grep -E 'CentOS' /etc/${rsource})" != "" ]; then
                     n="CentOS"
-                elif [ "$(egrep 'Scientific' /etc/${rsource})" != "" ]; then
+                elif [ "$(grep -E 'Scientific' /etc/${rsource})" != "" ]; then
                     n="Scientific Linux"
-                elif [ "$(egrep 'Red Hat Enterprise Linux' /etc/${rsource})" != "" ]; then
+                elif [ "$(grep -E 'Red Hat Enterprise Linux' /etc/${rsource})" != "" ]; then
                     n="<R>ed <H>at <E>nterprise <L>inux"
                 else
                     n="<R>ed <H>at <L>inux"
@@ -1272,7 +1272,7 @@ __ubuntu_derivatives_translation() {
     neon_16_ubuntu_base="16.04"
 
     # Translate Ubuntu derivatives to their base Ubuntu version
-    match=$(echo "$DISTRO_NAME_L" | egrep ${UBUNTU_DERIVATIVES})
+    match=$(echo "$DISTRO_NAME_L" | grep -E ${UBUNTU_DERIVATIVES})
 
     if [ "${match}" != "" ]; then
         case $match in
@@ -1417,7 +1417,7 @@ __debian_derivatives_translation() {
     raspbian_9_debian_base="9.0"
 
     # Translate Debian derivatives to their base Debian version
-    match=$(echo "$DISTRO_NAME_L" | egrep ${DEBIAN_DERIVATIVES})
+    match=$(echo "$DISTRO_NAME_L" | grep -E ${DEBIAN_DERIVATIVES})
 
     if [ "${match}" != "" ]; then
         case $match in
@@ -1728,14 +1728,14 @@ fi
 if ([ "${DISTRO_NAME_L}" != "ubuntu" ] && [ "$ITYPE" = "daily" ]); then
     echoerror "${DISTRO_NAME} does not have daily packages support"
     exit 1
-elif ([ "$(echo "${DISTRO_NAME_L}" | egrep '(debian|ubuntu|centos|red_hat|oracle|scientific|amazon)')" = "" ] && [ "$ITYPE" = "stable" ] && [ "$STABLE_REV" != "latest" ]); then
+elif ([ "$(echo "${DISTRO_NAME_L}" | grep -E '(debian|ubuntu|centos|red_hat|oracle|scientific|amazon)')" = "" ] && [ "$ITYPE" = "stable" ] && [ "$STABLE_REV" != "latest" ]); then
     echoerror "${DISTRO_NAME} does not have major version pegged packages support"
     exit 1
 fi
 
 # Only RedHat based distros have testing support
 if [ "${ITYPE}" = "testing" ]; then
-    if [ "$(echo "${DISTRO_NAME_L}" | egrep '(centos|red_hat|amazon|oracle)')" = "" ]; then
+    if [ "$(echo "${DISTRO_NAME_L}" | grep -E '(centos|red_hat|amazon|oracle)')" = "" ]; then
         echoerror "${DISTRO_NAME} does not have testing packages support"
         exit 1
     fi
@@ -4474,13 +4474,13 @@ install_amazon_linux_ami_deps() {
         repo_rev="latest"
     fi
 
-    if echo $repo_rev | egrep -q '^archive'; then
+    if echo $repo_rev | grep -E -q '^archive'; then
         year=$(echo "$repo_rev" | cut -d '/' -f 2 | cut -c1-4)
     else
         year=$(echo "$repo_rev" | cut -c1-4)
     fi
 
-    if echo "$repo_rev" | egrep -q '^(latest|2016\.11)$' || \
+    if echo "$repo_rev" | grep -E -q '^(latest|2016\.11)$' || \
             [ "$year" -gt 2016 ]; then
        _USEAWS=$BS_TRUE
        pkg_append="python27"

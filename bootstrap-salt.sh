@@ -6656,8 +6656,8 @@ fi
 # Drop the master address if passed
 if [ "$_SALT_MASTER_ADDRESS" != "null" ]; then
     [ ! -d "$_SALT_ETC_DIR/minion.d" ] && mkdir -p "$_SALT_ETC_DIR/minion.d"
-    cat <<_eof > $_SALT_ETC_DIR/minion.d/99-master-address.conf
-master: $_SALT_MASTER_ADDRESS
+    cat <<_eof > "$_SALT_ETC_DIR/minion.d/99-master-address.conf
+master: $_SALT_MASTER_ADDRESS"
 _eof
 fi
 

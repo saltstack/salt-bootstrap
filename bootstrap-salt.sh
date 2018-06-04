@@ -61,11 +61,11 @@ __DEFAULT_SLEEP=3
 _COLORS=${BS_COLORS:-$(tput colors 2>/dev/null || echo 0)}
 __detect_color_support() {
     if [ $? -eq 0 ] && [ "$_COLORS" -gt 2 ]; then
-        RC="\\033[1;31m"
-        GC="\\033[1;32m"
-        BC="\\033[1;34m"
-        YC="\\033[1;33m"
-        EC="\\033[0m"
+        RC='\033[1;31m'
+        GC='\033[1;32m'
+        BC='\033[1;34m'
+        YC='\033[1;33m'
+        EC='\033[0m'
     else
         RC=""
         GC=""
@@ -6656,8 +6656,8 @@ fi
 # Drop the master address if passed
 if [ "$_SALT_MASTER_ADDRESS" != "null" ]; then
     [ ! -d "$_SALT_ETC_DIR/minion.d" ] && mkdir -p "$_SALT_ETC_DIR/minion.d"
-    cat <<_eof > "$_SALT_ETC_DIR/minion.d/99-master-address.conf
-master: $_SALT_MASTER_ADDRESS"
+    cat <<_eof > "$_SALT_ETC_DIR/minion.d/99-master-address.conf"
+master: $_SALT_MASTER_ADDRESS
 _eof
 fi
 

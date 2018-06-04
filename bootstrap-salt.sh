@@ -351,7 +351,7 @@ __usage() {
     -i  Pass the salt-minion id. This will be stored under
         \${BS_SALT_ETC_DIR}/minion_id
     -p  Extra-package to install while installing Salt dependencies. One package
-        per -p flag. You're responsible for providing the proper package name.
+        per -p flag. You are responsible for providing the proper package name.
     -H  Use the specified HTTP proxy for all download URLs (including https://).
         For example: http://myproxy.example.com:3128
     -b  Assume that dependencies are already installed and software sources are
@@ -385,11 +385,11 @@ __usage() {
         no ".bak" file will be created as either of those options will force
         a complete overwrite of the file.
     -q  Quiet salt installation from git (setup.py install -q)
-    -x  Changes the python version used to install a git version of salt. Currently
-        this is considered experimental and has only been tested on Centos 6. This
-        only works for git installations.
+    -x  Changes the Python version used to install Salt. Currently, this is only
+        supported on Ubuntu 16 and CentOS 6. The CentOS 6 option only works with
+        git installations.
     -y  Installs a different python version on host. Currently this has only been
-        tested with Centos 6 and is considered experimental. This will install the
+        tested with CentOS 6 and is considered experimental. This will install the
         ius repo on the box if disable repo is false. This must be used in conjunction
         with -x <pythonversion>.  For example:
             sh bootstrap.sh -P -y -x python2.7 git v2017.7.2
@@ -655,6 +655,22 @@ if [ "$_CUSTOM_MINION_CONFIG" != "null" ]; then
         echoerror "Don't pass a minion config JSON dict (-j) if no minion is going to be bootstrapped or configured."
         exit 1
     fi
+fi
+
+# Check if we're installing via a different Python executable and set major version variables
+if [ -n "$_PY_EXE" ]; then
+    _PY_PKG_VER=$(echo "$_PY_EXE" | sed -r "s/\\.//g")
+
+    _PY_MAJOR_VERSION=$(echo "$_PY_PKG_VER" | cut -c 7)
+    if [ "$_PY_MAJOR_VERSION" != 3 ] && [ "$_PY_MAJOR_VERSION" != 2 ]; then
+        echoerror "Detected -x option, but Python major version is not 2 or 3."
+        echoerror "The -x option must be passed as python2, python27, or python2.7 (or use the Python '3' versions of examples)."
+        exit 1
+    fi
+
+    echoinfo "Detected -x option. Using $_PY_EXE to install Salt."
+else
+    _PY_PKG_VER=""
 fi
 
 # If the configuration directory or archive does not exist, error out
@@ -1102,9 +1118,7 @@ __install_python() {
         exit 1
     fi
 
-    PY_PKG_V=$(echo "$_PY_EXE" | sed -r "s/\.//g")
-    __PACKAGES="${PY_PKG_V}"
-
+    __PACKAGES="$_PY_PKG_VER"
 
     if [ ${_DISABLE_REPOS} -eq ${BS_FALSE} ]; then
         echoinfo "Attempting to install a repo to help provide a separate python package"
@@ -2594,8 +2608,13 @@ __install_saltstack_ubuntu_repository() {
     # shellcheck disable=SC2086,SC2090
     __apt_get_install_noinput ${__PACKAGES} || return 1
 
+    __PY_VERSION_REPO="apt"
+    if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 3 ]; then
+        __PY_VERSION_REPO="py3"
+    fi
+
     # SaltStack's stable Ubuntu repository:
-    SALTSTACK_UBUNTU_URL="${HTTP_VAL}://${_REPO_URL}/apt/ubuntu/${UBUNTU_VERSION}/${__REPO_ARCH}/${STABLE_REV}"
+    SALTSTACK_UBUNTU_URL="${HTTP_VAL}://${_REPO_URL}/${__PY_VERSION_REPO}/ubuntu/${UBUNTU_VERSION}/${__REPO_ARCH}/${STABLE_REV}"
     echo "deb $SALTSTACK_UBUNTU_URL $UBUNTU_CODENAME main" > /etc/apt/sources.list.d/saltstack.list
 
     __apt_key_fetch "$SALTSTACK_UBUNTU_URL/SALTSTACK-GPG-KEY.pub" || return 1
@@ -2624,7 +2643,7 @@ install_ubuntu_deps() {
         __PACKAGES="upstart"
     fi
 
-    if [ "$DISTRO_MAJOR_VERSION" -ge 16 ]; then
+    if [ "$DISTRO_MAJOR_VERSION" -ge 16 ] && [ -z "$_PY_EXE" ]; then
         __PACKAGES="${__PACKAGES} python2.7"
     fi
 
@@ -2740,12 +2759,23 @@ install_ubuntu_git_deps() {
     else
         install_ubuntu_stable_deps || return 1
 
-        __PACKAGES="${__PACKAGES} python-crypto python-jinja2 python-m2crypto python-msgpack"
-        __PACKAGES="${__PACKAGES} python-requests python-tornado python-yaml python-zmq"
+        if [ "$_PY_MAJOR_VERSION" -eq 3 ]; then
+            PY_PKG_VER=3
+        else
+            PY_PKG_VER=""
+
+            # There is no m2crypto package for Py3 at this time - only install for Py2
+            __PACKAGES="${__PACKAGES} python-m2crypto"
+        fi
+
+        __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-crypto python${PY_PKG_VER}-jinja2"
+        __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-msgpack python${PY_PKG_VER}-requests"
+        __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado python${PY_PKG_VER}-yaml"
+        __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-zmq"
 
         if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
             # Install python-libcloud if asked to
-            __PACKAGES="${__PACKAGES} python-libcloud"
+            __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-libcloud"
         fi
 
         # shellcheck disable=SC2086
@@ -2795,10 +2825,16 @@ install_ubuntu_git() {
         __activate_virtualenv || return 1
     fi
 
-    if [ -f "${_SALT_GIT_CHECKOUT_DIR}/salt/syspaths.py" ]; then
-        python setup.py --salt-config-dir="$_SALT_ETC_DIR" --salt-cache-dir="${_SALT_CACHE_DIR}" ${SETUP_PY_INSTALL_ARGS} install --install-layout=deb || return 1
+    if [ -n "$_PY_EXE" ]; then
+        _PYEXE=${_PY_EXE}
     else
-        python setup.py ${SETUP_PY_INSTALL_ARGS} install --install-layout=deb || return 1
+        _PYEXE=python2.7
+    fi
+
+    if [ -f "${_SALT_GIT_CHECKOUT_DIR}/salt/syspaths.py" ]; then
+        ${_PYEXE} setup.py --salt-config-dir="$_SALT_ETC_DIR" --salt-cache-dir="${_SALT_CACHE_DIR}" ${SETUP_PY_INSTALL_ARGS} install --install-layout=deb || return 1
+    else
+        ${_PYEXE} setup.py ${SETUP_PY_INSTALL_ARGS} install --install-layout=deb || return 1
     fi
 
     return 0

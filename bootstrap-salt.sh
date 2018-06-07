@@ -2760,7 +2760,7 @@ install_ubuntu_git_deps() {
     else
         install_ubuntu_stable_deps || return 1
 
-        if [ "$_PY_MAJOR_VERSION" -eq 3 ]; then
+        if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 3 ]; then
             PY_PKG_VER=3
         else
             PY_PKG_VER=""
@@ -3593,9 +3593,14 @@ __install_saltstack_rhel_repository() {
         repo_rev="latest"
     fi
 
+    __PY_VERSION_REPO="yum"
+    if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 3 ]; then
+        __PY_VERSION_REPO="py3"
+    fi
+
     # Avoid using '$releasever' variable for yum.
     # Instead, this should work correctly on all RHEL variants.
-    base_url="${HTTP_VAL}://${_REPO_URL}/yum/redhat/${DISTRO_MAJOR_VERSION}/\$basearch/${repo_rev}/"
+    base_url="${HTTP_VAL}://${_REPO_URL}/${__PY_VERSION_REPO}/redhat/${DISTRO_MAJOR_VERSION}/\$basearch/${repo_rev}/"
     gpg_key="SALTSTACK-GPG-KEY.pub"
     repo_file="/etc/yum.repos.d/saltstack.repo"
 
@@ -3611,7 +3616,7 @@ enabled=1
 enabled_metadata=1
 _eof
 
-        fetch_url="${HTTP_VAL}://${_REPO_URL}/yum/redhat/${DISTRO_MAJOR_VERSION}/${CPU_ARCH_L}/${repo_rev}/"
+        fetch_url="${HTTP_VAL}://${_REPO_URL}/${__PY_VERSION_REPO}/redhat/${DISTRO_MAJOR_VERSION}/${CPU_ARCH_L}/${repo_rev}/"
         __rpm_import_gpg "${fetch_url}${gpg_key}" || return 1
         yum clean metadata || return 1
     elif [ "$repo_rev" != "latest" ]; then
@@ -3627,7 +3632,14 @@ install_centos_stable_deps() {
         yum -y update || return 1
     fi
 
-    if [ $_DISABLE_REPOS -eq $BS_FALSE ]; then
+    if [ "$_DISABLE_REPOS" -eq "$BS_TRUE" ] && [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 3 ]; then
+        echoerror "Detected -r or -R option while installing Salt packages for Python 3."
+        echoerror "Python 3 packages for Salt require the EPEL repository to be installed."
+        echoerror "The -r and -R options are incompatible with -x and Python 3 bootstrap installs."
+        return 1
+    fi
+
+    if [ "$_DISABLE_REPOS" -eq "$BS_FALSE" ]; then
         __install_epel_repository || return 1
         __install_saltstack_rhel_repository || return 1
     fi
@@ -3639,8 +3651,14 @@ install_centos_stable_deps() {
         __install_saltstack_rhel_repository || return 1
     fi
 
+    __PACKAGES="yum-utils chkconfig"
+
     # YAML module is used for generating custom master/minion configs
-    __PACKAGES="yum-utils chkconfig PyYAML"
+    if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 3 ]; then
+        __PACKAGES="${__PACKAGES} python34-PyYAML"
+    else
+        __PACKAGES="${__PACKAGES} PyYAML"
+    fi
 
     # shellcheck disable=SC2086
     __yum_install_noinput ${__PACKAGES} || return 1
@@ -3721,15 +3739,29 @@ install_centos_git_deps() {
 
     __git_clone_and_checkout || return 1
 
-    __PACKAGES="m2crypto python-crypto python-futures python-jinja2 python-msgpack"
-    __PACKAGES="${__PACKAGES} python-requests python-tornado python-zmq"
+    __PACKAGES="m2crypto"
 
-    if [ "$DISTRO_MAJOR_VERSION" -ge 7 ]; then
-        __PACKAGES="${__PACKAGES} systemd-python"
+    if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 3 ]; then
+        # Packages are named python34-<whatever>
+        PY_PKG_VER=34
+    else
+        PY_PKG_VER=""
+
+        # Only Py2 needs python-futures
+        __PACKAGES="${__PACKAGES} python-futures"
+
+        # There is no systemd-python3 package as of this writing
+        if [ "$DISTRO_MAJOR_VERSION" -ge 7 ]; then
+            __PACKAGES="${__PACKAGES} systemd-python"
+        fi
     fi
 
+    __PACKAGES="python${PY_PKG_VER}-crypto python${PY_PKG_VER}-jinja2"
+    __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-msgpack python${PY_PKG_VER}-requests"
+    __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado python${PY_PKG_VER}-zmq"
+
     if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
-        __PACKAGES="${__PACKAGES} python-libcloud"
+        __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-libcloud"
     fi
 
     if [ "${_INSTALL_PY}" -eq "${BS_TRUE}" ]; then
@@ -3737,7 +3769,7 @@ install_centos_git_deps() {
         __install_python || return 1
     fi
 
-    if [ "${_PY_EXE}" != "" ]; then
+    if [ "${_PY_EXE}" != "" ] && [ "$_PIP_ALLOWED" -eq "$BS_TRUE" ]; then
         # If "-x" is defined, install dependencies with pip based on the Python version given.
         _PIP_PACKAGES="m2crypto jinja2 msgpack-python pycrypto PyYAML tornado<5.0 zmq"
 

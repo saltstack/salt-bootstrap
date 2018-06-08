@@ -331,6 +331,7 @@ Some distributions support installing Salt to use Python 3 instead of Python 2. 
 this offering, while limited, is as follows:
 
 - CentOS 7
+- Debian 9
 - Ubuntu 16.04
 
 Installing the Python 3 packages for Salt is done via the ``-x`` option:

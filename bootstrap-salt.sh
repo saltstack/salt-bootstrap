@@ -386,8 +386,8 @@ __usage() {
         a complete overwrite of the file.
     -q  Quiet salt installation from git (setup.py install -q)
     -x  Changes the Python version used to install Salt. Currently, this is only
-        supported on Ubuntu 16 and CentOS 6. The CentOS 6 option only works with
-        git installations.
+        supported on CentOS 7, Debian 9, Ubuntu 16 and CentOS 6. The CentOS 6
+        option only works with git installations.
     -y  Installs a different python version on host. Currently this has only been
         tested with CentOS 6 and is considered experimental. This will install the
         ius repo on the box if disable repo is false. This must be used in conjunction
@@ -3016,6 +3016,11 @@ __install_saltstack_debian_repository() {
         DEBIAN_CODENAME="$DISTRO_CODENAME"
     fi
 
+    __PY_VERSION_REPO="apt"
+    if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 3 ]; then
+        __PY_VERSION_REPO="py3"
+    fi
+
     __PACKAGES=''
 
     # Install downloader backend for GPG keys fetching
@@ -3034,7 +3039,7 @@ __install_saltstack_debian_repository() {
     __apt_get_install_noinput ${__PACKAGES} || return 1
 
     # amd64 is just a part of repository URI, 32-bit pkgs are hosted under the same location
-    SALTSTACK_DEBIAN_URL="${HTTP_VAL}://${_REPO_URL}/apt/debian/${DEBIAN_RELEASE}/${__REPO_ARCH}/${STABLE_REV}"
+    SALTSTACK_DEBIAN_URL="${HTTP_VAL}://${_REPO_URL}/${__PY_VERSION_REPO}/debian/${DEBIAN_RELEASE}/${__REPO_ARCH}/${STABLE_REV}"
     echo "deb $SALTSTACK_DEBIAN_URL $DEBIAN_CODENAME main" > "/etc/apt/sources.list.d/saltstack.list"
 
     __apt_key_fetch "$SALTSTACK_DEBIAN_URL/SALTSTACK-GPG-KEY.pub" || return 1
@@ -3064,11 +3069,17 @@ install_debian_deps() {
         __apt_get_upgrade_noinput || return 1
     fi
 
+    if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 3 ]; then
+        PY_PKG_VER=3
+    else
+        PY_PKG_VER=""
+    fi
+
     # Additionally install procps and pciutils which allows for Docker bootstraps. See 366#issuecomment-39666813
     __PACKAGES='procps pciutils'
 
     # YAML module is used for generating custom master/minion configs
-    __PACKAGES="${__PACKAGES} python-yaml"
+    __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-yaml"
 
     # shellcheck disable=SC2086
     __apt_get_install_noinput ${__PACKAGES} || return 1
@@ -3204,13 +3215,24 @@ install_debian_9_git_deps() {
 
     __git_clone_and_checkout || return 1
 
-    __PACKAGES="libzmq5 lsb-release python-apt python-backports-abc python-crypto"
-    __PACKAGES="${__PACKAGES} python-jinja2 python-m2crypto python-msgpack python-requests"
-    __PACKAGES="${__PACKAGES} python-systemd python-tornado python-yaml python-zmq"
+    __PACKAGES="libzmq5 lsb-release"
+
+    if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 3 ]; then
+        PY_PKG_VER=3
+    else
+        PY_PKG_VER=""
+
+        # These packages are PY2-ONLY
+        __PACKAGES="${__PACKAGES} python-backports-abc python-m2crypto"
+    fi
+
+    __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-apt python${PY_PKG_VER}-crypto python${PY_PKG_VER}-jinja2"
+    __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-msgpack python${PY_PKG_VER}-requests python${PY_PKG_VER}-systemd"
+    __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado python${PY_PKG_VER}-yaml python${PY_PKG_VER}-zmq"
 
     if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
         # Install python-libcloud if asked to
-        __PACKAGES="${__PACKAGES} python-libcloud"
+        __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-libcloud"
     fi
 
     # shellcheck disable=SC2086
@@ -3268,10 +3290,16 @@ install_debian_9_stable() {
 }
 
 install_debian_git() {
-    if [ -f "${_SALT_GIT_CHECKOUT_DIR}/salt/syspaths.py" ]; then
-        python setup.py --salt-config-dir="$_SALT_ETC_DIR" --salt-cache-dir="${_SALT_CACHE_DIR}" ${SETUP_PY_INSTALL_ARGS} install --install-layout=deb || return 1
+    if [ -n "$_PY_EXE" ]; then
+        _PYEXE=${_PY_EXE}
     else
-        python setup.py ${SETUP_PY_INSTALL_ARGS} install --install-layout=deb || return 1
+        _PYEXE=python
+    fi
+
+    if [ -f "${_SALT_GIT_CHECKOUT_DIR}/salt/syspaths.py" ]; then
+        ${_PYEXE} setup.py --salt-config-dir="$_SALT_ETC_DIR" --salt-cache-dir="${_SALT_CACHE_DIR}" ${SETUP_PY_INSTALL_ARGS} install --install-layout=deb || return 1
+    else
+        ${_PYEXE} setup.py ${SETUP_PY_INSTALL_ARGS} install --install-layout=deb || return 1
     fi
 }
 

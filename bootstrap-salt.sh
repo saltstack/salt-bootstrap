@@ -976,6 +976,7 @@ __gather_linux_system_info() {
             [ "$n" = "$DISTRO_NAME" ] && DISTRO_NAME="" || DISTRO_NAME="$n"
         elif [ "${DISTRO_NAME}" = "openSUSE project" ]; then
             # lsb_release -si returns "openSUSE project" on openSUSE 12.3
+            # lsb_release -si returns "openSUSE" on openSUSE 15.n 
             DISTRO_NAME="opensuse"
         elif [ "${DISTRO_NAME}" = "SUSE LINUX" ]; then
             if [ "$(lsb_release -sd | grep -i opensuse)" != "" ]; then
@@ -1048,7 +1049,7 @@ __gather_linux_system_info() {
             debian             ) n="Debian"         ;;
             ubuntu             ) n="Ubuntu"         ;;
             fedora             ) n="Fedora"         ;;
-            suse               ) n="SUSE"           ;;
+            suse|opensuse      ) n="SUSE"           ;;
             mandrake*|mandriva ) n="Mandriva"       ;;
             gentoo             ) n="Gentoo"         ;;
             slackware          ) n="Slackware"      ;;
@@ -1090,7 +1091,7 @@ __gather_linux_system_info() {
                         n="Debian"
                         v=$(__derive_debian_numeric_version "$v")
                         ;;
-                    sles        )
+                    sles|opensuse  )
                         n="SUSE"
                         v="${rv}"
                         ;;
@@ -5508,7 +5509,12 @@ __set_suse_pkg_repo() {
     elif [ "${DISTRO_MAJOR_VERSION}" -ge 42 ]; then
         DISTRO_REPO="openSUSE_Leap_${DISTRO_MAJOR_VERSION}.${DISTRO_MINOR_VERSION}"
     elif [ "${DISTRO_MAJOR_VERSION}" -lt 42 ]; then
-        DISTRO_REPO="SLE_${DISTRO_MAJOR_VERSION}_SP${SUSE_PATCHLEVEL}"
+        case ${DISTRO_MAJOR_VERSION} in
+        15)  DISTRO_REPO="openSUSE_Leap_${DISTRO_MAJOR_VERSION}.${DISTRO_MINOR_VERSION}"
+             ;;
+        *)   DISTRO_REPO="SLE_${DISTRO_MAJOR_VERSION}_SP${SUSE_PATCHLEVEL}"
+             ;;
+        esac
     fi
 
     if [ "$_DOWNSTREAM_PKG_REPO" -eq $BS_TRUE ]; then

@@ -584,6 +584,10 @@ if [ "$ITYPE" = "git" ]; then
     # Disable shell warning about unbound variable during git install
     STABLE_REV="latest"
 
+elif [ "$ITYPE" = "daily" ]; then
+    # Disable shell error about unbound variable during daily install
+    STABLE_REV="latest"
+
 # If doing stable install, check if version specified
 elif [ "$ITYPE" = "stable" ]; then
     if [ "$#" -eq 0 ];then
@@ -2622,7 +2626,7 @@ __install_saltstack_ubuntu_repository() {
     __apt_key_fetch "$SALTSTACK_UBUNTU_URL/SALTSTACK-GPG-KEY.pub" || return 1
 
     __wait_for_apt
-    apt-get update
+    apt-get update || return 1
 }
 
 install_ubuntu_deps() {
@@ -2635,7 +2639,7 @@ install_ubuntu_deps() {
         __enable_universe_repository || return 1
 
         __wait_for_apt
-        apt-get update
+        apt-get update || return 1
     fi
 
     __PACKAGES=''
@@ -2692,12 +2696,12 @@ install_ubuntu_stable_deps() {
     export DEBIAN_FRONTEND=noninteractive
 
     __wait_for_apt
-    apt-get update
+    apt-get update || return 1
 
     if [ "${_UPGRADE_SYS}" -eq $BS_TRUE ]; then
         if [ "${_INSECURE_DL}" -eq $BS_TRUE ]; then
             __apt_get_install_noinput --allow-unauthenticated debian-archive-keyring &&
-                apt-key update && apt-get update
+                apt-key update && apt-get update || return 1
         fi
 
         __apt_get_upgrade_noinput || return 1
@@ -2719,7 +2723,7 @@ install_ubuntu_daily_deps() {
         __enable_universe_repository || return 1
 
         add-apt-repository -y ppa:saltstack/salt-daily || return 1
-        apt-get update
+        apt-get update || return 1
     fi
 
     if [ "$_UPGRADE_SYS" -eq $BS_TRUE ]; then
@@ -2731,7 +2735,7 @@ install_ubuntu_daily_deps() {
 
 install_ubuntu_git_deps() {
     __wait_for_apt
-    apt-get update
+    apt-get update || return 1
 
     if ! __check_command_exists git; then
         __apt_get_install_noinput git-core || return 1
@@ -3046,7 +3050,7 @@ __install_saltstack_debian_repository() {
     __apt_key_fetch "$SALTSTACK_DEBIAN_URL/SALTSTACK-GPG-KEY.pub" || return 1
 
     __wait_for_apt
-    apt-get update
+    apt-get update || return 1
 }
 
 install_debian_deps() {
@@ -3058,13 +3062,13 @@ install_debian_deps() {
     export DEBIAN_FRONTEND=noninteractive
 
     __wait_for_apt
-    apt-get update
+    apt-get update || return 1
 
     if [ "${_UPGRADE_SYS}" -eq $BS_TRUE ]; then
         # Try to update GPG keys first if allowed
         if [ "${_INSECURE_DL}" -eq $BS_TRUE ]; then
             __apt_get_install_noinput --allow-unauthenticated debian-archive-keyring &&
-                apt-key update && apt-get update
+                apt-key update && apt-get update || return 1
         fi
 
         __apt_get_upgrade_noinput || return 1

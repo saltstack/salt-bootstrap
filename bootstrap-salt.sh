@@ -584,6 +584,10 @@ if [ "$ITYPE" = "git" ]; then
     # Disable shell warning about unbound variable during git install
     STABLE_REV="latest"
 
+elif [ "$ITYPE" = "daily" ]; then
+    # Disable shell error about unbound variable during daily install
+    STABLE_REV="latest"
+
 # If doing stable install, check if version specified
 elif [ "$ITYPE" = "stable" ]; then
     if [ "$#" -eq 0 ];then

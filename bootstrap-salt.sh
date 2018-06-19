@@ -2774,6 +2774,8 @@ install_ubuntu_git_deps() {
 
         if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 3 ]; then
             PY_PKG_VER=3
+
+            __PACKAGES="${__PACKAGES} python3-setuptools"
         else
             PY_PKG_VER=""
 

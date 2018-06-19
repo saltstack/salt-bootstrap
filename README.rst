@@ -333,6 +333,7 @@ this offering, while limited, is as follows:
 - CentOS 7
 - Debian 9
 - Ubuntu 16.04
+- Ubuntu 18.04
 
 Installing the Python 3 packages for Salt is done via the ``-x`` option:
 

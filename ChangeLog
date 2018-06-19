@@ -1,3 +1,17 @@
+Version TBD (In Progress on the Develop Branch):
+    * Add python 3 support for Ubuntu 18 (rallytime) #1248
+    * Return immediately if apt-get fails (icy) #1247
+    * Disable shell error about unbound variable during daily install (icy) #1246
+    * OpenSuse_Leap_15.0 saltstack repo support (noelmcloughlin) #1244
+    * Add Python3 package support for Debian 9 (rallytime) #1243
+    * Add Python3 package support for CentOS 7 (rallytime) #1242
+    * Shellcheck fixes found when running latest version (rallytime) #1239
+    * Add Python3 package support for Ubuntu 16.04 (rallytime) #1238
+    * Fix the variable ref from #803 (rallytime) #1229
+    * Add Ubuntu 18.04 support (rallytime) #1228
+    * Call __git_clone_and_checkout directly (jheidbrink) #1226
+    * Fix for silently ignored version argument on CentOS/RHEL (pjcreath) #1210
+
 Version 2018.04.25:
     * Install py-tornado4 for FreeBSD. (abednarik) #1219
     * Remove COPR repos configuration for Fedora (vutny ) #1211

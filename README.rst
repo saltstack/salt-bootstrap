@@ -310,8 +310,8 @@ UNIX systems
 
 - SmartOS
 
-Unsupported Distro
-------------------
+Unsupported Distributions
+-------------------------
 
 If you are running a Linux distribution that is not supported yet or is not correctly identified,
 please run the following commands and report their output when creating an issue:
@@ -323,6 +323,24 @@ please run the following commands and report their output when creating an issue
 
 For information on how to add support for a currently unsupported distribution, please refer to the
 `Contributing Guidelines`_.
+
+Python 3 Support
+----------------
+
+Some distributions support installing Salt to use Python 3 instead of Python 2. The availability of
+this offering, while limited, is as follows:
+
+- CentOS 7
+- Debian 9
+- Ubuntu 16.04
+
+Installing the Python 3 packages for Salt is done via the ``-x`` option:
+
+.. code:: console
+
+    sh bootstrap-salt.sh -x python3
+
+See the ``-x`` option for more information.
 
 Testing
 -------

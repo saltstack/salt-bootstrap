@@ -69,6 +69,7 @@ Guillaume Derval            GuillaumeDerval        guillaume@guillaumederval.be
 gweis                       gweis
 Henrik Holmboe              holmboe
 Howard Mei                  HowardMei              howardleomei@gmail.com
+Jan Heidbrink               jheidbrink
 James Booth                 absolutejam            vvalentine1337@gmail.com
 Jared E Stroud              jaredestroud           jaredestroud@gmail.com
 Jasper Lievisse Adriaanse   jasperla               jasper@humppa.nl
@@ -80,6 +81,7 @@ Justin Anderson             justinta               justin.ta@outlook.com
 Justin Findlay              jfindlay               jfindlay@gmail.com
 Karl Grzeszczak             karlgrz
 Kenneth Wilke               KennethWilke
+Ky-Anh Huynh                icy
 lomeroe                     lomeroe
 Liu Xiaohui                 oreh                   herolxh@gmail.com
 Lorenzo Perone              lopezio                lorenzo.perone@yellowspace.net
@@ -101,6 +103,7 @@ Michael Scherer             mscherer
 Michele Bologna             mbologna               michele.bologna@gmail.com
 Mike Carlson                m87carlson             mike@bayphoto.com
 Mike Place                  cachedout              mp@saltstack.com
+N                           noelmcloughlin         noel.maclochlainn@gmail.com
 nasenbaer13                 nasenbaer13
 nevins-b                    nevins-b
 Nicole Thomas               rallytime              nicole@saltstack.com

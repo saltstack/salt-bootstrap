@@ -289,7 +289,6 @@ __usage() {
                           for packages available at repo.saltstack.com
     - stable [version]    Install a specific version. Only supported for
                           packages available at repo.saltstack.com
-    - daily               Ubuntu specific: configure SaltStack Daily PPA
     - testing             RHEL-family specific: configure EPEL testing repo
     - git                 Install from the head of the develop branch
     - git [ref]           Install from any git ref (such as a branch, tag, or
@@ -300,7 +299,6 @@ __usage() {
     - ${__ScriptName} stable
     - ${__ScriptName} stable 2017.7
     - ${__ScriptName} stable 2017.7.2
-    - ${__ScriptName} daily
     - ${__ScriptName} testing
     - ${__ScriptName} git
     - ${__ScriptName} git 2017.7
@@ -567,7 +565,7 @@ if [ "$#" -gt 0 ];then
 fi
 
 # Check installation type
-if [ "$(echo "$ITYPE" | grep -E '(stable|testing|daily|git)')" = "" ]; then
+if [ "$(echo "$ITYPE" | grep -E '(stable|testing|git)')" = "" ]; then
     echoerror "Installation type \"$ITYPE\" is not known..."
     exit 1
 fi
@@ -582,10 +580,6 @@ if [ "$ITYPE" = "git" ]; then
     fi
 
     # Disable shell warning about unbound variable during git install
-    STABLE_REV="latest"
-
-elif [ "$ITYPE" = "daily" ]; then
-    # Disable shell error about unbound variable during daily install
     STABLE_REV="latest"
 
 # If doing stable install, check if version specified
@@ -980,7 +974,7 @@ __gather_linux_system_info() {
             [ "$n" = "$DISTRO_NAME" ] && DISTRO_NAME="" || DISTRO_NAME="$n"
         elif [ "${DISTRO_NAME}" = "openSUSE project" ]; then
             # lsb_release -si returns "openSUSE project" on openSUSE 12.3
-            # lsb_release -si returns "openSUSE" on openSUSE 15.n 
+            # lsb_release -si returns "openSUSE" on openSUSE 15.n
             DISTRO_NAME="opensuse"
         elif [ "${DISTRO_NAME}" = "SUSE LINUX" ]; then
             if [ "$(lsb_release -sd | grep -i opensuse)" != "" ]; then
@@ -1733,11 +1727,7 @@ elif [ "${DISTRO_NAME_L}" = "debian" ]; then
   __debian_codename_translation
 fi
 
-# Only Ubuntu has daily packages, let's let users know about that
-if ([ "${DISTRO_NAME_L}" != "ubuntu" ] && [ "$ITYPE" = "daily" ]); then
-    echoerror "${DISTRO_NAME} does not have daily packages support"
-    exit 1
-elif ([ "$(echo "${DISTRO_NAME_L}" | grep -E '(debian|ubuntu|centos|red_hat|oracle|scientific|amazon)')" = "" ] && [ "$ITYPE" = "stable" ] && [ "$STABLE_REV" != "latest" ]); then
+if ([ "$(echo "${DISTRO_NAME_L}" | grep -E '(debian|ubuntu|centos|red_hat|oracle|scientific|amazon)')" = "" ] && [ "$ITYPE" = "stable" ] && [ "$STABLE_REV" != "latest" ]); then
     echoerror "${DISTRO_NAME} does not have major version pegged packages support"
     exit 1
 fi
@@ -2722,24 +2712,6 @@ install_ubuntu_stable_deps() {
     install_ubuntu_deps || return 1
 }
 
-install_ubuntu_daily_deps() {
-    __wait_for_apt
-    install_ubuntu_stable_deps || return 1
-
-    if [ $_DISABLE_REPOS -eq $BS_FALSE ]; then
-        __enable_universe_repository || return 1
-
-        add-apt-repository -y ppa:saltstack/salt-daily || return 1
-        apt-get update || return 1
-    fi
-
-    if [ "$_UPGRADE_SYS" -eq $BS_TRUE ]; then
-        __apt_get_upgrade_noinput || return 1
-    fi
-
-    return 0
-}
-
 install_ubuntu_git_deps() {
     __wait_for_apt
     apt-get update || return 1
@@ -2824,12 +2796,6 @@ install_ubuntu_stable() {
 
     # shellcheck disable=SC2086
     __apt_get_install_noinput ${__PACKAGES} || return 1
-
-    return 0
-}
-
-install_ubuntu_daily() {
-    install_ubuntu_stable || return 1
 
     return 0
 }

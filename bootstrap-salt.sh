@@ -5095,7 +5095,7 @@ install_freebsd_11_stable() {
 install_freebsd_git() {
 
     # /usr/local/bin/python2 in FreeBSD is a symlink to /usr/local/bin/python2.7
-    __PYTHON_PATH=$(readlink -f "$(which python2)")
+    __PYTHON_PATH=$(readlink -f "$(command -v python2)")
     __ESCAPED_PYTHON_PATH=$(echo "${__PYTHON_PATH}" | sed 's/\//\\\//g')
 
     # Install from git

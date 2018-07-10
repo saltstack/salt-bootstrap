@@ -43,10 +43,6 @@ __ScriptArgs="$*"
 #======================================================================================================================
 
 
-#======================================================================================================================
-#  LET THE BLACK MAGIC BEGIN!!!!
-#======================================================================================================================
-
 # Bootstrap script truth values
 BS_TRUE=1
 BS_FALSE=0
@@ -60,6 +56,7 @@ __DEFAULT_SLEEP=3
 #----------------------------------------------------------------------------------------------------------------------
 _COLORS=${BS_COLORS:-$(tput colors 2>/dev/null || echo 0)}
 __detect_color_support() {
+    # shellcheck disable=SC2181
     if [ $? -eq 0 ] && [ "$_COLORS" -gt 2 ]; then
         RC='\033[1;31m'
         GC='\033[1;32m'
@@ -463,8 +460,7 @@ LOGPIPE="/tmp/$( echo "$__ScriptName" | sed s/.sh/.logpipe/g )"
 
 # Create our logging pipe
 # On FreeBSD we have to use mkfifo instead of mknod
-mknod "$LOGPIPE" p >/dev/null 2>&1 || mkfifo "$LOGPIPE" >/dev/null 2>&1
-if [ $? -ne 0 ]; then
+if ! (mknod "$LOGPIPE" p >/dev/null 2>&1 || mkfifo "$LOGPIPE" >/dev/null 2>&1); then
     echoerror "Failed to create the named pipe required to log"
     exit 1
 fi
@@ -789,8 +785,7 @@ __fetch_verify() {
     test "$(stat --format=%s "$fetch_verify_tmpf")" -eq "$fetch_verify_size" && \
     test "$(md5sum "$fetch_verify_tmpf" | awk '{ print $1 }')" = "$fetch_verify_sum" && \
     cat "$fetch_verify_tmpf" && \
-    rm -f "$fetch_verify_tmpf"
-    if [ $? -eq 0 ]; then
+    if rm -f "$fetch_verify_tmpf"; then
         return 0
     fi
     echo "Failed verification of $fetch_verify_url"
@@ -960,6 +955,8 @@ __gather_linux_system_info() {
 
     # Let's test if the lsb_release binary is available
     rv=$(lsb_release >/dev/null 2>&1)
+
+    # shellcheck disable=SC2181
     if [ $? -eq 0 ]; then
         DISTRO_NAME=$(lsb_release -si)
         if [ "${DISTRO_NAME}" = "Scientific" ]; then
@@ -1176,8 +1173,7 @@ __gather_sunos_system_info() {
                     DISTRO_NAME="Solaris"
                     # Let's make sure we not actually on a Joyent's SmartOS VM since some releases
                     # don't have SmartOS in `/etc/release`, only `Solaris`
-                    uname -v | grep joyent >/dev/null 2>&1
-                    if [ $? -eq 0 ]; then
+                    if uname -v | grep joyent >/dev/null 2>&1; then
                         DISTRO_NAME="SmartOS"
                     fi
                     break
@@ -1511,8 +1507,8 @@ __check_end_of_life_versions() {
             #  = 17.04
             if [ "$DISTRO_MAJOR_VERSION" -lt 14 ] || \
                 [ "$DISTRO_MAJOR_VERSION" -eq 15 ] || \
-                ([ "$DISTRO_MAJOR_VERSION" -eq 17 ] && [ "$DISTRO_MINOR_VERSION" -eq 04 ]) || \
-                ([ "$DISTRO_MAJOR_VERSION" -lt 17 ] && [ "$DISTRO_MINOR_VERSION" -eq 10 ]); then
+                { [ "$DISTRO_MAJOR_VERSION" -eq 17 ] && [ "$DISTRO_MINOR_VERSION" -eq 04 ]; } || \
+                { [ "$DISTRO_MAJOR_VERSION" -lt 17 ] && [ "$DISTRO_MINOR_VERSION" -eq 10 ]; }; then
                 echoerror "End of life distributions are not supported."
                 echoerror "Please consider upgrading to the next stable. See:"
                 echoerror "    https://wiki.ubuntu.com/Releases"
@@ -1526,7 +1522,7 @@ __check_end_of_life_versions() {
             #  <= 13.X
             #  <= 42.1
             if [ "$DISTRO_MAJOR_VERSION" -le 13 ] || \
-                ([ "$DISTRO_MAJOR_VERSION" -eq 42 ] && [ "$DISTRO_MINOR_VERSION" -le 1 ]); then
+                { [ "$DISTRO_MAJOR_VERSION" -eq 42 ] && [ "$DISTRO_MINOR_VERSION" -le 1 ]; }; then
                 echoerror "End of life distributions are not supported."
                 echoerror "Please consider upgrading to the next stable. See:"
                 echoerror "    http://en.opensuse.org/Lifetime"
@@ -1544,8 +1540,8 @@ __check_end_of_life_versions() {
                 SUSE_PATCHLEVEL="00"
             fi
             if [ "$DISTRO_MAJOR_VERSION" -lt 11 ] || \
-                ([ "$DISTRO_MAJOR_VERSION" -eq 11 ] && [ "$SUSE_PATCHLEVEL" -lt 04 ]) || \
-                ([ "$DISTRO_MAJOR_VERSION" -eq 12 ] && [ "$SUSE_PATCHLEVEL" -lt 02 ]); then
+                { [ "$DISTRO_MAJOR_VERSION" -eq 11 ] && [ "$SUSE_PATCHLEVEL" -lt 04 ]; } || \
+                { [ "$DISTRO_MAJOR_VERSION" -eq 12 ] && [ "$SUSE_PATCHLEVEL" -lt 02 ]; }; then
                 echoerror "Versions lower than SuSE 11 SP4 or 12 SP2 are not supported."
                 echoerror "Please consider upgrading to the next stable"
                 echoerror "    https://www.suse.com/lifecycle/"
@@ -1625,7 +1621,8 @@ __check_end_of_life_versions() {
 
         freebsd)
             # FreeBSD versions lower than 9.1 are not supported.
-            if ([ "$DISTRO_MAJOR_VERSION" -eq 9 ] && [ "$DISTRO_MINOR_VERSION" -lt 01 ]) || [ "$DISTRO_MAJOR_VERSION" -lt 9 ]; then
+            if { [ "$DISTRO_MAJOR_VERSION" -eq 9 ] && [ "$DISTRO_MINOR_VERSION" -lt 01 ]; } || \
+                [ "$DISTRO_MAJOR_VERSION" -lt 9 ]; then
                 echoerror "Versions lower than FreeBSD 9.1 are not supported."
                 exit 1
             fi
@@ -1727,7 +1724,7 @@ elif [ "${DISTRO_NAME_L}" = "debian" ]; then
   __debian_codename_translation
 fi
 
-if ([ "$(echo "${DISTRO_NAME_L}" | grep -E '(debian|ubuntu|centos|red_hat|oracle|scientific|amazon)')" = "" ] && [ "$ITYPE" = "stable" ] && [ "$STABLE_REV" != "latest" ]); then
+if [ "$(echo "${DISTRO_NAME_L}" | grep -E '(debian|ubuntu|centos|red_hat|oracle|scientific|amazon)')" = "" ] && [ "$ITYPE" = "stable" ] && [ "$STABLE_REV" != "latest" ]; then
     echoerror "${DISTRO_NAME} does not have major version pegged packages support"
     exit 1
 fi
@@ -1742,13 +1739,13 @@ if [ "${ITYPE}" = "testing" ]; then
 fi
 
 # Only Ubuntu has support for installing to virtualenvs
-if ([ "${DISTRO_NAME_L}" != "ubuntu" ] && [ "$_VIRTUALENV_DIR" != "null" ]); then
+if [ "${DISTRO_NAME_L}" != "ubuntu" ] && [ "$_VIRTUALENV_DIR" != "null" ]; then
     echoerror "${DISTRO_NAME} does not have -V support"
     exit 1
 fi
 
 # Only Ubuntu has support for pip installing all packages
-if ([ "${DISTRO_NAME_L}" != "ubuntu" ] && [ $_PIP_ALL -eq $BS_TRUE ]); then
+if [ "${DISTRO_NAME_L}" != "ubuntu" ] && [ $_PIP_ALL -eq $BS_TRUE ]; then
     echoerror "${DISTRO_NAME} does not have -a support"
     exit 1
 fi
@@ -1943,8 +1940,7 @@ __git_clone_and_checkout() {
         # HEAD; instead it will simply reset to itself.  Check the ref to see
         # if it is a branch name, check out the branch, and pull in the
         # changes.
-        git branch -a | grep -q "${GIT_REV}"
-        if [ $? -eq 0 ]; then
+        if git branch -a | grep -q "${GIT_REV}"; then
             echodebug "Rebasing the cloned repository branch"
             git pull --rebase || return 1
         fi
@@ -1967,8 +1963,7 @@ __git_clone_and_checkout() {
             if [ "$(git clone 2>&1 | grep 'single-branch')" != "" ]; then
                 # The "--single-branch" option is supported, attempt shallow cloning
                 echoinfo "Attempting to shallow clone $GIT_REV from Salt's repository ${_SALT_REPO_URL}"
-                git clone --depth 1 --branch "$GIT_REV" "$_SALT_REPO_URL" "$__SALT_CHECKOUT_REPONAME"
-                if [ $? -eq 0 ]; then
+                if git clone --depth 1 --branch "$GIT_REV" "$_SALT_REPO_URL" "$__SALT_CHECKOUT_REPONAME"; then
                     # shellcheck disable=SC2164
                     cd "${_SALT_GIT_CHECKOUT_DIR}"
                     __SHALLOW_CLONE=$BS_TRUE
@@ -2265,9 +2260,7 @@ __check_services_upstart() {
     echodebug "Checking if service ${servicename} is enabled"
 
     # Check if service is enabled to start at boot
-    initctl list | grep "${servicename}" > /dev/null 2>&1
-
-    if [ $? -eq 0 ]; then
+    if initctl list | grep "${servicename}" > /dev/null 2>&1; then
         echodebug "Service ${servicename} is enabled"
         return 0
     else
@@ -2921,8 +2914,7 @@ install_ubuntu_restart_daemons() {
         if [ -f /bin/systemctl ] && [ "$DISTRO_MAJOR_VERSION" -ge 16 ]; then
             echodebug "There's systemd support while checking salt-$fname"
             systemctl stop salt-$fname > /dev/null 2>&1
-            systemctl start salt-$fname.service
-            [ $? -eq 0 ] && continue
+            systemctl start salt-$fname.service && continue
             # We failed to start the service, let's test the SysV code below
             echodebug "Failed to start salt-$fname using systemd"
         fi
@@ -2930,13 +2922,11 @@ install_ubuntu_restart_daemons() {
         if [ -f /sbin/initctl ]; then
             echodebug "There's upstart support while checking salt-$fname"
 
-            status salt-$fname 2>/dev/null | grep -q running
-            if [ $? -eq 0 ]; then
+            if status salt-$fname 2>/dev/null | grep -q running; then
                 stop salt-$fname || (echodebug "Failed to stop salt-$fname" && return 1)
             fi
 
-            start salt-$fname
-            [ $? -eq 0 ] && continue
+            start salt-$fname && continue
             # We failed to start the service, let's test the SysV code below
             echodebug "Failed to start salt-$fname using Upstart"
         fi
@@ -3310,7 +3300,7 @@ install_debian_git_post() {
         # Configure SystemD for Debian 8 "Jessie" and later
         if [ -f /bin/systemctl ]; then
             if [ ! -f /lib/systemd/system/salt-${fname}.service ] || \
-                ([ -f /lib/systemd/system/salt-${fname}.service ] && [ $_FORCE_OVERWRITE -eq $BS_TRUE ]); then
+                { [ -f /lib/systemd/system/salt-${fname}.service ] && [ $_FORCE_OVERWRITE -eq $BS_TRUE ]; }; then
                 if [ -f "${_SALT_GIT_CHECKOUT_DIR}/pkg/salt-${fname}.service" ]; then
                     __copyfile "${_SALT_GIT_CHECKOUT_DIR}/pkg/salt-${fname}.service" /lib/systemd/system
                     __copyfile "${_SALT_GIT_CHECKOUT_DIR}/pkg/salt-${fname}.environment" "/etc/default/salt-${fname}"
@@ -3329,7 +3319,7 @@ install_debian_git_post() {
 
         # Install initscripts for Debian 7 "Wheezy"
         elif [ ! -f "/etc/init.d/salt-$fname" ] || \
-            ([ -f "/etc/init.d/salt-$fname" ] && [ "$_FORCE_OVERWRITE" -eq $BS_TRUE ]); then
+            { [ -f "/etc/init.d/salt-$fname" ] && [ "$_FORCE_OVERWRITE" -eq $BS_TRUE ]; }; then
             if [ -f "${_SALT_GIT_CHECKOUT_DIR}/pkg/salt-$fname.init" ]; then
                 __copyfile "${_SALT_GIT_CHECKOUT_DIR}/pkg/salt-${fname}.init" "/etc/init.d/salt-${fname}"
                 __copyfile "${_SALT_GIT_CHECKOUT_DIR}/pkg/salt-${fname}.environment" "/etc/default/salt-${fname}"
@@ -3579,8 +3569,7 @@ __install_epel_repository() {
     fi
 
     # Check if epel repo is already enabled and flag it accordingly
-    yum repolist | grep -q "^[!]\\?${_EPEL_REPO}/"
-    if [ $? -eq 0 ]; then
+    if yum repolist | grep -q "^[!]\\?${_EPEL_REPO}/"; then
         _EPEL_REPOS_INSTALLED=$BS_TRUE
         return 0
     fi
@@ -3844,13 +3833,13 @@ install_centos_git_post() {
 
         if [ -f /bin/systemctl ]; then
             if [ ! -f "/usr/lib/systemd/system/salt-${fname}.service" ] || \
-                ([ -f "/usr/lib/systemd/system/salt-${fname}.service" ] && [ "$_FORCE_OVERWRITE" -eq $BS_TRUE ]); then
+                { [ -f "/usr/lib/systemd/system/salt-${fname}.service" ] && [ "$_FORCE_OVERWRITE" -eq $BS_TRUE ]; }; then
                 __copyfile "${_SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-${fname}.service" /usr/lib/systemd/system
             fi
 
             SYSTEMD_RELOAD=$BS_TRUE
         elif [ ! -f "/etc/init.d/salt-$fname" ] || \
-            ([ -f "/etc/init.d/salt-$fname" ] && [ "$_FORCE_OVERWRITE" -eq $BS_TRUE ]); then
+            { [ -f "/etc/init.d/salt-$fname" ] && [ "$_FORCE_OVERWRITE" -eq $BS_TRUE ]; }; then
             __copyfile "${_SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-${fname}" /etc/init.d
             chmod +x /etc/init.d/salt-${fname}
         fi
@@ -3879,8 +3868,7 @@ install_centos_restart_daemons() {
 
         if [ -f /sbin/initctl ] && [ -f /etc/init/salt-${fname}.conf ]; then
             # We have upstart support and upstart knows about our service
-            /sbin/initctl status salt-$fname > /dev/null 2>&1
-            if [ $? -ne 0 ]; then
+            if ! /sbin/initctl status salt-$fname > /dev/null 2>&1; then
                 # Everything is in place and upstart gave us an error code? Fail!
                 return 1
             fi
@@ -3888,9 +3876,8 @@ install_centos_restart_daemons() {
             # upstart knows about this service.
             # Let's try to stop it, and then start it
             /sbin/initctl stop salt-$fname > /dev/null 2>&1
-            /sbin/initctl start salt-$fname > /dev/null 2>&1
             # Restart service
-            if [ $? -ne 0 ]; then
+            if ! /sbin/initctl start salt-$fname > /dev/null 2>&1; then
                 # Failed the restart?!
                 return 1
             fi
@@ -4421,6 +4408,7 @@ install_alpine_linux_post() {
             script_url="${_SALTSTACK_REPO_URL%.git}/raw/develop/pkg/alpine/salt-$fname"
             [ -f "/etc/init.d/salt-$fname" ] || __fetch_url "/etc/init.d/salt-$fname" "$script_url"
 
+            # shellcheck disable=SC2181
             if [ $? -eq 0 ]; then
                 chmod +x "/etc/init.d/salt-$fname"
             else
@@ -5094,7 +5082,7 @@ install_freebsd_11_stable() {
 install_freebsd_git() {
 
     # /usr/local/bin/python2 in FreeBSD is a symlink to /usr/local/bin/python2.7
-    __PYTHON_PATH=$(readlink -f "$(which python2)")
+    __PYTHON_PATH=$(readlink -f "$(command -v python2)")
     __ESCAPED_PYTHON_PATH=$(echo "${__PYTHON_PATH}" | sed 's/\//\\\//g')
 
     # Install from git
@@ -5563,6 +5551,7 @@ install_opensuse_stable_deps() {
     fi
 
     __zypper --gpg-auto-import-keys refresh
+    # shellcheck disable=SC2181
     if [ $? -ne 0 ] && [ $? -ne 4 ]; then
         # If the exit code is not 0, and it's not 4 (failed to update a
         # repository) return a failure. Otherwise continue.
@@ -5699,7 +5688,8 @@ install_opensuse_git_post() {
         if [ -f /bin/systemctl ]; then
             use_usr_lib=$BS_FALSE
 
-            if [ "${DISTRO_MAJOR_VERSION}" -gt 13 ] || ([ "${DISTRO_MAJOR_VERSION}" -eq 13 ] && [ "${DISTRO_MINOR_VERSION}" -ge 2 ]); then
+            if [ "${DISTRO_MAJOR_VERSION}" -gt 13 ] || \
+                { [ "${DISTRO_MAJOR_VERSION}" -eq 13 ] && [ "${DISTRO_MINOR_VERSION}" -ge 2 ]; }; then
                 use_usr_lib=$BS_TRUE
             fi
 
@@ -6438,7 +6428,7 @@ preseed_master() {
     SEED_DEST="$_PKI_DIR/master/minions"
     [ -d "$SEED_DEST" ] || (mkdir -p "$SEED_DEST" && chmod 700 "$SEED_DEST") || return 1
 
-    for keyfile in $_TEMP_KEYS_DIR/*; do
+    for keyfile in "$_TEMP_KEYS_DIR"/*; do
         keyfile=$(basename "${keyfile}")
         src_keyfile="${_TEMP_KEYS_DIR}/${keyfile}"
         dst_keyfile="${SEED_DEST}/${keyfile}"
@@ -6655,8 +6645,7 @@ fi
 if [ ${_NO_DEPS} -eq $BS_FALSE ] && [ $_CONFIG_ONLY -eq $BS_FALSE ]; then
     # Only execute function is not in config mode only
     echoinfo "Running ${DEPS_INSTALL_FUNC}()"
-    $DEPS_INSTALL_FUNC
-    if [ $? -ne 0 ]; then
+    if ! ${DEPS_INSTALL_FUNC}; then
         echoerror "Failed to run ${DEPS_INSTALL_FUNC}()!!!"
         exit 1
     fi
@@ -6680,8 +6669,7 @@ if [ "$_CUSTOM_MASTER_CONFIG" != "null" ] || [ "$_CUSTOM_MINION_CONFIG" != "null
     if [ ${_NO_DEPS} -eq $BS_FALSE ] && [ $_CONFIG_ONLY -eq $BS_TRUE ]; then
         # Execute function to satisfy dependencies for configuration step
         echoinfo "Running ${DEPS_INSTALL_FUNC}()"
-        $DEPS_INSTALL_FUNC
-        if [ $? -ne 0 ]; then
+        if ! ${DEPS_INSTALL_FUNC}; then
             echoerror "Failed to run ${DEPS_INSTALL_FUNC}()!!!"
             exit 1
         fi
@@ -6691,8 +6679,7 @@ fi
 # Configure Salt
 if [ "$CONFIG_SALT_FUNC" != "null" ] && [ "$_TEMP_CONFIG_DIR" != "null" ]; then
     echoinfo "Running ${CONFIG_SALT_FUNC}()"
-    $CONFIG_SALT_FUNC
-    if [ $? -ne 0 ]; then
+    if ! ${CONFIG_SALT_FUNC}; then
         echoerror "Failed to run ${CONFIG_SALT_FUNC}()!!!"
         exit 1
     fi
@@ -6715,8 +6702,7 @@ fi
 # Pre-seed master keys
 if [ "$PRESEED_MASTER_FUNC" != "null" ] && [ "$_TEMP_KEYS_DIR" != "null" ]; then
     echoinfo "Running ${PRESEED_MASTER_FUNC}()"
-    $PRESEED_MASTER_FUNC
-    if [ $? -ne 0 ]; then
+    if ! ${PRESEED_MASTER_FUNC}; then
         echoerror "Failed to run ${PRESEED_MASTER_FUNC}()!!!"
         exit 1
     fi
@@ -6726,8 +6712,7 @@ fi
 if [ "$_CONFIG_ONLY" -eq $BS_FALSE ]; then
     # Only execute function is not in config mode only
     echoinfo "Running ${INSTALL_FUNC}()"
-    $INSTALL_FUNC
-    if [ $? -ne 0 ]; then
+    if ! ${INSTALL_FUNC}; then
         echoerror "Failed to run ${INSTALL_FUNC}()!!!"
         exit 1
     fi
@@ -6736,8 +6721,7 @@ fi
 # Run any post install function. Only execute function if not in config mode only
 if [ "$POST_INSTALL_FUNC" != "null" ] && [ "$_CONFIG_ONLY" -eq $BS_FALSE ]; then
     echoinfo "Running ${POST_INSTALL_FUNC}()"
-    $POST_INSTALL_FUNC
-    if [ $? -ne 0 ]; then
+    if ! ${POST_INSTALL_FUNC}; then
         echoerror "Failed to run ${POST_INSTALL_FUNC}()!!!"
         exit 1
     fi
@@ -6746,8 +6730,7 @@ fi
 # Run any check services function, Only execute function if not in config mode only
 if [ "$CHECK_SERVICES_FUNC" != "null" ] && [ "$_CONFIG_ONLY" -eq $BS_FALSE ]; then
     echoinfo "Running ${CHECK_SERVICES_FUNC}()"
-    $CHECK_SERVICES_FUNC
-    if [ $? -ne 0 ]; then
+    if ! ${CHECK_SERVICES_FUNC}; then
         echoerror "Failed to run ${CHECK_SERVICES_FUNC}()!!!"
         exit 1
     fi
@@ -6758,8 +6741,7 @@ if [ "$STARTDAEMONS_INSTALL_FUNC" != "null" ] && [ ${_START_DAEMONS} -eq $BS_TRU
     echoinfo "Running ${STARTDAEMONS_INSTALL_FUNC}()"
     echodebug "Waiting ${_SLEEP} seconds for processes to settle before checking for them"
     sleep ${_SLEEP}
-    $STARTDAEMONS_INSTALL_FUNC
-    if [ $? -ne 0 ]; then
+    if ! ${STARTDAEMONS_INSTALL_FUNC}; then
         echoerror "Failed to run ${STARTDAEMONS_INSTALL_FUNC}()!!!"
         exit 1
     fi
@@ -6770,8 +6752,7 @@ if [ "$DAEMONS_RUNNING_FUNC" != "null" ] && [ ${_START_DAEMONS} -eq $BS_TRUE ]; 
     echoinfo "Running ${DAEMONS_RUNNING_FUNC}()"
     echodebug "Waiting ${_SLEEP} seconds for processes to settle before checking for them"
     sleep ${_SLEEP}  # Sleep a little bit to let daemons start
-    $DAEMONS_RUNNING_FUNC
-    if [ $? -ne 0 ]; then
+    if ! ${DAEMONS_RUNNING_FUNC}; then
         echoerror "Failed to run ${DAEMONS_RUNNING_FUNC}()!!!"
 
         for fname in api master minion syndic; do

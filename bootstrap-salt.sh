@@ -1089,8 +1089,12 @@ __gather_linux_system_info() {
                         n="Debian"
                         v=$(__derive_debian_numeric_version "$v")
                         ;;
-                    sles|opensuse  )
+                    sles  )
                         n="SUSE"
+                        v="${rv}"
+                        ;;
+                    opensuse-leap  )
+                        n="opensuse"
                         v="${rv}"
                         ;;
                     *           )

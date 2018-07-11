@@ -75,17 +75,17 @@ node ('bootstrap') {
         checkstyle pattern: '**/checkstyle.xml'
         archiveArtifacts artifacts: '**/checkstyle.xml'
     }
-    if (env.CHANGE_ID) {
-        // Running for a PR only runs against 4 random distros from a shorter list
-        stage('kitchen-pr') {
-            parallel prSetupRuns
-        }
-    } else {
-        // If we're not running for a pr we run *everything*
-        stage('kitchen-all') {
-            parallel setupRuns
-        }
-    }
+    // if (env.CHANGE_ID) {
+    //     // Running for a PR only runs against 4 random distros from a shorter list
+    //     stage('kitchen-pr') {
+    //         parallel prSetupRuns
+    //     }
+    // } else {
+    //     // If we're not running for a pr we run *everything*
+    //     stage('kitchen-all') {
+    //         parallel setupRuns
+    //     }
+    // }
 }
 
 /*

@@ -257,7 +257,7 @@ Red Hat family
 - Amazon Linux 2012.3 and later
 - CentOS 6/7
 - Cloud Linux 6/7
-- Fedora 26/27/28 (install latest stable from standard repositories)
+- Fedora 27/28 (install latest stable from standard repositories)
 - Oracle Linux 6/7
 - Red Hat Enterprise Linux 6/7
 - Scientific Linux 6/7

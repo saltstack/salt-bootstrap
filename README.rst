@@ -289,6 +289,9 @@ release instead.
 For example, when installing Salt on Ubuntu 17.10, the bootstrap script will setup the repository
 for Ubuntu 16.04 from `SaltStack's Ubuntu repository`_ and install the 16.04 packages.
 
+Non-LTS Ubuntu releases are not supported once the release reaches End-of-Life as defined by
+`Ubuntu's release schedule`_.
+
 
 Other Linux distributions
 ~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -401,6 +404,7 @@ Salt components, custom configurations, and even `pre-accepted Minion keys`_ alr
 .. _`SaltStack's corporate repository`: https://repo.saltstack.com/
 .. _`SaltStack's Debian repository`: http://repo.saltstack.com/#debian
 .. _`SaltStack's Ubuntu repository`: http://repo.saltstack.com/#ubuntu
+.. _`Ubuntu's release schedule`: https://wiki.ubuntu.com/Releases
 .. _Vagrant: http://www.vagrantup.com
 
 

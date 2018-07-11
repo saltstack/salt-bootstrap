@@ -1382,9 +1382,6 @@ __ubuntu_codename_translation() {
         "16")
             DISTRO_CODENAME="xenial"
             ;;
-        "17")
-            DISTRO_CODENAME="artful"
-            ;;
         "18")
             DISTRO_CODENAME="bionic"
             ;;
@@ -1506,11 +1503,11 @@ __check_end_of_life_versions() {
             #  = 14.10
             #  = 15.04, 15.10
             #  = 16.10
-            #  = 17.04
+            #  = 17.04, 17.10
             if [ "$DISTRO_MAJOR_VERSION" -lt 14 ] || \
                 [ "$DISTRO_MAJOR_VERSION" -eq 15 ] || \
-                { [ "$DISTRO_MAJOR_VERSION" -eq 17 ] && [ "$DISTRO_MINOR_VERSION" -eq 04 ]; } || \
-                { [ "$DISTRO_MAJOR_VERSION" -lt 17 ] && [ "$DISTRO_MINOR_VERSION" -eq 10 ]; }; then
+                [ "$DISTRO_MAJOR_VERSION" -eq 17 ] || \
+                { [ "$DISTRO_MAJOR_VERSION" -eq 16 ] && [ "$DISTRO_MINOR_VERSION" -eq 10 ]; }; then
                 echoerror "End of life distributions are not supported."
                 echoerror "Please consider upgrading to the next stable. See:"
                 echoerror "    https://wiki.ubuntu.com/Releases"
@@ -2576,11 +2573,7 @@ __enable_universe_repository() {
 
 __install_saltstack_ubuntu_repository() {
     # Workaround for latest non-LTS ubuntu
-    if [ "$DISTRO_MAJOR_VERSION" -eq 17 ]; then
-        echowarn "Non-LTS Ubuntu detected, but stable packages requested. Trying packages for 16.04 LTS release. You may experience problems."
-        UBUNTU_VERSION=16.04
-        UBUNTU_CODENAME="xenial"
-    elif [ "$DISTRO_MAJOR_VERSION" -gt 18 ]; then
+    if [ "$DISTRO_MAJOR_VERSION" -gt 18 ]; then
         echowarn "Non-LTS Ubuntu detected, but stable packages requested. Trying packages for latest LTS release. You may experience problems."
         UBUNTU_VERSION=18.04
         UBUNTU_CODENAME="bionic"

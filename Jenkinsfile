@@ -72,7 +72,7 @@ node ('bootstrap') {
         echo "${env.CHANGE_URL}"
     }
     stage('shellcheck') {
-        sh 'shellcheck -s sh -f checkstyle bootstrap-salt.sh | tee checkstyle.xml'
+        sh 'stack exec -- shellcheck -s sh -f checkstyle bootstrap-salt.sh | tee checkstyle.xml'
         checkstyle pattern: '**/checkstyle.xml'
         archiveArtifacts artifacts: '**/checkstyle.xml'
     }

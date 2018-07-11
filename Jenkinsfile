@@ -71,21 +71,21 @@ def prSetupRuns = prDistroversions.collectEntries {
 node ('bootstrap') {
     stage('checkout') { checkout scm }
     stage('shellcheck') {
-        sh 'shellcheck -s sh -f checkstyle bootstrap-salt.sh | tee checkstyle.xml'
+        sh 'stack exec -- shellcheck -s sh -f checkstyle bootstrap-salt.sh | tee checkstyle.xml'
         checkstyle pattern: '**/checkstyle.xml'
         archiveArtifacts artifacts: '**/checkstyle.xml'
     }
-    if (env.CHANGE_ID) {
-        // Running for a PR only runs against 4 random distros from a shorter list
-        stage('kitchen-pr') {
-            parallel prSetupRuns
-        }
-    } else {
-        // If we're not running for a pr we run *everything*
-        stage('kitchen-all') {
-            parallel setupRuns
-        }
-    }
+    // if (env.CHANGE_ID) {
+    //     // Running for a PR only runs against 4 random distros from a shorter list
+    //     stage('kitchen-pr') {
+    //         parallel prSetupRuns
+    //     }
+    // } else {
+    //     // If we're not running for a pr we run *everything*
+    //     stage('kitchen-all') {
+    //         parallel setupRuns
+    //     }
+    // }
 }
 
 /*

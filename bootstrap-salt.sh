@@ -457,6 +457,8 @@ shift $((OPTIND-1))
 # Define our logging file and pipe paths
 LOGFILE="/tmp/$( echo "$__ScriptName" | sed s/.sh/.log/g )"
 LOGPIPE="/tmp/$( echo "$__ScriptName" | sed s/.sh/.logpipe/g )"
+# Ensure no residual pipe exists
+rm "$LOGPIPE" 2>/dev/null
 
 # Create our logging pipe
 # On FreeBSD we have to use mkfifo instead of mknod

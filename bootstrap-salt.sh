@@ -5537,7 +5537,8 @@ __zypper_install() {
     fi
 }
 
-install_opensuse_stable_deps() {
+__opensuse_prep_install() {
+    # DRY function for common installation preparatory steps for SUSE
     if [ $_DISABLE_REPOS -eq $BS_FALSE ]; then
         # Is the repository already known
         __set_suse_pkg_repo
@@ -5546,6 +5547,7 @@ install_opensuse_stable_deps() {
     fi
 
     __zypper --gpg-auto-import-keys refresh
+
     # shellcheck disable=SC2181
     if [ $? -ne 0 ] && [ $? -ne 4 ]; then
         # If the exit code is not 0, and it's not 4 (failed to update a
@@ -5553,13 +5555,17 @@ install_opensuse_stable_deps() {
         return 1
     fi
 
+    if [ "$_UPGRADE_SYS" -eq $BS_TRUE ]; then
+        __zypper --gpg-auto-import-keys update || return 1
+    fi
+}
+
+install_opensuse_stable_deps() {
+    __opensuse_prep_install || return 1
+
     if [ "$DISTRO_MAJOR_VERSION" -eq 12 ] && [ "$DISTRO_MINOR_VERSION" -eq 3 ]; then
         # Because patterns-openSUSE-minimal_base-conflicts conflicts with python, lets remove the first one
         __zypper remove patterns-openSUSE-minimal_base-conflicts
-    fi
-
-    if [ "$_UPGRADE_SYS" -eq $BS_TRUE ]; then
-        __zypper --gpg-auto-import-keys update || return 1
     fi
 
     # YAML module is used for generating custom master/minion configs
@@ -5759,22 +5765,110 @@ install_opensuse_check_services() {
 
 #######################################################################################################################
 #
+#   openSUSE Leap 15
+#
+
+install_opensuse_15_stable_deps() {
+    __opensuse_prep_install || return 1
+
+    # SUSE only packages Salt for Python 3 on Leap 15
+    # Py3 is the default bootstrap install for Leap 15
+    # However, git installs might specify "-x python2"
+    if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 2 ]; then
+        PY_PKG_VER=2
+    else
+        PY_PKG_VER=3
+    fi
+
+    # YAML module is used for generating custom master/minion configs
+    # requests is still used by many salt modules
+    __PACKAGES="python${PY_PKG_VER}-PyYAML python${PY_PKG_VER}-requests"
+
+    # shellcheck disable=SC2086
+    __zypper_install ${__PACKAGES} || return 1
+
+    if [ "${_EXTRA_PACKAGES}" != "" ]; then
+        echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
+        # shellcheck disable=SC2086
+        __zypper_install ${_EXTRA_PACKAGES} || return 1
+    fi
+
+    return 0
+}
+
+install_opensuse_15_git_deps() {
+    install_opensuse_15_stable_deps || return 1
+
+    if ! __check_command_exists git; then
+        __zypper_install git  || return 1
+    fi
+
+    __git_clone_and_checkout || return 1
+
+    # Py3 is the default bootstrap install for Leap 15
+    # However, git installs might specify "-x python2"
+    if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 2 ]; then
+        PY_PKG_VER=2
+
+        # This is required by some of the python2 packages below
+        __PACKAGES="libpython2_7-1_0"
+    else
+        PY_PKG_VER=3
+        __PACKAGES=""
+    fi
+
+    __PACKAGES="${__PACKAGES} libzmq5 python${PY_PKG_VER}-Jinja2 python${PY_PKG_VER}-msgpack"
+    __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-pycrypto python${PY_PKG_VER}-pyzmq"
+
+    if [ -f "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" ]; then
+        # We're on the develop branch, install whichever tornado is on the requirements file
+        __REQUIRED_TORNADO="$(grep tornado "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt")"
+        if [ "${__REQUIRED_TORNADO}" != "" ]; then
+            __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
+        fi
+    fi
+
+    if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
+        __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-apache-libcloud"
+    fi
+
+    # shellcheck disable=SC2086
+    __zypper_install ${__PACKAGES} || return 1
+
+    # Let's trigger config_salt()
+    if [ "$_TEMP_CONFIG_DIR" = "null" ]; then
+        _TEMP_CONFIG_DIR="${_SALT_GIT_CHECKOUT_DIR}/conf/"
+        CONFIG_SALT_FUNC="config_salt"
+    fi
+
+    return 0
+}
+
+install_opensuse_15_git() {
+
+    # Py3 is the default bootstrap install for Leap 15
+    if [ -n "$_PY_EXE" ]; then
+        _PYEXE=${_PY_EXE}
+    else
+        _PYEXE=python3
+    fi
+
+    ${_PYEXE} setup.py ${SETUP_PY_INSTALL_ARGS} install --prefix=/usr || return 1
+    return 0
+}
+
+#
+#   End of openSUSE Leap 15
+#
+#######################################################################################################################
+
+#######################################################################################################################
+#
 #   SUSE Enterprise 12
 #
 
 install_suse_12_stable_deps() {
-    if [ $_DISABLE_REPOS -eq $BS_FALSE ]; then
-        # Is the repository already known
-        __set_suse_pkg_repo
-        # Check zypper repos and refresh if necessary
-        __check_and_refresh_suse_pkg_repo
-    fi
-
-    __zypper --gpg-auto-import-keys refresh || return 1
-
-    if [ "$_UPGRADE_SYS" -eq $BS_TRUE ]; then
-        __zypper --gpg-auto-import-keys update || return 1
-    fi
+    __opensuse_prep_install || return 1
 
     # YAML module is used for generating custom master/minion configs
     # requests is still used by many salt modules
@@ -5792,7 +5886,6 @@ install_suse_12_stable_deps() {
     # we want to install, even with --non-interactive.
     # Let's try to install the higher version first and then the lower one in case of failure
     __zypper_install 'python-M2Crypto>=0.22' || __zypper_install 'python-M2Crypto>=0.21' || return 1
-
 
     if [ "${_EXTRA_PACKAGES}" != "" ]; then
         echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
@@ -5877,18 +5970,7 @@ install_suse_12_restart_daemons() {
 #
 
 install_suse_11_stable_deps() {
-    if [ $_DISABLE_REPOS -eq $BS_FALSE ]; then
-        # Is the repository already known
-        __set_suse_pkg_repo
-        # Check zypper repos and refresh if necessary
-        __check_and_refresh_suse_pkg_repo
-    fi
-
-    __zypper --gpg-auto-import-keys refresh || return 1
-
-    if [ "$_UPGRADE_SYS" -eq $BS_TRUE ]; then
-        __zypper --gpg-auto-import-keys update || return 1
-    fi
+    __opensuse_prep_install || return 1
 
     # YAML module is used for generating custom master/minion configs
     __PACKAGES="python-PyYAML"

@@ -1526,9 +1526,9 @@ __check_end_of_life_versions() {
             # openSUSE versions not supported
             #
             #  <= 13.X
-            #  <= 42.1
-            if [ "$DISTRO_MAJOR_VERSION" -le 13 ] || \
-                { [ "$DISTRO_MAJOR_VERSION" -eq 42 ] && [ "$DISTRO_MINOR_VERSION" -le 1 ]; }; then
+            #  <= 42.2
+            if [ "$DISTRO_MAJOR_VERSION" -lt 15 ] || \
+                { [ "$DISTRO_MAJOR_VERSION" -eq 42 ] && [ "$DISTRO_MINOR_VERSION" -le 2 ]; }; then
                 echoerror "End of life distributions are not supported."
                 echoerror "Please consider upgrading to the next stable. See:"
                 echoerror "    http://en.opensuse.org/Lifetime"
@@ -5473,15 +5473,10 @@ __set_suse_pkg_repo() {
     # Set distro repo variable
     if [ "${DISTRO_MAJOR_VERSION}" -gt 2015 ]; then
         DISTRO_REPO="openSUSE_Tumbleweed"
-    elif [ "${DISTRO_MAJOR_VERSION}" -ge 42 ]; then
+    elif [ "${DISTRO_MAJOR_VERSION}" -ge 42 ] || [ "${DISTRO_MAJOR_VERSION}" -eq 15 ]; then
         DISTRO_REPO="openSUSE_Leap_${DISTRO_MAJOR_VERSION}.${DISTRO_MINOR_VERSION}"
-    elif [ "${DISTRO_MAJOR_VERSION}" -lt 42 ]; then
-        case ${DISTRO_MAJOR_VERSION} in
-        15)  DISTRO_REPO="openSUSE_Leap_${DISTRO_MAJOR_VERSION}.${DISTRO_MINOR_VERSION}"
-             ;;
-        *)   DISTRO_REPO="SLE_${DISTRO_MAJOR_VERSION}_SP${SUSE_PATCHLEVEL}"
-             ;;
-        esac
+    else
+        DISTRO_REPO="SLE_${DISTRO_MAJOR_VERSION}_SP${SUSE_PATCHLEVEL}"
     fi
 
     if [ "$_DOWNSTREAM_PKG_REPO" -eq $BS_TRUE ]; then
@@ -5688,8 +5683,7 @@ install_opensuse_git_post() {
         if [ -f /bin/systemctl ]; then
             use_usr_lib=$BS_FALSE
 
-            if [ "${DISTRO_MAJOR_VERSION}" -gt 13 ] || \
-                { [ "${DISTRO_MAJOR_VERSION}" -eq 13 ] && [ "${DISTRO_MINOR_VERSION}" -ge 2 ]; }; then
+            if [ "${DISTRO_MAJOR_VERSION}" -ge 15 ]; then
                 use_usr_lib=$BS_TRUE
             fi
 

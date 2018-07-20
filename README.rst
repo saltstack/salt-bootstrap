@@ -257,7 +257,7 @@ Red Hat family
 - Amazon Linux 2012.3 and later
 - CentOS 6/7
 - Cloud Linux 6/7
-- Fedora 26/27/28 (install latest stable from standard repositories)
+- Fedora 27/28 (install latest stable from standard repositories)
 - Oracle Linux 6/7
 - Red Hat Enterprise Linux 6/7
 - Scientific Linux 6/7
@@ -266,9 +266,18 @@ Red Hat family
 SUSE family
 ~~~~~~~~~~~
 
-- openSUSE Leap 42.2/42.3
+- openSUSE Leap 15 (see note below)
+- openSUSE Leap 42.3
 - openSUSE Tumbleweed 2015
 - SUSE Linux Enterprise Server 11 SP4, 12 SP2
+
+**NOTE:** Leap 15 installs Python 3 Salt packages by default. Salt is packaged by SUSE, and
+Leap 15 ships with Python 3. Salt with Python 2 can be installed using the the ``-x`` option
+in combination with the ``git`` installation method.
+
+.. code:: console
+
+    sh bootstrap-salt.sh -x python2 git v2018.3.2
 
 
 Ubuntu and derivatives

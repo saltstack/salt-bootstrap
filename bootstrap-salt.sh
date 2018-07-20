@@ -1088,8 +1088,12 @@ __gather_linux_system_info() {
                         n="Debian"
                         v=$(__derive_debian_numeric_version "$v")
                         ;;
-                    sles|opensuse  )
+                    sles  )
                         n="SUSE"
+                        v="${rv}"
+                        ;;
+                    opensuse-leap  )
+                        n="opensuse"
                         v="${rv}"
                         ;;
                     *           )
@@ -1519,9 +1523,9 @@ __check_end_of_life_versions() {
             # openSUSE versions not supported
             #
             #  <= 13.X
-            #  <= 42.1
-            if [ "$DISTRO_MAJOR_VERSION" -le 13 ] || \
-                { [ "$DISTRO_MAJOR_VERSION" -eq 42 ] && [ "$DISTRO_MINOR_VERSION" -le 1 ]; }; then
+            #  <= 42.2
+            if [ "$DISTRO_MAJOR_VERSION" -lt 15 ] || \
+                { [ "$DISTRO_MAJOR_VERSION" -eq 42 ] && [ "$DISTRO_MINOR_VERSION" -le 2 ]; }; then
                 echoerror "End of life distributions are not supported."
                 echoerror "Please consider upgrading to the next stable. See:"
                 echoerror "    http://en.opensuse.org/Lifetime"
@@ -1549,8 +1553,8 @@ __check_end_of_life_versions() {
             ;;
 
         fedora)
-            # Fedora lower than 26 are no longer supported
-            if [ "$DISTRO_MAJOR_VERSION" -lt 26 ]; then
+            # Fedora lower than 27 are no longer supported
+            if [ "$DISTRO_MAJOR_VERSION" -lt 27 ]; then
                 echoerror "End of life distributions are not supported."
                 echoerror "Please consider upgrading to the next stable. See:"
                 echoerror "    https://fedoraproject.org/wiki/Releases"
@@ -3393,14 +3397,8 @@ install_debian_check_services() {
 
 install_fedora_deps() {
 
-    __PACKAGES="libyaml m2crypto PyYAML python-crypto python-jinja2"
+    __PACKAGES="dnf-utils libyaml m2crypto PyYAML python-crypto python-jinja2"
     __PACKAGES="${__PACKAGES} python2-msgpack python2-requests python-zmq"
-
-    if [ "$DISTRO_MAJOR_VERSION" -lt 26 ]; then
-        __PACKAGES="${__PACKAGES} yum-utils"
-    else
-        __PACKAGES="${__PACKAGES} dnf-utils"
-    fi
 
     # shellcheck disable=SC2086
     dnf install -y ${__PACKAGES} || return 1
@@ -5468,15 +5466,10 @@ __set_suse_pkg_repo() {
     # Set distro repo variable
     if [ "${DISTRO_MAJOR_VERSION}" -gt 2015 ]; then
         DISTRO_REPO="openSUSE_Tumbleweed"
-    elif [ "${DISTRO_MAJOR_VERSION}" -ge 42 ]; then
+    elif [ "${DISTRO_MAJOR_VERSION}" -ge 42 ] || [ "${DISTRO_MAJOR_VERSION}" -eq 15 ]; then
         DISTRO_REPO="openSUSE_Leap_${DISTRO_MAJOR_VERSION}.${DISTRO_MINOR_VERSION}"
-    elif [ "${DISTRO_MAJOR_VERSION}" -lt 42 ]; then
-        case ${DISTRO_MAJOR_VERSION} in
-        15)  DISTRO_REPO="openSUSE_Leap_${DISTRO_MAJOR_VERSION}.${DISTRO_MINOR_VERSION}"
-             ;;
-        *)   DISTRO_REPO="SLE_${DISTRO_MAJOR_VERSION}_SP${SUSE_PATCHLEVEL}"
-             ;;
-        esac
+    else
+        DISTRO_REPO="SLE_${DISTRO_MAJOR_VERSION}_SP${SUSE_PATCHLEVEL}"
     fi
 
     if [ "$_DOWNSTREAM_PKG_REPO" -eq $BS_TRUE ]; then
@@ -5537,7 +5530,8 @@ __zypper_install() {
     fi
 }
 
-install_opensuse_stable_deps() {
+__opensuse_prep_install() {
+    # DRY function for common installation preparatory steps for SUSE
     if [ $_DISABLE_REPOS -eq $BS_FALSE ]; then
         # Is the repository already known
         __set_suse_pkg_repo
@@ -5546,6 +5540,7 @@ install_opensuse_stable_deps() {
     fi
 
     __zypper --gpg-auto-import-keys refresh
+
     # shellcheck disable=SC2181
     if [ $? -ne 0 ] && [ $? -ne 4 ]; then
         # If the exit code is not 0, and it's not 4 (failed to update a
@@ -5553,13 +5548,17 @@ install_opensuse_stable_deps() {
         return 1
     fi
 
+    if [ "$_UPGRADE_SYS" -eq $BS_TRUE ]; then
+        __zypper --gpg-auto-import-keys update || return 1
+    fi
+}
+
+install_opensuse_stable_deps() {
+    __opensuse_prep_install || return 1
+
     if [ "$DISTRO_MAJOR_VERSION" -eq 12 ] && [ "$DISTRO_MINOR_VERSION" -eq 3 ]; then
         # Because patterns-openSUSE-minimal_base-conflicts conflicts with python, lets remove the first one
         __zypper remove patterns-openSUSE-minimal_base-conflicts
-    fi
-
-    if [ "$_UPGRADE_SYS" -eq $BS_TRUE ]; then
-        __zypper --gpg-auto-import-keys update || return 1
     fi
 
     # YAML module is used for generating custom master/minion configs
@@ -5683,8 +5682,7 @@ install_opensuse_git_post() {
         if [ -f /bin/systemctl ]; then
             use_usr_lib=$BS_FALSE
 
-            if [ "${DISTRO_MAJOR_VERSION}" -gt 13 ] || \
-                { [ "${DISTRO_MAJOR_VERSION}" -eq 13 ] && [ "${DISTRO_MINOR_VERSION}" -ge 2 ]; }; then
+            if [ "${DISTRO_MAJOR_VERSION}" -ge 15 ]; then
                 use_usr_lib=$BS_TRUE
             fi
 
@@ -5760,22 +5758,110 @@ install_opensuse_check_services() {
 
 #######################################################################################################################
 #
+#   openSUSE Leap 15
+#
+
+install_opensuse_15_stable_deps() {
+    __opensuse_prep_install || return 1
+
+    # SUSE only packages Salt for Python 3 on Leap 15
+    # Py3 is the default bootstrap install for Leap 15
+    # However, git installs might specify "-x python2"
+    if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 2 ]; then
+        PY_PKG_VER=2
+    else
+        PY_PKG_VER=3
+    fi
+
+    # YAML module is used for generating custom master/minion configs
+    # requests is still used by many salt modules
+    __PACKAGES="python${PY_PKG_VER}-PyYAML python${PY_PKG_VER}-requests"
+
+    # shellcheck disable=SC2086
+    __zypper_install ${__PACKAGES} || return 1
+
+    if [ "${_EXTRA_PACKAGES}" != "" ]; then
+        echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
+        # shellcheck disable=SC2086
+        __zypper_install ${_EXTRA_PACKAGES} || return 1
+    fi
+
+    return 0
+}
+
+install_opensuse_15_git_deps() {
+    install_opensuse_15_stable_deps || return 1
+
+    if ! __check_command_exists git; then
+        __zypper_install git  || return 1
+    fi
+
+    __git_clone_and_checkout || return 1
+
+    # Py3 is the default bootstrap install for Leap 15
+    # However, git installs might specify "-x python2"
+    if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 2 ]; then
+        PY_PKG_VER=2
+
+        # This is required by some of the python2 packages below
+        __PACKAGES="libpython2_7-1_0"
+    else
+        PY_PKG_VER=3
+        __PACKAGES=""
+    fi
+
+    __PACKAGES="${__PACKAGES} libzmq5 python${PY_PKG_VER}-Jinja2 python${PY_PKG_VER}-msgpack"
+    __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-pycrypto python${PY_PKG_VER}-pyzmq"
+
+    if [ -f "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" ]; then
+        # We're on the develop branch, install whichever tornado is on the requirements file
+        __REQUIRED_TORNADO="$(grep tornado "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt")"
+        if [ "${__REQUIRED_TORNADO}" != "" ]; then
+            __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
+        fi
+    fi
+
+    if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
+        __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-apache-libcloud"
+    fi
+
+    # shellcheck disable=SC2086
+    __zypper_install ${__PACKAGES} || return 1
+
+    # Let's trigger config_salt()
+    if [ "$_TEMP_CONFIG_DIR" = "null" ]; then
+        _TEMP_CONFIG_DIR="${_SALT_GIT_CHECKOUT_DIR}/conf/"
+        CONFIG_SALT_FUNC="config_salt"
+    fi
+
+    return 0
+}
+
+install_opensuse_15_git() {
+
+    # Py3 is the default bootstrap install for Leap 15
+    if [ -n "$_PY_EXE" ]; then
+        _PYEXE=${_PY_EXE}
+    else
+        _PYEXE=python3
+    fi
+
+    ${_PYEXE} setup.py ${SETUP_PY_INSTALL_ARGS} install --prefix=/usr || return 1
+    return 0
+}
+
+#
+#   End of openSUSE Leap 15
+#
+#######################################################################################################################
+
+#######################################################################################################################
+#
 #   SUSE Enterprise 12
 #
 
 install_suse_12_stable_deps() {
-    if [ $_DISABLE_REPOS -eq $BS_FALSE ]; then
-        # Is the repository already known
-        __set_suse_pkg_repo
-        # Check zypper repos and refresh if necessary
-        __check_and_refresh_suse_pkg_repo
-    fi
-
-    __zypper --gpg-auto-import-keys refresh || return 1
-
-    if [ "$_UPGRADE_SYS" -eq $BS_TRUE ]; then
-        __zypper --gpg-auto-import-keys update || return 1
-    fi
+    __opensuse_prep_install || return 1
 
     # YAML module is used for generating custom master/minion configs
     # requests is still used by many salt modules
@@ -5793,7 +5879,6 @@ install_suse_12_stable_deps() {
     # we want to install, even with --non-interactive.
     # Let's try to install the higher version first and then the lower one in case of failure
     __zypper_install 'python-M2Crypto>=0.22' || __zypper_install 'python-M2Crypto>=0.21' || return 1
-
 
     if [ "${_EXTRA_PACKAGES}" != "" ]; then
         echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
@@ -5878,18 +5963,7 @@ install_suse_12_restart_daemons() {
 #
 
 install_suse_11_stable_deps() {
-    if [ $_DISABLE_REPOS -eq $BS_FALSE ]; then
-        # Is the repository already known
-        __set_suse_pkg_repo
-        # Check zypper repos and refresh if necessary
-        __check_and_refresh_suse_pkg_repo
-    fi
-
-    __zypper --gpg-auto-import-keys refresh || return 1
-
-    if [ "$_UPGRADE_SYS" -eq $BS_TRUE ]; then
-        __zypper --gpg-auto-import-keys update || return 1
-    fi
+    __opensuse_prep_install || return 1
 
     # YAML module is used for generating custom master/minion configs
     __PACKAGES="python-PyYAML"

@@ -72,7 +72,7 @@ node ('bootstrap') {
     stage('checkout') { checkout scm }
     stage('shellcheck') {
         sh 'stack exec -- shellcheck -s sh -f checkstyle bootstrap-salt.sh | tee checkstyle.xml'
-        checkstyle pattern: '**/checkstyle.xml'
+        checkstyle canComputeNew: false, defaultEncoding: '', healthy: '', pattern: '**/checkstyle.xml', unHealthy: '', unstableTotalAll: '0' 
         archiveArtifacts artifacts: '**/checkstyle.xml'
     }
     // if (env.CHANGE_ID) {

@@ -1,4 +1,12 @@
 Version TBD (In Progress on the Develop Branch):
+    * Add opensuse 15 specific installation functions (rallytime) #1263
+    * Remove support for openSUSE Leap 42.2 (rallytime) #1262
+    * Remove support for Fedora 26 (rallytime) #1261
+    * Remove support for Ubuntu 17.10 (rallytime) #1260
+    * Ensure pipe is absent before mkfifo/mknod (noelmcloughlin) #1256
+    * fix for opensuse15 if no lsb_release pkg (noelmcloughlin) #1255
+    * Fix Up ShellCheck errors/warnings for latest version of shellcheck (rallytime) #1253
+    * Remove daily install option on Ubuntu system (icy) #1250
     * Add python 3 support for Ubuntu 18 (rallytime) #1248
     * Return immediately if apt-get fails (icy) #1247
     * Disable shell error about unbound variable during daily install (icy) #1246

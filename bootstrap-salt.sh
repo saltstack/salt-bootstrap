@@ -2577,7 +2577,8 @@ __enable_universe_repository() {
 
 __install_saltstack_ubuntu_repository() {
     # Workaround for latest non-LTS ubuntu
-    if [ "$DISTRO_MAJOR_VERSION" -gt 18 ] || [ "${DISTRO_VERSION}" -eq "18.10" ]; then
+    if [ "$DISTRO_MAJOR_VERSION" -gt 18 ] || \
+        { [ "$DISTRO_MAJOR_VERSION" -eq 18 ] && [ "$DISTRO_MINOR_VERSION" -eq 10 ]; }; then
         echowarn "Non-LTS Ubuntu detected, but stable packages requested. Trying packages for latest LTS release. You may experience problems."
         UBUNTU_VERSION=18.04
         UBUNTU_CODENAME="bionic"

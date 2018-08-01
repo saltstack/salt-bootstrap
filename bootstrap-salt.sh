@@ -1315,6 +1315,7 @@ __check_dpkg_architecture() {
     fi
 
     __REPO_ARCH="$DPKG_ARCHITECTURE"
+    __REPO_ARCH_DEB='deb'
     __return_code=0
 
     case $DPKG_ARCHITECTURE in
@@ -1324,6 +1325,18 @@ __check_dpkg_architecture() {
             __REPO_ARCH="amd64"
             ;;
         "amd64")
+            error_msg=""
+            ;;
+        "arm64")
+            if [ "$_CUSTOM_REPO_URL" != "null" ]; then
+                warn_msg="Support for arm64 is experimental, make sure the custom repository used has the expected structure and contents."
+            else
+                # Saltstack official repository does not yet have arm64 metadata,
+                # use amd64 repositories on arm64, since all pkgs are arch-independent
+                __REPO_ARCH="amd64"
+                __REPO_ARCH_DEB="deb [arch=$__REPO_ARCH]"
+                warn_msg="Support for arm64 packages is experimental and might rely on architecture-independent packages from the amd64 repository."
+            fi
             error_msg=""
             ;;
         "armhf")
@@ -1340,6 +1353,11 @@ __check_dpkg_architecture() {
             ;;
     esac
 
+    if [ "${warn_msg}" != "" ]; then
+        # AArch64: Do not fail at this point, but warn the user about experimental support
+        # See https://github.com/saltstack/salt-bootstrap/issues/1240
+        echowarn "${warn_msg}"
+    fi
     if [ "${error_msg}" != "" ]; then
         echoerror "${error_msg}"
         if [ "$ITYPE" != "git" ]; then
@@ -2611,7 +2629,7 @@ __install_saltstack_ubuntu_repository() {
 
     # SaltStack's stable Ubuntu repository:
     SALTSTACK_UBUNTU_URL="${HTTP_VAL}://${_REPO_URL}/${__PY_VERSION_REPO}/ubuntu/${UBUNTU_VERSION}/${__REPO_ARCH}/${STABLE_REV}"
-    echo "deb $SALTSTACK_UBUNTU_URL $UBUNTU_CODENAME main" > /etc/apt/sources.list.d/saltstack.list
+    echo "$__REPO_ARCH_DEB $SALTSTACK_UBUNTU_URL $UBUNTU_CODENAME main" > /etc/apt/sources.list.d/saltstack.list
 
     __apt_key_fetch "$SALTSTACK_UBUNTU_URL/SALTSTACK-GPG-KEY.pub" || return 1
 
@@ -3010,7 +3028,7 @@ __install_saltstack_debian_repository() {
 
     # amd64 is just a part of repository URI, 32-bit pkgs are hosted under the same location
     SALTSTACK_DEBIAN_URL="${HTTP_VAL}://${_REPO_URL}/${__PY_VERSION_REPO}/debian/${DEBIAN_RELEASE}/${__REPO_ARCH}/${STABLE_REV}"
-    echo "deb $SALTSTACK_DEBIAN_URL $DEBIAN_CODENAME main" > "/etc/apt/sources.list.d/saltstack.list"
+    echo "$__REPO_ARCH_DEB $SALTSTACK_DEBIAN_URL $DEBIAN_CODENAME main" > "/etc/apt/sources.list.d/saltstack.list"
 
     __apt_key_fetch "$SALTSTACK_DEBIAN_URL/SALTSTACK-GPG-KEY.pub" || return 1
 

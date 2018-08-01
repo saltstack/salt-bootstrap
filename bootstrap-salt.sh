@@ -5912,14 +5912,14 @@ install_suse_12_git_deps() {
     install_suse_12_stable_deps || return 1
 
     if ! __check_command_exists git; then
-        __zypper_install git  || return 1
+        __zypper_install git-core  || return 1
     fi
 
     __git_clone_and_checkout || return 1
 
     __PACKAGES=""
     # shellcheck disable=SC2089
-    __PACKAGES="${__PACKAGES} libzmq3 python-Jinja2 python-msgpack-python python-pycrypto"
+    __PACKAGES="${__PACKAGES} libzmq4 python-Jinja2 python-msgpack-python python-pycrypto"
     __PACKAGES="${__PACKAGES} python-pyzmq python-xml"
 
     if [ -f "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" ]; then

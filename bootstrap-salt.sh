@@ -1353,7 +1353,7 @@ __check_dpkg_architecture() {
             ;;
     esac
 
-    if [ "${warn_msg}" != "" ]; then
+    if [ "${warn_msg:-}" != "" ]; then
         # AArch64: Do not fail at this point, but warn the user about experimental support
         # See https://github.com/saltstack/salt-bootstrap/issues/1240
         echowarn "${warn_msg}"

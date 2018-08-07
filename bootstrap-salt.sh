@@ -4723,7 +4723,7 @@ install_arch_linux_git_deps() {
     fi
     pacman -R --noconfirm python2-distribute
     pacman -Su --noconfirm --needed python2-crypto python2-setuptools python2-jinja \
-        python2-m2crypto python2-markupsafe python2-msgpack python2-psutil \
+        python2-m2crypto python2-futures cpython2-markupsafe python2-msgpack python2-psutil \
         python2-pyzmq zeromq python2-requests python2-systemd || return 1
 
     __git_clone_and_checkout || return 1

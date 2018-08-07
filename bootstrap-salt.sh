@@ -3788,8 +3788,10 @@ install_centos_git_deps() {
         fi
 
         if [ -f "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" ]; then
-            for SINGLE_PACKAGE in $_PIP_PACKAGES; do
-                __REQUIRED_VERSION="$(grep "${SINGLE_PACKAGE}" "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt")"
+            # Filter out any commented lines from the requirements file
+            _REQ_LINES="$(grep '^[^#]' "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt")"
+            for SINGLE_PACKAGE in ${_PIP_PACKAGES}; do
+                __REQUIRED_VERSION="$(grep "${SINGLE_PACKAGE}" "${_REQ_LINES}")"
                 if [ "${__REQUIRED_VERSION}" != "" ]; then
                     _PIP_PACKAGES=$(echo "$_PIP_PACKAGES" | sed "s/${SINGLE_PACKAGE}/${__REQUIRED_VERSION}/")
                 fi

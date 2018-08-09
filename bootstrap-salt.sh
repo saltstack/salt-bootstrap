@@ -381,8 +381,8 @@ __usage() {
         a complete overwrite of the file.
     -q  Quiet salt installation from git (setup.py install -q)
     -x  Changes the Python version used to install Salt. Currently, this is only
-        supported on CentOS 7, Debian 9, Ubuntu 16 and CentOS 6. The CentOS 6
-        option only works with git installations.
+        supported on CentOS 6+, Debian 9+, Ubuntu 16+, and Fedora.
+        The Fedora and CentOS 6 options only work with git installations.
     -y  Installs a different python version on host. Currently this has only been
         tested with CentOS 6 and is considered experimental. This will install the
         ius repo on the box if disable repo is false. This must be used in conjunction

@@ -342,10 +342,15 @@ Python 3 Support
 Some distributions support installing Salt to use Python 3 instead of Python 2. The availability of
 this offering, while limited, is as follows:
 
+- CentOS 6
 - CentOS 7
 - Debian 9
+- Fedora
 - Ubuntu 16.04
 - Ubuntu 18.04
+
+The Fedora and CentOS 6 options only support git installations.
+On Fedora 28, PIP installation must be allowed (-P) due to incompatibility with the shipped Tornado library.
 
 Installing the Python 3 packages for Salt is done via the ``-x`` option:
 

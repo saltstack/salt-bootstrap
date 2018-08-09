@@ -3429,8 +3429,8 @@ install_fedora_deps() {
        fi
     fi
 
-    __PACKAGES="dnf-utils ${__PACKAGES} python${PY_PKG_VER}-crypto python${PY_PKG_VER}-requests python${PY_PKG_VER}-zmq"
-    __PACKAGES="${__PACKAGES} libyaml python${PY_PKG_VER}-jinja2 python${PY_PKG_VER}-msgpack"
+    __PACKAGES="${__PACKAGES} dnf-utils libyaml python${PY_PKG_VER}-crypto python${PY_PKG_VER}-jinja2"
+    __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-msgpack python${PY_PKG_VER}-requests python${PY_PKG_VER}-zmq"
 
     # shellcheck disable=SC2086
     dnf install -y ${__PACKAGES} || return 1

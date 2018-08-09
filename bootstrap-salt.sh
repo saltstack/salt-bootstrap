@@ -3509,9 +3509,9 @@ install_fedora_git_deps() {
     __PACKAGES="python${PY_PKG_VER}-systemd"
     if [ "${PY_PKG_VER}" -eq 3 ] && [ "$DISTRO_MAJOR_VERSION" -ge 28 ]; then
         __check_pip_allowed "You need to allow pip based installations (-P) for Tornado <5.0 in order to install Salt on Python 3"
-        # shellcheck disable=SC2039
-        grep tornado "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" | while IFS=$'\n' read -r dep; do
-          "${_PY_EXE}" -m pip install "${dep}" || return 1
+        grep tornado "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" | while IFS='
+'         read -r dep; do
+            "${_PY_EXE}" -m pip install "${dep}" || return 1
         done
     else
         __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"

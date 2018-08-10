@@ -380,9 +380,9 @@ __usage() {
         no ".bak" file will be created as either of those options will force
         a complete overwrite of the file.
     -q  Quiet salt installation from git (setup.py install -q)
-    -x  Changes the Python version used to install Salt. Currently, this is only
-        supported on CentOS 7, Debian 9, Ubuntu 16 and CentOS 6. The CentOS 6
-        option only works with git installations.
+    -x  Changes the Python version used to install Salt.
+        For CentOS 6 git installations python2.7 is supported.
+        Fedora git installation, CentOS 7, Debian 9, Ubuntu 16.04 and 18.04 support python3.
     -y  Installs a different python version on host. Currently this has only been
         tested with CentOS 6 and is considered experimental. This will install the
         ius repo on the box if disable repo is false. This must be used in conjunction
@@ -3415,9 +3415,22 @@ install_debian_check_services() {
 #
 
 install_fedora_deps() {
+    if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 3 ]; then
+        # Packages are named python3-<whatever>
+        PY_PKG_VER=3
+        __PACKAGES="python3-m2crypto python3-PyYAML"
+    else
+        PY_PKG_VER=2
+        __PACKAGES="m2crypto"
+        if [ "$DISTRO_MAJOR_VERSION" -ge 28 ]; then
+          __PACKAGES="${__PACKAGES} python2-pyyaml"
+        else
+          __PACKAGES="${__PACKAGES} PyYAML"
+       fi
+    fi
 
-    __PACKAGES="dnf-utils libyaml m2crypto PyYAML python-crypto python-jinja2"
-    __PACKAGES="${__PACKAGES} python2-msgpack python2-requests python-zmq"
+    __PACKAGES="${__PACKAGES} dnf-utils libyaml python${PY_PKG_VER}-crypto python${PY_PKG_VER}-jinja2"
+    __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-msgpack python${PY_PKG_VER}-requests python${PY_PKG_VER}-zmq"
 
     # shellcheck disable=SC2086
     dnf install -y ${__PACKAGES} || return 1
@@ -3474,6 +3487,12 @@ install_fedora_stable_post() {
 }
 
 install_fedora_git_deps() {
+    if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 3 ]; then
+        # Packages are named python3-<whatever>
+        PY_PKG_VER=3
+    else
+        PY_PKG_VER=2
+    fi
 
     if [ "$_INSECURE_DL" -eq $BS_FALSE ] && [ "${_SALT_REPO_URL%%://*}" = "https" ]; then
         dnf install -y ca-certificates || return 1
@@ -3487,10 +3506,19 @@ install_fedora_git_deps() {
 
     __git_clone_and_checkout || return 1
 
-    __PACKAGES="python2-tornado systemd-python"
+    __PACKAGES="python${PY_PKG_VER}-systemd"
+    if [ "${PY_PKG_VER}" -eq 3 ] && [ "$DISTRO_MAJOR_VERSION" -ge 28 ]; then
+        __check_pip_allowed "You need to allow pip based installations (-P) for Tornado <5.0 in order to install Salt on Python 3"
+        grep tornado "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" | while IFS='
+'         read -r dep; do
+            "${_PY_EXE}" -m pip install "${dep}" || return 1
+        done
+    else
+        __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
+    fi
 
     if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
-        __PACKAGES="${__PACKAGES} python-libcloud python-netaddr"
+        __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-libcloud python${PY_PKG_VER}-netaddr"
     fi
 
     # shellcheck disable=SC2086
@@ -3506,10 +3534,17 @@ install_fedora_git_deps() {
 }
 
 install_fedora_git() {
-    if [ -f "${_SALT_GIT_CHECKOUT_DIR}/salt/syspaths.py" ]; then
-        python setup.py --salt-config-dir="$_SALT_ETC_DIR" --salt-cache-dir="${_SALT_CACHE_DIR}" ${SETUP_PY_INSTALL_ARGS} install || return 1
+    if [ "${_PY_EXE}" != "" ]; then
+        _PYEXE=${_PY_EXE}
+        echoinfo "Using the following python version: ${_PY_EXE} to install salt"
     else
-        python setup.py ${SETUP_PY_INSTALL_ARGS} install || return 1
+        _PYEXE='python2'
+    fi
+
+    if [ -f "${_SALT_GIT_CHECKOUT_DIR}/salt/syspaths.py" ]; then
+        ${_PYEXE} setup.py --salt-config-dir="$_SALT_ETC_DIR" --salt-cache-dir="${_SALT_CACHE_DIR}" ${SETUP_PY_INSTALL_ARGS} install --prefix=/usr || return 1
+    else
+        ${_PYEXE} setup.py ${SETUP_PY_INSTALL_ARGS} install --prefix=/usr || return 1
     fi
     return 0
 }

@@ -1,3 +1,33 @@
+Version TBD (In Progress on the Develop Branch):
+
+Version 2018.08.13:
+    * Fedora Py3 fixes (The-Loeki) #1273
+    * Handle commented lines in the requirements files for pip pkgs (rallytime) #1271
+    * Remove typo: extra 'c' was accidentally added in #1269 (rallytime) #1270
+    * [Arch] Add python2-futures to list of pkgs on git install (rallytime) #1269
+    * Fix undefined variable warn_msg on amd64 (alexandruavadanii) #1268 
+    * SLES12SP changed packages git to git-core and libzmq3 to libzmq4 (mfapouw) #1266
+    * Add opensuse 15 specific installation functions (rallytime) #1263
+    * Remove support for openSUSE Leap 42.2 (rallytime) #1262
+    * Remove support for Fedora 26 (rallytime) #1261
+    * Remove support for Ubuntu 17.10 (rallytime) #1260
+    * Ensure pipe is absent before mkfifo/mknod (noelmcloughlin) #1256
+    * fix for opensuse15 if no lsb_release pkg (noelmcloughlin) #1255
+    * Fix Up ShellCheck errors/warnings for latest version of shellcheck (rallytime) #1253
+    * Remove daily install option on Ubuntu system (icy) #1250
+    * Add python 3 support for Ubuntu 18 (rallytime) #1248
+    * Return immediately if apt-get fails (icy) #1247
+    * Disable shell error about unbound variable during daily install (icy) #1246
+    * OpenSuse_Leap_15.0 saltstack repo support (noelmcloughlin) #1244
+    * Add Python3 package support for Debian 9 (rallytime) #1243
+    * Add Python3 package support for CentOS 7 (rallytime) #1242
+    * Shellcheck fixes found when running latest version (rallytime) #1239
+    * Add Python3 package support for Ubuntu 16.04 (rallytime) #1238
+    * Fix the variable ref from #803 (rallytime) #1229
+    * Add Ubuntu 18.04 support (rallytime) #1228
+    * Call __git_clone_and_checkout directly (jheidbrink) #1226
+    * Fix for silently ignored version argument on CentOS/RHEL (pjcreath) #1210
+
 Version 2018.04.25:
     * Install py-tornado4 for FreeBSD. (abednarik) #1219
     * Remove COPR repos configuration for Fedora (vutny ) #1211

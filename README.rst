@@ -28,6 +28,7 @@ sum** of the downloaded ``bootstrap-salt.sh`` file.
 
 The SHA256 sum of the ``bootstrap-salt.sh`` file, per release, is:
 
+- 2018.04.25: ``e2e3397d6642ba6462174b4723f1b30d04229b75efc099a553e15ea727877dfb``
 - 2017.12.13: ``c127b3aa4a8422f6b81f5b4a40d31d13cec97bf3a39bca9c11a28f24910a6895``
 - 2017.08.17: ``909b4d35696b9867b34b22ef4b60edbc5a0e9f8d1ed8d05f922acb79a02e46e3``
 - 2017.05.24: ``8c42c2e5ad3d4384ddc557da5c214ba3e40c056ca1b758d14a392c1364650e89``
@@ -256,7 +257,7 @@ Red Hat family
 - Amazon Linux 2012.3 and later
 - CentOS 6/7
 - Cloud Linux 6/7
-- Fedora 26/27/28 (install latest stable from standard repositories)
+- Fedora 27/28 (install latest stable from standard repositories)
 - Oracle Linux 6/7
 - Red Hat Enterprise Linux 6/7
 - Scientific Linux 6/7
@@ -265,9 +266,18 @@ Red Hat family
 SUSE family
 ~~~~~~~~~~~
 
-- openSUSE Leap 42.2/42.3
+- openSUSE Leap 15 (see note below)
+- openSUSE Leap 42.3
 - openSUSE Tumbleweed 2015
 - SUSE Linux Enterprise Server 11 SP4, 12 SP2
+
+**NOTE:** Leap 15 installs Python 3 Salt packages by default. Salt is packaged by SUSE, and
+Leap 15 ships with Python 3. Salt with Python 2 can be installed using the the ``-x`` option
+in combination with the ``git`` installation method.
+
+.. code:: console
+
+    sh bootstrap-salt.sh -x python2 git v2018.3.2
 
 
 Ubuntu and derivatives
@@ -275,7 +285,7 @@ Ubuntu and derivatives
 
 - KDE neon (based on Ubuntu 16.04)
 - Linux Mint 17/18
-- Ubuntu 14.04/16.04 and subsequent non-TLS releases (see below)
+- Ubuntu 14.04/16.04/18.04 and subsequent non-LTS releases (see below)
 
 Ubuntu Best Effort Support: Non-LTS Releases
 ********************************************
@@ -285,8 +295,11 @@ repositories are not provided on `SaltStack's Ubuntu repository`_ for the non-LT
 bootstrap script will attempt to install the packages for the most closely related LTS Ubuntu
 release instead.
 
-For example, when installing Salt on Ubuntu 17.10, the bootstrap script will setup the repository
-for Ubuntu 16.04 from `SaltStack's Ubuntu repository`_ and install the 16.04 packages.
+For example, when installing Salt on Ubuntu 18.10, the bootstrap script will setup the repository
+for Ubuntu 18.04 from `SaltStack's Ubuntu repository`_ and install the 18.04 packages.
+
+Non-LTS Ubuntu releases are not supported once the release reaches End-of-Life as defined by
+`Ubuntu's release schedule`_.
 
 
 Other Linux distributions
@@ -309,8 +322,8 @@ UNIX systems
 
 - SmartOS
 
-Unsupported Distro
-------------------
+Unsupported Distributions
+-------------------------
 
 If you are running a Linux distribution that is not supported yet or is not correctly identified,
 please run the following commands and report their output when creating an issue:
@@ -322,6 +335,28 @@ please run the following commands and report their output when creating an issue
 
 For information on how to add support for a currently unsupported distribution, please refer to the
 `Contributing Guidelines`_.
+
+Python 3 Support
+----------------
+
+Some distributions support installing Salt to use Python 3 instead of Python 2. The availability of
+this offering, while limited, is as follows:
+
+- CentOS 7
+- Debian 9
+- Fedora (only git installations)
+- Ubuntu 16.04
+- Ubuntu 18.04
+
+On Fedora 28, PIP installation must be allowed (-P) due to incompatibility with the shipped Tornado library.
+
+Installing the Python 3 packages for Salt is done via the ``-x`` option:
+
+.. code:: console
+
+    sh bootstrap-salt.sh -x python3
+
+See the ``-x`` option for more information.
 
 Testing
 -------
@@ -381,6 +416,7 @@ Salt components, custom configurations, and even `pre-accepted Minion keys`_ alr
 .. _`SaltStack's corporate repository`: https://repo.saltstack.com/
 .. _`SaltStack's Debian repository`: http://repo.saltstack.com/#debian
 .. _`SaltStack's Ubuntu repository`: http://repo.saltstack.com/#ubuntu
+.. _`Ubuntu's release schedule`: https://wiki.ubuntu.com/Releases
 .. _Vagrant: http://www.vagrantup.com
 
 

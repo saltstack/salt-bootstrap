@@ -1,4 +1,12 @@
 Version TBD (In Progress on the Develop Branch):
+
+Version 2018.08.13:
+    * Fedora Py3 fixes (The-Loeki) #1273
+    * Handle commented lines in the requirements files for pip pkgs (rallytime) #1271
+    * Remove typo: extra 'c' was accidentally added in #1269 (rallytime) #1270
+    * [Arch] Add python2-futures to list of pkgs on git install (rallytime) #1269
+    * Fix undefined variable warn_msg on amd64 (alexandruavadanii) #1268 
+    * SLES12SP changed packages git to git-core and libzmq3 to libzmq4 (mfapouw) #1266
     * Add opensuse 15 specific installation functions (rallytime) #1263
     * Remove support for openSUSE Leap 42.2 (rallytime) #1262
     * Remove support for Fedora 26 (rallytime) #1261

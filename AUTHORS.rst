@@ -12,6 +12,7 @@ Adam Wright                 hipikat                adam@hipikat.org
 Alec Koumjian               akoumjian              akoumjian@gmail.com
 Alex Van't Hof              alexvh
 Alexander Krasnukhin        themalkolm             the.malkolm@gmail.com
+Alexandru Avadanii          alexandruavadanii      Alexandru.Avadanii@enea.com
 Alexey                      dmitrievav
 Ali Rizvi-Santiago          arizvisa
 amendlik                    amendlik
@@ -98,6 +99,7 @@ Matthew Mead-Briggs         mattmb
 Matthew Richardson          mrichar1
 Matthew Willson             ixela
 Matthieu Guegan             mguegan
+mfapouw                     mfapouw
 Michael A. Smith            kojiromike             michaels@syapse.com
 Michael Scherer             mscherer
 Michele Bologna             mbologna               michele.bologna@gmail.com

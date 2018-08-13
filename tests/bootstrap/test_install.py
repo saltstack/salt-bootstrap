@@ -270,39 +270,6 @@ class InstallationTestCase(BootstrapTestCase):
             )
         )
 
-    def test_install_daily(self):
-        args = []
-        if requires_pip_based_installations():
-            args.append('-P')
-
-        args.append('daily')
-
-        rc, out, err = self.run_script(
-            args=args, timeout=15 * 60, stream_stds=True
-        )
-        if GRAINS['os'] in ('Ubuntu', 'Trisquel', 'Mint'):
-            self.assert_script_result(
-                'Failed to install daily',
-                0, (rc, out, err)
-            )
-
-            # Try to get the versions report
-            self.assert_script_result(
-                'Failed to get the versions report (\'--versions-report\')',
-                0,
-                self.run_script(
-                    script=None,
-                    args=('salt-minion', '--versions-report'),
-                    timeout=15 * 60,
-                    stream_stds=True
-                )
-            )
-        else:
-            self.assert_script_result(
-                'Although system is not Ubuntu, we managed to install',
-                1, (rc, out, err)
-            )
-
     def test_install_testing(self):
         args = []
         if requires_pip_based_installations():

@@ -39,6 +39,13 @@ platforms:
         - yum install -y upstart
     provisioner:
       salt_bootstrap_options: -MPq -y -x python2.7 -X git %s
+  - name: amazon-1
+    driver_config:
+      image: amazonlinux:1
+      platform: rhel
+      run_command: /sbin/init
+      provision_command:
+        - yum install -y upstart
   - name: ubuntu-18.04
     driver_config:
       run_command: /lib/systemd/systemd
@@ -92,6 +99,7 @@ suites:
     excludes:
       - centos-6
       - fedora
+      - opensuse
   - name: py2-stable-2018.3
     provisioner:
       salt_version: 2018.3

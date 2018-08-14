@@ -13,6 +13,7 @@ provisioner:
   name: salt_solo
   salt_install: bootstrap
   salt_bootstrap_url: bootstrap-salt.sh
+  salt_bootstrap_options: -MPq git %s
   install_after_init_environment: true
   log_level: info
   sudo: true
@@ -37,7 +38,14 @@ platforms:
       provision_command:
         - yum install -y upstart
     provisioner:
-      salt_bootstrap_options: -MPq -y -x python2.7 -X git %s
+      salt_bootstrap_options: -MPq -y -x python2.7 git %s
+  - name: amazon-1
+    driver_config:
+      image: amazonlinux:1
+      platform: rhel
+      run_command: /sbin/init
+      provision_command:
+        - yum install -y upstart
   - name: ubuntu-18.04
     driver_config:
       run_command: /lib/systemd/systemd
@@ -70,34 +78,37 @@ platforms:
       run_command: /usr/lib/systemd/systemd
       provision_command:
         - systemctl enable sshd.service
+
 suites:
   - name: py2-git-2017.7
     provisioner:
       salt_version: 2017.7
-      salt_bootstrap_options: -MPq git %s
   - name: py2-git-2018.3
     provisioner:
       salt_version: 2018.3
-      salt_bootstrap_options: -MPq git %s
   - name: py2-git-fluorine
     provisioner:
       salt_version: fluorine
-      salt_bootstrap_options: -MPq git %s
   - name: py2-git-develop
     provisioner:
       salt_version: develop
-      salt_bootstrap_options: -MPq git %s
   - name: py2-stable-2017.7
     provisioner:
       salt_version: 2017.7
       salt_bootstrap_options: -MP stable %s
     excludes:
+      - arch
       - centos-6
       - fedora
+      - opensuse
   - name: py2-stable-2018.3
     provisioner:
       salt_version: 2018.3
-      salt_bootstrap_options: -MP stable %s
+      salt_bootstrap_options: -MP stable
     excludes:
       - centos-6
 
+verifier:
+  name: shell
+  remote_exec: false
+  command: pytest -v tests/integration/

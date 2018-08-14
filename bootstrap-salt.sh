@@ -3099,7 +3099,7 @@ install_debian_git_deps() {
 
     __PACKAGES="libzmq3 libzmq3-dev lsb-release python-apt python-backports.ssl-match-hostname"
     __PACKAGES="${__PACKAGES} python-crypto python-jinja2 python-msgpack python-m2crypto"
-    __PACKAGES="${__PACKAGES} python-requests python-tornado python-yaml python-zmq python-futures"
+    __PACKAGES="${__PACKAGES} python-requests python-tornado python-yaml python-zmq"
 
     if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
         # Install python-libcloud if asked to
@@ -3140,7 +3140,7 @@ install_debian_8_git_deps() {
 
     __PACKAGES="libzmq3 libzmq3-dev lsb-release python-apt python-crypto python-jinja2"
     __PACKAGES="${__PACKAGES} python-m2crypto python-msgpack python-requests python-systemd"
-    __PACKAGES="${__PACKAGES} python-yaml python-zmq"
+    __PACKAGES="${__PACKAGES} python-yaml python-zmq python-concurrent.futures"
 
     if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
         # Install python-libcloud if asked to
@@ -3211,7 +3211,7 @@ install_debian_9_git_deps() {
         PY_PKG_VER=""
 
         # These packages are PY2-ONLY
-        __PACKAGES="${__PACKAGES} python-backports-abc python-m2crypto"
+        __PACKAGES="${__PACKAGES} python-backports-abc python-m2crypto python-concurrent.futures"
     fi
 
     __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-apt python${PY_PKG_VER}-crypto python${PY_PKG_VER}-jinja2"

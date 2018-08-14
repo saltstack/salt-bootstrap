@@ -32,8 +32,9 @@ matrix:
   allow_failures:
   - env: PLATFORM=ubuntu-1804
   - env: PLATFORM=ubuntu-1604
-  - env: PLATFORM=centos-6
   - env: PLATFORM=debian-8
+  - env: PLATFORM=debian-9
+  - env: PLATFORM=centos-6
 
 sudo: true
 dist: trusty
@@ -50,4 +51,4 @@ script:
 
 after_script:
   - bundle exec kitchen list $PLATFORM
-  - bundle exec kitchen destriy "$PLATFORM"
+  - bundle exec kitchen destroy "$PLATFORM"

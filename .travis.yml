@@ -34,7 +34,7 @@ script:
   # Check shell scripts
   - shellcheck -s sh -f checkstyle bootstrap-salt.sh
   # Run test-kitchen with docker driver:
-  - bundle exec kitchen create -c 10 "$SUITE"
+  - bundle exec kitchen create -l warn -c 10 "$SUITE"
   - bundle exec kitchen converge "$SUITE"
   - bundle exec kitchen verify "$SUITE"
 

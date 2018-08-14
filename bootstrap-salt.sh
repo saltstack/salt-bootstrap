@@ -4608,6 +4608,7 @@ _eof
     # which is already installed
     __PACKAGES="m2crypto ${pkg_append}-crypto ${pkg_append}-jinja2 ${pkg_append}-PyYAML"
     __PACKAGES="${__PACKAGES} ${pkg_append}-msgpack ${pkg_append}-requests ${pkg_append}-zmq"
+    __PACKAGES="${__PACKAGES} ${pkg_append}-futures"
 
     # shellcheck disable=SC2086
     __yum_install_noinput ${__PACKAGES} || return 1
@@ -4627,6 +4628,9 @@ install_amazon_linux_ami_git_deps() {
     PIP_EXE='pip'
     if __check_command_exists python2.7; then
         if ! __check_command_exists pip2.7; then
+            if ! __check_command_exists easy_install-2.7; then
+                __yum_install_noinput python27-setuptools
+            fi
             /usr/bin/easy_install-2.7 pip || return 1
         fi
         PIP_EXE='/usr/local/bin/pip2.7'
@@ -4646,7 +4650,7 @@ install_amazon_linux_ami_git_deps() {
 
     if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
         __check_pip_allowed "You need to allow pip based installations (-P) in order to install apache-libcloud"
-        __PACKAGES="${__PACKAGES} python-pip"
+        __PACKAGES="${__PACKAGES} python27-pip"
         __PIP_PACKAGES="${__PIP_PACKAGES} apache-libcloud>=$_LIBCLOUD_MIN_VERSION"
     fi
 

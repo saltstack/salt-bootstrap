@@ -3099,7 +3099,7 @@ install_debian_git_deps() {
 
     __PACKAGES="libzmq3 libzmq3-dev lsb-release python-apt python-backports.ssl-match-hostname"
     __PACKAGES="${__PACKAGES} python-crypto python-jinja2 python-msgpack python-m2crypto"
-    __PACKAGES="${__PACKAGES} python-requests python-tornado python-yaml python-zmq"
+    __PACKAGES="${__PACKAGES} python-requests python-tornado python-yaml python-zmq python-futures"
 
     if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
         # Install python-libcloud if asked to
@@ -4795,7 +4795,7 @@ install_arch_linux_stable() {
     pacman -S --noconfirm --needed bash || return 1
     pacman -Su --noconfirm || return 1
     # We can now resume regular salt update
-    pacman -Syu --noconfirm salt || return 1
+    pacman -Syu --noconfirm salt python2-futures || return 1
     return 0
 }
 
@@ -5649,7 +5649,7 @@ install_opensuse_git_deps() {
 
     __git_clone_and_checkout || return 1
 
-    __PACKAGES="libzmq5 python-Jinja2 python-m2crypto python-msgpack-python python-pycrypto python-pyzmq python-xml"
+    __PACKAGES="libzmq5 python-Jinja2 python-m2crypto python-msgpack-python python-pycrypto python-pyzmq python-xml python-futures"
 
     if [ -f "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" ]; then
         # We're on the develop branch, install whichever tornado is on the requirements file

@@ -16,13 +16,16 @@ rvm:
 
 env:
   matrix:
-    - SUITE=py2-git-20177
-    - SUITE=py2-git-20183
-    - SUITE=py2-git-fluorine
-    - SUITE=py2-git-develop
-    - SUITE=py2-stable-20177
-    - SUITE=py2-stable-20183
-
+  - PLATFORM=fedora
+  - PLATFORM=centos-7
+  - PLATFORM=centos-6
+  - PLATFORM=ubuntu-18.04
+  - PLATFORM=ubuntu-16.04
+  - PLATFORM=ubuntu-14.04
+  - PLATFORM=debian-8
+  - PLATFORM=debian-9
+  - PLATFORM=arch
+  - PLATFORM=opensuse
 
 sudo: true
 dist: trusty
@@ -34,10 +37,10 @@ script:
   # Check shell scripts
   - shellcheck -s sh -f checkstyle bootstrap-salt.sh
   # Run test-kitchen with docker driver:
-  - bundle exec kitchen create -l warn -c 10 "$SUITE"
-  - bundle exec kitchen converge "$SUITE"
-  - bundle exec kitchen verify "$SUITE"
+  - bundle exec kitchen create -l warn -c 6 "$PLATFORM"
+  - bundle exec kitchen converge "$PLATFORM"
+  - bundle exec kitchen verify "$PLATFORM"
 
 after_script:
-  - bundle exec kitchen list $SUITE
-  - bundle exec kitchen destriy "$SUITE"
+  - bundle exec kitchen list $PLATFORM
+  - bundle exec kitchen destriy "$PLATFORM"

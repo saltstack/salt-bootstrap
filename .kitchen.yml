@@ -97,7 +97,7 @@ suites:
   - name: py2-stable-2018.3
     provisioner:
       salt_version: 2018.3
-      salt_bootstrap_options: -MP stable %s
+      salt_bootstrap_options: -MP stable
     excludes:
       - centos-6
 

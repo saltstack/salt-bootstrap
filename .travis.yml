@@ -32,6 +32,8 @@ matrix:
   allow_failures:
   - env: PLATFORM=ubuntu-1804
   - env: PLATFORM=ubuntu-1604
+  - env: PLATFORM=centos-6
+  - env: PLATFORM=debian-8
 
 sudo: true
 dist: trusty

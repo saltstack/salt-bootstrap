@@ -3419,6 +3419,7 @@ install_fedora_deps() {
         dnf -y update || return 1
     fi
 
+    __PACKAGES="${__PACKAGES:=}"
     if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 3 ]; then
         # Packages are named python3-<whatever>
         PY_PKG_VER=3
@@ -3490,7 +3491,7 @@ install_fedora_git_deps() {
         PY_PKG_VER=2
     fi
 
-    __PACKAGES=
+    __PACKAGES="${__PACKAGES:=}"
     if [ "$_INSECURE_DL" -eq $BS_FALSE ] && [ "${_SALT_REPO_URL%%://*}" = "https" ]; then
         __PACKAGES="${__PACKAGES} ca-certificates"
     fi

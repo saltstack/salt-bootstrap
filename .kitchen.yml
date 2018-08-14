@@ -13,7 +13,7 @@ provisioner:
   name: salt_solo
   salt_install: bootstrap
   salt_bootstrap_url: bootstrap-salt.sh
-  salt_bootstrap_options: -MPq git %s
+  salt_bootstrap_options: -MPfq git %s
   install_after_init_environment: true
   log_level: info
   sudo: true
@@ -38,7 +38,7 @@ platforms:
       provision_command:
         - yum install -y upstart
     provisioner:
-      salt_bootstrap_options: -MPq -y -x python2.7 git %s
+      salt_bootstrap_options: -MPfq -y -x python2.7 git %s
   - name: amazon-1
     driver_config:
       image: amazonlinux:1

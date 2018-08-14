@@ -28,6 +28,11 @@ env:
   - PLATFORM=arch
   - PLATFORM=opensuse
 
+matrix:
+  allow_failures:
+  - env: PLATFORM=ubuntu-1804
+  - env: PLATFORM=ubuntu-1604
+
 sudo: true
 dist: trusty
 

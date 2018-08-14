@@ -38,7 +38,6 @@ script:
   - shellcheck -s sh -f checkstyle bootstrap-salt.sh
   # Run test-kitchen with docker driver:
   - bundle exec kitchen create -l warn -c 6 "$PLATFORM"
-  - bundle exec kitchen converge "$PLATFORM"
   - bundle exec kitchen verify "$PLATFORM"
 
 after_script:

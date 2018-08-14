@@ -16,12 +16,12 @@ rvm:
 
 env:
   matrix:
-    - SUITE=py2-git-2017.7
-    - SUITE=py2-git-2018.3
+    - SUITE=py2-git-20177
+    - SUITE=py2-git-20183
     - SUITE=py2-git-fluorine
     - SUITE=py2-git-develop
-    - SUITE=py2-stable-2017.7
-    - SUITE=py2-stable-2018.3
+    - SUITE=py2-stable-20177
+    - SUITE=py2-stable-20183
 
 
 sudo: true

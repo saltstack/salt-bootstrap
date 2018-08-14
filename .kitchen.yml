@@ -1,0 +1,103 @@
+---
+driver:
+  name: docker
+  use_sudo: false
+  hostname: salt
+  privileged: true
+  username: kitchen
+  cap_add:
+    - sys_admin
+  disable_upstart: false
+
+provisioner:
+  name: salt_solo
+  salt_install: bootstrap
+  salt_bootstrap_url: bootstrap-salt.sh
+  install_after_init_environment: true
+  log_level: info
+  sudo: true
+  require_chef: false
+  formula: tests
+  state_top:
+    base:
+      '*':
+        - tests.accept_key
+
+platforms:
+  - name: fedora
+    driver_config:
+      image: fedora:latest
+      run_command: /usr/lib/systemd/systemd
+  - name: centos-7
+    driver_config:
+      run_command: /usr/lib/systemd/systemd
+  - name: centos-6
+    driver_config:
+      run_command: /sbin/init
+      provision_command:
+        - yum install -y upstart
+    provisioner:
+      salt_bootstrap_options: -MPq -y -x python2.7 -X git %s
+  - name: ubuntu-18.04
+    driver_config:
+      run_command: /lib/systemd/systemd
+  - name: ubuntu-16.04
+    driver_config:
+      run_command: /lib/systemd/systemd
+  - name: ubuntu-14.04
+    driver_config:
+      run_command: /sbin/init
+      provision_command:
+        - rm -f /sbin/initctl
+        - dpkg-divert --local --rename --remove /sbin/initctl
+  - name: debian-8
+    driver_config:
+      run_command: /lib/systemd/systemd
+      provision_command:
+        - apt-get install -y dbus
+  - name: debian-9
+    driver_config:
+      run_command: /lib/systemd/systemd
+  - name: arch
+    driver_config:
+      image: base/archlinux
+      run_command: /usr/lib/systemd/systemd
+      provision_command:
+        - pacman -Syu --noconfirm systemd
+        - systemctl enable sshd
+  - name: opensuse
+    driver_config:
+      run_command: /usr/lib/systemd/systemd
+      provision_command:
+        - systemctl enable sshd.service
+suites:
+  - name: py2-git-2017.7
+    provisioner:
+      salt_version: 2017.7
+      salt_bootstrap_options: -MPq git %s
+  - name: py2-git-2018.3
+    provisioner:
+      salt_version: 2018.3
+      salt_bootstrap_options: -MPq git %s
+  - name: py2-git-fluorine
+    provisioner:
+      salt_version: fluorine
+      salt_bootstrap_options: -MPq git %s
+  - name: py2-git-develop
+    provisioner:
+      salt_version: develop
+      salt_bootstrap_options: -MPq git %s
+  - name: py2-stable-2017.7
+    provisioner:
+      salt_version: 2017.7
+      salt_bootstrap_options: -MP stable %s
+    excludes:
+      - centos-6
+      - fedora
+  - name: py2-stable-2018.3
+    provisioner:
+      salt_version: 2018.3
+      salt_bootstrap_options: -MP stable %s
+    excludes:
+      - centos-6
+

@@ -101,3 +101,7 @@ suites:
     excludes:
       - centos-6
 
+verifier:
+  name: shell
+  remote_exec: false
+  command: pytest -v tests/integration/

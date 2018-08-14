@@ -17,13 +17,3 @@ else:
 @pytest.fixture
 def host():
     return test_host
-
-
-@pytest.fixture
-def salt():
-    if 'windows' in os.environ.get('KITCHEN_INSTANCE'):
-        tmpconf = r'c:\Users\vagrant\AppData\Local\Temp\kitchen\etc\salt'
-    else:
-        test_host.run('sudo chown -R {0} /tmp/kitchen'.format(os.environ.get('KITCHEN_USERNAME')))
-        tmpconf = '/tmp/kitchen/etc/salt'
-    return functools.partial(test_host.salt, config=tmpconf)

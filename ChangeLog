@@ -1,5 +1,8 @@
 Version TBD (In Progress on the Develop Branch):
 
+Version 2018.08.15:
+    * Add tests using kitchen-salt #1279
+
 Version 2018.08.13:
     * Fedora Py3 fixes (The-Loeki) #1273
     * Handle commented lines in the requirements files for pip pkgs (rallytime) #1271

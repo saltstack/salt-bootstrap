@@ -4,3 +4,7 @@
 
 # Pycharm
 .idea
+
+# test-kitchen
+.bundle
+Gemfile.lock

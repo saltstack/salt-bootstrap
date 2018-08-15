@@ -3415,35 +3415,31 @@ install_debian_check_services() {
 #
 
 install_fedora_deps() {
+    if [ "$_UPGRADE_SYS" -eq $BS_TRUE ]; then
+        dnf -y update || return 1
+    fi
+
     if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 3 ]; then
         # Packages are named python3-<whatever>
         PY_PKG_VER=3
-        __PACKAGES="python3-m2crypto python3-PyYAML"
+        __PACKAGES="${__PACKAGES} python3-m2crypto python3-PyYAML"
     else
         PY_PKG_VER=2
-        __PACKAGES="m2crypto"
+        __PACKAGES="${__PACKAGES} m2crypto"
         if [ "$DISTRO_MAJOR_VERSION" -ge 28 ]; then
           __PACKAGES="${__PACKAGES} python2-pyyaml"
         else
           __PACKAGES="${__PACKAGES} PyYAML"
        fi
     fi
-
-    __PACKAGES="${__PACKAGES} procps-ng dnf-utils libyaml python${PY_PKG_VER}-crypto python${PY_PKG_VER}-jinja2"
+    __PACKAGES="${__PACKAGES} dnf-utils libyaml procps-ng python${PY_PKG_VER}-crypto python${PY_PKG_VER}-jinja2"
     __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-msgpack python${PY_PKG_VER}-requests python${PY_PKG_VER}-zmq"
-
-    # shellcheck disable=SC2086
-    dnf install -y ${__PACKAGES} || return 1
-
-    if [ "$_UPGRADE_SYS" -eq $BS_TRUE ]; then
-        dnf -y update || return 1
-    fi
-
     if [ "${_EXTRA_PACKAGES}" != "" ]; then
         echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
-        # shellcheck disable=SC2086
-        dnf install -y ${_EXTRA_PACKAGES} || return 1
     fi
+
+    # shellcheck disable=SC2086
+    dnf install -y ${__PACKAGES} ${_EXTRA_PACKAGES} || return 1
 
     return 0
 }
@@ -3494,35 +3490,37 @@ install_fedora_git_deps() {
         PY_PKG_VER=2
     fi
 
+    __PACKAGES=
     if [ "$_INSECURE_DL" -eq $BS_FALSE ] && [ "${_SALT_REPO_URL%%://*}" = "https" ]; then
-        dnf install -y ca-certificates || return 1
+        __PACKAGES="${__PACKAGES} ca-certificates"
+    fi
+    if ! __check_command_exists git; then
+        __PACKAGES="${__PACKAGES} git"
+    fi
+    if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
+        __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-libcloud python${PY_PKG_VER}-netaddr"
+    fi
+    __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-systemd"
+
+    # Fedora 28+ ships with tornado 5.0+ which is broken for salt on py3
+    # https://github.com/saltstack/salt-bootstrap/issues/1220
+    if [ "${PY_PKG_VER}" -lt 3 ] || [ "$DISTRO_MAJOR_VERSION" -lt 28 ]; then
+        __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
     fi
 
     install_fedora_deps || return 1
 
-    if ! __check_command_exists git; then
-        dnf install -y git || return 1
-    fi
-
     __git_clone_and_checkout || return 1
 
-    __PACKAGES="python${PY_PKG_VER}-systemd"
+    # Fedora 28+ needs tornado <5.0 from pip
+    # https://github.com/saltstack/salt-bootstrap/issues/1220
     if [ "${PY_PKG_VER}" -eq 3 ] && [ "$DISTRO_MAJOR_VERSION" -ge 28 ]; then
         __check_pip_allowed "You need to allow pip based installations (-P) for Tornado <5.0 in order to install Salt on Python 3"
         grep tornado "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" | while IFS='
 '         read -r dep; do
             "${_PY_EXE}" -m pip install "${dep}" || return 1
         done
-    else
-        __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
     fi
-
-    if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
-        __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-libcloud python${PY_PKG_VER}-netaddr"
-    fi
-
-    # shellcheck disable=SC2086
-    dnf install -y ${__PACKAGES} || return 1
 
     # Let's trigger config_salt()
     if [ "$_TEMP_CONFIG_DIR" = "null" ]; then

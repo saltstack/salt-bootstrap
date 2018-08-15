@@ -1,17 +1,54 @@
+language: ruby
+
+services:
+  - docker
+
+addons:
+  apt:
+    packages:
+    - curl
+    - git
+    - shellcheck
+    - python-pip
+
+rvm:
+  - ruby
+
+env:
+  matrix:
+  - PLATFORM=fedora
+  - PLATFORM=centos-7
+  - PLATFORM=centos-6
+  - PLATFORM=amazon-1
+  - PLATFORM=ubuntu-1804
+  - PLATFORM=ubuntu-1604
+  - PLATFORM=ubuntu-1404
+  - PLATFORM=debian-8
+  - PLATFORM=debian-9
+  - PLATFORM=arch
+  - PLATFORM=opensuse
+
+matrix:
+  allow_failures:
+  - env: PLATFORM=ubuntu-1804
+  - env: PLATFORM=ubuntu-1604
+  - env: PLATFORM=debian-8
+  - env: PLATFORM=debian-9
+  - env: PLATFORM=centos-6
+
+sudo: true
+dist: trusty
+
 before_install:
-  - "if [[ $TRAVIS_PYTHON_VERSION == '2.6' ]]; then sudo pip install unittest2; fi"
-  - sudo pip install --use-mirrors --mirrors=http://g.pypi.python.org/ --mirrors=http://c.pypi.python.org/ --mirrors=http://pypi.crate.io/ unittest-xml-reporting
-  - sudo apt-get remove -y -o DPkg::Options::=--force-confold --purge libzmq3
-  - sudo apt-get autoremove -y -o DPkg::Options::=--force-confold --purge
-  - sudo ls -lah /etc/apt/sources.list.d/
-  - sudo rm -f /etc/apt/sources.list.d/travis_ci_zeromq3-source.list
-  - sudo pip install git+https://github.com/saltstack/salt-testing.git#egg=SaltTesting
+  - pip install --user -r tests/requirements.txt
 
 script:
-  - BS_ECHO_DEBUG=1 sudo -E python tests/runtests.py -vv
+  # Check shell scripts
+  - shellcheck -s sh -f checkstyle bootstrap-salt.sh
+  # Run test-kitchen with docker driver:
+  - bundle exec kitchen create -l warn -c 6 "$PLATFORM"
+  - bundle exec kitchen verify "$PLATFORM"
 
-notifications:
-  irc:
-    channels: "irc.freenode.org#salt-devel"
-    on_success: change
-    on_failure: change
+after_script:
+  - bundle exec kitchen list $PLATFORM
+  - bundle exec kitchen destroy "$PLATFORM"

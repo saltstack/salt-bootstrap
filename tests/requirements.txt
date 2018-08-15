@@ -1,0 +1,4 @@
+testinfra
+paramiko
+pywinrm
+six>=1.10.0

@@ -1,4 +1,6 @@
 Version TBD (In Progress on the Develop Branch):
+    * FIX #1237 SmartOS should use pkgin show-deps (sjorge) #1283
+    * Fedora: Reduce DNF calls to 2 during install_dep phase (The-Loeki) #1278
 
 Version 2018.08.15:
     * Add tests using kitchen-salt #1279

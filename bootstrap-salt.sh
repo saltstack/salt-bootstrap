@@ -5336,7 +5336,8 @@ install_openbsd_restart_daemons() {
 #   SmartOS Install Functions
 #
 install_smartos_deps() {
-    pkgin -y install zeromq py27-crypto py27-m2crypto py27-msgpack py27-yaml py27-jinja2 py27-zmq py27-requests || return 1
+    smartos_deps="$(pkgin show-deps salt | grep '^\s' | grep -v '\snot' | xargs) py27-m2crypto"
+    pkgin -y install "${smartos_deps}" || return 1
 
     # Set _SALT_ETC_DIR to SmartOS default if they didn't specify
     _SALT_ETC_DIR=${BS_SALT_ETC_DIR:-/opt/local/etc/salt}

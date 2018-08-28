@@ -322,7 +322,7 @@ UNIX systems
 
 **SunOS**:
 
-- SmartOS
+- SmartOS (2015Q4 and later)
 
 Unsupported Distributions
 -------------------------

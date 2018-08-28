@@ -77,6 +77,7 @@ Jasper Lievisse Adriaanse   jasperla               jasper@humppa.nl
 JD                          decomposite
 Jeff Hui                    jeffh                  jeff@jeffhui.net
 Jeff Strunk                 jstrunk
+Jorge Schrauwen             sjorge
 Juan A. Moyano              wincus                 wincus.public@gmail.com
 Justin Anderson             justinta               justin.ta@outlook.com
 Justin Findlay              jfindlay               jfindlay@gmail.com

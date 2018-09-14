@@ -1632,7 +1632,7 @@ __check_end_of_life_versions() {
 
         amazon*linux*ami)
             # Amazon Linux versions lower than 2012.0X no longer supported
-            if [ "$DISTRO_MAJOR_VERSION" -lt 2012 ]; then
+            if [ "$DISTRO_MAJOR_VERSION" -lt 2012 -a "$DISTRO_MAJOR_VERSION" -gt 10 ]; then
                 echoerror "End of life distributions are not supported."
                 echoerror "Please consider upgrading to the next stable. See:"
                 echoerror "    https://aws.amazon.com/amazon-linux-ami/"
@@ -4678,6 +4678,92 @@ install_amazon_linux_ami_git_deps() {
     fi
 
     return 0
+}
+
+install_amazon_linux_ami_2_deps() {
+    # Shim to figure out if we're using old (rhel) or new (aws) rpms.
+    _USEAWS=$BS_FALSE
+    pkg_append="python"
+
+    if [ "$ITYPE" = "stable" ]; then
+        repo_rev="$STABLE_REV"
+    else
+        repo_rev="latest"
+    fi
+
+    if echo $repo_rev | grep -E -q '^archive'; then
+        year=$(echo "$repo_rev" | cut -d '/' -f 2 | cut -c1-4)
+    else
+        year=$(echo "$repo_rev" | cut -c1-4)
+    fi
+
+    if echo "$repo_rev" | grep -E -q '^(latest|2016\.11)$' || \
+            [ "$year" -gt 2016 ]; then
+       _USEAWS=$BS_TRUE
+       pkg_append="python"
+    fi
+
+    # We need to install yum-utils before doing anything else when installing on
+    # Amazon Linux ECS-optimized images. See issue #974.
+    __yum_install_noinput yum-utils
+
+    # Do upgrade early
+    if [ "$_UPGRADE_SYS" -eq $BS_TRUE ]; then
+        yum -y update || return 1
+    fi
+
+    if [ $_DISABLE_REPOS -eq $BS_FALSE ] || [ "$_CUSTOM_REPO_URL" != "null" ]; then
+        __REPO_FILENAME="saltstack-repo.repo"
+
+        # Set a few vars to make life easier.
+        if [ $_USEAWS -eq $BS_TRUE ]; then
+           base_url="$HTTP_VAL://${_REPO_URL}/yum/redhat/7/\$basearch/$repo_rev/"
+           gpg_key="${base_url}SALTSTACK-GPG-KEY.pub
+           ${base_url}base/RPM-GPG-KEY-CentOS-7"
+           repo_name="SaltStack repo for Amazon Linux 2.0"
+        else
+           base_url="$HTTP_VAL://${_REPO_URL}/yum/redhat/6/\$basearch/$repo_rev/"
+           gpg_key="${base_url}SALTSTACK-GPG-KEY.pub"
+           repo_name="SaltStack repo for RHEL/CentOS 6"
+        fi
+
+        # This should prob be refactored to use __install_saltstack_rhel_repository()
+        # With args passed in to do the right thing.  Reformatted to be more like the
+        # amazon linux yum file.
+        if [ ! -s "/etc/yum.repos.d/${__REPO_FILENAME}" ]; then
+          cat <<_eof > "/etc/yum.repos.d/${__REPO_FILENAME}"
+[saltstack-repo]
+name=$repo_name
+failovermethod=priority
+priority=10
+gpgcheck=1
+gpgkey=$gpg_key
+baseurl=$base_url
+_eof
+        fi
+
+    fi
+
+    # Package python-ordereddict-1.1-2.el6.noarch is obsoleted by python26-2.6.9-2.88.amzn1.x86_64
+    # which is already installed
+    '''
+    __PACKAGES="m2crypto ${pkg_append}-crypto ${pkg_append}-jinja2 PyYAML"
+    __PACKAGES="${__PACKAGES} ${pkg_append}-msgpack ${pkg_append}-requests ${pkg_append}-zmq"
+    __PACKAGES="${__PACKAGES} ${pkg_append}-futures"
+    __PACKAGES="${__PACKAGES} ${pkg_append}-markupsafe python2-pip ${pkg_append}-tornado pciutils-libs"
+    '''
+    __PACKAGES="m2crypto ${pkg_append}-crypto ${pkg_append}-jinja2 PyYAML"
+    __PACKAGES="${__PACKAGES} ${pkg_append}-msgpack ${pkg_append}-requests ${pkg_append}-zmq"
+    __PACKAGES="${__PACKAGES} ${pkg_append}-futures"
+
+    # shellcheck disable=SC2086
+    __yum_install_noinput ${__PACKAGES} || return 1
+
+    if [ "${_EXTRA_PACKAGES}" != "" ]; then
+        echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
+        # shellcheck disable=SC2086
+        __yum_install_noinput ${_EXTRA_PACKAGES} || return 1
+    fi
 }
 
 install_amazon_linux_ami_stable() {

@@ -1632,7 +1632,8 @@ __check_end_of_life_versions() {
 
         amazon*linux*ami)
             # Amazon Linux versions lower than 2012.0X no longer supported
-            if [ "$DISTRO_MAJOR_VERSION" -lt 2012 -a "$DISTRO_MAJOR_VERSION" -gt 10 ]; then
+            # Except for Amazon Linux 2, which reset the major version counter
+            if [ "$DISTRO_MAJOR_VERSION" -lt 2012 ] && [ "$DISTRO_MAJOR_VERSION" -gt 10 ]; then
                 echoerror "End of life distributions are not supported."
                 echoerror "Please consider upgrading to the next stable. See:"
                 echoerror "    https://aws.amazon.com/amazon-linux-ami/"
@@ -4715,17 +4716,11 @@ install_amazon_linux_ami_2_deps() {
     if [ $_DISABLE_REPOS -eq $BS_FALSE ] || [ "$_CUSTOM_REPO_URL" != "null" ]; then
         __REPO_FILENAME="saltstack-repo.repo"
 
-        # Set a few vars to make life easier.
-        if [ $_USEAWS -eq $BS_TRUE ]; then
-           base_url="$HTTP_VAL://${_REPO_URL}/yum/redhat/7/\$basearch/$repo_rev/"
-           gpg_key="${base_url}SALTSTACK-GPG-KEY.pub
-           ${base_url}base/RPM-GPG-KEY-CentOS-7"
-           repo_name="SaltStack repo for Amazon Linux 2.0"
-        else
-           base_url="$HTTP_VAL://${_REPO_URL}/yum/redhat/6/\$basearch/$repo_rev/"
-           gpg_key="${base_url}SALTSTACK-GPG-KEY.pub"
-           repo_name="SaltStack repo for RHEL/CentOS 6"
-        fi
+        base_url="$HTTP_VAL://${_REPO_URL}/yum/redhat/7/\$basearch/$repo_rev/"
+        base_url="$HTTP_VAL://${_REPO_URL}/yum/amazon/2/\$basearch/latest"
+        gpg_key="${base_url}SALTSTACK-GPG-KEY.pub
+        ${base_url}base/RPM-GPG-KEY-CentOS-7"
+        repo_name="SaltStack repo for Amazon Linux 2.0"
 
         # This should prob be refactored to use __install_saltstack_rhel_repository()
         # With args passed in to do the right thing.  Reformatted to be more like the

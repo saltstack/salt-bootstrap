@@ -18,7 +18,7 @@
 #======================================================================================================================
 set -o nounset                              # Treat unset variables as an error
 
-__ScriptVersion="2018.11.01"
+__ScriptVersion="2018.08.15"
 __ScriptName="bootstrap-salt.sh"
 
 __ScriptFullName="$0"
@@ -1801,11 +1801,12 @@ __wait_for_apt(){
     # Timeout set at 15 minutes
     WAIT_TIMEOUT=900
 
-    # Set an initial exit code to 100; which matches the exit code of a locked apt process
-    (exit 100)
+    # Run our passed in apt command
+    "${@}"
+    APT_RETURN=$?
 
-    while [ $? -eq 100 ]; do
-      sleep 1
+    # If our exit code from apt is 100, then we're waiting on a lock
+    while [ $APT_RETURN -eq 100 ]; do
       WAIT_TIMEOUT=$((WAIT_TIMEOUT - 1))
 
       # If timeout reaches 0, abort.
@@ -1813,10 +1814,11 @@ __wait_for_apt(){
           echoerror "Apt, apt-get, aptitude, or dpkg process is taking too long."
           echoerror "Bootstrap script cannot proceed. Aborting."
           return 1
+      else
+          # Try running apt again until our return code != 100
+	  "${@}"
+    	  APT_RETURN=$?
       fi
-
-      # Run our commands last to get the right (or wrong) exit code
-      "${@}"
     done
 }
 

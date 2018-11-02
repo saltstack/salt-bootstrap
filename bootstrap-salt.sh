@@ -1807,6 +1807,7 @@ __wait_for_apt(){
 
     # If our exit code from apt is 100, then we're waiting on a lock
     while [ $APT_RETURN -eq 100 ]; do
+      sleep 1
       WAIT_TIMEOUT=$((WAIT_TIMEOUT - 1))
 
       # If timeout reaches 0, abort.

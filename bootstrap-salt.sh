@@ -1269,6 +1269,7 @@ __ubuntu_derivatives_translation() {
     linuxmint_13_ubuntu_base="12.04"
     linuxmint_17_ubuntu_base="14.04"
     linuxmint_18_ubuntu_base="16.04"
+    linuxmint_19_ubuntu_base="18.04"
     linaro_12_ubuntu_base="12.04"
     elementary_os_02_ubuntu_base="12.04"
     neon_16_ubuntu_base="16.04"
@@ -1798,24 +1799,31 @@ __function_defined() {
 #                 process is finished so the script doesn't exit on a locked proc.
 #----------------------------------------------------------------------------------------------------------------------
 __wait_for_apt(){
-    echodebug "Checking if apt process is currently running."
-
     # Timeout set at 15 minutes
     WAIT_TIMEOUT=900
 
-    while ps -C apt,apt-get,aptitude,dpkg >/dev/null; do
-        sleep 1
-        WAIT_TIMEOUT=$((WAIT_TIMEOUT - 1))
+    # Run our passed in apt command
+    "${@}"
+    APT_RETURN=$?
 
-        # If timeout reaches 0, abort.
-        if [ "$WAIT_TIMEOUT" -eq 0 ]; then
-            echoerror "Apt, apt-get, aptitude, or dpkg process is taking too long."
-            echoerror "Bootstrap script cannot proceed. Aborting."
-            return 1
-        fi
+    # If our exit code from apt is 100, then we're waiting on a lock
+    while [ $APT_RETURN -eq 100 ]; do
+      sleep 1
+      WAIT_TIMEOUT=$((WAIT_TIMEOUT - 1))
+
+      # If timeout reaches 0, abort.
+      if [ "$WAIT_TIMEOUT" -eq 0 ]; then
+          echoerror "Apt, apt-get, aptitude, or dpkg process is taking too long."
+          echoerror "Bootstrap script cannot proceed. Aborting."
+          return 1
+      else
+          # Try running apt again until our return code != 100
+	  "${@}"
+    	  APT_RETURN=$?
+      fi
     done
 
-    echodebug "No apt processes are currently running."
+    return $APT_RETURN
 }
 
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
@@ -1824,8 +1832,7 @@ __wait_for_apt(){
 #    PARAMETERS:  packages
 #----------------------------------------------------------------------------------------------------------------------
 __apt_get_install_noinput() {
-    __wait_for_apt
-    apt-get install -y -o DPkg::Options::=--force-confold "${@}"; return $?
+    __wait_for_apt apt-get install -y -o DPkg::Options::=--force-confold "${@}"; return $?
 }   # ----------  end of function __apt_get_install_noinput  ----------
 
 
@@ -1834,8 +1841,7 @@ __apt_get_install_noinput() {
 #   DESCRIPTION:  (DRY) apt-get upgrade with noinput options
 #----------------------------------------------------------------------------------------------------------------------
 __apt_get_upgrade_noinput() {
-    __wait_for_apt
-    apt-get upgrade -y -o DPkg::Options::=--force-confold; return $?
+    __wait_for_apt apt-get upgrade -y -o DPkg::Options::=--force-confold; return $?
 }   # ----------  end of function __apt_get_upgrade_noinput  ----------
 
 
@@ -1845,11 +1851,10 @@ __apt_get_upgrade_noinput() {
 #    PARAMETERS:  url
 #----------------------------------------------------------------------------------------------------------------------
 __apt_key_fetch() {
-    __wait_for_apt
     url=$1
 
     # shellcheck disable=SC2086
-    apt-key adv ${_GPG_ARGS} --fetch-keys "$url"; return $?
+    __wait_for_apt apt-key adv ${_GPG_ARGS} --fetch-keys "$url"; return $?
 }   # ----------  end of function __apt_key_fetch  ----------
 
 
@@ -2634,8 +2639,7 @@ __install_saltstack_ubuntu_repository() {
 
     __apt_key_fetch "$SALTSTACK_UBUNTU_URL/SALTSTACK-GPG-KEY.pub" || return 1
 
-    __wait_for_apt
-    apt-get update || return 1
+    __wait_for_apt apt-get update || return 1
 }
 
 install_ubuntu_deps() {
@@ -2647,8 +2651,7 @@ install_ubuntu_deps() {
 
         __enable_universe_repository || return 1
 
-        __wait_for_apt
-        apt-get update || return 1
+        __wait_for_apt apt-get update || return 1
     fi
 
     __PACKAGES=''
@@ -2704,8 +2707,7 @@ install_ubuntu_stable_deps() {
     # No user interaction, libc6 restart services for example
     export DEBIAN_FRONTEND=noninteractive
 
-    __wait_for_apt
-    apt-get update || return 1
+    __wait_for_apt apt-get update || return 1
 
     if [ "${_UPGRADE_SYS}" -eq $BS_TRUE ]; then
         if [ "${_INSECURE_DL}" -eq $BS_TRUE ]; then
@@ -2725,8 +2727,7 @@ install_ubuntu_stable_deps() {
 }
 
 install_ubuntu_git_deps() {
-    __wait_for_apt
-    apt-get update || return 1
+    __wait_for_apt apt-get update || return 1
 
     if ! __check_command_exists git; then
         __apt_get_install_noinput git-core || return 1
@@ -3033,8 +3034,7 @@ __install_saltstack_debian_repository() {
 
     __apt_key_fetch "$SALTSTACK_DEBIAN_URL/SALTSTACK-GPG-KEY.pub" || return 1
 
-    __wait_for_apt
-    apt-get update || return 1
+    __wait_for_apt apt-get update || return 1
 }
 
 install_debian_deps() {
@@ -3045,8 +3045,7 @@ install_debian_deps() {
     # No user interaction, libc6 restart services for example
     export DEBIAN_FRONTEND=noninteractive
 
-    __wait_for_apt
-    apt-get update || return 1
+    __wait_for_apt apt-get update || return 1
 
     if [ "${_UPGRADE_SYS}" -eq $BS_TRUE ]; then
         # Try to update GPG keys first if allowed
@@ -3165,8 +3164,7 @@ install_debian_8_git_deps() {
                 /etc/apt/sources.list.d/backports.list
         fi
 
-        __wait_for_apt
-        apt-get update || return 1
+        __wait_for_apt apt-get update || return 1
 
         # python-tornado package should be installed from backports repo
         __PACKAGES="${__PACKAGES} python-backports.ssl-match-hostname python-tornado/jessie-backports"

@@ -4679,6 +4679,67 @@ install_amazon_linux_ami_git_deps() {
     return 0
 }
 
+install_amazon_linux_ami_2_git_deps() {
+    if [ "$_INSECURE_DL" -eq $BS_FALSE ] && [ "${_SALT_REPO_URL%%://*}" = "https" ]; then
+        yum -y install ca-certificates || return 1
+    fi
+
+    PIP_EXE='pip'
+    if __check_command_exists python2.7; then
+        if ! __check_command_exists pip2.7; then
+            if ! __check_command_exists easy_install-2.7; then
+                __yum_install_noinput python27-setuptools
+            fi
+            /usr/bin/easy_install-2.7 pip || return 1
+        fi
+        PIP_EXE='/usr/local/bin/pip2.7'
+        _PY_EXE='python2.7'
+    fi
+
+    install_amazon_linux_ami_2_deps || return 1
+
+    if ! __check_command_exists git; then
+        __yum_install_noinput git || return 1
+    fi
+
+    __git_clone_and_checkout || return 1
+
+    __PACKAGES=""
+    __PIP_PACKAGES=""
+
+    if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
+        __check_pip_allowed "You need to allow pip based installations (-P) in order to install apache-libcloud"
+        __PACKAGES="${__PACKAGES} python27-pip"
+        __PIP_PACKAGES="${__PIP_PACKAGES} apache-libcloud>=$_LIBCLOUD_MIN_VERSION"
+    fi
+
+    if [ -f "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" ]; then
+        # We're on the develop branch, install whichever tornado is on the requirements file
+        __REQUIRED_TORNADO="$(grep tornado "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt")"
+        if [ "${__REQUIRED_TORNADO}" != "" ]; then
+            __PACKAGES="${__PACKAGES} ${pkg_append}-tornado"
+        fi
+    fi
+
+    if [ "${__PACKAGES}" != "" ]; then
+        # shellcheck disable=SC2086
+        __yum_install_noinput ${__PACKAGES} || return 1
+    fi
+
+    if [ "${__PIP_PACKAGES}" != "" ]; then
+        # shellcheck disable=SC2086
+        ${PIP_EXE} install ${__PIP_PACKAGES} || return 1
+    fi
+
+    # Let's trigger config_salt()
+    if [ "$_TEMP_CONFIG_DIR" = "null" ]; then
+        _TEMP_CONFIG_DIR="${_SALT_GIT_CHECKOUT_DIR}/conf/"
+        CONFIG_SALT_FUNC="config_salt"
+    fi
+
+    return 0
+}
+
 install_amazon_linux_ami_2_deps() {
     # Shim to figure out if we're using old (rhel) or new (aws) rpms.
     _USEAWS=$BS_FALSE
@@ -4784,6 +4845,41 @@ install_amazon_linux_ami_testing() {
 }
 
 install_amazon_linux_ami_testing_post() {
+    install_centos_testing_post || return 1
+    return 0
+}
+
+install_amazon_linux_ami_2_stable() {
+    install_centos_stable || return 1
+    return 0
+}
+
+install_amazon_linux_ami_2_stable_post() {
+    install_centos_stable_post || return 1
+    return 0
+}
+
+install_amazon_linux_ami_2_restart_daemons() {
+    install_centos_restart_daemons || return 1
+    return 0
+}
+
+install_amazon_linux_ami_2_git() {
+    install_centos_git || return 1
+    return 0
+}
+
+install_amazon_linux_ami_2_git_post() {
+    install_centos_git_post || return 1
+    return 0
+}
+
+install_amazon_linux_ami_2_testing() {
+    install_centos_testing || return 1
+    return 0
+}
+
+install_amazon_linux_ami_2_testing_post() {
     install_centos_testing_post || return 1
     return 0
 }

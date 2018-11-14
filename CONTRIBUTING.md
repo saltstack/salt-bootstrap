@@ -140,7 +140,9 @@ key to your GitHub account. Once these steps are completed, the commit signing
 verification will look like the example in GitHub's
 [GPG Signature Verification feature announcement](https://github.com/blog/2144-gpg-signature-verification).
 
-## Release Cadence
+## Release Information
+
+### Release Cadence
 
 There is no defined release schedule for the bootstrap script at this time.
 Typically, SaltStack's release team determines when it would be good to release
@@ -153,6 +155,21 @@ Timing the release usually involves an analysis of the following:
 - Types of fixes submitted to `develop` since the last release
 - Fixes needed for inclusion in an upcoming version of [Salt](https://github.com/saltstack/salt)
 - Length of time since the last bootstrap release
+
+### Release Process
+
+The release process consists of the following steps:
+
+1. Merge in any outstanding PRs that are ready.
+1. Add new contributors to the [AUTHORS](https://github.com/saltstack/salt-bootstrap/blob/develop/AUTHORS.rst) file.
+1. Update the [ChangeLog](https://github.com/saltstack/salt-bootstrap/blob/develop/ChangeLog).
+1. Update the version number in the bootstrap script. The version number is date-based, `<year.month.day>`.
+   For example, version `2018.08.15` was released on August 15, 2018.
+1. Merge the `develop` branch into the `stable` branch.
+1. Update `bootstrap.saltstack.com` with the new stable release. The checksum on the
+   [README page](https://github.com/saltstack/salt-bootstrap/blob/develop/README.rst)
+   should also be updated.
+1. Merge the new stable release into [Salt](https://github.com/saltstack/salt).
 
 ## Adding Support for Other Operating Systems
 

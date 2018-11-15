@@ -4687,12 +4687,9 @@ install_amazon_linux_ami_2_git_deps() {
     PIP_EXE='pip'
     if __check_command_exists python2.7; then
         if ! __check_command_exists pip2.7; then
-            if ! __check_command_exists easy_install-2.7; then
-                __yum_install_noinput python27-setuptools
-            fi
-            /usr/bin/easy_install-2.7 pip || return 1
+            __yum_install_noinput python2-pip
         fi
-        PIP_EXE='/usr/local/bin/pip2.7'
+        PIP_EXE='/bin/pip'
         _PY_EXE='python2.7'
     fi
 

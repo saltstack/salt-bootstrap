@@ -58,10 +58,15 @@ platforms:
       provision_command:
         - rm -f /sbin/initctl
         - dpkg-divert --local --rename --remove /sbin/initctl
-  - name: debian-8
+  - name: debian-8-git
     driver_config:
       run_command: /lib/systemd/systemd
       provision_command:
+        - apt-get install -y dbus
+  - name: debian-8-stable
+      driver_config:
+        run_command: /lib/systemd/systemd
+        provision_command:
         - apt-get install -y dbus
   - name: debian-9
     driver_config:
@@ -83,15 +88,23 @@ suites:
   - name: py2-git-2017.7
     provisioner:
       salt_version: 2017.7
+    excludes:
+      - debian-8-stable
   - name: py2-git-2018.3
     provisioner:
       salt_version: 2018.3
+    excludes:
+      - debian-8-stable
   - name: py2-git-fluorine
     provisioner:
       salt_version: fluorine
+    excludes:
+      - debian-8-stable
   - name: py2-git-develop
     provisioner:
       salt_version: develop
+    excludes:
+      - debian-8-stable
   - name: py2-stable-2017.7
     provisioner:
       salt_version: 2017.7
@@ -99,6 +112,7 @@ suites:
     excludes:
       - arch
       - centos-6
+      - debian-8-git
       - fedora
       - opensuse
   - name: py2-stable-2018.3
@@ -107,6 +121,7 @@ suites:
       salt_bootstrap_options: -MP stable
     excludes:
       - centos-6
+      - debian-8-git
 
 verifier:
   name: shell

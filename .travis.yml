@@ -25,7 +25,8 @@ env:
   - PLATFORM=ubuntu-1404
   - PLATFORM=debian-8-git
   - PLATFORM=debian-8-stable
-  - PLATFORM=debian-9
+  - PLATFORM=debian-9-git
+  - PLATFORM=debian-9-stable
   - PLATFORM=arch
   - PLATFORM=opensuse
 
@@ -33,7 +34,6 @@ matrix:
   allow_failures:
   - env: PLATFORM=ubuntu-1804
   - env: PLATFORM=ubuntu-1604
-  - env: PLATFORM=debian-9
   - env: PLATFORM=centos-6
 
 sudo: true

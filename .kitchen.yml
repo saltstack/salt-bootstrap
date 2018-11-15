@@ -68,9 +68,12 @@ platforms:
         run_command: /lib/systemd/systemd
         provision_command:
         - apt-get install -y dbus
-  - name: debian-9
+  - name: debian-9-git
     driver_config:
       run_command: /lib/systemd/systemd
+  - name: debian-9-stable
+      driver_config:
+        run_command: /lib/systemd/systemd
   - name: arch
     driver_config:
       image: base/archlinux
@@ -90,21 +93,25 @@ suites:
       salt_version: 2017.7
     excludes:
       - debian-8-stable
+      - debian-9-stable
   - name: py2-git-2018.3
     provisioner:
       salt_version: 2018.3
     excludes:
       - debian-8-stable
+      - debian-9-stable
   - name: py2-git-fluorine
     provisioner:
       salt_version: fluorine
     excludes:
       - debian-8-stable
+      - debian-9-stable
   - name: py2-git-develop
     provisioner:
       salt_version: develop
     excludes:
       - debian-8-stable
+      - debian-9-stable
   - name: py2-stable-2017.7
     provisioner:
       salt_version: 2017.7
@@ -113,6 +120,7 @@ suites:
       - arch
       - centos-6
       - debian-8-git
+      - debian-9-git
       - fedora
       - opensuse
   - name: py2-stable-2018.3
@@ -122,6 +130,7 @@ suites:
     excludes:
       - centos-6
       - debian-8-git
+      - debian-9-git
 
 verifier:
   name: shell

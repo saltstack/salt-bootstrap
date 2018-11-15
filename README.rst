@@ -44,6 +44,9 @@ Contributing
 The Salt Bootstrap project is open and encouraging to code contributions. Please review the
 `Contributing Guidelines`_ for information on filing issues, fixing bugs, and submitting features.
 
+The `Contributing Guidelines`_ also contain information about the Bootstrap release cadence and
+process.
+
 Examples
 --------
 

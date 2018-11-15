@@ -1,4 +1,9 @@
 #!/bin/sh -
+
+# WARNING: Changes to this file in the salt repo will be overwritten!
+# Please submit pull requests against the salt-bootstrap repo:
+# https://github.com/saltstack/salt-bootstrap
+
 #======================================================================================================================
 # vim: softtabstop=4 shiftwidth=4 expandtab fenc=utf-8 spell spelllang=en cc=120
 #======================================================================================================================

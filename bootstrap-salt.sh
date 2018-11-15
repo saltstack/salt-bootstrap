@@ -1812,7 +1812,7 @@ __wait_for_apt(){
 
     # If our exit code from apt is 100, then we're waiting on a lock
     while [ $APT_RETURN -eq 100 ]; do
-      echoinfo "Aware of the lock.  Patiently waiting $WAIT_TIMEOUT more seconds..."
+      echoinfo "Aware of the lock. Patiently waiting $WAIT_TIMEOUT more seconds..."
       sleep 1
       WAIT_TIMEOUT=$((WAIT_TIMEOUT - 1))
 

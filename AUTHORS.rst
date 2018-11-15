@@ -38,11 +38,13 @@ Megan Wilhite               Ch3LL                  megan.wilhite@gmail.com
 Chris Rebert                cvrebert               chris.rebert@hulu.com
 Chris Buechler              cbuechler              cmb@pfsense.org
 Christer Edwards            cedwards
+Christian McHugh            mchugh19
 Clark Perkins               iclarkperkins          clark.perkins@digitalreasoning.com
 Dag Viggo Lokøen            dagvl                  dag.viggo@lokoen.org
 Dan Mick                    dmick                  dan.mick@inktank.com
 Daniel Poelzleithner        poelzi
 Daniel Wallace              gtmanfred              danielwallace@gtmanfred.com
+Darko Cerdic                darkocerdic
 David J. Felix              DavidJFelix
 denmat                      denmat
 Denys Havrysh               vutny                  denys.gavrysh@gmail.com
@@ -95,6 +97,7 @@ Marcus Furlong              furlongm               furlongm@gmail.com
 Mark Lee                    malept
 markgaylard                 markgaylard
 Matt Black                  mafrosis
+Matt McKinnon               ripesensor
 Matthew Garrett             cingeyedog             matt@clemson.edu
 Matthew Mead-Briggs         mattmb
 Matthew Richardson          mrichar1

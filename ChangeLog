@@ -1,10 +1,14 @@
 Version TBD (In Progress on the Develop Branch):
+    * use official amazon linux 2 repo for amazon linux 2 (mchugh19) #1287
+    * Add release info to applicable docs (rallytime) #1292
+    * Modify wait_for_apt function (ripesensor) #1291
+    * Add support for LinuxMint 19 (darkocerdic) #1289
     * FIX #1237 SmartOS should use pkgin show-deps (sjorge) #1283
     * Fedora: Reduce DNF calls to 2 during install_dep phase (The-Loeki) #1278
 
 Version 2018.08.15:
-    * Add tests using kitchen-salt #1279
-    * Add python-futures to Py2 installs #1279
+    * Add tests using kitchen-salt (gtmanfred) #1279
+    * Add python-futures to Py2 installs (gtmanfred) #1279
 
 Version 2018.08.13:
     * Fedora Py3 fixes (The-Loeki) #1273

@@ -1,4 +1,5 @@
 Version TBD (In Progress on the Develop Branch):
+    * use official amazon linux 2 repo for amazon linux 2 (mchugh19) #1287
     * Add release info to applicable docs (rallytime) #1292
     * Modify wait_for_apt function (ripesensor) #1291
     * Add support for LinuxMint 19 (darkocerdic) #1289

@@ -38,6 +38,7 @@ Megan Wilhite               Ch3LL                  megan.wilhite@gmail.com
 Chris Rebert                cvrebert               chris.rebert@hulu.com
 Chris Buechler              cbuechler              cmb@pfsense.org
 Christer Edwards            cedwards
+Christian McHugh            mchugh19
 Clark Perkins               iclarkperkins          clark.perkins@digitalreasoning.com
 Dag Viggo Lokøen            dagvl                  dag.viggo@lokoen.org
 Dan Mick                    dmick                  dan.mick@inktank.com

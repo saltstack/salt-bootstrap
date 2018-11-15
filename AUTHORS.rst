@@ -43,6 +43,7 @@ Dag Viggo Lokøen            dagvl                  dag.viggo@lokoen.org
 Dan Mick                    dmick                  dan.mick@inktank.com
 Daniel Poelzleithner        poelzi
 Daniel Wallace              gtmanfred              danielwallace@gtmanfred.com
+Darko Cerdic                darkocerdic
 David J. Felix              DavidJFelix
 denmat                      denmat
 Denys Havrysh               vutny                  denys.gavrysh@gmail.com
@@ -95,6 +96,7 @@ Marcus Furlong              furlongm               furlongm@gmail.com
 Mark Lee                    malept
 markgaylard                 markgaylard
 Matt Black                  mafrosis
+Matt McKinnon               ripesensor
 Matthew Garrett             cingeyedog             matt@clemson.edu
 Matthew Mead-Briggs         mattmb
 Matthew Richardson          mrichar1

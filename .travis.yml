@@ -22,7 +22,8 @@ env:
   - PLATFORM=amazon-1
   - PLATFORM=amazon-2
   - PLATFORM=ubuntu-1804
-  - PLATFORM=ubuntu-1604
+  - PLATFORM=py2-ubuntu-1604
+  - PLATFORM=py3-ubuntu-1604
   - PLATFORM=ubuntu-1404
   - PLATFORM=debian-8
   - PLATFORM=debian-9

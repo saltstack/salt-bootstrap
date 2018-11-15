@@ -54,9 +54,14 @@ platforms:
   - name: ubuntu-18.04
     driver_config:
       run_command: /lib/systemd/systemd
-  - name: ubuntu-16.04
+  - name: py2-ubuntu-16.04
     driver_config:
       run_command: /lib/systemd/systemd
+  - name: py3-ubuntu-16.04
+      driver_config:
+        run_command: /lib/systemd/systemd
+      provisioner:
+        salt_bootstrap_options: -MPfq -x python3 git %s
   - name: ubuntu-14.04
     driver_config:
       run_command: /sbin/init
@@ -85,6 +90,7 @@ platforms:
         - systemctl enable sshd.service
 
 suites:
+  # Py2 Git Tests
   - name: py2-git-2017.7
     provisioner:
       salt_version: 2017.7
@@ -99,6 +105,7 @@ suites:
   - name: py2-git-develop
     provisioner:
       salt_version: develop
+  # Py2 Stable Tests
   - name: py2-stable-2017.7
     provisioner:
       salt_version: 2017.7
@@ -114,6 +121,22 @@ suites:
       salt_bootstrap_options: -MP stable
     excludes:
       - centos-6
+  # Py3 Git Tests
+  - name: py3-git-2018.3
+      provisioner:
+        salt_version: 2018.3
+      includes:
+      - py3-ubuntu-16.04
+  - name: py3-git-fluorine
+      provisioner:
+        salt_version: fluorine
+      includes:
+      - py3-ubuntu-1604
+  - name: py3-git-develop
+      provisioner:
+        salt_version: develop
+      includes:
+      - py3-ubuntu-1604
 
 verifier:
   name: shell

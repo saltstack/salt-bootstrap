@@ -1638,7 +1638,8 @@ __check_end_of_life_versions() {
 
         amazon*linux*ami)
             # Amazon Linux versions lower than 2012.0X no longer supported
-            if [ "$DISTRO_MAJOR_VERSION" -lt 2012 ]; then
+            # Except for Amazon Linux 2, which reset the major version counter
+            if [ "$DISTRO_MAJOR_VERSION" -lt 2012 ] && [ "$DISTRO_MAJOR_VERSION" -gt 10 ]; then
                 echoerror "End of life distributions are not supported."
                 echoerror "Please consider upgrading to the next stable. See:"
                 echoerror "    https://aws.amazon.com/amazon-linux-ami/"
@@ -4683,6 +4684,138 @@ install_amazon_linux_ami_git_deps() {
     return 0
 }
 
+install_amazon_linux_ami_2_git_deps() {
+    if [ "$_INSECURE_DL" -eq $BS_FALSE ] && [ "${_SALT_REPO_URL%%://*}" = "https" ]; then
+        yum -y install ca-certificates || return 1
+    fi
+
+    PIP_EXE='pip'
+    if __check_command_exists python2.7; then
+        if ! __check_command_exists pip2.7; then
+            __yum_install_noinput python2-pip
+        fi
+        PIP_EXE='/bin/pip'
+        _PY_EXE='python2.7'
+    fi
+
+    install_amazon_linux_ami_2_deps || return 1
+
+    if ! __check_command_exists git; then
+        __yum_install_noinput git || return 1
+    fi
+
+    __git_clone_and_checkout || return 1
+
+    __PACKAGES=""
+    __PIP_PACKAGES=""
+
+    if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
+        __check_pip_allowed "You need to allow pip based installations (-P) in order to install apache-libcloud"
+        __PACKAGES="${__PACKAGES} python27-pip"
+        __PIP_PACKAGES="${__PIP_PACKAGES} apache-libcloud>=$_LIBCLOUD_MIN_VERSION"
+    fi
+
+    if [ -f "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" ]; then
+        # We're on the develop branch, install whichever tornado is on the requirements file
+        __REQUIRED_TORNADO="$(grep tornado "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt")"
+        if [ "${__REQUIRED_TORNADO}" != "" ]; then
+            __PACKAGES="${__PACKAGES} ${pkg_append}-tornado"
+        fi
+    fi
+
+    if [ "${__PACKAGES}" != "" ]; then
+        # shellcheck disable=SC2086
+        __yum_install_noinput ${__PACKAGES} || return 1
+    fi
+
+    if [ "${__PIP_PACKAGES}" != "" ]; then
+        # shellcheck disable=SC2086
+        ${PIP_EXE} install ${__PIP_PACKAGES} || return 1
+    fi
+
+    # Let's trigger config_salt()
+    if [ "$_TEMP_CONFIG_DIR" = "null" ]; then
+        _TEMP_CONFIG_DIR="${_SALT_GIT_CHECKOUT_DIR}/conf/"
+        CONFIG_SALT_FUNC="config_salt"
+    fi
+
+    return 0
+}
+
+install_amazon_linux_ami_2_deps() {
+    # Shim to figure out if we're using old (rhel) or new (aws) rpms.
+    _USEAWS=$BS_FALSE
+    pkg_append="python"
+
+    if [ "$ITYPE" = "stable" ]; then
+        repo_rev="$STABLE_REV"
+    else
+        repo_rev="latest"
+    fi
+
+    if echo $repo_rev | grep -E -q '^archive'; then
+        year=$(echo "$repo_rev" | cut -d '/' -f 2 | cut -c1-4)
+    else
+        year=$(echo "$repo_rev" | cut -c1-4)
+    fi
+
+    if echo "$repo_rev" | grep -E -q '^(latest|2016\.11)$' || \
+            [ "$year" -gt 2016 ]; then
+       _USEAWS=$BS_TRUE
+       pkg_append="python"
+    fi
+
+    # We need to install yum-utils before doing anything else when installing on
+    # Amazon Linux ECS-optimized images. See issue #974.
+    __yum_install_noinput yum-utils
+
+    # Do upgrade early
+    if [ "$_UPGRADE_SYS" -eq $BS_TRUE ]; then
+        yum -y update || return 1
+    fi
+
+    if [ $_DISABLE_REPOS -eq $BS_FALSE ] || [ "$_CUSTOM_REPO_URL" != "null" ]; then
+        __REPO_FILENAME="saltstack-repo.repo"
+
+        base_url="$HTTP_VAL://${_REPO_URL}/yum/redhat/7/\$basearch/$repo_rev/"
+        base_url="$HTTP_VAL://${_REPO_URL}/yum/amazon/2/\$basearch/latest/"
+        gpg_key="${base_url}SALTSTACK-GPG-KEY.pub
+        ${base_url}base/RPM-GPG-KEY-CentOS-7"
+        repo_name="SaltStack repo for Amazon Linux 2.0"
+
+        # This should prob be refactored to use __install_saltstack_rhel_repository()
+        # With args passed in to do the right thing.  Reformatted to be more like the
+        # amazon linux yum file.
+        if [ ! -s "/etc/yum.repos.d/${__REPO_FILENAME}" ]; then
+          cat <<_eof > "/etc/yum.repos.d/${__REPO_FILENAME}"
+[saltstack-repo]
+name=$repo_name
+failovermethod=priority
+priority=10
+gpgcheck=1
+gpgkey=$gpg_key
+baseurl=$base_url
+_eof
+        fi
+
+    fi
+
+    # Package python-ordereddict-1.1-2.el6.noarch is obsoleted by python26-2.6.9-2.88.amzn1.x86_64
+    # which is already installed
+    __PACKAGES="m2crypto ${pkg_append}-crypto ${pkg_append}-jinja2 PyYAML"
+    __PACKAGES="${__PACKAGES} ${pkg_append}-msgpack ${pkg_append}-requests ${pkg_append}-zmq"
+    __PACKAGES="${__PACKAGES} ${pkg_append}-futures"
+
+    # shellcheck disable=SC2086
+    __yum_install_noinput ${__PACKAGES} || return 1
+
+    if [ "${_EXTRA_PACKAGES}" != "" ]; then
+        echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
+        # shellcheck disable=SC2086
+        __yum_install_noinput ${_EXTRA_PACKAGES} || return 1
+    fi
+}
+
 install_amazon_linux_ami_stable() {
     install_centos_stable || return 1
     return 0
@@ -4714,6 +4847,41 @@ install_amazon_linux_ami_testing() {
 }
 
 install_amazon_linux_ami_testing_post() {
+    install_centos_testing_post || return 1
+    return 0
+}
+
+install_amazon_linux_ami_2_stable() {
+    install_centos_stable || return 1
+    return 0
+}
+
+install_amazon_linux_ami_2_stable_post() {
+    install_centos_stable_post || return 1
+    return 0
+}
+
+install_amazon_linux_ami_2_restart_daemons() {
+    install_centos_restart_daemons || return 1
+    return 0
+}
+
+install_amazon_linux_ami_2_git() {
+    install_centos_git || return 1
+    return 0
+}
+
+install_amazon_linux_ami_2_git_post() {
+    install_centos_git_post || return 1
+    return 0
+}
+
+install_amazon_linux_ami_2_testing() {
+    install_centos_testing || return 1
+    return 0
+}
+
+install_amazon_linux_ami_2_testing_post() {
     install_centos_testing_post || return 1
     return 0
 }

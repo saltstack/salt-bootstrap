@@ -54,10 +54,10 @@ platforms:
   - name: ubuntu-18.04
     driver_config:
       run_command: /lib/systemd/systemd
-  - name: py2-ubuntu-16.04
+  - name: py2-ubuntu-1604
     driver_config:
       run_command: /lib/systemd/systemd
-  - name: py3-ubuntu-16.04
+  - name: py3-ubuntu-1604
       driver_config:
         run_command: /lib/systemd/systemd
       provisioner:
@@ -126,7 +126,7 @@ suites:
       provisioner:
         salt_version: 2018.3
       includes:
-      - py3-ubuntu-16.04
+      - py3-ubuntu-1604
   - name: py3-git-fluorine
       provisioner:
         salt_version: fluorine

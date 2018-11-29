@@ -3019,6 +3019,11 @@ __install_saltstack_debian_repository() {
 
     __PACKAGES=''
 
+    # Install procps i.e. debian:stretch-slim container images
+    if ! [ -x "$(command -v ps)" ]; then
+        __PACKAGES="${__PACKAGES} procps"
+    fi
+
     # Install downloader backend for GPG keys fetching
     if [ "$DISTRO_MAJOR_VERSION" -ge 9 ]; then
         __PACKAGES="${__PACKAGES} gnupg2 dirmngr"

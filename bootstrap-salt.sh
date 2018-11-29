@@ -3019,7 +3019,7 @@ __install_saltstack_debian_repository() {
 
     __PACKAGES=''
 
-    # Install procps i.e. debian:stretch-slim container images
+    # Install procps packages on systems missing it, e.g. debian:stretch-slim container images
     if ! [ -x "$(command -v ps)" ]; then
         __PACKAGES="${__PACKAGES} procps"
     fi

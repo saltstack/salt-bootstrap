@@ -46,6 +46,11 @@ platforms:
       run_command: /sbin/init
       provision_command:
         - yum install -y upstart
+  - name: amazon-2
+    driver_config:
+      image: amazonlinux:2
+      platform: rhel
+      run_command: /usr/lib/systemd/systemd
   - name: ubuntu-18.04
     driver_config:
       run_command: /lib/systemd/systemd
@@ -83,12 +88,14 @@ suites:
   - name: py2-git-2017.7
     provisioner:
       salt_version: 2017.7
+    excludes:
+      - arch
   - name: py2-git-2018.3
     provisioner:
       salt_version: 2018.3
-  - name: py2-git-fluorine
+  - name: py2-git-2019.2
     provisioner:
-      salt_version: fluorine
+      salt_version: 2019.2
   - name: py2-git-develop
     provisioner:
       salt_version: develop

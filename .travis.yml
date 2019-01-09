@@ -20,6 +20,7 @@ env:
   - PLATFORM=centos-7
   - PLATFORM=centos-6
   - PLATFORM=amazon-1
+  - PLATFORM=amazon-2
   - PLATFORM=ubuntu-1804
   - PLATFORM=ubuntu-1604
   - PLATFORM=ubuntu-1404

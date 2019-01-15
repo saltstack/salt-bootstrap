@@ -1,0 +1,14 @@
+kind: pipeline
+name: centos-7
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: build
+  image: docker:dind
+  privileged: true
+  environment:
+    PATH: $PATH:/usr/local/rbenv/plugins/ruby-build/bin:/usr/local/rbenv/bin:/usr/bin:/bin:/usr/local/bin:/usr/local/sbin:/usr/sbin:/sbin
+    

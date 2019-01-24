@@ -38,7 +38,6 @@ steps:
 - name: build
   image: saltstack/drone-plugin-kitchen
   privileged: true
-  failure: ignore
   settings:
     target: centos-7
     requirements: tests/requirements.txt
@@ -57,9 +56,8 @@ steps:
 - name: build
   image: saltstack/drone-plugin-kitchen
   privileged: true
-  failure: ignore
   settings:
-    target: amazon1
+    target: amazon-1
     requirements: tests/requirements.txt
   when:
     event:
@@ -76,9 +74,8 @@ steps:
 - name: build
   image: saltstack/drone-plugin-kitchen
   privileged: true
-  failure: ignore
   settings:
-    target: amazon2
+    target: amazon-2
     requirements: tests/requirements.txt
   when:
     event:
@@ -97,7 +94,7 @@ steps:
   privileged: true
   failure: ignore
   settings:
-    target: debian8
+    target: debian-8
     requirements: tests/requirements.txt
   when:
     event:
@@ -116,7 +113,7 @@ steps:
   privileged: true
   failure: ignore
   settings:
-    target: debian9
+    target: debian-9
     requirements: tests/requirements.txt
   when:
     event:
@@ -133,7 +130,6 @@ steps:
 - name: build
   image: saltstack/drone-plugin-kitchen
   privileged: true
-  failure: ignore
   settings:
     target: fedora
     requirements: tests/requirements.txt
@@ -152,7 +148,6 @@ steps:
 - name: build
   image: saltstack/drone-plugin-kitchen
   privileged: true
-  failure: ignore
   settings:
     target: opensuse
     requirements: tests/requirements.txt
@@ -173,7 +168,7 @@ steps:
   privileged: true
   failure: ignore
   settings:
-    target: ubuntu1604
+    target: ubuntu-16.04
     requirements: tests/requirements.txt
   when:
     event:
@@ -192,7 +187,7 @@ steps:
   privileged: true
   failure: ignore
   settings:
-    target: ubuntu1804
+    target: ubuntu-18.04
     requirements: tests/requirements.txt
   when:
     event:

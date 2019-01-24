@@ -7,6 +7,9 @@ steps:
   image: koalaman/shellcheck-alpine
   commands:
   - shellcheck -s sh -f checkstyle bootstrap-salt.sh
+  when:
+    event:
+    - pull_request
 
 ---
 kind: pipeline
@@ -19,6 +22,9 @@ steps:
   settings:
     target: centos-6
     requirements: tests/requirements.txt
+    when:
+      event:
+      - pull_request
 
 depends_on:
 - run-shellcheck
@@ -34,6 +40,9 @@ steps:
   settings:
     target: centos-7
     requirements: tests/requirements.txt
+    when:
+      event:
+      - pull_request
 
 depends_on:
 - run-shellcheck
@@ -49,6 +58,9 @@ steps:
   settings:
     target: amazon1
     requirements: tests/requirements.txt
+    when:
+      event:
+      - pull_request
 
 depends_on:
 - run-shellcheck
@@ -64,6 +76,9 @@ steps:
   settings:
     target: amazon2
     requirements: tests/requirements.txt
+    when:
+      event:
+      - pull_request
 
 depends_on:
 - run-shellcheck
@@ -79,6 +94,9 @@ steps:
   settings:
     target: debian8
     requirements: tests/requirements.txt
+    when:
+      event:
+      - pull_request
 
 depends_on:
 - run-shellcheck
@@ -94,6 +112,9 @@ steps:
   settings:
     target: debian9
     requirements: tests/requirements.txt
+    when:
+      event:
+      - pull_request
 
 depends_on:
 - run-shellcheck
@@ -109,6 +130,9 @@ steps:
   settings:
     target: fedora
     requirements: tests/requirements.txt
+    when:
+      event:
+      - pull_request
 
 depends_on:
 - run-shellcheck
@@ -124,6 +148,9 @@ steps:
   settings:
     target: opensuse
     requirements: tests/requirements.txt
+    when:
+      event:
+      - pull_request
 
 depends_on:
 - run-shellcheck
@@ -139,6 +166,9 @@ steps:
   settings:
     target: ubuntu1604
     requirements: tests/requirements.txt
+    when:
+      event:
+      - pull_request
 
 depends_on:
 - run-shellcheck
@@ -154,6 +184,9 @@ steps:
   settings:
     target: ubuntu1804
     requirements: tests/requirements.txt
+  when:
+    event:
+    - pull_request
 
 depends_on:
 - run-shellcheck

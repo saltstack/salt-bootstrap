@@ -168,7 +168,7 @@ steps:
   privileged: true
   failure: ignore
   settings:
-    target: ubuntu-16.04
+    target: ubuntu-1604
     requirements: tests/requirements.txt
   when:
     event:
@@ -187,7 +187,7 @@ steps:
   privileged: true
   failure: ignore
   settings:
-    target: ubuntu-18.04
+    target: ubuntu-1804
     requirements: tests/requirements.txt
   when:
     event:

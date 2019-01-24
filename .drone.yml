@@ -1,96 +1,200 @@
 ---
-#
-# execute this file via: drone exec --privileged saltstack/drone-plugin-kitchen
-#
 kind: pipeline
-name: salt-bootstrap
+name: run-shellcheck
 
 steps:
-- name: build-all
-  image: alpine
-  commands:
-  - echo Giddy up!!!
-  depends_on:
-  - run-shellcheck
-  - build-centos6
-  - build-centos7
-  - build-amazon1
-  - build-amazon2
-  - build-debian8
-  - build-debian9
-  - build-fedora
-  - build-opensuse
-  - build-ubuntu1604
-  - build-ubuntu1804
-- name: run-shellcheck
+- name: build
   image: koalaman/shellcheck-alpine
   commands:
   - shellcheck -s sh -f checkstyle bootstrap-salt.sh
-- name: build-centos6
+  when:
+    event:
+    - pull_request
+
+---
+kind: pipeline
+name: build-centos6
+
+steps:
+- name: build
   image: saltstack/drone-plugin-kitchen
   failure: ignore
   settings:
     target: centos-6
     requirements: tests/requirements.txt
-- name: build-centos7
+    when:
+      event:
+      - pull_request
+
+depends_on:
+- run-shellcheck
+
+---
+kind: pipeline
+name: build-centos7
+
+steps:
+- name: build
   image: saltstack/drone-plugin-kitchen
+  failure: ignore
   settings:
     target: centos-7
     requirements: tests/requirements.txt
-- name: build-amazon1
-  image: saltstack/drone-plugin-kitchen
-  settings:
-    target: amazon-1
-    requirements: tests/requirements.txt
-- name: build-amazon2
-  image: saltstack/drone-plugin-kitchen
-  settings:
-    target: amazon-2
-    requirements: tests/requirements.txt
-- name: build-debian8
-  image: saltstack/drone-plugin-kitchen
-  failure: ignore
-  settings:
-    target: debian-8
-    requirements: tests/requirements.txt
-- name: build-debian9
+    when:
+      event:
+      - pull_request
+
+depends_on:
+- run-shellcheck
+
+---
+kind: pipeline
+name: build-amazon1
+
+steps:
+- name: build
   image: saltstack/drone-plugin-kitchen
   failure: ignore
   settings:
-    target: debian-9
+    target: amazon1
     requirements: tests/requirements.txt
-- name: build-fedora
+    when:
+      event:
+      - pull_request
+
+depends_on:
+- run-shellcheck
+
+---
+kind: pipeline
+name: build-amazon2
+
+steps:
+- name: build
   image: saltstack/drone-plugin-kitchen
+  failure: ignore
+  settings:
+    target: amazon2
+    requirements: tests/requirements.txt
+    when:
+      event:
+      - pull_request
+
+depends_on:
+- run-shellcheck
+
+---
+kind: pipeline
+name: build-debian8
+
+steps:
+- name: build
+  image: saltstack/drone-plugin-kitchen
+  failure: ignore
+  settings:
+    target: debian8
+    requirements: tests/requirements.txt
+    when:
+      event:
+      - pull_request
+
+depends_on:
+- run-shellcheck
+
+---
+kind: pipeline
+name: build-debian9
+
+steps:
+- name: build
+  image: saltstack/drone-plugin-kitchen
+  failure: ignore
+  settings:
+    target: debian9
+    requirements: tests/requirements.txt
+    when:
+      event:
+      - pull_request
+
+depends_on:
+- run-shellcheck
+
+---
+kind: pipeline
+name: build-fedora
+
+steps:
+- name: build
+  image: saltstack/drone-plugin-kitchen
+  failure: ignore
   settings:
     target: fedora
     requirements: tests/requirements.txt
-- name: build-opensuse
+    when:
+      event:
+      - pull_request
+
+depends_on:
+- run-shellcheck
+
+---
+kind: pipeline
+name: build-opensuse
+
+steps:
+- name: build
   image: saltstack/drone-plugin-kitchen
+  failure: ignore
   settings:
     target: opensuse
     requirements: tests/requirements.txt
-- name: build-ubuntu1404
-  image: saltstack/drone-plugin-kitchen
-  settings:
-    target: ubuntu-1404
-    requirements: tests/requirements.txt
-- name: build-ubuntu1604
+    when:
+      event:
+      - pull_request
+
+depends_on:
+- run-shellcheck
+
+---
+kind: pipeline
+name: build-ubuntu1604
+
+steps:
+- name: build
   image: saltstack/drone-plugin-kitchen
   failure: ignore
   settings:
-    target: ubuntu-1604
+    target: ubuntu1604
     requirements: tests/requirements.txt
-- name: build-ubuntu1804
+    when:
+      event:
+      - pull_request
+
+depends_on:
+- run-shellcheck
+
+---
+kind: pipeline
+name: build-ubuntu1804
+
+steps:
+- name: build
   image: saltstack/drone-plugin-kitchen
   failure: ignore
   settings:
-    target: ubuntu-1804
+    target: ubuntu1804
     requirements: tests/requirements.txt
   when:
     event:
     - pull_request
+
+depends_on:
+- run-shellcheck
+
+
+
 ---
 kind: signature
-hmac: 04f23cb4ddf4e8223fb6c44bee2f043b73c93c983c397474b97db4deb6807701
+hmac: 32411e880077b35a310059229f194fd9a8e0fe7a10ec82d556e842d197349228
 
 ...

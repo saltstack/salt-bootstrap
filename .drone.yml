@@ -1,3 +1,4 @@
+---
 #
 # execute this file via: drone exec --privileged saltstack/drone-plugin-kitchen
 #
@@ -85,3 +86,8 @@ steps:
   settings:
     target: ubuntu-1804
     requirements: tests/requirements.txt
+---
+kind: signature
+hmac: 04f23cb4ddf4e8223fb6c44bee2f043b73c93c983c397474b97db4deb6807701
+
+...

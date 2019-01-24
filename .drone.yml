@@ -18,13 +18,14 @@ name: build-centos6
 steps:
 - name: build
   image: saltstack/drone-plugin-kitchen
+  privileged: true
   failure: ignore
   settings:
     target: centos-6
     requirements: tests/requirements.txt
-    when:
-      event:
-      - pull_request
+  when:
+    event:
+    - pull_request
 
 depends_on:
 - run-shellcheck
@@ -36,13 +37,14 @@ name: build-centos7
 steps:
 - name: build
   image: saltstack/drone-plugin-kitchen
+  privileged: true
   failure: ignore
   settings:
     target: centos-7
     requirements: tests/requirements.txt
-    when:
-      event:
-      - pull_request
+  when:
+    event:
+    - pull_request
 
 depends_on:
 - run-shellcheck
@@ -54,13 +56,14 @@ name: build-amazon1
 steps:
 - name: build
   image: saltstack/drone-plugin-kitchen
+  privileged: true
   failure: ignore
   settings:
     target: amazon1
     requirements: tests/requirements.txt
-    when:
-      event:
-      - pull_request
+  when:
+    event:
+    - pull_request
 
 depends_on:
 - run-shellcheck
@@ -72,13 +75,14 @@ name: build-amazon2
 steps:
 - name: build
   image: saltstack/drone-plugin-kitchen
+  privileged: true
   failure: ignore
   settings:
     target: amazon2
     requirements: tests/requirements.txt
-    when:
-      event:
-      - pull_request
+  when:
+    event:
+    - pull_request
 
 depends_on:
 - run-shellcheck
@@ -90,13 +94,14 @@ name: build-debian8
 steps:
 - name: build
   image: saltstack/drone-plugin-kitchen
+  privileged: true
   failure: ignore
   settings:
     target: debian8
     requirements: tests/requirements.txt
-    when:
-      event:
-      - pull_request
+  when:
+    event:
+    - pull_request
 
 depends_on:
 - run-shellcheck
@@ -108,13 +113,14 @@ name: build-debian9
 steps:
 - name: build
   image: saltstack/drone-plugin-kitchen
+  privileged: true
   failure: ignore
   settings:
     target: debian9
     requirements: tests/requirements.txt
-    when:
-      event:
-      - pull_request
+  when:
+    event:
+    - pull_request
 
 depends_on:
 - run-shellcheck
@@ -126,13 +132,14 @@ name: build-fedora
 steps:
 - name: build
   image: saltstack/drone-plugin-kitchen
+  privileged: true
   failure: ignore
   settings:
     target: fedora
     requirements: tests/requirements.txt
-    when:
-      event:
-      - pull_request
+  when:
+    event:
+    - pull_request
 
 depends_on:
 - run-shellcheck
@@ -144,13 +151,14 @@ name: build-opensuse
 steps:
 - name: build
   image: saltstack/drone-plugin-kitchen
+  privileged: true
   failure: ignore
   settings:
     target: opensuse
     requirements: tests/requirements.txt
-    when:
-      event:
-      - pull_request
+  when:
+    event:
+    - pull_request
 
 depends_on:
 - run-shellcheck
@@ -162,13 +170,14 @@ name: build-ubuntu1604
 steps:
 - name: build
   image: saltstack/drone-plugin-kitchen
+  privileged: true
   failure: ignore
   settings:
     target: ubuntu1604
     requirements: tests/requirements.txt
-    when:
-      event:
-      - pull_request
+  when:
+    event:
+    - pull_request
 
 depends_on:
 - run-shellcheck
@@ -180,6 +189,7 @@ name: build-ubuntu1804
 steps:
 - name: build
   image: saltstack/drone-plugin-kitchen
+  privileged: true
   failure: ignore
   settings:
     target: ubuntu1804

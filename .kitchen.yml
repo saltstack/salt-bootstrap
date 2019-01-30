@@ -118,4 +118,4 @@ suites:
 verifier:
   name: shell
   remote_exec: false
-  command: pytest -v tests/integration/
+  command: pytest --cache-clear -v tests/integration/

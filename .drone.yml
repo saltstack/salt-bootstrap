@@ -166,7 +166,6 @@ steps:
 - name: build
   image: saltstack/drone-plugin-kitchen
   privileged: true
-  failure: ignore
   settings:
     target: ubuntu-1604
     requirements: tests/requirements.txt
@@ -185,7 +184,6 @@ steps:
 - name: build
   image: saltstack/drone-plugin-kitchen
   privileged: true
-  failure: ignore
   settings:
     target: ubuntu-1804
     requirements: tests/requirements.txt

@@ -7,7 +7,7 @@ platform:
   arch: amd64
 
 steps:
-- name: build
+- name: build-centos-6
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
@@ -29,7 +29,7 @@ platform:
   arch: amd64
 
 steps:
-- name: build
+- name: build-centos-7
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
@@ -51,7 +51,7 @@ platform:
   arch: amd64
 
 steps:
-- name: build
+- name: build-debian-8
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
@@ -73,7 +73,7 @@ platform:
   arch: amd64
 
 steps:
-- name: build
+- name: build-debian-9
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
@@ -95,7 +95,7 @@ platform:
   arch: amd64
 
 steps:
-- name: build
+- name: build-ubuntu-1404
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
@@ -117,7 +117,7 @@ platform:
   arch: amd64
 
 steps:
-- name: build
+- name: build-ubuntu-1804
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
@@ -139,7 +139,7 @@ platform:
   arch: amd64
 
 steps:
-- name: shellcheck
+- name: run-shellcheck
   image: koalaman/shellcheck-alpine
   commands:
   - shellcheck -s sh -f checkstyle bootstrap-salt.sh

@@ -1,9 +1,10 @@
 local Shellcheck() = {
   kind: 'pipeline',
   name: 'run-shellcheck',
+  
   steps: [
     {
-      name: 'shellcheck',
+      name: 'run-shellcheck',
       image: 'koalaman/shellcheck-alpine',
       commands: [
         'shellcheck -s sh -f checkstyle bootstrap-salt.sh',
@@ -19,7 +20,7 @@ local Build(os, os_version) = {
         
   steps: [
     {
-      name: 'build',
+      name: 'build-' + os + '-' + os_version,
       image: 'saltstack/drone-plugin-kitchen',
       privileged: true,
       settings: {
@@ -47,7 +48,8 @@ local distros = [
 [
   Build(distro.name, distro.version)
   for distro in distros
-] + 
+] 
++ 
 [
   Shellcheck()
 ] 

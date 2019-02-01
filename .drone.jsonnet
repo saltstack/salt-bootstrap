@@ -10,12 +10,12 @@ local Build(os, os_version) = {
         target: os + '-' + os_version,
         requirements: 'tests/requirements.txt',
       },
-        when: { event: ['pull_request'] },
-      }
-   ],
+      when: { event: ['pull_request'] },
+      },
+  ],
   depends_on: [
     'run-shellcheck'
-  ],
+  ]
 };
 
 local Shellcheck() = {
@@ -28,7 +28,7 @@ local Shellcheck() = {
       commands: [
         'shellcheck -s sh -f checkstyle bootstrap-salt.sh',
       ],
-     when: { event: ['pull_request'] }
+       when: { event: ['pull_request'] }
     }
   ]
 };

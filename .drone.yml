@@ -1,168 +1,154 @@
 ---
-{
-   "depends_on": [
-      "run-shellcheck"
-   ],
-   "kind": "pipeline",
-   "name": "build-centos-6",
-   "steps": [
-      {
-         "image": "saltstack/drone-plugin-kitchen",
-         "name": "build",
-         "privileged": true,
-         "settings": {
-            "requirements": "tests/requirements.txt",
-            "target": "centos-6"
-         },
-         "when": {
-            "event": [
-               "pull_request"
-            ]
-         }
-      }
-   ]
-}
+kind: pipeline
+name: build-centos-6
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: build
+  image: saltstack/drone-plugin-kitchen
+  settings:
+    requirements: tests/requirements.txt
+    target: centos-6
+  privileged: true
+  when:
+    event:
+    - pull_request
+
+depends_on:
+- run-shellcheck
+
 ---
-{
-   "depends_on": [
-      "run-shellcheck"
-   ],
-   "kind": "pipeline",
-   "name": "build-centos-7",
-   "steps": [
-      {
-         "image": "saltstack/drone-plugin-kitchen",
-         "name": "build",
-         "privileged": true,
-         "settings": {
-            "requirements": "tests/requirements.txt",
-            "target": "centos-7"
-         },
-         "when": {
-            "event": [
-               "pull_request"
-            ]
-         }
-      }
-   ]
-}
+kind: pipeline
+name: build-centos-7
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: build
+  image: saltstack/drone-plugin-kitchen
+  settings:
+    requirements: tests/requirements.txt
+    target: centos-7
+  privileged: true
+  when:
+    event:
+    - pull_request
+
+depends_on:
+- run-shellcheck
+
 ---
-{
-   "depends_on": [
-      "run-shellcheck"
-   ],
-   "kind": "pipeline",
-   "name": "build-debian-8",
-   "steps": [
-      {
-         "image": "saltstack/drone-plugin-kitchen",
-         "name": "build",
-         "privileged": true,
-         "settings": {
-            "requirements": "tests/requirements.txt",
-            "target": "debian-8"
-         },
-         "when": {
-            "event": [
-               "pull_request"
-            ]
-         }
-      }
-   ]
-}
+kind: pipeline
+name: build-debian-8
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: build
+  image: saltstack/drone-plugin-kitchen
+  settings:
+    requirements: tests/requirements.txt
+    target: debian-8
+  privileged: true
+  when:
+    event:
+    - pull_request
+
+depends_on:
+- run-shellcheck
+
 ---
-{
-   "depends_on": [
-      "run-shellcheck"
-   ],
-   "kind": "pipeline",
-   "name": "build-debian-9",
-   "steps": [
-      {
-         "image": "saltstack/drone-plugin-kitchen",
-         "name": "build",
-         "privileged": true,
-         "settings": {
-            "requirements": "tests/requirements.txt",
-            "target": "debian-9"
-         },
-         "when": {
-            "event": [
-               "pull_request"
-            ]
-         }
-      }
-   ]
-}
+kind: pipeline
+name: build-debian-9
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: build
+  image: saltstack/drone-plugin-kitchen
+  settings:
+    requirements: tests/requirements.txt
+    target: debian-9
+  privileged: true
+  when:
+    event:
+    - pull_request
+
+depends_on:
+- run-shellcheck
+
 ---
-{
-   "depends_on": [
-      "run-shellcheck"
-   ],
-   "kind": "pipeline",
-   "name": "build-ubuntu-1404",
-   "steps": [
-      {
-         "image": "saltstack/drone-plugin-kitchen",
-         "name": "build",
-         "privileged": true,
-         "settings": {
-            "requirements": "tests/requirements.txt",
-            "target": "ubuntu-1404"
-         },
-         "when": {
-            "event": [
-               "pull_request"
-            ]
-         }
-      }
-   ]
-}
+kind: pipeline
+name: build-ubuntu-1404
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: build
+  image: saltstack/drone-plugin-kitchen
+  settings:
+    requirements: tests/requirements.txt
+    target: ubuntu-1404
+  privileged: true
+  when:
+    event:
+    - pull_request
+
+depends_on:
+- run-shellcheck
+
 ---
-{
-   "depends_on": [
-      "run-shellcheck"
-   ],
-   "kind": "pipeline",
-   "name": "build-ubuntu-1804",
-   "steps": [
-      {
-         "image": "saltstack/drone-plugin-kitchen",
-         "name": "build",
-         "privileged": true,
-         "settings": {
-            "requirements": "tests/requirements.txt",
-            "target": "ubuntu-1804"
-         },
-         "when": {
-            "event": [
-               "pull_request"
-            ]
-         }
-      }
-   ]
-}
+kind: pipeline
+name: build-ubuntu-1804
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: build
+  image: saltstack/drone-plugin-kitchen
+  settings:
+    requirements: tests/requirements.txt
+    target: ubuntu-1804
+  privileged: true
+  when:
+    event:
+    - pull_request
+
+depends_on:
+- run-shellcheck
+
 ---
-{
-   "kind": "pipeline",
-   "name": "run-shellcheck",
-   "steps": [
-      {
-         "commands": [
-            "shellcheck -s sh -f checkstyle bootstrap-salt.sh"
-         ],
-         "image": "koalaman/shellcheck-alpine",
-         "name": "run-shellcheck",
-         "when": {
-            "event": [
-               "pull_request"
-            ]
-         }
-      }
-   ]
-}
+kind: pipeline
+name: run-shellcheck
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: run-shellcheck
+  image: koalaman/shellcheck-alpine
+  commands:
+  - shellcheck -s sh -f checkstyle bootstrap-salt.sh
+  when:
+    event:
+    - pull_request
+
 ---
 kind: signature
-hmac: 28ee922e7781842a8666344b4f7ebce3a5c0971db4f2a78c240548c45ff251d4
+hmac: 3932ad0ad24dfbc51ac7367295fbd3c95288dc79bfb12246269965f9a9965ae4
 
 ...

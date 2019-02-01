@@ -161,4 +161,8 @@
       }
    ]
 }
+---
+kind: signature
+hmac: 28ee922e7781842a8666344b4f7ebce3a5c0971db4f2a78c240548c45ff251d4
+
 ...

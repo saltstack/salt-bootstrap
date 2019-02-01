@@ -36,7 +36,9 @@ local Build(os, os_version) = {
 };
         
 local distros = [
-  { name: 'centos', version: '6' },
+  { name: 'amazon', version: '1' },
+  { name: 'amazon', version: '2' },
+#  { name: 'centos', version: '6' },
   { name: 'centos', version: '7' },
   { name: 'debian', version: '8' },
   { name: 'debian', version: '9' },
@@ -44,12 +46,5 @@ local distros = [
 #  { name: 'ubuntu', version: '1604' },
   { name: 'ubuntu', version: '1804' },
 ];
-        
-[
-  Build(distro.name, distro.version)
-  for distro in distros
-] 
-+ 
-[
-  Shellcheck()
-] 
+
+[Shellcheck()] + [Build(distro.name, distro.version)for distro in distros]

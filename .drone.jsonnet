@@ -4,7 +4,7 @@ local Shellcheck() = {
   
   steps: [
     {
-      name: 'run-shellcheck',
+      name: 'build',
       image: 'koalaman/shellcheck-alpine',
       commands: [
         'shellcheck -s sh -f checkstyle bootstrap-salt.sh',
@@ -20,9 +20,9 @@ local Build(os, os_version) = {
         
   steps: [
     {
-      name: 'build-' + os + '-' + os_version,
-      image: 'saltstack/drone-plugin-kitchen',
+      name: 'build',
       privileged: true,
+      image: 'saltstack/drone-plugin-kitchen',
       settings: {
         target: os + '-' + os_version,
         requirements: 'tests/requirements.txt',

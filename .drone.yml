@@ -13,25 +13,6 @@ steps:
 
 ---
 kind: pipeline
-name: build-centos6
-
-steps:
-- name: build
-  image: saltstack/drone-plugin-kitchen
-  privileged: true
-  failure: ignore
-  settings:
-    target: centos-6
-    requirements: tests/requirements.txt
-  when:
-    event:
-    - pull_request
-
-depends_on:
-- run-shellcheck
-
----
-kind: pipeline
 name: build-centos7
 
 steps:
@@ -150,24 +131,6 @@ steps:
   privileged: true
   settings:
     target: opensuse
-    requirements: tests/requirements.txt
-  when:
-    event:
-    - pull_request
-
-depends_on:
-- run-shellcheck
-
----
-kind: pipeline
-name: build-ubuntu1604
-
-steps:
-- name: build
-  image: saltstack/drone-plugin-kitchen
-  privileged: true
-  settings:
-    target: ubuntu-1604
     requirements: tests/requirements.txt
   when:
     event:

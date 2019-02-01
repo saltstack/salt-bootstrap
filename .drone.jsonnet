@@ -19,7 +19,7 @@ local Build(os, os_version) = {
 };
 
 local Shellcheck() = {
-kind: 'pipeline',
+  kind: 'pipeline',
   name: 'run-shellcheck',
   steps: [
     {

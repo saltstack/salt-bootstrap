@@ -152,7 +152,7 @@
             "shellcheck -s sh -f checkstyle bootstrap-salt.sh"
          ],
          "image": "koalaman/shellcheck-alpine",
-         "name": "run-shellcheck",
+         "name": "shellcheck",
          "when": {
             "event": [
                "pull_request"
@@ -163,6 +163,6 @@
 }
 ---
 kind: signature
-hmac: 28ee922e7781842a8666344b4f7ebce3a5c0971db4f2a78c240548c45ff251d4
+hmac: e0f575abc8248a3efe3291836aaee209aac496312196dc8289c4e5abc8268c3a
 
 ...

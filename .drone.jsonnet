@@ -23,7 +23,7 @@ local Shellcheck() = {
   name: 'run-shellcheck',
   steps: [
     {
-      name: 'run-shellcheck',
+      name: 'shellcheck',
       image: 'koalaman/shellcheck-alpine',
       commands: [
         'shellcheck -s sh -f checkstyle bootstrap-salt.sh',

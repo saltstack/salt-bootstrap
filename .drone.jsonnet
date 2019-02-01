@@ -1,6 +1,22 @@
+local Shellcheck() = {
+  kind: 'pipeline',
+  name: 'run-shellcheck',
+  steps: [
+    {
+      name: 'shellcheck',
+      image: 'koalaman/shellcheck-alpine',
+      commands: [
+        'shellcheck -s sh -f checkstyle bootstrap-salt.sh',
+      ],
+       when: { event: ['pull_request'] }
+    }
+  ]
+};
+
 local Build(os, os_version) = {
   kind: 'pipeline',
   name: 'build-' + os + '-' + os_version,
+        
   steps: [
     {
       name: 'build',
@@ -17,21 +33,6 @@ local Build(os, os_version) = {
     'run-shellcheck'
   ]
 };
-
-local Shellcheck() = {
-  kind: 'pipeline',
-  name: 'run-shellcheck',
-  steps: [
-    {
-      name: 'shellcheck',
-      image: 'koalaman/shellcheck-alpine',
-      commands: [
-        'shellcheck -s sh -f checkstyle bootstrap-salt.sh',
-      ],
-       when: { event: ['pull_request'] }
-    }
-  ]
-};
         
 local distros = [
   { name: 'centos', version: '6' },
@@ -46,6 +47,7 @@ local distros = [
 [
   Build(distro.name, distro.version)
   for distro in distros
-] + [
+] + 
+[
   Shellcheck()
 ] 

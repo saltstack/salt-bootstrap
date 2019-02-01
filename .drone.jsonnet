@@ -42,7 +42,7 @@ local distros = [
   { name: 'centos', version: '7' },
   { name: 'debian', version: '8' },
   { name: 'debian', version: '9' },
-  { name: 'ubuntu', version: '1404' },
+#  { name: 'ubuntu', version: '1404' },
 #  { name: 'ubuntu', version: '1604' },
   { name: 'ubuntu', version: '1804' },
 ];

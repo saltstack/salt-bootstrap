@@ -127,28 +127,6 @@ depends_on:
 
 ---
 kind: pipeline
-name: build-ubuntu-1404
-
-platform:
-  os: linux
-  arch: amd64
-
-steps:
-- name: build
-  image: saltstack/drone-plugin-kitchen
-  settings:
-    requirements: tests/requirements.txt
-    target: ubuntu-1404
-  privileged: true
-  when:
-    event:
-    - pull_request
-
-depends_on:
-- run-shellcheck
-
----
-kind: pipeline
 name: build-ubuntu-1804
 
 platform:
@@ -171,6 +149,6 @@ depends_on:
 
 ---
 kind: signature
-hmac: 3872650e56f228942361778f1a5b97b9d9447d880e951df3e938db66db4dc4b5
+hmac: 177ea56204b3976fd6728cbddd22a8fab85c9d487294021221871cfb3d568efa
 
 ...

@@ -1,203 +1,164 @@
 ---
-kind: pipeline
-name: run-shellcheck
-
-steps:
-- name: build
-  image: koalaman/shellcheck-alpine
-  commands:
-  - shellcheck -s sh -f checkstyle bootstrap-salt.sh
-  when:
-    event:
-    - pull_request
-
+{
+   "depends_on": [
+      "run-shellcheck"
+   ],
+   "kind": "pipeline",
+   "name": "build-centos-6",
+   "steps": [
+      {
+         "image": "saltstack/drone-plugin-kitchen",
+         "name": "build",
+         "privileged": true,
+         "settings": {
+            "requirements": "tests/requirements.txt",
+            "target": "centos-6"
+         },
+         "when": {
+            "event": [
+               "pull_request"
+            ]
+         }
+      }
+   ]
+}
 ---
-kind: pipeline
-name: build-centos6
-
-steps:
-- name: build
-  image: saltstack/drone-plugin-kitchen
-  privileged: true
-  failure: ignore
-  settings:
-    target: centos-6
-    requirements: tests/requirements.txt
-  when:
-    event:
-    - pull_request
-
-depends_on:
-- run-shellcheck
-
+{
+   "depends_on": [
+      "run-shellcheck"
+   ],
+   "kind": "pipeline",
+   "name": "build-centos-7",
+   "steps": [
+      {
+         "image": "saltstack/drone-plugin-kitchen",
+         "name": "build",
+         "privileged": true,
+         "settings": {
+            "requirements": "tests/requirements.txt",
+            "target": "centos-7"
+         },
+         "when": {
+            "event": [
+               "pull_request"
+            ]
+         }
+      }
+   ]
+}
 ---
-kind: pipeline
-name: build-centos7
-
-steps:
-- name: build
-  image: saltstack/drone-plugin-kitchen
-  privileged: true
-  settings:
-    target: centos-7
-    requirements: tests/requirements.txt
-  when:
-    event:
-    - pull_request
-
-depends_on:
-- run-shellcheck
-
+{
+   "depends_on": [
+      "run-shellcheck"
+   ],
+   "kind": "pipeline",
+   "name": "build-debian-8",
+   "steps": [
+      {
+         "image": "saltstack/drone-plugin-kitchen",
+         "name": "build",
+         "privileged": true,
+         "settings": {
+            "requirements": "tests/requirements.txt",
+            "target": "debian-8"
+         },
+         "when": {
+            "event": [
+               "pull_request"
+            ]
+         }
+      }
+   ]
+}
 ---
-kind: pipeline
-name: build-amazon1
-
-steps:
-- name: build
-  image: saltstack/drone-plugin-kitchen
-  privileged: true
-  settings:
-    target: amazon-1
-    requirements: tests/requirements.txt
-  when:
-    event:
-    - pull_request
-
-depends_on:
-- run-shellcheck
-
+{
+   "depends_on": [
+      "run-shellcheck"
+   ],
+   "kind": "pipeline",
+   "name": "build-debian-9",
+   "steps": [
+      {
+         "image": "saltstack/drone-plugin-kitchen",
+         "name": "build",
+         "privileged": true,
+         "settings": {
+            "requirements": "tests/requirements.txt",
+            "target": "debian-9"
+         },
+         "when": {
+            "event": [
+               "pull_request"
+            ]
+         }
+      }
+   ]
+}
 ---
-kind: pipeline
-name: build-amazon2
-
-steps:
-- name: build
-  image: saltstack/drone-plugin-kitchen
-  privileged: true
-  settings:
-    target: amazon-2
-    requirements: tests/requirements.txt
-  when:
-    event:
-    - pull_request
-
-depends_on:
-- run-shellcheck
-
+{
+   "depends_on": [
+      "run-shellcheck"
+   ],
+   "kind": "pipeline",
+   "name": "build-ubuntu-1404",
+   "steps": [
+      {
+         "image": "saltstack/drone-plugin-kitchen",
+         "name": "build",
+         "privileged": true,
+         "settings": {
+            "requirements": "tests/requirements.txt",
+            "target": "ubuntu-1404"
+         },
+         "when": {
+            "event": [
+               "pull_request"
+            ]
+         }
+      }
+   ]
+}
 ---
-kind: pipeline
-name: build-debian8
-
-steps:
-- name: build
-  image: saltstack/drone-plugin-kitchen
-  privileged: true
-  failure: ignore
-  settings:
-    target: debian-8
-    requirements: tests/requirements.txt
-  when:
-    event:
-    - pull_request
-
-depends_on:
-- run-shellcheck
-
+{
+   "depends_on": [
+      "run-shellcheck"
+   ],
+   "kind": "pipeline",
+   "name": "build-ubuntu-1804",
+   "steps": [
+      {
+         "image": "saltstack/drone-plugin-kitchen",
+         "name": "build",
+         "privileged": true,
+         "settings": {
+            "requirements": "tests/requirements.txt",
+            "target": "ubuntu-1804"
+         },
+         "when": {
+            "event": [
+               "pull_request"
+            ]
+         }
+      }
+   ]
+}
 ---
-kind: pipeline
-name: build-debian9
-
-steps:
-- name: build
-  image: saltstack/drone-plugin-kitchen
-  privileged: true
-  failure: ignore
-  settings:
-    target: debian-9
-    requirements: tests/requirements.txt
-  when:
-    event:
-    - pull_request
-
-depends_on:
-- run-shellcheck
-
----
-kind: pipeline
-name: build-fedora
-
-steps:
-- name: build
-  image: saltstack/drone-plugin-kitchen
-  privileged: true
-  settings:
-    target: fedora
-    requirements: tests/requirements.txt
-  when:
-    event:
-    - pull_request
-
-depends_on:
-- run-shellcheck
-
----
-kind: pipeline
-name: build-opensuse
-
-steps:
-- name: build
-  image: saltstack/drone-plugin-kitchen
-  privileged: true
-  settings:
-    target: opensuse
-    requirements: tests/requirements.txt
-  when:
-    event:
-    - pull_request
-
-depends_on:
-- run-shellcheck
-
----
-kind: pipeline
-name: build-ubuntu1604
-
-steps:
-- name: build
-  image: saltstack/drone-plugin-kitchen
-  privileged: true
-  settings:
-    target: ubuntu-1604
-    requirements: tests/requirements.txt
-  when:
-    event:
-    - pull_request
-
-depends_on:
-- run-shellcheck
-
----
-kind: pipeline
-name: build-ubuntu1804
-
-steps:
-- name: build
-  image: saltstack/drone-plugin-kitchen
-  privileged: true
-  settings:
-    target: ubuntu-1804
-    requirements: tests/requirements.txt
-  when:
-    event:
-    - pull_request
-
-depends_on:
-- run-shellcheck
-
-
-
----
-kind: signature
-hmac: 32411e880077b35a310059229f194fd9a8e0fe7a10ec82d556e842d197349228
-
+{
+   "kind": "pipeline",
+   "name": "run-shellcheck",
+   "steps": [
+      {
+         "commands": [
+            "shellcheck -s sh -f checkstyle bootstrap-salt.sh"
+         ],
+         "image": "koalaman/shellcheck-alpine",
+         "name": "run-shellcheck",
+         "when": {
+            "event": [
+               "pull_request"
+            ]
+         }
+      }
+   ]
+}
 ...

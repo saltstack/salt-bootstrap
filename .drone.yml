@@ -195,8 +195,6 @@ depends_on:
 - run-shellcheck
 
 
-
----
 ---
 kind: signature
 hmac: a31505227173366492f3e1f12de826593b380306a1bb735d36c2b85d770bea8f

@@ -2,6 +2,10 @@
 kind: pipeline
 name: run-shellcheck
 
+platform:
+  os: linux
+  arch: amd64
+
 steps:
 - name: build
   image: koalaman/shellcheck-alpine
@@ -13,52 +17,19 @@ steps:
 
 ---
 kind: pipeline
-name: build-centos6
+name: build-amazon-1
+
+platform:
+  os: linux
+  arch: amd64
 
 steps:
 - name: build
   image: saltstack/drone-plugin-kitchen
-  privileged: true
-  failure: ignore
   settings:
-    target: centos-6
     requirements: tests/requirements.txt
-  when:
-    event:
-    - pull_request
-
-depends_on:
-- run-shellcheck
-
----
-kind: pipeline
-name: build-centos7
-
-steps:
-- name: build
-  image: saltstack/drone-plugin-kitchen
-  privileged: true
-  settings:
-    target: centos-7
-    requirements: tests/requirements.txt
-  when:
-    event:
-    - pull_request
-
-depends_on:
-- run-shellcheck
-
----
-kind: pipeline
-name: build-amazon1
-
-steps:
-- name: build
-  image: saltstack/drone-plugin-kitchen
-  privileged: true
-  settings:
     target: amazon-1
-    requirements: tests/requirements.txt
+  privileged: true
   when:
     event:
     - pull_request
@@ -68,15 +39,19 @@ depends_on:
 
 ---
 kind: pipeline
-name: build-amazon2
+name: build-amazon-2
+
+platform:
+  os: linux
+  arch: amd64
 
 steps:
 - name: build
   image: saltstack/drone-plugin-kitchen
-  privileged: true
   settings:
+    requirements: tests/requirements.txt
     target: amazon-2
-    requirements: tests/requirements.txt
+  privileged: true
   when:
     event:
     - pull_request
@@ -86,16 +61,41 @@ depends_on:
 
 ---
 kind: pipeline
-name: build-debian8
+name: build-centos-7
+
+platform:
+  os: linux
+  arch: amd64
 
 steps:
 - name: build
   image: saltstack/drone-plugin-kitchen
-  privileged: true
-  failure: ignore
   settings:
+    requirements: tests/requirements.txt
+    target: centos-7
+  privileged: true
+  when:
+    event:
+    - pull_request
+
+depends_on:
+- run-shellcheck
+
+---
+kind: pipeline
+name: build-debian-8
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: build
+  image: saltstack/drone-plugin-kitchen
+  settings:
+    requirements: tests/requirements.txt
     target: debian-8
-    requirements: tests/requirements.txt
+  privileged: true
   when:
     event:
     - pull_request
@@ -105,16 +105,19 @@ depends_on:
 
 ---
 kind: pipeline
-name: build-debian9
+name: build-debian-9
+
+platform:
+  os: linux
+  arch: amd64
 
 steps:
 - name: build
   image: saltstack/drone-plugin-kitchen
-  privileged: true
-  failure: ignore
   settings:
+    requirements: tests/requirements.txt
     target: debian-9
-    requirements: tests/requirements.txt
+  privileged: true
   when:
     event:
     - pull_request
@@ -124,80 +127,28 @@ depends_on:
 
 ---
 kind: pipeline
-name: build-fedora
+name: build-ubuntu-1804
+
+platform:
+  os: linux
+  arch: amd64
 
 steps:
 - name: build
   image: saltstack/drone-plugin-kitchen
-  privileged: true
   settings:
-    target: fedora
     requirements: tests/requirements.txt
-  when:
-    event:
-    - pull_request
-
-depends_on:
-- run-shellcheck
-
----
-kind: pipeline
-name: build-opensuse
-
-steps:
-- name: build
-  image: saltstack/drone-plugin-kitchen
-  privileged: true
-  settings:
-    target: opensuse
-    requirements: tests/requirements.txt
-  when:
-    event:
-    - pull_request
-
-depends_on:
-- run-shellcheck
-
----
-kind: pipeline
-name: build-ubuntu1604
-
-steps:
-- name: build
-  image: saltstack/drone-plugin-kitchen
-  privileged: true
-  settings:
-    target: ubuntu-1604
-    requirements: tests/requirements.txt
-  when:
-    event:
-    - pull_request
-
-depends_on:
-- run-shellcheck
-
----
-kind: pipeline
-name: build-ubuntu1804
-
-steps:
-- name: build
-  image: saltstack/drone-plugin-kitchen
-  privileged: true
-  settings:
     target: ubuntu-1804
-    requirements: tests/requirements.txt
+  privileged: true
   when:
     event:
     - pull_request
 
 depends_on:
 - run-shellcheck
-
-
 
 ---
 kind: signature
-hmac: 32411e880077b35a310059229f194fd9a8e0fe7a10ec82d556e842d197349228
+hmac: 177ea56204b3976fd6728cbddd22a8fab85c9d487294021221871cfb3d568efa
 
 ...

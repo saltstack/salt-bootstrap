@@ -1475,7 +1475,7 @@ __debian_derivatives_translation() {
                 ;;
             turnkey)
                 _major=$(echo "$DISTRO_VERSION" | sed 's/^\([0-9]*\).*/\1/g')
-                _debian_derivative="bunsenlabs"
+                _debian_derivative="turnkey"
                 ;;
         esac
 

@@ -5228,7 +5228,7 @@ install_freebsd_git_deps() {
     install_freebsd_9_stable_deps || return 1
 
     # shellcheck disable=SC2086
-    SALT_DEPENDENCIES=$(/usr/local/sbin/pkg search -d py27-salt | grep -v Depends | sed -e 's/^[[:space:]]*//' | tail -n +3 | tr '\n' ' ')
+    SALT_DEPENDENCIES=$(/usr/local/sbin/pkg search ${FROM_FREEBSD} -d py27-salt | grep -v Depends | sed -e 's/^[[:space:]]*//' | tail -n +3 | tr '\n' ' ')
     # shellcheck disable=SC2086
     /usr/local/sbin/pkg install ${FROM_FREEBSD} -y ${SALT_DEPENDENCIES} || return 1
     # install python meta package

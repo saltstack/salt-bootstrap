@@ -96,7 +96,7 @@ a bug fix or feature implementation can be merged in.
 
 ### PR Tests
 
-There are several Jenkins jobs that run on each Pull Request. Most of these are
+There are several build jobs that run on each Pull Request. Most of these are
 CI jobs that set up different steps, such as setting up the job, cloning the
 repo from the PR, etc.
 

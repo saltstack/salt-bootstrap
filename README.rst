@@ -2,7 +2,7 @@
 Bootstrapping Salt
 ==================
 
-|windows_build|
+|build|
 
 .. contents::
     :local:
@@ -425,9 +425,8 @@ Salt components, custom configurations, and even `pre-accepted Minion keys`_ alr
 .. _`Ubuntu's release schedule`: https://wiki.ubuntu.com/Releases
 .. _Vagrant: http://www.vagrantup.com
 
-
-.. |windows_build|  image:: https://ci.appveyor.com/api/projects/status/github/saltstack/salt-bootstrap?branch=develop&svg=true
-    :target: https://ci.appveyor.com/project/saltstack-public/salt-bootstrap
-    :alt: Build status of the develop branch on Windows
+.. |build|  image:: https://drone.saltstack.com/api/badges/saltstack/salt-bootstrap/status.svg
+    :target: https://drone.saltstack.com/saltstack/salt-bootstrap
+    :alt: Build status on Linux
 
 .. vim: fenc=utf-8 spell spl=en cc=100 tw=99 fo=want sts=2 sw=2 et

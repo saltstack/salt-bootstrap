@@ -11,9 +11,6 @@ steps:
   image: koalaman/shellcheck-alpine
   commands:
   - shellcheck -s sh -f checkstyle bootstrap-salt.sh
-  when:
-    event:
-    - pull_request
 
 ---
 kind: pipeline
@@ -30,9 +27,6 @@ steps:
     requirements: tests/requirements.txt
     target: amazon-1
   privileged: true
-  when:
-    event:
-    - pull_request
 
 depends_on:
 - run-shellcheck
@@ -52,9 +46,6 @@ steps:
     requirements: tests/requirements.txt
     target: amazon-2
   privileged: true
-  when:
-    event:
-    - pull_request
 
 depends_on:
 - run-shellcheck
@@ -74,9 +65,6 @@ steps:
     requirements: tests/requirements.txt
     target: centos-7
   privileged: true
-  when:
-    event:
-    - pull_request
 
 depends_on:
 - run-shellcheck
@@ -96,9 +84,6 @@ steps:
     requirements: tests/requirements.txt
     target: debian-8
   privileged: true
-  when:
-    event:
-    - pull_request
 
 depends_on:
 - run-shellcheck
@@ -118,9 +103,6 @@ steps:
     requirements: tests/requirements.txt
     target: debian-9
   privileged: true
-  when:
-    event:
-    - pull_request
 
 depends_on:
 - run-shellcheck
@@ -140,15 +122,12 @@ steps:
     requirements: tests/requirements.txt
     target: ubuntu-1804
   privileged: true
-  when:
-    event:
-    - pull_request
 
 depends_on:
 - run-shellcheck
 
 ---
 kind: signature
-hmac: 177ea56204b3976fd6728cbddd22a8fab85c9d487294021221871cfb3d568efa
+hmac: 563c4cb4cefd58c08143192bd72c5a25c5d0edbe4a6d1f5f89c87d3ca2024246
 
 ...

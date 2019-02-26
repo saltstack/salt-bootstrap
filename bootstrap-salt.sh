@@ -2788,6 +2788,7 @@ install_ubuntu_git_deps() {
         __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-msgpack python${PY_PKG_VER}-requests"
         __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado python${PY_PKG_VER}-yaml"
         __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-zmq"
+        __PACKAGES="${__PACKAGES} python-concurrent.futures"
 
         if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
             # Install python-libcloud if asked to

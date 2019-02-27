@@ -1,5 +1,11 @@
 Version TBD (In Progress on the Develop Branch):
 
+Version 2019.02.27:
+    * Add support for bunsenlabs devian derivative (kevinquinnyo) #1300
+    * Add support for TurnKey devian derivative (dafyddj) #1313
+    * Fix BSD develop install (hackacad) #1316
+    * Ensure python-concurrent.futures is installed for Ubuntu (garethgreenaway) #1321
+
 Version 2019.01.08:
     * use official amazon linux 2 repo for amazon linux 2 (mchugh19) #1287
     * Add release info to applicable docs (rallytime) #1292

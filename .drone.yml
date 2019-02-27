@@ -1,0 +1,133 @@
+---
+kind: pipeline
+name: run-shellcheck
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: build
+  image: koalaman/shellcheck-alpine
+  commands:
+  - shellcheck -s sh -f checkstyle bootstrap-salt.sh
+
+---
+kind: pipeline
+name: build-amazon-1
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: build
+  image: saltstack/drone-plugin-kitchen
+  settings:
+    requirements: tests/requirements.txt
+    target: amazon-1
+  privileged: true
+
+depends_on:
+- run-shellcheck
+
+---
+kind: pipeline
+name: build-amazon-2
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: build
+  image: saltstack/drone-plugin-kitchen
+  settings:
+    requirements: tests/requirements.txt
+    target: amazon-2
+  privileged: true
+
+depends_on:
+- run-shellcheck
+
+---
+kind: pipeline
+name: build-centos-7
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: build
+  image: saltstack/drone-plugin-kitchen
+  settings:
+    requirements: tests/requirements.txt
+    target: centos-7
+  privileged: true
+
+depends_on:
+- run-shellcheck
+
+---
+kind: pipeline
+name: build-debian-8
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: build
+  image: saltstack/drone-plugin-kitchen
+  settings:
+    requirements: tests/requirements.txt
+    target: debian-8
+  privileged: true
+
+depends_on:
+- run-shellcheck
+
+---
+kind: pipeline
+name: build-debian-9
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: build
+  image: saltstack/drone-plugin-kitchen
+  settings:
+    requirements: tests/requirements.txt
+    target: debian-9
+  privileged: true
+
+depends_on:
+- run-shellcheck
+
+---
+kind: pipeline
+name: build-ubuntu-1804
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: build
+  image: saltstack/drone-plugin-kitchen
+  settings:
+    requirements: tests/requirements.txt
+    target: ubuntu-1804
+  privileged: true
+
+depends_on:
+- run-shellcheck
+
+---
+kind: signature
+hmac: 563c4cb4cefd58c08143192bd72c5a25c5d0edbe4a6d1f5f89c87d3ca2024246
+
+...

@@ -8,6 +8,7 @@ driver:
   cap_add:
     - sys_admin
   disable_upstart: false
+  use_internal_docker_network: true
 
 provisioner:
   name: salt_solo
@@ -118,4 +119,4 @@ suites:
 verifier:
   name: shell
   remote_exec: false
-  command: pytest -v tests/integration/
+  command: pytest --cache-clear -v tests/integration/

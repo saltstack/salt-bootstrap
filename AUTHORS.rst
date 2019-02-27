@@ -40,6 +40,7 @@ Chris Buechler              cbuechler              cmb@pfsense.org
 Christer Edwards            cedwards
 Christian McHugh            mchugh19
 Clark Perkins               iclarkperkins          clark.perkins@digitalreasoning.com
+Dafydd Jones                dafyddj                dafydd@techneg.it
 Dag Viggo Lokøen            dagvl                  dag.viggo@lokoen.org
 Dan Mick                    dmick                  dan.mick@inktank.com
 Daniel Poelzleithner        poelzi
@@ -62,6 +63,7 @@ EYJ                         eyj
 fizmat                      fizmat
 Forrest Alvarez             gravyboat
 Fred Reimer                 freimer                freimer@freimer.org
+Gareth J. Greenaway         garethgreenaway        gareth@wiked.org
 Geoff Garside               geoffgarside           geoff@geoffgarside.co.uk
 George                      aflat                  gstock.public@gmail.com
 gdm85                       gdm85
@@ -85,6 +87,7 @@ Justin Anderson             justinta               justin.ta@outlook.com
 Justin Findlay              jfindlay               jfindlay@gmail.com
 Karl Grzeszczak             karlgrz
 Kenneth Wilke               KennethWilke
+Kevin Quinn                 kevinquinnyo           kevin.quinn@totalserversolutions.com
 Ky-Anh Huynh                icy
 lomeroe                     lomeroe
 Liu Xiaohui                 oreh                   herolxh@gmail.com
@@ -143,6 +146,7 @@ Shawn Butts                 shawnbutts
 Skyler Berg                 skylerberg             skylertheberg@gmail.com
 Stanislav B                 stanislavb
 Steve Groesz                wolfpackmars2          wolfpackmars2@yahoo.com
+Sven R                      hackacad               admin@hackacad.net
 sybix                       sybix
 Tate Eskew                  tateeskew
 Thomas S. Hatch             thatch45               thatch45@saltstack.com

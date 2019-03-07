@@ -5163,7 +5163,7 @@ __configure_freebsd_pkg_details() {
     FROM_FREEBSD="-r FreeBSD"
 
     ##### Workaround : Waiting for SaltStack Repository to be available for FreeBSD 12 ####
-    if [ ${DISTRO_MAJOR_VERSION} -ne 12 ]; then
+    if [ "${DISTRO_MAJOR_VERSION}" -ne 12 ]; then
         ## add saltstack freebsd repo
         salt_conf_file=/usr/local/etc/pkg/repos/saltstack.conf
         {

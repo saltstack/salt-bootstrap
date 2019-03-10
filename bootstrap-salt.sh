@@ -2888,6 +2888,11 @@ install_ubuntu_git_post() {
 
         if [ -f /bin/systemctl ] && [ "$DISTRO_MAJOR_VERSION" -ge 16 ]; then
             __copyfile "${_SALT_GIT_CHECKOUT_DIR}/pkg/salt-${fname}.service" "/lib/systemd/system/salt-${fname}.service"
+            # Set service to know about virtualenv
+            if [ "${_VIRTUALENV_DIR}" != "null" ]; then
+                mkdir -p "/etc/systemd/system/salt-${fname}.service.d" || return 1
+                printf "[Service]\nExecStart=\nExecStart=${_VIRTUALENV_DIR}/bin/python /usr/bin/salt-${fname}\n" > "/etc/systemd/system/salt-${fname}.service.d/override.conf" || return 1
+            fi
 
             # Skip salt-api since the service should be opt-in and not necessarily started on boot
             [ $fname = "api" ] && continue

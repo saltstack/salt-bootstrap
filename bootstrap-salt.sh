@@ -328,7 +328,7 @@ __usage() {
     -X  Do not start daemons after installation
     -d  Disables checking if Salt services are enabled to start on system boot.
         You can also do this by touching /tmp/disable_salt_checks on the target
-        host. Default: \${BS_FALSE}
+        host. Default: ${BS_FALSE}
     -P  Allow pip based installations. On some distributions the required salt
         packages or its dependencies are not available as a package for that
         distribution. Using this flag allows the script to use pip as a last
@@ -347,9 +347,9 @@ __usage() {
         also be specified. Salt installation will be ommitted, but some of the
         dependencies could be installed to write configuration with -j or -J.
     -A  Pass the salt-master DNS name or IP. This will be stored under
-        \${BS_SALT_ETC_DIR}/minion.d/99-master-address.conf
+        ${BS_SALT_ETC_DIR}/minion.d/99-master-address.conf
     -i  Pass the salt-minion id. This will be stored under
-        \${BS_SALT_ETC_DIR}/minion_id
+        ${BS_SALT_ETC_DIR}/minion_id
     -p  Extra-package to install while installing Salt dependencies. One package
         per -p flag. You are responsible for providing the proper package name.
     -H  Use the specified HTTP proxy for all download URLs (including https://).

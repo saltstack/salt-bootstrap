@@ -2759,7 +2759,7 @@ install_ubuntu_git_deps() {
 
     # See how we are installing packages
     if [ "${_PIP_ALL}" -eq $BS_TRUE ]; then
-        __PACKAGES="${__PACKAGES} python-dev swig libssl-dev libzmq3 libzmq3-dev"
+        __PACKAGES="${__PACKAGES} python-dev swig libssl-dev libzmq5"
 
         if ! __check_command_exists pip; then
             __PACKAGES="${__PACKAGES} python-setuptools python-pip"

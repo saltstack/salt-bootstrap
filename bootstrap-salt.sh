@@ -2509,7 +2509,8 @@ __install_pip_deps() {
         exit 1
     fi
 
-    __PIP_PACKAGES=''
+    # TODO: shouldn't be hard-coded to xenial, why doesn't pypi have a working version?
+    __PIP_PACKAGES='git+https://salsa.debian.org/apt-team/python-apt@1.1.y-xenial'
     if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
         # shellcheck disable=SC2089
         __PIP_PACKAGES="${__PIP_PACKAGES} 'apache-libcloud>=$_LIBCLOUD_MIN_VERSION'"

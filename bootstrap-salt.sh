@@ -2427,9 +2427,9 @@ __create_virtualenv() {
     if [ ! -d "$_VIRTUALENV_DIR" ]; then
         echoinfo "Creating virtualenv ${_VIRTUALENV_DIR}"
         if [ $_PIP_ALL -eq $BS_TRUE ]; then
-            virtualenv --no-site-packages "${_VIRTUALENV_DIR}" || return 1
+            /usr/local/bin/virtualenv --no-site-packages "${_VIRTUALENV_DIR}" || return 1
         else
-            virtualenv --system-site-packages "${_VIRTUALENV_DIR}" || return 1
+            /usr/local/bin/virtualenv --system-site-packages "${_VIRTUALENV_DIR}" || return 1
         fi
     fi
     return 0

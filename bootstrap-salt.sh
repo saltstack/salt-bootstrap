@@ -4789,8 +4789,7 @@ install_amazon_linux_ami_2_deps() {
     if [ $_DISABLE_REPOS -eq $BS_FALSE ] || [ "$_CUSTOM_REPO_URL" != "null" ]; then
         __REPO_FILENAME="saltstack-repo.repo"
 
-        base_url="$HTTP_VAL://${_REPO_URL}/yum/redhat/7/\$basearch/$repo_rev/"
-        base_url="$HTTP_VAL://${_REPO_URL}/yum/amazon/2/\$basearch/latest/"
+        base_url="$HTTP_VAL://${_REPO_URL}/yum/amazon/2/\$basearch/$repo_rev/"
         gpg_key="${base_url}SALTSTACK-GPG-KEY.pub
         ${base_url}base/RPM-GPG-KEY-CentOS-7"
         repo_name="SaltStack repo for Amazon Linux 2.0"

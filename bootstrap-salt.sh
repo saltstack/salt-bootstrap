@@ -5162,17 +5162,21 @@ __configure_freebsd_pkg_details() {
     fi
     FROM_FREEBSD="-r FreeBSD"
 
-    ## add saltstack freebsd repo
-    salt_conf_file=/usr/local/etc/pkg/repos/saltstack.conf
-    {
-        echo "SaltStack:{"
-        echo "    url: \"${SALTPKGCONFURL}\","
-        echo "    mirror_type: \"http\","
-        echo "    enabled: true"
-        echo "    priority: 10"
-        echo "}"
-    } > $salt_conf_file
-    FROM_SALTSTACK="-r SaltStack"
+    ##### Workaround : Waiting for SaltStack Repository to be available for FreeBSD 12 ####
+    if [ "${DISTRO_MAJOR_VERSION}" -ne 12 ]; then
+        ## add saltstack freebsd repo
+        salt_conf_file=/usr/local/etc/pkg/repos/saltstack.conf
+        {
+            echo "SaltStack:{"
+            echo "    url: \"${SALTPKGCONFURL}\","
+            echo "    mirror_type: \"http\","
+            echo "    enabled: true"
+            echo "    priority: 10"
+            echo "}"
+        } > $salt_conf_file
+        FROM_SALTSTACK="-r SaltStack"
+    fi
+    ##### End Workaround : Waiting for SaltStack Repository to be available for FreeBSD 12 ####
 
     ## ensure future ports builds use pkgng
     echo "WITH_PKGNG=   yes" >> /etc/make.conf
@@ -5227,6 +5231,10 @@ install_freebsd_10_stable_deps() {
 }
 
 install_freebsd_11_stable_deps() {
+    install_freebsd_9_stable_deps
+}
+
+install_freebsd_12_stable_deps() {
     install_freebsd_9_stable_deps
 }
 
@@ -5316,6 +5324,16 @@ install_freebsd_11_stable() {
     return 0
 }
 
+install_freebsd_12_stable() {
+#
+# installing latest version of salt from FreeBSD CURRENT ports repo
+#
+    # shellcheck disable=SC2086
+    /usr/local/sbin/pkg install ${FROM_FREEBSD} -y sysutils/py-salt || return 1
+
+    return 0
+}
+
 install_freebsd_git() {
 
     # /usr/local/bin/python2 in FreeBSD is a symlink to /usr/local/bin/python2.7
@@ -5379,6 +5397,10 @@ install_freebsd_10_stable_post() {
 }
 
 install_freebsd_11_stable_post() {
+    install_freebsd_9_stable_post
+}
+
+install_freebsd_12_stable_post() {
     install_freebsd_9_stable_post
 }
 

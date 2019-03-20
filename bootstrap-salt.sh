@@ -521,6 +521,12 @@ __exit_cleanup() {
         rm -f "$LOGPIPE"
     fi
 
+    # Remove the temporary apt error file when the script exits
+    if [ -f "$APT_ERR" ]; then
+        echodebug "Removing the temporary apt error file $APT_ERR"
+        rm -f "$APT_ERR"
+    fi
+
     # Kill tee when exiting, CentOS, at least requires this
     # shellcheck disable=SC2009
     TEE_PID=$(ps ax | grep tee | grep "$LOGFILE" | awk '{print $1}')
@@ -1813,12 +1819,12 @@ __function_defined() {
 #                 a boot process, such as on AWS AMIs. This func will wait until the boot
 #                 process is finished so the script doesn't exit on a locked proc.
 #----------------------------------------------------------------------------------------------------------------------
+APT_ERR=$(mktemp /tmp/apt_error.XXXX)
 __wait_for_apt(){
     # Timeout set at 15 minutes
     WAIT_TIMEOUT=900
 
     # Run our passed in apt command
-    APT_ERR=$(mktemp /tmp/apt_error.XXXX)
     "${@}" 2>$APT_ERR
     APT_RETURN=$?
 
@@ -1838,7 +1844,6 @@ __wait_for_apt(){
       fi
     done
 
-    rm $APT_ERR
     return $APT_RETURN
 }
 

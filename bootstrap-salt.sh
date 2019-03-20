@@ -1818,27 +1818,27 @@ __wait_for_apt(){
     WAIT_TIMEOUT=900
 
     # Run our passed in apt command
-    "${@}"
+    APT_ERR=$(mktemp /tmp/apt_error.XXXX)
+    "${@}" 2>$APT_ERR
     APT_RETURN=$?
 
-    # If our exit code from apt is 100, then we're waiting on a lock
-    while [ $APT_RETURN -eq 100 ]; do
+    # Make sure we're not waiting on a lock
+    while [ $APT_RETURN -ne 0 ] && [ $(grep -c "^E: Could not get lock" $APT_ERR) -ge 1 ]; do
       echoinfo "Aware of the lock. Patiently waiting $WAIT_TIMEOUT more seconds..."
       sleep 1
       WAIT_TIMEOUT=$((WAIT_TIMEOUT - 1))
 
-      # If timeout reaches 0, abort.
       if [ "$WAIT_TIMEOUT" -eq 0 ]; then
           echoerror "Apt, apt-get, aptitude, or dpkg process is taking too long."
           echoerror "Bootstrap script cannot proceed. Aborting."
           return 1
       else
-          # Try running apt again until our return code != 100
 	  "${@}"
     	  APT_RETURN=$?
       fi
     done
 
+    rm $APT_ERR
     return $APT_RETURN
 }
 

@@ -1829,7 +1829,7 @@ __wait_for_apt(){
     APT_RETURN=$?
 
     # Make sure we're not waiting on a lock
-    while [ $APT_RETURN -ne 0 ] && [ $(grep -c "^E: Could not get lock" $APT_ERR) -ge 1 ]; do
+    while [ $APT_RETURN -ne 0 ] && grep -q -v '^E: Could not get lock' "$APT_ERR"; do
       echoinfo "Aware of the lock. Patiently waiting $WAIT_TIMEOUT more seconds..."
       sleep 1
       WAIT_TIMEOUT=$((WAIT_TIMEOUT - 1))

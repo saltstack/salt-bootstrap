@@ -1829,7 +1829,7 @@ __wait_for_apt(){
     APT_RETURN=$?
 
     # Make sure we're not waiting on a lock
-    while [ $APT_RETURN -ne 0 ] && grep -q -v '^E: Could not get lock' "$APT_ERR"; do
+    while [ $APT_RETURN -ne 0 ] && grep -q '^E: Could not get lock' "$APT_ERR"; do
       echoinfo "Aware of the lock. Patiently waiting $WAIT_TIMEOUT more seconds..."
       sleep 1
       WAIT_TIMEOUT=$((WAIT_TIMEOUT - 1))
@@ -1839,7 +1839,7 @@ __wait_for_apt(){
           echoerror "Bootstrap script cannot proceed. Aborting."
           return 1
       else
-	  "${@}"
+	  "${@}" 2>$APT_ERR
     	  APT_RETURN=$?
       fi
     done

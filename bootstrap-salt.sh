@@ -1825,7 +1825,7 @@ __wait_for_apt(){
     WAIT_TIMEOUT=900
 
     # Run our passed in apt command
-    "${@}" 2>$APT_ERR
+    "${@}" 2>"$APT_ERR"
     APT_RETURN=$?
 
     # Make sure we're not waiting on a lock
@@ -1839,7 +1839,7 @@ __wait_for_apt(){
           echoerror "Bootstrap script cannot proceed. Aborting."
           return 1
       else
-	  "${@}" 2>$APT_ERR
+	  "${@}" 2>"$APT_ERR"
     	  APT_RETURN=$?
       fi
     done

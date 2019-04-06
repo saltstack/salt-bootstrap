@@ -24,7 +24,7 @@ steps:
 - name: throttle-build
   image: alpine
   commands:
-  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
+  - "sh -c 't=$(shuf -i 10-60 -n 1); echo Sleeping $t seconds; sleep $t'"
 
 - name: py2-git-2017-7
   image: saltstack/drone-plugin-kitchen
@@ -68,7 +68,7 @@ steps:
 - name: throttle-build
   image: alpine
   commands:
-  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
+  - "sh -c 't=$(shuf -i 10-60 -n 1); echo Sleeping $t seconds; sleep $t'"
 
 - name: py2-git-2017-7
   image: saltstack/drone-plugin-kitchen
@@ -139,7 +139,7 @@ steps:
 - name: throttle-build
   image: alpine
   commands:
-  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
+  - "sh -c 't=$(shuf -i 10-60 -n 1); echo Sleeping $t seconds; sleep $t'"
 
 - name: py2-git-2017-7
   image: saltstack/drone-plugin-kitchen
@@ -210,7 +210,7 @@ steps:
 - name: throttle-build
   image: alpine
   commands:
-  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
+  - "sh -c 't=$(shuf -i 10-60 -n 1); echo Sleeping $t seconds; sleep $t'"
 
 - name: py2-git-2017-7
   image: saltstack/drone-plugin-kitchen
@@ -281,7 +281,7 @@ steps:
 - name: throttle-build
   image: alpine
   commands:
-  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
+  - "sh -c 't=$(shuf -i 10-60 -n 1); echo Sleeping $t seconds; sleep $t'"
 
 - name: py2-git-2017-7
   image: saltstack/drone-plugin-kitchen
@@ -352,7 +352,7 @@ steps:
 - name: throttle-build
   image: alpine
   commands:
-  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
+  - "sh -c 't=$(shuf -i 10-60 -n 1); echo Sleeping $t seconds; sleep $t'"
 
 - name: py2-git-2017-7
   image: saltstack/drone-plugin-kitchen
@@ -423,7 +423,7 @@ steps:
 - name: throttle-build
   image: alpine
   commands:
-  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
+  - "sh -c 't=$(shuf -i 10-60 -n 1); echo Sleeping $t seconds; sleep $t'"
 
 - name: py2-git-2017-7
   image: saltstack/drone-plugin-kitchen
@@ -494,7 +494,7 @@ steps:
 - name: throttle-build
   image: alpine
   commands:
-  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
+  - "sh -c 't=$(shuf -i 10-60 -n 1); echo Sleeping $t seconds; sleep $t'"
 
 - name: py2-git-2017-7
   image: saltstack/drone-plugin-kitchen
@@ -538,7 +538,7 @@ steps:
 - name: throttle-build
   image: alpine
   commands:
-  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
+  - "sh -c 't=$(shuf -i 10-60 -n 1); echo Sleeping $t seconds; sleep $t'"
 
 - name: py2-git-2017-7
   image: saltstack/drone-plugin-kitchen
@@ -582,7 +582,7 @@ steps:
 - name: throttle-build
   image: alpine
   commands:
-  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
+  - "sh -c 't=$(shuf -i 10-60 -n 1); echo Sleeping $t seconds; sleep $t'"
 
 - name: py2-git-2017-7
   image: saltstack/drone-plugin-kitchen
@@ -626,7 +626,7 @@ steps:
 - name: throttle-build
   image: alpine
   commands:
-  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
+  - "sh -c 't=$(shuf -i 10-60 -n 1); echo Sleeping $t seconds; sleep $t'"
 
 - name: py2-git-2017-7
   image: saltstack/drone-plugin-kitchen
@@ -670,7 +670,7 @@ steps:
 - name: throttle-build
   image: alpine
   commands:
-  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
+  - "sh -c 't=$(shuf -i 10-60 -n 1); echo Sleeping $t seconds; sleep $t'"
 
 - name: py2-git-2017-7
   image: saltstack/drone-plugin-kitchen
@@ -741,7 +741,7 @@ steps:
 - name: throttle-build
   image: alpine
   commands:
-  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
+  - "sh -c 't=$(shuf -i 10-60 -n 1); echo Sleeping $t seconds; sleep $t'"
 
 - name: py2-git-2017-7
   image: saltstack/drone-plugin-kitchen
@@ -812,7 +812,7 @@ steps:
 - name: throttle-build
   image: alpine
   commands:
-  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
+  - "sh -c 't=$(shuf -i 10-60 -n 1); echo Sleeping $t seconds; sleep $t'"
 
 - name: py2-git-2017-7
   image: saltstack/drone-plugin-kitchen
@@ -873,6 +873,6 @@ depends_on:
 
 ---
 kind: signature
-hmac: ec677bfb06e994529362dc0d6eb5c4b057329871a0d2c7c3cc8c481b6eacf08d
+hmac: ce7fc9d04548b5160a561da165fa1b3c97697d5fd882fafe64eaafac423b61f0
 
 ...

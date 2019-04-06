@@ -11,7 +11,7 @@ local stable_suites = [
   'py2-stable-2019-2',
 ];
 
-local git_distros = [
+local distros = [
   'arch',
   'amazon-1',
   'amazon-2',
@@ -67,7 +67,7 @@ local Build(distro) = {
       name: 'throttle-build',
       image: 'alpine',
       commands: [
-        "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'",
+        "sh -c 't=$(shuf -i 10-60 -n 1); echo Sleeping $t seconds; sleep $t'",
       ],
     },
   ] + [
@@ -95,5 +95,5 @@ local Build(distro) = {
   Shellcheck(),
 ] + [
   Build(distro)
-  for distro in git_distros
+  for distro in distros
 ]

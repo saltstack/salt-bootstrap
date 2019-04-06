@@ -1,8 +1,11 @@
-local suites = [
+local git_suites = [
   'py2-git-2017-7',
   'py2-git-2018-3',
   'py2-git-2019-2',
   'py2-git-develop',
+];
+
+local stable_suites = [
   'py2-stable-2017-7',
   'py2-stable-2018-3',
   'py2-stable-2019-2',
@@ -78,9 +81,9 @@ local Build(suite, distro) = {
 ] + [
   Build(suite, distro)
   for distro in stable_distros
-  for suite in suites
+  for suite in stable_suites
 ] + [
   Build(suite, distro)
   for distro in git_distros
-  for suite in suites
+  for suite in git_suites
 ]

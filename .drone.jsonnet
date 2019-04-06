@@ -1,12 +1,16 @@
 local distros = [
   { name: 'amazon', version: '1' },
   { name: 'amazon', version: '2' },
-  //  { name: 'centos', version: '6' },
+  { name: 'centos', version: '6' },
   { name: 'centos', version: '7' },
   { name: 'debian', version: '8' },
   { name: 'debian', version: '9' },
-  //  { name: 'ubuntu', version: '1404' },
-  //  { name: 'ubuntu', version: '1604' },
+  { name: 'fedora', version: '28' },
+  { name: 'fedora', version: '29' },
+  { name: 'opensuse', version: '15' },
+  { name: 'opensuse', version: '42' },
+  { name: 'ubuntu', version: '1404' },
+  { name: 'ubuntu', version: '1604' },
   { name: 'ubuntu', version: '1804' },
 ];
 

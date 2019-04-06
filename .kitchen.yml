@@ -26,9 +26,13 @@ provisioner:
         - tests.accept_key
 
 platforms:
-  - name: fedora
+  - name: fedora-28
     driver_config:
-      image: fedora:latest
+      image: fedora:28
+      run_command: /usr/lib/systemd/systemd
+  - name: fedora-29
+    driver_config:
+      image: fedora:29
       run_command: /usr/lib/systemd/systemd
   - name: centos-7
     driver_config:
@@ -79,8 +83,15 @@ platforms:
       provision_command:
         - pacman -Syu --noconfirm systemd
         - systemctl enable sshd
-  - name: opensuse
+  - name: opensuse-15
     driver_config:
+      image: opensuse/leap:15.0
+      run_command: /usr/lib/systemd/systemd
+      provision_command:
+        - systemctl enable sshd.service
+  - name: opensuse-42
+    driver_config:
+      image: opensuse/leap:42.3
       run_command: /usr/lib/systemd/systemd
       provision_command:
         - systemctl enable sshd.service
@@ -107,8 +118,10 @@ suites:
     excludes:
       - arch
       - centos-6
-      - fedora
-      - opensuse
+      - fedora-28
+      - fedora-29
+      - opensuse-15
+      - opensuse-42
   - name: py2-stable-2018.3
     provisioner:
       salt_version: 2018.3

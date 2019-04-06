@@ -52,6 +52,25 @@ depends_on:
 
 ---
 kind: pipeline
+name: build-centos-6
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: build
+  image: saltstack/drone-plugin-kitchen
+  settings:
+    requirements: tests/requirements.txt
+    target: centos-6
+  privileged: true
+
+depends_on:
+- run-shellcheck
+
+---
+kind: pipeline
 name: build-centos-7
 
 platform:
@@ -109,6 +128,120 @@ depends_on:
 
 ---
 kind: pipeline
+name: build-fedora-28
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: build
+  image: saltstack/drone-plugin-kitchen
+  settings:
+    requirements: tests/requirements.txt
+    target: fedora-28
+  privileged: true
+
+depends_on:
+- run-shellcheck
+
+---
+kind: pipeline
+name: build-fedora-29
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: build
+  image: saltstack/drone-plugin-kitchen
+  settings:
+    requirements: tests/requirements.txt
+    target: fedora-29
+  privileged: true
+
+depends_on:
+- run-shellcheck
+
+---
+kind: pipeline
+name: build-opensuse-15
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: build
+  image: saltstack/drone-plugin-kitchen
+  settings:
+    requirements: tests/requirements.txt
+    target: opensuse-15
+  privileged: true
+
+depends_on:
+- run-shellcheck
+
+---
+kind: pipeline
+name: build-opensuse-42
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: build
+  image: saltstack/drone-plugin-kitchen
+  settings:
+    requirements: tests/requirements.txt
+    target: opensuse-42
+  privileged: true
+
+depends_on:
+- run-shellcheck
+
+---
+kind: pipeline
+name: build-ubuntu-1404
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: build
+  image: saltstack/drone-plugin-kitchen
+  settings:
+    requirements: tests/requirements.txt
+    target: ubuntu-1404
+  privileged: true
+
+depends_on:
+- run-shellcheck
+
+---
+kind: pipeline
+name: build-ubuntu-1604
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: build
+  image: saltstack/drone-plugin-kitchen
+  settings:
+    requirements: tests/requirements.txt
+    target: ubuntu-1604
+  privileged: true
+
+depends_on:
+- run-shellcheck
+
+---
+kind: pipeline
 name: build-ubuntu-1804
 
 platform:
@@ -125,9 +258,5 @@ steps:
 
 depends_on:
 - run-shellcheck
-
----
-kind: signature
-hmac: 563c4cb4cefd58c08143192bd72c5a25c5d0edbe4a6d1f5f89c87d3ca2024246
 
 ...

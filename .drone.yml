@@ -14,7 +14,7 @@ steps:
 
 ---
 kind: pipeline
-name: py2-git-2017.7-amazon-1
+name: py2-git-2017-7-amazon-1
 
 platform:
   os: linux
@@ -25,7 +25,7 @@ steps:
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
-    target: py2-git-2017.7-amazon-1
+    target: py2-git-2017-7-amazon-1
   privileged: true
 
 depends_on:
@@ -33,7 +33,7 @@ depends_on:
 
 ---
 kind: pipeline
-name: py2-git-2018.3-amazon-1
+name: py2-git-2018-3-amazon-1
 
 platform:
   os: linux
@@ -44,7 +44,7 @@ steps:
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
-    target: py2-git-2018.3-amazon-1
+    target: py2-git-2018-3-amazon-1
   privileged: true
 
 depends_on:
@@ -52,7 +52,7 @@ depends_on:
 
 ---
 kind: pipeline
-name: py2-git-2019.2-amazon-1
+name: py2-git-2019-2-amazon-1
 
 platform:
   os: linux
@@ -63,7 +63,7 @@ steps:
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
-    target: py2-git-2019.2-amazon-1
+    target: py2-git-2019-2-amazon-1
   privileged: true
 
 depends_on:
@@ -90,7 +90,7 @@ depends_on:
 
 ---
 kind: pipeline
-name: py2-stable-2017.7-amazon-1
+name: py2-stable-2017-7-amazon-1
 
 platform:
   os: linux
@@ -101,7 +101,7 @@ steps:
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
-    target: py2-stable-2017.7-amazon-1
+    target: py2-stable-2017-7-amazon-1
   privileged: true
 
 depends_on:
@@ -109,7 +109,7 @@ depends_on:
 
 ---
 kind: pipeline
-name: py2-stable-2018.3-amazon-1
+name: py2-stable-2018-3-amazon-1
 
 platform:
   os: linux
@@ -120,7 +120,7 @@ steps:
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
-    target: py2-stable-2018.3-amazon-1
+    target: py2-stable-2018-3-amazon-1
   privileged: true
 
 depends_on:
@@ -128,7 +128,7 @@ depends_on:
 
 ---
 kind: pipeline
-name: py2-stable-2019.2-amazon-1
+name: py2-stable-2019-2-amazon-1
 
 platform:
   os: linux
@@ -139,7 +139,7 @@ steps:
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
-    target: py2-stable-2019.2-amazon-1
+    target: py2-stable-2019-2-amazon-1
   privileged: true
 
 depends_on:
@@ -147,7 +147,7 @@ depends_on:
 
 ---
 kind: pipeline
-name: py2-git-2017.7-amazon-2
+name: py2-git-2017-7-amazon-2
 
 platform:
   os: linux
@@ -158,7 +158,7 @@ steps:
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
-    target: py2-git-2017.7-amazon-2
+    target: py2-git-2017-7-amazon-2
   privileged: true
 
 depends_on:
@@ -166,7 +166,7 @@ depends_on:
 
 ---
 kind: pipeline
-name: py2-git-2018.3-amazon-2
+name: py2-git-2018-3-amazon-2
 
 platform:
   os: linux
@@ -177,7 +177,7 @@ steps:
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
-    target: py2-git-2018.3-amazon-2
+    target: py2-git-2018-3-amazon-2
   privileged: true
 
 depends_on:
@@ -185,7 +185,7 @@ depends_on:
 
 ---
 kind: pipeline
-name: py2-git-2019.2-amazon-2
+name: py2-git-2019-2-amazon-2
 
 platform:
   os: linux
@@ -196,7 +196,7 @@ steps:
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
-    target: py2-git-2019.2-amazon-2
+    target: py2-git-2019-2-amazon-2
   privileged: true
 
 depends_on:
@@ -223,7 +223,7 @@ depends_on:
 
 ---
 kind: pipeline
-name: py2-stable-2017.7-amazon-2
+name: py2-stable-2017-7-amazon-2
 
 platform:
   os: linux
@@ -234,7 +234,7 @@ steps:
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
-    target: py2-stable-2017.7-amazon-2
+    target: py2-stable-2017-7-amazon-2
   privileged: true
 
 depends_on:
@@ -242,7 +242,7 @@ depends_on:
 
 ---
 kind: pipeline
-name: py2-stable-2018.3-amazon-2
+name: py2-stable-2018-3-amazon-2
 
 platform:
   os: linux
@@ -253,7 +253,7 @@ steps:
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
-    target: py2-stable-2018.3-amazon-2
+    target: py2-stable-2018-3-amazon-2
   privileged: true
 
 depends_on:
@@ -261,7 +261,7 @@ depends_on:
 
 ---
 kind: pipeline
-name: py2-stable-2019.2-amazon-2
+name: py2-stable-2019-2-amazon-2
 
 platform:
   os: linux
@@ -272,7 +272,7 @@ steps:
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
-    target: py2-stable-2019.2-amazon-2
+    target: py2-stable-2019-2-amazon-2
   privileged: true
 
 depends_on:
@@ -280,7 +280,7 @@ depends_on:
 
 ---
 kind: pipeline
-name: py2-git-2017.7-centos-6
+name: py2-git-2017-7-centos-6
 
 platform:
   os: linux
@@ -291,7 +291,7 @@ steps:
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
-    target: py2-git-2017.7-centos-6
+    target: py2-git-2017-7-centos-6
   privileged: true
 
 depends_on:
@@ -299,7 +299,7 @@ depends_on:
 
 ---
 kind: pipeline
-name: py2-git-2018.3-centos-6
+name: py2-git-2018-3-centos-6
 
 platform:
   os: linux
@@ -310,7 +310,7 @@ steps:
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
-    target: py2-git-2018.3-centos-6
+    target: py2-git-2018-3-centos-6
   privileged: true
 
 depends_on:
@@ -318,7 +318,7 @@ depends_on:
 
 ---
 kind: pipeline
-name: py2-git-2019.2-centos-6
+name: py2-git-2019-2-centos-6
 
 platform:
   os: linux
@@ -329,7 +329,7 @@ steps:
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
-    target: py2-git-2019.2-centos-6
+    target: py2-git-2019-2-centos-6
   privileged: true
 
 depends_on:
@@ -356,7 +356,7 @@ depends_on:
 
 ---
 kind: pipeline
-name: py2-stable-2017.7-centos-6
+name: py2-stable-2017-7-centos-6
 
 platform:
   os: linux
@@ -367,7 +367,7 @@ steps:
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
-    target: py2-stable-2017.7-centos-6
+    target: py2-stable-2017-7-centos-6
   privileged: true
 
 depends_on:
@@ -375,7 +375,7 @@ depends_on:
 
 ---
 kind: pipeline
-name: py2-stable-2018.3-centos-6
+name: py2-stable-2018-3-centos-6
 
 platform:
   os: linux
@@ -386,7 +386,7 @@ steps:
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
-    target: py2-stable-2018.3-centos-6
+    target: py2-stable-2018-3-centos-6
   privileged: true
 
 depends_on:
@@ -394,7 +394,7 @@ depends_on:
 
 ---
 kind: pipeline
-name: py2-stable-2019.2-centos-6
+name: py2-stable-2019-2-centos-6
 
 platform:
   os: linux
@@ -405,7 +405,7 @@ steps:
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
-    target: py2-stable-2019.2-centos-6
+    target: py2-stable-2019-2-centos-6
   privileged: true
 
 depends_on:
@@ -413,7 +413,7 @@ depends_on:
 
 ---
 kind: pipeline
-name: py2-git-2017.7-centos-7
+name: py2-git-2017-7-centos-7
 
 platform:
   os: linux
@@ -424,7 +424,7 @@ steps:
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
-    target: py2-git-2017.7-centos-7
+    target: py2-git-2017-7-centos-7
   privileged: true
 
 depends_on:
@@ -432,7 +432,7 @@ depends_on:
 
 ---
 kind: pipeline
-name: py2-git-2018.3-centos-7
+name: py2-git-2018-3-centos-7
 
 platform:
   os: linux
@@ -443,7 +443,7 @@ steps:
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
-    target: py2-git-2018.3-centos-7
+    target: py2-git-2018-3-centos-7
   privileged: true
 
 depends_on:
@@ -451,7 +451,7 @@ depends_on:
 
 ---
 kind: pipeline
-name: py2-git-2019.2-centos-7
+name: py2-git-2019-2-centos-7
 
 platform:
   os: linux
@@ -462,7 +462,7 @@ steps:
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
-    target: py2-git-2019.2-centos-7
+    target: py2-git-2019-2-centos-7
   privileged: true
 
 depends_on:
@@ -489,7 +489,7 @@ depends_on:
 
 ---
 kind: pipeline
-name: py2-stable-2017.7-centos-7
+name: py2-stable-2017-7-centos-7
 
 platform:
   os: linux
@@ -500,7 +500,7 @@ steps:
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
-    target: py2-stable-2017.7-centos-7
+    target: py2-stable-2017-7-centos-7
   privileged: true
 
 depends_on:
@@ -508,7 +508,7 @@ depends_on:
 
 ---
 kind: pipeline
-name: py2-stable-2018.3-centos-7
+name: py2-stable-2018-3-centos-7
 
 platform:
   os: linux
@@ -519,7 +519,7 @@ steps:
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
-    target: py2-stable-2018.3-centos-7
+    target: py2-stable-2018-3-centos-7
   privileged: true
 
 depends_on:
@@ -527,7 +527,7 @@ depends_on:
 
 ---
 kind: pipeline
-name: py2-stable-2019.2-centos-7
+name: py2-stable-2019-2-centos-7
 
 platform:
   os: linux
@@ -538,7 +538,7 @@ steps:
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
-    target: py2-stable-2019.2-centos-7
+    target: py2-stable-2019-2-centos-7
   privileged: true
 
 depends_on:
@@ -546,7 +546,7 @@ depends_on:
 
 ---
 kind: pipeline
-name: py2-git-2017.7-debian-8
+name: py2-git-2017-7-debian-8
 
 platform:
   os: linux
@@ -557,7 +557,7 @@ steps:
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
-    target: py2-git-2017.7-debian-8
+    target: py2-git-2017-7-debian-8
   privileged: true
 
 depends_on:
@@ -565,7 +565,7 @@ depends_on:
 
 ---
 kind: pipeline
-name: py2-git-2018.3-debian-8
+name: py2-git-2018-3-debian-8
 
 platform:
   os: linux
@@ -576,7 +576,7 @@ steps:
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
-    target: py2-git-2018.3-debian-8
+    target: py2-git-2018-3-debian-8
   privileged: true
 
 depends_on:
@@ -584,7 +584,7 @@ depends_on:
 
 ---
 kind: pipeline
-name: py2-git-2019.2-debian-8
+name: py2-git-2019-2-debian-8
 
 platform:
   os: linux
@@ -595,7 +595,7 @@ steps:
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
-    target: py2-git-2019.2-debian-8
+    target: py2-git-2019-2-debian-8
   privileged: true
 
 depends_on:
@@ -622,7 +622,7 @@ depends_on:
 
 ---
 kind: pipeline
-name: py2-stable-2017.7-debian-8
+name: py2-stable-2017-7-debian-8
 
 platform:
   os: linux
@@ -633,7 +633,7 @@ steps:
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
-    target: py2-stable-2017.7-debian-8
+    target: py2-stable-2017-7-debian-8
   privileged: true
 
 depends_on:
@@ -641,7 +641,7 @@ depends_on:
 
 ---
 kind: pipeline
-name: py2-stable-2018.3-debian-8
+name: py2-stable-2018-3-debian-8
 
 platform:
   os: linux
@@ -652,7 +652,7 @@ steps:
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
-    target: py2-stable-2018.3-debian-8
+    target: py2-stable-2018-3-debian-8
   privileged: true
 
 depends_on:
@@ -660,7 +660,7 @@ depends_on:
 
 ---
 kind: pipeline
-name: py2-stable-2019.2-debian-8
+name: py2-stable-2019-2-debian-8
 
 platform:
   os: linux
@@ -671,7 +671,7 @@ steps:
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
-    target: py2-stable-2019.2-debian-8
+    target: py2-stable-2019-2-debian-8
   privileged: true
 
 depends_on:
@@ -679,7 +679,7 @@ depends_on:
 
 ---
 kind: pipeline
-name: py2-git-2017.7-debian-9
+name: py2-git-2017-7-debian-9
 
 platform:
   os: linux
@@ -690,7 +690,7 @@ steps:
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
-    target: py2-git-2017.7-debian-9
+    target: py2-git-2017-7-debian-9
   privileged: true
 
 depends_on:
@@ -698,7 +698,7 @@ depends_on:
 
 ---
 kind: pipeline
-name: py2-git-2018.3-debian-9
+name: py2-git-2018-3-debian-9
 
 platform:
   os: linux
@@ -709,7 +709,7 @@ steps:
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
-    target: py2-git-2018.3-debian-9
+    target: py2-git-2018-3-debian-9
   privileged: true
 
 depends_on:
@@ -717,7 +717,7 @@ depends_on:
 
 ---
 kind: pipeline
-name: py2-git-2019.2-debian-9
+name: py2-git-2019-2-debian-9
 
 platform:
   os: linux
@@ -728,7 +728,7 @@ steps:
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
-    target: py2-git-2019.2-debian-9
+    target: py2-git-2019-2-debian-9
   privileged: true
 
 depends_on:
@@ -755,7 +755,7 @@ depends_on:
 
 ---
 kind: pipeline
-name: py2-stable-2017.7-debian-9
+name: py2-stable-2017-7-debian-9
 
 platform:
   os: linux
@@ -766,7 +766,7 @@ steps:
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
-    target: py2-stable-2017.7-debian-9
+    target: py2-stable-2017-7-debian-9
   privileged: true
 
 depends_on:
@@ -774,7 +774,7 @@ depends_on:
 
 ---
 kind: pipeline
-name: py2-stable-2018.3-debian-9
+name: py2-stable-2018-3-debian-9
 
 platform:
   os: linux
@@ -785,7 +785,7 @@ steps:
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
-    target: py2-stable-2018.3-debian-9
+    target: py2-stable-2018-3-debian-9
   privileged: true
 
 depends_on:
@@ -793,7 +793,7 @@ depends_on:
 
 ---
 kind: pipeline
-name: py2-stable-2019.2-debian-9
+name: py2-stable-2019-2-debian-9
 
 platform:
   os: linux
@@ -804,7 +804,7 @@ steps:
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
-    target: py2-stable-2019.2-debian-9
+    target: py2-stable-2019-2-debian-9
   privileged: true
 
 depends_on:
@@ -812,7 +812,7 @@ depends_on:
 
 ---
 kind: pipeline
-name: py2-git-2017.7-fedora-28
+name: py2-git-2017-7-fedora-28
 
 platform:
   os: linux
@@ -823,7 +823,7 @@ steps:
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
-    target: py2-git-2017.7-fedora-28
+    target: py2-git-2017-7-fedora-28
   privileged: true
 
 depends_on:
@@ -831,7 +831,7 @@ depends_on:
 
 ---
 kind: pipeline
-name: py2-git-2018.3-fedora-28
+name: py2-git-2018-3-fedora-28
 
 platform:
   os: linux
@@ -842,7 +842,7 @@ steps:
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
-    target: py2-git-2018.3-fedora-28
+    target: py2-git-2018-3-fedora-28
   privileged: true
 
 depends_on:
@@ -850,7 +850,7 @@ depends_on:
 
 ---
 kind: pipeline
-name: py2-git-2019.2-fedora-28
+name: py2-git-2019-2-fedora-28
 
 platform:
   os: linux
@@ -861,7 +861,7 @@ steps:
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
-    target: py2-git-2019.2-fedora-28
+    target: py2-git-2019-2-fedora-28
   privileged: true
 
 depends_on:
@@ -888,7 +888,7 @@ depends_on:
 
 ---
 kind: pipeline
-name: py2-stable-2017.7-fedora-28
+name: py2-stable-2017-7-fedora-28
 
 platform:
   os: linux
@@ -899,7 +899,7 @@ steps:
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
-    target: py2-stable-2017.7-fedora-28
+    target: py2-stable-2017-7-fedora-28
   privileged: true
 
 depends_on:
@@ -907,7 +907,7 @@ depends_on:
 
 ---
 kind: pipeline
-name: py2-stable-2018.3-fedora-28
+name: py2-stable-2018-3-fedora-28
 
 platform:
   os: linux
@@ -918,7 +918,7 @@ steps:
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
-    target: py2-stable-2018.3-fedora-28
+    target: py2-stable-2018-3-fedora-28
   privileged: true
 
 depends_on:
@@ -926,7 +926,7 @@ depends_on:
 
 ---
 kind: pipeline
-name: py2-stable-2019.2-fedora-28
+name: py2-stable-2019-2-fedora-28
 
 platform:
   os: linux
@@ -937,7 +937,7 @@ steps:
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
-    target: py2-stable-2019.2-fedora-28
+    target: py2-stable-2019-2-fedora-28
   privileged: true
 
 depends_on:
@@ -945,7 +945,7 @@ depends_on:
 
 ---
 kind: pipeline
-name: py2-git-2017.7-fedora-29
+name: py2-git-2017-7-fedora-29
 
 platform:
   os: linux
@@ -956,7 +956,7 @@ steps:
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
-    target: py2-git-2017.7-fedora-29
+    target: py2-git-2017-7-fedora-29
   privileged: true
 
 depends_on:
@@ -964,7 +964,7 @@ depends_on:
 
 ---
 kind: pipeline
-name: py2-git-2018.3-fedora-29
+name: py2-git-2018-3-fedora-29
 
 platform:
   os: linux
@@ -975,7 +975,7 @@ steps:
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
-    target: py2-git-2018.3-fedora-29
+    target: py2-git-2018-3-fedora-29
   privileged: true
 
 depends_on:
@@ -983,7 +983,7 @@ depends_on:
 
 ---
 kind: pipeline
-name: py2-git-2019.2-fedora-29
+name: py2-git-2019-2-fedora-29
 
 platform:
   os: linux
@@ -994,7 +994,7 @@ steps:
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
-    target: py2-git-2019.2-fedora-29
+    target: py2-git-2019-2-fedora-29
   privileged: true
 
 depends_on:
@@ -1021,7 +1021,7 @@ depends_on:
 
 ---
 kind: pipeline
-name: py2-stable-2017.7-fedora-29
+name: py2-stable-2017-7-fedora-29
 
 platform:
   os: linux
@@ -1032,7 +1032,7 @@ steps:
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
-    target: py2-stable-2017.7-fedora-29
+    target: py2-stable-2017-7-fedora-29
   privileged: true
 
 depends_on:
@@ -1040,7 +1040,7 @@ depends_on:
 
 ---
 kind: pipeline
-name: py2-stable-2018.3-fedora-29
+name: py2-stable-2018-3-fedora-29
 
 platform:
   os: linux
@@ -1051,7 +1051,7 @@ steps:
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
-    target: py2-stable-2018.3-fedora-29
+    target: py2-stable-2018-3-fedora-29
   privileged: true
 
 depends_on:
@@ -1059,7 +1059,7 @@ depends_on:
 
 ---
 kind: pipeline
-name: py2-stable-2019.2-fedora-29
+name: py2-stable-2019-2-fedora-29
 
 platform:
   os: linux
@@ -1070,7 +1070,7 @@ steps:
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
-    target: py2-stable-2019.2-fedora-29
+    target: py2-stable-2019-2-fedora-29
   privileged: true
 
 depends_on:
@@ -1078,7 +1078,7 @@ depends_on:
 
 ---
 kind: pipeline
-name: py2-git-2017.7-opensuse-15
+name: py2-git-2017-7-opensuse-15
 
 platform:
   os: linux
@@ -1089,7 +1089,7 @@ steps:
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
-    target: py2-git-2017.7-opensuse-15
+    target: py2-git-2017-7-opensuse-15
   privileged: true
 
 depends_on:
@@ -1097,7 +1097,7 @@ depends_on:
 
 ---
 kind: pipeline
-name: py2-git-2018.3-opensuse-15
+name: py2-git-2018-3-opensuse-15
 
 platform:
   os: linux
@@ -1108,7 +1108,7 @@ steps:
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
-    target: py2-git-2018.3-opensuse-15
+    target: py2-git-2018-3-opensuse-15
   privileged: true
 
 depends_on:
@@ -1116,7 +1116,7 @@ depends_on:
 
 ---
 kind: pipeline
-name: py2-git-2019.2-opensuse-15
+name: py2-git-2019-2-opensuse-15
 
 platform:
   os: linux
@@ -1127,7 +1127,7 @@ steps:
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
-    target: py2-git-2019.2-opensuse-15
+    target: py2-git-2019-2-opensuse-15
   privileged: true
 
 depends_on:
@@ -1154,7 +1154,7 @@ depends_on:
 
 ---
 kind: pipeline
-name: py2-stable-2017.7-opensuse-15
+name: py2-stable-2017-7-opensuse-15
 
 platform:
   os: linux
@@ -1165,7 +1165,7 @@ steps:
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
-    target: py2-stable-2017.7-opensuse-15
+    target: py2-stable-2017-7-opensuse-15
   privileged: true
 
 depends_on:
@@ -1173,7 +1173,7 @@ depends_on:
 
 ---
 kind: pipeline
-name: py2-stable-2018.3-opensuse-15
+name: py2-stable-2018-3-opensuse-15
 
 platform:
   os: linux
@@ -1184,7 +1184,7 @@ steps:
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
-    target: py2-stable-2018.3-opensuse-15
+    target: py2-stable-2018-3-opensuse-15
   privileged: true
 
 depends_on:
@@ -1192,7 +1192,7 @@ depends_on:
 
 ---
 kind: pipeline
-name: py2-stable-2019.2-opensuse-15
+name: py2-stable-2019-2-opensuse-15
 
 platform:
   os: linux
@@ -1203,7 +1203,7 @@ steps:
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
-    target: py2-stable-2019.2-opensuse-15
+    target: py2-stable-2019-2-opensuse-15
   privileged: true
 
 depends_on:
@@ -1211,7 +1211,7 @@ depends_on:
 
 ---
 kind: pipeline
-name: py2-git-2017.7-opensuse-42
+name: py2-git-2017-7-opensuse-42
 
 platform:
   os: linux
@@ -1222,7 +1222,7 @@ steps:
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
-    target: py2-git-2017.7-opensuse-42
+    target: py2-git-2017-7-opensuse-42
   privileged: true
 
 depends_on:
@@ -1230,7 +1230,7 @@ depends_on:
 
 ---
 kind: pipeline
-name: py2-git-2018.3-opensuse-42
+name: py2-git-2018-3-opensuse-42
 
 platform:
   os: linux
@@ -1241,7 +1241,7 @@ steps:
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
-    target: py2-git-2018.3-opensuse-42
+    target: py2-git-2018-3-opensuse-42
   privileged: true
 
 depends_on:
@@ -1249,7 +1249,7 @@ depends_on:
 
 ---
 kind: pipeline
-name: py2-git-2019.2-opensuse-42
+name: py2-git-2019-2-opensuse-42
 
 platform:
   os: linux
@@ -1260,7 +1260,7 @@ steps:
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
-    target: py2-git-2019.2-opensuse-42
+    target: py2-git-2019-2-opensuse-42
   privileged: true
 
 depends_on:
@@ -1287,7 +1287,7 @@ depends_on:
 
 ---
 kind: pipeline
-name: py2-stable-2017.7-opensuse-42
+name: py2-stable-2017-7-opensuse-42
 
 platform:
   os: linux
@@ -1298,7 +1298,7 @@ steps:
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
-    target: py2-stable-2017.7-opensuse-42
+    target: py2-stable-2017-7-opensuse-42
   privileged: true
 
 depends_on:
@@ -1306,7 +1306,7 @@ depends_on:
 
 ---
 kind: pipeline
-name: py2-stable-2018.3-opensuse-42
+name: py2-stable-2018-3-opensuse-42
 
 platform:
   os: linux
@@ -1317,7 +1317,7 @@ steps:
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
-    target: py2-stable-2018.3-opensuse-42
+    target: py2-stable-2018-3-opensuse-42
   privileged: true
 
 depends_on:
@@ -1325,7 +1325,7 @@ depends_on:
 
 ---
 kind: pipeline
-name: py2-stable-2019.2-opensuse-42
+name: py2-stable-2019-2-opensuse-42
 
 platform:
   os: linux
@@ -1336,7 +1336,7 @@ steps:
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
-    target: py2-stable-2019.2-opensuse-42
+    target: py2-stable-2019-2-opensuse-42
   privileged: true
 
 depends_on:
@@ -1344,7 +1344,7 @@ depends_on:
 
 ---
 kind: pipeline
-name: py2-git-2017.7-ubuntu-1404
+name: py2-git-2017-7-ubuntu-1404
 
 platform:
   os: linux
@@ -1355,7 +1355,7 @@ steps:
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
-    target: py2-git-2017.7-ubuntu-1404
+    target: py2-git-2017-7-ubuntu-1404
   privileged: true
 
 depends_on:
@@ -1363,7 +1363,7 @@ depends_on:
 
 ---
 kind: pipeline
-name: py2-git-2018.3-ubuntu-1404
+name: py2-git-2018-3-ubuntu-1404
 
 platform:
   os: linux
@@ -1374,7 +1374,7 @@ steps:
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
-    target: py2-git-2018.3-ubuntu-1404
+    target: py2-git-2018-3-ubuntu-1404
   privileged: true
 
 depends_on:
@@ -1382,7 +1382,7 @@ depends_on:
 
 ---
 kind: pipeline
-name: py2-git-2019.2-ubuntu-1404
+name: py2-git-2019-2-ubuntu-1404
 
 platform:
   os: linux
@@ -1393,7 +1393,7 @@ steps:
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
-    target: py2-git-2019.2-ubuntu-1404
+    target: py2-git-2019-2-ubuntu-1404
   privileged: true
 
 depends_on:
@@ -1420,7 +1420,7 @@ depends_on:
 
 ---
 kind: pipeline
-name: py2-stable-2017.7-ubuntu-1404
+name: py2-stable-2017-7-ubuntu-1404
 
 platform:
   os: linux
@@ -1431,7 +1431,7 @@ steps:
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
-    target: py2-stable-2017.7-ubuntu-1404
+    target: py2-stable-2017-7-ubuntu-1404
   privileged: true
 
 depends_on:
@@ -1439,7 +1439,7 @@ depends_on:
 
 ---
 kind: pipeline
-name: py2-stable-2018.3-ubuntu-1404
+name: py2-stable-2018-3-ubuntu-1404
 
 platform:
   os: linux
@@ -1450,7 +1450,7 @@ steps:
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
-    target: py2-stable-2018.3-ubuntu-1404
+    target: py2-stable-2018-3-ubuntu-1404
   privileged: true
 
 depends_on:
@@ -1458,7 +1458,7 @@ depends_on:
 
 ---
 kind: pipeline
-name: py2-stable-2019.2-ubuntu-1404
+name: py2-stable-2019-2-ubuntu-1404
 
 platform:
   os: linux
@@ -1469,7 +1469,7 @@ steps:
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
-    target: py2-stable-2019.2-ubuntu-1404
+    target: py2-stable-2019-2-ubuntu-1404
   privileged: true
 
 depends_on:
@@ -1477,7 +1477,7 @@ depends_on:
 
 ---
 kind: pipeline
-name: py2-git-2017.7-ubuntu-1604
+name: py2-git-2017-7-ubuntu-1604
 
 platform:
   os: linux
@@ -1488,7 +1488,7 @@ steps:
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
-    target: py2-git-2017.7-ubuntu-1604
+    target: py2-git-2017-7-ubuntu-1604
   privileged: true
 
 depends_on:
@@ -1496,7 +1496,7 @@ depends_on:
 
 ---
 kind: pipeline
-name: py2-git-2018.3-ubuntu-1604
+name: py2-git-2018-3-ubuntu-1604
 
 platform:
   os: linux
@@ -1507,7 +1507,7 @@ steps:
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
-    target: py2-git-2018.3-ubuntu-1604
+    target: py2-git-2018-3-ubuntu-1604
   privileged: true
 
 depends_on:
@@ -1515,7 +1515,7 @@ depends_on:
 
 ---
 kind: pipeline
-name: py2-git-2019.2-ubuntu-1604
+name: py2-git-2019-2-ubuntu-1604
 
 platform:
   os: linux
@@ -1526,7 +1526,7 @@ steps:
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
-    target: py2-git-2019.2-ubuntu-1604
+    target: py2-git-2019-2-ubuntu-1604
   privileged: true
 
 depends_on:
@@ -1553,7 +1553,7 @@ depends_on:
 
 ---
 kind: pipeline
-name: py2-stable-2017.7-ubuntu-1604
+name: py2-stable-2017-7-ubuntu-1604
 
 platform:
   os: linux
@@ -1564,7 +1564,7 @@ steps:
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
-    target: py2-stable-2017.7-ubuntu-1604
+    target: py2-stable-2017-7-ubuntu-1604
   privileged: true
 
 depends_on:
@@ -1572,7 +1572,7 @@ depends_on:
 
 ---
 kind: pipeline
-name: py2-stable-2018.3-ubuntu-1604
+name: py2-stable-2018-3-ubuntu-1604
 
 platform:
   os: linux
@@ -1583,7 +1583,7 @@ steps:
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
-    target: py2-stable-2018.3-ubuntu-1604
+    target: py2-stable-2018-3-ubuntu-1604
   privileged: true
 
 depends_on:
@@ -1591,7 +1591,7 @@ depends_on:
 
 ---
 kind: pipeline
-name: py2-stable-2019.2-ubuntu-1604
+name: py2-stable-2019-2-ubuntu-1604
 
 platform:
   os: linux
@@ -1602,7 +1602,7 @@ steps:
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
-    target: py2-stable-2019.2-ubuntu-1604
+    target: py2-stable-2019-2-ubuntu-1604
   privileged: true
 
 depends_on:
@@ -1610,7 +1610,7 @@ depends_on:
 
 ---
 kind: pipeline
-name: py2-git-2017.7-ubuntu-1804
+name: py2-git-2017-7-ubuntu-1804
 
 platform:
   os: linux
@@ -1621,7 +1621,7 @@ steps:
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
-    target: py2-git-2017.7-ubuntu-1804
+    target: py2-git-2017-7-ubuntu-1804
   privileged: true
 
 depends_on:
@@ -1629,7 +1629,7 @@ depends_on:
 
 ---
 kind: pipeline
-name: py2-git-2018.3-ubuntu-1804
+name: py2-git-2018-3-ubuntu-1804
 
 platform:
   os: linux
@@ -1640,7 +1640,7 @@ steps:
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
-    target: py2-git-2018.3-ubuntu-1804
+    target: py2-git-2018-3-ubuntu-1804
   privileged: true
 
 depends_on:
@@ -1648,7 +1648,7 @@ depends_on:
 
 ---
 kind: pipeline
-name: py2-git-2019.2-ubuntu-1804
+name: py2-git-2019-2-ubuntu-1804
 
 platform:
   os: linux
@@ -1659,7 +1659,7 @@ steps:
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
-    target: py2-git-2019.2-ubuntu-1804
+    target: py2-git-2019-2-ubuntu-1804
   privileged: true
 
 depends_on:
@@ -1686,7 +1686,7 @@ depends_on:
 
 ---
 kind: pipeline
-name: py2-stable-2017.7-ubuntu-1804
+name: py2-stable-2017-7-ubuntu-1804
 
 platform:
   os: linux
@@ -1697,7 +1697,7 @@ steps:
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
-    target: py2-stable-2017.7-ubuntu-1804
+    target: py2-stable-2017-7-ubuntu-1804
   privileged: true
 
 depends_on:
@@ -1705,7 +1705,7 @@ depends_on:
 
 ---
 kind: pipeline
-name: py2-stable-2018.3-ubuntu-1804
+name: py2-stable-2018-3-ubuntu-1804
 
 platform:
   os: linux
@@ -1716,7 +1716,7 @@ steps:
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
-    target: py2-stable-2018.3-ubuntu-1804
+    target: py2-stable-2018-3-ubuntu-1804
   privileged: true
 
 depends_on:
@@ -1724,7 +1724,7 @@ depends_on:
 
 ---
 kind: pipeline
-name: py2-stable-2019.2-ubuntu-1804
+name: py2-stable-2019-2-ubuntu-1804
 
 platform:
   os: linux
@@ -1735,7 +1735,7 @@ steps:
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
-    target: py2-stable-2019.2-ubuntu-1804
+    target: py2-stable-2019-2-ubuntu-1804
   privileged: true
 
 depends_on:
@@ -1743,6 +1743,6 @@ depends_on:
 
 ---
 kind: signature
-hmac: ea705e5194cc7bc20d8022398adcb86a218e78b50fc630e924569b0cb8a80c30
+hmac: 46202f72731770191f9a5d808cb5b739622a68251a07c4be552a95ddfd68cd8e
 
 ...

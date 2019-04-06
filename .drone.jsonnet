@@ -1,11 +1,11 @@
 local suites = [
-  'py2-git-2017.7',
-  'py2-git-2018.3',
-  'py2-git-2019.2',
+  'py2-git-2017-7',
+  'py2-git-2018-3',
+  'py2-git-2019-2',
   'py2-git-develop',
-  'py2-stable-2017.7',
-  'py2-stable-2018.3',
-  'py2-stable-2019.2',
+  'py2-stable-2017-7',
+  'py2-stable-2018-3',
+  'py2-stable-2019-2',
 ];
 
 local distros = [

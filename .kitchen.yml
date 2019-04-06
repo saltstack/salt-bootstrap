@@ -20,10 +20,11 @@ provisioner:
   sudo: true
   require_chef: false
   formula: tests
-  state_top:
-    base:
-      '*':
-        - tests.accept_key
+  run_salt_call: false
+  init_environment: |
+    echo 'auto_accept: true' > /tmp/auto-accept-keys.conf
+    sudo mkdir -p /etc/salt/master.d
+    sudo mv /tmp/auto-accept-keys.conf /etc/salt/master.d/auto-accept-keys.conf
 
 platforms:
   - name: fedora-28

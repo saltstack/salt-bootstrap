@@ -14,1662 +14,903 @@ steps:
 
 ---
 kind: pipeline
-name: py2-stable-2017-7-amazon-1
+name: amazon-1-stable
 
 platform:
   os: linux
   arch: amd64
 
 steps:
-- name: throttle build
-  image: alpine
-  commands:
-  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
-
-- name: build
+- name: py2-stable-2017-7
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
     target: py2-stable-2017-7-amazon-1
   privileged: true
+  depends_on:
+  - run-shellcheck
 
-depends_on:
-- run-shellcheck
-
----
-kind: pipeline
-name: py2-stable-2018-3-amazon-1
-
-platform:
-  os: linux
-  arch: amd64
-
-steps:
-- name: throttle build
-  image: alpine
-  commands:
-  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
-
-- name: build
+- name: py2-stable-2018-3
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
     target: py2-stable-2018-3-amazon-1
   privileged: true
+  depends_on:
+  - run-shellcheck
 
-depends_on:
-- run-shellcheck
-
----
-kind: pipeline
-name: py2-stable-2019-2-amazon-1
-
-platform:
-  os: linux
-  arch: amd64
-
-steps:
-- name: throttle build
-  image: alpine
-  commands:
-  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
-
-- name: build
+- name: py2-stable-2019-2
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
     target: py2-stable-2019-2-amazon-1
   privileged: true
+  depends_on:
+  - run-shellcheck
 
 depends_on:
 - run-shellcheck
 
 ---
 kind: pipeline
-name: py2-stable-2017-7-amazon-2
+name: amazon-2-stable
 
 platform:
   os: linux
   arch: amd64
 
 steps:
-- name: throttle build
-  image: alpine
-  commands:
-  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
-
-- name: build
+- name: py2-stable-2017-7
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
     target: py2-stable-2017-7-amazon-2
   privileged: true
+  depends_on:
+  - run-shellcheck
 
-depends_on:
-- run-shellcheck
-
----
-kind: pipeline
-name: py2-stable-2018-3-amazon-2
-
-platform:
-  os: linux
-  arch: amd64
-
-steps:
-- name: throttle build
-  image: alpine
-  commands:
-  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
-
-- name: build
+- name: py2-stable-2018-3
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
     target: py2-stable-2018-3-amazon-2
   privileged: true
+  depends_on:
+  - run-shellcheck
 
-depends_on:
-- run-shellcheck
-
----
-kind: pipeline
-name: py2-stable-2019-2-amazon-2
-
-platform:
-  os: linux
-  arch: amd64
-
-steps:
-- name: throttle build
-  image: alpine
-  commands:
-  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
-
-- name: build
+- name: py2-stable-2019-2
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
     target: py2-stable-2019-2-amazon-2
   privileged: true
+  depends_on:
+  - run-shellcheck
 
 depends_on:
 - run-shellcheck
 
 ---
 kind: pipeline
-name: py2-stable-2017-7-centos-6
+name: centos-6-stable
 
 platform:
   os: linux
   arch: amd64
 
 steps:
-- name: throttle build
-  image: alpine
-  commands:
-  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
-
-- name: build
+- name: py2-stable-2017-7
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
     target: py2-stable-2017-7-centos-6
   privileged: true
+  depends_on:
+  - run-shellcheck
 
-depends_on:
-- run-shellcheck
-
----
-kind: pipeline
-name: py2-stable-2018-3-centos-6
-
-platform:
-  os: linux
-  arch: amd64
-
-steps:
-- name: throttle build
-  image: alpine
-  commands:
-  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
-
-- name: build
+- name: py2-stable-2018-3
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
     target: py2-stable-2018-3-centos-6
   privileged: true
+  depends_on:
+  - run-shellcheck
 
-depends_on:
-- run-shellcheck
-
----
-kind: pipeline
-name: py2-stable-2019-2-centos-6
-
-platform:
-  os: linux
-  arch: amd64
-
-steps:
-- name: throttle build
-  image: alpine
-  commands:
-  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
-
-- name: build
+- name: py2-stable-2019-2
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
     target: py2-stable-2019-2-centos-6
   privileged: true
+  depends_on:
+  - run-shellcheck
 
 depends_on:
 - run-shellcheck
 
 ---
 kind: pipeline
-name: py2-stable-2017-7-centos-7
+name: centos-7-stable
 
 platform:
   os: linux
   arch: amd64
 
 steps:
-- name: throttle build
-  image: alpine
-  commands:
-  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
-
-- name: build
+- name: py2-stable-2017-7
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
     target: py2-stable-2017-7-centos-7
   privileged: true
+  depends_on:
+  - run-shellcheck
 
-depends_on:
-- run-shellcheck
-
----
-kind: pipeline
-name: py2-stable-2018-3-centos-7
-
-platform:
-  os: linux
-  arch: amd64
-
-steps:
-- name: throttle build
-  image: alpine
-  commands:
-  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
-
-- name: build
+- name: py2-stable-2018-3
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
     target: py2-stable-2018-3-centos-7
   privileged: true
+  depends_on:
+  - run-shellcheck
 
-depends_on:
-- run-shellcheck
-
----
-kind: pipeline
-name: py2-stable-2019-2-centos-7
-
-platform:
-  os: linux
-  arch: amd64
-
-steps:
-- name: throttle build
-  image: alpine
-  commands:
-  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
-
-- name: build
+- name: py2-stable-2019-2
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
     target: py2-stable-2019-2-centos-7
   privileged: true
+  depends_on:
+  - run-shellcheck
 
 depends_on:
 - run-shellcheck
 
 ---
 kind: pipeline
-name: py2-stable-2017-7-debian-8
+name: debian-8-stable
 
 platform:
   os: linux
   arch: amd64
 
 steps:
-- name: throttle build
-  image: alpine
-  commands:
-  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
-
-- name: build
+- name: py2-stable-2017-7
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
     target: py2-stable-2017-7-debian-8
   privileged: true
+  depends_on:
+  - run-shellcheck
 
-depends_on:
-- run-shellcheck
-
----
-kind: pipeline
-name: py2-stable-2018-3-debian-8
-
-platform:
-  os: linux
-  arch: amd64
-
-steps:
-- name: throttle build
-  image: alpine
-  commands:
-  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
-
-- name: build
+- name: py2-stable-2018-3
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
     target: py2-stable-2018-3-debian-8
   privileged: true
+  depends_on:
+  - run-shellcheck
 
-depends_on:
-- run-shellcheck
-
----
-kind: pipeline
-name: py2-stable-2019-2-debian-8
-
-platform:
-  os: linux
-  arch: amd64
-
-steps:
-- name: throttle build
-  image: alpine
-  commands:
-  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
-
-- name: build
+- name: py2-stable-2019-2
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
     target: py2-stable-2019-2-debian-8
   privileged: true
+  depends_on:
+  - run-shellcheck
 
 depends_on:
 - run-shellcheck
 
 ---
 kind: pipeline
-name: py2-stable-2017-7-debian-9
+name: debian-9-stable
 
 platform:
   os: linux
   arch: amd64
 
 steps:
-- name: throttle build
-  image: alpine
-  commands:
-  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
-
-- name: build
+- name: py2-stable-2017-7
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
     target: py2-stable-2017-7-debian-9
   privileged: true
+  depends_on:
+  - run-shellcheck
 
-depends_on:
-- run-shellcheck
-
----
-kind: pipeline
-name: py2-stable-2018-3-debian-9
-
-platform:
-  os: linux
-  arch: amd64
-
-steps:
-- name: throttle build
-  image: alpine
-  commands:
-  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
-
-- name: build
+- name: py2-stable-2018-3
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
     target: py2-stable-2018-3-debian-9
   privileged: true
+  depends_on:
+  - run-shellcheck
 
-depends_on:
-- run-shellcheck
-
----
-kind: pipeline
-name: py2-stable-2019-2-debian-9
-
-platform:
-  os: linux
-  arch: amd64
-
-steps:
-- name: throttle build
-  image: alpine
-  commands:
-  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
-
-- name: build
+- name: py2-stable-2019-2
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
     target: py2-stable-2019-2-debian-9
   privileged: true
+  depends_on:
+  - run-shellcheck
 
 depends_on:
 - run-shellcheck
 
 ---
 kind: pipeline
-name: py2-stable-2017-7-ubuntu-1404
+name: ubuntu-1404-stable
 
 platform:
   os: linux
   arch: amd64
 
 steps:
-- name: throttle build
-  image: alpine
-  commands:
-  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
-
-- name: build
+- name: py2-stable-2017-7
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
     target: py2-stable-2017-7-ubuntu-1404
   privileged: true
+  depends_on:
+  - run-shellcheck
 
-depends_on:
-- run-shellcheck
-
----
-kind: pipeline
-name: py2-stable-2018-3-ubuntu-1404
-
-platform:
-  os: linux
-  arch: amd64
-
-steps:
-- name: throttle build
-  image: alpine
-  commands:
-  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
-
-- name: build
+- name: py2-stable-2018-3
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
     target: py2-stable-2018-3-ubuntu-1404
   privileged: true
+  depends_on:
+  - run-shellcheck
 
-depends_on:
-- run-shellcheck
-
----
-kind: pipeline
-name: py2-stable-2019-2-ubuntu-1404
-
-platform:
-  os: linux
-  arch: amd64
-
-steps:
-- name: throttle build
-  image: alpine
-  commands:
-  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
-
-- name: build
+- name: py2-stable-2019-2
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
     target: py2-stable-2019-2-ubuntu-1404
   privileged: true
+  depends_on:
+  - run-shellcheck
 
 depends_on:
 - run-shellcheck
 
 ---
 kind: pipeline
-name: py2-stable-2017-7-ubuntu-1604
+name: ubuntu-1604-stable
 
 platform:
   os: linux
   arch: amd64
 
 steps:
-- name: throttle build
-  image: alpine
-  commands:
-  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
-
-- name: build
+- name: py2-stable-2017-7
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
     target: py2-stable-2017-7-ubuntu-1604
   privileged: true
+  depends_on:
+  - run-shellcheck
 
-depends_on:
-- run-shellcheck
-
----
-kind: pipeline
-name: py2-stable-2018-3-ubuntu-1604
-
-platform:
-  os: linux
-  arch: amd64
-
-steps:
-- name: throttle build
-  image: alpine
-  commands:
-  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
-
-- name: build
+- name: py2-stable-2018-3
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
     target: py2-stable-2018-3-ubuntu-1604
   privileged: true
+  depends_on:
+  - run-shellcheck
 
-depends_on:
-- run-shellcheck
-
----
-kind: pipeline
-name: py2-stable-2019-2-ubuntu-1604
-
-platform:
-  os: linux
-  arch: amd64
-
-steps:
-- name: throttle build
-  image: alpine
-  commands:
-  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
-
-- name: build
+- name: py2-stable-2019-2
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
     target: py2-stable-2019-2-ubuntu-1604
   privileged: true
+  depends_on:
+  - run-shellcheck
 
 depends_on:
 - run-shellcheck
 
 ---
 kind: pipeline
-name: py2-stable-2017-7-ubuntu-1804
+name: ubuntu-1804-stable
 
 platform:
   os: linux
   arch: amd64
 
 steps:
-- name: throttle build
-  image: alpine
-  commands:
-  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
-
-- name: build
+- name: py2-stable-2017-7
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
     target: py2-stable-2017-7-ubuntu-1804
   privileged: true
+  depends_on:
+  - run-shellcheck
 
-depends_on:
-- run-shellcheck
-
----
-kind: pipeline
-name: py2-stable-2018-3-ubuntu-1804
-
-platform:
-  os: linux
-  arch: amd64
-
-steps:
-- name: throttle build
-  image: alpine
-  commands:
-  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
-
-- name: build
+- name: py2-stable-2018-3
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
     target: py2-stable-2018-3-ubuntu-1804
   privileged: true
+  depends_on:
+  - run-shellcheck
 
-depends_on:
-- run-shellcheck
-
----
-kind: pipeline
-name: py2-stable-2019-2-ubuntu-1804
-
-platform:
-  os: linux
-  arch: amd64
-
-steps:
-- name: throttle build
-  image: alpine
-  commands:
-  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
-
-- name: build
+- name: py2-stable-2019-2
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
     target: py2-stable-2019-2-ubuntu-1804
   privileged: true
+  depends_on:
+  - run-shellcheck
 
 depends_on:
 - run-shellcheck
 
 ---
 kind: pipeline
-name: py2-git-2017-7-arch
+name: arch-git
 
 platform:
   os: linux
   arch: amd64
 
 steps:
-- name: throttle build
-  image: alpine
-  commands:
-  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
-
-- name: build
+- name: py2-git-2017-7
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
     target: py2-git-2017-7-arch
   privileged: true
+  depends_on:
+  - run-shellcheck
 
-depends_on:
-- run-shellcheck
-
----
-kind: pipeline
-name: py2-git-2018-3-arch
-
-platform:
-  os: linux
-  arch: amd64
-
-steps:
-- name: throttle build
-  image: alpine
-  commands:
-  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
-
-- name: build
+- name: py2-git-2018-3
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
     target: py2-git-2018-3-arch
   privileged: true
+  depends_on:
+  - run-shellcheck
 
-depends_on:
-- run-shellcheck
-
----
-kind: pipeline
-name: py2-git-2019-2-arch
-
-platform:
-  os: linux
-  arch: amd64
-
-steps:
-- name: throttle build
-  image: alpine
-  commands:
-  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
-
-- name: build
+- name: py2-git-2019-2
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
     target: py2-git-2019-2-arch
   privileged: true
+  depends_on:
+  - run-shellcheck
 
 depends_on:
 - run-shellcheck
 
 ---
 kind: pipeline
-name: py2-git-2017-7-amazon-1
+name: amazon-1-git
 
 platform:
   os: linux
   arch: amd64
 
 steps:
-- name: throttle build
-  image: alpine
-  commands:
-  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
-
-- name: build
+- name: py2-git-2017-7
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
     target: py2-git-2017-7-amazon-1
   privileged: true
+  depends_on:
+  - run-shellcheck
 
-depends_on:
-- run-shellcheck
-
----
-kind: pipeline
-name: py2-git-2018-3-amazon-1
-
-platform:
-  os: linux
-  arch: amd64
-
-steps:
-- name: throttle build
-  image: alpine
-  commands:
-  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
-
-- name: build
+- name: py2-git-2018-3
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
     target: py2-git-2018-3-amazon-1
   privileged: true
+  depends_on:
+  - run-shellcheck
 
-depends_on:
-- run-shellcheck
-
----
-kind: pipeline
-name: py2-git-2019-2-amazon-1
-
-platform:
-  os: linux
-  arch: amd64
-
-steps:
-- name: throttle build
-  image: alpine
-  commands:
-  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
-
-- name: build
+- name: py2-git-2019-2
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
     target: py2-git-2019-2-amazon-1
   privileged: true
+  depends_on:
+  - run-shellcheck
 
 depends_on:
 - run-shellcheck
 
 ---
 kind: pipeline
-name: py2-git-2017-7-amazon-2
+name: amazon-2-git
 
 platform:
   os: linux
   arch: amd64
 
 steps:
-- name: throttle build
-  image: alpine
-  commands:
-  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
-
-- name: build
+- name: py2-git-2017-7
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
     target: py2-git-2017-7-amazon-2
   privileged: true
+  depends_on:
+  - run-shellcheck
 
-depends_on:
-- run-shellcheck
-
----
-kind: pipeline
-name: py2-git-2018-3-amazon-2
-
-platform:
-  os: linux
-  arch: amd64
-
-steps:
-- name: throttle build
-  image: alpine
-  commands:
-  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
-
-- name: build
+- name: py2-git-2018-3
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
     target: py2-git-2018-3-amazon-2
   privileged: true
+  depends_on:
+  - run-shellcheck
 
-depends_on:
-- run-shellcheck
-
----
-kind: pipeline
-name: py2-git-2019-2-amazon-2
-
-platform:
-  os: linux
-  arch: amd64
-
-steps:
-- name: throttle build
-  image: alpine
-  commands:
-  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
-
-- name: build
+- name: py2-git-2019-2
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
     target: py2-git-2019-2-amazon-2
   privileged: true
+  depends_on:
+  - run-shellcheck
 
 depends_on:
 - run-shellcheck
 
 ---
 kind: pipeline
-name: py2-git-2017-7-centos-6
+name: centos-6-git
 
 platform:
   os: linux
   arch: amd64
 
 steps:
-- name: throttle build
-  image: alpine
-  commands:
-  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
-
-- name: build
+- name: py2-git-2017-7
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
     target: py2-git-2017-7-centos-6
   privileged: true
+  depends_on:
+  - run-shellcheck
 
-depends_on:
-- run-shellcheck
-
----
-kind: pipeline
-name: py2-git-2018-3-centos-6
-
-platform:
-  os: linux
-  arch: amd64
-
-steps:
-- name: throttle build
-  image: alpine
-  commands:
-  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
-
-- name: build
+- name: py2-git-2018-3
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
     target: py2-git-2018-3-centos-6
   privileged: true
+  depends_on:
+  - run-shellcheck
 
-depends_on:
-- run-shellcheck
-
----
-kind: pipeline
-name: py2-git-2019-2-centos-6
-
-platform:
-  os: linux
-  arch: amd64
-
-steps:
-- name: throttle build
-  image: alpine
-  commands:
-  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
-
-- name: build
+- name: py2-git-2019-2
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
     target: py2-git-2019-2-centos-6
   privileged: true
+  depends_on:
+  - run-shellcheck
 
 depends_on:
 - run-shellcheck
 
 ---
 kind: pipeline
-name: py2-git-2017-7-centos-7
+name: centos-7-git
 
 platform:
   os: linux
   arch: amd64
 
 steps:
-- name: throttle build
-  image: alpine
-  commands:
-  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
-
-- name: build
+- name: py2-git-2017-7
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
     target: py2-git-2017-7-centos-7
   privileged: true
+  depends_on:
+  - run-shellcheck
 
-depends_on:
-- run-shellcheck
-
----
-kind: pipeline
-name: py2-git-2018-3-centos-7
-
-platform:
-  os: linux
-  arch: amd64
-
-steps:
-- name: throttle build
-  image: alpine
-  commands:
-  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
-
-- name: build
+- name: py2-git-2018-3
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
     target: py2-git-2018-3-centos-7
   privileged: true
+  depends_on:
+  - run-shellcheck
 
-depends_on:
-- run-shellcheck
-
----
-kind: pipeline
-name: py2-git-2019-2-centos-7
-
-platform:
-  os: linux
-  arch: amd64
-
-steps:
-- name: throttle build
-  image: alpine
-  commands:
-  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
-
-- name: build
+- name: py2-git-2019-2
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
     target: py2-git-2019-2-centos-7
   privileged: true
+  depends_on:
+  - run-shellcheck
 
 depends_on:
 - run-shellcheck
 
 ---
 kind: pipeline
-name: py2-git-2017-7-debian-8
+name: debian-8-git
 
 platform:
   os: linux
   arch: amd64
 
 steps:
-- name: throttle build
-  image: alpine
-  commands:
-  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
-
-- name: build
+- name: py2-git-2017-7
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
     target: py2-git-2017-7-debian-8
   privileged: true
+  depends_on:
+  - run-shellcheck
 
-depends_on:
-- run-shellcheck
-
----
-kind: pipeline
-name: py2-git-2018-3-debian-8
-
-platform:
-  os: linux
-  arch: amd64
-
-steps:
-- name: throttle build
-  image: alpine
-  commands:
-  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
-
-- name: build
+- name: py2-git-2018-3
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
     target: py2-git-2018-3-debian-8
   privileged: true
+  depends_on:
+  - run-shellcheck
 
-depends_on:
-- run-shellcheck
-
----
-kind: pipeline
-name: py2-git-2019-2-debian-8
-
-platform:
-  os: linux
-  arch: amd64
-
-steps:
-- name: throttle build
-  image: alpine
-  commands:
-  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
-
-- name: build
+- name: py2-git-2019-2
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
     target: py2-git-2019-2-debian-8
   privileged: true
+  depends_on:
+  - run-shellcheck
 
 depends_on:
 - run-shellcheck
 
 ---
 kind: pipeline
-name: py2-git-2017-7-debian-9
+name: debian-9-git
 
 platform:
   os: linux
   arch: amd64
 
 steps:
-- name: throttle build
-  image: alpine
-  commands:
-  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
-
-- name: build
+- name: py2-git-2017-7
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
     target: py2-git-2017-7-debian-9
   privileged: true
+  depends_on:
+  - run-shellcheck
 
-depends_on:
-- run-shellcheck
-
----
-kind: pipeline
-name: py2-git-2018-3-debian-9
-
-platform:
-  os: linux
-  arch: amd64
-
-steps:
-- name: throttle build
-  image: alpine
-  commands:
-  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
-
-- name: build
+- name: py2-git-2018-3
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
     target: py2-git-2018-3-debian-9
   privileged: true
+  depends_on:
+  - run-shellcheck
 
-depends_on:
-- run-shellcheck
-
----
-kind: pipeline
-name: py2-git-2019-2-debian-9
-
-platform:
-  os: linux
-  arch: amd64
-
-steps:
-- name: throttle build
-  image: alpine
-  commands:
-  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
-
-- name: build
+- name: py2-git-2019-2
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
     target: py2-git-2019-2-debian-9
   privileged: true
+  depends_on:
+  - run-shellcheck
 
 depends_on:
 - run-shellcheck
 
 ---
 kind: pipeline
-name: py2-git-2017-7-fedora-28
+name: fedora-28-git
 
 platform:
   os: linux
   arch: amd64
 
 steps:
-- name: throttle build
-  image: alpine
-  commands:
-  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
-
-- name: build
+- name: py2-git-2017-7
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
     target: py2-git-2017-7-fedora-28
   privileged: true
+  depends_on:
+  - run-shellcheck
 
-depends_on:
-- run-shellcheck
-
----
-kind: pipeline
-name: py2-git-2018-3-fedora-28
-
-platform:
-  os: linux
-  arch: amd64
-
-steps:
-- name: throttle build
-  image: alpine
-  commands:
-  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
-
-- name: build
+- name: py2-git-2018-3
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
     target: py2-git-2018-3-fedora-28
   privileged: true
+  depends_on:
+  - run-shellcheck
 
-depends_on:
-- run-shellcheck
-
----
-kind: pipeline
-name: py2-git-2019-2-fedora-28
-
-platform:
-  os: linux
-  arch: amd64
-
-steps:
-- name: throttle build
-  image: alpine
-  commands:
-  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
-
-- name: build
+- name: py2-git-2019-2
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
     target: py2-git-2019-2-fedora-28
   privileged: true
+  depends_on:
+  - run-shellcheck
 
 depends_on:
 - run-shellcheck
 
 ---
 kind: pipeline
-name: py2-git-2017-7-fedora-29
+name: fedora-29-git
 
 platform:
   os: linux
   arch: amd64
 
 steps:
-- name: throttle build
-  image: alpine
-  commands:
-  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
-
-- name: build
+- name: py2-git-2017-7
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
     target: py2-git-2017-7-fedora-29
   privileged: true
+  depends_on:
+  - run-shellcheck
 
-depends_on:
-- run-shellcheck
-
----
-kind: pipeline
-name: py2-git-2018-3-fedora-29
-
-platform:
-  os: linux
-  arch: amd64
-
-steps:
-- name: throttle build
-  image: alpine
-  commands:
-  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
-
-- name: build
+- name: py2-git-2018-3
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
     target: py2-git-2018-3-fedora-29
   privileged: true
+  depends_on:
+  - run-shellcheck
 
-depends_on:
-- run-shellcheck
-
----
-kind: pipeline
-name: py2-git-2019-2-fedora-29
-
-platform:
-  os: linux
-  arch: amd64
-
-steps:
-- name: throttle build
-  image: alpine
-  commands:
-  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
-
-- name: build
+- name: py2-git-2019-2
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
     target: py2-git-2019-2-fedora-29
   privileged: true
+  depends_on:
+  - run-shellcheck
 
 depends_on:
 - run-shellcheck
 
 ---
 kind: pipeline
-name: py2-git-2017-7-opensuse-15
+name: opensuse-15-git
 
 platform:
   os: linux
   arch: amd64
 
 steps:
-- name: throttle build
-  image: alpine
-  commands:
-  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
-
-- name: build
+- name: py2-git-2017-7
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
     target: py2-git-2017-7-opensuse-15
   privileged: true
+  depends_on:
+  - run-shellcheck
 
-depends_on:
-- run-shellcheck
-
----
-kind: pipeline
-name: py2-git-2018-3-opensuse-15
-
-platform:
-  os: linux
-  arch: amd64
-
-steps:
-- name: throttle build
-  image: alpine
-  commands:
-  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
-
-- name: build
+- name: py2-git-2018-3
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
     target: py2-git-2018-3-opensuse-15
   privileged: true
+  depends_on:
+  - run-shellcheck
 
-depends_on:
-- run-shellcheck
-
----
-kind: pipeline
-name: py2-git-2019-2-opensuse-15
-
-platform:
-  os: linux
-  arch: amd64
-
-steps:
-- name: throttle build
-  image: alpine
-  commands:
-  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
-
-- name: build
+- name: py2-git-2019-2
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
     target: py2-git-2019-2-opensuse-15
   privileged: true
+  depends_on:
+  - run-shellcheck
 
 depends_on:
 - run-shellcheck
 
 ---
 kind: pipeline
-name: py2-git-2017-7-opensuse-42
+name: opensuse-42-git
 
 platform:
   os: linux
   arch: amd64
 
 steps:
-- name: throttle build
-  image: alpine
-  commands:
-  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
-
-- name: build
+- name: py2-git-2017-7
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
     target: py2-git-2017-7-opensuse-42
   privileged: true
+  depends_on:
+  - run-shellcheck
 
-depends_on:
-- run-shellcheck
-
----
-kind: pipeline
-name: py2-git-2018-3-opensuse-42
-
-platform:
-  os: linux
-  arch: amd64
-
-steps:
-- name: throttle build
-  image: alpine
-  commands:
-  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
-
-- name: build
+- name: py2-git-2018-3
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
     target: py2-git-2018-3-opensuse-42
   privileged: true
+  depends_on:
+  - run-shellcheck
 
-depends_on:
-- run-shellcheck
-
----
-kind: pipeline
-name: py2-git-2019-2-opensuse-42
-
-platform:
-  os: linux
-  arch: amd64
-
-steps:
-- name: throttle build
-  image: alpine
-  commands:
-  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
-
-- name: build
+- name: py2-git-2019-2
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
     target: py2-git-2019-2-opensuse-42
   privileged: true
+  depends_on:
+  - run-shellcheck
 
 depends_on:
 - run-shellcheck
 
 ---
 kind: pipeline
-name: py2-git-2017-7-ubuntu-1404
+name: ubuntu-1404-git
 
 platform:
   os: linux
   arch: amd64
 
 steps:
-- name: throttle build
-  image: alpine
-  commands:
-  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
-
-- name: build
+- name: py2-git-2017-7
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
     target: py2-git-2017-7-ubuntu-1404
   privileged: true
+  depends_on:
+  - run-shellcheck
 
-depends_on:
-- run-shellcheck
-
----
-kind: pipeline
-name: py2-git-2018-3-ubuntu-1404
-
-platform:
-  os: linux
-  arch: amd64
-
-steps:
-- name: throttle build
-  image: alpine
-  commands:
-  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
-
-- name: build
+- name: py2-git-2018-3
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
     target: py2-git-2018-3-ubuntu-1404
   privileged: true
+  depends_on:
+  - run-shellcheck
 
-depends_on:
-- run-shellcheck
-
----
-kind: pipeline
-name: py2-git-2019-2-ubuntu-1404
-
-platform:
-  os: linux
-  arch: amd64
-
-steps:
-- name: throttle build
-  image: alpine
-  commands:
-  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
-
-- name: build
+- name: py2-git-2019-2
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
     target: py2-git-2019-2-ubuntu-1404
   privileged: true
+  depends_on:
+  - run-shellcheck
 
 depends_on:
 - run-shellcheck
 
 ---
 kind: pipeline
-name: py2-git-2017-7-ubuntu-1604
+name: ubuntu-1604-git
 
 platform:
   os: linux
   arch: amd64
 
 steps:
-- name: throttle build
-  image: alpine
-  commands:
-  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
-
-- name: build
+- name: py2-git-2017-7
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
     target: py2-git-2017-7-ubuntu-1604
   privileged: true
+  depends_on:
+  - run-shellcheck
 
-depends_on:
-- run-shellcheck
-
----
-kind: pipeline
-name: py2-git-2018-3-ubuntu-1604
-
-platform:
-  os: linux
-  arch: amd64
-
-steps:
-- name: throttle build
-  image: alpine
-  commands:
-  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
-
-- name: build
+- name: py2-git-2018-3
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
     target: py2-git-2018-3-ubuntu-1604
   privileged: true
+  depends_on:
+  - run-shellcheck
 
-depends_on:
-- run-shellcheck
-
----
-kind: pipeline
-name: py2-git-2019-2-ubuntu-1604
-
-platform:
-  os: linux
-  arch: amd64
-
-steps:
-- name: throttle build
-  image: alpine
-  commands:
-  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
-
-- name: build
+- name: py2-git-2019-2
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
     target: py2-git-2019-2-ubuntu-1604
   privileged: true
+  depends_on:
+  - run-shellcheck
 
 depends_on:
 - run-shellcheck
 
 ---
 kind: pipeline
-name: py2-git-2017-7-ubuntu-1804
+name: ubuntu-1804-git
 
 platform:
   os: linux
   arch: amd64
 
 steps:
-- name: throttle build
-  image: alpine
-  commands:
-  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
-
-- name: build
+- name: py2-git-2017-7
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
     target: py2-git-2017-7-ubuntu-1804
   privileged: true
+  depends_on:
+  - run-shellcheck
 
-depends_on:
-- run-shellcheck
-
----
-kind: pipeline
-name: py2-git-2018-3-ubuntu-1804
-
-platform:
-  os: linux
-  arch: amd64
-
-steps:
-- name: throttle build
-  image: alpine
-  commands:
-  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
-
-- name: build
+- name: py2-git-2018-3
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
     target: py2-git-2018-3-ubuntu-1804
   privileged: true
+  depends_on:
+  - run-shellcheck
 
-depends_on:
-- run-shellcheck
-
----
-kind: pipeline
-name: py2-git-2019-2-ubuntu-1804
-
-platform:
-  os: linux
-  arch: amd64
-
-steps:
-- name: throttle build
-  image: alpine
-  commands:
-  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
-
-- name: build
+- name: py2-git-2019-2
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
     target: py2-git-2019-2-ubuntu-1804
   privileged: true
+  depends_on:
+  - run-shellcheck
 
 depends_on:
 - run-shellcheck
 
 ---
 kind: signature
-hmac: cbf4ad0b023bb3b5b9ac8948bbde836956289da44e5d76044cf760592abceb5c
+hmac: 2b2b96a55b8714b616544143099c7b464390a3210604e63e77caab5f52179f0f
 
 ...

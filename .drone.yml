@@ -14,403 +14,7 @@ steps:
 
 ---
 kind: pipeline
-name: amazon-1-stable
-
-platform:
-  os: linux
-  arch: amd64
-
-steps:
-- name: throttle-build
-  image: alpine
-  commands:
-  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
-
-- name: py2-stable-2017-7
-  image: saltstack/drone-plugin-kitchen
-  settings:
-    requirements: tests/requirements.txt
-    target: py2-stable-2017-7-amazon-1
-  privileged: true
-  depends_on:
-  - throttle-build
-
-- name: py2-stable-2018-3
-  image: saltstack/drone-plugin-kitchen
-  settings:
-    requirements: tests/requirements.txt
-    target: py2-stable-2018-3-amazon-1
-  privileged: true
-  depends_on:
-  - throttle-build
-
-- name: py2-stable-2019-2
-  image: saltstack/drone-plugin-kitchen
-  settings:
-    requirements: tests/requirements.txt
-    target: py2-stable-2019-2-amazon-1
-  privileged: true
-  depends_on:
-  - throttle-build
-
-depends_on:
-- run-shellcheck
-
----
-kind: pipeline
-name: amazon-2-stable
-
-platform:
-  os: linux
-  arch: amd64
-
-steps:
-- name: throttle-build
-  image: alpine
-  commands:
-  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
-
-- name: py2-stable-2017-7
-  image: saltstack/drone-plugin-kitchen
-  settings:
-    requirements: tests/requirements.txt
-    target: py2-stable-2017-7-amazon-2
-  privileged: true
-  depends_on:
-  - throttle-build
-
-- name: py2-stable-2018-3
-  image: saltstack/drone-plugin-kitchen
-  settings:
-    requirements: tests/requirements.txt
-    target: py2-stable-2018-3-amazon-2
-  privileged: true
-  depends_on:
-  - throttle-build
-
-- name: py2-stable-2019-2
-  image: saltstack/drone-plugin-kitchen
-  settings:
-    requirements: tests/requirements.txt
-    target: py2-stable-2019-2-amazon-2
-  privileged: true
-  depends_on:
-  - throttle-build
-
-depends_on:
-- run-shellcheck
-
----
-kind: pipeline
-name: centos-6-stable
-
-platform:
-  os: linux
-  arch: amd64
-
-steps:
-- name: throttle-build
-  image: alpine
-  commands:
-  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
-
-- name: py2-stable-2017-7
-  image: saltstack/drone-plugin-kitchen
-  settings:
-    requirements: tests/requirements.txt
-    target: py2-stable-2017-7-centos-6
-  privileged: true
-  depends_on:
-  - throttle-build
-
-- name: py2-stable-2018-3
-  image: saltstack/drone-plugin-kitchen
-  settings:
-    requirements: tests/requirements.txt
-    target: py2-stable-2018-3-centos-6
-  privileged: true
-  depends_on:
-  - throttle-build
-
-- name: py2-stable-2019-2
-  image: saltstack/drone-plugin-kitchen
-  settings:
-    requirements: tests/requirements.txt
-    target: py2-stable-2019-2-centos-6
-  privileged: true
-  depends_on:
-  - throttle-build
-
-depends_on:
-- run-shellcheck
-
----
-kind: pipeline
-name: centos-7-stable
-
-platform:
-  os: linux
-  arch: amd64
-
-steps:
-- name: throttle-build
-  image: alpine
-  commands:
-  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
-
-- name: py2-stable-2017-7
-  image: saltstack/drone-plugin-kitchen
-  settings:
-    requirements: tests/requirements.txt
-    target: py2-stable-2017-7-centos-7
-  privileged: true
-  depends_on:
-  - throttle-build
-
-- name: py2-stable-2018-3
-  image: saltstack/drone-plugin-kitchen
-  settings:
-    requirements: tests/requirements.txt
-    target: py2-stable-2018-3-centos-7
-  privileged: true
-  depends_on:
-  - throttle-build
-
-- name: py2-stable-2019-2
-  image: saltstack/drone-plugin-kitchen
-  settings:
-    requirements: tests/requirements.txt
-    target: py2-stable-2019-2-centos-7
-  privileged: true
-  depends_on:
-  - throttle-build
-
-depends_on:
-- run-shellcheck
-
----
-kind: pipeline
-name: debian-8-stable
-
-platform:
-  os: linux
-  arch: amd64
-
-steps:
-- name: throttle-build
-  image: alpine
-  commands:
-  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
-
-- name: py2-stable-2017-7
-  image: saltstack/drone-plugin-kitchen
-  settings:
-    requirements: tests/requirements.txt
-    target: py2-stable-2017-7-debian-8
-  privileged: true
-  depends_on:
-  - throttle-build
-
-- name: py2-stable-2018-3
-  image: saltstack/drone-plugin-kitchen
-  settings:
-    requirements: tests/requirements.txt
-    target: py2-stable-2018-3-debian-8
-  privileged: true
-  depends_on:
-  - throttle-build
-
-- name: py2-stable-2019-2
-  image: saltstack/drone-plugin-kitchen
-  settings:
-    requirements: tests/requirements.txt
-    target: py2-stable-2019-2-debian-8
-  privileged: true
-  depends_on:
-  - throttle-build
-
-depends_on:
-- run-shellcheck
-
----
-kind: pipeline
-name: debian-9-stable
-
-platform:
-  os: linux
-  arch: amd64
-
-steps:
-- name: throttle-build
-  image: alpine
-  commands:
-  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
-
-- name: py2-stable-2017-7
-  image: saltstack/drone-plugin-kitchen
-  settings:
-    requirements: tests/requirements.txt
-    target: py2-stable-2017-7-debian-9
-  privileged: true
-  depends_on:
-  - throttle-build
-
-- name: py2-stable-2018-3
-  image: saltstack/drone-plugin-kitchen
-  settings:
-    requirements: tests/requirements.txt
-    target: py2-stable-2018-3-debian-9
-  privileged: true
-  depends_on:
-  - throttle-build
-
-- name: py2-stable-2019-2
-  image: saltstack/drone-plugin-kitchen
-  settings:
-    requirements: tests/requirements.txt
-    target: py2-stable-2019-2-debian-9
-  privileged: true
-  depends_on:
-  - throttle-build
-
-depends_on:
-- run-shellcheck
-
----
-kind: pipeline
-name: ubuntu-1404-stable
-
-platform:
-  os: linux
-  arch: amd64
-
-steps:
-- name: throttle-build
-  image: alpine
-  commands:
-  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
-
-- name: py2-stable-2017-7
-  image: saltstack/drone-plugin-kitchen
-  settings:
-    requirements: tests/requirements.txt
-    target: py2-stable-2017-7-ubuntu-1404
-  privileged: true
-  depends_on:
-  - throttle-build
-
-- name: py2-stable-2018-3
-  image: saltstack/drone-plugin-kitchen
-  settings:
-    requirements: tests/requirements.txt
-    target: py2-stable-2018-3-ubuntu-1404
-  privileged: true
-  depends_on:
-  - throttle-build
-
-- name: py2-stable-2019-2
-  image: saltstack/drone-plugin-kitchen
-  settings:
-    requirements: tests/requirements.txt
-    target: py2-stable-2019-2-ubuntu-1404
-  privileged: true
-  depends_on:
-  - throttle-build
-
-depends_on:
-- run-shellcheck
-
----
-kind: pipeline
-name: ubuntu-1604-stable
-
-platform:
-  os: linux
-  arch: amd64
-
-steps:
-- name: throttle-build
-  image: alpine
-  commands:
-  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
-
-- name: py2-stable-2017-7
-  image: saltstack/drone-plugin-kitchen
-  settings:
-    requirements: tests/requirements.txt
-    target: py2-stable-2017-7-ubuntu-1604
-  privileged: true
-  depends_on:
-  - throttle-build
-
-- name: py2-stable-2018-3
-  image: saltstack/drone-plugin-kitchen
-  settings:
-    requirements: tests/requirements.txt
-    target: py2-stable-2018-3-ubuntu-1604
-  privileged: true
-  depends_on:
-  - throttle-build
-
-- name: py2-stable-2019-2
-  image: saltstack/drone-plugin-kitchen
-  settings:
-    requirements: tests/requirements.txt
-    target: py2-stable-2019-2-ubuntu-1604
-  privileged: true
-  depends_on:
-  - throttle-build
-
-depends_on:
-- run-shellcheck
-
----
-kind: pipeline
-name: ubuntu-1804-stable
-
-platform:
-  os: linux
-  arch: amd64
-
-steps:
-- name: throttle-build
-  image: alpine
-  commands:
-  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
-
-- name: py2-stable-2017-7
-  image: saltstack/drone-plugin-kitchen
-  settings:
-    requirements: tests/requirements.txt
-    target: py2-stable-2017-7-ubuntu-1804
-  privileged: true
-  depends_on:
-  - throttle-build
-
-- name: py2-stable-2018-3
-  image: saltstack/drone-plugin-kitchen
-  settings:
-    requirements: tests/requirements.txt
-    target: py2-stable-2018-3-ubuntu-1804
-  privileged: true
-  depends_on:
-  - throttle-build
-
-- name: py2-stable-2019-2
-  image: saltstack/drone-plugin-kitchen
-  settings:
-    requirements: tests/requirements.txt
-    target: py2-stable-2019-2-ubuntu-1804
-  privileged: true
-  depends_on:
-  - throttle-build
-
-depends_on:
-- run-shellcheck
-
----
-kind: pipeline
-name: arch-git
+name: arch
 
 platform:
   os: linux
@@ -454,7 +58,7 @@ depends_on:
 
 ---
 kind: pipeline
-name: amazon-1-git
+name: amazon-1
 
 platform:
   os: linux
@@ -493,12 +97,39 @@ steps:
   depends_on:
   - throttle-build
 
+- name: py2-stable-2017-7
+  image: saltstack/drone-plugin-kitchen
+  settings:
+    requirements: tests/requirements.txt
+    target: py2-stable-2017-7-amazon-1
+  privileged: true
+  depends_on:
+  - throttle-build
+
+- name: py2-stable-2018-3
+  image: saltstack/drone-plugin-kitchen
+  settings:
+    requirements: tests/requirements.txt
+    target: py2-stable-2018-3-amazon-1
+  privileged: true
+  depends_on:
+  - throttle-build
+
+- name: py2-stable-2019-2
+  image: saltstack/drone-plugin-kitchen
+  settings:
+    requirements: tests/requirements.txt
+    target: py2-stable-2019-2-amazon-1
+  privileged: true
+  depends_on:
+  - throttle-build
+
 depends_on:
 - run-shellcheck
 
 ---
 kind: pipeline
-name: amazon-2-git
+name: amazon-2
 
 platform:
   os: linux
@@ -537,12 +168,39 @@ steps:
   depends_on:
   - throttle-build
 
+- name: py2-stable-2017-7
+  image: saltstack/drone-plugin-kitchen
+  settings:
+    requirements: tests/requirements.txt
+    target: py2-stable-2017-7-amazon-2
+  privileged: true
+  depends_on:
+  - throttle-build
+
+- name: py2-stable-2018-3
+  image: saltstack/drone-plugin-kitchen
+  settings:
+    requirements: tests/requirements.txt
+    target: py2-stable-2018-3-amazon-2
+  privileged: true
+  depends_on:
+  - throttle-build
+
+- name: py2-stable-2019-2
+  image: saltstack/drone-plugin-kitchen
+  settings:
+    requirements: tests/requirements.txt
+    target: py2-stable-2019-2-amazon-2
+  privileged: true
+  depends_on:
+  - throttle-build
+
 depends_on:
 - run-shellcheck
 
 ---
 kind: pipeline
-name: centos-6-git
+name: centos-6
 
 platform:
   os: linux
@@ -581,12 +239,39 @@ steps:
   depends_on:
   - throttle-build
 
+- name: py2-stable-2017-7
+  image: saltstack/drone-plugin-kitchen
+  settings:
+    requirements: tests/requirements.txt
+    target: py2-stable-2017-7-centos-6
+  privileged: true
+  depends_on:
+  - throttle-build
+
+- name: py2-stable-2018-3
+  image: saltstack/drone-plugin-kitchen
+  settings:
+    requirements: tests/requirements.txt
+    target: py2-stable-2018-3-centos-6
+  privileged: true
+  depends_on:
+  - throttle-build
+
+- name: py2-stable-2019-2
+  image: saltstack/drone-plugin-kitchen
+  settings:
+    requirements: tests/requirements.txt
+    target: py2-stable-2019-2-centos-6
+  privileged: true
+  depends_on:
+  - throttle-build
+
 depends_on:
 - run-shellcheck
 
 ---
 kind: pipeline
-name: centos-7-git
+name: centos-7
 
 platform:
   os: linux
@@ -625,12 +310,39 @@ steps:
   depends_on:
   - throttle-build
 
+- name: py2-stable-2017-7
+  image: saltstack/drone-plugin-kitchen
+  settings:
+    requirements: tests/requirements.txt
+    target: py2-stable-2017-7-centos-7
+  privileged: true
+  depends_on:
+  - throttle-build
+
+- name: py2-stable-2018-3
+  image: saltstack/drone-plugin-kitchen
+  settings:
+    requirements: tests/requirements.txt
+    target: py2-stable-2018-3-centos-7
+  privileged: true
+  depends_on:
+  - throttle-build
+
+- name: py2-stable-2019-2
+  image: saltstack/drone-plugin-kitchen
+  settings:
+    requirements: tests/requirements.txt
+    target: py2-stable-2019-2-centos-7
+  privileged: true
+  depends_on:
+  - throttle-build
+
 depends_on:
 - run-shellcheck
 
 ---
 kind: pipeline
-name: debian-8-git
+name: debian-8
 
 platform:
   os: linux
@@ -669,12 +381,39 @@ steps:
   depends_on:
   - throttle-build
 
+- name: py2-stable-2017-7
+  image: saltstack/drone-plugin-kitchen
+  settings:
+    requirements: tests/requirements.txt
+    target: py2-stable-2017-7-debian-8
+  privileged: true
+  depends_on:
+  - throttle-build
+
+- name: py2-stable-2018-3
+  image: saltstack/drone-plugin-kitchen
+  settings:
+    requirements: tests/requirements.txt
+    target: py2-stable-2018-3-debian-8
+  privileged: true
+  depends_on:
+  - throttle-build
+
+- name: py2-stable-2019-2
+  image: saltstack/drone-plugin-kitchen
+  settings:
+    requirements: tests/requirements.txt
+    target: py2-stable-2019-2-debian-8
+  privileged: true
+  depends_on:
+  - throttle-build
+
 depends_on:
 - run-shellcheck
 
 ---
 kind: pipeline
-name: debian-9-git
+name: debian-9
 
 platform:
   os: linux
@@ -713,12 +452,39 @@ steps:
   depends_on:
   - throttle-build
 
+- name: py2-stable-2017-7
+  image: saltstack/drone-plugin-kitchen
+  settings:
+    requirements: tests/requirements.txt
+    target: py2-stable-2017-7-debian-9
+  privileged: true
+  depends_on:
+  - throttle-build
+
+- name: py2-stable-2018-3
+  image: saltstack/drone-plugin-kitchen
+  settings:
+    requirements: tests/requirements.txt
+    target: py2-stable-2018-3-debian-9
+  privileged: true
+  depends_on:
+  - throttle-build
+
+- name: py2-stable-2019-2
+  image: saltstack/drone-plugin-kitchen
+  settings:
+    requirements: tests/requirements.txt
+    target: py2-stable-2019-2-debian-9
+  privileged: true
+  depends_on:
+  - throttle-build
+
 depends_on:
 - run-shellcheck
 
 ---
 kind: pipeline
-name: fedora-28-git
+name: fedora-28
 
 platform:
   os: linux
@@ -762,7 +528,7 @@ depends_on:
 
 ---
 kind: pipeline
-name: fedora-29-git
+name: fedora-29
 
 platform:
   os: linux
@@ -806,7 +572,7 @@ depends_on:
 
 ---
 kind: pipeline
-name: opensuse-15-git
+name: opensuse-15
 
 platform:
   os: linux
@@ -850,7 +616,7 @@ depends_on:
 
 ---
 kind: pipeline
-name: opensuse-42-git
+name: opensuse-42
 
 platform:
   os: linux
@@ -894,7 +660,7 @@ depends_on:
 
 ---
 kind: pipeline
-name: ubuntu-1404-git
+name: ubuntu-1404
 
 platform:
   os: linux
@@ -933,12 +699,39 @@ steps:
   depends_on:
   - throttle-build
 
+- name: py2-stable-2017-7
+  image: saltstack/drone-plugin-kitchen
+  settings:
+    requirements: tests/requirements.txt
+    target: py2-stable-2017-7-ubuntu-1404
+  privileged: true
+  depends_on:
+  - throttle-build
+
+- name: py2-stable-2018-3
+  image: saltstack/drone-plugin-kitchen
+  settings:
+    requirements: tests/requirements.txt
+    target: py2-stable-2018-3-ubuntu-1404
+  privileged: true
+  depends_on:
+  - throttle-build
+
+- name: py2-stable-2019-2
+  image: saltstack/drone-plugin-kitchen
+  settings:
+    requirements: tests/requirements.txt
+    target: py2-stable-2019-2-ubuntu-1404
+  privileged: true
+  depends_on:
+  - throttle-build
+
 depends_on:
 - run-shellcheck
 
 ---
 kind: pipeline
-name: ubuntu-1604-git
+name: ubuntu-1604
 
 platform:
   os: linux
@@ -977,12 +770,39 @@ steps:
   depends_on:
   - throttle-build
 
+- name: py2-stable-2017-7
+  image: saltstack/drone-plugin-kitchen
+  settings:
+    requirements: tests/requirements.txt
+    target: py2-stable-2017-7-ubuntu-1604
+  privileged: true
+  depends_on:
+  - throttle-build
+
+- name: py2-stable-2018-3
+  image: saltstack/drone-plugin-kitchen
+  settings:
+    requirements: tests/requirements.txt
+    target: py2-stable-2018-3-ubuntu-1604
+  privileged: true
+  depends_on:
+  - throttle-build
+
+- name: py2-stable-2019-2
+  image: saltstack/drone-plugin-kitchen
+  settings:
+    requirements: tests/requirements.txt
+    target: py2-stable-2019-2-ubuntu-1604
+  privileged: true
+  depends_on:
+  - throttle-build
+
 depends_on:
 - run-shellcheck
 
 ---
 kind: pipeline
-name: ubuntu-1804-git
+name: ubuntu-1804
 
 platform:
   os: linux
@@ -1021,11 +841,38 @@ steps:
   depends_on:
   - throttle-build
 
+- name: py2-stable-2017-7
+  image: saltstack/drone-plugin-kitchen
+  settings:
+    requirements: tests/requirements.txt
+    target: py2-stable-2017-7-ubuntu-1804
+  privileged: true
+  depends_on:
+  - throttle-build
+
+- name: py2-stable-2018-3
+  image: saltstack/drone-plugin-kitchen
+  settings:
+    requirements: tests/requirements.txt
+    target: py2-stable-2018-3-ubuntu-1804
+  privileged: true
+  depends_on:
+  - throttle-build
+
+- name: py2-stable-2019-2
+  image: saltstack/drone-plugin-kitchen
+  settings:
+    requirements: tests/requirements.txt
+    target: py2-stable-2019-2-ubuntu-1804
+  privileged: true
+  depends_on:
+  - throttle-build
+
 depends_on:
 - run-shellcheck
 
 ---
 kind: signature
-hmac: e138fa2dfd22d5535087e0b2efd99cf7a6f0d7ce717932963dd52ba13c2b798a
+hmac: ec677bfb06e994529362dc0d6eb5c4b057329871a0d2c7c3cc8c481b6eacf08d
 
 ...

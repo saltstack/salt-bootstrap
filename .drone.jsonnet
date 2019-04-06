@@ -55,9 +55,12 @@ local Shellcheck() = {
   ],
 };
 
-local Build(distro, kind, suites) = {
+
+local Build(distro) = {
   kind: 'pipeline',
-  name: std.format('%s-%s', [distro, kind]),
+  name: distro,
+
+  local suites = if std.count(stable_distros, distro) > 0 then git_suites + stable_suites else git_suites,
 
   steps: [
     {
@@ -91,9 +94,6 @@ local Build(distro, kind, suites) = {
 [
   Shellcheck(),
 ] + [
-  Build(distro, 'stable', stable_suites)
-  for distro in stable_distros
-] + [
-  Build(distro, 'git', git_suites)
+  Build(distro)
   for distro in git_distros
 ]

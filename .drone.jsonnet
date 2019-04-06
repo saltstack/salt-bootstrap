@@ -8,20 +8,33 @@ local suites = [
   'py2-stable-2019-2',
 ];
 
-local distros = [
-  { name: 'amazon', version: '1' },
-  { name: 'amazon', version: '2' },
-  { name: 'centos', version: '6' },
-  { name: 'centos', version: '7' },
-  { name: 'debian', version: '8' },
-  { name: 'debian', version: '9' },
-  { name: 'fedora', version: '28' },
-  { name: 'fedora', version: '29' },
-  { name: 'opensuse', version: '15' },
-  { name: 'opensuse', version: '42' },
-  { name: 'ubuntu', version: '1404' },
-  { name: 'ubuntu', version: '1604' },
-  { name: 'ubuntu', version: '1804' },
+local git_distros = [
+  'arch',
+  'amazon-1',
+  'amazon-2',
+  'centos-6',
+  'centos-7',
+  'debian-8',
+  'debian-9',
+  'fedora-28',
+  'fedora-29',
+  'opensuse-15',
+  'opensuse-42',
+  'ubuntu-1404',
+  'ubuntu-1604',
+  'ubuntu-1804',
+];
+
+local stable_distros = [
+  'amazon-1',
+  'amazon-2',
+  'centos-6',
+  'centos-7',
+  'debian-8',
+  'debian-9',
+  'ubuntu-1404',
+  'ubuntu-1604',
+  'ubuntu-1804',
 ];
 
 local Shellcheck() = {
@@ -39,9 +52,9 @@ local Shellcheck() = {
   ],
 };
 
-local Build(suite, os, os_version) = {
+local Build(suite, distro) = {
   kind: 'pipeline',
-  name: std.format('%s-%s-%s', [suite, os, os_version]),
+  name: std.format('%s-%s', [suite, distro]),
 
   steps: [
     {
@@ -49,7 +62,7 @@ local Build(suite, os, os_version) = {
       privileged: true,
       image: 'saltstack/drone-plugin-kitchen',
       settings: {
-        target: std.format('%s-%s-%s', [suite, os, os_version]),
+        target: std.format('%s-%s', [suite, distro]),
         requirements: 'tests/requirements.txt',
       },
     },
@@ -63,7 +76,11 @@ local Build(suite, os, os_version) = {
 [
   Shellcheck(),
 ] + [
-  Build(suite, distro.name, distro.version)
-  for distro in distros
+  Build(suite, distro)
+  for distro in stable_distros
+  for suite in suites
+] + [
+  Build(suite, distro)
+  for distro in git_distros
   for suite in suites
 ]

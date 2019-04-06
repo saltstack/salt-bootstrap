@@ -113,14 +113,35 @@ suites:
     provisioner:
       salt_version: 2017.7
       salt_bootstrap_options: -MP stable %s
+    excludes:
+      - arch
+      - fedora-28
+      - fedora-29
+      - opensuse-15
+      - opensuse-42
+      - ubuntu-1404
   - name: py2-stable-2018-3
     provisioner:
       salt_version: 2018.3
       salt_bootstrap_options: -MP stable %s
+    excludes:
+      - arch
+      - fedora-28
+      - fedora-29
+      - opensuse-15
+      - opensuse-42
+      - ubuntu-1404
   - name: py2-stable-2019-2
     provisioner:
       salt_version: 2019.2
       salt_bootstrap_options: -MP stable %s
+    excludes:
+      - arch
+      - fedora-28
+      - fedora-29
+      - opensuse-15
+      - opensuse-42
+      - ubuntu-1404
 
 verifier:
   name: shell

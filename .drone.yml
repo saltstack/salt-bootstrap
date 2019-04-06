@@ -812,6 +812,1336 @@ depends_on:
 
 ---
 kind: pipeline
+name: py2-git-2017-7-ubuntu-1404
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: build
+  image: saltstack/drone-plugin-kitchen
+  settings:
+    requirements: tests/requirements.txt
+    target: py2-git-2017-7-ubuntu-1404
+  privileged: true
+
+depends_on:
+- run-shellcheck
+
+---
+kind: pipeline
+name: py2-git-2018-3-ubuntu-1404
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: build
+  image: saltstack/drone-plugin-kitchen
+  settings:
+    requirements: tests/requirements.txt
+    target: py2-git-2018-3-ubuntu-1404
+  privileged: true
+
+depends_on:
+- run-shellcheck
+
+---
+kind: pipeline
+name: py2-git-2019-2-ubuntu-1404
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: build
+  image: saltstack/drone-plugin-kitchen
+  settings:
+    requirements: tests/requirements.txt
+    target: py2-git-2019-2-ubuntu-1404
+  privileged: true
+
+depends_on:
+- run-shellcheck
+
+---
+kind: pipeline
+name: py2-git-develop-ubuntu-1404
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: build
+  image: saltstack/drone-plugin-kitchen
+  settings:
+    requirements: tests/requirements.txt
+    target: py2-git-develop-ubuntu-1404
+  privileged: true
+
+depends_on:
+- run-shellcheck
+
+---
+kind: pipeline
+name: py2-stable-2017-7-ubuntu-1404
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: build
+  image: saltstack/drone-plugin-kitchen
+  settings:
+    requirements: tests/requirements.txt
+    target: py2-stable-2017-7-ubuntu-1404
+  privileged: true
+
+depends_on:
+- run-shellcheck
+
+---
+kind: pipeline
+name: py2-stable-2018-3-ubuntu-1404
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: build
+  image: saltstack/drone-plugin-kitchen
+  settings:
+    requirements: tests/requirements.txt
+    target: py2-stable-2018-3-ubuntu-1404
+  privileged: true
+
+depends_on:
+- run-shellcheck
+
+---
+kind: pipeline
+name: py2-stable-2019-2-ubuntu-1404
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: build
+  image: saltstack/drone-plugin-kitchen
+  settings:
+    requirements: tests/requirements.txt
+    target: py2-stable-2019-2-ubuntu-1404
+  privileged: true
+
+depends_on:
+- run-shellcheck
+
+---
+kind: pipeline
+name: py2-git-2017-7-ubuntu-1604
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: build
+  image: saltstack/drone-plugin-kitchen
+  settings:
+    requirements: tests/requirements.txt
+    target: py2-git-2017-7-ubuntu-1604
+  privileged: true
+
+depends_on:
+- run-shellcheck
+
+---
+kind: pipeline
+name: py2-git-2018-3-ubuntu-1604
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: build
+  image: saltstack/drone-plugin-kitchen
+  settings:
+    requirements: tests/requirements.txt
+    target: py2-git-2018-3-ubuntu-1604
+  privileged: true
+
+depends_on:
+- run-shellcheck
+
+---
+kind: pipeline
+name: py2-git-2019-2-ubuntu-1604
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: build
+  image: saltstack/drone-plugin-kitchen
+  settings:
+    requirements: tests/requirements.txt
+    target: py2-git-2019-2-ubuntu-1604
+  privileged: true
+
+depends_on:
+- run-shellcheck
+
+---
+kind: pipeline
+name: py2-git-develop-ubuntu-1604
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: build
+  image: saltstack/drone-plugin-kitchen
+  settings:
+    requirements: tests/requirements.txt
+    target: py2-git-develop-ubuntu-1604
+  privileged: true
+
+depends_on:
+- run-shellcheck
+
+---
+kind: pipeline
+name: py2-stable-2017-7-ubuntu-1604
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: build
+  image: saltstack/drone-plugin-kitchen
+  settings:
+    requirements: tests/requirements.txt
+    target: py2-stable-2017-7-ubuntu-1604
+  privileged: true
+
+depends_on:
+- run-shellcheck
+
+---
+kind: pipeline
+name: py2-stable-2018-3-ubuntu-1604
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: build
+  image: saltstack/drone-plugin-kitchen
+  settings:
+    requirements: tests/requirements.txt
+    target: py2-stable-2018-3-ubuntu-1604
+  privileged: true
+
+depends_on:
+- run-shellcheck
+
+---
+kind: pipeline
+name: py2-stable-2019-2-ubuntu-1604
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: build
+  image: saltstack/drone-plugin-kitchen
+  settings:
+    requirements: tests/requirements.txt
+    target: py2-stable-2019-2-ubuntu-1604
+  privileged: true
+
+depends_on:
+- run-shellcheck
+
+---
+kind: pipeline
+name: py2-git-2017-7-ubuntu-1804
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: build
+  image: saltstack/drone-plugin-kitchen
+  settings:
+    requirements: tests/requirements.txt
+    target: py2-git-2017-7-ubuntu-1804
+  privileged: true
+
+depends_on:
+- run-shellcheck
+
+---
+kind: pipeline
+name: py2-git-2018-3-ubuntu-1804
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: build
+  image: saltstack/drone-plugin-kitchen
+  settings:
+    requirements: tests/requirements.txt
+    target: py2-git-2018-3-ubuntu-1804
+  privileged: true
+
+depends_on:
+- run-shellcheck
+
+---
+kind: pipeline
+name: py2-git-2019-2-ubuntu-1804
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: build
+  image: saltstack/drone-plugin-kitchen
+  settings:
+    requirements: tests/requirements.txt
+    target: py2-git-2019-2-ubuntu-1804
+  privileged: true
+
+depends_on:
+- run-shellcheck
+
+---
+kind: pipeline
+name: py2-git-develop-ubuntu-1804
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: build
+  image: saltstack/drone-plugin-kitchen
+  settings:
+    requirements: tests/requirements.txt
+    target: py2-git-develop-ubuntu-1804
+  privileged: true
+
+depends_on:
+- run-shellcheck
+
+---
+kind: pipeline
+name: py2-stable-2017-7-ubuntu-1804
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: build
+  image: saltstack/drone-plugin-kitchen
+  settings:
+    requirements: tests/requirements.txt
+    target: py2-stable-2017-7-ubuntu-1804
+  privileged: true
+
+depends_on:
+- run-shellcheck
+
+---
+kind: pipeline
+name: py2-stable-2018-3-ubuntu-1804
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: build
+  image: saltstack/drone-plugin-kitchen
+  settings:
+    requirements: tests/requirements.txt
+    target: py2-stable-2018-3-ubuntu-1804
+  privileged: true
+
+depends_on:
+- run-shellcheck
+
+---
+kind: pipeline
+name: py2-stable-2019-2-ubuntu-1804
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: build
+  image: saltstack/drone-plugin-kitchen
+  settings:
+    requirements: tests/requirements.txt
+    target: py2-stable-2019-2-ubuntu-1804
+  privileged: true
+
+depends_on:
+- run-shellcheck
+
+---
+kind: pipeline
+name: py2-git-2017-7-arch
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: build
+  image: saltstack/drone-plugin-kitchen
+  settings:
+    requirements: tests/requirements.txt
+    target: py2-git-2017-7-arch
+  privileged: true
+
+depends_on:
+- run-shellcheck
+
+---
+kind: pipeline
+name: py2-git-2018-3-arch
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: build
+  image: saltstack/drone-plugin-kitchen
+  settings:
+    requirements: tests/requirements.txt
+    target: py2-git-2018-3-arch
+  privileged: true
+
+depends_on:
+- run-shellcheck
+
+---
+kind: pipeline
+name: py2-git-2019-2-arch
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: build
+  image: saltstack/drone-plugin-kitchen
+  settings:
+    requirements: tests/requirements.txt
+    target: py2-git-2019-2-arch
+  privileged: true
+
+depends_on:
+- run-shellcheck
+
+---
+kind: pipeline
+name: py2-git-develop-arch
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: build
+  image: saltstack/drone-plugin-kitchen
+  settings:
+    requirements: tests/requirements.txt
+    target: py2-git-develop-arch
+  privileged: true
+
+depends_on:
+- run-shellcheck
+
+---
+kind: pipeline
+name: py2-stable-2017-7-arch
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: build
+  image: saltstack/drone-plugin-kitchen
+  settings:
+    requirements: tests/requirements.txt
+    target: py2-stable-2017-7-arch
+  privileged: true
+
+depends_on:
+- run-shellcheck
+
+---
+kind: pipeline
+name: py2-stable-2018-3-arch
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: build
+  image: saltstack/drone-plugin-kitchen
+  settings:
+    requirements: tests/requirements.txt
+    target: py2-stable-2018-3-arch
+  privileged: true
+
+depends_on:
+- run-shellcheck
+
+---
+kind: pipeline
+name: py2-stable-2019-2-arch
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: build
+  image: saltstack/drone-plugin-kitchen
+  settings:
+    requirements: tests/requirements.txt
+    target: py2-stable-2019-2-arch
+  privileged: true
+
+depends_on:
+- run-shellcheck
+
+---
+kind: pipeline
+name: py2-git-2017-7-amazon-1
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: build
+  image: saltstack/drone-plugin-kitchen
+  settings:
+    requirements: tests/requirements.txt
+    target: py2-git-2017-7-amazon-1
+  privileged: true
+
+depends_on:
+- run-shellcheck
+
+---
+kind: pipeline
+name: py2-git-2018-3-amazon-1
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: build
+  image: saltstack/drone-plugin-kitchen
+  settings:
+    requirements: tests/requirements.txt
+    target: py2-git-2018-3-amazon-1
+  privileged: true
+
+depends_on:
+- run-shellcheck
+
+---
+kind: pipeline
+name: py2-git-2019-2-amazon-1
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: build
+  image: saltstack/drone-plugin-kitchen
+  settings:
+    requirements: tests/requirements.txt
+    target: py2-git-2019-2-amazon-1
+  privileged: true
+
+depends_on:
+- run-shellcheck
+
+---
+kind: pipeline
+name: py2-git-develop-amazon-1
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: build
+  image: saltstack/drone-plugin-kitchen
+  settings:
+    requirements: tests/requirements.txt
+    target: py2-git-develop-amazon-1
+  privileged: true
+
+depends_on:
+- run-shellcheck
+
+---
+kind: pipeline
+name: py2-stable-2017-7-amazon-1
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: build
+  image: saltstack/drone-plugin-kitchen
+  settings:
+    requirements: tests/requirements.txt
+    target: py2-stable-2017-7-amazon-1
+  privileged: true
+
+depends_on:
+- run-shellcheck
+
+---
+kind: pipeline
+name: py2-stable-2018-3-amazon-1
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: build
+  image: saltstack/drone-plugin-kitchen
+  settings:
+    requirements: tests/requirements.txt
+    target: py2-stable-2018-3-amazon-1
+  privileged: true
+
+depends_on:
+- run-shellcheck
+
+---
+kind: pipeline
+name: py2-stable-2019-2-amazon-1
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: build
+  image: saltstack/drone-plugin-kitchen
+  settings:
+    requirements: tests/requirements.txt
+    target: py2-stable-2019-2-amazon-1
+  privileged: true
+
+depends_on:
+- run-shellcheck
+
+---
+kind: pipeline
+name: py2-git-2017-7-amazon-2
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: build
+  image: saltstack/drone-plugin-kitchen
+  settings:
+    requirements: tests/requirements.txt
+    target: py2-git-2017-7-amazon-2
+  privileged: true
+
+depends_on:
+- run-shellcheck
+
+---
+kind: pipeline
+name: py2-git-2018-3-amazon-2
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: build
+  image: saltstack/drone-plugin-kitchen
+  settings:
+    requirements: tests/requirements.txt
+    target: py2-git-2018-3-amazon-2
+  privileged: true
+
+depends_on:
+- run-shellcheck
+
+---
+kind: pipeline
+name: py2-git-2019-2-amazon-2
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: build
+  image: saltstack/drone-plugin-kitchen
+  settings:
+    requirements: tests/requirements.txt
+    target: py2-git-2019-2-amazon-2
+  privileged: true
+
+depends_on:
+- run-shellcheck
+
+---
+kind: pipeline
+name: py2-git-develop-amazon-2
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: build
+  image: saltstack/drone-plugin-kitchen
+  settings:
+    requirements: tests/requirements.txt
+    target: py2-git-develop-amazon-2
+  privileged: true
+
+depends_on:
+- run-shellcheck
+
+---
+kind: pipeline
+name: py2-stable-2017-7-amazon-2
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: build
+  image: saltstack/drone-plugin-kitchen
+  settings:
+    requirements: tests/requirements.txt
+    target: py2-stable-2017-7-amazon-2
+  privileged: true
+
+depends_on:
+- run-shellcheck
+
+---
+kind: pipeline
+name: py2-stable-2018-3-amazon-2
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: build
+  image: saltstack/drone-plugin-kitchen
+  settings:
+    requirements: tests/requirements.txt
+    target: py2-stable-2018-3-amazon-2
+  privileged: true
+
+depends_on:
+- run-shellcheck
+
+---
+kind: pipeline
+name: py2-stable-2019-2-amazon-2
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: build
+  image: saltstack/drone-plugin-kitchen
+  settings:
+    requirements: tests/requirements.txt
+    target: py2-stable-2019-2-amazon-2
+  privileged: true
+
+depends_on:
+- run-shellcheck
+
+---
+kind: pipeline
+name: py2-git-2017-7-centos-6
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: build
+  image: saltstack/drone-plugin-kitchen
+  settings:
+    requirements: tests/requirements.txt
+    target: py2-git-2017-7-centos-6
+  privileged: true
+
+depends_on:
+- run-shellcheck
+
+---
+kind: pipeline
+name: py2-git-2018-3-centos-6
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: build
+  image: saltstack/drone-plugin-kitchen
+  settings:
+    requirements: tests/requirements.txt
+    target: py2-git-2018-3-centos-6
+  privileged: true
+
+depends_on:
+- run-shellcheck
+
+---
+kind: pipeline
+name: py2-git-2019-2-centos-6
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: build
+  image: saltstack/drone-plugin-kitchen
+  settings:
+    requirements: tests/requirements.txt
+    target: py2-git-2019-2-centos-6
+  privileged: true
+
+depends_on:
+- run-shellcheck
+
+---
+kind: pipeline
+name: py2-git-develop-centos-6
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: build
+  image: saltstack/drone-plugin-kitchen
+  settings:
+    requirements: tests/requirements.txt
+    target: py2-git-develop-centos-6
+  privileged: true
+
+depends_on:
+- run-shellcheck
+
+---
+kind: pipeline
+name: py2-stable-2017-7-centos-6
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: build
+  image: saltstack/drone-plugin-kitchen
+  settings:
+    requirements: tests/requirements.txt
+    target: py2-stable-2017-7-centos-6
+  privileged: true
+
+depends_on:
+- run-shellcheck
+
+---
+kind: pipeline
+name: py2-stable-2018-3-centos-6
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: build
+  image: saltstack/drone-plugin-kitchen
+  settings:
+    requirements: tests/requirements.txt
+    target: py2-stable-2018-3-centos-6
+  privileged: true
+
+depends_on:
+- run-shellcheck
+
+---
+kind: pipeline
+name: py2-stable-2019-2-centos-6
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: build
+  image: saltstack/drone-plugin-kitchen
+  settings:
+    requirements: tests/requirements.txt
+    target: py2-stable-2019-2-centos-6
+  privileged: true
+
+depends_on:
+- run-shellcheck
+
+---
+kind: pipeline
+name: py2-git-2017-7-centos-7
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: build
+  image: saltstack/drone-plugin-kitchen
+  settings:
+    requirements: tests/requirements.txt
+    target: py2-git-2017-7-centos-7
+  privileged: true
+
+depends_on:
+- run-shellcheck
+
+---
+kind: pipeline
+name: py2-git-2018-3-centos-7
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: build
+  image: saltstack/drone-plugin-kitchen
+  settings:
+    requirements: tests/requirements.txt
+    target: py2-git-2018-3-centos-7
+  privileged: true
+
+depends_on:
+- run-shellcheck
+
+---
+kind: pipeline
+name: py2-git-2019-2-centos-7
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: build
+  image: saltstack/drone-plugin-kitchen
+  settings:
+    requirements: tests/requirements.txt
+    target: py2-git-2019-2-centos-7
+  privileged: true
+
+depends_on:
+- run-shellcheck
+
+---
+kind: pipeline
+name: py2-git-develop-centos-7
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: build
+  image: saltstack/drone-plugin-kitchen
+  settings:
+    requirements: tests/requirements.txt
+    target: py2-git-develop-centos-7
+  privileged: true
+
+depends_on:
+- run-shellcheck
+
+---
+kind: pipeline
+name: py2-stable-2017-7-centos-7
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: build
+  image: saltstack/drone-plugin-kitchen
+  settings:
+    requirements: tests/requirements.txt
+    target: py2-stable-2017-7-centos-7
+  privileged: true
+
+depends_on:
+- run-shellcheck
+
+---
+kind: pipeline
+name: py2-stable-2018-3-centos-7
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: build
+  image: saltstack/drone-plugin-kitchen
+  settings:
+    requirements: tests/requirements.txt
+    target: py2-stable-2018-3-centos-7
+  privileged: true
+
+depends_on:
+- run-shellcheck
+
+---
+kind: pipeline
+name: py2-stable-2019-2-centos-7
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: build
+  image: saltstack/drone-plugin-kitchen
+  settings:
+    requirements: tests/requirements.txt
+    target: py2-stable-2019-2-centos-7
+  privileged: true
+
+depends_on:
+- run-shellcheck
+
+---
+kind: pipeline
+name: py2-git-2017-7-debian-8
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: build
+  image: saltstack/drone-plugin-kitchen
+  settings:
+    requirements: tests/requirements.txt
+    target: py2-git-2017-7-debian-8
+  privileged: true
+
+depends_on:
+- run-shellcheck
+
+---
+kind: pipeline
+name: py2-git-2018-3-debian-8
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: build
+  image: saltstack/drone-plugin-kitchen
+  settings:
+    requirements: tests/requirements.txt
+    target: py2-git-2018-3-debian-8
+  privileged: true
+
+depends_on:
+- run-shellcheck
+
+---
+kind: pipeline
+name: py2-git-2019-2-debian-8
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: build
+  image: saltstack/drone-plugin-kitchen
+  settings:
+    requirements: tests/requirements.txt
+    target: py2-git-2019-2-debian-8
+  privileged: true
+
+depends_on:
+- run-shellcheck
+
+---
+kind: pipeline
+name: py2-git-develop-debian-8
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: build
+  image: saltstack/drone-plugin-kitchen
+  settings:
+    requirements: tests/requirements.txt
+    target: py2-git-develop-debian-8
+  privileged: true
+
+depends_on:
+- run-shellcheck
+
+---
+kind: pipeline
+name: py2-stable-2017-7-debian-8
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: build
+  image: saltstack/drone-plugin-kitchen
+  settings:
+    requirements: tests/requirements.txt
+    target: py2-stable-2017-7-debian-8
+  privileged: true
+
+depends_on:
+- run-shellcheck
+
+---
+kind: pipeline
+name: py2-stable-2018-3-debian-8
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: build
+  image: saltstack/drone-plugin-kitchen
+  settings:
+    requirements: tests/requirements.txt
+    target: py2-stable-2018-3-debian-8
+  privileged: true
+
+depends_on:
+- run-shellcheck
+
+---
+kind: pipeline
+name: py2-stable-2019-2-debian-8
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: build
+  image: saltstack/drone-plugin-kitchen
+  settings:
+    requirements: tests/requirements.txt
+    target: py2-stable-2019-2-debian-8
+  privileged: true
+
+depends_on:
+- run-shellcheck
+
+---
+kind: pipeline
+name: py2-git-2017-7-debian-9
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: build
+  image: saltstack/drone-plugin-kitchen
+  settings:
+    requirements: tests/requirements.txt
+    target: py2-git-2017-7-debian-9
+  privileged: true
+
+depends_on:
+- run-shellcheck
+
+---
+kind: pipeline
+name: py2-git-2018-3-debian-9
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: build
+  image: saltstack/drone-plugin-kitchen
+  settings:
+    requirements: tests/requirements.txt
+    target: py2-git-2018-3-debian-9
+  privileged: true
+
+depends_on:
+- run-shellcheck
+
+---
+kind: pipeline
+name: py2-git-2019-2-debian-9
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: build
+  image: saltstack/drone-plugin-kitchen
+  settings:
+    requirements: tests/requirements.txt
+    target: py2-git-2019-2-debian-9
+  privileged: true
+
+depends_on:
+- run-shellcheck
+
+---
+kind: pipeline
+name: py2-git-develop-debian-9
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: build
+  image: saltstack/drone-plugin-kitchen
+  settings:
+    requirements: tests/requirements.txt
+    target: py2-git-develop-debian-9
+  privileged: true
+
+depends_on:
+- run-shellcheck
+
+---
+kind: pipeline
+name: py2-stable-2017-7-debian-9
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: build
+  image: saltstack/drone-plugin-kitchen
+  settings:
+    requirements: tests/requirements.txt
+    target: py2-stable-2017-7-debian-9
+  privileged: true
+
+depends_on:
+- run-shellcheck
+
+---
+kind: pipeline
+name: py2-stable-2018-3-debian-9
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: build
+  image: saltstack/drone-plugin-kitchen
+  settings:
+    requirements: tests/requirements.txt
+    target: py2-stable-2018-3-debian-9
+  privileged: true
+
+depends_on:
+- run-shellcheck
+
+---
+kind: pipeline
+name: py2-stable-2019-2-debian-9
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: build
+  image: saltstack/drone-plugin-kitchen
+  settings:
+    requirements: tests/requirements.txt
+    target: py2-stable-2019-2-debian-9
+  privileged: true
+
+depends_on:
+- run-shellcheck
+
+---
+kind: pipeline
 name: py2-git-2017-7-fedora-28
 
 platform:
@@ -1743,6 +3073,6 @@ depends_on:
 
 ---
 kind: signature
-hmac: 46202f72731770191f9a5d808cb5b739622a68251a07c4be552a95ddfd68cd8e
+hmac: 4747c28ac6976a7f26a00f11fa96efb8e3e070d5029d1637a3bdf62bf3117141
 
 ...

@@ -1,7 +1,5 @@
-import functools
 import os
 import pytest
-import subprocess
 import testinfra
 
 if os.environ.get('KITCHEN_USERNAME') == 'vagrant':

@@ -584,25 +584,6 @@ depends_on:
 
 ---
 kind: pipeline
-name: py2-git-develop-arch
-
-platform:
-  os: linux
-  arch: amd64
-
-steps:
-- name: build
-  image: saltstack/drone-plugin-kitchen
-  settings:
-    requirements: tests/requirements.txt
-    target: py2-git-develop-arch
-  privileged: true
-
-depends_on:
-- run-shellcheck
-
----
-kind: pipeline
 name: py2-git-2017-7-amazon-1
 
 platform:
@@ -653,25 +634,6 @@ steps:
   settings:
     requirements: tests/requirements.txt
     target: py2-git-2019-2-amazon-1
-  privileged: true
-
-depends_on:
-- run-shellcheck
-
----
-kind: pipeline
-name: py2-git-develop-amazon-1
-
-platform:
-  os: linux
-  arch: amd64
-
-steps:
-- name: build
-  image: saltstack/drone-plugin-kitchen
-  settings:
-    requirements: tests/requirements.txt
-    target: py2-git-develop-amazon-1
   privileged: true
 
 depends_on:
@@ -736,25 +698,6 @@ depends_on:
 
 ---
 kind: pipeline
-name: py2-git-develop-amazon-2
-
-platform:
-  os: linux
-  arch: amd64
-
-steps:
-- name: build
-  image: saltstack/drone-plugin-kitchen
-  settings:
-    requirements: tests/requirements.txt
-    target: py2-git-develop-amazon-2
-  privileged: true
-
-depends_on:
-- run-shellcheck
-
----
-kind: pipeline
 name: py2-git-2017-7-centos-6
 
 platform:
@@ -805,25 +748,6 @@ steps:
   settings:
     requirements: tests/requirements.txt
     target: py2-git-2019-2-centos-6
-  privileged: true
-
-depends_on:
-- run-shellcheck
-
----
-kind: pipeline
-name: py2-git-develop-centos-6
-
-platform:
-  os: linux
-  arch: amd64
-
-steps:
-- name: build
-  image: saltstack/drone-plugin-kitchen
-  settings:
-    requirements: tests/requirements.txt
-    target: py2-git-develop-centos-6
   privileged: true
 
 depends_on:
@@ -888,25 +812,6 @@ depends_on:
 
 ---
 kind: pipeline
-name: py2-git-develop-centos-7
-
-platform:
-  os: linux
-  arch: amd64
-
-steps:
-- name: build
-  image: saltstack/drone-plugin-kitchen
-  settings:
-    requirements: tests/requirements.txt
-    target: py2-git-develop-centos-7
-  privileged: true
-
-depends_on:
-- run-shellcheck
-
----
-kind: pipeline
 name: py2-git-2017-7-debian-8
 
 platform:
@@ -957,25 +862,6 @@ steps:
   settings:
     requirements: tests/requirements.txt
     target: py2-git-2019-2-debian-8
-  privileged: true
-
-depends_on:
-- run-shellcheck
-
----
-kind: pipeline
-name: py2-git-develop-debian-8
-
-platform:
-  os: linux
-  arch: amd64
-
-steps:
-- name: build
-  image: saltstack/drone-plugin-kitchen
-  settings:
-    requirements: tests/requirements.txt
-    target: py2-git-develop-debian-8
   privileged: true
 
 depends_on:
@@ -1040,25 +926,6 @@ depends_on:
 
 ---
 kind: pipeline
-name: py2-git-develop-debian-9
-
-platform:
-  os: linux
-  arch: amd64
-
-steps:
-- name: build
-  image: saltstack/drone-plugin-kitchen
-  settings:
-    requirements: tests/requirements.txt
-    target: py2-git-develop-debian-9
-  privileged: true
-
-depends_on:
-- run-shellcheck
-
----
-kind: pipeline
 name: py2-git-2017-7-fedora-28
 
 platform:
@@ -1109,25 +976,6 @@ steps:
   settings:
     requirements: tests/requirements.txt
     target: py2-git-2019-2-fedora-28
-  privileged: true
-
-depends_on:
-- run-shellcheck
-
----
-kind: pipeline
-name: py2-git-develop-fedora-28
-
-platform:
-  os: linux
-  arch: amd64
-
-steps:
-- name: build
-  image: saltstack/drone-plugin-kitchen
-  settings:
-    requirements: tests/requirements.txt
-    target: py2-git-develop-fedora-28
   privileged: true
 
 depends_on:
@@ -1192,25 +1040,6 @@ depends_on:
 
 ---
 kind: pipeline
-name: py2-git-develop-fedora-29
-
-platform:
-  os: linux
-  arch: amd64
-
-steps:
-- name: build
-  image: saltstack/drone-plugin-kitchen
-  settings:
-    requirements: tests/requirements.txt
-    target: py2-git-develop-fedora-29
-  privileged: true
-
-depends_on:
-- run-shellcheck
-
----
-kind: pipeline
 name: py2-git-2017-7-opensuse-15
 
 platform:
@@ -1261,25 +1090,6 @@ steps:
   settings:
     requirements: tests/requirements.txt
     target: py2-git-2019-2-opensuse-15
-  privileged: true
-
-depends_on:
-- run-shellcheck
-
----
-kind: pipeline
-name: py2-git-develop-opensuse-15
-
-platform:
-  os: linux
-  arch: amd64
-
-steps:
-- name: build
-  image: saltstack/drone-plugin-kitchen
-  settings:
-    requirements: tests/requirements.txt
-    target: py2-git-develop-opensuse-15
   privileged: true
 
 depends_on:
@@ -1344,25 +1154,6 @@ depends_on:
 
 ---
 kind: pipeline
-name: py2-git-develop-opensuse-42
-
-platform:
-  os: linux
-  arch: amd64
-
-steps:
-- name: build
-  image: saltstack/drone-plugin-kitchen
-  settings:
-    requirements: tests/requirements.txt
-    target: py2-git-develop-opensuse-42
-  privileged: true
-
-depends_on:
-- run-shellcheck
-
----
-kind: pipeline
 name: py2-git-2017-7-ubuntu-1404
 
 platform:
@@ -1413,25 +1204,6 @@ steps:
   settings:
     requirements: tests/requirements.txt
     target: py2-git-2019-2-ubuntu-1404
-  privileged: true
-
-depends_on:
-- run-shellcheck
-
----
-kind: pipeline
-name: py2-git-develop-ubuntu-1404
-
-platform:
-  os: linux
-  arch: amd64
-
-steps:
-- name: build
-  image: saltstack/drone-plugin-kitchen
-  settings:
-    requirements: tests/requirements.txt
-    target: py2-git-develop-ubuntu-1404
   privileged: true
 
 depends_on:
@@ -1496,25 +1268,6 @@ depends_on:
 
 ---
 kind: pipeline
-name: py2-git-develop-ubuntu-1604
-
-platform:
-  os: linux
-  arch: amd64
-
-steps:
-- name: build
-  image: saltstack/drone-plugin-kitchen
-  settings:
-    requirements: tests/requirements.txt
-    target: py2-git-develop-ubuntu-1604
-  privileged: true
-
-depends_on:
-- run-shellcheck
-
----
-kind: pipeline
 name: py2-git-2017-7-ubuntu-1804
 
 platform:
@@ -1571,26 +1324,7 @@ depends_on:
 - run-shellcheck
 
 ---
-kind: pipeline
-name: py2-git-develop-ubuntu-1804
-
-platform:
-  os: linux
-  arch: amd64
-
-steps:
-- name: build
-  image: saltstack/drone-plugin-kitchen
-  settings:
-    requirements: tests/requirements.txt
-    target: py2-git-develop-ubuntu-1804
-  privileged: true
-
-depends_on:
-- run-shellcheck
-
----
 kind: signature
-hmac: 2d994326935f65cd989495a029521d668a48458529aa808cf428bce6754cdeee
+hmac: d5884d09e97fe99082b4ff515d890e9423b377d1f6f22a70cfc88673cf82c711
 
 ...

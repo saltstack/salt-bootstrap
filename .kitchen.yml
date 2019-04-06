@@ -106,9 +106,6 @@ suites:
   - name: py2-git-2019-2
     provisioner:
       salt_version: 2019.2
-  - name: py2-git-develop
-    provisioner:
-      salt_version: develop
   - name: py2-stable-2017-7
     provisioner:
       salt_version: 2017.7

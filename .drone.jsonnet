@@ -2,7 +2,7 @@ local git_suites = [
   'py2-git-2017-7',
   'py2-git-2018-3',
   'py2-git-2019-2',
-  'py2-git-develop',
+  // 'py2-git-develop',  // Don't test against Salt's develop branch. Stability is not assured.
 ];
 
 local stable_suites = [

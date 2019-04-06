@@ -89,6 +89,8 @@ platforms:
       run_command: /usr/lib/systemd/systemd
       provision_command:
         - systemctl enable sshd.service
+    provisioner:
+      salt_bootstrap_options: -MPfq -y -x python2 git %s
   - name: opensuse-42
     driver_config:
       image: opensuse/leap:42.3

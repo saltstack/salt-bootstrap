@@ -1,3 +1,13 @@
+local suites = [
+  'py2-git-2017.7',
+  'py2-git-2018.3',
+  'py2-git-2019.2',
+  'py2-git-develop',
+  'py2-stable-2017.7',
+  'py2-stable-2018.3',
+  'py2-stable-2019.2',
+];
+
 local distros = [
   { name: 'amazon', version: '1' },
   { name: 'amazon', version: '2' },
@@ -29,9 +39,9 @@ local Shellcheck() = {
   ],
 };
 
-local Build(os, os_version) = {
+local Build(suite, os, os_version) = {
   kind: 'pipeline',
-  name: std.format('build-%s-%s', [os, os_version]),
+  name: std.format('%s-%s-%s', [suite, os, os_version]),
 
   steps: [
     {
@@ -39,7 +49,7 @@ local Build(os, os_version) = {
       privileged: true,
       image: 'saltstack/drone-plugin-kitchen',
       settings: {
-        target: std.format('%s-%s', [os, os_version]),
+        target: std.format('%s-%s-%s', [suite, os, os_version]),
         requirements: 'tests/requirements.txt',
       },
     },
@@ -53,6 +63,7 @@ local Build(os, os_version) = {
 [
   Shellcheck(),
 ] + [
-  Build(distro.name, distro.version)
+  Build(suite, distro.name, distro.version)
   for distro in distros
+  for suite in suites
 ]

@@ -21,6 +21,11 @@ platform:
   arch: amd64
 
 steps:
+- name: throttle build
+  image: alpine
+  commands:
+  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
+
 - name: build
   image: saltstack/drone-plugin-kitchen
   settings:
@@ -40,6 +45,11 @@ platform:
   arch: amd64
 
 steps:
+- name: throttle build
+  image: alpine
+  commands:
+  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
+
 - name: build
   image: saltstack/drone-plugin-kitchen
   settings:
@@ -59,6 +69,11 @@ platform:
   arch: amd64
 
 steps:
+- name: throttle build
+  image: alpine
+  commands:
+  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
+
 - name: build
   image: saltstack/drone-plugin-kitchen
   settings:
@@ -78,6 +93,11 @@ platform:
   arch: amd64
 
 steps:
+- name: throttle build
+  image: alpine
+  commands:
+  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
+
 - name: build
   image: saltstack/drone-plugin-kitchen
   settings:
@@ -97,6 +117,11 @@ platform:
   arch: amd64
 
 steps:
+- name: throttle build
+  image: alpine
+  commands:
+  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
+
 - name: build
   image: saltstack/drone-plugin-kitchen
   settings:
@@ -116,6 +141,11 @@ platform:
   arch: amd64
 
 steps:
+- name: throttle build
+  image: alpine
+  commands:
+  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
+
 - name: build
   image: saltstack/drone-plugin-kitchen
   settings:
@@ -135,6 +165,11 @@ platform:
   arch: amd64
 
 steps:
+- name: throttle build
+  image: alpine
+  commands:
+  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
+
 - name: build
   image: saltstack/drone-plugin-kitchen
   settings:
@@ -154,6 +189,11 @@ platform:
   arch: amd64
 
 steps:
+- name: throttle build
+  image: alpine
+  commands:
+  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
+
 - name: build
   image: saltstack/drone-plugin-kitchen
   settings:
@@ -173,6 +213,11 @@ platform:
   arch: amd64
 
 steps:
+- name: throttle build
+  image: alpine
+  commands:
+  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
+
 - name: build
   image: saltstack/drone-plugin-kitchen
   settings:
@@ -192,6 +237,11 @@ platform:
   arch: amd64
 
 steps:
+- name: throttle build
+  image: alpine
+  commands:
+  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
+
 - name: build
   image: saltstack/drone-plugin-kitchen
   settings:
@@ -211,6 +261,11 @@ platform:
   arch: amd64
 
 steps:
+- name: throttle build
+  image: alpine
+  commands:
+  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
+
 - name: build
   image: saltstack/drone-plugin-kitchen
   settings:
@@ -230,6 +285,11 @@ platform:
   arch: amd64
 
 steps:
+- name: throttle build
+  image: alpine
+  commands:
+  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
+
 - name: build
   image: saltstack/drone-plugin-kitchen
   settings:
@@ -249,6 +309,11 @@ platform:
   arch: amd64
 
 steps:
+- name: throttle build
+  image: alpine
+  commands:
+  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
+
 - name: build
   image: saltstack/drone-plugin-kitchen
   settings:
@@ -268,6 +333,11 @@ platform:
   arch: amd64
 
 steps:
+- name: throttle build
+  image: alpine
+  commands:
+  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
+
 - name: build
   image: saltstack/drone-plugin-kitchen
   settings:
@@ -287,6 +357,11 @@ platform:
   arch: amd64
 
 steps:
+- name: throttle build
+  image: alpine
+  commands:
+  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
+
 - name: build
   image: saltstack/drone-plugin-kitchen
   settings:
@@ -306,6 +381,11 @@ platform:
   arch: amd64
 
 steps:
+- name: throttle build
+  image: alpine
+  commands:
+  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
+
 - name: build
   image: saltstack/drone-plugin-kitchen
   settings:
@@ -325,6 +405,11 @@ platform:
   arch: amd64
 
 steps:
+- name: throttle build
+  image: alpine
+  commands:
+  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
+
 - name: build
   image: saltstack/drone-plugin-kitchen
   settings:
@@ -344,6 +429,11 @@ platform:
   arch: amd64
 
 steps:
+- name: throttle build
+  image: alpine
+  commands:
+  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
+
 - name: build
   image: saltstack/drone-plugin-kitchen
   settings:
@@ -363,6 +453,11 @@ platform:
   arch: amd64
 
 steps:
+- name: throttle build
+  image: alpine
+  commands:
+  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
+
 - name: build
   image: saltstack/drone-plugin-kitchen
   settings:
@@ -382,6 +477,11 @@ platform:
   arch: amd64
 
 steps:
+- name: throttle build
+  image: alpine
+  commands:
+  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
+
 - name: build
   image: saltstack/drone-plugin-kitchen
   settings:
@@ -401,6 +501,11 @@ platform:
   arch: amd64
 
 steps:
+- name: throttle build
+  image: alpine
+  commands:
+  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
+
 - name: build
   image: saltstack/drone-plugin-kitchen
   settings:
@@ -420,6 +525,11 @@ platform:
   arch: amd64
 
 steps:
+- name: throttle build
+  image: alpine
+  commands:
+  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
+
 - name: build
   image: saltstack/drone-plugin-kitchen
   settings:
@@ -439,6 +549,11 @@ platform:
   arch: amd64
 
 steps:
+- name: throttle build
+  image: alpine
+  commands:
+  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
+
 - name: build
   image: saltstack/drone-plugin-kitchen
   settings:
@@ -458,6 +573,11 @@ platform:
   arch: amd64
 
 steps:
+- name: throttle build
+  image: alpine
+  commands:
+  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
+
 - name: build
   image: saltstack/drone-plugin-kitchen
   settings:
@@ -477,6 +597,11 @@ platform:
   arch: amd64
 
 steps:
+- name: throttle build
+  image: alpine
+  commands:
+  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
+
 - name: build
   image: saltstack/drone-plugin-kitchen
   settings:
@@ -496,6 +621,11 @@ platform:
   arch: amd64
 
 steps:
+- name: throttle build
+  image: alpine
+  commands:
+  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
+
 - name: build
   image: saltstack/drone-plugin-kitchen
   settings:
@@ -515,6 +645,11 @@ platform:
   arch: amd64
 
 steps:
+- name: throttle build
+  image: alpine
+  commands:
+  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
+
 - name: build
   image: saltstack/drone-plugin-kitchen
   settings:
@@ -534,6 +669,11 @@ platform:
   arch: amd64
 
 steps:
+- name: throttle build
+  image: alpine
+  commands:
+  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
+
 - name: build
   image: saltstack/drone-plugin-kitchen
   settings:
@@ -553,6 +693,11 @@ platform:
   arch: amd64
 
 steps:
+- name: throttle build
+  image: alpine
+  commands:
+  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
+
 - name: build
   image: saltstack/drone-plugin-kitchen
   settings:
@@ -572,6 +717,11 @@ platform:
   arch: amd64
 
 steps:
+- name: throttle build
+  image: alpine
+  commands:
+  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
+
 - name: build
   image: saltstack/drone-plugin-kitchen
   settings:
@@ -591,6 +741,11 @@ platform:
   arch: amd64
 
 steps:
+- name: throttle build
+  image: alpine
+  commands:
+  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
+
 - name: build
   image: saltstack/drone-plugin-kitchen
   settings:
@@ -610,6 +765,11 @@ platform:
   arch: amd64
 
 steps:
+- name: throttle build
+  image: alpine
+  commands:
+  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
+
 - name: build
   image: saltstack/drone-plugin-kitchen
   settings:
@@ -629,6 +789,11 @@ platform:
   arch: amd64
 
 steps:
+- name: throttle build
+  image: alpine
+  commands:
+  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
+
 - name: build
   image: saltstack/drone-plugin-kitchen
   settings:
@@ -648,6 +813,11 @@ platform:
   arch: amd64
 
 steps:
+- name: throttle build
+  image: alpine
+  commands:
+  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
+
 - name: build
   image: saltstack/drone-plugin-kitchen
   settings:
@@ -667,6 +837,11 @@ platform:
   arch: amd64
 
 steps:
+- name: throttle build
+  image: alpine
+  commands:
+  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
+
 - name: build
   image: saltstack/drone-plugin-kitchen
   settings:
@@ -686,6 +861,11 @@ platform:
   arch: amd64
 
 steps:
+- name: throttle build
+  image: alpine
+  commands:
+  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
+
 - name: build
   image: saltstack/drone-plugin-kitchen
   settings:
@@ -705,6 +885,11 @@ platform:
   arch: amd64
 
 steps:
+- name: throttle build
+  image: alpine
+  commands:
+  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
+
 - name: build
   image: saltstack/drone-plugin-kitchen
   settings:
@@ -724,6 +909,11 @@ platform:
   arch: amd64
 
 steps:
+- name: throttle build
+  image: alpine
+  commands:
+  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
+
 - name: build
   image: saltstack/drone-plugin-kitchen
   settings:
@@ -743,6 +933,11 @@ platform:
   arch: amd64
 
 steps:
+- name: throttle build
+  image: alpine
+  commands:
+  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
+
 - name: build
   image: saltstack/drone-plugin-kitchen
   settings:
@@ -762,6 +957,11 @@ platform:
   arch: amd64
 
 steps:
+- name: throttle build
+  image: alpine
+  commands:
+  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
+
 - name: build
   image: saltstack/drone-plugin-kitchen
   settings:
@@ -781,6 +981,11 @@ platform:
   arch: amd64
 
 steps:
+- name: throttle build
+  image: alpine
+  commands:
+  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
+
 - name: build
   image: saltstack/drone-plugin-kitchen
   settings:
@@ -800,6 +1005,11 @@ platform:
   arch: amd64
 
 steps:
+- name: throttle build
+  image: alpine
+  commands:
+  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
+
 - name: build
   image: saltstack/drone-plugin-kitchen
   settings:
@@ -819,6 +1029,11 @@ platform:
   arch: amd64
 
 steps:
+- name: throttle build
+  image: alpine
+  commands:
+  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
+
 - name: build
   image: saltstack/drone-plugin-kitchen
   settings:
@@ -838,6 +1053,11 @@ platform:
   arch: amd64
 
 steps:
+- name: throttle build
+  image: alpine
+  commands:
+  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
+
 - name: build
   image: saltstack/drone-plugin-kitchen
   settings:
@@ -857,6 +1077,11 @@ platform:
   arch: amd64
 
 steps:
+- name: throttle build
+  image: alpine
+  commands:
+  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
+
 - name: build
   image: saltstack/drone-plugin-kitchen
   settings:
@@ -876,6 +1101,11 @@ platform:
   arch: amd64
 
 steps:
+- name: throttle build
+  image: alpine
+  commands:
+  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
+
 - name: build
   image: saltstack/drone-plugin-kitchen
   settings:
@@ -895,6 +1125,11 @@ platform:
   arch: amd64
 
 steps:
+- name: throttle build
+  image: alpine
+  commands:
+  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
+
 - name: build
   image: saltstack/drone-plugin-kitchen
   settings:
@@ -914,6 +1149,11 @@ platform:
   arch: amd64
 
 steps:
+- name: throttle build
+  image: alpine
+  commands:
+  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
+
 - name: build
   image: saltstack/drone-plugin-kitchen
   settings:
@@ -933,6 +1173,11 @@ platform:
   arch: amd64
 
 steps:
+- name: throttle build
+  image: alpine
+  commands:
+  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
+
 - name: build
   image: saltstack/drone-plugin-kitchen
   settings:
@@ -952,6 +1197,11 @@ platform:
   arch: amd64
 
 steps:
+- name: throttle build
+  image: alpine
+  commands:
+  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
+
 - name: build
   image: saltstack/drone-plugin-kitchen
   settings:
@@ -971,6 +1221,11 @@ platform:
   arch: amd64
 
 steps:
+- name: throttle build
+  image: alpine
+  commands:
+  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
+
 - name: build
   image: saltstack/drone-plugin-kitchen
   settings:
@@ -990,6 +1245,11 @@ platform:
   arch: amd64
 
 steps:
+- name: throttle build
+  image: alpine
+  commands:
+  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
+
 - name: build
   image: saltstack/drone-plugin-kitchen
   settings:
@@ -1009,6 +1269,11 @@ platform:
   arch: amd64
 
 steps:
+- name: throttle build
+  image: alpine
+  commands:
+  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
+
 - name: build
   image: saltstack/drone-plugin-kitchen
   settings:
@@ -1028,6 +1293,11 @@ platform:
   arch: amd64
 
 steps:
+- name: throttle build
+  image: alpine
+  commands:
+  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
+
 - name: build
   image: saltstack/drone-plugin-kitchen
   settings:
@@ -1047,6 +1317,11 @@ platform:
   arch: amd64
 
 steps:
+- name: throttle build
+  image: alpine
+  commands:
+  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
+
 - name: build
   image: saltstack/drone-plugin-kitchen
   settings:
@@ -1066,6 +1341,11 @@ platform:
   arch: amd64
 
 steps:
+- name: throttle build
+  image: alpine
+  commands:
+  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
+
 - name: build
   image: saltstack/drone-plugin-kitchen
   settings:
@@ -1085,6 +1365,11 @@ platform:
   arch: amd64
 
 steps:
+- name: throttle build
+  image: alpine
+  commands:
+  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
+
 - name: build
   image: saltstack/drone-plugin-kitchen
   settings:
@@ -1104,6 +1389,11 @@ platform:
   arch: amd64
 
 steps:
+- name: throttle build
+  image: alpine
+  commands:
+  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
+
 - name: build
   image: saltstack/drone-plugin-kitchen
   settings:
@@ -1123,6 +1413,11 @@ platform:
   arch: amd64
 
 steps:
+- name: throttle build
+  image: alpine
+  commands:
+  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
+
 - name: build
   image: saltstack/drone-plugin-kitchen
   settings:
@@ -1142,6 +1437,11 @@ platform:
   arch: amd64
 
 steps:
+- name: throttle build
+  image: alpine
+  commands:
+  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
+
 - name: build
   image: saltstack/drone-plugin-kitchen
   settings:
@@ -1161,6 +1461,11 @@ platform:
   arch: amd64
 
 steps:
+- name: throttle build
+  image: alpine
+  commands:
+  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
+
 - name: build
   image: saltstack/drone-plugin-kitchen
   settings:
@@ -1180,6 +1485,11 @@ platform:
   arch: amd64
 
 steps:
+- name: throttle build
+  image: alpine
+  commands:
+  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
+
 - name: build
   image: saltstack/drone-plugin-kitchen
   settings:
@@ -1199,6 +1509,11 @@ platform:
   arch: amd64
 
 steps:
+- name: throttle build
+  image: alpine
+  commands:
+  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
+
 - name: build
   image: saltstack/drone-plugin-kitchen
   settings:
@@ -1218,6 +1533,11 @@ platform:
   arch: amd64
 
 steps:
+- name: throttle build
+  image: alpine
+  commands:
+  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
+
 - name: build
   image: saltstack/drone-plugin-kitchen
   settings:
@@ -1237,6 +1557,11 @@ platform:
   arch: amd64
 
 steps:
+- name: throttle build
+  image: alpine
+  commands:
+  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
+
 - name: build
   image: saltstack/drone-plugin-kitchen
   settings:
@@ -1256,6 +1581,11 @@ platform:
   arch: amd64
 
 steps:
+- name: throttle build
+  image: alpine
+  commands:
+  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
+
 - name: build
   image: saltstack/drone-plugin-kitchen
   settings:
@@ -1275,6 +1605,11 @@ platform:
   arch: amd64
 
 steps:
+- name: throttle build
+  image: alpine
+  commands:
+  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
+
 - name: build
   image: saltstack/drone-plugin-kitchen
   settings:
@@ -1294,6 +1629,11 @@ platform:
   arch: amd64
 
 steps:
+- name: throttle build
+  image: alpine
+  commands:
+  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
+
 - name: build
   image: saltstack/drone-plugin-kitchen
   settings:
@@ -1313,6 +1653,11 @@ platform:
   arch: amd64
 
 steps:
+- name: throttle build
+  image: alpine
+  commands:
+  - "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'"
+
 - name: build
   image: saltstack/drone-plugin-kitchen
   settings:
@@ -1325,6 +1670,6 @@ depends_on:
 
 ---
 kind: signature
-hmac: d5884d09e97fe99082b4ff515d890e9423b377d1f6f22a70cfc88673cf82c711
+hmac: cbf4ad0b023bb3b5b9ac8948bbde836956289da44e5d76044cf760592abceb5c
 
 ...

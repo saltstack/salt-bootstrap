@@ -61,6 +61,13 @@ local Build(suite, distro) = {
 
   steps: [
     {
+      name: 'throttle build',
+      image: 'alpine',
+      commands: [
+        "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'",
+      ],
+    },
+    {
       name: 'build',
       privileged: true,
       image: 'saltstack/drone-plugin-kitchen',

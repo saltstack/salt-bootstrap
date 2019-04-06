@@ -55,27 +55,21 @@ local Shellcheck() = {
   ],
 };
 
-local Build(suite, distro) = {
+local Build(suites, distro) = {
   kind: 'pipeline',
-  name: std.format('%s-%s', [suite, distro]),
+  name: distro,
 
   steps: [
     {
-      name: 'throttle build',
-      image: 'alpine',
-      commands: [
-        "sh -c 't=$(shuf -i 1-20 -n 1); echo Sleeping $t seconds; sleep $t'",
-      ],
-    },
-    {
-      name: 'build',
+      name: suite,
       privileged: true,
       image: 'saltstack/drone-plugin-kitchen',
       settings: {
         target: std.format('%s-%s', [suite, distro]),
         requirements: 'tests/requirements.txt',
       },
-    },
+    }
+    for suite in suites
   ],
   depends_on: [
     'run-shellcheck',
@@ -86,11 +80,9 @@ local Build(suite, distro) = {
 [
   Shellcheck(),
 ] + [
-  Build(suite, distro)
+  Build(stable_suites, distro)
   for distro in stable_distros
-  for suite in stable_suites
 ] + [
-  Build(suite, distro)
+  Build(git_suites, distro)
   for distro in git_distros
-  for suite in git_suites
 ]

@@ -55,7 +55,7 @@ local Shellcheck() = {
   ],
 };
 
-local Build(suites, distro) = {
+local Build(distro) = {
   kind: 'pipeline',
   name: distro,
 
@@ -69,7 +69,7 @@ local Build(suites, distro) = {
         requirements: 'tests/requirements.txt',
       },
     }
-    for suite in suites
+    for suite in git_suites + stable_suites
   ],
   depends_on: [
     'run-shellcheck',
@@ -80,9 +80,6 @@ local Build(suites, distro) = {
 [
   Shellcheck(),
 ] + [
-  Build(stable_suites, distro)
+  Build(distro)
   for distro in stable_distros
-] + [
-  Build(git_suites, distro)
-  for distro in git_distros
 ]

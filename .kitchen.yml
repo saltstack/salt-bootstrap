@@ -8,7 +8,7 @@ driver:
   cap_add:
     - sys_admin
   disable_upstart: false
-  use_internal_docker_network: true
+  use_internal_docker_network: false
 
 provisioner:
   name: salt_solo

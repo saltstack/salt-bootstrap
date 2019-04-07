@@ -24,7 +24,7 @@ steps:
 - name: throttle-build
   image: alpine
   commands:
-  - "sh -c 't=10; echo Sleeping 10 seconds; sleep 10'"
+  - "sh -c 't=15; echo Sleeping 15 seconds; sleep 15'"
 
 - name: Py2 2017.7(Git)
   image: saltstack/drone-plugin-kitchen
@@ -68,7 +68,7 @@ steps:
 - name: throttle-build
   image: alpine
   commands:
-  - "sh -c 't=20; echo Sleeping 20 seconds; sleep 20'"
+  - "sh -c 't=30; echo Sleeping 30 seconds; sleep 30'"
 
 - name: Py2 2017.7(Git)
   image: saltstack/drone-plugin-kitchen
@@ -139,7 +139,7 @@ steps:
 - name: throttle-build
   image: alpine
   commands:
-  - "sh -c 't=30; echo Sleeping 30 seconds; sleep 30'"
+  - "sh -c 't=45; echo Sleeping 45 seconds; sleep 45'"
 
 - name: Py2 2017.7(Git)
   image: saltstack/drone-plugin-kitchen
@@ -210,7 +210,7 @@ steps:
 - name: throttle-build
   image: alpine
   commands:
-  - "sh -c 't=40; echo Sleeping 40 seconds; sleep 40'"
+  - "sh -c 't=60; echo Sleeping 60 seconds; sleep 60'"
 
 - name: Py2 2017.7(Git)
   image: saltstack/drone-plugin-kitchen
@@ -281,7 +281,7 @@ steps:
 - name: throttle-build
   image: alpine
   commands:
-  - "sh -c 't=50; echo Sleeping 50 seconds; sleep 50'"
+  - "sh -c 't=75; echo Sleeping 75 seconds; sleep 75'"
 
 - name: Py2 2017.7(Git)
   image: saltstack/drone-plugin-kitchen
@@ -352,7 +352,7 @@ steps:
 - name: throttle-build
   image: alpine
   commands:
-  - "sh -c 't=60; echo Sleeping 60 seconds; sleep 60'"
+  - "sh -c 't=90; echo Sleeping 90 seconds; sleep 90'"
 
 - name: Py2 2017.7(Git)
   image: saltstack/drone-plugin-kitchen
@@ -423,7 +423,7 @@ steps:
 - name: throttle-build
   image: alpine
   commands:
-  - "sh -c 't=70; echo Sleeping 70 seconds; sleep 70'"
+  - "sh -c 't=105; echo Sleeping 105 seconds; sleep 105'"
 
 - name: Py2 2017.7(Git)
   image: saltstack/drone-plugin-kitchen
@@ -494,7 +494,7 @@ steps:
 - name: throttle-build
   image: alpine
   commands:
-  - "sh -c 't=80; echo Sleeping 80 seconds; sleep 80'"
+  - "sh -c 't=120; echo Sleeping 120 seconds; sleep 120'"
 
 - name: Py2 2017.7(Git)
   image: saltstack/drone-plugin-kitchen
@@ -538,7 +538,7 @@ steps:
 - name: throttle-build
   image: alpine
   commands:
-  - "sh -c 't=90; echo Sleeping 90 seconds; sleep 90'"
+  - "sh -c 't=135; echo Sleeping 135 seconds; sleep 135'"
 
 - name: Py2 2017.7(Git)
   image: saltstack/drone-plugin-kitchen
@@ -582,7 +582,7 @@ steps:
 - name: throttle-build
   image: alpine
   commands:
-  - "sh -c 't=90; echo Sleeping 90 seconds; sleep 90'"
+  - "sh -c 't=135; echo Sleeping 135 seconds; sleep 135'"
 
 - name: Py2 2017.7(Git)
   image: saltstack/drone-plugin-kitchen
@@ -626,7 +626,7 @@ steps:
 - name: throttle-build
   image: alpine
   commands:
-  - "sh -c 't=100; echo Sleeping 100 seconds; sleep 100'"
+  - "sh -c 't=150; echo Sleeping 150 seconds; sleep 150'"
 
 - name: Py2 2017.7(Git)
   image: saltstack/drone-plugin-kitchen
@@ -670,7 +670,7 @@ steps:
 - name: throttle-build
   image: alpine
   commands:
-  - "sh -c 't=110; echo Sleeping 110 seconds; sleep 110'"
+  - "sh -c 't=165; echo Sleeping 165 seconds; sleep 165'"
 
 - name: Py2 2017.7(Git)
   image: saltstack/drone-plugin-kitchen
@@ -741,7 +741,7 @@ steps:
 - name: throttle-build
   image: alpine
   commands:
-  - "sh -c 't=120; echo Sleeping 120 seconds; sleep 120'"
+  - "sh -c 't=180; echo Sleeping 180 seconds; sleep 180'"
 
 - name: Py2 2017.7(Git)
   image: saltstack/drone-plugin-kitchen
@@ -812,7 +812,7 @@ steps:
 - name: throttle-build
   image: alpine
   commands:
-  - "sh -c 't=130; echo Sleeping 130 seconds; sleep 130'"
+  - "sh -c 't=195; echo Sleeping 195 seconds; sleep 195'"
 
 - name: Py2 2017.7(Git)
   image: saltstack/drone-plugin-kitchen
@@ -873,6 +873,6 @@ depends_on:
 
 ---
 kind: signature
-hmac: fa242d0fc30d62b2bee601e29fa31ea7e3dd3746bf5949b382595be347e34e38
+hmac: 2d015eee8ce2c6446e23f4a9f0d39ceca3765433f2fb3d5f757e522cb3aa28ac
 
 ...

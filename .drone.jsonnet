@@ -67,7 +67,7 @@ local Build(distro) = {
       name: 'throttle-build',
       image: 'alpine',
       commands: [
-        std.format("sh -c 't=%(offset)s; echo Sleeping %(offset)s seconds; sleep %(offset)s'", { offset: 10 * distro.multiplier }),
+        std.format("sh -c 't=%(offset)s; echo Sleeping %(offset)s seconds; sleep %(offset)s'", { offset: 15 * distro.multiplier }),
       ],
     },
   ] + [

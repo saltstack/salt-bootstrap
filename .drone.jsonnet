@@ -12,20 +12,20 @@ local stable_suites = [
 ];
 
 local distros = [
-  { name: 'Arch', slug: 'arch', offset: 5 },
-  { name: 'Amazon 1', slug: 'amazon-1', offset: 10 }
-  { name: 'Amazon 2', slug: 'amazon-2', offset: 15 },
-  { name: 'CentOS 6', slug: 'centos-6', offset: 20 },
-  { name: 'CentOS 7', slug: 'centos-7', offset: 25 },
-  { name: 'Debian 8', slug: 'debian-8', offset: 30 },
-  { name: 'Debian 9', slug: 'debian-9', offset: 35 },
-  { name: 'Fedora 28', slug: 'fedora-28', offset: 40 },
-  { name: 'Fedora 29', slug: 'fedora-29', offset: 45 },
-  { name: 'Opensuse 15.0', slug: 'opensuse-15', offset: 50 },
-  { name: 'Opensuse 42.3', slug: 'opensuse-42', offset: 55 },
-  { name: 'Ubuntu 14.04', slug: 'ubuntu-1404', offset: 60 },
-  { name: 'Ubuntu 16.04', slug: 'ubuntu-1604', offset: 65 },
-  { name: 'Ubuntu 18.04', slug: 'ubuntu-1804', offset: 70 },
+  { name: 'Arch', slug: 'arch', multiplier: 1 },
+  { name: 'Amazon 1', slug: 'amazon-1', multiplier: 2 },
+  { name: 'Amazon 2', slug: 'amazon-2', multiplier: 3 },
+  { name: 'CentOS 6', slug: 'centos-6', multiplier: 4 },
+  { name: 'CentOS 7', slug: 'centos-7', multiplier: 5 },
+  { name: 'Debian 8', slug: 'debian-8', multiplier: 6 },
+  { name: 'Debian 9', slug: 'debian-9', multiplier: 7 },
+  { name: 'Fedora 28', slug: 'fedora-28', multiplier: 8 },
+  { name: 'Fedora 29', slug: 'fedora-29', multiplier: 9 },
+  { name: 'Opensuse 15.0', slug: 'opensuse-15', multiplier: 9 },
+  { name: 'Opensuse 42.3', slug: 'opensuse-42', multiplier: 10 },
+  { name: 'Ubuntu 14.04', slug: 'ubuntu-1404', multiplier: 11 },
+  { name: 'Ubuntu 16.04', slug: 'ubuntu-1604', multiplier: 12 },
+  { name: 'Ubuntu 18.04', slug: 'ubuntu-1804', multiplier: 13 },
 ];
 
 local stable_distros = [
@@ -67,7 +67,7 @@ local Build(distro) = {
       name: 'throttle-build',
       image: 'alpine',
       commands: [
-        std.format("sh -c 't=%(offset)s; echo Sleeping %(offset)s seconds; sleep %(offset)s'", { offset: distro.offset }),
+        std.format("sh -c 't=%(offset)s; echo Sleeping %(offset)s seconds; sleep %(offset)s'", { offset: 10 * distro.multiplier }),
       ],
     },
   ] + [

@@ -26,7 +26,7 @@ steps:
   commands:
   - "sh -c 't=$(shuf -i 10-60 -n 1); echo Sleeping $t seconds; sleep $t'"
 
-- name: py2-git-2017-7
+- name: Py2 2017.7(Git)
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
@@ -35,7 +35,7 @@ steps:
   depends_on:
   - throttle-build
 
-- name: py2-git-2018-3
+- name: Py2 2018.3(Git)
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
@@ -44,7 +44,7 @@ steps:
   depends_on:
   - throttle-build
 
-- name: py2-git-2019-2
+- name: Py2 2019.2(Git)
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
@@ -70,7 +70,7 @@ steps:
   commands:
   - "sh -c 't=$(shuf -i 10-60 -n 1); echo Sleeping $t seconds; sleep $t'"
 
-- name: py2-git-2017-7
+- name: Py2 2017.7(Git)
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
@@ -79,7 +79,7 @@ steps:
   depends_on:
   - throttle-build
 
-- name: py2-git-2018-3
+- name: Py2 2018.3(Git)
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
@@ -88,7 +88,7 @@ steps:
   depends_on:
   - throttle-build
 
-- name: py2-git-2019-2
+- name: Py2 2019.2(Git)
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
@@ -97,7 +97,7 @@ steps:
   depends_on:
   - throttle-build
 
-- name: py2-stable-2017-7
+- name: Py2 2017.7(Stable)
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
@@ -106,7 +106,7 @@ steps:
   depends_on:
   - throttle-build
 
-- name: py2-stable-2018-3
+- name: Py2 2018.3(Stable)
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
@@ -115,7 +115,7 @@ steps:
   depends_on:
   - throttle-build
 
-- name: py2-stable-2019-2
+- name: Py2 2019.2(Stable)
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
@@ -141,7 +141,7 @@ steps:
   commands:
   - "sh -c 't=$(shuf -i 10-60 -n 1); echo Sleeping $t seconds; sleep $t'"
 
-- name: py2-git-2017-7
+- name: Py2 2017.7(Git)
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
@@ -150,7 +150,7 @@ steps:
   depends_on:
   - throttle-build
 
-- name: py2-git-2018-3
+- name: Py2 2018.3(Git)
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
@@ -159,7 +159,7 @@ steps:
   depends_on:
   - throttle-build
 
-- name: py2-git-2019-2
+- name: Py2 2019.2(Git)
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
@@ -168,7 +168,7 @@ steps:
   depends_on:
   - throttle-build
 
-- name: py2-stable-2017-7
+- name: Py2 2017.7(Stable)
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
@@ -177,7 +177,7 @@ steps:
   depends_on:
   - throttle-build
 
-- name: py2-stable-2018-3
+- name: Py2 2018.3(Stable)
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
@@ -186,7 +186,7 @@ steps:
   depends_on:
   - throttle-build
 
-- name: py2-stable-2019-2
+- name: Py2 2019.2(Stable)
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
@@ -212,7 +212,7 @@ steps:
   commands:
   - "sh -c 't=$(shuf -i 10-60 -n 1); echo Sleeping $t seconds; sleep $t'"
 
-- name: py2-git-2017-7
+- name: Py2 2017.7(Git)
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
@@ -221,7 +221,7 @@ steps:
   depends_on:
   - throttle-build
 
-- name: py2-git-2018-3
+- name: Py2 2018.3(Git)
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
@@ -230,7 +230,7 @@ steps:
   depends_on:
   - throttle-build
 
-- name: py2-git-2019-2
+- name: Py2 2019.2(Git)
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
@@ -239,7 +239,7 @@ steps:
   depends_on:
   - throttle-build
 
-- name: py2-stable-2017-7
+- name: Py2 2017.7(Stable)
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
@@ -248,7 +248,7 @@ steps:
   depends_on:
   - throttle-build
 
-- name: py2-stable-2018-3
+- name: Py2 2018.3(Stable)
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
@@ -257,7 +257,7 @@ steps:
   depends_on:
   - throttle-build
 
-- name: py2-stable-2019-2
+- name: Py2 2019.2(Stable)
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
@@ -283,7 +283,7 @@ steps:
   commands:
   - "sh -c 't=$(shuf -i 10-60 -n 1); echo Sleeping $t seconds; sleep $t'"
 
-- name: py2-git-2017-7
+- name: Py2 2017.7(Git)
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
@@ -292,7 +292,7 @@ steps:
   depends_on:
   - throttle-build
 
-- name: py2-git-2018-3
+- name: Py2 2018.3(Git)
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
@@ -301,7 +301,7 @@ steps:
   depends_on:
   - throttle-build
 
-- name: py2-git-2019-2
+- name: Py2 2019.2(Git)
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
@@ -310,7 +310,7 @@ steps:
   depends_on:
   - throttle-build
 
-- name: py2-stable-2017-7
+- name: Py2 2017.7(Stable)
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
@@ -319,7 +319,7 @@ steps:
   depends_on:
   - throttle-build
 
-- name: py2-stable-2018-3
+- name: Py2 2018.3(Stable)
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
@@ -328,7 +328,7 @@ steps:
   depends_on:
   - throttle-build
 
-- name: py2-stable-2019-2
+- name: Py2 2019.2(Stable)
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
@@ -354,7 +354,7 @@ steps:
   commands:
   - "sh -c 't=$(shuf -i 10-60 -n 1); echo Sleeping $t seconds; sleep $t'"
 
-- name: py2-git-2017-7
+- name: Py2 2017.7(Git)
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
@@ -363,7 +363,7 @@ steps:
   depends_on:
   - throttle-build
 
-- name: py2-git-2018-3
+- name: Py2 2018.3(Git)
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
@@ -372,7 +372,7 @@ steps:
   depends_on:
   - throttle-build
 
-- name: py2-git-2019-2
+- name: Py2 2019.2(Git)
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
@@ -381,7 +381,7 @@ steps:
   depends_on:
   - throttle-build
 
-- name: py2-stable-2017-7
+- name: Py2 2017.7(Stable)
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
@@ -390,7 +390,7 @@ steps:
   depends_on:
   - throttle-build
 
-- name: py2-stable-2018-3
+- name: Py2 2018.3(Stable)
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
@@ -399,7 +399,7 @@ steps:
   depends_on:
   - throttle-build
 
-- name: py2-stable-2019-2
+- name: Py2 2019.2(Stable)
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
@@ -425,7 +425,7 @@ steps:
   commands:
   - "sh -c 't=$(shuf -i 10-60 -n 1); echo Sleeping $t seconds; sleep $t'"
 
-- name: py2-git-2017-7
+- name: Py2 2017.7(Git)
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
@@ -434,7 +434,7 @@ steps:
   depends_on:
   - throttle-build
 
-- name: py2-git-2018-3
+- name: Py2 2018.3(Git)
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
@@ -443,7 +443,7 @@ steps:
   depends_on:
   - throttle-build
 
-- name: py2-git-2019-2
+- name: Py2 2019.2(Git)
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
@@ -469,7 +469,7 @@ steps:
   commands:
   - "sh -c 't=$(shuf -i 10-60 -n 1); echo Sleeping $t seconds; sleep $t'"
 
-- name: py2-git-2017-7
+- name: Py2 2017.7(Git)
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
@@ -478,7 +478,7 @@ steps:
   depends_on:
   - throttle-build
 
-- name: py2-git-2018-3
+- name: Py2 2018.3(Git)
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
@@ -487,7 +487,7 @@ steps:
   depends_on:
   - throttle-build
 
-- name: py2-git-2019-2
+- name: Py2 2019.2(Git)
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
@@ -513,7 +513,7 @@ steps:
   commands:
   - "sh -c 't=$(shuf -i 10-60 -n 1); echo Sleeping $t seconds; sleep $t'"
 
-- name: py2-git-2017-7
+- name: Py2 2017.7(Git)
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
@@ -522,7 +522,7 @@ steps:
   depends_on:
   - throttle-build
 
-- name: py2-git-2018-3
+- name: Py2 2018.3(Git)
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
@@ -531,7 +531,7 @@ steps:
   depends_on:
   - throttle-build
 
-- name: py2-git-2019-2
+- name: Py2 2019.2(Git)
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
@@ -557,7 +557,7 @@ steps:
   commands:
   - "sh -c 't=$(shuf -i 10-60 -n 1); echo Sleeping $t seconds; sleep $t'"
 
-- name: py2-git-2017-7
+- name: Py2 2017.7(Git)
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
@@ -566,7 +566,7 @@ steps:
   depends_on:
   - throttle-build
 
-- name: py2-git-2018-3
+- name: Py2 2018.3(Git)
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
@@ -575,7 +575,7 @@ steps:
   depends_on:
   - throttle-build
 
-- name: py2-git-2019-2
+- name: Py2 2019.2(Git)
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
@@ -601,7 +601,7 @@ steps:
   commands:
   - "sh -c 't=$(shuf -i 10-60 -n 1); echo Sleeping $t seconds; sleep $t'"
 
-- name: py2-git-2017-7
+- name: Py2 2017.7(Git)
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
@@ -610,7 +610,7 @@ steps:
   depends_on:
   - throttle-build
 
-- name: py2-git-2018-3
+- name: Py2 2018.3(Git)
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
@@ -619,7 +619,7 @@ steps:
   depends_on:
   - throttle-build
 
-- name: py2-git-2019-2
+- name: Py2 2019.2(Git)
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
@@ -628,7 +628,7 @@ steps:
   depends_on:
   - throttle-build
 
-- name: py2-stable-2017-7
+- name: Py2 2017.7(Stable)
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
@@ -637,7 +637,7 @@ steps:
   depends_on:
   - throttle-build
 
-- name: py2-stable-2018-3
+- name: Py2 2018.3(Stable)
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
@@ -646,7 +646,7 @@ steps:
   depends_on:
   - throttle-build
 
-- name: py2-stable-2019-2
+- name: Py2 2019.2(Stable)
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
@@ -672,7 +672,7 @@ steps:
   commands:
   - "sh -c 't=$(shuf -i 10-60 -n 1); echo Sleeping $t seconds; sleep $t'"
 
-- name: py2-git-2017-7
+- name: Py2 2017.7(Git)
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
@@ -681,7 +681,7 @@ steps:
   depends_on:
   - throttle-build
 
-- name: py2-git-2018-3
+- name: Py2 2018.3(Git)
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
@@ -690,7 +690,7 @@ steps:
   depends_on:
   - throttle-build
 
-- name: py2-git-2019-2
+- name: Py2 2019.2(Git)
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
@@ -699,7 +699,7 @@ steps:
   depends_on:
   - throttle-build
 
-- name: py2-stable-2017-7
+- name: Py2 2017.7(Stable)
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
@@ -708,7 +708,7 @@ steps:
   depends_on:
   - throttle-build
 
-- name: py2-stable-2018-3
+- name: Py2 2018.3(Stable)
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
@@ -717,7 +717,7 @@ steps:
   depends_on:
   - throttle-build
 
-- name: py2-stable-2019-2
+- name: Py2 2019.2(Stable)
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
@@ -743,7 +743,7 @@ steps:
   commands:
   - "sh -c 't=$(shuf -i 10-60 -n 1); echo Sleeping $t seconds; sleep $t'"
 
-- name: py2-git-2017-7
+- name: Py2 2017.7(Git)
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
@@ -752,7 +752,7 @@ steps:
   depends_on:
   - throttle-build
 
-- name: py2-git-2018-3
+- name: Py2 2018.3(Git)
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
@@ -761,7 +761,7 @@ steps:
   depends_on:
   - throttle-build
 
-- name: py2-git-2019-2
+- name: Py2 2019.2(Git)
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
@@ -770,7 +770,7 @@ steps:
   depends_on:
   - throttle-build
 
-- name: py2-stable-2017-7
+- name: Py2 2017.7(Stable)
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
@@ -779,7 +779,7 @@ steps:
   depends_on:
   - throttle-build
 
-- name: py2-stable-2018-3
+- name: Py2 2018.3(Stable)
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
@@ -788,7 +788,7 @@ steps:
   depends_on:
   - throttle-build
 
-- name: py2-stable-2019-2
+- name: Py2 2019.2(Stable)
   image: saltstack/drone-plugin-kitchen
   settings:
     requirements: tests/requirements.txt
@@ -802,6 +802,6 @@ depends_on:
 
 ---
 kind: signature
-hmac: abd8923f4b5902a6fb333e888cf3efaa20c0c4b5715d93c4defdc07b9650782d
+hmac: 260c4d8d1b993597174bcfaf76e88d857ecff595e19d0ee6cf04a4080b0b8bb3
 
 ...

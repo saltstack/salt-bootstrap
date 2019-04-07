@@ -1,14 +1,14 @@
 local git_suites = [
-  'py2-git-2017-7',
-  'py2-git-2018-3',
-  'py2-git-2019-2',
-  // 'py2-git-develop',  // Don't test against Salt's develop branch. Stability is not assured.
+  { name: 'Py2 2017.7(Git)', slug: 'py2-git-2017-7' },
+  { name: 'Py2 2018.3(Git)', slug: 'py2-git-2018-3' },
+  { name: 'Py2 2019.2(Git)', slug: 'py2-git-2019-2' },
+  // {name: 'Py2 develop(Stable)', slug: 'py2-git-develop'},  // Don't test against Salt's develop branch. Stability is not assured.
 ];
 
 local stable_suites = [
-  'py2-stable-2017-7',
-  'py2-stable-2018-3',
-  'py2-stable-2019-2',
+  { name: 'Py2 2017.7(Stable)', slug: 'py2-stable-2017-7' },
+  { name: 'Py2 2018.3(Stable)', slug: 'py2-stable-2018-3' },
+  { name: 'Py2 2019.2(Stable)', slug: 'py2-stable-2019-2' },
 ];
 
 local distros = [
@@ -72,14 +72,14 @@ local Build(distro) = {
     },
   ] + [
     {
-      name: suite,
+      name: suite.name,
       privileged: true,
       image: 'saltstack/drone-plugin-kitchen',
       depends_on: [
         'throttle-build',
       ],
       settings: {
-        target: std.format('%s-%s', [suite, distro.slug]),
+        target: std.format('%s-%s', [suite.slug, distro.slug]),
         requirements: 'tests/requirements.txt',
       },
     }

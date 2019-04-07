@@ -25,6 +25,7 @@ provisioner:
     echo 'auto_accept: true' > /tmp/auto-accept-keys.conf
     sudo mkdir -p /etc/salt/master.d
     sudo mv /tmp/auto-accept-keys.conf /etc/salt/master.d/auto-accept-keys.conf
+    sh -c 't=$(shuf -i 1-15 -n 1); echo Sleeping $t seconds; sleep $t'
 
 platforms:
   - name: fedora-28

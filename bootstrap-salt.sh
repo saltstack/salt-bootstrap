@@ -499,6 +499,7 @@ exec 2>"$LOGPIPE"
 #              14               SIGALRM
 #              15               SIGTERM
 #----------------------------------------------------------------------------------------------------------------------
+APT_ERR=$(mktemp /tmp/apt_error.XXXX)
 __exit_cleanup() {
     EXIT_CODE=$?
 
@@ -1819,7 +1820,6 @@ __function_defined() {
 #                 a boot process, such as on AWS AMIs. This func will wait until the boot
 #                 process is finished so the script doesn't exit on a locked proc.
 #----------------------------------------------------------------------------------------------------------------------
-APT_ERR=$(mktemp /tmp/apt_error.XXXX)
 __wait_for_apt(){
     # Timeout set at 15 minutes
     WAIT_TIMEOUT=900
@@ -1839,8 +1839,8 @@ __wait_for_apt(){
           echoerror "Bootstrap script cannot proceed. Aborting."
           return 1
       else
-	  "${@}" 2>"$APT_ERR"
-    	  APT_RETURN=$?
+          "${@}" 2>"$APT_ERR"
+          APT_RETURN=$?
       fi
     done
 

@@ -35,14 +35,14 @@ platforms:
       run_command: /sbin/init
       provision_command:
         - yum install -y upstart
-        - sh -c 't=$(shuf -i 5-35 -n 1); echo Sleeping $t seconds; sleep $t'
+        - sh -c 't=$(shuf -i 10-60 -n 1); echo Sleeping $t seconds; sleep $t'
   - name: amazon-2
     driver_config:
       image: amazonlinux:2
       platform: rhel
       run_command: /usr/lib/systemd/systemd
       provision_command:
-        - sh -c 't=$(shuf -i 5-35 -n 1); echo Sleeping $t seconds; sleep $t'
+        - sh -c 't=$(shuf -i 11-61 -n 1); echo Sleeping $t seconds; sleep $t'
   - name: arch
     driver_config:
       image: archlinux/base
@@ -50,18 +50,18 @@ platforms:
       provision_command:
         - pacman -Syu --noconfirm --needed systemd grep awk procps which
         - systemctl enable sshd
-        - sh -c 't=$(shuf -i 5-35 -n 1); echo Sleeping $t seconds; sleep $t'
+        - sh -c 't=$(shuf -i 12-62 -n 1); echo Sleeping $t seconds; sleep $t'
   - name: centos-7
     driver_config:
       run_command: /usr/lib/systemd/systemd
       provision_command:
-        - sh -c 't=$(shuf -i 5-35 -n 1); echo Sleeping $t seconds; sleep $t'
+        - sh -c 't=$(shuf -i 13-63 -n 1); echo Sleeping $t seconds; sleep $t'
   - name: centos-6
     driver_config:
       run_command: /sbin/init
       provision_command:
         - yum install -y upstart
-        - sh -c 't=$(shuf -i 5-35 -n 1); echo Sleeping $t seconds; sleep $t'
+        - sh -c 't=$(shuf -i 14-64 -n 1); echo Sleeping $t seconds; sleep $t'
     provisioner:
       salt_bootstrap_options: -MPfq -y -x python2.7 git %s
   - name: debian-8
@@ -69,31 +69,31 @@ platforms:
       run_command: /lib/systemd/systemd
       provision_command:
         - apt-get install -y dbus
-        - sh -c 't=$(shuf -i 5-35 -n 1); echo Sleeping $t seconds; sleep $t'
+        - sh -c 't=$(shuf -i 15-65 -n 1); echo Sleeping $t seconds; sleep $t'
   - name: debian-9
     driver_config:
       run_command: /lib/systemd/systemd
       provision_command:
-        - sh -c 't=$(shuf -i 5-35 -n 1); echo Sleeping $t seconds; sleep $t'
+        - sh -c 't=$(shuf -i 16-66 -n 1); echo Sleeping $t seconds; sleep $t'
   - name: fedora-28
     driver_config:
       image: fedora:28
       run_command: /usr/lib/systemd/systemd
       provision_command:
-        - sh -c 't=$(shuf -i 5-35 -n 1); echo Sleeping $t seconds; sleep $t'
+        - sh -c 't=$(shuf -i 17-67 -n 1); echo Sleeping $t seconds; sleep $t'
   - name: fedora-29
     driver_config:
       image: fedora:29
       run_command: /usr/lib/systemd/systemd
       provision_command:
-        - sh -c 't=$(shuf -i 5-35 -n 1); echo Sleeping $t seconds; sleep $t'
+        - sh -c 't=$(shuf -i 18-68 -n 1); echo Sleeping $t seconds; sleep $t'
   - name: opensuse-15
     driver_config:
       image: opensuse/leap:15.0
       run_command: /usr/lib/systemd/systemd
       provision_command:
         - systemctl enable sshd.service
-        - sh -c 't=$(shuf -i 5-35 -n 1); echo Sleeping $t seconds; sleep $t'
+        - sh -c 't=$(shuf -i 19-69 -n 1); echo Sleeping $t seconds; sleep $t'
     provisioner:
       salt_bootstrap_options: -MPfq -y -x python2 git %s
   - name: opensuse-42
@@ -102,24 +102,24 @@ platforms:
       run_command: /usr/lib/systemd/systemd
       provision_command:
         - systemctl enable sshd.service
-        - sh -c 't=$(shuf -i 5-35 -n 1); echo Sleeping $t seconds; sleep $t'
+        - sh -c 't=$(shuf -i 20-70 -n 1); echo Sleeping $t seconds; sleep $t'
   - name: ubuntu-18.04
     driver_config:
       run_command: /lib/systemd/systemd
       provision_command:
-        - sh -c 't=$(shuf -i 5-35 -n 1); echo Sleeping $t seconds; sleep $t'
+        - sh -c 't=$(shuf -i 21-71 -n 1); echo Sleeping $t seconds; sleep $t'
   - name: ubuntu-16.04
     driver_config:
       run_command: /lib/systemd/systemd
       provision_command:
-        - sh -c 't=$(shuf -i 5-35 -n 1); echo Sleeping $t seconds; sleep $t'
+        - sh -c 't=$(shuf -i 22-72 -n 1); echo Sleeping $t seconds; sleep $t'
   - name: ubuntu-14.04
     driver_config:
       run_command: /sbin/init
       provision_command:
         - rm -f /sbin/initctl
         - dpkg-divert --local --rename --remove /sbin/initctl
-        - sh -c 't=$(shuf -i 5-35 -n 1); echo Sleeping $t seconds; sleep $t'
+        - sh -c 't=$(shuf -i 23-73 -n 1); echo Sleeping $t seconds; sleep $t'
 
 suites:
   - name: py2-git-2017-7

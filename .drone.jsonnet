@@ -12,20 +12,20 @@ local stable_suites = [
 ];
 
 local distros = [
-  'arch',
-  'amazon-1',
-  'amazon-2',
-  'centos-6',
-  'centos-7',
-  'debian-8',
-  'debian-9',
-  'fedora-28',
-  'fedora-29',
-  'opensuse-15',
-  'opensuse-42',
-  'ubuntu-1404',
-  'ubuntu-1604',
-  'ubuntu-1804',
+  { name: 'Arch', slug: 'arch' },
+  { name: 'Amazon 1', slug: 'amazon-1' }
+  { name: 'Amazon 2', slug: 'amazon-2' },
+  { name: 'CentOS 6', slug: 'centos-6' },
+  { name: 'CentOS 7', slug: 'centos-7' },
+  { name: 'Debian 8', slug: 'debian-8' },
+  { name: 'Debian 9', slug: 'debian-9' },
+  { name: 'Fedora 28', slug: 'fedora-28' },
+  { name: 'Fedora 29', slug: 'fedora-29' },
+  { name: 'Opensuse 15.0', slug: 'opensuse-15' },
+  { name: 'Opensuse 42.3', slug: 'opensuse-42' },
+  { name: 'Ubuntu 14.04', slug: 'ubuntu-1404' },
+  { name: 'Ubuntu 16.04', slug: 'ubuntu-1604' },
+  { name: 'Ubuntu 18.04', slug: 'ubuntu-1804' },
 ];
 
 local stable_distros = [
@@ -58,9 +58,9 @@ local Shellcheck() = {
 
 local Build(distro) = {
   kind: 'pipeline',
-  name: distro,
+  name: distro.name,
 
-  local suites = if std.count(stable_distros, distro) > 0 then git_suites + stable_suites else git_suites,
+  local suites = if std.count(stable_distros, distro.slug) > 0 then git_suites + stable_suites else git_suites,
 
   steps: [
     {
@@ -79,7 +79,7 @@ local Build(distro) = {
         'throttle-build',
       ],
       settings: {
-        target: std.format('%s-%s', [suite, distro]),
+        target: std.format('%s-%s', [suite, distro.slug]),
         requirements: 'tests/requirements.txt',
       },
     }

@@ -14,7 +14,7 @@ steps:
 
 ---
 kind: pipeline
-name: arch
+name: Arch
 
 platform:
   os: linux
@@ -58,78 +58,7 @@ depends_on:
 
 ---
 kind: pipeline
-name: amazon-1
-
-platform:
-  os: linux
-  arch: amd64
-
-steps:
-- name: throttle-build
-  image: alpine
-  commands:
-  - "sh -c 't=$(shuf -i 10-60 -n 1); echo Sleeping $t seconds; sleep $t'"
-
-- name: py2-git-2017-7
-  image: saltstack/drone-plugin-kitchen
-  settings:
-    requirements: tests/requirements.txt
-    target: py2-git-2017-7-amazon-1
-  privileged: true
-  depends_on:
-  - throttle-build
-
-- name: py2-git-2018-3
-  image: saltstack/drone-plugin-kitchen
-  settings:
-    requirements: tests/requirements.txt
-    target: py2-git-2018-3-amazon-1
-  privileged: true
-  depends_on:
-  - throttle-build
-
-- name: py2-git-2019-2
-  image: saltstack/drone-plugin-kitchen
-  settings:
-    requirements: tests/requirements.txt
-    target: py2-git-2019-2-amazon-1
-  privileged: true
-  depends_on:
-  - throttle-build
-
-- name: py2-stable-2017-7
-  image: saltstack/drone-plugin-kitchen
-  settings:
-    requirements: tests/requirements.txt
-    target: py2-stable-2017-7-amazon-1
-  privileged: true
-  depends_on:
-  - throttle-build
-
-- name: py2-stable-2018-3
-  image: saltstack/drone-plugin-kitchen
-  settings:
-    requirements: tests/requirements.txt
-    target: py2-stable-2018-3-amazon-1
-  privileged: true
-  depends_on:
-  - throttle-build
-
-- name: py2-stable-2019-2
-  image: saltstack/drone-plugin-kitchen
-  settings:
-    requirements: tests/requirements.txt
-    target: py2-stable-2019-2-amazon-1
-  privileged: true
-  depends_on:
-  - throttle-build
-
-depends_on:
-- run-shellcheck
-
----
-kind: pipeline
-name: amazon-2
+name: Amazon 2
 
 platform:
   os: linux
@@ -200,7 +129,7 @@ depends_on:
 
 ---
 kind: pipeline
-name: centos-6
+name: CentOS 6
 
 platform:
   os: linux
@@ -271,7 +200,7 @@ depends_on:
 
 ---
 kind: pipeline
-name: centos-7
+name: CentOS 7
 
 platform:
   os: linux
@@ -342,7 +271,7 @@ depends_on:
 
 ---
 kind: pipeline
-name: debian-8
+name: Debian 8
 
 platform:
   os: linux
@@ -413,7 +342,7 @@ depends_on:
 
 ---
 kind: pipeline
-name: debian-9
+name: Debian 9
 
 platform:
   os: linux
@@ -484,7 +413,7 @@ depends_on:
 
 ---
 kind: pipeline
-name: fedora-28
+name: Fedora 28
 
 platform:
   os: linux
@@ -528,7 +457,7 @@ depends_on:
 
 ---
 kind: pipeline
-name: fedora-29
+name: Fedora 29
 
 platform:
   os: linux
@@ -572,7 +501,7 @@ depends_on:
 
 ---
 kind: pipeline
-name: opensuse-15
+name: Opensuse 15.0
 
 platform:
   os: linux
@@ -616,7 +545,7 @@ depends_on:
 
 ---
 kind: pipeline
-name: opensuse-42
+name: Opensuse 42.3
 
 platform:
   os: linux
@@ -660,7 +589,7 @@ depends_on:
 
 ---
 kind: pipeline
-name: ubuntu-1404
+name: Ubuntu 14.04
 
 platform:
   os: linux
@@ -731,7 +660,7 @@ depends_on:
 
 ---
 kind: pipeline
-name: ubuntu-1604
+name: Ubuntu 16.04
 
 platform:
   os: linux
@@ -802,7 +731,7 @@ depends_on:
 
 ---
 kind: pipeline
-name: ubuntu-1804
+name: Ubuntu 18.04
 
 platform:
   os: linux
@@ -873,6 +802,6 @@ depends_on:
 
 ---
 kind: signature
-hmac: ce7fc9d04548b5160a561da165fa1b3c97697d5fd882fafe64eaafac423b61f0
+hmac: abd8923f4b5902a6fb333e888cf3efaa20c0c4b5715d93c4defdc07b9650782d
 
 ...

@@ -28,31 +28,6 @@ provisioner:
     sh -c 't=$(shuf -i 1-15 -n 1); echo Sleeping $t seconds; sleep $t'
 
 platforms:
-  - name: fedora-28
-    driver_config:
-      image: fedora:28
-      run_command: /usr/lib/systemd/systemd
-      provision_command:
-        - sh -c 't=$(shuf -i 5-35 -n 1); echo Sleeping $t seconds; sleep $t'
-  - name: fedora-29
-    driver_config:
-      image: fedora:29
-      run_command: /usr/lib/systemd/systemd
-      provision_command:
-        - sh -c 't=$(shuf -i 5-35 -n 1); echo Sleeping $t seconds; sleep $t'
-  - name: centos-7
-    driver_config:
-      run_command: /usr/lib/systemd/systemd
-      provision_command:
-        - sh -c 't=$(shuf -i 5-35 -n 1); echo Sleeping $t seconds; sleep $t'
-  - name: centos-6
-    driver_config:
-      run_command: /sbin/init
-      provision_command:
-        - yum install -y upstart
-        - sh -c 't=$(shuf -i 5-35 -n 1); echo Sleeping $t seconds; sleep $t'
-    provisioner:
-      salt_bootstrap_options: -MPfq -y -x python2.7 git %s
   - name: amazon-1
     driver_config:
       image: amazonlinux:1
@@ -67,6 +42,66 @@ platforms:
       platform: rhel
       run_command: /usr/lib/systemd/systemd
       provision_command:
+        - sh -c 't=$(shuf -i 5-35 -n 1); echo Sleeping $t seconds; sleep $t'
+  - name: arch
+    driver_config:
+      image: archlinux/base
+      run_command: /usr/lib/systemd/systemd
+      provision_command:
+        - pacman -Syu --noconfirm --needed systemd grep awk procps which
+        - systemctl enable sshd
+        - sh -c 't=$(shuf -i 5-35 -n 1); echo Sleeping $t seconds; sleep $t'
+  - name: centos-7
+    driver_config:
+      run_command: /usr/lib/systemd/systemd
+      provision_command:
+        - sh -c 't=$(shuf -i 5-35 -n 1); echo Sleeping $t seconds; sleep $t'
+  - name: centos-6
+    driver_config:
+      run_command: /sbin/init
+      provision_command:
+        - yum install -y upstart
+        - sh -c 't=$(shuf -i 5-35 -n 1); echo Sleeping $t seconds; sleep $t'
+    provisioner:
+      salt_bootstrap_options: -MPfq -y -x python2.7 git %s
+  - name: debian-8
+    driver_config:
+      run_command: /lib/systemd/systemd
+      provision_command:
+        - apt-get install -y dbus
+        - sh -c 't=$(shuf -i 5-35 -n 1); echo Sleeping $t seconds; sleep $t'
+  - name: debian-9
+    driver_config:
+      run_command: /lib/systemd/systemd
+      provision_command:
+        - sh -c 't=$(shuf -i 5-35 -n 1); echo Sleeping $t seconds; sleep $t'
+  - name: fedora-28
+    driver_config:
+      image: fedora:28
+      run_command: /usr/lib/systemd/systemd
+      provision_command:
+        - sh -c 't=$(shuf -i 5-35 -n 1); echo Sleeping $t seconds; sleep $t'
+  - name: fedora-29
+    driver_config:
+      image: fedora:29
+      run_command: /usr/lib/systemd/systemd
+      provision_command:
+        - sh -c 't=$(shuf -i 5-35 -n 1); echo Sleeping $t seconds; sleep $t'
+  - name: opensuse-15
+    driver_config:
+      image: opensuse/leap:15.0
+      run_command: /usr/lib/systemd/systemd
+      provision_command:
+        - systemctl enable sshd.service
+        - sh -c 't=$(shuf -i 5-35 -n 1); echo Sleeping $t seconds; sleep $t'
+    provisioner:
+      salt_bootstrap_options: -MPfq -y -x python2 git %s
+  - name: opensuse-42
+    driver_config:
+      image: opensuse/leap:42.3
+      run_command: /usr/lib/systemd/systemd
+      provision_command:
+        - systemctl enable sshd.service
         - sh -c 't=$(shuf -i 5-35 -n 1); echo Sleeping $t seconds; sleep $t'
   - name: ubuntu-18.04
     driver_config:
@@ -84,41 +119,6 @@ platforms:
       provision_command:
         - rm -f /sbin/initctl
         - dpkg-divert --local --rename --remove /sbin/initctl
-        - sh -c 't=$(shuf -i 5-35 -n 1); echo Sleeping $t seconds; sleep $t'
-  - name: debian-8
-    driver_config:
-      run_command: /lib/systemd/systemd
-      provision_command:
-        - apt-get install -y dbus
-        - sh -c 't=$(shuf -i 5-35 -n 1); echo Sleeping $t seconds; sleep $t'
-  - name: debian-9
-    driver_config:
-      run_command: /lib/systemd/systemd
-      provision_command:
-        - sh -c 't=$(shuf -i 5-35 -n 1); echo Sleeping $t seconds; sleep $t'
-  - name: arch
-    driver_config:
-      image: archlinux/base
-      run_command: /usr/lib/systemd/systemd
-      provision_command:
-        - pacman -Syu --noconfirm --needed systemd grep awk procps which
-        - systemctl enable sshd
-        - sh -c 't=$(shuf -i 5-35 -n 1); echo Sleeping $t seconds; sleep $t'
-  - name: opensuse-15
-    driver_config:
-      image: opensuse/leap:15.0
-      run_command: /usr/lib/systemd/systemd
-      provision_command:
-        - systemctl enable sshd.service
-        - sh -c 't=$(shuf -i 5-35 -n 1); echo Sleeping $t seconds; sleep $t'
-    provisioner:
-      salt_bootstrap_options: -MPfq -y -x python2 git %s
-  - name: opensuse-42
-    driver_config:
-      image: opensuse/leap:42.3
-      run_command: /usr/lib/systemd/systemd
-      provision_command:
-        - systemctl enable sshd.service
         - sh -c 't=$(shuf -i 5-35 -n 1); echo Sleeping $t seconds; sleep $t'
 
 suites:

@@ -4,7 +4,7 @@ driver:
   use_sudo: false
   hostname: salt
   privileged: true
-  username: kitchen
+  username: root
   cap_add:
     - sys_admin
   disable_upstart: false
@@ -17,14 +17,14 @@ provisioner:
   salt_bootstrap_options: -MPfq git %s
   install_after_init_environment: true
   log_level: info
-  sudo: true
+  sudo: false
   require_chef: false
   formula: tests
   run_salt_call: false
   init_environment: |
     echo 'auto_accept: true' > /tmp/auto-accept-keys.conf
-    sudo mkdir -p /etc/salt/master.d
-    sudo mv /tmp/auto-accept-keys.conf /etc/salt/master.d/auto-accept-keys.conf
+    mkdir -p /etc/salt/master.d
+    mv /tmp/auto-accept-keys.conf /etc/salt/master.d/auto-accept-keys.conf
     sh -c 't=$(shuf -i 1-15 -n 1); echo Sleeping $t seconds; sleep $t'
 
 platforms:

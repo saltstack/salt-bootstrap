@@ -30,17 +30,17 @@ platforms:
   - name: fedora-28
     driver_config:
       image: fedora:28
-      run_command: /usr/lib/systemd/systemd
+      run_command: sh -c 't=$(shuf -i 1-15 -n 1); echo Sleeping $t seconds; sleep $t'; /usr/lib/systemd/systemd
   - name: fedora-29
     driver_config:
       image: fedora:29
-      run_command: /usr/lib/systemd/systemd
+      run_command: sh -c 't=$(shuf -i 1-15 -n 1); echo Sleeping $t seconds; sleep $t'; /usr/lib/systemd/systemd
   - name: centos-7
     driver_config:
-      run_command: /usr/lib/systemd/systemd
+      run_command: sh -c 't=$(shuf -i 1-15 -n 1); echo Sleeping $t seconds; sleep $t'; /usr/lib/systemd/systemd
   - name: centos-6
     driver_config:
-      run_command: /sbin/init
+      run_command: sh -c 't=$(shuf -i 1-15 -n 1); echo Sleeping $t seconds; sleep $t'; /sbin/init
       provision_command:
         - yum install -y upstart
     provisioner:
@@ -49,45 +49,45 @@ platforms:
     driver_config:
       image: amazonlinux:1
       platform: rhel
-      run_command: /sbin/init
+      run_command: sh -c 't=$(shuf -i 1-15 -n 1); echo Sleeping $t seconds; sleep $t'; /sbin/init
       provision_command:
         - yum install -y upstart
   - name: amazon-2
     driver_config:
       image: amazonlinux:2
       platform: rhel
-      run_command: /usr/lib/systemd/systemd
+      run_command: sh -c 't=$(shuf -i 1-15 -n 1); echo Sleeping $t seconds; sleep $t'; /usr/lib/systemd/systemd
   - name: ubuntu-18.04
     driver_config:
-      run_command: /lib/systemd/systemd
+      run_command: sh -c 't=$(shuf -i 1-15 -n 1); echo Sleeping $t seconds; sleep $t'; /lib/systemd/systemd
   - name: ubuntu-16.04
     driver_config:
-      run_command: /lib/systemd/systemd
+      run_command: sh -c 't=$(shuf -i 1-15 -n 1); echo Sleeping $t seconds; sleep $t'; /lib/systemd/systemd
   - name: ubuntu-14.04
     driver_config:
-      run_command: /sbin/init
+      run_command: sh -c 't=$(shuf -i 1-15 -n 1); echo Sleeping $t seconds; sleep $t'; /sbin/init
       provision_command:
         - rm -f /sbin/initctl
         - dpkg-divert --local --rename --remove /sbin/initctl
   - name: debian-8
     driver_config:
-      run_command: /lib/systemd/systemd
+      run_command: sh -c 't=$(shuf -i 1-15 -n 1); echo Sleeping $t seconds; sleep $t'; /lib/systemd/systemd
       provision_command:
         - apt-get install -y dbus
   - name: debian-9
     driver_config:
-      run_command: /lib/systemd/systemd
+      run_command: sh -c 't=$(shuf -i 1-15 -n 1); echo Sleeping $t seconds; sleep $t'; /lib/systemd/systemd
   - name: arch
     driver_config:
       image: archlinux/base
-      run_command: /usr/lib/systemd/systemd
+      run_command: sh -c 't=$(shuf -i 1-15 -n 1); echo Sleeping $t seconds; sleep $t'; /usr/lib/systemd/systemd
       provision_command:
         - pacman -Syu --noconfirm --needed systemd grep awk procps which
         - systemctl enable sshd
   - name: opensuse-15
     driver_config:
       image: opensuse/leap:15.0
-      run_command: /usr/lib/systemd/systemd
+      run_command: sh -c 't=$(shuf -i 1-15 -n 1); echo Sleeping $t seconds; sleep $t'; /usr/lib/systemd/systemd
       provision_command:
         - systemctl enable sshd.service
     provisioner:
@@ -95,7 +95,7 @@ platforms:
   - name: opensuse-42
     driver_config:
       image: opensuse/leap:42.3
-      run_command: /usr/lib/systemd/systemd
+      run_command: sh -c 't=$(shuf -i 1-15 -n 1); echo Sleeping $t seconds; sleep $t'; /usr/lib/systemd/systemd
       provision_command:
         - systemctl enable sshd.service
 

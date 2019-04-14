@@ -78,6 +78,7 @@ platforms:
       image: opensuse/leap:15.0
       run_command: /usr/lib/systemd/systemd
       provision_command:
+        - zypper --non-interactive install --auto-agree-with-licenses dbus-1
         - systemctl enable sshd.service
     provisioner:
       salt_bootstrap_options: -MPfq -y -x python2 git %s
@@ -86,6 +87,7 @@ platforms:
       image: opensuse/leap:42.3
       run_command: /usr/lib/systemd/systemd
       provision_command:
+        - zypper --non-interactive install --auto-agree-with-licenses dbus-1
         - systemctl enable sshd.service
   - name: ubuntu-18.04
     driver_config:

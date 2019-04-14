@@ -108,6 +108,7 @@ steps:
   privileged: true
   depends_on:
   - throttle-build
+  - Py2 2017.7(Git)
 
 - name: Py2 2018.3(Stable)
   image: saltstack/drone-plugin-kitchen
@@ -117,6 +118,7 @@ steps:
   privileged: true
   depends_on:
   - throttle-build
+  - Py2 2018.3(Git)
 
 - name: Py2 2019.2(Stable)
   image: saltstack/drone-plugin-kitchen
@@ -126,6 +128,7 @@ steps:
   privileged: true
   depends_on:
   - throttle-build
+  - Py2 2019.2(Git)
 
 node:
   project: open
@@ -182,6 +185,7 @@ steps:
   privileged: true
   depends_on:
   - throttle-build
+  - Py2 2017.7(Git)
 
 - name: Py2 2018.3(Stable)
   image: saltstack/drone-plugin-kitchen
@@ -191,6 +195,7 @@ steps:
   privileged: true
   depends_on:
   - throttle-build
+  - Py2 2018.3(Git)
 
 - name: Py2 2019.2(Stable)
   image: saltstack/drone-plugin-kitchen
@@ -200,6 +205,7 @@ steps:
   privileged: true
   depends_on:
   - throttle-build
+  - Py2 2019.2(Git)
 
 node:
   project: open
@@ -256,6 +262,7 @@ steps:
   privileged: true
   depends_on:
   - throttle-build
+  - Py2 2017.7(Git)
 
 - name: Py2 2018.3(Stable)
   image: saltstack/drone-plugin-kitchen
@@ -265,6 +272,7 @@ steps:
   privileged: true
   depends_on:
   - throttle-build
+  - Py2 2018.3(Git)
 
 - name: Py2 2019.2(Stable)
   image: saltstack/drone-plugin-kitchen
@@ -274,6 +282,7 @@ steps:
   privileged: true
   depends_on:
   - throttle-build
+  - Py2 2019.2(Git)
 
 node:
   project: open
@@ -330,6 +339,7 @@ steps:
   privileged: true
   depends_on:
   - throttle-build
+  - Py2 2017.7(Git)
 
 - name: Py2 2018.3(Stable)
   image: saltstack/drone-plugin-kitchen
@@ -339,6 +349,7 @@ steps:
   privileged: true
   depends_on:
   - throttle-build
+  - Py2 2018.3(Git)
 
 - name: Py2 2019.2(Stable)
   image: saltstack/drone-plugin-kitchen
@@ -348,6 +359,7 @@ steps:
   privileged: true
   depends_on:
   - throttle-build
+  - Py2 2019.2(Git)
 
 node:
   project: open
@@ -404,6 +416,7 @@ steps:
   privileged: true
   depends_on:
   - throttle-build
+  - Py2 2017.7(Git)
 
 - name: Py2 2018.3(Stable)
   image: saltstack/drone-plugin-kitchen
@@ -413,6 +426,7 @@ steps:
   privileged: true
   depends_on:
   - throttle-build
+  - Py2 2018.3(Git)
 
 - name: Py2 2019.2(Stable)
   image: saltstack/drone-plugin-kitchen
@@ -422,6 +436,7 @@ steps:
   privileged: true
   depends_on:
   - throttle-build
+  - Py2 2019.2(Git)
 
 node:
   project: open
@@ -478,6 +493,7 @@ steps:
   privileged: true
   depends_on:
   - throttle-build
+  - Py2 2017.7(Git)
 
 - name: Py2 2018.3(Stable)
   image: saltstack/drone-plugin-kitchen
@@ -487,6 +503,7 @@ steps:
   privileged: true
   depends_on:
   - throttle-build
+  - Py2 2018.3(Git)
 
 - name: Py2 2019.2(Stable)
   image: saltstack/drone-plugin-kitchen
@@ -496,6 +513,7 @@ steps:
   privileged: true
   depends_on:
   - throttle-build
+  - Py2 2019.2(Git)
 
 node:
   project: open
@@ -740,6 +758,7 @@ steps:
   privileged: true
   depends_on:
   - throttle-build
+  - Py2 2017.7(Git)
 
 - name: Py2 2018.3(Stable)
   image: saltstack/drone-plugin-kitchen
@@ -749,6 +768,7 @@ steps:
   privileged: true
   depends_on:
   - throttle-build
+  - Py2 2018.3(Git)
 
 - name: Py2 2019.2(Stable)
   image: saltstack/drone-plugin-kitchen
@@ -758,6 +778,7 @@ steps:
   privileged: true
   depends_on:
   - throttle-build
+  - Py2 2019.2(Git)
 
 node:
   project: open
@@ -814,6 +835,7 @@ steps:
   privileged: true
   depends_on:
   - throttle-build
+  - Py2 2017.7(Git)
 
 - name: Py2 2018.3(Stable)
   image: saltstack/drone-plugin-kitchen
@@ -823,6 +845,7 @@ steps:
   privileged: true
   depends_on:
   - throttle-build
+  - Py2 2018.3(Git)
 
 - name: Py2 2019.2(Stable)
   image: saltstack/drone-plugin-kitchen
@@ -832,6 +855,7 @@ steps:
   privileged: true
   depends_on:
   - throttle-build
+  - Py2 2019.2(Git)
 
 node:
   project: open
@@ -888,6 +912,7 @@ steps:
   privileged: true
   depends_on:
   - throttle-build
+  - Py2 2017.7(Git)
 
 - name: Py2 2018.3(Stable)
   image: saltstack/drone-plugin-kitchen
@@ -897,6 +922,7 @@ steps:
   privileged: true
   depends_on:
   - throttle-build
+  - Py2 2018.3(Git)
 
 - name: Py2 2019.2(Stable)
   image: saltstack/drone-plugin-kitchen
@@ -906,6 +932,7 @@ steps:
   privileged: true
   depends_on:
   - throttle-build
+  - Py2 2019.2(Git)
 
 node:
   project: open
@@ -915,6 +942,6 @@ depends_on:
 
 ---
 kind: signature
-hmac: e56c45a253af58232e583c28533a5524b094cb241a483507d12e2021e5b83f47
+hmac: a3eccc661788d04ac52809af158b0257942e73aeb0e265031b192767d9b256aa
 
 ...

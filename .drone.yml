@@ -1,13 +1,13 @@
 ---
 kind: pipeline
-name: run-shellcheck
+name: Lint
 
 platform:
   os: linux
   arch: amd64
 
 steps:
-- name: build
+- name: shellcheck
   image: koalaman/shellcheck-alpine
   commands:
   - shellcheck -s sh -f checkstyle bootstrap-salt.sh
@@ -873,6 +873,6 @@ depends_on:
 
 ---
 kind: signature
-hmac: cb3c28587008787bf331f2f71287c4c95ee495ed42755d6f1cca7ba6e8596292
+hmac: 3aaad2a88f620d28f8a70aa3e5e700e7fbe560ba285901143c6fc459fdbf9f20
 
 ...

@@ -42,11 +42,11 @@ local stable_distros = [
 
 local Shellcheck() = {
   kind: 'pipeline',
-  name: 'run-shellcheck',
+  name: 'Lint',
 
   steps: [
     {
-      name: 'build',
+      name: 'shellcheck',
       image: 'koalaman/shellcheck-alpine',
       commands: [
         'shellcheck -s sh -f checkstyle bootstrap-salt.sh',

@@ -12,20 +12,20 @@ local stable_suites = [
 ];
 
 local distros = [
-  { name: 'Arch', slug: 'arch', multiplier: 0 },
-  { name: 'Amazon 1', slug: 'amazon-1', multiplier: 1 },
-  { name: 'Amazon 2', slug: 'amazon-2', multiplier: 2 },
-  { name: 'CentOS 6', slug: 'centos-6', multiplier: 3 },
-  { name: 'CentOS 7', slug: 'centos-7', multiplier: 4 },
-  { name: 'Debian 8', slug: 'debian-8', multiplier: 5 },
-  { name: 'Debian 9', slug: 'debian-9', multiplier: 6 },
-  { name: 'Fedora 28', slug: 'fedora-28', multiplier: 7 },
-  { name: 'Fedora 29', slug: 'fedora-29', multiplier: 8 },
-  { name: 'Opensuse 15.0', slug: 'opensuse-15', multiplier: 9 },
-  { name: 'Opensuse 42.3', slug: 'opensuse-42', multiplier: 10 },
-  { name: 'Ubuntu 14.04', slug: 'ubuntu-1404', multiplier: 11 },
-  { name: 'Ubuntu 16.04', slug: 'ubuntu-1604', multiplier: 12 },
-  { name: 'Ubuntu 18.04', slug: 'ubuntu-1804', multiplier: 13 },
+  { name: 'Arch', slug: 'arch', multiplier: 0, depends: [] },
+  { name: 'Amazon 1', slug: 'amazon-1', multiplier: 1, depends: [] },
+  { name: 'Amazon 2', slug: 'amazon-2', multiplier: 2, depends: [] },
+  { name: 'CentOS 6', slug: 'centos-6', multiplier: 3, depends: [] },
+  { name: 'CentOS 7', slug: 'centos-7', multiplier: 4, depends: [] },
+  { name: 'Debian 8', slug: 'debian-8', multiplier: 5, depends: [] },
+  { name: 'Debian 9', slug: 'debian-9', multiplier: 6, depends: [] },
+  { name: 'Fedora 28', slug: 'fedora-28', multiplier: 7, depends: ['Debian 9'] },
+  { name: 'Fedora 29', slug: 'fedora-29', multiplier: 8, depends: ['Debian 8'] },
+  { name: 'Opensuse 15.0', slug: 'opensuse-15', multiplier: 9, depends: ['CentOS 7'] },
+  { name: 'Opensuse 42.3', slug: 'opensuse-42', multiplier: 10, depends: ['CentOS 6'] },
+  { name: 'Ubuntu 14.04', slug: 'ubuntu-1404', multiplier: 11, depends: ['Amazon 2'] },
+  { name: 'Ubuntu 16.04', slug: 'ubuntu-1604', multiplier: 12, depends: ['Amazon 1'] },
+  { name: 'Ubuntu 18.04', slug: 'ubuntu-1804', multiplier: 13, depends: ['Arch'] },
 ];
 
 local stable_distros = [
@@ -67,22 +67,11 @@ local Build(distro) = {
 
   steps: [
     {
-      name: 'throttle-build',
-      image: 'alpine',
-      commands: [
-        std.format(
-          "sh -c 't=%(offset)s; echo Sleeping %(offset)s seconds; sleep %(offset)s'",
-          { offset: 5 * std.length(suites) * distro.multiplier }
-        ),
-      ],
-    },
-  ] + [
-    {
       name: suite.name,
       privileged: true,
       image: 'saltstack/drone-plugin-kitchen',
       depends_on: [
-        'throttle-build',
+        'clone',
       ] + suite.depends,
       settings: {
         target: std.format('%s-%s', [suite.slug, distro.slug]),
@@ -93,7 +82,7 @@ local Build(distro) = {
   ],
   depends_on: [
     'Lint',
-  ],
+  ] + distro.depends,
 };
 
 

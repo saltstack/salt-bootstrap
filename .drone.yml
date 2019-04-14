@@ -21,11 +21,6 @@ platform:
   arch: amd64
 
 steps:
-- name: throttle-build
-  image: alpine
-  commands:
-  - "sh -c 't=0; echo Sleeping 0 seconds; sleep 0'"
-
 - name: Py2 2017.7(Git)
   image: saltstack/drone-plugin-kitchen
   settings:
@@ -33,7 +28,7 @@ steps:
     target: py2-git-2017-7-arch
   privileged: true
   depends_on:
-  - throttle-build
+  - clone
 
 - name: Py2 2018.3(Git)
   image: saltstack/drone-plugin-kitchen
@@ -42,7 +37,7 @@ steps:
     target: py2-git-2018-3-arch
   privileged: true
   depends_on:
-  - throttle-build
+  - clone
   - Py2 2017.7(Git)
 
 - name: Py2 2019.2(Git)
@@ -52,7 +47,7 @@ steps:
     target: py2-git-2019-2-arch
   privileged: true
   depends_on:
-  - throttle-build
+  - clone
   - Py2 2018.3(Git)
 
 node:
@@ -70,11 +65,6 @@ platform:
   arch: amd64
 
 steps:
-- name: throttle-build
-  image: alpine
-  commands:
-  - "sh -c 't=30; echo Sleeping 30 seconds; sleep 30'"
-
 - name: Py2 2017.7(Git)
   image: saltstack/drone-plugin-kitchen
   settings:
@@ -82,7 +72,7 @@ steps:
     target: py2-git-2017-7-amazon-1
   privileged: true
   depends_on:
-  - throttle-build
+  - clone
 
 - name: Py2 2018.3(Git)
   image: saltstack/drone-plugin-kitchen
@@ -91,7 +81,7 @@ steps:
     target: py2-git-2018-3-amazon-1
   privileged: true
   depends_on:
-  - throttle-build
+  - clone
   - Py2 2017.7(Git)
 
 - name: Py2 2019.2(Git)
@@ -101,7 +91,7 @@ steps:
     target: py2-git-2019-2-amazon-1
   privileged: true
   depends_on:
-  - throttle-build
+  - clone
   - Py2 2018.3(Git)
 
 - name: Py2 2017.7(Stable)
@@ -111,7 +101,7 @@ steps:
     target: py2-stable-2017-7-amazon-1
   privileged: true
   depends_on:
-  - throttle-build
+  - clone
   - Py2 2017.7(Git)
 
 - name: Py2 2018.3(Stable)
@@ -121,7 +111,7 @@ steps:
     target: py2-stable-2018-3-amazon-1
   privileged: true
   depends_on:
-  - throttle-build
+  - clone
   - Py2 2018.3(Git)
 
 - name: Py2 2019.2(Stable)
@@ -131,7 +121,7 @@ steps:
     target: py2-stable-2019-2-amazon-1
   privileged: true
   depends_on:
-  - throttle-build
+  - clone
   - Py2 2019.2(Git)
 
 node:
@@ -149,11 +139,6 @@ platform:
   arch: amd64
 
 steps:
-- name: throttle-build
-  image: alpine
-  commands:
-  - "sh -c 't=60; echo Sleeping 60 seconds; sleep 60'"
-
 - name: Py2 2017.7(Git)
   image: saltstack/drone-plugin-kitchen
   settings:
@@ -161,7 +146,7 @@ steps:
     target: py2-git-2017-7-amazon-2
   privileged: true
   depends_on:
-  - throttle-build
+  - clone
 
 - name: Py2 2018.3(Git)
   image: saltstack/drone-plugin-kitchen
@@ -170,7 +155,7 @@ steps:
     target: py2-git-2018-3-amazon-2
   privileged: true
   depends_on:
-  - throttle-build
+  - clone
   - Py2 2017.7(Git)
 
 - name: Py2 2019.2(Git)
@@ -180,7 +165,7 @@ steps:
     target: py2-git-2019-2-amazon-2
   privileged: true
   depends_on:
-  - throttle-build
+  - clone
   - Py2 2018.3(Git)
 
 - name: Py2 2017.7(Stable)
@@ -190,7 +175,7 @@ steps:
     target: py2-stable-2017-7-amazon-2
   privileged: true
   depends_on:
-  - throttle-build
+  - clone
   - Py2 2017.7(Git)
 
 - name: Py2 2018.3(Stable)
@@ -200,7 +185,7 @@ steps:
     target: py2-stable-2018-3-amazon-2
   privileged: true
   depends_on:
-  - throttle-build
+  - clone
   - Py2 2018.3(Git)
 
 - name: Py2 2019.2(Stable)
@@ -210,7 +195,7 @@ steps:
     target: py2-stable-2019-2-amazon-2
   privileged: true
   depends_on:
-  - throttle-build
+  - clone
   - Py2 2019.2(Git)
 
 node:
@@ -228,11 +213,6 @@ platform:
   arch: amd64
 
 steps:
-- name: throttle-build
-  image: alpine
-  commands:
-  - "sh -c 't=90; echo Sleeping 90 seconds; sleep 90'"
-
 - name: Py2 2017.7(Git)
   image: saltstack/drone-plugin-kitchen
   settings:
@@ -240,7 +220,7 @@ steps:
     target: py2-git-2017-7-centos-6
   privileged: true
   depends_on:
-  - throttle-build
+  - clone
 
 - name: Py2 2018.3(Git)
   image: saltstack/drone-plugin-kitchen
@@ -249,7 +229,7 @@ steps:
     target: py2-git-2018-3-centos-6
   privileged: true
   depends_on:
-  - throttle-build
+  - clone
   - Py2 2017.7(Git)
 
 - name: Py2 2019.2(Git)
@@ -259,7 +239,7 @@ steps:
     target: py2-git-2019-2-centos-6
   privileged: true
   depends_on:
-  - throttle-build
+  - clone
   - Py2 2018.3(Git)
 
 - name: Py2 2017.7(Stable)
@@ -269,7 +249,7 @@ steps:
     target: py2-stable-2017-7-centos-6
   privileged: true
   depends_on:
-  - throttle-build
+  - clone
   - Py2 2017.7(Git)
 
 - name: Py2 2018.3(Stable)
@@ -279,7 +259,7 @@ steps:
     target: py2-stable-2018-3-centos-6
   privileged: true
   depends_on:
-  - throttle-build
+  - clone
   - Py2 2018.3(Git)
 
 - name: Py2 2019.2(Stable)
@@ -289,7 +269,7 @@ steps:
     target: py2-stable-2019-2-centos-6
   privileged: true
   depends_on:
-  - throttle-build
+  - clone
   - Py2 2019.2(Git)
 
 node:
@@ -307,11 +287,6 @@ platform:
   arch: amd64
 
 steps:
-- name: throttle-build
-  image: alpine
-  commands:
-  - "sh -c 't=120; echo Sleeping 120 seconds; sleep 120'"
-
 - name: Py2 2017.7(Git)
   image: saltstack/drone-plugin-kitchen
   settings:
@@ -319,7 +294,7 @@ steps:
     target: py2-git-2017-7-centos-7
   privileged: true
   depends_on:
-  - throttle-build
+  - clone
 
 - name: Py2 2018.3(Git)
   image: saltstack/drone-plugin-kitchen
@@ -328,7 +303,7 @@ steps:
     target: py2-git-2018-3-centos-7
   privileged: true
   depends_on:
-  - throttle-build
+  - clone
   - Py2 2017.7(Git)
 
 - name: Py2 2019.2(Git)
@@ -338,7 +313,7 @@ steps:
     target: py2-git-2019-2-centos-7
   privileged: true
   depends_on:
-  - throttle-build
+  - clone
   - Py2 2018.3(Git)
 
 - name: Py2 2017.7(Stable)
@@ -348,7 +323,7 @@ steps:
     target: py2-stable-2017-7-centos-7
   privileged: true
   depends_on:
-  - throttle-build
+  - clone
   - Py2 2017.7(Git)
 
 - name: Py2 2018.3(Stable)
@@ -358,7 +333,7 @@ steps:
     target: py2-stable-2018-3-centos-7
   privileged: true
   depends_on:
-  - throttle-build
+  - clone
   - Py2 2018.3(Git)
 
 - name: Py2 2019.2(Stable)
@@ -368,7 +343,7 @@ steps:
     target: py2-stable-2019-2-centos-7
   privileged: true
   depends_on:
-  - throttle-build
+  - clone
   - Py2 2019.2(Git)
 
 node:
@@ -386,11 +361,6 @@ platform:
   arch: amd64
 
 steps:
-- name: throttle-build
-  image: alpine
-  commands:
-  - "sh -c 't=150; echo Sleeping 150 seconds; sleep 150'"
-
 - name: Py2 2017.7(Git)
   image: saltstack/drone-plugin-kitchen
   settings:
@@ -398,7 +368,7 @@ steps:
     target: py2-git-2017-7-debian-8
   privileged: true
   depends_on:
-  - throttle-build
+  - clone
 
 - name: Py2 2018.3(Git)
   image: saltstack/drone-plugin-kitchen
@@ -407,7 +377,7 @@ steps:
     target: py2-git-2018-3-debian-8
   privileged: true
   depends_on:
-  - throttle-build
+  - clone
   - Py2 2017.7(Git)
 
 - name: Py2 2019.2(Git)
@@ -417,7 +387,7 @@ steps:
     target: py2-git-2019-2-debian-8
   privileged: true
   depends_on:
-  - throttle-build
+  - clone
   - Py2 2018.3(Git)
 
 - name: Py2 2017.7(Stable)
@@ -427,7 +397,7 @@ steps:
     target: py2-stable-2017-7-debian-8
   privileged: true
   depends_on:
-  - throttle-build
+  - clone
   - Py2 2017.7(Git)
 
 - name: Py2 2018.3(Stable)
@@ -437,7 +407,7 @@ steps:
     target: py2-stable-2018-3-debian-8
   privileged: true
   depends_on:
-  - throttle-build
+  - clone
   - Py2 2018.3(Git)
 
 - name: Py2 2019.2(Stable)
@@ -447,7 +417,7 @@ steps:
     target: py2-stable-2019-2-debian-8
   privileged: true
   depends_on:
-  - throttle-build
+  - clone
   - Py2 2019.2(Git)
 
 node:
@@ -465,11 +435,6 @@ platform:
   arch: amd64
 
 steps:
-- name: throttle-build
-  image: alpine
-  commands:
-  - "sh -c 't=180; echo Sleeping 180 seconds; sleep 180'"
-
 - name: Py2 2017.7(Git)
   image: saltstack/drone-plugin-kitchen
   settings:
@@ -477,7 +442,7 @@ steps:
     target: py2-git-2017-7-debian-9
   privileged: true
   depends_on:
-  - throttle-build
+  - clone
 
 - name: Py2 2018.3(Git)
   image: saltstack/drone-plugin-kitchen
@@ -486,7 +451,7 @@ steps:
     target: py2-git-2018-3-debian-9
   privileged: true
   depends_on:
-  - throttle-build
+  - clone
   - Py2 2017.7(Git)
 
 - name: Py2 2019.2(Git)
@@ -496,7 +461,7 @@ steps:
     target: py2-git-2019-2-debian-9
   privileged: true
   depends_on:
-  - throttle-build
+  - clone
   - Py2 2018.3(Git)
 
 - name: Py2 2017.7(Stable)
@@ -506,7 +471,7 @@ steps:
     target: py2-stable-2017-7-debian-9
   privileged: true
   depends_on:
-  - throttle-build
+  - clone
   - Py2 2017.7(Git)
 
 - name: Py2 2018.3(Stable)
@@ -516,7 +481,7 @@ steps:
     target: py2-stable-2018-3-debian-9
   privileged: true
   depends_on:
-  - throttle-build
+  - clone
   - Py2 2018.3(Git)
 
 - name: Py2 2019.2(Stable)
@@ -526,7 +491,7 @@ steps:
     target: py2-stable-2019-2-debian-9
   privileged: true
   depends_on:
-  - throttle-build
+  - clone
   - Py2 2019.2(Git)
 
 node:
@@ -544,11 +509,6 @@ platform:
   arch: amd64
 
 steps:
-- name: throttle-build
-  image: alpine
-  commands:
-  - "sh -c 't=105; echo Sleeping 105 seconds; sleep 105'"
-
 - name: Py2 2017.7(Git)
   image: saltstack/drone-plugin-kitchen
   settings:
@@ -556,7 +516,7 @@ steps:
     target: py2-git-2017-7-fedora-28
   privileged: true
   depends_on:
-  - throttle-build
+  - clone
 
 - name: Py2 2018.3(Git)
   image: saltstack/drone-plugin-kitchen
@@ -565,7 +525,7 @@ steps:
     target: py2-git-2018-3-fedora-28
   privileged: true
   depends_on:
-  - throttle-build
+  - clone
   - Py2 2017.7(Git)
 
 - name: Py2 2019.2(Git)
@@ -575,7 +535,7 @@ steps:
     target: py2-git-2019-2-fedora-28
   privileged: true
   depends_on:
-  - throttle-build
+  - clone
   - Py2 2018.3(Git)
 
 node:
@@ -583,6 +543,7 @@ node:
 
 depends_on:
 - Lint
+- Debian 9
 
 ---
 kind: pipeline
@@ -593,11 +554,6 @@ platform:
   arch: amd64
 
 steps:
-- name: throttle-build
-  image: alpine
-  commands:
-  - "sh -c 't=120; echo Sleeping 120 seconds; sleep 120'"
-
 - name: Py2 2017.7(Git)
   image: saltstack/drone-plugin-kitchen
   settings:
@@ -605,7 +561,7 @@ steps:
     target: py2-git-2017-7-fedora-29
   privileged: true
   depends_on:
-  - throttle-build
+  - clone
 
 - name: Py2 2018.3(Git)
   image: saltstack/drone-plugin-kitchen
@@ -614,7 +570,7 @@ steps:
     target: py2-git-2018-3-fedora-29
   privileged: true
   depends_on:
-  - throttle-build
+  - clone
   - Py2 2017.7(Git)
 
 - name: Py2 2019.2(Git)
@@ -624,7 +580,7 @@ steps:
     target: py2-git-2019-2-fedora-29
   privileged: true
   depends_on:
-  - throttle-build
+  - clone
   - Py2 2018.3(Git)
 
 node:
@@ -632,6 +588,7 @@ node:
 
 depends_on:
 - Lint
+- Debian 8
 
 ---
 kind: pipeline
@@ -642,11 +599,6 @@ platform:
   arch: amd64
 
 steps:
-- name: throttle-build
-  image: alpine
-  commands:
-  - "sh -c 't=135; echo Sleeping 135 seconds; sleep 135'"
-
 - name: Py2 2017.7(Git)
   image: saltstack/drone-plugin-kitchen
   settings:
@@ -654,7 +606,7 @@ steps:
     target: py2-git-2017-7-opensuse-15
   privileged: true
   depends_on:
-  - throttle-build
+  - clone
 
 - name: Py2 2018.3(Git)
   image: saltstack/drone-plugin-kitchen
@@ -663,7 +615,7 @@ steps:
     target: py2-git-2018-3-opensuse-15
   privileged: true
   depends_on:
-  - throttle-build
+  - clone
   - Py2 2017.7(Git)
 
 - name: Py2 2019.2(Git)
@@ -673,7 +625,7 @@ steps:
     target: py2-git-2019-2-opensuse-15
   privileged: true
   depends_on:
-  - throttle-build
+  - clone
   - Py2 2018.3(Git)
 
 node:
@@ -681,6 +633,7 @@ node:
 
 depends_on:
 - Lint
+- CentOS 7
 
 ---
 kind: pipeline
@@ -691,11 +644,6 @@ platform:
   arch: amd64
 
 steps:
-- name: throttle-build
-  image: alpine
-  commands:
-  - "sh -c 't=150; echo Sleeping 150 seconds; sleep 150'"
-
 - name: Py2 2017.7(Git)
   image: saltstack/drone-plugin-kitchen
   settings:
@@ -703,7 +651,7 @@ steps:
     target: py2-git-2017-7-opensuse-42
   privileged: true
   depends_on:
-  - throttle-build
+  - clone
 
 - name: Py2 2018.3(Git)
   image: saltstack/drone-plugin-kitchen
@@ -712,7 +660,7 @@ steps:
     target: py2-git-2018-3-opensuse-42
   privileged: true
   depends_on:
-  - throttle-build
+  - clone
   - Py2 2017.7(Git)
 
 - name: Py2 2019.2(Git)
@@ -722,7 +670,7 @@ steps:
     target: py2-git-2019-2-opensuse-42
   privileged: true
   depends_on:
-  - throttle-build
+  - clone
   - Py2 2018.3(Git)
 
 node:
@@ -730,6 +678,7 @@ node:
 
 depends_on:
 - Lint
+- CentOS 6
 
 ---
 kind: pipeline
@@ -740,11 +689,6 @@ platform:
   arch: amd64
 
 steps:
-- name: throttle-build
-  image: alpine
-  commands:
-  - "sh -c 't=330; echo Sleeping 330 seconds; sleep 330'"
-
 - name: Py2 2017.7(Git)
   image: saltstack/drone-plugin-kitchen
   settings:
@@ -752,7 +696,7 @@ steps:
     target: py2-git-2017-7-ubuntu-1404
   privileged: true
   depends_on:
-  - throttle-build
+  - clone
 
 - name: Py2 2018.3(Git)
   image: saltstack/drone-plugin-kitchen
@@ -761,7 +705,7 @@ steps:
     target: py2-git-2018-3-ubuntu-1404
   privileged: true
   depends_on:
-  - throttle-build
+  - clone
   - Py2 2017.7(Git)
 
 - name: Py2 2019.2(Git)
@@ -771,7 +715,7 @@ steps:
     target: py2-git-2019-2-ubuntu-1404
   privileged: true
   depends_on:
-  - throttle-build
+  - clone
   - Py2 2018.3(Git)
 
 - name: Py2 2017.7(Stable)
@@ -781,7 +725,7 @@ steps:
     target: py2-stable-2017-7-ubuntu-1404
   privileged: true
   depends_on:
-  - throttle-build
+  - clone
   - Py2 2017.7(Git)
 
 - name: Py2 2018.3(Stable)
@@ -791,7 +735,7 @@ steps:
     target: py2-stable-2018-3-ubuntu-1404
   privileged: true
   depends_on:
-  - throttle-build
+  - clone
   - Py2 2018.3(Git)
 
 - name: Py2 2019.2(Stable)
@@ -801,7 +745,7 @@ steps:
     target: py2-stable-2019-2-ubuntu-1404
   privileged: true
   depends_on:
-  - throttle-build
+  - clone
   - Py2 2019.2(Git)
 
 node:
@@ -809,6 +753,7 @@ node:
 
 depends_on:
 - Lint
+- Amazon 2
 
 ---
 kind: pipeline
@@ -819,11 +764,6 @@ platform:
   arch: amd64
 
 steps:
-- name: throttle-build
-  image: alpine
-  commands:
-  - "sh -c 't=360; echo Sleeping 360 seconds; sleep 360'"
-
 - name: Py2 2017.7(Git)
   image: saltstack/drone-plugin-kitchen
   settings:
@@ -831,7 +771,7 @@ steps:
     target: py2-git-2017-7-ubuntu-1604
   privileged: true
   depends_on:
-  - throttle-build
+  - clone
 
 - name: Py2 2018.3(Git)
   image: saltstack/drone-plugin-kitchen
@@ -840,7 +780,7 @@ steps:
     target: py2-git-2018-3-ubuntu-1604
   privileged: true
   depends_on:
-  - throttle-build
+  - clone
   - Py2 2017.7(Git)
 
 - name: Py2 2019.2(Git)
@@ -850,7 +790,7 @@ steps:
     target: py2-git-2019-2-ubuntu-1604
   privileged: true
   depends_on:
-  - throttle-build
+  - clone
   - Py2 2018.3(Git)
 
 - name: Py2 2017.7(Stable)
@@ -860,7 +800,7 @@ steps:
     target: py2-stable-2017-7-ubuntu-1604
   privileged: true
   depends_on:
-  - throttle-build
+  - clone
   - Py2 2017.7(Git)
 
 - name: Py2 2018.3(Stable)
@@ -870,7 +810,7 @@ steps:
     target: py2-stable-2018-3-ubuntu-1604
   privileged: true
   depends_on:
-  - throttle-build
+  - clone
   - Py2 2018.3(Git)
 
 - name: Py2 2019.2(Stable)
@@ -880,7 +820,7 @@ steps:
     target: py2-stable-2019-2-ubuntu-1604
   privileged: true
   depends_on:
-  - throttle-build
+  - clone
   - Py2 2019.2(Git)
 
 node:
@@ -888,6 +828,7 @@ node:
 
 depends_on:
 - Lint
+- Amazon 1
 
 ---
 kind: pipeline
@@ -898,11 +839,6 @@ platform:
   arch: amd64
 
 steps:
-- name: throttle-build
-  image: alpine
-  commands:
-  - "sh -c 't=390; echo Sleeping 390 seconds; sleep 390'"
-
 - name: Py2 2017.7(Git)
   image: saltstack/drone-plugin-kitchen
   settings:
@@ -910,7 +846,7 @@ steps:
     target: py2-git-2017-7-ubuntu-1804
   privileged: true
   depends_on:
-  - throttle-build
+  - clone
 
 - name: Py2 2018.3(Git)
   image: saltstack/drone-plugin-kitchen
@@ -919,7 +855,7 @@ steps:
     target: py2-git-2018-3-ubuntu-1804
   privileged: true
   depends_on:
-  - throttle-build
+  - clone
   - Py2 2017.7(Git)
 
 - name: Py2 2019.2(Git)
@@ -929,7 +865,7 @@ steps:
     target: py2-git-2019-2-ubuntu-1804
   privileged: true
   depends_on:
-  - throttle-build
+  - clone
   - Py2 2018.3(Git)
 
 - name: Py2 2017.7(Stable)
@@ -939,7 +875,7 @@ steps:
     target: py2-stable-2017-7-ubuntu-1804
   privileged: true
   depends_on:
-  - throttle-build
+  - clone
   - Py2 2017.7(Git)
 
 - name: Py2 2018.3(Stable)
@@ -949,7 +885,7 @@ steps:
     target: py2-stable-2018-3-ubuntu-1804
   privileged: true
   depends_on:
-  - throttle-build
+  - clone
   - Py2 2018.3(Git)
 
 - name: Py2 2019.2(Stable)
@@ -959,7 +895,7 @@ steps:
     target: py2-stable-2019-2-ubuntu-1804
   privileged: true
   depends_on:
-  - throttle-build
+  - clone
   - Py2 2019.2(Git)
 
 node:
@@ -967,9 +903,10 @@ node:
 
 depends_on:
 - Lint
+- Arch
 
 ---
 kind: signature
-hmac: 4c93d5517a3c7f900b8a7fb0a4c61feeb4f2b521f5dfb2c214c472b8c0c61ea4
+hmac: 31c3ffeadce2453e88dd9c8e2af3dc659835c53e339a25f3ad3ef08d4d846383
 
 ...

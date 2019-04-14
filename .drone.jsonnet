@@ -59,6 +59,9 @@ local Shellcheck() = {
 local Build(distro) = {
   kind: 'pipeline',
   name: distro.name,
+  node: {
+    project: 'open',
+  },
 
   local suites = if std.count(stable_distros, distro.slug) > 0 then git_suites + stable_suites else git_suites,
 

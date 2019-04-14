@@ -53,6 +53,9 @@ steps:
   depends_on:
   - throttle-build
 
+node:
+  project: open
+
 depends_on:
 - run-shellcheck
 
@@ -123,6 +126,9 @@ steps:
   privileged: true
   depends_on:
   - throttle-build
+
+node:
+  project: open
 
 depends_on:
 - run-shellcheck
@@ -195,6 +201,9 @@ steps:
   depends_on:
   - throttle-build
 
+node:
+  project: open
+
 depends_on:
 - run-shellcheck
 
@@ -265,6 +274,9 @@ steps:
   privileged: true
   depends_on:
   - throttle-build
+
+node:
+  project: open
 
 depends_on:
 - run-shellcheck
@@ -337,6 +349,9 @@ steps:
   depends_on:
   - throttle-build
 
+node:
+  project: open
+
 depends_on:
 - run-shellcheck
 
@@ -407,6 +422,9 @@ steps:
   privileged: true
   depends_on:
   - throttle-build
+
+node:
+  project: open
 
 depends_on:
 - run-shellcheck
@@ -479,6 +497,9 @@ steps:
   depends_on:
   - throttle-build
 
+node:
+  project: open
+
 depends_on:
 - run-shellcheck
 
@@ -522,6 +543,9 @@ steps:
   privileged: true
   depends_on:
   - throttle-build
+
+node:
+  project: open
 
 depends_on:
 - run-shellcheck
@@ -567,6 +591,9 @@ steps:
   depends_on:
   - throttle-build
 
+node:
+  project: open
+
 depends_on:
 - run-shellcheck
 
@@ -611,6 +638,9 @@ steps:
   depends_on:
   - throttle-build
 
+node:
+  project: open
+
 depends_on:
 - run-shellcheck
 
@@ -654,6 +684,9 @@ steps:
   privileged: true
   depends_on:
   - throttle-build
+
+node:
+  project: open
 
 depends_on:
 - run-shellcheck
@@ -726,6 +759,9 @@ steps:
   depends_on:
   - throttle-build
 
+node:
+  project: open
+
 depends_on:
 - run-shellcheck
 
@@ -796,6 +832,9 @@ steps:
   privileged: true
   depends_on:
   - throttle-build
+
+node:
+  project: open
 
 depends_on:
 - run-shellcheck
@@ -868,11 +907,14 @@ steps:
   depends_on:
   - throttle-build
 
+node:
+  project: open
+
 depends_on:
 - run-shellcheck
 
 ---
 kind: signature
-hmac: 3aaad2a88f620d28f8a70aa3e5e700e7fbe560ba285901143c6fc459fdbf9f20
+hmac: b03e19c133948366846efec5b00644668a071c3d5d4a170110567384870b2a35
 
 ...

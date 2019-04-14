@@ -22,33 +22,64 @@ platform:
 
 steps:
 - name: Py2 2017.7(Git)
-  image: saltstack/drone-plugin-kitchen
-  settings:
-    requirements: tests/requirements.txt
-    target: py2-git-2017-7-arch
-  privileged: true
+  image: docker:edge-dind
+  commands:
+  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
+  - gem install bundler
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - "echo 'Waiting for docker to start'"
+  - sleep 15
+  - docker ps -a
+  - bundle exec kitchen test py2-git-2017-7-arch
+  environment:
+    DOCKER_HOST: tcp://docker:2375
   depends_on:
   - clone
 
 - name: Py2 2018.3(Git)
-  image: saltstack/drone-plugin-kitchen
-  settings:
-    requirements: tests/requirements.txt
-    target: py2-git-2018-3-arch
-  privileged: true
+  image: docker:edge-dind
+  commands:
+  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
+  - gem install bundler
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - "echo 'Waiting for docker to start'"
+  - sleep 15
+  - docker ps -a
+  - bundle exec kitchen test py2-git-2018-3-arch
+  environment:
+    DOCKER_HOST: tcp://docker:2375
   depends_on:
   - clone
   - Py2 2017.7(Git)
 
 - name: Py2 2019.2(Git)
-  image: saltstack/drone-plugin-kitchen
-  settings:
-    requirements: tests/requirements.txt
-    target: py2-git-2019-2-arch
-  privileged: true
+  image: docker:edge-dind
+  commands:
+  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
+  - gem install bundler
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - "echo 'Waiting for docker to start'"
+  - sleep 15
+  - docker ps -a
+  - bundle exec kitchen test py2-git-2019-2-arch
+  environment:
+    DOCKER_HOST: tcp://docker:2375
   depends_on:
   - clone
   - Py2 2018.3(Git)
+
+services:
+- name: docker
+  image: docker:edge-dind
+  command:
+  - --storage-driver=overlay2
+  privileged: true
 
 node:
   project: open
@@ -66,63 +97,118 @@ platform:
 
 steps:
 - name: Py2 2017.7(Git)
-  image: saltstack/drone-plugin-kitchen
-  settings:
-    requirements: tests/requirements.txt
-    target: py2-git-2017-7-amazon-1
-  privileged: true
+  image: docker:edge-dind
+  commands:
+  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
+  - gem install bundler
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - "echo 'Waiting for docker to start'"
+  - sleep 15
+  - docker ps -a
+  - bundle exec kitchen test py2-git-2017-7-amazon-1
+  environment:
+    DOCKER_HOST: tcp://docker:2375
   depends_on:
   - clone
 
 - name: Py2 2018.3(Git)
-  image: saltstack/drone-plugin-kitchen
-  settings:
-    requirements: tests/requirements.txt
-    target: py2-git-2018-3-amazon-1
-  privileged: true
+  image: docker:edge-dind
+  commands:
+  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
+  - gem install bundler
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - "echo 'Waiting for docker to start'"
+  - sleep 15
+  - docker ps -a
+  - bundle exec kitchen test py2-git-2018-3-amazon-1
+  environment:
+    DOCKER_HOST: tcp://docker:2375
   depends_on:
   - clone
   - Py2 2017.7(Git)
 
 - name: Py2 2019.2(Git)
-  image: saltstack/drone-plugin-kitchen
-  settings:
-    requirements: tests/requirements.txt
-    target: py2-git-2019-2-amazon-1
-  privileged: true
+  image: docker:edge-dind
+  commands:
+  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
+  - gem install bundler
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - "echo 'Waiting for docker to start'"
+  - sleep 15
+  - docker ps -a
+  - bundle exec kitchen test py2-git-2019-2-amazon-1
+  environment:
+    DOCKER_HOST: tcp://docker:2375
   depends_on:
   - clone
   - Py2 2018.3(Git)
 
 - name: Py2 2017.7(Stable)
-  image: saltstack/drone-plugin-kitchen
-  settings:
-    requirements: tests/requirements.txt
-    target: py2-stable-2017-7-amazon-1
-  privileged: true
+  image: docker:edge-dind
+  commands:
+  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
+  - gem install bundler
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - "echo 'Waiting for docker to start'"
+  - sleep 15
+  - docker ps -a
+  - bundle exec kitchen test py2-stable-2017-7-amazon-1
+  environment:
+    DOCKER_HOST: tcp://docker:2375
   depends_on:
   - clone
   - Py2 2017.7(Git)
 
 - name: Py2 2018.3(Stable)
-  image: saltstack/drone-plugin-kitchen
-  settings:
-    requirements: tests/requirements.txt
-    target: py2-stable-2018-3-amazon-1
-  privileged: true
+  image: docker:edge-dind
+  commands:
+  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
+  - gem install bundler
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - "echo 'Waiting for docker to start'"
+  - sleep 15
+  - docker ps -a
+  - bundle exec kitchen test py2-stable-2018-3-amazon-1
+  environment:
+    DOCKER_HOST: tcp://docker:2375
   depends_on:
   - clone
   - Py2 2018.3(Git)
 
 - name: Py2 2019.2(Stable)
-  image: saltstack/drone-plugin-kitchen
-  settings:
-    requirements: tests/requirements.txt
-    target: py2-stable-2019-2-amazon-1
-  privileged: true
+  image: docker:edge-dind
+  commands:
+  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
+  - gem install bundler
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - "echo 'Waiting for docker to start'"
+  - sleep 15
+  - docker ps -a
+  - bundle exec kitchen test py2-stable-2019-2-amazon-1
+  environment:
+    DOCKER_HOST: tcp://docker:2375
   depends_on:
   - clone
   - Py2 2019.2(Git)
+
+services:
+- name: docker
+  image: docker:edge-dind
+  command:
+  - --storage-driver=overlay2
+  privileged: true
 
 node:
   project: open
@@ -140,63 +226,118 @@ platform:
 
 steps:
 - name: Py2 2017.7(Git)
-  image: saltstack/drone-plugin-kitchen
-  settings:
-    requirements: tests/requirements.txt
-    target: py2-git-2017-7-amazon-2
-  privileged: true
+  image: docker:edge-dind
+  commands:
+  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
+  - gem install bundler
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - "echo 'Waiting for docker to start'"
+  - sleep 15
+  - docker ps -a
+  - bundle exec kitchen test py2-git-2017-7-amazon-2
+  environment:
+    DOCKER_HOST: tcp://docker:2375
   depends_on:
   - clone
 
 - name: Py2 2018.3(Git)
-  image: saltstack/drone-plugin-kitchen
-  settings:
-    requirements: tests/requirements.txt
-    target: py2-git-2018-3-amazon-2
-  privileged: true
+  image: docker:edge-dind
+  commands:
+  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
+  - gem install bundler
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - "echo 'Waiting for docker to start'"
+  - sleep 15
+  - docker ps -a
+  - bundle exec kitchen test py2-git-2018-3-amazon-2
+  environment:
+    DOCKER_HOST: tcp://docker:2375
   depends_on:
   - clone
   - Py2 2017.7(Git)
 
 - name: Py2 2019.2(Git)
-  image: saltstack/drone-plugin-kitchen
-  settings:
-    requirements: tests/requirements.txt
-    target: py2-git-2019-2-amazon-2
-  privileged: true
+  image: docker:edge-dind
+  commands:
+  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
+  - gem install bundler
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - "echo 'Waiting for docker to start'"
+  - sleep 15
+  - docker ps -a
+  - bundle exec kitchen test py2-git-2019-2-amazon-2
+  environment:
+    DOCKER_HOST: tcp://docker:2375
   depends_on:
   - clone
   - Py2 2018.3(Git)
 
 - name: Py2 2017.7(Stable)
-  image: saltstack/drone-plugin-kitchen
-  settings:
-    requirements: tests/requirements.txt
-    target: py2-stable-2017-7-amazon-2
-  privileged: true
+  image: docker:edge-dind
+  commands:
+  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
+  - gem install bundler
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - "echo 'Waiting for docker to start'"
+  - sleep 15
+  - docker ps -a
+  - bundle exec kitchen test py2-stable-2017-7-amazon-2
+  environment:
+    DOCKER_HOST: tcp://docker:2375
   depends_on:
   - clone
   - Py2 2017.7(Git)
 
 - name: Py2 2018.3(Stable)
-  image: saltstack/drone-plugin-kitchen
-  settings:
-    requirements: tests/requirements.txt
-    target: py2-stable-2018-3-amazon-2
-  privileged: true
+  image: docker:edge-dind
+  commands:
+  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
+  - gem install bundler
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - "echo 'Waiting for docker to start'"
+  - sleep 15
+  - docker ps -a
+  - bundle exec kitchen test py2-stable-2018-3-amazon-2
+  environment:
+    DOCKER_HOST: tcp://docker:2375
   depends_on:
   - clone
   - Py2 2018.3(Git)
 
 - name: Py2 2019.2(Stable)
-  image: saltstack/drone-plugin-kitchen
-  settings:
-    requirements: tests/requirements.txt
-    target: py2-stable-2019-2-amazon-2
-  privileged: true
+  image: docker:edge-dind
+  commands:
+  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
+  - gem install bundler
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - "echo 'Waiting for docker to start'"
+  - sleep 15
+  - docker ps -a
+  - bundle exec kitchen test py2-stable-2019-2-amazon-2
+  environment:
+    DOCKER_HOST: tcp://docker:2375
   depends_on:
   - clone
   - Py2 2019.2(Git)
+
+services:
+- name: docker
+  image: docker:edge-dind
+  command:
+  - --storage-driver=overlay2
+  privileged: true
 
 node:
   project: open
@@ -214,63 +355,118 @@ platform:
 
 steps:
 - name: Py2 2017.7(Git)
-  image: saltstack/drone-plugin-kitchen
-  settings:
-    requirements: tests/requirements.txt
-    target: py2-git-2017-7-centos-6
-  privileged: true
+  image: docker:edge-dind
+  commands:
+  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
+  - gem install bundler
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - "echo 'Waiting for docker to start'"
+  - sleep 15
+  - docker ps -a
+  - bundle exec kitchen test py2-git-2017-7-centos-6
+  environment:
+    DOCKER_HOST: tcp://docker:2375
   depends_on:
   - clone
 
 - name: Py2 2018.3(Git)
-  image: saltstack/drone-plugin-kitchen
-  settings:
-    requirements: tests/requirements.txt
-    target: py2-git-2018-3-centos-6
-  privileged: true
+  image: docker:edge-dind
+  commands:
+  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
+  - gem install bundler
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - "echo 'Waiting for docker to start'"
+  - sleep 15
+  - docker ps -a
+  - bundle exec kitchen test py2-git-2018-3-centos-6
+  environment:
+    DOCKER_HOST: tcp://docker:2375
   depends_on:
   - clone
   - Py2 2017.7(Git)
 
 - name: Py2 2019.2(Git)
-  image: saltstack/drone-plugin-kitchen
-  settings:
-    requirements: tests/requirements.txt
-    target: py2-git-2019-2-centos-6
-  privileged: true
+  image: docker:edge-dind
+  commands:
+  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
+  - gem install bundler
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - "echo 'Waiting for docker to start'"
+  - sleep 15
+  - docker ps -a
+  - bundle exec kitchen test py2-git-2019-2-centos-6
+  environment:
+    DOCKER_HOST: tcp://docker:2375
   depends_on:
   - clone
   - Py2 2018.3(Git)
 
 - name: Py2 2017.7(Stable)
-  image: saltstack/drone-plugin-kitchen
-  settings:
-    requirements: tests/requirements.txt
-    target: py2-stable-2017-7-centos-6
-  privileged: true
+  image: docker:edge-dind
+  commands:
+  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
+  - gem install bundler
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - "echo 'Waiting for docker to start'"
+  - sleep 15
+  - docker ps -a
+  - bundle exec kitchen test py2-stable-2017-7-centos-6
+  environment:
+    DOCKER_HOST: tcp://docker:2375
   depends_on:
   - clone
   - Py2 2017.7(Git)
 
 - name: Py2 2018.3(Stable)
-  image: saltstack/drone-plugin-kitchen
-  settings:
-    requirements: tests/requirements.txt
-    target: py2-stable-2018-3-centos-6
-  privileged: true
+  image: docker:edge-dind
+  commands:
+  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
+  - gem install bundler
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - "echo 'Waiting for docker to start'"
+  - sleep 15
+  - docker ps -a
+  - bundle exec kitchen test py2-stable-2018-3-centos-6
+  environment:
+    DOCKER_HOST: tcp://docker:2375
   depends_on:
   - clone
   - Py2 2018.3(Git)
 
 - name: Py2 2019.2(Stable)
-  image: saltstack/drone-plugin-kitchen
-  settings:
-    requirements: tests/requirements.txt
-    target: py2-stable-2019-2-centos-6
-  privileged: true
+  image: docker:edge-dind
+  commands:
+  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
+  - gem install bundler
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - "echo 'Waiting for docker to start'"
+  - sleep 15
+  - docker ps -a
+  - bundle exec kitchen test py2-stable-2019-2-centos-6
+  environment:
+    DOCKER_HOST: tcp://docker:2375
   depends_on:
   - clone
   - Py2 2019.2(Git)
+
+services:
+- name: docker
+  image: docker:edge-dind
+  command:
+  - --storage-driver=overlay2
+  privileged: true
 
 node:
   project: open
@@ -288,63 +484,118 @@ platform:
 
 steps:
 - name: Py2 2017.7(Git)
-  image: saltstack/drone-plugin-kitchen
-  settings:
-    requirements: tests/requirements.txt
-    target: py2-git-2017-7-centos-7
-  privileged: true
+  image: docker:edge-dind
+  commands:
+  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
+  - gem install bundler
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - "echo 'Waiting for docker to start'"
+  - sleep 15
+  - docker ps -a
+  - bundle exec kitchen test py2-git-2017-7-centos-7
+  environment:
+    DOCKER_HOST: tcp://docker:2375
   depends_on:
   - clone
 
 - name: Py2 2018.3(Git)
-  image: saltstack/drone-plugin-kitchen
-  settings:
-    requirements: tests/requirements.txt
-    target: py2-git-2018-3-centos-7
-  privileged: true
+  image: docker:edge-dind
+  commands:
+  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
+  - gem install bundler
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - "echo 'Waiting for docker to start'"
+  - sleep 15
+  - docker ps -a
+  - bundle exec kitchen test py2-git-2018-3-centos-7
+  environment:
+    DOCKER_HOST: tcp://docker:2375
   depends_on:
   - clone
   - Py2 2017.7(Git)
 
 - name: Py2 2019.2(Git)
-  image: saltstack/drone-plugin-kitchen
-  settings:
-    requirements: tests/requirements.txt
-    target: py2-git-2019-2-centos-7
-  privileged: true
+  image: docker:edge-dind
+  commands:
+  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
+  - gem install bundler
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - "echo 'Waiting for docker to start'"
+  - sleep 15
+  - docker ps -a
+  - bundle exec kitchen test py2-git-2019-2-centos-7
+  environment:
+    DOCKER_HOST: tcp://docker:2375
   depends_on:
   - clone
   - Py2 2018.3(Git)
 
 - name: Py2 2017.7(Stable)
-  image: saltstack/drone-plugin-kitchen
-  settings:
-    requirements: tests/requirements.txt
-    target: py2-stable-2017-7-centos-7
-  privileged: true
+  image: docker:edge-dind
+  commands:
+  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
+  - gem install bundler
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - "echo 'Waiting for docker to start'"
+  - sleep 15
+  - docker ps -a
+  - bundle exec kitchen test py2-stable-2017-7-centos-7
+  environment:
+    DOCKER_HOST: tcp://docker:2375
   depends_on:
   - clone
   - Py2 2017.7(Git)
 
 - name: Py2 2018.3(Stable)
-  image: saltstack/drone-plugin-kitchen
-  settings:
-    requirements: tests/requirements.txt
-    target: py2-stable-2018-3-centos-7
-  privileged: true
+  image: docker:edge-dind
+  commands:
+  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
+  - gem install bundler
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - "echo 'Waiting for docker to start'"
+  - sleep 15
+  - docker ps -a
+  - bundle exec kitchen test py2-stable-2018-3-centos-7
+  environment:
+    DOCKER_HOST: tcp://docker:2375
   depends_on:
   - clone
   - Py2 2018.3(Git)
 
 - name: Py2 2019.2(Stable)
-  image: saltstack/drone-plugin-kitchen
-  settings:
-    requirements: tests/requirements.txt
-    target: py2-stable-2019-2-centos-7
-  privileged: true
+  image: docker:edge-dind
+  commands:
+  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
+  - gem install bundler
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - "echo 'Waiting for docker to start'"
+  - sleep 15
+  - docker ps -a
+  - bundle exec kitchen test py2-stable-2019-2-centos-7
+  environment:
+    DOCKER_HOST: tcp://docker:2375
   depends_on:
   - clone
   - Py2 2019.2(Git)
+
+services:
+- name: docker
+  image: docker:edge-dind
+  command:
+  - --storage-driver=overlay2
+  privileged: true
 
 node:
   project: open
@@ -362,63 +613,118 @@ platform:
 
 steps:
 - name: Py2 2017.7(Git)
-  image: saltstack/drone-plugin-kitchen
-  settings:
-    requirements: tests/requirements.txt
-    target: py2-git-2017-7-debian-8
-  privileged: true
+  image: docker:edge-dind
+  commands:
+  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
+  - gem install bundler
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - "echo 'Waiting for docker to start'"
+  - sleep 15
+  - docker ps -a
+  - bundle exec kitchen test py2-git-2017-7-debian-8
+  environment:
+    DOCKER_HOST: tcp://docker:2375
   depends_on:
   - clone
 
 - name: Py2 2018.3(Git)
-  image: saltstack/drone-plugin-kitchen
-  settings:
-    requirements: tests/requirements.txt
-    target: py2-git-2018-3-debian-8
-  privileged: true
+  image: docker:edge-dind
+  commands:
+  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
+  - gem install bundler
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - "echo 'Waiting for docker to start'"
+  - sleep 15
+  - docker ps -a
+  - bundle exec kitchen test py2-git-2018-3-debian-8
+  environment:
+    DOCKER_HOST: tcp://docker:2375
   depends_on:
   - clone
   - Py2 2017.7(Git)
 
 - name: Py2 2019.2(Git)
-  image: saltstack/drone-plugin-kitchen
-  settings:
-    requirements: tests/requirements.txt
-    target: py2-git-2019-2-debian-8
-  privileged: true
+  image: docker:edge-dind
+  commands:
+  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
+  - gem install bundler
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - "echo 'Waiting for docker to start'"
+  - sleep 15
+  - docker ps -a
+  - bundle exec kitchen test py2-git-2019-2-debian-8
+  environment:
+    DOCKER_HOST: tcp://docker:2375
   depends_on:
   - clone
   - Py2 2018.3(Git)
 
 - name: Py2 2017.7(Stable)
-  image: saltstack/drone-plugin-kitchen
-  settings:
-    requirements: tests/requirements.txt
-    target: py2-stable-2017-7-debian-8
-  privileged: true
+  image: docker:edge-dind
+  commands:
+  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
+  - gem install bundler
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - "echo 'Waiting for docker to start'"
+  - sleep 15
+  - docker ps -a
+  - bundle exec kitchen test py2-stable-2017-7-debian-8
+  environment:
+    DOCKER_HOST: tcp://docker:2375
   depends_on:
   - clone
   - Py2 2017.7(Git)
 
 - name: Py2 2018.3(Stable)
-  image: saltstack/drone-plugin-kitchen
-  settings:
-    requirements: tests/requirements.txt
-    target: py2-stable-2018-3-debian-8
-  privileged: true
+  image: docker:edge-dind
+  commands:
+  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
+  - gem install bundler
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - "echo 'Waiting for docker to start'"
+  - sleep 15
+  - docker ps -a
+  - bundle exec kitchen test py2-stable-2018-3-debian-8
+  environment:
+    DOCKER_HOST: tcp://docker:2375
   depends_on:
   - clone
   - Py2 2018.3(Git)
 
 - name: Py2 2019.2(Stable)
-  image: saltstack/drone-plugin-kitchen
-  settings:
-    requirements: tests/requirements.txt
-    target: py2-stable-2019-2-debian-8
-  privileged: true
+  image: docker:edge-dind
+  commands:
+  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
+  - gem install bundler
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - "echo 'Waiting for docker to start'"
+  - sleep 15
+  - docker ps -a
+  - bundle exec kitchen test py2-stable-2019-2-debian-8
+  environment:
+    DOCKER_HOST: tcp://docker:2375
   depends_on:
   - clone
   - Py2 2019.2(Git)
+
+services:
+- name: docker
+  image: docker:edge-dind
+  command:
+  - --storage-driver=overlay2
+  privileged: true
 
 node:
   project: open
@@ -436,63 +742,118 @@ platform:
 
 steps:
 - name: Py2 2017.7(Git)
-  image: saltstack/drone-plugin-kitchen
-  settings:
-    requirements: tests/requirements.txt
-    target: py2-git-2017-7-debian-9
-  privileged: true
+  image: docker:edge-dind
+  commands:
+  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
+  - gem install bundler
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - "echo 'Waiting for docker to start'"
+  - sleep 15
+  - docker ps -a
+  - bundle exec kitchen test py2-git-2017-7-debian-9
+  environment:
+    DOCKER_HOST: tcp://docker:2375
   depends_on:
   - clone
 
 - name: Py2 2018.3(Git)
-  image: saltstack/drone-plugin-kitchen
-  settings:
-    requirements: tests/requirements.txt
-    target: py2-git-2018-3-debian-9
-  privileged: true
+  image: docker:edge-dind
+  commands:
+  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
+  - gem install bundler
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - "echo 'Waiting for docker to start'"
+  - sleep 15
+  - docker ps -a
+  - bundle exec kitchen test py2-git-2018-3-debian-9
+  environment:
+    DOCKER_HOST: tcp://docker:2375
   depends_on:
   - clone
   - Py2 2017.7(Git)
 
 - name: Py2 2019.2(Git)
-  image: saltstack/drone-plugin-kitchen
-  settings:
-    requirements: tests/requirements.txt
-    target: py2-git-2019-2-debian-9
-  privileged: true
+  image: docker:edge-dind
+  commands:
+  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
+  - gem install bundler
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - "echo 'Waiting for docker to start'"
+  - sleep 15
+  - docker ps -a
+  - bundle exec kitchen test py2-git-2019-2-debian-9
+  environment:
+    DOCKER_HOST: tcp://docker:2375
   depends_on:
   - clone
   - Py2 2018.3(Git)
 
 - name: Py2 2017.7(Stable)
-  image: saltstack/drone-plugin-kitchen
-  settings:
-    requirements: tests/requirements.txt
-    target: py2-stable-2017-7-debian-9
-  privileged: true
+  image: docker:edge-dind
+  commands:
+  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
+  - gem install bundler
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - "echo 'Waiting for docker to start'"
+  - sleep 15
+  - docker ps -a
+  - bundle exec kitchen test py2-stable-2017-7-debian-9
+  environment:
+    DOCKER_HOST: tcp://docker:2375
   depends_on:
   - clone
   - Py2 2017.7(Git)
 
 - name: Py2 2018.3(Stable)
-  image: saltstack/drone-plugin-kitchen
-  settings:
-    requirements: tests/requirements.txt
-    target: py2-stable-2018-3-debian-9
-  privileged: true
+  image: docker:edge-dind
+  commands:
+  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
+  - gem install bundler
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - "echo 'Waiting for docker to start'"
+  - sleep 15
+  - docker ps -a
+  - bundle exec kitchen test py2-stable-2018-3-debian-9
+  environment:
+    DOCKER_HOST: tcp://docker:2375
   depends_on:
   - clone
   - Py2 2018.3(Git)
 
 - name: Py2 2019.2(Stable)
-  image: saltstack/drone-plugin-kitchen
-  settings:
-    requirements: tests/requirements.txt
-    target: py2-stable-2019-2-debian-9
-  privileged: true
+  image: docker:edge-dind
+  commands:
+  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
+  - gem install bundler
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - "echo 'Waiting for docker to start'"
+  - sleep 15
+  - docker ps -a
+  - bundle exec kitchen test py2-stable-2019-2-debian-9
+  environment:
+    DOCKER_HOST: tcp://docker:2375
   depends_on:
   - clone
   - Py2 2019.2(Git)
+
+services:
+- name: docker
+  image: docker:edge-dind
+  command:
+  - --storage-driver=overlay2
+  privileged: true
 
 node:
   project: open
@@ -510,33 +871,64 @@ platform:
 
 steps:
 - name: Py2 2017.7(Git)
-  image: saltstack/drone-plugin-kitchen
-  settings:
-    requirements: tests/requirements.txt
-    target: py2-git-2017-7-fedora-28
-  privileged: true
+  image: docker:edge-dind
+  commands:
+  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
+  - gem install bundler
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - "echo 'Waiting for docker to start'"
+  - sleep 15
+  - docker ps -a
+  - bundle exec kitchen test py2-git-2017-7-fedora-28
+  environment:
+    DOCKER_HOST: tcp://docker:2375
   depends_on:
   - clone
 
 - name: Py2 2018.3(Git)
-  image: saltstack/drone-plugin-kitchen
-  settings:
-    requirements: tests/requirements.txt
-    target: py2-git-2018-3-fedora-28
-  privileged: true
+  image: docker:edge-dind
+  commands:
+  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
+  - gem install bundler
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - "echo 'Waiting for docker to start'"
+  - sleep 15
+  - docker ps -a
+  - bundle exec kitchen test py2-git-2018-3-fedora-28
+  environment:
+    DOCKER_HOST: tcp://docker:2375
   depends_on:
   - clone
   - Py2 2017.7(Git)
 
 - name: Py2 2019.2(Git)
-  image: saltstack/drone-plugin-kitchen
-  settings:
-    requirements: tests/requirements.txt
-    target: py2-git-2019-2-fedora-28
-  privileged: true
+  image: docker:edge-dind
+  commands:
+  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
+  - gem install bundler
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - "echo 'Waiting for docker to start'"
+  - sleep 15
+  - docker ps -a
+  - bundle exec kitchen test py2-git-2019-2-fedora-28
+  environment:
+    DOCKER_HOST: tcp://docker:2375
   depends_on:
   - clone
   - Py2 2018.3(Git)
+
+services:
+- name: docker
+  image: docker:edge-dind
+  command:
+  - --storage-driver=overlay2
+  privileged: true
 
 node:
   project: open
@@ -555,33 +947,64 @@ platform:
 
 steps:
 - name: Py2 2017.7(Git)
-  image: saltstack/drone-plugin-kitchen
-  settings:
-    requirements: tests/requirements.txt
-    target: py2-git-2017-7-fedora-29
-  privileged: true
+  image: docker:edge-dind
+  commands:
+  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
+  - gem install bundler
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - "echo 'Waiting for docker to start'"
+  - sleep 15
+  - docker ps -a
+  - bundle exec kitchen test py2-git-2017-7-fedora-29
+  environment:
+    DOCKER_HOST: tcp://docker:2375
   depends_on:
   - clone
 
 - name: Py2 2018.3(Git)
-  image: saltstack/drone-plugin-kitchen
-  settings:
-    requirements: tests/requirements.txt
-    target: py2-git-2018-3-fedora-29
-  privileged: true
+  image: docker:edge-dind
+  commands:
+  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
+  - gem install bundler
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - "echo 'Waiting for docker to start'"
+  - sleep 15
+  - docker ps -a
+  - bundle exec kitchen test py2-git-2018-3-fedora-29
+  environment:
+    DOCKER_HOST: tcp://docker:2375
   depends_on:
   - clone
   - Py2 2017.7(Git)
 
 - name: Py2 2019.2(Git)
-  image: saltstack/drone-plugin-kitchen
-  settings:
-    requirements: tests/requirements.txt
-    target: py2-git-2019-2-fedora-29
-  privileged: true
+  image: docker:edge-dind
+  commands:
+  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
+  - gem install bundler
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - "echo 'Waiting for docker to start'"
+  - sleep 15
+  - docker ps -a
+  - bundle exec kitchen test py2-git-2019-2-fedora-29
+  environment:
+    DOCKER_HOST: tcp://docker:2375
   depends_on:
   - clone
   - Py2 2018.3(Git)
+
+services:
+- name: docker
+  image: docker:edge-dind
+  command:
+  - --storage-driver=overlay2
+  privileged: true
 
 node:
   project: open
@@ -600,33 +1023,64 @@ platform:
 
 steps:
 - name: Py2 2017.7(Git)
-  image: saltstack/drone-plugin-kitchen
-  settings:
-    requirements: tests/requirements.txt
-    target: py2-git-2017-7-opensuse-15
-  privileged: true
+  image: docker:edge-dind
+  commands:
+  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
+  - gem install bundler
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - "echo 'Waiting for docker to start'"
+  - sleep 15
+  - docker ps -a
+  - bundle exec kitchen test py2-git-2017-7-opensuse-15
+  environment:
+    DOCKER_HOST: tcp://docker:2375
   depends_on:
   - clone
 
 - name: Py2 2018.3(Git)
-  image: saltstack/drone-plugin-kitchen
-  settings:
-    requirements: tests/requirements.txt
-    target: py2-git-2018-3-opensuse-15
-  privileged: true
+  image: docker:edge-dind
+  commands:
+  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
+  - gem install bundler
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - "echo 'Waiting for docker to start'"
+  - sleep 15
+  - docker ps -a
+  - bundle exec kitchen test py2-git-2018-3-opensuse-15
+  environment:
+    DOCKER_HOST: tcp://docker:2375
   depends_on:
   - clone
   - Py2 2017.7(Git)
 
 - name: Py2 2019.2(Git)
-  image: saltstack/drone-plugin-kitchen
-  settings:
-    requirements: tests/requirements.txt
-    target: py2-git-2019-2-opensuse-15
-  privileged: true
+  image: docker:edge-dind
+  commands:
+  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
+  - gem install bundler
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - "echo 'Waiting for docker to start'"
+  - sleep 15
+  - docker ps -a
+  - bundle exec kitchen test py2-git-2019-2-opensuse-15
+  environment:
+    DOCKER_HOST: tcp://docker:2375
   depends_on:
   - clone
   - Py2 2018.3(Git)
+
+services:
+- name: docker
+  image: docker:edge-dind
+  command:
+  - --storage-driver=overlay2
+  privileged: true
 
 node:
   project: open
@@ -645,33 +1099,64 @@ platform:
 
 steps:
 - name: Py2 2017.7(Git)
-  image: saltstack/drone-plugin-kitchen
-  settings:
-    requirements: tests/requirements.txt
-    target: py2-git-2017-7-opensuse-42
-  privileged: true
+  image: docker:edge-dind
+  commands:
+  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
+  - gem install bundler
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - "echo 'Waiting for docker to start'"
+  - sleep 15
+  - docker ps -a
+  - bundle exec kitchen test py2-git-2017-7-opensuse-42
+  environment:
+    DOCKER_HOST: tcp://docker:2375
   depends_on:
   - clone
 
 - name: Py2 2018.3(Git)
-  image: saltstack/drone-plugin-kitchen
-  settings:
-    requirements: tests/requirements.txt
-    target: py2-git-2018-3-opensuse-42
-  privileged: true
+  image: docker:edge-dind
+  commands:
+  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
+  - gem install bundler
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - "echo 'Waiting for docker to start'"
+  - sleep 15
+  - docker ps -a
+  - bundle exec kitchen test py2-git-2018-3-opensuse-42
+  environment:
+    DOCKER_HOST: tcp://docker:2375
   depends_on:
   - clone
   - Py2 2017.7(Git)
 
 - name: Py2 2019.2(Git)
-  image: saltstack/drone-plugin-kitchen
-  settings:
-    requirements: tests/requirements.txt
-    target: py2-git-2019-2-opensuse-42
-  privileged: true
+  image: docker:edge-dind
+  commands:
+  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
+  - gem install bundler
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - "echo 'Waiting for docker to start'"
+  - sleep 15
+  - docker ps -a
+  - bundle exec kitchen test py2-git-2019-2-opensuse-42
+  environment:
+    DOCKER_HOST: tcp://docker:2375
   depends_on:
   - clone
   - Py2 2018.3(Git)
+
+services:
+- name: docker
+  image: docker:edge-dind
+  command:
+  - --storage-driver=overlay2
+  privileged: true
 
 node:
   project: open
@@ -690,63 +1175,118 @@ platform:
 
 steps:
 - name: Py2 2017.7(Git)
-  image: saltstack/drone-plugin-kitchen
-  settings:
-    requirements: tests/requirements.txt
-    target: py2-git-2017-7-ubuntu-1404
-  privileged: true
+  image: docker:edge-dind
+  commands:
+  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
+  - gem install bundler
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - "echo 'Waiting for docker to start'"
+  - sleep 15
+  - docker ps -a
+  - bundle exec kitchen test py2-git-2017-7-ubuntu-1404
+  environment:
+    DOCKER_HOST: tcp://docker:2375
   depends_on:
   - clone
 
 - name: Py2 2018.3(Git)
-  image: saltstack/drone-plugin-kitchen
-  settings:
-    requirements: tests/requirements.txt
-    target: py2-git-2018-3-ubuntu-1404
-  privileged: true
+  image: docker:edge-dind
+  commands:
+  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
+  - gem install bundler
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - "echo 'Waiting for docker to start'"
+  - sleep 15
+  - docker ps -a
+  - bundle exec kitchen test py2-git-2018-3-ubuntu-1404
+  environment:
+    DOCKER_HOST: tcp://docker:2375
   depends_on:
   - clone
   - Py2 2017.7(Git)
 
 - name: Py2 2019.2(Git)
-  image: saltstack/drone-plugin-kitchen
-  settings:
-    requirements: tests/requirements.txt
-    target: py2-git-2019-2-ubuntu-1404
-  privileged: true
+  image: docker:edge-dind
+  commands:
+  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
+  - gem install bundler
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - "echo 'Waiting for docker to start'"
+  - sleep 15
+  - docker ps -a
+  - bundle exec kitchen test py2-git-2019-2-ubuntu-1404
+  environment:
+    DOCKER_HOST: tcp://docker:2375
   depends_on:
   - clone
   - Py2 2018.3(Git)
 
 - name: Py2 2017.7(Stable)
-  image: saltstack/drone-plugin-kitchen
-  settings:
-    requirements: tests/requirements.txt
-    target: py2-stable-2017-7-ubuntu-1404
-  privileged: true
+  image: docker:edge-dind
+  commands:
+  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
+  - gem install bundler
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - "echo 'Waiting for docker to start'"
+  - sleep 15
+  - docker ps -a
+  - bundle exec kitchen test py2-stable-2017-7-ubuntu-1404
+  environment:
+    DOCKER_HOST: tcp://docker:2375
   depends_on:
   - clone
   - Py2 2017.7(Git)
 
 - name: Py2 2018.3(Stable)
-  image: saltstack/drone-plugin-kitchen
-  settings:
-    requirements: tests/requirements.txt
-    target: py2-stable-2018-3-ubuntu-1404
-  privileged: true
+  image: docker:edge-dind
+  commands:
+  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
+  - gem install bundler
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - "echo 'Waiting for docker to start'"
+  - sleep 15
+  - docker ps -a
+  - bundle exec kitchen test py2-stable-2018-3-ubuntu-1404
+  environment:
+    DOCKER_HOST: tcp://docker:2375
   depends_on:
   - clone
   - Py2 2018.3(Git)
 
 - name: Py2 2019.2(Stable)
-  image: saltstack/drone-plugin-kitchen
-  settings:
-    requirements: tests/requirements.txt
-    target: py2-stable-2019-2-ubuntu-1404
-  privileged: true
+  image: docker:edge-dind
+  commands:
+  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
+  - gem install bundler
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - "echo 'Waiting for docker to start'"
+  - sleep 15
+  - docker ps -a
+  - bundle exec kitchen test py2-stable-2019-2-ubuntu-1404
+  environment:
+    DOCKER_HOST: tcp://docker:2375
   depends_on:
   - clone
   - Py2 2019.2(Git)
+
+services:
+- name: docker
+  image: docker:edge-dind
+  command:
+  - --storage-driver=overlay2
+  privileged: true
 
 node:
   project: open
@@ -765,63 +1305,118 @@ platform:
 
 steps:
 - name: Py2 2017.7(Git)
-  image: saltstack/drone-plugin-kitchen
-  settings:
-    requirements: tests/requirements.txt
-    target: py2-git-2017-7-ubuntu-1604
-  privileged: true
+  image: docker:edge-dind
+  commands:
+  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
+  - gem install bundler
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - "echo 'Waiting for docker to start'"
+  - sleep 15
+  - docker ps -a
+  - bundle exec kitchen test py2-git-2017-7-ubuntu-1604
+  environment:
+    DOCKER_HOST: tcp://docker:2375
   depends_on:
   - clone
 
 - name: Py2 2018.3(Git)
-  image: saltstack/drone-plugin-kitchen
-  settings:
-    requirements: tests/requirements.txt
-    target: py2-git-2018-3-ubuntu-1604
-  privileged: true
+  image: docker:edge-dind
+  commands:
+  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
+  - gem install bundler
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - "echo 'Waiting for docker to start'"
+  - sleep 15
+  - docker ps -a
+  - bundle exec kitchen test py2-git-2018-3-ubuntu-1604
+  environment:
+    DOCKER_HOST: tcp://docker:2375
   depends_on:
   - clone
   - Py2 2017.7(Git)
 
 - name: Py2 2019.2(Git)
-  image: saltstack/drone-plugin-kitchen
-  settings:
-    requirements: tests/requirements.txt
-    target: py2-git-2019-2-ubuntu-1604
-  privileged: true
+  image: docker:edge-dind
+  commands:
+  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
+  - gem install bundler
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - "echo 'Waiting for docker to start'"
+  - sleep 15
+  - docker ps -a
+  - bundle exec kitchen test py2-git-2019-2-ubuntu-1604
+  environment:
+    DOCKER_HOST: tcp://docker:2375
   depends_on:
   - clone
   - Py2 2018.3(Git)
 
 - name: Py2 2017.7(Stable)
-  image: saltstack/drone-plugin-kitchen
-  settings:
-    requirements: tests/requirements.txt
-    target: py2-stable-2017-7-ubuntu-1604
-  privileged: true
+  image: docker:edge-dind
+  commands:
+  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
+  - gem install bundler
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - "echo 'Waiting for docker to start'"
+  - sleep 15
+  - docker ps -a
+  - bundle exec kitchen test py2-stable-2017-7-ubuntu-1604
+  environment:
+    DOCKER_HOST: tcp://docker:2375
   depends_on:
   - clone
   - Py2 2017.7(Git)
 
 - name: Py2 2018.3(Stable)
-  image: saltstack/drone-plugin-kitchen
-  settings:
-    requirements: tests/requirements.txt
-    target: py2-stable-2018-3-ubuntu-1604
-  privileged: true
+  image: docker:edge-dind
+  commands:
+  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
+  - gem install bundler
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - "echo 'Waiting for docker to start'"
+  - sleep 15
+  - docker ps -a
+  - bundle exec kitchen test py2-stable-2018-3-ubuntu-1604
+  environment:
+    DOCKER_HOST: tcp://docker:2375
   depends_on:
   - clone
   - Py2 2018.3(Git)
 
 - name: Py2 2019.2(Stable)
-  image: saltstack/drone-plugin-kitchen
-  settings:
-    requirements: tests/requirements.txt
-    target: py2-stable-2019-2-ubuntu-1604
-  privileged: true
+  image: docker:edge-dind
+  commands:
+  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
+  - gem install bundler
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - "echo 'Waiting for docker to start'"
+  - sleep 15
+  - docker ps -a
+  - bundle exec kitchen test py2-stable-2019-2-ubuntu-1604
+  environment:
+    DOCKER_HOST: tcp://docker:2375
   depends_on:
   - clone
   - Py2 2019.2(Git)
+
+services:
+- name: docker
+  image: docker:edge-dind
+  command:
+  - --storage-driver=overlay2
+  privileged: true
 
 node:
   project: open
@@ -840,63 +1435,118 @@ platform:
 
 steps:
 - name: Py2 2017.7(Git)
-  image: saltstack/drone-plugin-kitchen
-  settings:
-    requirements: tests/requirements.txt
-    target: py2-git-2017-7-ubuntu-1804
-  privileged: true
+  image: docker:edge-dind
+  commands:
+  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
+  - gem install bundler
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - "echo 'Waiting for docker to start'"
+  - sleep 15
+  - docker ps -a
+  - bundle exec kitchen test py2-git-2017-7-ubuntu-1804
+  environment:
+    DOCKER_HOST: tcp://docker:2375
   depends_on:
   - clone
 
 - name: Py2 2018.3(Git)
-  image: saltstack/drone-plugin-kitchen
-  settings:
-    requirements: tests/requirements.txt
-    target: py2-git-2018-3-ubuntu-1804
-  privileged: true
+  image: docker:edge-dind
+  commands:
+  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
+  - gem install bundler
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - "echo 'Waiting for docker to start'"
+  - sleep 15
+  - docker ps -a
+  - bundle exec kitchen test py2-git-2018-3-ubuntu-1804
+  environment:
+    DOCKER_HOST: tcp://docker:2375
   depends_on:
   - clone
   - Py2 2017.7(Git)
 
 - name: Py2 2019.2(Git)
-  image: saltstack/drone-plugin-kitchen
-  settings:
-    requirements: tests/requirements.txt
-    target: py2-git-2019-2-ubuntu-1804
-  privileged: true
+  image: docker:edge-dind
+  commands:
+  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
+  - gem install bundler
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - "echo 'Waiting for docker to start'"
+  - sleep 15
+  - docker ps -a
+  - bundle exec kitchen test py2-git-2019-2-ubuntu-1804
+  environment:
+    DOCKER_HOST: tcp://docker:2375
   depends_on:
   - clone
   - Py2 2018.3(Git)
 
 - name: Py2 2017.7(Stable)
-  image: saltstack/drone-plugin-kitchen
-  settings:
-    requirements: tests/requirements.txt
-    target: py2-stable-2017-7-ubuntu-1804
-  privileged: true
+  image: docker:edge-dind
+  commands:
+  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
+  - gem install bundler
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - "echo 'Waiting for docker to start'"
+  - sleep 15
+  - docker ps -a
+  - bundle exec kitchen test py2-stable-2017-7-ubuntu-1804
+  environment:
+    DOCKER_HOST: tcp://docker:2375
   depends_on:
   - clone
   - Py2 2017.7(Git)
 
 - name: Py2 2018.3(Stable)
-  image: saltstack/drone-plugin-kitchen
-  settings:
-    requirements: tests/requirements.txt
-    target: py2-stable-2018-3-ubuntu-1804
-  privileged: true
+  image: docker:edge-dind
+  commands:
+  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
+  - gem install bundler
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - "echo 'Waiting for docker to start'"
+  - sleep 15
+  - docker ps -a
+  - bundle exec kitchen test py2-stable-2018-3-ubuntu-1804
+  environment:
+    DOCKER_HOST: tcp://docker:2375
   depends_on:
   - clone
   - Py2 2018.3(Git)
 
 - name: Py2 2019.2(Stable)
-  image: saltstack/drone-plugin-kitchen
-  settings:
-    requirements: tests/requirements.txt
-    target: py2-stable-2019-2-ubuntu-1804
-  privileged: true
+  image: docker:edge-dind
+  commands:
+  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
+  - gem install bundler
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - "echo 'Waiting for docker to start'"
+  - sleep 15
+  - docker ps -a
+  - bundle exec kitchen test py2-stable-2019-2-ubuntu-1804
+  environment:
+    DOCKER_HOST: tcp://docker:2375
   depends_on:
   - clone
   - Py2 2019.2(Git)
+
+services:
+- name: docker
+  image: docker:edge-dind
+  command:
+  - --storage-driver=overlay2
+  privileged: true
 
 node:
   project: open
@@ -907,6 +1557,6 @@ depends_on:
 
 ---
 kind: signature
-hmac: 31c3ffeadce2453e88dd9c8e2af3dc659835c53e339a25f3ad3ef08d4d846383
+hmac: cafe61d4887d61379d88ed9b0fab457a9558e1630a2f50a77e5d3af1c0f6e3ce
 
 ...

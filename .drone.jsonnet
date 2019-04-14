@@ -68,17 +68,37 @@ local Build(distro) = {
   steps: [
     {
       name: suite.name,
-      privileged: true,
-      image: 'saltstack/drone-plugin-kitchen',
+      image: 'docker:edge-dind',
+      environment: {
+        DOCKER_HOST: 'tcp://docker:2375',
+      },
       depends_on: [
         'clone',
       ] + suite.depends,
-      settings: {
-        target: std.format('%s-%s', [suite.slug, distro.slug]),
-        requirements: 'tests/requirements.txt',
-      },
+      commands: [
+        'apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev',
+        'gem install bundler',
+        'pip install -U pip',
+        'pip install -r tests/requirements.txt',
+        'bundle install --with docker --without opennebula ec2 windows vagrant',
+        "echo 'Waiting for docker to start'",
+        'sleep 15',  // sleep 5 # give docker enough time to start
+        'docker ps -a',
+        std.format('bundle exec kitchen test %s-%s', [suite.slug, distro.slug]),
+      ],
     }
     for suite in suites
+  ],
+  services: [
+    {
+      name: 'docker',
+      image: 'docker:edge-dind',
+      privileged: true,
+      environment: {},
+      command: [
+        '--storage-driver=overlay2',
+      ],
+    },
   ],
   depends_on: [
     'Lint',

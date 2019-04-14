@@ -6075,14 +6075,14 @@ install_opensuse_15_git_deps() {
         PY_PKG_VER=2
 
         # This is required by some of the python2 packages below
-        __PACKAGES="libpython2_7-1_0"
+        __PACKAGES="libpython2_7-1_0 python2-futures python-ipaddress"
     else
         PY_PKG_VER=3
         __PACKAGES=""
     fi
 
     __PACKAGES="${__PACKAGES} libzmq5 python${PY_PKG_VER}-Jinja2 python${PY_PKG_VER}-msgpack"
-    __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-pycrypto python${PY_PKG_VER}-pyzmq "
+    __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-pycrypto python${PY_PKG_VER}-pyzmq"
     __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-xml"
 
     if [ -f "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" ]; then

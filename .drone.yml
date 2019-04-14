@@ -21,6 +21,11 @@ platform:
   arch: amd64
 
 steps:
+- name: throttle-build
+  image: alpine
+  commands:
+  - "sh -c 't=0; echo Sleeping 0 seconds; sleep 0'"
+
 - name: Py2 2017.7(Git)
   image: docker:edge-dind
   commands:
@@ -30,13 +35,13 @@ steps:
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
   - "echo 'Waiting for docker to start'"
-  - sleep 15
+  - sleep 10
   - docker ps -a
   - bundle exec kitchen test py2-git-2017-7-arch
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
-  - clone
+  - throttle-build
 
 - name: Py2 2018.3(Git)
   image: docker:edge-dind
@@ -47,13 +52,13 @@ steps:
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
   - "echo 'Waiting for docker to start'"
-  - sleep 15
+  - sleep 10
   - docker ps -a
   - bundle exec kitchen test py2-git-2018-3-arch
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
-  - clone
+  - throttle-build
   - Py2 2017.7(Git)
 
 - name: Py2 2019.2(Git)
@@ -65,13 +70,13 @@ steps:
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
   - "echo 'Waiting for docker to start'"
-  - sleep 15
+  - sleep 10
   - docker ps -a
   - bundle exec kitchen test py2-git-2019-2-arch
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
-  - clone
+  - throttle-build
   - Py2 2018.3(Git)
 
 services:
@@ -96,6 +101,11 @@ platform:
   arch: amd64
 
 steps:
+- name: throttle-build
+  image: alpine
+  commands:
+  - "sh -c 't=30; echo Sleeping 30 seconds; sleep 30'"
+
 - name: Py2 2017.7(Git)
   image: docker:edge-dind
   commands:
@@ -105,13 +115,13 @@ steps:
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
   - "echo 'Waiting for docker to start'"
-  - sleep 15
+  - sleep 10
   - docker ps -a
   - bundle exec kitchen test py2-git-2017-7-amazon-1
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
-  - clone
+  - throttle-build
 
 - name: Py2 2018.3(Git)
   image: docker:edge-dind
@@ -122,13 +132,13 @@ steps:
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
   - "echo 'Waiting for docker to start'"
-  - sleep 15
+  - sleep 10
   - docker ps -a
   - bundle exec kitchen test py2-git-2018-3-amazon-1
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
-  - clone
+  - throttle-build
   - Py2 2017.7(Git)
 
 - name: Py2 2019.2(Git)
@@ -140,13 +150,13 @@ steps:
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
   - "echo 'Waiting for docker to start'"
-  - sleep 15
+  - sleep 10
   - docker ps -a
   - bundle exec kitchen test py2-git-2019-2-amazon-1
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
-  - clone
+  - throttle-build
   - Py2 2018.3(Git)
 
 - name: Py2 2017.7(Stable)
@@ -158,13 +168,13 @@ steps:
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
   - "echo 'Waiting for docker to start'"
-  - sleep 15
+  - sleep 10
   - docker ps -a
   - bundle exec kitchen test py2-stable-2017-7-amazon-1
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
-  - clone
+  - throttle-build
   - Py2 2017.7(Git)
 
 - name: Py2 2018.3(Stable)
@@ -176,13 +186,13 @@ steps:
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
   - "echo 'Waiting for docker to start'"
-  - sleep 15
+  - sleep 10
   - docker ps -a
   - bundle exec kitchen test py2-stable-2018-3-amazon-1
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
-  - clone
+  - throttle-build
   - Py2 2018.3(Git)
 
 - name: Py2 2019.2(Stable)
@@ -194,13 +204,13 @@ steps:
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
   - "echo 'Waiting for docker to start'"
-  - sleep 15
+  - sleep 10
   - docker ps -a
   - bundle exec kitchen test py2-stable-2019-2-amazon-1
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
-  - clone
+  - throttle-build
   - Py2 2019.2(Git)
 
 services:
@@ -225,6 +235,11 @@ platform:
   arch: amd64
 
 steps:
+- name: throttle-build
+  image: alpine
+  commands:
+  - "sh -c 't=60; echo Sleeping 60 seconds; sleep 60'"
+
 - name: Py2 2017.7(Git)
   image: docker:edge-dind
   commands:
@@ -234,13 +249,13 @@ steps:
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
   - "echo 'Waiting for docker to start'"
-  - sleep 15
+  - sleep 10
   - docker ps -a
   - bundle exec kitchen test py2-git-2017-7-amazon-2
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
-  - clone
+  - throttle-build
 
 - name: Py2 2018.3(Git)
   image: docker:edge-dind
@@ -251,13 +266,13 @@ steps:
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
   - "echo 'Waiting for docker to start'"
-  - sleep 15
+  - sleep 10
   - docker ps -a
   - bundle exec kitchen test py2-git-2018-3-amazon-2
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
-  - clone
+  - throttle-build
   - Py2 2017.7(Git)
 
 - name: Py2 2019.2(Git)
@@ -269,13 +284,13 @@ steps:
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
   - "echo 'Waiting for docker to start'"
-  - sleep 15
+  - sleep 10
   - docker ps -a
   - bundle exec kitchen test py2-git-2019-2-amazon-2
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
-  - clone
+  - throttle-build
   - Py2 2018.3(Git)
 
 - name: Py2 2017.7(Stable)
@@ -287,13 +302,13 @@ steps:
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
   - "echo 'Waiting for docker to start'"
-  - sleep 15
+  - sleep 10
   - docker ps -a
   - bundle exec kitchen test py2-stable-2017-7-amazon-2
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
-  - clone
+  - throttle-build
   - Py2 2017.7(Git)
 
 - name: Py2 2018.3(Stable)
@@ -305,13 +320,13 @@ steps:
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
   - "echo 'Waiting for docker to start'"
-  - sleep 15
+  - sleep 10
   - docker ps -a
   - bundle exec kitchen test py2-stable-2018-3-amazon-2
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
-  - clone
+  - throttle-build
   - Py2 2018.3(Git)
 
 - name: Py2 2019.2(Stable)
@@ -323,13 +338,13 @@ steps:
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
   - "echo 'Waiting for docker to start'"
-  - sleep 15
+  - sleep 10
   - docker ps -a
   - bundle exec kitchen test py2-stable-2019-2-amazon-2
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
-  - clone
+  - throttle-build
   - Py2 2019.2(Git)
 
 services:
@@ -354,6 +369,11 @@ platform:
   arch: amd64
 
 steps:
+- name: throttle-build
+  image: alpine
+  commands:
+  - "sh -c 't=90; echo Sleeping 90 seconds; sleep 90'"
+
 - name: Py2 2017.7(Git)
   image: docker:edge-dind
   commands:
@@ -363,13 +383,13 @@ steps:
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
   - "echo 'Waiting for docker to start'"
-  - sleep 15
+  - sleep 10
   - docker ps -a
   - bundle exec kitchen test py2-git-2017-7-centos-6
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
-  - clone
+  - throttle-build
 
 - name: Py2 2018.3(Git)
   image: docker:edge-dind
@@ -380,13 +400,13 @@ steps:
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
   - "echo 'Waiting for docker to start'"
-  - sleep 15
+  - sleep 10
   - docker ps -a
   - bundle exec kitchen test py2-git-2018-3-centos-6
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
-  - clone
+  - throttle-build
   - Py2 2017.7(Git)
 
 - name: Py2 2019.2(Git)
@@ -398,13 +418,13 @@ steps:
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
   - "echo 'Waiting for docker to start'"
-  - sleep 15
+  - sleep 10
   - docker ps -a
   - bundle exec kitchen test py2-git-2019-2-centos-6
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
-  - clone
+  - throttle-build
   - Py2 2018.3(Git)
 
 - name: Py2 2017.7(Stable)
@@ -416,13 +436,13 @@ steps:
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
   - "echo 'Waiting for docker to start'"
-  - sleep 15
+  - sleep 10
   - docker ps -a
   - bundle exec kitchen test py2-stable-2017-7-centos-6
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
-  - clone
+  - throttle-build
   - Py2 2017.7(Git)
 
 - name: Py2 2018.3(Stable)
@@ -434,13 +454,13 @@ steps:
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
   - "echo 'Waiting for docker to start'"
-  - sleep 15
+  - sleep 10
   - docker ps -a
   - bundle exec kitchen test py2-stable-2018-3-centos-6
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
-  - clone
+  - throttle-build
   - Py2 2018.3(Git)
 
 - name: Py2 2019.2(Stable)
@@ -452,13 +472,13 @@ steps:
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
   - "echo 'Waiting for docker to start'"
-  - sleep 15
+  - sleep 10
   - docker ps -a
   - bundle exec kitchen test py2-stable-2019-2-centos-6
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
-  - clone
+  - throttle-build
   - Py2 2019.2(Git)
 
 services:
@@ -483,6 +503,11 @@ platform:
   arch: amd64
 
 steps:
+- name: throttle-build
+  image: alpine
+  commands:
+  - "sh -c 't=120; echo Sleeping 120 seconds; sleep 120'"
+
 - name: Py2 2017.7(Git)
   image: docker:edge-dind
   commands:
@@ -492,13 +517,13 @@ steps:
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
   - "echo 'Waiting for docker to start'"
-  - sleep 15
+  - sleep 10
   - docker ps -a
   - bundle exec kitchen test py2-git-2017-7-centos-7
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
-  - clone
+  - throttle-build
 
 - name: Py2 2018.3(Git)
   image: docker:edge-dind
@@ -509,13 +534,13 @@ steps:
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
   - "echo 'Waiting for docker to start'"
-  - sleep 15
+  - sleep 10
   - docker ps -a
   - bundle exec kitchen test py2-git-2018-3-centos-7
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
-  - clone
+  - throttle-build
   - Py2 2017.7(Git)
 
 - name: Py2 2019.2(Git)
@@ -527,13 +552,13 @@ steps:
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
   - "echo 'Waiting for docker to start'"
-  - sleep 15
+  - sleep 10
   - docker ps -a
   - bundle exec kitchen test py2-git-2019-2-centos-7
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
-  - clone
+  - throttle-build
   - Py2 2018.3(Git)
 
 - name: Py2 2017.7(Stable)
@@ -545,13 +570,13 @@ steps:
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
   - "echo 'Waiting for docker to start'"
-  - sleep 15
+  - sleep 10
   - docker ps -a
   - bundle exec kitchen test py2-stable-2017-7-centos-7
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
-  - clone
+  - throttle-build
   - Py2 2017.7(Git)
 
 - name: Py2 2018.3(Stable)
@@ -563,13 +588,13 @@ steps:
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
   - "echo 'Waiting for docker to start'"
-  - sleep 15
+  - sleep 10
   - docker ps -a
   - bundle exec kitchen test py2-stable-2018-3-centos-7
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
-  - clone
+  - throttle-build
   - Py2 2018.3(Git)
 
 - name: Py2 2019.2(Stable)
@@ -581,13 +606,13 @@ steps:
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
   - "echo 'Waiting for docker to start'"
-  - sleep 15
+  - sleep 10
   - docker ps -a
   - bundle exec kitchen test py2-stable-2019-2-centos-7
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
-  - clone
+  - throttle-build
   - Py2 2019.2(Git)
 
 services:
@@ -612,6 +637,11 @@ platform:
   arch: amd64
 
 steps:
+- name: throttle-build
+  image: alpine
+  commands:
+  - "sh -c 't=150; echo Sleeping 150 seconds; sleep 150'"
+
 - name: Py2 2017.7(Git)
   image: docker:edge-dind
   commands:
@@ -621,13 +651,13 @@ steps:
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
   - "echo 'Waiting for docker to start'"
-  - sleep 15
+  - sleep 10
   - docker ps -a
   - bundle exec kitchen test py2-git-2017-7-debian-8
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
-  - clone
+  - throttle-build
 
 - name: Py2 2018.3(Git)
   image: docker:edge-dind
@@ -638,13 +668,13 @@ steps:
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
   - "echo 'Waiting for docker to start'"
-  - sleep 15
+  - sleep 10
   - docker ps -a
   - bundle exec kitchen test py2-git-2018-3-debian-8
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
-  - clone
+  - throttle-build
   - Py2 2017.7(Git)
 
 - name: Py2 2019.2(Git)
@@ -656,13 +686,13 @@ steps:
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
   - "echo 'Waiting for docker to start'"
-  - sleep 15
+  - sleep 10
   - docker ps -a
   - bundle exec kitchen test py2-git-2019-2-debian-8
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
-  - clone
+  - throttle-build
   - Py2 2018.3(Git)
 
 - name: Py2 2017.7(Stable)
@@ -674,13 +704,13 @@ steps:
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
   - "echo 'Waiting for docker to start'"
-  - sleep 15
+  - sleep 10
   - docker ps -a
   - bundle exec kitchen test py2-stable-2017-7-debian-8
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
-  - clone
+  - throttle-build
   - Py2 2017.7(Git)
 
 - name: Py2 2018.3(Stable)
@@ -692,13 +722,13 @@ steps:
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
   - "echo 'Waiting for docker to start'"
-  - sleep 15
+  - sleep 10
   - docker ps -a
   - bundle exec kitchen test py2-stable-2018-3-debian-8
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
-  - clone
+  - throttle-build
   - Py2 2018.3(Git)
 
 - name: Py2 2019.2(Stable)
@@ -710,13 +740,13 @@ steps:
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
   - "echo 'Waiting for docker to start'"
-  - sleep 15
+  - sleep 10
   - docker ps -a
   - bundle exec kitchen test py2-stable-2019-2-debian-8
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
-  - clone
+  - throttle-build
   - Py2 2019.2(Git)
 
 services:
@@ -741,6 +771,11 @@ platform:
   arch: amd64
 
 steps:
+- name: throttle-build
+  image: alpine
+  commands:
+  - "sh -c 't=180; echo Sleeping 180 seconds; sleep 180'"
+
 - name: Py2 2017.7(Git)
   image: docker:edge-dind
   commands:
@@ -750,13 +785,13 @@ steps:
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
   - "echo 'Waiting for docker to start'"
-  - sleep 15
+  - sleep 10
   - docker ps -a
   - bundle exec kitchen test py2-git-2017-7-debian-9
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
-  - clone
+  - throttle-build
 
 - name: Py2 2018.3(Git)
   image: docker:edge-dind
@@ -767,13 +802,13 @@ steps:
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
   - "echo 'Waiting for docker to start'"
-  - sleep 15
+  - sleep 10
   - docker ps -a
   - bundle exec kitchen test py2-git-2018-3-debian-9
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
-  - clone
+  - throttle-build
   - Py2 2017.7(Git)
 
 - name: Py2 2019.2(Git)
@@ -785,13 +820,13 @@ steps:
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
   - "echo 'Waiting for docker to start'"
-  - sleep 15
+  - sleep 10
   - docker ps -a
   - bundle exec kitchen test py2-git-2019-2-debian-9
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
-  - clone
+  - throttle-build
   - Py2 2018.3(Git)
 
 - name: Py2 2017.7(Stable)
@@ -803,13 +838,13 @@ steps:
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
   - "echo 'Waiting for docker to start'"
-  - sleep 15
+  - sleep 10
   - docker ps -a
   - bundle exec kitchen test py2-stable-2017-7-debian-9
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
-  - clone
+  - throttle-build
   - Py2 2017.7(Git)
 
 - name: Py2 2018.3(Stable)
@@ -821,13 +856,13 @@ steps:
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
   - "echo 'Waiting for docker to start'"
-  - sleep 15
+  - sleep 10
   - docker ps -a
   - bundle exec kitchen test py2-stable-2018-3-debian-9
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
-  - clone
+  - throttle-build
   - Py2 2018.3(Git)
 
 - name: Py2 2019.2(Stable)
@@ -839,13 +874,13 @@ steps:
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
   - "echo 'Waiting for docker to start'"
-  - sleep 15
+  - sleep 10
   - docker ps -a
   - bundle exec kitchen test py2-stable-2019-2-debian-9
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
-  - clone
+  - throttle-build
   - Py2 2019.2(Git)
 
 services:
@@ -870,6 +905,11 @@ platform:
   arch: amd64
 
 steps:
+- name: throttle-build
+  image: alpine
+  commands:
+  - "sh -c 't=105; echo Sleeping 105 seconds; sleep 105'"
+
 - name: Py2 2017.7(Git)
   image: docker:edge-dind
   commands:
@@ -879,13 +919,13 @@ steps:
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
   - "echo 'Waiting for docker to start'"
-  - sleep 15
+  - sleep 10
   - docker ps -a
   - bundle exec kitchen test py2-git-2017-7-fedora-28
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
-  - clone
+  - throttle-build
 
 - name: Py2 2018.3(Git)
   image: docker:edge-dind
@@ -896,13 +936,13 @@ steps:
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
   - "echo 'Waiting for docker to start'"
-  - sleep 15
+  - sleep 10
   - docker ps -a
   - bundle exec kitchen test py2-git-2018-3-fedora-28
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
-  - clone
+  - throttle-build
   - Py2 2017.7(Git)
 
 - name: Py2 2019.2(Git)
@@ -914,13 +954,13 @@ steps:
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
   - "echo 'Waiting for docker to start'"
-  - sleep 15
+  - sleep 10
   - docker ps -a
   - bundle exec kitchen test py2-git-2019-2-fedora-28
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
-  - clone
+  - throttle-build
   - Py2 2018.3(Git)
 
 services:
@@ -946,6 +986,11 @@ platform:
   arch: amd64
 
 steps:
+- name: throttle-build
+  image: alpine
+  commands:
+  - "sh -c 't=120; echo Sleeping 120 seconds; sleep 120'"
+
 - name: Py2 2017.7(Git)
   image: docker:edge-dind
   commands:
@@ -955,13 +1000,13 @@ steps:
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
   - "echo 'Waiting for docker to start'"
-  - sleep 15
+  - sleep 10
   - docker ps -a
   - bundle exec kitchen test py2-git-2017-7-fedora-29
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
-  - clone
+  - throttle-build
 
 - name: Py2 2018.3(Git)
   image: docker:edge-dind
@@ -972,13 +1017,13 @@ steps:
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
   - "echo 'Waiting for docker to start'"
-  - sleep 15
+  - sleep 10
   - docker ps -a
   - bundle exec kitchen test py2-git-2018-3-fedora-29
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
-  - clone
+  - throttle-build
   - Py2 2017.7(Git)
 
 - name: Py2 2019.2(Git)
@@ -990,13 +1035,13 @@ steps:
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
   - "echo 'Waiting for docker to start'"
-  - sleep 15
+  - sleep 10
   - docker ps -a
   - bundle exec kitchen test py2-git-2019-2-fedora-29
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
-  - clone
+  - throttle-build
   - Py2 2018.3(Git)
 
 services:
@@ -1022,6 +1067,11 @@ platform:
   arch: amd64
 
 steps:
+- name: throttle-build
+  image: alpine
+  commands:
+  - "sh -c 't=135; echo Sleeping 135 seconds; sleep 135'"
+
 - name: Py2 2017.7(Git)
   image: docker:edge-dind
   commands:
@@ -1031,13 +1081,13 @@ steps:
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
   - "echo 'Waiting for docker to start'"
-  - sleep 15
+  - sleep 10
   - docker ps -a
   - bundle exec kitchen test py2-git-2017-7-opensuse-15
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
-  - clone
+  - throttle-build
 
 - name: Py2 2018.3(Git)
   image: docker:edge-dind
@@ -1048,13 +1098,13 @@ steps:
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
   - "echo 'Waiting for docker to start'"
-  - sleep 15
+  - sleep 10
   - docker ps -a
   - bundle exec kitchen test py2-git-2018-3-opensuse-15
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
-  - clone
+  - throttle-build
   - Py2 2017.7(Git)
 
 - name: Py2 2019.2(Git)
@@ -1066,13 +1116,13 @@ steps:
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
   - "echo 'Waiting for docker to start'"
-  - sleep 15
+  - sleep 10
   - docker ps -a
   - bundle exec kitchen test py2-git-2019-2-opensuse-15
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
-  - clone
+  - throttle-build
   - Py2 2018.3(Git)
 
 services:
@@ -1098,6 +1148,11 @@ platform:
   arch: amd64
 
 steps:
+- name: throttle-build
+  image: alpine
+  commands:
+  - "sh -c 't=150; echo Sleeping 150 seconds; sleep 150'"
+
 - name: Py2 2017.7(Git)
   image: docker:edge-dind
   commands:
@@ -1107,13 +1162,13 @@ steps:
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
   - "echo 'Waiting for docker to start'"
-  - sleep 15
+  - sleep 10
   - docker ps -a
   - bundle exec kitchen test py2-git-2017-7-opensuse-42
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
-  - clone
+  - throttle-build
 
 - name: Py2 2018.3(Git)
   image: docker:edge-dind
@@ -1124,13 +1179,13 @@ steps:
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
   - "echo 'Waiting for docker to start'"
-  - sleep 15
+  - sleep 10
   - docker ps -a
   - bundle exec kitchen test py2-git-2018-3-opensuse-42
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
-  - clone
+  - throttle-build
   - Py2 2017.7(Git)
 
 - name: Py2 2019.2(Git)
@@ -1142,13 +1197,13 @@ steps:
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
   - "echo 'Waiting for docker to start'"
-  - sleep 15
+  - sleep 10
   - docker ps -a
   - bundle exec kitchen test py2-git-2019-2-opensuse-42
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
-  - clone
+  - throttle-build
   - Py2 2018.3(Git)
 
 services:
@@ -1174,6 +1229,11 @@ platform:
   arch: amd64
 
 steps:
+- name: throttle-build
+  image: alpine
+  commands:
+  - "sh -c 't=330; echo Sleeping 330 seconds; sleep 330'"
+
 - name: Py2 2017.7(Git)
   image: docker:edge-dind
   commands:
@@ -1183,13 +1243,13 @@ steps:
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
   - "echo 'Waiting for docker to start'"
-  - sleep 15
+  - sleep 10
   - docker ps -a
   - bundle exec kitchen test py2-git-2017-7-ubuntu-1404
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
-  - clone
+  - throttle-build
 
 - name: Py2 2018.3(Git)
   image: docker:edge-dind
@@ -1200,13 +1260,13 @@ steps:
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
   - "echo 'Waiting for docker to start'"
-  - sleep 15
+  - sleep 10
   - docker ps -a
   - bundle exec kitchen test py2-git-2018-3-ubuntu-1404
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
-  - clone
+  - throttle-build
   - Py2 2017.7(Git)
 
 - name: Py2 2019.2(Git)
@@ -1218,13 +1278,13 @@ steps:
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
   - "echo 'Waiting for docker to start'"
-  - sleep 15
+  - sleep 10
   - docker ps -a
   - bundle exec kitchen test py2-git-2019-2-ubuntu-1404
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
-  - clone
+  - throttle-build
   - Py2 2018.3(Git)
 
 - name: Py2 2017.7(Stable)
@@ -1236,13 +1296,13 @@ steps:
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
   - "echo 'Waiting for docker to start'"
-  - sleep 15
+  - sleep 10
   - docker ps -a
   - bundle exec kitchen test py2-stable-2017-7-ubuntu-1404
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
-  - clone
+  - throttle-build
   - Py2 2017.7(Git)
 
 - name: Py2 2018.3(Stable)
@@ -1254,13 +1314,13 @@ steps:
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
   - "echo 'Waiting for docker to start'"
-  - sleep 15
+  - sleep 10
   - docker ps -a
   - bundle exec kitchen test py2-stable-2018-3-ubuntu-1404
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
-  - clone
+  - throttle-build
   - Py2 2018.3(Git)
 
 - name: Py2 2019.2(Stable)
@@ -1272,13 +1332,13 @@ steps:
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
   - "echo 'Waiting for docker to start'"
-  - sleep 15
+  - sleep 10
   - docker ps -a
   - bundle exec kitchen test py2-stable-2019-2-ubuntu-1404
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
-  - clone
+  - throttle-build
   - Py2 2019.2(Git)
 
 services:
@@ -1304,6 +1364,11 @@ platform:
   arch: amd64
 
 steps:
+- name: throttle-build
+  image: alpine
+  commands:
+  - "sh -c 't=360; echo Sleeping 360 seconds; sleep 360'"
+
 - name: Py2 2017.7(Git)
   image: docker:edge-dind
   commands:
@@ -1313,13 +1378,13 @@ steps:
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
   - "echo 'Waiting for docker to start'"
-  - sleep 15
+  - sleep 10
   - docker ps -a
   - bundle exec kitchen test py2-git-2017-7-ubuntu-1604
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
-  - clone
+  - throttle-build
 
 - name: Py2 2018.3(Git)
   image: docker:edge-dind
@@ -1330,13 +1395,13 @@ steps:
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
   - "echo 'Waiting for docker to start'"
-  - sleep 15
+  - sleep 10
   - docker ps -a
   - bundle exec kitchen test py2-git-2018-3-ubuntu-1604
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
-  - clone
+  - throttle-build
   - Py2 2017.7(Git)
 
 - name: Py2 2019.2(Git)
@@ -1348,13 +1413,13 @@ steps:
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
   - "echo 'Waiting for docker to start'"
-  - sleep 15
+  - sleep 10
   - docker ps -a
   - bundle exec kitchen test py2-git-2019-2-ubuntu-1604
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
-  - clone
+  - throttle-build
   - Py2 2018.3(Git)
 
 - name: Py2 2017.7(Stable)
@@ -1366,13 +1431,13 @@ steps:
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
   - "echo 'Waiting for docker to start'"
-  - sleep 15
+  - sleep 10
   - docker ps -a
   - bundle exec kitchen test py2-stable-2017-7-ubuntu-1604
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
-  - clone
+  - throttle-build
   - Py2 2017.7(Git)
 
 - name: Py2 2018.3(Stable)
@@ -1384,13 +1449,13 @@ steps:
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
   - "echo 'Waiting for docker to start'"
-  - sleep 15
+  - sleep 10
   - docker ps -a
   - bundle exec kitchen test py2-stable-2018-3-ubuntu-1604
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
-  - clone
+  - throttle-build
   - Py2 2018.3(Git)
 
 - name: Py2 2019.2(Stable)
@@ -1402,13 +1467,13 @@ steps:
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
   - "echo 'Waiting for docker to start'"
-  - sleep 15
+  - sleep 10
   - docker ps -a
   - bundle exec kitchen test py2-stable-2019-2-ubuntu-1604
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
-  - clone
+  - throttle-build
   - Py2 2019.2(Git)
 
 services:
@@ -1434,6 +1499,11 @@ platform:
   arch: amd64
 
 steps:
+- name: throttle-build
+  image: alpine
+  commands:
+  - "sh -c 't=390; echo Sleeping 390 seconds; sleep 390'"
+
 - name: Py2 2017.7(Git)
   image: docker:edge-dind
   commands:
@@ -1443,13 +1513,13 @@ steps:
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
   - "echo 'Waiting for docker to start'"
-  - sleep 15
+  - sleep 10
   - docker ps -a
   - bundle exec kitchen test py2-git-2017-7-ubuntu-1804
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
-  - clone
+  - throttle-build
 
 - name: Py2 2018.3(Git)
   image: docker:edge-dind
@@ -1460,13 +1530,13 @@ steps:
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
   - "echo 'Waiting for docker to start'"
-  - sleep 15
+  - sleep 10
   - docker ps -a
   - bundle exec kitchen test py2-git-2018-3-ubuntu-1804
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
-  - clone
+  - throttle-build
   - Py2 2017.7(Git)
 
 - name: Py2 2019.2(Git)
@@ -1478,13 +1548,13 @@ steps:
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
   - "echo 'Waiting for docker to start'"
-  - sleep 15
+  - sleep 10
   - docker ps -a
   - bundle exec kitchen test py2-git-2019-2-ubuntu-1804
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
-  - clone
+  - throttle-build
   - Py2 2018.3(Git)
 
 - name: Py2 2017.7(Stable)
@@ -1496,13 +1566,13 @@ steps:
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
   - "echo 'Waiting for docker to start'"
-  - sleep 15
+  - sleep 10
   - docker ps -a
   - bundle exec kitchen test py2-stable-2017-7-ubuntu-1804
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
-  - clone
+  - throttle-build
   - Py2 2017.7(Git)
 
 - name: Py2 2018.3(Stable)
@@ -1514,13 +1584,13 @@ steps:
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
   - "echo 'Waiting for docker to start'"
-  - sleep 15
+  - sleep 10
   - docker ps -a
   - bundle exec kitchen test py2-stable-2018-3-ubuntu-1804
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
-  - clone
+  - throttle-build
   - Py2 2018.3(Git)
 
 - name: Py2 2019.2(Stable)
@@ -1532,13 +1602,13 @@ steps:
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
   - "echo 'Waiting for docker to start'"
-  - sleep 15
+  - sleep 10
   - docker ps -a
   - bundle exec kitchen test py2-stable-2019-2-ubuntu-1804
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
-  - clone
+  - throttle-build
   - Py2 2019.2(Git)
 
 services:
@@ -1557,6 +1627,6 @@ depends_on:
 
 ---
 kind: signature
-hmac: cafe61d4887d61379d88ed9b0fab457a9558e1630a2f50a77e5d3af1c0f6e3ce
+hmac: 0814fe03cbaad49e7e9f1aef5d50b1713503e4d745b80372d2c55b32dfffd5e5
 
 ...

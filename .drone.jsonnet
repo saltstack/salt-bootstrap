@@ -67,13 +67,24 @@ local Build(distro) = {
 
   steps: [
     {
+      name: 'throttle-build',
+      image: 'alpine',
+      commands: [
+        std.format(
+          "sh -c 't=%(offset)s; echo Sleeping %(offset)s seconds; sleep %(offset)s'",
+          { offset: 5 * std.length(suites) * distro.multiplier }
+        ),
+      ],
+    },
+  ] + [
+    {
       name: suite.name,
       image: 'docker:edge-dind',
       environment: {
         DOCKER_HOST: 'tcp://docker:2375',
       },
       depends_on: [
-        'clone',
+        'throttle-build',
       ] + suite.depends,
       commands: [
         'apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev',
@@ -82,7 +93,7 @@ local Build(distro) = {
         'pip install -r tests/requirements.txt',
         'bundle install --with docker --without opennebula ec2 windows vagrant',
         "echo 'Waiting for docker to start'",
-        'sleep 15',  // sleep 5 # give docker enough time to start
+        'sleep 10',  // give docker enough time to start
         'docker ps -a',
         std.format('bundle exec kitchen test %s-%s', [suite.slug, distro.slug]),
       ],

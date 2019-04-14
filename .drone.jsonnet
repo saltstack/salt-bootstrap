@@ -92,7 +92,7 @@ local Build(distro) = {
     for suite in suites
   ],
   depends_on: [
-    'run-shellcheck',
+    'Lint',
   ],
 };
 

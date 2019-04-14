@@ -57,7 +57,7 @@ node:
   project: open
 
 depends_on:
-- run-shellcheck
+- Lint
 
 ---
 kind: pipeline
@@ -131,7 +131,7 @@ node:
   project: open
 
 depends_on:
-- run-shellcheck
+- Lint
 
 ---
 kind: pipeline
@@ -205,7 +205,7 @@ node:
   project: open
 
 depends_on:
-- run-shellcheck
+- Lint
 
 ---
 kind: pipeline
@@ -279,7 +279,7 @@ node:
   project: open
 
 depends_on:
-- run-shellcheck
+- Lint
 
 ---
 kind: pipeline
@@ -353,7 +353,7 @@ node:
   project: open
 
 depends_on:
-- run-shellcheck
+- Lint
 
 ---
 kind: pipeline
@@ -427,7 +427,7 @@ node:
   project: open
 
 depends_on:
-- run-shellcheck
+- Lint
 
 ---
 kind: pipeline
@@ -501,7 +501,7 @@ node:
   project: open
 
 depends_on:
-- run-shellcheck
+- Lint
 
 ---
 kind: pipeline
@@ -548,7 +548,7 @@ node:
   project: open
 
 depends_on:
-- run-shellcheck
+- Lint
 
 ---
 kind: pipeline
@@ -595,7 +595,7 @@ node:
   project: open
 
 depends_on:
-- run-shellcheck
+- Lint
 
 ---
 kind: pipeline
@@ -642,7 +642,7 @@ node:
   project: open
 
 depends_on:
-- run-shellcheck
+- Lint
 
 ---
 kind: pipeline
@@ -689,7 +689,7 @@ node:
   project: open
 
 depends_on:
-- run-shellcheck
+- Lint
 
 ---
 kind: pipeline
@@ -763,7 +763,7 @@ node:
   project: open
 
 depends_on:
-- run-shellcheck
+- Lint
 
 ---
 kind: pipeline
@@ -837,7 +837,7 @@ node:
   project: open
 
 depends_on:
-- run-shellcheck
+- Lint
 
 ---
 kind: pipeline
@@ -911,10 +911,10 @@ node:
   project: open
 
 depends_on:
-- run-shellcheck
+- Lint
 
 ---
 kind: signature
-hmac: b03e19c133948366846efec5b00644668a071c3d5d4a170110567384870b2a35
+hmac: e56c45a253af58232e583c28533a5524b094cb241a483507d12e2021e5b83f47
 
 ...

@@ -94,274 +94,6 @@ depends_on:
 
 ---
 kind: pipeline
-name: Amazon 1
-
-platform:
-  os: linux
-  arch: amd64
-
-steps:
-- name: throttle-build
-  image: alpine
-  commands:
-  - "sh -c 't=30; echo Sleeping 30 seconds; sleep 30'"
-
-- name: Py2 2017.7(Git)
-  image: docker:edge-dind
-  commands:
-  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
-  - gem install bundler
-  - pip install -U pip
-  - pip install -r tests/requirements.txt
-  - bundle install --with docker --without opennebula ec2 windows vagrant
-  - "echo 'Waiting for docker to start'"
-  - sleep 10
-  - docker ps -a
-  - bundle exec kitchen test py2-git-2017-7-amazon-1
-  environment:
-    DOCKER_HOST: tcp://docker:2375
-  depends_on:
-  - throttle-build
-
-- name: Py2 2018.3(Git)
-  image: docker:edge-dind
-  commands:
-  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
-  - gem install bundler
-  - pip install -U pip
-  - pip install -r tests/requirements.txt
-  - bundle install --with docker --without opennebula ec2 windows vagrant
-  - "echo 'Waiting for docker to start'"
-  - sleep 10
-  - docker ps -a
-  - bundle exec kitchen test py2-git-2018-3-amazon-1
-  environment:
-    DOCKER_HOST: tcp://docker:2375
-  depends_on:
-  - throttle-build
-  - Py2 2017.7(Git)
-
-- name: Py2 2019.2(Git)
-  image: docker:edge-dind
-  commands:
-  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
-  - gem install bundler
-  - pip install -U pip
-  - pip install -r tests/requirements.txt
-  - bundle install --with docker --without opennebula ec2 windows vagrant
-  - "echo 'Waiting for docker to start'"
-  - sleep 10
-  - docker ps -a
-  - bundle exec kitchen test py2-git-2019-2-amazon-1
-  environment:
-    DOCKER_HOST: tcp://docker:2375
-  depends_on:
-  - throttle-build
-  - Py2 2018.3(Git)
-
-- name: Py2 2017.7(Stable)
-  image: docker:edge-dind
-  commands:
-  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
-  - gem install bundler
-  - pip install -U pip
-  - pip install -r tests/requirements.txt
-  - bundle install --with docker --without opennebula ec2 windows vagrant
-  - "echo 'Waiting for docker to start'"
-  - sleep 10
-  - docker ps -a
-  - bundle exec kitchen test py2-stable-2017-7-amazon-1
-  environment:
-    DOCKER_HOST: tcp://docker:2375
-  depends_on:
-  - throttle-build
-  - Py2 2017.7(Git)
-
-- name: Py2 2018.3(Stable)
-  image: docker:edge-dind
-  commands:
-  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
-  - gem install bundler
-  - pip install -U pip
-  - pip install -r tests/requirements.txt
-  - bundle install --with docker --without opennebula ec2 windows vagrant
-  - "echo 'Waiting for docker to start'"
-  - sleep 10
-  - docker ps -a
-  - bundle exec kitchen test py2-stable-2018-3-amazon-1
-  environment:
-    DOCKER_HOST: tcp://docker:2375
-  depends_on:
-  - throttle-build
-  - Py2 2018.3(Git)
-
-- name: Py2 2019.2(Stable)
-  image: docker:edge-dind
-  commands:
-  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
-  - gem install bundler
-  - pip install -U pip
-  - pip install -r tests/requirements.txt
-  - bundle install --with docker --without opennebula ec2 windows vagrant
-  - "echo 'Waiting for docker to start'"
-  - sleep 10
-  - docker ps -a
-  - bundle exec kitchen test py2-stable-2019-2-amazon-1
-  environment:
-    DOCKER_HOST: tcp://docker:2375
-  depends_on:
-  - throttle-build
-  - Py2 2019.2(Git)
-
-services:
-- name: docker
-  image: docker:edge-dind
-  command:
-  - --storage-driver=overlay2
-  privileged: true
-
-node:
-  project: open
-
-depends_on:
-- Lint
-
----
-kind: pipeline
-name: Amazon 2
-
-platform:
-  os: linux
-  arch: amd64
-
-steps:
-- name: throttle-build
-  image: alpine
-  commands:
-  - "sh -c 't=60; echo Sleeping 60 seconds; sleep 60'"
-
-- name: Py2 2017.7(Git)
-  image: docker:edge-dind
-  commands:
-  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
-  - gem install bundler
-  - pip install -U pip
-  - pip install -r tests/requirements.txt
-  - bundle install --with docker --without opennebula ec2 windows vagrant
-  - "echo 'Waiting for docker to start'"
-  - sleep 10
-  - docker ps -a
-  - bundle exec kitchen test py2-git-2017-7-amazon-2
-  environment:
-    DOCKER_HOST: tcp://docker:2375
-  depends_on:
-  - throttle-build
-
-- name: Py2 2018.3(Git)
-  image: docker:edge-dind
-  commands:
-  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
-  - gem install bundler
-  - pip install -U pip
-  - pip install -r tests/requirements.txt
-  - bundle install --with docker --without opennebula ec2 windows vagrant
-  - "echo 'Waiting for docker to start'"
-  - sleep 10
-  - docker ps -a
-  - bundle exec kitchen test py2-git-2018-3-amazon-2
-  environment:
-    DOCKER_HOST: tcp://docker:2375
-  depends_on:
-  - throttle-build
-  - Py2 2017.7(Git)
-
-- name: Py2 2019.2(Git)
-  image: docker:edge-dind
-  commands:
-  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
-  - gem install bundler
-  - pip install -U pip
-  - pip install -r tests/requirements.txt
-  - bundle install --with docker --without opennebula ec2 windows vagrant
-  - "echo 'Waiting for docker to start'"
-  - sleep 10
-  - docker ps -a
-  - bundle exec kitchen test py2-git-2019-2-amazon-2
-  environment:
-    DOCKER_HOST: tcp://docker:2375
-  depends_on:
-  - throttle-build
-  - Py2 2018.3(Git)
-
-- name: Py2 2017.7(Stable)
-  image: docker:edge-dind
-  commands:
-  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
-  - gem install bundler
-  - pip install -U pip
-  - pip install -r tests/requirements.txt
-  - bundle install --with docker --without opennebula ec2 windows vagrant
-  - "echo 'Waiting for docker to start'"
-  - sleep 10
-  - docker ps -a
-  - bundle exec kitchen test py2-stable-2017-7-amazon-2
-  environment:
-    DOCKER_HOST: tcp://docker:2375
-  depends_on:
-  - throttle-build
-  - Py2 2017.7(Git)
-
-- name: Py2 2018.3(Stable)
-  image: docker:edge-dind
-  commands:
-  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
-  - gem install bundler
-  - pip install -U pip
-  - pip install -r tests/requirements.txt
-  - bundle install --with docker --without opennebula ec2 windows vagrant
-  - "echo 'Waiting for docker to start'"
-  - sleep 10
-  - docker ps -a
-  - bundle exec kitchen test py2-stable-2018-3-amazon-2
-  environment:
-    DOCKER_HOST: tcp://docker:2375
-  depends_on:
-  - throttle-build
-  - Py2 2018.3(Git)
-
-- name: Py2 2019.2(Stable)
-  image: docker:edge-dind
-  commands:
-  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
-  - gem install bundler
-  - pip install -U pip
-  - pip install -r tests/requirements.txt
-  - bundle install --with docker --without opennebula ec2 windows vagrant
-  - "echo 'Waiting for docker to start'"
-  - sleep 10
-  - docker ps -a
-  - bundle exec kitchen test py2-stable-2019-2-amazon-2
-  environment:
-    DOCKER_HOST: tcp://docker:2375
-  depends_on:
-  - throttle-build
-  - Py2 2019.2(Git)
-
-services:
-- name: docker
-  image: docker:edge-dind
-  command:
-  - --storage-driver=overlay2
-  privileged: true
-
-node:
-  project: open
-
-depends_on:
-- Lint
-
----
-kind: pipeline
 name: CentOS 6
 
 platform:
@@ -908,7 +640,7 @@ steps:
 - name: throttle-build
   image: alpine
   commands:
-  - "sh -c 't=105; echo Sleeping 105 seconds; sleep 105'"
+  - "sh -c 't=90; echo Sleeping 90 seconds; sleep 90'"
 
 - name: Py2 2017.7(Git)
   image: docker:edge-dind
@@ -975,7 +707,6 @@ node:
 
 depends_on:
 - Lint
-- Debian 9
 
 ---
 kind: pipeline
@@ -989,7 +720,7 @@ steps:
 - name: throttle-build
   image: alpine
   commands:
-  - "sh -c 't=120; echo Sleeping 120 seconds; sleep 120'"
+  - "sh -c 't=75; echo Sleeping 75 seconds; sleep 75'"
 
 - name: Py2 2017.7(Git)
   image: docker:edge-dind
@@ -1056,7 +787,6 @@ node:
 
 depends_on:
 - Lint
-- Debian 8
 
 ---
 kind: pipeline
@@ -1070,7 +800,7 @@ steps:
 - name: throttle-build
   image: alpine
   commands:
-  - "sh -c 't=135; echo Sleeping 135 seconds; sleep 135'"
+  - "sh -c 't=60; echo Sleeping 60 seconds; sleep 60'"
 
 - name: Py2 2017.7(Git)
   image: docker:edge-dind
@@ -1137,7 +867,6 @@ node:
 
 depends_on:
 - Lint
-- CentOS 7
 
 ---
 kind: pipeline
@@ -1151,7 +880,7 @@ steps:
 - name: throttle-build
   image: alpine
   commands:
-  - "sh -c 't=150; echo Sleeping 150 seconds; sleep 150'"
+  - "sh -c 't=45; echo Sleeping 45 seconds; sleep 45'"
 
 - name: Py2 2017.7(Git)
   image: docker:edge-dind
@@ -1218,7 +947,6 @@ node:
 
 depends_on:
 - Lint
-- CentOS 6
 
 ---
 kind: pipeline
@@ -1232,7 +960,7 @@ steps:
 - name: throttle-build
   image: alpine
   commands:
-  - "sh -c 't=330; echo Sleeping 330 seconds; sleep 330'"
+  - "sh -c 't=60; echo Sleeping 60 seconds; sleep 60'"
 
 - name: Py2 2017.7(Git)
   image: docker:edge-dind
@@ -1353,7 +1081,6 @@ node:
 
 depends_on:
 - Lint
-- Amazon 2
 
 ---
 kind: pipeline
@@ -1367,7 +1094,7 @@ steps:
 - name: throttle-build
   image: alpine
   commands:
-  - "sh -c 't=360; echo Sleeping 360 seconds; sleep 360'"
+  - "sh -c 't=30; echo Sleeping 30 seconds; sleep 30'"
 
 - name: Py2 2017.7(Git)
   image: docker:edge-dind
@@ -1488,7 +1215,6 @@ node:
 
 depends_on:
 - Lint
-- Amazon 1
 
 ---
 kind: pipeline
@@ -1502,7 +1228,7 @@ steps:
 - name: throttle-build
   image: alpine
   commands:
-  - "sh -c 't=390; echo Sleeping 390 seconds; sleep 390'"
+  - "sh -c 't=0; echo Sleeping 0 seconds; sleep 0'"
 
 - name: Py2 2017.7(Git)
   image: docker:edge-dind
@@ -1623,10 +1349,9 @@ node:
 
 depends_on:
 - Lint
-- Arch
 
 ---
 kind: signature
-hmac: 0814fe03cbaad49e7e9f1aef5d50b1713503e4d745b80372d2c55b32dfffd5e5
+hmac: 5f368b5d2667f2550e77b81876bc5b1fb9f703944b08b845a6736b6e0a161e95
 
 ...

@@ -6082,7 +6082,8 @@ install_opensuse_15_git_deps() {
     fi
 
     __PACKAGES="${__PACKAGES} libzmq5 python${PY_PKG_VER}-Jinja2 python${PY_PKG_VER}-msgpack"
-    __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-pycrypto python${PY_PKG_VER}-pyzmq"
+    __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-pycrypto python${PY_PKG_VER}-pyzmq "
+    __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-xml"
 
     if [ -f "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" ]; then
         # We're on the develop branch, install whichever tornado is on the requirements file

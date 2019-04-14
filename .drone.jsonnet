@@ -1,7 +1,7 @@
 local git_suites = [
   { name: 'Py2 2017.7(Git)', slug: 'py2-git-2017-7', depends: [] },
-  { name: 'Py2 2018.3(Git)', slug: 'py2-git-2018-3', depends: [] },
-  { name: 'Py2 2019.2(Git)', slug: 'py2-git-2019-2', depends: [] },
+  { name: 'Py2 2018.3(Git)', slug: 'py2-git-2018-3', depends: ['Py2 2017.7(Git)'] },
+  { name: 'Py2 2019.2(Git)', slug: 'py2-git-2019-2', depends: ['Py2 2018.3(Git)'] },
   // {name: 'Py2 develop(Stable)', slug: 'py2-git-develop'},  // Don't test against Salt's develop branch. Stability is not assured.
 ];
 

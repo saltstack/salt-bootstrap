@@ -1875,7 +1875,7 @@ __apt_key_fetch() {
     url=$1
 
     # shellcheck disable=SC2086
-    __wait_for_apt apt-key adv ${_GPG_ARGS} --fetch-keys "$url"; return $?
+    __wait_for_apt curl ${_CURL_ARGS} -sSL "$url" | apt-key add -; return $?
 }   # ----------  end of function __apt_key_fetch  ----------
 
 

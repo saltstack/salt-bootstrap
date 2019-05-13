@@ -1894,7 +1894,7 @@ __temp_gpg_pub() {
 __apt_key_fetch() {
     url=$1
 
-    tempfile=__temp_gpg_pub || return 1
+    tempfile="$(__temp_gpg_pub)" || return 1
 
     __fetch_url "$tempfile" "$url" || return 1
     apt-key add "$tempfile" || return 1
@@ -1912,7 +1912,7 @@ __apt_key_fetch() {
 __rpm_import_gpg() {
     url=$1
 
-    tempfile=__temp_gpg_pub || return 1
+    tempfile="$(__temp_gpg_pub)" || return 1
 
     __fetch_url "$tempfile" "$url" || return 1
     rpm --import "$tempfile" || return 1

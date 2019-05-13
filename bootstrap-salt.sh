@@ -1867,6 +1867,26 @@ __apt_get_upgrade_noinput() {
 
 
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  __temp_gpg_pub
+#   DESCRIPTION:  Create a temporary file for downloading a GPG public key.
+#----------------------------------------------------------------------------------------------------------------------
+__temp_gpg_pub() {
+    if __check_command_exists mktemp; then
+        tempfile="$(mktemp /tmp/salt-gpg-XXXXXXXX.pub 2>/dev/null)"
+
+        if [ -z "$tempfile" ]; then
+            echoerror "Failed to create temporary file in /tmp"
+            return 1
+        fi
+    else
+        tempfile="/tmp/salt-gpg-$$.pub"
+    fi
+
+    echo $tempfile
+}   # ----------- end of function __temp_gpg_pub  -----------
+
+
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #          NAME:  __apt_key_fetch
 #   DESCRIPTION:  Download and import GPG public key for "apt-secure"
 #    PARAMETERS:  url
@@ -1874,8 +1894,13 @@ __apt_get_upgrade_noinput() {
 __apt_key_fetch() {
     url=$1
 
-    # shellcheck disable=SC2086
-    __fetch_url - "$url" | apt-key add -; return $?
+    tempfile = __temp_gpg_pub || return 1
+
+    __fetch_url "$tempfile" "$url" || return 1
+    apt-key add "$tempfile" || return 1
+    rm -f "$tempfile"
+
+    return 0
 }   # ----------  end of function __apt_key_fetch  ----------
 
 
@@ -1887,16 +1912,7 @@ __apt_key_fetch() {
 __rpm_import_gpg() {
     url=$1
 
-    if __check_command_exists mktemp; then
-        tempfile="$(mktemp /tmp/salt-gpg-XXXXXXXX.pub 2>/dev/null)"
-
-        if [ -z "$tempfile" ]; then
-            echoerror "Failed to create temporary file in /tmp"
-            return 1
-        fi
-    else
-        tempfile="/tmp/salt-gpg-$$.pub"
-    fi
+    tempfile = __temp_gpg_pub || return 1
 
     __fetch_url "$tempfile" "$url" || return 1
     rpm --import "$tempfile" || return 1

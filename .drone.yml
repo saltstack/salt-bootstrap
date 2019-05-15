@@ -26,7 +26,7 @@ steps:
   commands:
   - "sh -c 't=0; echo Sleeping 0 seconds; sleep 0'"
 
-- name: Converge Arch
+- name: create
   image: docker:edge-dind
   commands:
   - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
@@ -35,7 +35,7 @@ steps:
   - "echo 'Waiting for docker to start'"
   - sleep 10
   - docker ps -a
-  - bundle exec kitchen converge arch
+  - bundle exec kitchen create arch
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
@@ -54,7 +54,7 @@ steps:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
-  - Converge Arch
+  - create
 
 - name: Py2 2018.3(Git)
   image: docker:edge-dind
@@ -69,7 +69,7 @@ steps:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
-  - Converge Arch
+  - create
 
 - name: Py2 2019.2(Git)
   image: docker:edge-dind
@@ -84,7 +84,7 @@ steps:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
-  - Converge Arch
+  - create
 
 services:
 - name: docker
@@ -113,7 +113,7 @@ steps:
   commands:
   - "sh -c 't=90; echo Sleeping 90 seconds; sleep 90'"
 
-- name: Converge CentOS 6
+- name: create
   image: docker:edge-dind
   commands:
   - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
@@ -122,7 +122,7 @@ steps:
   - "echo 'Waiting for docker to start'"
   - sleep 10
   - docker ps -a
-  - bundle exec kitchen converge centos-6
+  - bundle exec kitchen create centos-6
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
@@ -141,7 +141,7 @@ steps:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
-  - Converge CentOS 6
+  - create
 
 - name: Py2 2018.3(Git)
   image: docker:edge-dind
@@ -156,7 +156,7 @@ steps:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
-  - Converge CentOS 6
+  - create
 
 - name: Py2 2019.2(Git)
   image: docker:edge-dind
@@ -171,7 +171,7 @@ steps:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
-  - Converge CentOS 6
+  - create
 
 - name: Py2 2017.7(Stable)
   image: docker:edge-dind
@@ -186,7 +186,7 @@ steps:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
-  - Converge CentOS 6
+  - create
 
 - name: Py2 2018.3(Stable)
   image: docker:edge-dind
@@ -201,7 +201,7 @@ steps:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
-  - Converge CentOS 6
+  - create
 
 - name: Py2 2019.2(Stable)
   image: docker:edge-dind
@@ -216,7 +216,7 @@ steps:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
-  - Converge CentOS 6
+  - create
 
 services:
 - name: docker
@@ -245,7 +245,7 @@ steps:
   commands:
   - "sh -c 't=120; echo Sleeping 120 seconds; sleep 120'"
 
-- name: Converge CentOS 7
+- name: create
   image: docker:edge-dind
   commands:
   - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
@@ -254,7 +254,7 @@ steps:
   - "echo 'Waiting for docker to start'"
   - sleep 10
   - docker ps -a
-  - bundle exec kitchen converge centos-7
+  - bundle exec kitchen create centos-7
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
@@ -273,7 +273,7 @@ steps:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
-  - Converge CentOS 7
+  - create
 
 - name: Py2 2018.3(Git)
   image: docker:edge-dind
@@ -288,7 +288,7 @@ steps:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
-  - Converge CentOS 7
+  - create
 
 - name: Py2 2019.2(Git)
   image: docker:edge-dind
@@ -303,7 +303,7 @@ steps:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
-  - Converge CentOS 7
+  - create
 
 - name: Py2 2017.7(Stable)
   image: docker:edge-dind
@@ -318,7 +318,7 @@ steps:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
-  - Converge CentOS 7
+  - create
 
 - name: Py2 2018.3(Stable)
   image: docker:edge-dind
@@ -333,7 +333,7 @@ steps:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
-  - Converge CentOS 7
+  - create
 
 - name: Py2 2019.2(Stable)
   image: docker:edge-dind
@@ -348,7 +348,7 @@ steps:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
-  - Converge CentOS 7
+  - create
 
 services:
 - name: docker
@@ -377,7 +377,7 @@ steps:
   commands:
   - "sh -c 't=150; echo Sleeping 150 seconds; sleep 150'"
 
-- name: Converge Debian 8
+- name: create
   image: docker:edge-dind
   commands:
   - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
@@ -386,7 +386,7 @@ steps:
   - "echo 'Waiting for docker to start'"
   - sleep 10
   - docker ps -a
-  - bundle exec kitchen converge debian-8
+  - bundle exec kitchen create debian-8
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
@@ -405,7 +405,7 @@ steps:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
-  - Converge Debian 8
+  - create
 
 - name: Py2 2018.3(Git)
   image: docker:edge-dind
@@ -420,7 +420,7 @@ steps:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
-  - Converge Debian 8
+  - create
 
 - name: Py2 2019.2(Git)
   image: docker:edge-dind
@@ -435,7 +435,7 @@ steps:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
-  - Converge Debian 8
+  - create
 
 - name: Py2 2017.7(Stable)
   image: docker:edge-dind
@@ -450,7 +450,7 @@ steps:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
-  - Converge Debian 8
+  - create
 
 - name: Py2 2018.3(Stable)
   image: docker:edge-dind
@@ -465,7 +465,7 @@ steps:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
-  - Converge Debian 8
+  - create
 
 - name: Py2 2019.2(Stable)
   image: docker:edge-dind
@@ -480,7 +480,7 @@ steps:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
-  - Converge Debian 8
+  - create
 
 services:
 - name: docker
@@ -509,7 +509,7 @@ steps:
   commands:
   - "sh -c 't=180; echo Sleeping 180 seconds; sleep 180'"
 
-- name: Converge Debian 9
+- name: create
   image: docker:edge-dind
   commands:
   - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
@@ -518,7 +518,7 @@ steps:
   - "echo 'Waiting for docker to start'"
   - sleep 10
   - docker ps -a
-  - bundle exec kitchen converge debian-9
+  - bundle exec kitchen create debian-9
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
@@ -537,7 +537,7 @@ steps:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
-  - Converge Debian 9
+  - create
 
 - name: Py2 2018.3(Git)
   image: docker:edge-dind
@@ -552,7 +552,7 @@ steps:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
-  - Converge Debian 9
+  - create
 
 - name: Py2 2019.2(Git)
   image: docker:edge-dind
@@ -567,7 +567,7 @@ steps:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
-  - Converge Debian 9
+  - create
 
 - name: Py2 2017.7(Stable)
   image: docker:edge-dind
@@ -582,7 +582,7 @@ steps:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
-  - Converge Debian 9
+  - create
 
 - name: Py2 2018.3(Stable)
   image: docker:edge-dind
@@ -597,7 +597,7 @@ steps:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
-  - Converge Debian 9
+  - create
 
 - name: Py2 2019.2(Stable)
   image: docker:edge-dind
@@ -612,7 +612,7 @@ steps:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
-  - Converge Debian 9
+  - create
 
 services:
 - name: docker
@@ -641,7 +641,7 @@ steps:
   commands:
   - "sh -c 't=90; echo Sleeping 90 seconds; sleep 90'"
 
-- name: Converge Fedora 28
+- name: create
   image: docker:edge-dind
   commands:
   - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
@@ -650,7 +650,7 @@ steps:
   - "echo 'Waiting for docker to start'"
   - sleep 10
   - docker ps -a
-  - bundle exec kitchen converge fedora-28
+  - bundle exec kitchen create fedora-28
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
@@ -669,7 +669,7 @@ steps:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
-  - Converge Fedora 28
+  - create
 
 - name: Py2 2018.3(Git)
   image: docker:edge-dind
@@ -684,7 +684,7 @@ steps:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
-  - Converge Fedora 28
+  - create
 
 - name: Py2 2019.2(Git)
   image: docker:edge-dind
@@ -699,7 +699,7 @@ steps:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
-  - Converge Fedora 28
+  - create
 
 services:
 - name: docker
@@ -728,7 +728,7 @@ steps:
   commands:
   - "sh -c 't=75; echo Sleeping 75 seconds; sleep 75'"
 
-- name: Converge Fedora 29
+- name: create
   image: docker:edge-dind
   commands:
   - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
@@ -737,7 +737,7 @@ steps:
   - "echo 'Waiting for docker to start'"
   - sleep 10
   - docker ps -a
-  - bundle exec kitchen converge fedora-29
+  - bundle exec kitchen create fedora-29
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
@@ -756,7 +756,7 @@ steps:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
-  - Converge Fedora 29
+  - create
 
 - name: Py2 2018.3(Git)
   image: docker:edge-dind
@@ -771,7 +771,7 @@ steps:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
-  - Converge Fedora 29
+  - create
 
 - name: Py2 2019.2(Git)
   image: docker:edge-dind
@@ -786,7 +786,7 @@ steps:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
-  - Converge Fedora 29
+  - create
 
 services:
 - name: docker
@@ -815,7 +815,7 @@ steps:
   commands:
   - "sh -c 't=60; echo Sleeping 60 seconds; sleep 60'"
 
-- name: Converge Opensuse 15.0
+- name: create
   image: docker:edge-dind
   commands:
   - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
@@ -824,7 +824,7 @@ steps:
   - "echo 'Waiting for docker to start'"
   - sleep 10
   - docker ps -a
-  - bundle exec kitchen converge opensuse-15
+  - bundle exec kitchen create opensuse-15
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
@@ -843,7 +843,7 @@ steps:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
-  - Converge Opensuse 15.0
+  - create
 
 - name: Py2 2018.3(Git)
   image: docker:edge-dind
@@ -858,7 +858,7 @@ steps:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
-  - Converge Opensuse 15.0
+  - create
 
 - name: Py2 2019.2(Git)
   image: docker:edge-dind
@@ -873,7 +873,7 @@ steps:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
-  - Converge Opensuse 15.0
+  - create
 
 services:
 - name: docker
@@ -902,7 +902,7 @@ steps:
   commands:
   - "sh -c 't=45; echo Sleeping 45 seconds; sleep 45'"
 
-- name: Converge Opensuse 42.3
+- name: create
   image: docker:edge-dind
   commands:
   - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
@@ -911,7 +911,7 @@ steps:
   - "echo 'Waiting for docker to start'"
   - sleep 10
   - docker ps -a
-  - bundle exec kitchen converge opensuse-42
+  - bundle exec kitchen create opensuse-42
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
@@ -930,7 +930,7 @@ steps:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
-  - Converge Opensuse 42.3
+  - create
 
 - name: Py2 2018.3(Git)
   image: docker:edge-dind
@@ -945,7 +945,7 @@ steps:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
-  - Converge Opensuse 42.3
+  - create
 
 - name: Py2 2019.2(Git)
   image: docker:edge-dind
@@ -960,7 +960,7 @@ steps:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
-  - Converge Opensuse 42.3
+  - create
 
 services:
 - name: docker
@@ -989,7 +989,7 @@ steps:
   commands:
   - "sh -c 't=30; echo Sleeping 30 seconds; sleep 30'"
 
-- name: Converge Ubuntu 16.04
+- name: create
   image: docker:edge-dind
   commands:
   - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
@@ -998,7 +998,7 @@ steps:
   - "echo 'Waiting for docker to start'"
   - sleep 10
   - docker ps -a
-  - bundle exec kitchen converge ubuntu-1604
+  - bundle exec kitchen create ubuntu-1604
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
@@ -1017,7 +1017,7 @@ steps:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
-  - Converge Ubuntu 16.04
+  - create
 
 - name: Py2 2018.3(Git)
   image: docker:edge-dind
@@ -1032,7 +1032,7 @@ steps:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
-  - Converge Ubuntu 16.04
+  - create
 
 - name: Py2 2019.2(Git)
   image: docker:edge-dind
@@ -1047,7 +1047,7 @@ steps:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
-  - Converge Ubuntu 16.04
+  - create
 
 - name: Py2 2017.7(Stable)
   image: docker:edge-dind
@@ -1062,7 +1062,7 @@ steps:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
-  - Converge Ubuntu 16.04
+  - create
 
 - name: Py2 2018.3(Stable)
   image: docker:edge-dind
@@ -1077,7 +1077,7 @@ steps:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
-  - Converge Ubuntu 16.04
+  - create
 
 - name: Py2 2019.2(Stable)
   image: docker:edge-dind
@@ -1092,7 +1092,7 @@ steps:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
-  - Converge Ubuntu 16.04
+  - create
 
 services:
 - name: docker
@@ -1121,7 +1121,7 @@ steps:
   commands:
   - "sh -c 't=0; echo Sleeping 0 seconds; sleep 0'"
 
-- name: Converge Ubuntu 18.04
+- name: create
   image: docker:edge-dind
   commands:
   - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
@@ -1130,7 +1130,7 @@ steps:
   - "echo 'Waiting for docker to start'"
   - sleep 10
   - docker ps -a
-  - bundle exec kitchen converge ubuntu-1804
+  - bundle exec kitchen create ubuntu-1804
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
@@ -1149,7 +1149,7 @@ steps:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
-  - Converge Ubuntu 18.04
+  - create
 
 - name: Py2 2018.3(Git)
   image: docker:edge-dind
@@ -1164,7 +1164,7 @@ steps:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
-  - Converge Ubuntu 18.04
+  - create
 
 - name: Py2 2019.2(Git)
   image: docker:edge-dind
@@ -1179,7 +1179,7 @@ steps:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
-  - Converge Ubuntu 18.04
+  - create
 
 - name: Py2 2017.7(Stable)
   image: docker:edge-dind
@@ -1194,7 +1194,7 @@ steps:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
-  - Converge Ubuntu 18.04
+  - create
 
 - name: Py2 2018.3(Stable)
   image: docker:edge-dind
@@ -1209,7 +1209,7 @@ steps:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
-  - Converge Ubuntu 18.04
+  - create
 
 - name: Py2 2019.2(Stable)
   image: docker:edge-dind
@@ -1224,7 +1224,7 @@ steps:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
-  - Converge Ubuntu 18.04
+  - create
 
 services:
 - name: docker
@@ -1241,6 +1241,6 @@ depends_on:
 
 ---
 kind: signature
-hmac: cf6f4f59490e8b3adf0f1f0976939d1381b62ec2a4a94009fd6cd4681a7ca61a
+hmac: f0ec6791f3166a8e1ddd866184713eeb670d93caefc3d1837235fe8abcb48049
 
 ...

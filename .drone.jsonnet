@@ -75,7 +75,7 @@ local Build(distro) = {
       ],
     },
     {
-      name: std.format('Converge %s', [distro.name]),
+      name: 'create',
       image: 'docker:edge-dind',
       environment: {
         DOCKER_HOST: 'tcp://docker:2375',
@@ -90,7 +90,7 @@ local Build(distro) = {
         "echo 'Waiting for docker to start'",
         'sleep 10',  // give docker enough time to start
         'docker ps -a',
-        std.format('bundle exec kitchen converge %s', [distro.slug]),
+        std.format('bundle exec kitchen create %s', [distro.slug]),
       ],
     },
   ] + [
@@ -102,7 +102,7 @@ local Build(distro) = {
       },
       depends_on: [
         'throttle-build',
-        std.format('Converge %s', [distro.name]),
+        'create',
       ],
       commands: [
         'apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev',

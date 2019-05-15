@@ -59,7 +59,6 @@ steps:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
-  - Py2 2017.7(Git)
 
 - name: Py2 2019.2(Git)
   image: docker:edge-dind
@@ -77,7 +76,6 @@ steps:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
-  - Py2 2018.3(Git)
 
 services:
 - name: docker
@@ -139,7 +137,6 @@ steps:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
-  - Py2 2017.7(Git)
 
 - name: Py2 2019.2(Git)
   image: docker:edge-dind
@@ -157,7 +154,6 @@ steps:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
-  - Py2 2018.3(Git)
 
 - name: Py2 2017.7(Stable)
   image: docker:edge-dind
@@ -175,7 +171,6 @@ steps:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
-  - Py2 2017.7(Git)
 
 - name: Py2 2018.3(Stable)
   image: docker:edge-dind
@@ -193,7 +188,6 @@ steps:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
-  - Py2 2018.3(Git)
 
 - name: Py2 2019.2(Stable)
   image: docker:edge-dind
@@ -211,7 +205,6 @@ steps:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
-  - Py2 2019.2(Git)
 
 services:
 - name: docker
@@ -273,7 +266,6 @@ steps:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
-  - Py2 2017.7(Git)
 
 - name: Py2 2019.2(Git)
   image: docker:edge-dind
@@ -291,7 +283,6 @@ steps:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
-  - Py2 2018.3(Git)
 
 - name: Py2 2017.7(Stable)
   image: docker:edge-dind
@@ -309,7 +300,6 @@ steps:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
-  - Py2 2017.7(Git)
 
 - name: Py2 2018.3(Stable)
   image: docker:edge-dind
@@ -327,7 +317,6 @@ steps:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
-  - Py2 2018.3(Git)
 
 - name: Py2 2019.2(Stable)
   image: docker:edge-dind
@@ -345,7 +334,6 @@ steps:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
-  - Py2 2019.2(Git)
 
 services:
 - name: docker
@@ -407,7 +395,6 @@ steps:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
-  - Py2 2017.7(Git)
 
 - name: Py2 2019.2(Git)
   image: docker:edge-dind
@@ -425,7 +412,6 @@ steps:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
-  - Py2 2018.3(Git)
 
 - name: Py2 2017.7(Stable)
   image: docker:edge-dind
@@ -443,7 +429,6 @@ steps:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
-  - Py2 2017.7(Git)
 
 - name: Py2 2018.3(Stable)
   image: docker:edge-dind
@@ -461,7 +446,6 @@ steps:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
-  - Py2 2018.3(Git)
 
 - name: Py2 2019.2(Stable)
   image: docker:edge-dind
@@ -479,7 +463,6 @@ steps:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
-  - Py2 2019.2(Git)
 
 services:
 - name: docker
@@ -541,7 +524,6 @@ steps:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
-  - Py2 2017.7(Git)
 
 - name: Py2 2019.2(Git)
   image: docker:edge-dind
@@ -559,7 +541,6 @@ steps:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
-  - Py2 2018.3(Git)
 
 - name: Py2 2017.7(Stable)
   image: docker:edge-dind
@@ -577,7 +558,6 @@ steps:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
-  - Py2 2017.7(Git)
 
 - name: Py2 2018.3(Stable)
   image: docker:edge-dind
@@ -595,7 +575,6 @@ steps:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
-  - Py2 2018.3(Git)
 
 - name: Py2 2019.2(Stable)
   image: docker:edge-dind
@@ -613,7 +592,6 @@ steps:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
-  - Py2 2019.2(Git)
 
 services:
 - name: docker
@@ -675,7 +653,6 @@ steps:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
-  - Py2 2017.7(Git)
 
 - name: Py2 2019.2(Git)
   image: docker:edge-dind
@@ -693,7 +670,6 @@ steps:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
-  - Py2 2018.3(Git)
 
 services:
 - name: docker
@@ -755,7 +731,6 @@ steps:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
-  - Py2 2017.7(Git)
 
 - name: Py2 2019.2(Git)
   image: docker:edge-dind
@@ -773,7 +748,6 @@ steps:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
-  - Py2 2018.3(Git)
 
 services:
 - name: docker
@@ -835,7 +809,6 @@ steps:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
-  - Py2 2017.7(Git)
 
 - name: Py2 2019.2(Git)
   image: docker:edge-dind
@@ -853,7 +826,6 @@ steps:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
-  - Py2 2018.3(Git)
 
 services:
 - name: docker
@@ -915,7 +887,6 @@ steps:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
-  - Py2 2017.7(Git)
 
 - name: Py2 2019.2(Git)
   image: docker:edge-dind
@@ -933,7 +904,6 @@ steps:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
-  - Py2 2018.3(Git)
 
 services:
 - name: docker
@@ -995,7 +965,6 @@ steps:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
-  - Py2 2017.7(Git)
 
 - name: Py2 2019.2(Git)
   image: docker:edge-dind
@@ -1013,7 +982,6 @@ steps:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
-  - Py2 2018.3(Git)
 
 - name: Py2 2017.7(Stable)
   image: docker:edge-dind
@@ -1031,7 +999,6 @@ steps:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
-  - Py2 2017.7(Git)
 
 - name: Py2 2018.3(Stable)
   image: docker:edge-dind
@@ -1049,7 +1016,6 @@ steps:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
-  - Py2 2018.3(Git)
 
 - name: Py2 2019.2(Stable)
   image: docker:edge-dind
@@ -1067,7 +1033,6 @@ steps:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
-  - Py2 2019.2(Git)
 
 services:
 - name: docker
@@ -1129,7 +1094,6 @@ steps:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
-  - Py2 2017.7(Git)
 
 - name: Py2 2019.2(Git)
   image: docker:edge-dind
@@ -1147,7 +1111,6 @@ steps:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
-  - Py2 2018.3(Git)
 
 - name: Py2 2017.7(Stable)
   image: docker:edge-dind
@@ -1165,7 +1128,6 @@ steps:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
-  - Py2 2017.7(Git)
 
 - name: Py2 2018.3(Stable)
   image: docker:edge-dind
@@ -1183,7 +1145,6 @@ steps:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
-  - Py2 2018.3(Git)
 
 - name: Py2 2019.2(Stable)
   image: docker:edge-dind
@@ -1201,7 +1162,6 @@ steps:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
-  - Py2 2019.2(Git)
 
 services:
 - name: docker
@@ -1218,6 +1178,6 @@ depends_on:
 
 ---
 kind: signature
-hmac: b342a68e9394efa7475353f4d27a51021bb203b6ac54f82c7f7285d18a47a2a0
+hmac: 7ecfc845f0ee48492a8c3c42d38e9cc51f2e3ed5507de90f408c09a3a124c8c5
 
 ...

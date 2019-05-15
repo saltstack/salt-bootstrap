@@ -83,7 +83,7 @@ local Build(distro) = {
       },
       depends_on: [
         'throttle-build',
-      ] + suite.depends,
+      ],
       commands: [
         'apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev',
         'gem install bundler',

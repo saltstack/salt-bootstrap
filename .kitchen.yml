@@ -95,12 +95,6 @@ platforms:
   - name: ubuntu-16.04
     driver_config:
       run_command: /lib/systemd/systemd
-  - name: ubuntu-14.04
-    driver_config:
-      run_command: /sbin/init
-      provision_command:
-        - rm -f /sbin/initctl
-        - dpkg-divert --local --rename --remove /sbin/initctl
 
 suites:
   - name: py2-git-2017-7
@@ -122,7 +116,6 @@ suites:
       - fedora-29
       - opensuse-15
       - opensuse-42
-      - ubuntu-1404
   - name: py2-stable-2018-3
     provisioner:
       salt_version: 2018.3
@@ -133,7 +126,6 @@ suites:
       - fedora-29
       - opensuse-15
       - opensuse-42
-      - ubuntu-1404
   - name: py2-stable-2019-2
     provisioner:
       salt_version: 2019.2
@@ -144,7 +136,6 @@ suites:
       - fedora-29
       - opensuse-15
       - opensuse-42
-      - ubuntu-1404
 
 verifier:
   name: shell

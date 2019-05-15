@@ -23,7 +23,6 @@ local distros = [
   { name: 'Fedora 29', slug: 'fedora-29', multiplier: 5, depends: [] },
   { name: 'Opensuse 15.0', slug: 'opensuse-15', multiplier: 4, depends: [] },
   { name: 'Opensuse 42.3', slug: 'opensuse-42', multiplier: 3, depends: [] },
-  { name: 'Ubuntu 14.04', slug: 'ubuntu-1404', multiplier: 2, depends: [] },
   { name: 'Ubuntu 16.04', slug: 'ubuntu-1604', multiplier: 1, depends: [] },
   { name: 'Ubuntu 18.04', slug: 'ubuntu-1804', multiplier: 0, depends: [] },
 ];
@@ -35,7 +34,6 @@ local stable_distros = [
   'centos-7',
   'debian-8',
   'debian-9',
-  'ubuntu-1404',
   'ubuntu-1604',
   'ubuntu-1804',
 ];

@@ -499,6 +499,7 @@ exec 2>"$LOGPIPE"
 #              14               SIGALRM
 #              15               SIGTERM
 #----------------------------------------------------------------------------------------------------------------------
+APT_ERR=$(mktemp /tmp/apt_error.XXXX)
 __exit_cleanup() {
     EXIT_CODE=$?
 
@@ -1819,7 +1820,6 @@ __function_defined() {
 #                 a boot process, such as on AWS AMIs. This func will wait until the boot
 #                 process is finished so the script doesn't exit on a locked proc.
 #----------------------------------------------------------------------------------------------------------------------
-APT_ERR=$(mktemp /tmp/apt_error.XXXX)
 __wait_for_apt(){
     # Timeout set at 15 minutes
     WAIT_TIMEOUT=900
@@ -1830,18 +1830,18 @@ __wait_for_apt(){
 
     # Make sure we're not waiting on a lock
     while [ $APT_RETURN -ne 0 ] && grep -q '^E: Could not get lock' "$APT_ERR"; do
-      echoinfo "Aware of the lock. Patiently waiting $WAIT_TIMEOUT more seconds..."
-      sleep 1
-      WAIT_TIMEOUT=$((WAIT_TIMEOUT - 1))
+        echoinfo "Aware of the lock. Patiently waiting $WAIT_TIMEOUT more seconds..."
+        sleep 1
+        WAIT_TIMEOUT=$((WAIT_TIMEOUT - 1))
 
-      if [ "$WAIT_TIMEOUT" -eq 0 ]; then
-          echoerror "Apt, apt-get, aptitude, or dpkg process is taking too long."
-          echoerror "Bootstrap script cannot proceed. Aborting."
-          return 1
-      else
-	  "${@}" 2>"$APT_ERR"
-    	  APT_RETURN=$?
-      fi
+        if [ "$WAIT_TIMEOUT" -eq 0 ]; then
+            echoerror "Apt, apt-get, aptitude, or dpkg process is taking too long."
+            echoerror "Bootstrap script cannot proceed. Aborting."
+            return 1
+        else
+            "${@}" 2>"$APT_ERR"
+            APT_RETURN=$?
+        fi
     done
 
     return $APT_RETURN
@@ -3851,7 +3851,7 @@ install_centos_git_deps() {
 
     if [ "${_PY_EXE}" != "" ] && [ "$_PIP_ALLOWED" -eq "$BS_TRUE" ]; then
         # If "-x" is defined, install dependencies with pip based on the Python version given.
-        _PIP_PACKAGES="m2crypto jinja2 msgpack-python pycrypto PyYAML tornado<5.0 zmq futures>=2.0"
+        _PIP_PACKAGES="m2crypto!=0.33.0 jinja2 msgpack-python pycrypto PyYAML tornado<5.0 zmq futures>=2.0"
 
         # install swig and openssl on cent6
         if [ "$DISTRO_MAJOR_VERSION" -eq 6 ]; then
@@ -7152,3 +7152,5 @@ else
 fi
 
 exit 0
+
+# vim: set sts=4 ts=4 et

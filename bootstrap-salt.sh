@@ -1830,18 +1830,18 @@ __wait_for_apt(){
 
     # Make sure we're not waiting on a lock
     while [ $APT_RETURN -ne 0 ] && grep -q '^E: Could not get lock' "$APT_ERR"; do
-      echoinfo "Aware of the lock. Patiently waiting $WAIT_TIMEOUT more seconds..."
-      sleep 1
-      WAIT_TIMEOUT=$((WAIT_TIMEOUT - 1))
+        echoinfo "Aware of the lock. Patiently waiting $WAIT_TIMEOUT more seconds..."
+        sleep 1
+        WAIT_TIMEOUT=$((WAIT_TIMEOUT - 1))
 
-      if [ "$WAIT_TIMEOUT" -eq 0 ]; then
-          echoerror "Apt, apt-get, aptitude, or dpkg process is taking too long."
-          echoerror "Bootstrap script cannot proceed. Aborting."
-          return 1
-      else
-	  "${@}" 2>"$APT_ERR"
-    	  APT_RETURN=$?
-      fi
+        if [ "$WAIT_TIMEOUT" -eq 0 ]; then
+            echoerror "Apt, apt-get, aptitude, or dpkg process is taking too long."
+            echoerror "Bootstrap script cannot proceed. Aborting."
+            return 1
+        else
+            "${@}" 2>"$APT_ERR"
+            APT_RETURN=$?
+        fi
     done
 
     return $APT_RETURN
@@ -7136,3 +7136,5 @@ else
 fi
 
 exit 0
+
+# vim: set sts=4 ts=4 et

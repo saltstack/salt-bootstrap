@@ -4,4 +4,4 @@ import pytest
 
 def test_ping(host):
     with host.sudo():
-        assert host.salt('test.ping')
+        assert host.salt('test.ping', '--timeout=120')

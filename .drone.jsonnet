@@ -90,7 +90,7 @@ local Build(distro) = {
         "echo 'Waiting for docker to start'",
         'sleep 10',  // give docker enough time to start
         'docker ps -a',
-        std.format('bundle exec kitchen converge -c %s %s', [std.length(suites), distro.slug]),
+        std.format('bundle exec kitchen converge %s', [distro.slug]),
       ],
     },
   ] + [

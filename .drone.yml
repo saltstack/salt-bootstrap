@@ -35,7 +35,7 @@ steps:
   - "echo 'Waiting for docker to start'"
   - sleep 10
   - docker ps -a
-  - bundle exec kitchen converge -c 3 arch
+  - bundle exec kitchen converge arch
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
@@ -122,7 +122,7 @@ steps:
   - "echo 'Waiting for docker to start'"
   - sleep 10
   - docker ps -a
-  - bundle exec kitchen converge -c 6 centos-6
+  - bundle exec kitchen converge centos-6
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
@@ -254,7 +254,7 @@ steps:
   - "echo 'Waiting for docker to start'"
   - sleep 10
   - docker ps -a
-  - bundle exec kitchen converge -c 6 centos-7
+  - bundle exec kitchen converge centos-7
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
@@ -386,7 +386,7 @@ steps:
   - "echo 'Waiting for docker to start'"
   - sleep 10
   - docker ps -a
-  - bundle exec kitchen converge -c 6 debian-8
+  - bundle exec kitchen converge debian-8
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
@@ -518,7 +518,7 @@ steps:
   - "echo 'Waiting for docker to start'"
   - sleep 10
   - docker ps -a
-  - bundle exec kitchen converge -c 6 debian-9
+  - bundle exec kitchen converge debian-9
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
@@ -650,7 +650,7 @@ steps:
   - "echo 'Waiting for docker to start'"
   - sleep 10
   - docker ps -a
-  - bundle exec kitchen converge -c 3 fedora-28
+  - bundle exec kitchen converge fedora-28
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
@@ -737,7 +737,7 @@ steps:
   - "echo 'Waiting for docker to start'"
   - sleep 10
   - docker ps -a
-  - bundle exec kitchen converge -c 3 fedora-29
+  - bundle exec kitchen converge fedora-29
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
@@ -824,7 +824,7 @@ steps:
   - "echo 'Waiting for docker to start'"
   - sleep 10
   - docker ps -a
-  - bundle exec kitchen converge -c 3 opensuse-15
+  - bundle exec kitchen converge opensuse-15
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
@@ -911,7 +911,7 @@ steps:
   - "echo 'Waiting for docker to start'"
   - sleep 10
   - docker ps -a
-  - bundle exec kitchen converge -c 3 opensuse-42
+  - bundle exec kitchen converge opensuse-42
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
@@ -998,7 +998,7 @@ steps:
   - "echo 'Waiting for docker to start'"
   - sleep 10
   - docker ps -a
-  - bundle exec kitchen converge -c 6 ubuntu-1604
+  - bundle exec kitchen converge ubuntu-1604
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
@@ -1130,7 +1130,7 @@ steps:
   - "echo 'Waiting for docker to start'"
   - sleep 10
   - docker ps -a
-  - bundle exec kitchen converge -c 6 ubuntu-1804
+  - bundle exec kitchen converge ubuntu-1804
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
@@ -1241,6 +1241,6 @@ depends_on:
 
 ---
 kind: signature
-hmac: 38fde6eb518c687ec652dcb1b93d56105d00ff87a7fa705658dfc3d1ada513d7
+hmac: cf6f4f59490e8b3adf0f1f0976939d1381b62ec2a4a94009fd6cd4681a7ca61a
 
 ...

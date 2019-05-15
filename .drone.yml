@@ -26,6 +26,21 @@ steps:
   commands:
   - "sh -c 't=0; echo Sleeping 0 seconds; sleep 0'"
 
+- name: Converge Arch
+  image: docker:edge-dind
+  commands:
+  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
+  - gem install bundler
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - "echo 'Waiting for docker to start'"
+  - sleep 10
+  - docker ps -a
+  - bundle exec kitchen converge -c 3 arch
+  environment:
+    DOCKER_HOST: tcp://docker:2375
+  depends_on:
+  - throttle-build
+
 - name: Py2 2017.7(Git)
   image: docker:edge-dind
   commands:
@@ -34,14 +49,12 @@ steps:
   - pip install -U pip
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
-  - "echo 'Waiting for docker to start'"
-  - sleep 10
-  - docker ps -a
   - bundle exec kitchen test py2-git-2017-7-arch
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
+  - Converge Arch
 
 - name: Py2 2018.3(Git)
   image: docker:edge-dind
@@ -51,14 +64,12 @@ steps:
   - pip install -U pip
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
-  - "echo 'Waiting for docker to start'"
-  - sleep 10
-  - docker ps -a
   - bundle exec kitchen test py2-git-2018-3-arch
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
+  - Converge Arch
 
 - name: Py2 2019.2(Git)
   image: docker:edge-dind
@@ -68,14 +79,12 @@ steps:
   - pip install -U pip
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
-  - "echo 'Waiting for docker to start'"
-  - sleep 10
-  - docker ps -a
   - bundle exec kitchen test py2-git-2019-2-arch
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
+  - Converge Arch
 
 services:
 - name: docker
@@ -104,6 +113,21 @@ steps:
   commands:
   - "sh -c 't=90; echo Sleeping 90 seconds; sleep 90'"
 
+- name: Converge CentOS 6
+  image: docker:edge-dind
+  commands:
+  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
+  - gem install bundler
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - "echo 'Waiting for docker to start'"
+  - sleep 10
+  - docker ps -a
+  - bundle exec kitchen converge -c 6 centos-6
+  environment:
+    DOCKER_HOST: tcp://docker:2375
+  depends_on:
+  - throttle-build
+
 - name: Py2 2017.7(Git)
   image: docker:edge-dind
   commands:
@@ -112,14 +136,12 @@ steps:
   - pip install -U pip
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
-  - "echo 'Waiting for docker to start'"
-  - sleep 10
-  - docker ps -a
   - bundle exec kitchen test py2-git-2017-7-centos-6
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
+  - Converge CentOS 6
 
 - name: Py2 2018.3(Git)
   image: docker:edge-dind
@@ -129,14 +151,12 @@ steps:
   - pip install -U pip
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
-  - "echo 'Waiting for docker to start'"
-  - sleep 10
-  - docker ps -a
   - bundle exec kitchen test py2-git-2018-3-centos-6
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
+  - Converge CentOS 6
 
 - name: Py2 2019.2(Git)
   image: docker:edge-dind
@@ -146,14 +166,12 @@ steps:
   - pip install -U pip
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
-  - "echo 'Waiting for docker to start'"
-  - sleep 10
-  - docker ps -a
   - bundle exec kitchen test py2-git-2019-2-centos-6
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
+  - Converge CentOS 6
 
 - name: Py2 2017.7(Stable)
   image: docker:edge-dind
@@ -163,14 +181,12 @@ steps:
   - pip install -U pip
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
-  - "echo 'Waiting for docker to start'"
-  - sleep 10
-  - docker ps -a
   - bundle exec kitchen test py2-stable-2017-7-centos-6
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
+  - Converge CentOS 6
 
 - name: Py2 2018.3(Stable)
   image: docker:edge-dind
@@ -180,14 +196,12 @@ steps:
   - pip install -U pip
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
-  - "echo 'Waiting for docker to start'"
-  - sleep 10
-  - docker ps -a
   - bundle exec kitchen test py2-stable-2018-3-centos-6
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
+  - Converge CentOS 6
 
 - name: Py2 2019.2(Stable)
   image: docker:edge-dind
@@ -197,14 +211,12 @@ steps:
   - pip install -U pip
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
-  - "echo 'Waiting for docker to start'"
-  - sleep 10
-  - docker ps -a
   - bundle exec kitchen test py2-stable-2019-2-centos-6
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
+  - Converge CentOS 6
 
 services:
 - name: docker
@@ -233,6 +245,21 @@ steps:
   commands:
   - "sh -c 't=120; echo Sleeping 120 seconds; sleep 120'"
 
+- name: Converge CentOS 7
+  image: docker:edge-dind
+  commands:
+  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
+  - gem install bundler
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - "echo 'Waiting for docker to start'"
+  - sleep 10
+  - docker ps -a
+  - bundle exec kitchen converge -c 6 centos-7
+  environment:
+    DOCKER_HOST: tcp://docker:2375
+  depends_on:
+  - throttle-build
+
 - name: Py2 2017.7(Git)
   image: docker:edge-dind
   commands:
@@ -241,14 +268,12 @@ steps:
   - pip install -U pip
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
-  - "echo 'Waiting for docker to start'"
-  - sleep 10
-  - docker ps -a
   - bundle exec kitchen test py2-git-2017-7-centos-7
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
+  - Converge CentOS 7
 
 - name: Py2 2018.3(Git)
   image: docker:edge-dind
@@ -258,14 +283,12 @@ steps:
   - pip install -U pip
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
-  - "echo 'Waiting for docker to start'"
-  - sleep 10
-  - docker ps -a
   - bundle exec kitchen test py2-git-2018-3-centos-7
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
+  - Converge CentOS 7
 
 - name: Py2 2019.2(Git)
   image: docker:edge-dind
@@ -275,14 +298,12 @@ steps:
   - pip install -U pip
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
-  - "echo 'Waiting for docker to start'"
-  - sleep 10
-  - docker ps -a
   - bundle exec kitchen test py2-git-2019-2-centos-7
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
+  - Converge CentOS 7
 
 - name: Py2 2017.7(Stable)
   image: docker:edge-dind
@@ -292,14 +313,12 @@ steps:
   - pip install -U pip
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
-  - "echo 'Waiting for docker to start'"
-  - sleep 10
-  - docker ps -a
   - bundle exec kitchen test py2-stable-2017-7-centos-7
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
+  - Converge CentOS 7
 
 - name: Py2 2018.3(Stable)
   image: docker:edge-dind
@@ -309,14 +328,12 @@ steps:
   - pip install -U pip
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
-  - "echo 'Waiting for docker to start'"
-  - sleep 10
-  - docker ps -a
   - bundle exec kitchen test py2-stable-2018-3-centos-7
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
+  - Converge CentOS 7
 
 - name: Py2 2019.2(Stable)
   image: docker:edge-dind
@@ -326,14 +343,12 @@ steps:
   - pip install -U pip
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
-  - "echo 'Waiting for docker to start'"
-  - sleep 10
-  - docker ps -a
   - bundle exec kitchen test py2-stable-2019-2-centos-7
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
+  - Converge CentOS 7
 
 services:
 - name: docker
@@ -362,6 +377,21 @@ steps:
   commands:
   - "sh -c 't=150; echo Sleeping 150 seconds; sleep 150'"
 
+- name: Converge Debian 8
+  image: docker:edge-dind
+  commands:
+  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
+  - gem install bundler
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - "echo 'Waiting for docker to start'"
+  - sleep 10
+  - docker ps -a
+  - bundle exec kitchen converge -c 6 debian-8
+  environment:
+    DOCKER_HOST: tcp://docker:2375
+  depends_on:
+  - throttle-build
+
 - name: Py2 2017.7(Git)
   image: docker:edge-dind
   commands:
@@ -370,14 +400,12 @@ steps:
   - pip install -U pip
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
-  - "echo 'Waiting for docker to start'"
-  - sleep 10
-  - docker ps -a
   - bundle exec kitchen test py2-git-2017-7-debian-8
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
+  - Converge Debian 8
 
 - name: Py2 2018.3(Git)
   image: docker:edge-dind
@@ -387,14 +415,12 @@ steps:
   - pip install -U pip
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
-  - "echo 'Waiting for docker to start'"
-  - sleep 10
-  - docker ps -a
   - bundle exec kitchen test py2-git-2018-3-debian-8
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
+  - Converge Debian 8
 
 - name: Py2 2019.2(Git)
   image: docker:edge-dind
@@ -404,14 +430,12 @@ steps:
   - pip install -U pip
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
-  - "echo 'Waiting for docker to start'"
-  - sleep 10
-  - docker ps -a
   - bundle exec kitchen test py2-git-2019-2-debian-8
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
+  - Converge Debian 8
 
 - name: Py2 2017.7(Stable)
   image: docker:edge-dind
@@ -421,14 +445,12 @@ steps:
   - pip install -U pip
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
-  - "echo 'Waiting for docker to start'"
-  - sleep 10
-  - docker ps -a
   - bundle exec kitchen test py2-stable-2017-7-debian-8
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
+  - Converge Debian 8
 
 - name: Py2 2018.3(Stable)
   image: docker:edge-dind
@@ -438,14 +460,12 @@ steps:
   - pip install -U pip
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
-  - "echo 'Waiting for docker to start'"
-  - sleep 10
-  - docker ps -a
   - bundle exec kitchen test py2-stable-2018-3-debian-8
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
+  - Converge Debian 8
 
 - name: Py2 2019.2(Stable)
   image: docker:edge-dind
@@ -455,14 +475,12 @@ steps:
   - pip install -U pip
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
-  - "echo 'Waiting for docker to start'"
-  - sleep 10
-  - docker ps -a
   - bundle exec kitchen test py2-stable-2019-2-debian-8
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
+  - Converge Debian 8
 
 services:
 - name: docker
@@ -491,6 +509,21 @@ steps:
   commands:
   - "sh -c 't=180; echo Sleeping 180 seconds; sleep 180'"
 
+- name: Converge Debian 9
+  image: docker:edge-dind
+  commands:
+  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
+  - gem install bundler
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - "echo 'Waiting for docker to start'"
+  - sleep 10
+  - docker ps -a
+  - bundle exec kitchen converge -c 6 debian-9
+  environment:
+    DOCKER_HOST: tcp://docker:2375
+  depends_on:
+  - throttle-build
+
 - name: Py2 2017.7(Git)
   image: docker:edge-dind
   commands:
@@ -499,14 +532,12 @@ steps:
   - pip install -U pip
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
-  - "echo 'Waiting for docker to start'"
-  - sleep 10
-  - docker ps -a
   - bundle exec kitchen test py2-git-2017-7-debian-9
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
+  - Converge Debian 9
 
 - name: Py2 2018.3(Git)
   image: docker:edge-dind
@@ -516,14 +547,12 @@ steps:
   - pip install -U pip
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
-  - "echo 'Waiting for docker to start'"
-  - sleep 10
-  - docker ps -a
   - bundle exec kitchen test py2-git-2018-3-debian-9
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
+  - Converge Debian 9
 
 - name: Py2 2019.2(Git)
   image: docker:edge-dind
@@ -533,14 +562,12 @@ steps:
   - pip install -U pip
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
-  - "echo 'Waiting for docker to start'"
-  - sleep 10
-  - docker ps -a
   - bundle exec kitchen test py2-git-2019-2-debian-9
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
+  - Converge Debian 9
 
 - name: Py2 2017.7(Stable)
   image: docker:edge-dind
@@ -550,14 +577,12 @@ steps:
   - pip install -U pip
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
-  - "echo 'Waiting for docker to start'"
-  - sleep 10
-  - docker ps -a
   - bundle exec kitchen test py2-stable-2017-7-debian-9
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
+  - Converge Debian 9
 
 - name: Py2 2018.3(Stable)
   image: docker:edge-dind
@@ -567,14 +592,12 @@ steps:
   - pip install -U pip
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
-  - "echo 'Waiting for docker to start'"
-  - sleep 10
-  - docker ps -a
   - bundle exec kitchen test py2-stable-2018-3-debian-9
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
+  - Converge Debian 9
 
 - name: Py2 2019.2(Stable)
   image: docker:edge-dind
@@ -584,14 +607,12 @@ steps:
   - pip install -U pip
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
-  - "echo 'Waiting for docker to start'"
-  - sleep 10
-  - docker ps -a
   - bundle exec kitchen test py2-stable-2019-2-debian-9
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
+  - Converge Debian 9
 
 services:
 - name: docker
@@ -620,6 +641,21 @@ steps:
   commands:
   - "sh -c 't=90; echo Sleeping 90 seconds; sleep 90'"
 
+- name: Converge Fedora 28
+  image: docker:edge-dind
+  commands:
+  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
+  - gem install bundler
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - "echo 'Waiting for docker to start'"
+  - sleep 10
+  - docker ps -a
+  - bundle exec kitchen converge -c 3 fedora-28
+  environment:
+    DOCKER_HOST: tcp://docker:2375
+  depends_on:
+  - throttle-build
+
 - name: Py2 2017.7(Git)
   image: docker:edge-dind
   commands:
@@ -628,14 +664,12 @@ steps:
   - pip install -U pip
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
-  - "echo 'Waiting for docker to start'"
-  - sleep 10
-  - docker ps -a
   - bundle exec kitchen test py2-git-2017-7-fedora-28
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
+  - Converge Fedora 28
 
 - name: Py2 2018.3(Git)
   image: docker:edge-dind
@@ -645,14 +679,12 @@ steps:
   - pip install -U pip
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
-  - "echo 'Waiting for docker to start'"
-  - sleep 10
-  - docker ps -a
   - bundle exec kitchen test py2-git-2018-3-fedora-28
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
+  - Converge Fedora 28
 
 - name: Py2 2019.2(Git)
   image: docker:edge-dind
@@ -662,14 +694,12 @@ steps:
   - pip install -U pip
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
-  - "echo 'Waiting for docker to start'"
-  - sleep 10
-  - docker ps -a
   - bundle exec kitchen test py2-git-2019-2-fedora-28
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
+  - Converge Fedora 28
 
 services:
 - name: docker
@@ -698,6 +728,21 @@ steps:
   commands:
   - "sh -c 't=75; echo Sleeping 75 seconds; sleep 75'"
 
+- name: Converge Fedora 29
+  image: docker:edge-dind
+  commands:
+  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
+  - gem install bundler
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - "echo 'Waiting for docker to start'"
+  - sleep 10
+  - docker ps -a
+  - bundle exec kitchen converge -c 3 fedora-29
+  environment:
+    DOCKER_HOST: tcp://docker:2375
+  depends_on:
+  - throttle-build
+
 - name: Py2 2017.7(Git)
   image: docker:edge-dind
   commands:
@@ -706,14 +751,12 @@ steps:
   - pip install -U pip
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
-  - "echo 'Waiting for docker to start'"
-  - sleep 10
-  - docker ps -a
   - bundle exec kitchen test py2-git-2017-7-fedora-29
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
+  - Converge Fedora 29
 
 - name: Py2 2018.3(Git)
   image: docker:edge-dind
@@ -723,14 +766,12 @@ steps:
   - pip install -U pip
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
-  - "echo 'Waiting for docker to start'"
-  - sleep 10
-  - docker ps -a
   - bundle exec kitchen test py2-git-2018-3-fedora-29
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
+  - Converge Fedora 29
 
 - name: Py2 2019.2(Git)
   image: docker:edge-dind
@@ -740,14 +781,12 @@ steps:
   - pip install -U pip
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
-  - "echo 'Waiting for docker to start'"
-  - sleep 10
-  - docker ps -a
   - bundle exec kitchen test py2-git-2019-2-fedora-29
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
+  - Converge Fedora 29
 
 services:
 - name: docker
@@ -776,6 +815,21 @@ steps:
   commands:
   - "sh -c 't=60; echo Sleeping 60 seconds; sleep 60'"
 
+- name: Converge Opensuse 15.0
+  image: docker:edge-dind
+  commands:
+  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
+  - gem install bundler
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - "echo 'Waiting for docker to start'"
+  - sleep 10
+  - docker ps -a
+  - bundle exec kitchen converge -c 3 opensuse-15
+  environment:
+    DOCKER_HOST: tcp://docker:2375
+  depends_on:
+  - throttle-build
+
 - name: Py2 2017.7(Git)
   image: docker:edge-dind
   commands:
@@ -784,14 +838,12 @@ steps:
   - pip install -U pip
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
-  - "echo 'Waiting for docker to start'"
-  - sleep 10
-  - docker ps -a
   - bundle exec kitchen test py2-git-2017-7-opensuse-15
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
+  - Converge Opensuse 15.0
 
 - name: Py2 2018.3(Git)
   image: docker:edge-dind
@@ -801,14 +853,12 @@ steps:
   - pip install -U pip
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
-  - "echo 'Waiting for docker to start'"
-  - sleep 10
-  - docker ps -a
   - bundle exec kitchen test py2-git-2018-3-opensuse-15
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
+  - Converge Opensuse 15.0
 
 - name: Py2 2019.2(Git)
   image: docker:edge-dind
@@ -818,14 +868,12 @@ steps:
   - pip install -U pip
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
-  - "echo 'Waiting for docker to start'"
-  - sleep 10
-  - docker ps -a
   - bundle exec kitchen test py2-git-2019-2-opensuse-15
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
+  - Converge Opensuse 15.0
 
 services:
 - name: docker
@@ -854,6 +902,21 @@ steps:
   commands:
   - "sh -c 't=45; echo Sleeping 45 seconds; sleep 45'"
 
+- name: Converge Opensuse 42.3
+  image: docker:edge-dind
+  commands:
+  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
+  - gem install bundler
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - "echo 'Waiting for docker to start'"
+  - sleep 10
+  - docker ps -a
+  - bundle exec kitchen converge -c 3 opensuse-42
+  environment:
+    DOCKER_HOST: tcp://docker:2375
+  depends_on:
+  - throttle-build
+
 - name: Py2 2017.7(Git)
   image: docker:edge-dind
   commands:
@@ -862,14 +925,12 @@ steps:
   - pip install -U pip
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
-  - "echo 'Waiting for docker to start'"
-  - sleep 10
-  - docker ps -a
   - bundle exec kitchen test py2-git-2017-7-opensuse-42
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
+  - Converge Opensuse 42.3
 
 - name: Py2 2018.3(Git)
   image: docker:edge-dind
@@ -879,14 +940,12 @@ steps:
   - pip install -U pip
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
-  - "echo 'Waiting for docker to start'"
-  - sleep 10
-  - docker ps -a
   - bundle exec kitchen test py2-git-2018-3-opensuse-42
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
+  - Converge Opensuse 42.3
 
 - name: Py2 2019.2(Git)
   image: docker:edge-dind
@@ -896,14 +955,12 @@ steps:
   - pip install -U pip
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
-  - "echo 'Waiting for docker to start'"
-  - sleep 10
-  - docker ps -a
   - bundle exec kitchen test py2-git-2019-2-opensuse-42
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
+  - Converge Opensuse 42.3
 
 services:
 - name: docker
@@ -932,6 +989,21 @@ steps:
   commands:
   - "sh -c 't=30; echo Sleeping 30 seconds; sleep 30'"
 
+- name: Converge Ubuntu 16.04
+  image: docker:edge-dind
+  commands:
+  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
+  - gem install bundler
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - "echo 'Waiting for docker to start'"
+  - sleep 10
+  - docker ps -a
+  - bundle exec kitchen converge -c 6 ubuntu-1604
+  environment:
+    DOCKER_HOST: tcp://docker:2375
+  depends_on:
+  - throttle-build
+
 - name: Py2 2017.7(Git)
   image: docker:edge-dind
   commands:
@@ -940,14 +1012,12 @@ steps:
   - pip install -U pip
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
-  - "echo 'Waiting for docker to start'"
-  - sleep 10
-  - docker ps -a
   - bundle exec kitchen test py2-git-2017-7-ubuntu-1604
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
+  - Converge Ubuntu 16.04
 
 - name: Py2 2018.3(Git)
   image: docker:edge-dind
@@ -957,14 +1027,12 @@ steps:
   - pip install -U pip
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
-  - "echo 'Waiting for docker to start'"
-  - sleep 10
-  - docker ps -a
   - bundle exec kitchen test py2-git-2018-3-ubuntu-1604
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
+  - Converge Ubuntu 16.04
 
 - name: Py2 2019.2(Git)
   image: docker:edge-dind
@@ -974,14 +1042,12 @@ steps:
   - pip install -U pip
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
-  - "echo 'Waiting for docker to start'"
-  - sleep 10
-  - docker ps -a
   - bundle exec kitchen test py2-git-2019-2-ubuntu-1604
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
+  - Converge Ubuntu 16.04
 
 - name: Py2 2017.7(Stable)
   image: docker:edge-dind
@@ -991,14 +1057,12 @@ steps:
   - pip install -U pip
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
-  - "echo 'Waiting for docker to start'"
-  - sleep 10
-  - docker ps -a
   - bundle exec kitchen test py2-stable-2017-7-ubuntu-1604
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
+  - Converge Ubuntu 16.04
 
 - name: Py2 2018.3(Stable)
   image: docker:edge-dind
@@ -1008,14 +1072,12 @@ steps:
   - pip install -U pip
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
-  - "echo 'Waiting for docker to start'"
-  - sleep 10
-  - docker ps -a
   - bundle exec kitchen test py2-stable-2018-3-ubuntu-1604
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
+  - Converge Ubuntu 16.04
 
 - name: Py2 2019.2(Stable)
   image: docker:edge-dind
@@ -1025,14 +1087,12 @@ steps:
   - pip install -U pip
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
-  - "echo 'Waiting for docker to start'"
-  - sleep 10
-  - docker ps -a
   - bundle exec kitchen test py2-stable-2019-2-ubuntu-1604
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
+  - Converge Ubuntu 16.04
 
 services:
 - name: docker
@@ -1061,6 +1121,21 @@ steps:
   commands:
   - "sh -c 't=0; echo Sleeping 0 seconds; sleep 0'"
 
+- name: Converge Ubuntu 18.04
+  image: docker:edge-dind
+  commands:
+  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
+  - gem install bundler
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - "echo 'Waiting for docker to start'"
+  - sleep 10
+  - docker ps -a
+  - bundle exec kitchen converge -c 6 ubuntu-1804
+  environment:
+    DOCKER_HOST: tcp://docker:2375
+  depends_on:
+  - throttle-build
+
 - name: Py2 2017.7(Git)
   image: docker:edge-dind
   commands:
@@ -1069,14 +1144,12 @@ steps:
   - pip install -U pip
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
-  - "echo 'Waiting for docker to start'"
-  - sleep 10
-  - docker ps -a
   - bundle exec kitchen test py2-git-2017-7-ubuntu-1804
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
+  - Converge Ubuntu 18.04
 
 - name: Py2 2018.3(Git)
   image: docker:edge-dind
@@ -1086,14 +1159,12 @@ steps:
   - pip install -U pip
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
-  - "echo 'Waiting for docker to start'"
-  - sleep 10
-  - docker ps -a
   - bundle exec kitchen test py2-git-2018-3-ubuntu-1804
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
+  - Converge Ubuntu 18.04
 
 - name: Py2 2019.2(Git)
   image: docker:edge-dind
@@ -1103,14 +1174,12 @@ steps:
   - pip install -U pip
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
-  - "echo 'Waiting for docker to start'"
-  - sleep 10
-  - docker ps -a
   - bundle exec kitchen test py2-git-2019-2-ubuntu-1804
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
+  - Converge Ubuntu 18.04
 
 - name: Py2 2017.7(Stable)
   image: docker:edge-dind
@@ -1120,14 +1189,12 @@ steps:
   - pip install -U pip
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
-  - "echo 'Waiting for docker to start'"
-  - sleep 10
-  - docker ps -a
   - bundle exec kitchen test py2-stable-2017-7-ubuntu-1804
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
+  - Converge Ubuntu 18.04
 
 - name: Py2 2018.3(Stable)
   image: docker:edge-dind
@@ -1137,14 +1204,12 @@ steps:
   - pip install -U pip
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
-  - "echo 'Waiting for docker to start'"
-  - sleep 10
-  - docker ps -a
   - bundle exec kitchen test py2-stable-2018-3-ubuntu-1804
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
+  - Converge Ubuntu 18.04
 
 - name: Py2 2019.2(Stable)
   image: docker:edge-dind
@@ -1154,14 +1219,12 @@ steps:
   - pip install -U pip
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
-  - "echo 'Waiting for docker to start'"
-  - sleep 10
-  - docker ps -a
   - bundle exec kitchen test py2-stable-2019-2-ubuntu-1804
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
+  - Converge Ubuntu 18.04
 
 services:
 - name: docker
@@ -1178,6 +1241,6 @@ depends_on:
 
 ---
 kind: signature
-hmac: 7ecfc845f0ee48492a8c3c42d38e9cc51f2e3ed5507de90f408c09a3a124c8c5
+hmac: 38fde6eb518c687ec652dcb1b93d56105d00ff87a7fa705658dfc3d1ada513d7
 
 ...

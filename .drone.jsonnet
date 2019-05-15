@@ -74,9 +74,8 @@ local Build(distro) = {
         ),
       ],
     },
-  ] + [
     {
-      name: suite.name,
+      name: std.format('Converge %s', [distro.name]),
       image: 'docker:edge-dind',
       environment: {
         DOCKER_HOST: 'tcp://docker:2375',
@@ -87,12 +86,30 @@ local Build(distro) = {
       commands: [
         'apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev',
         'gem install bundler',
-        'pip install -U pip',
-        'pip install -r tests/requirements.txt',
         'bundle install --with docker --without opennebula ec2 windows vagrant',
         "echo 'Waiting for docker to start'",
         'sleep 10',  // give docker enough time to start
         'docker ps -a',
+        std.format('bundle exec kitchen converge -c %s %s', [std.length(suites), distro.slug]),
+      ],
+    },
+  ] + [
+    {
+      name: suite.name,
+      image: 'docker:edge-dind',
+      environment: {
+        DOCKER_HOST: 'tcp://docker:2375',
+      },
+      depends_on: [
+        'throttle-build',
+        std.format('Converge %s', [distro.name]),
+      ],
+      commands: [
+        'apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev',
+        'gem install bundler',
+        'pip install -U pip',
+        'pip install -r tests/requirements.txt',
+        'bundle install --with docker --without opennebula ec2 windows vagrant',
         std.format('bundle exec kitchen test %s-%s', [suite.slug, distro.slug]),
       ],
     }

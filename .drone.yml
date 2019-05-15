@@ -27,10 +27,8 @@ steps:
   - "sh -c 't=0; echo Sleeping 0 seconds; sleep 0'"
 
 - name: create
-  image: docker:edge-dind
+  image: saltstack/drone-salt-bootstrap-testing
   commands:
-  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
-  - gem install bundler
   - bundle install --with docker --without opennebula ec2 windows vagrant
   - "echo 'Waiting for docker to start'"
   - sleep 10
@@ -42,10 +40,8 @@ steps:
   - throttle-build
 
 - name: Py2 2017.7(Git)
-  image: docker:edge-dind
+  image: saltstack/drone-salt-bootstrap-testing
   commands:
-  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
-  - gem install bundler
   - pip install -U pip
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
@@ -57,10 +53,8 @@ steps:
   - create
 
 - name: Py2 2018.3(Git)
-  image: docker:edge-dind
+  image: saltstack/drone-salt-bootstrap-testing
   commands:
-  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
-  - gem install bundler
   - pip install -U pip
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
@@ -72,10 +66,8 @@ steps:
   - create
 
 - name: Py2 2019.2(Git)
-  image: docker:edge-dind
+  image: saltstack/drone-salt-bootstrap-testing
   commands:
-  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
-  - gem install bundler
   - pip install -U pip
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
@@ -88,7 +80,7 @@ steps:
 
 services:
 - name: docker
-  image: docker:edge-dind
+  image: saltstack/drone-salt-bootstrap-testing
   command:
   - --storage-driver=overlay2
   privileged: true
@@ -114,10 +106,8 @@ steps:
   - "sh -c 't=90; echo Sleeping 90 seconds; sleep 90'"
 
 - name: create
-  image: docker:edge-dind
+  image: saltstack/drone-salt-bootstrap-testing
   commands:
-  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
-  - gem install bundler
   - bundle install --with docker --without opennebula ec2 windows vagrant
   - "echo 'Waiting for docker to start'"
   - sleep 10
@@ -129,10 +119,8 @@ steps:
   - throttle-build
 
 - name: Py2 2017.7(Git)
-  image: docker:edge-dind
+  image: saltstack/drone-salt-bootstrap-testing
   commands:
-  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
-  - gem install bundler
   - pip install -U pip
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
@@ -144,10 +132,8 @@ steps:
   - create
 
 - name: Py2 2018.3(Git)
-  image: docker:edge-dind
+  image: saltstack/drone-salt-bootstrap-testing
   commands:
-  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
-  - gem install bundler
   - pip install -U pip
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
@@ -159,10 +145,8 @@ steps:
   - create
 
 - name: Py2 2019.2(Git)
-  image: docker:edge-dind
+  image: saltstack/drone-salt-bootstrap-testing
   commands:
-  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
-  - gem install bundler
   - pip install -U pip
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
@@ -174,10 +158,8 @@ steps:
   - create
 
 - name: Py2 2017.7(Stable)
-  image: docker:edge-dind
+  image: saltstack/drone-salt-bootstrap-testing
   commands:
-  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
-  - gem install bundler
   - pip install -U pip
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
@@ -189,10 +171,8 @@ steps:
   - create
 
 - name: Py2 2018.3(Stable)
-  image: docker:edge-dind
+  image: saltstack/drone-salt-bootstrap-testing
   commands:
-  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
-  - gem install bundler
   - pip install -U pip
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
@@ -204,10 +184,8 @@ steps:
   - create
 
 - name: Py2 2019.2(Stable)
-  image: docker:edge-dind
+  image: saltstack/drone-salt-bootstrap-testing
   commands:
-  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
-  - gem install bundler
   - pip install -U pip
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
@@ -220,7 +198,7 @@ steps:
 
 services:
 - name: docker
-  image: docker:edge-dind
+  image: saltstack/drone-salt-bootstrap-testing
   command:
   - --storage-driver=overlay2
   privileged: true
@@ -246,10 +224,8 @@ steps:
   - "sh -c 't=120; echo Sleeping 120 seconds; sleep 120'"
 
 - name: create
-  image: docker:edge-dind
+  image: saltstack/drone-salt-bootstrap-testing
   commands:
-  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
-  - gem install bundler
   - bundle install --with docker --without opennebula ec2 windows vagrant
   - "echo 'Waiting for docker to start'"
   - sleep 10
@@ -261,10 +237,8 @@ steps:
   - throttle-build
 
 - name: Py2 2017.7(Git)
-  image: docker:edge-dind
+  image: saltstack/drone-salt-bootstrap-testing
   commands:
-  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
-  - gem install bundler
   - pip install -U pip
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
@@ -276,10 +250,8 @@ steps:
   - create
 
 - name: Py2 2018.3(Git)
-  image: docker:edge-dind
+  image: saltstack/drone-salt-bootstrap-testing
   commands:
-  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
-  - gem install bundler
   - pip install -U pip
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
@@ -291,10 +263,8 @@ steps:
   - create
 
 - name: Py2 2019.2(Git)
-  image: docker:edge-dind
+  image: saltstack/drone-salt-bootstrap-testing
   commands:
-  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
-  - gem install bundler
   - pip install -U pip
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
@@ -306,10 +276,8 @@ steps:
   - create
 
 - name: Py2 2017.7(Stable)
-  image: docker:edge-dind
+  image: saltstack/drone-salt-bootstrap-testing
   commands:
-  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
-  - gem install bundler
   - pip install -U pip
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
@@ -321,10 +289,8 @@ steps:
   - create
 
 - name: Py2 2018.3(Stable)
-  image: docker:edge-dind
+  image: saltstack/drone-salt-bootstrap-testing
   commands:
-  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
-  - gem install bundler
   - pip install -U pip
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
@@ -336,10 +302,8 @@ steps:
   - create
 
 - name: Py2 2019.2(Stable)
-  image: docker:edge-dind
+  image: saltstack/drone-salt-bootstrap-testing
   commands:
-  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
-  - gem install bundler
   - pip install -U pip
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
@@ -352,7 +316,7 @@ steps:
 
 services:
 - name: docker
-  image: docker:edge-dind
+  image: saltstack/drone-salt-bootstrap-testing
   command:
   - --storage-driver=overlay2
   privileged: true
@@ -378,10 +342,8 @@ steps:
   - "sh -c 't=150; echo Sleeping 150 seconds; sleep 150'"
 
 - name: create
-  image: docker:edge-dind
+  image: saltstack/drone-salt-bootstrap-testing
   commands:
-  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
-  - gem install bundler
   - bundle install --with docker --without opennebula ec2 windows vagrant
   - "echo 'Waiting for docker to start'"
   - sleep 10
@@ -393,10 +355,8 @@ steps:
   - throttle-build
 
 - name: Py2 2017.7(Git)
-  image: docker:edge-dind
+  image: saltstack/drone-salt-bootstrap-testing
   commands:
-  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
-  - gem install bundler
   - pip install -U pip
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
@@ -408,10 +368,8 @@ steps:
   - create
 
 - name: Py2 2018.3(Git)
-  image: docker:edge-dind
+  image: saltstack/drone-salt-bootstrap-testing
   commands:
-  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
-  - gem install bundler
   - pip install -U pip
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
@@ -423,10 +381,8 @@ steps:
   - create
 
 - name: Py2 2019.2(Git)
-  image: docker:edge-dind
+  image: saltstack/drone-salt-bootstrap-testing
   commands:
-  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
-  - gem install bundler
   - pip install -U pip
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
@@ -438,10 +394,8 @@ steps:
   - create
 
 - name: Py2 2017.7(Stable)
-  image: docker:edge-dind
+  image: saltstack/drone-salt-bootstrap-testing
   commands:
-  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
-  - gem install bundler
   - pip install -U pip
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
@@ -453,10 +407,8 @@ steps:
   - create
 
 - name: Py2 2018.3(Stable)
-  image: docker:edge-dind
+  image: saltstack/drone-salt-bootstrap-testing
   commands:
-  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
-  - gem install bundler
   - pip install -U pip
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
@@ -468,10 +420,8 @@ steps:
   - create
 
 - name: Py2 2019.2(Stable)
-  image: docker:edge-dind
+  image: saltstack/drone-salt-bootstrap-testing
   commands:
-  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
-  - gem install bundler
   - pip install -U pip
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
@@ -484,7 +434,7 @@ steps:
 
 services:
 - name: docker
-  image: docker:edge-dind
+  image: saltstack/drone-salt-bootstrap-testing
   command:
   - --storage-driver=overlay2
   privileged: true
@@ -510,10 +460,8 @@ steps:
   - "sh -c 't=180; echo Sleeping 180 seconds; sleep 180'"
 
 - name: create
-  image: docker:edge-dind
+  image: saltstack/drone-salt-bootstrap-testing
   commands:
-  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
-  - gem install bundler
   - bundle install --with docker --without opennebula ec2 windows vagrant
   - "echo 'Waiting for docker to start'"
   - sleep 10
@@ -525,10 +473,8 @@ steps:
   - throttle-build
 
 - name: Py2 2017.7(Git)
-  image: docker:edge-dind
+  image: saltstack/drone-salt-bootstrap-testing
   commands:
-  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
-  - gem install bundler
   - pip install -U pip
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
@@ -540,10 +486,8 @@ steps:
   - create
 
 - name: Py2 2018.3(Git)
-  image: docker:edge-dind
+  image: saltstack/drone-salt-bootstrap-testing
   commands:
-  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
-  - gem install bundler
   - pip install -U pip
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
@@ -555,10 +499,8 @@ steps:
   - create
 
 - name: Py2 2019.2(Git)
-  image: docker:edge-dind
+  image: saltstack/drone-salt-bootstrap-testing
   commands:
-  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
-  - gem install bundler
   - pip install -U pip
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
@@ -570,10 +512,8 @@ steps:
   - create
 
 - name: Py2 2017.7(Stable)
-  image: docker:edge-dind
+  image: saltstack/drone-salt-bootstrap-testing
   commands:
-  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
-  - gem install bundler
   - pip install -U pip
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
@@ -585,10 +525,8 @@ steps:
   - create
 
 - name: Py2 2018.3(Stable)
-  image: docker:edge-dind
+  image: saltstack/drone-salt-bootstrap-testing
   commands:
-  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
-  - gem install bundler
   - pip install -U pip
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
@@ -600,10 +538,8 @@ steps:
   - create
 
 - name: Py2 2019.2(Stable)
-  image: docker:edge-dind
+  image: saltstack/drone-salt-bootstrap-testing
   commands:
-  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
-  - gem install bundler
   - pip install -U pip
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
@@ -616,7 +552,7 @@ steps:
 
 services:
 - name: docker
-  image: docker:edge-dind
+  image: saltstack/drone-salt-bootstrap-testing
   command:
   - --storage-driver=overlay2
   privileged: true
@@ -642,10 +578,8 @@ steps:
   - "sh -c 't=90; echo Sleeping 90 seconds; sleep 90'"
 
 - name: create
-  image: docker:edge-dind
+  image: saltstack/drone-salt-bootstrap-testing
   commands:
-  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
-  - gem install bundler
   - bundle install --with docker --without opennebula ec2 windows vagrant
   - "echo 'Waiting for docker to start'"
   - sleep 10
@@ -657,10 +591,8 @@ steps:
   - throttle-build
 
 - name: Py2 2017.7(Git)
-  image: docker:edge-dind
+  image: saltstack/drone-salt-bootstrap-testing
   commands:
-  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
-  - gem install bundler
   - pip install -U pip
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
@@ -672,10 +604,8 @@ steps:
   - create
 
 - name: Py2 2018.3(Git)
-  image: docker:edge-dind
+  image: saltstack/drone-salt-bootstrap-testing
   commands:
-  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
-  - gem install bundler
   - pip install -U pip
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
@@ -687,10 +617,8 @@ steps:
   - create
 
 - name: Py2 2019.2(Git)
-  image: docker:edge-dind
+  image: saltstack/drone-salt-bootstrap-testing
   commands:
-  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
-  - gem install bundler
   - pip install -U pip
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
@@ -703,7 +631,7 @@ steps:
 
 services:
 - name: docker
-  image: docker:edge-dind
+  image: saltstack/drone-salt-bootstrap-testing
   command:
   - --storage-driver=overlay2
   privileged: true
@@ -729,10 +657,8 @@ steps:
   - "sh -c 't=75; echo Sleeping 75 seconds; sleep 75'"
 
 - name: create
-  image: docker:edge-dind
+  image: saltstack/drone-salt-bootstrap-testing
   commands:
-  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
-  - gem install bundler
   - bundle install --with docker --without opennebula ec2 windows vagrant
   - "echo 'Waiting for docker to start'"
   - sleep 10
@@ -744,10 +670,8 @@ steps:
   - throttle-build
 
 - name: Py2 2017.7(Git)
-  image: docker:edge-dind
+  image: saltstack/drone-salt-bootstrap-testing
   commands:
-  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
-  - gem install bundler
   - pip install -U pip
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
@@ -759,10 +683,8 @@ steps:
   - create
 
 - name: Py2 2018.3(Git)
-  image: docker:edge-dind
+  image: saltstack/drone-salt-bootstrap-testing
   commands:
-  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
-  - gem install bundler
   - pip install -U pip
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
@@ -774,10 +696,8 @@ steps:
   - create
 
 - name: Py2 2019.2(Git)
-  image: docker:edge-dind
+  image: saltstack/drone-salt-bootstrap-testing
   commands:
-  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
-  - gem install bundler
   - pip install -U pip
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
@@ -790,7 +710,7 @@ steps:
 
 services:
 - name: docker
-  image: docker:edge-dind
+  image: saltstack/drone-salt-bootstrap-testing
   command:
   - --storage-driver=overlay2
   privileged: true
@@ -816,10 +736,8 @@ steps:
   - "sh -c 't=60; echo Sleeping 60 seconds; sleep 60'"
 
 - name: create
-  image: docker:edge-dind
+  image: saltstack/drone-salt-bootstrap-testing
   commands:
-  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
-  - gem install bundler
   - bundle install --with docker --without opennebula ec2 windows vagrant
   - "echo 'Waiting for docker to start'"
   - sleep 10
@@ -831,10 +749,8 @@ steps:
   - throttle-build
 
 - name: Py2 2017.7(Git)
-  image: docker:edge-dind
+  image: saltstack/drone-salt-bootstrap-testing
   commands:
-  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
-  - gem install bundler
   - pip install -U pip
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
@@ -846,10 +762,8 @@ steps:
   - create
 
 - name: Py2 2018.3(Git)
-  image: docker:edge-dind
+  image: saltstack/drone-salt-bootstrap-testing
   commands:
-  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
-  - gem install bundler
   - pip install -U pip
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
@@ -861,10 +775,8 @@ steps:
   - create
 
 - name: Py2 2019.2(Git)
-  image: docker:edge-dind
+  image: saltstack/drone-salt-bootstrap-testing
   commands:
-  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
-  - gem install bundler
   - pip install -U pip
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
@@ -877,7 +789,7 @@ steps:
 
 services:
 - name: docker
-  image: docker:edge-dind
+  image: saltstack/drone-salt-bootstrap-testing
   command:
   - --storage-driver=overlay2
   privileged: true
@@ -903,10 +815,8 @@ steps:
   - "sh -c 't=45; echo Sleeping 45 seconds; sleep 45'"
 
 - name: create
-  image: docker:edge-dind
+  image: saltstack/drone-salt-bootstrap-testing
   commands:
-  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
-  - gem install bundler
   - bundle install --with docker --without opennebula ec2 windows vagrant
   - "echo 'Waiting for docker to start'"
   - sleep 10
@@ -918,10 +828,8 @@ steps:
   - throttle-build
 
 - name: Py2 2017.7(Git)
-  image: docker:edge-dind
+  image: saltstack/drone-salt-bootstrap-testing
   commands:
-  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
-  - gem install bundler
   - pip install -U pip
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
@@ -933,10 +841,8 @@ steps:
   - create
 
 - name: Py2 2018.3(Git)
-  image: docker:edge-dind
+  image: saltstack/drone-salt-bootstrap-testing
   commands:
-  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
-  - gem install bundler
   - pip install -U pip
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
@@ -948,10 +854,8 @@ steps:
   - create
 
 - name: Py2 2019.2(Git)
-  image: docker:edge-dind
+  image: saltstack/drone-salt-bootstrap-testing
   commands:
-  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
-  - gem install bundler
   - pip install -U pip
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
@@ -964,7 +868,7 @@ steps:
 
 services:
 - name: docker
-  image: docker:edge-dind
+  image: saltstack/drone-salt-bootstrap-testing
   command:
   - --storage-driver=overlay2
   privileged: true
@@ -990,10 +894,8 @@ steps:
   - "sh -c 't=30; echo Sleeping 30 seconds; sleep 30'"
 
 - name: create
-  image: docker:edge-dind
+  image: saltstack/drone-salt-bootstrap-testing
   commands:
-  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
-  - gem install bundler
   - bundle install --with docker --without opennebula ec2 windows vagrant
   - "echo 'Waiting for docker to start'"
   - sleep 10
@@ -1005,10 +907,8 @@ steps:
   - throttle-build
 
 - name: Py2 2017.7(Git)
-  image: docker:edge-dind
+  image: saltstack/drone-salt-bootstrap-testing
   commands:
-  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
-  - gem install bundler
   - pip install -U pip
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
@@ -1020,10 +920,8 @@ steps:
   - create
 
 - name: Py2 2018.3(Git)
-  image: docker:edge-dind
+  image: saltstack/drone-salt-bootstrap-testing
   commands:
-  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
-  - gem install bundler
   - pip install -U pip
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
@@ -1035,10 +933,8 @@ steps:
   - create
 
 - name: Py2 2019.2(Git)
-  image: docker:edge-dind
+  image: saltstack/drone-salt-bootstrap-testing
   commands:
-  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
-  - gem install bundler
   - pip install -U pip
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
@@ -1050,10 +946,8 @@ steps:
   - create
 
 - name: Py2 2017.7(Stable)
-  image: docker:edge-dind
+  image: saltstack/drone-salt-bootstrap-testing
   commands:
-  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
-  - gem install bundler
   - pip install -U pip
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
@@ -1065,10 +959,8 @@ steps:
   - create
 
 - name: Py2 2018.3(Stable)
-  image: docker:edge-dind
+  image: saltstack/drone-salt-bootstrap-testing
   commands:
-  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
-  - gem install bundler
   - pip install -U pip
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
@@ -1080,10 +972,8 @@ steps:
   - create
 
 - name: Py2 2019.2(Stable)
-  image: docker:edge-dind
+  image: saltstack/drone-salt-bootstrap-testing
   commands:
-  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
-  - gem install bundler
   - pip install -U pip
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
@@ -1096,7 +986,7 @@ steps:
 
 services:
 - name: docker
-  image: docker:edge-dind
+  image: saltstack/drone-salt-bootstrap-testing
   command:
   - --storage-driver=overlay2
   privileged: true
@@ -1122,10 +1012,8 @@ steps:
   - "sh -c 't=0; echo Sleeping 0 seconds; sleep 0'"
 
 - name: create
-  image: docker:edge-dind
+  image: saltstack/drone-salt-bootstrap-testing
   commands:
-  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
-  - gem install bundler
   - bundle install --with docker --without opennebula ec2 windows vagrant
   - "echo 'Waiting for docker to start'"
   - sleep 10
@@ -1137,10 +1025,8 @@ steps:
   - throttle-build
 
 - name: Py2 2017.7(Git)
-  image: docker:edge-dind
+  image: saltstack/drone-salt-bootstrap-testing
   commands:
-  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
-  - gem install bundler
   - pip install -U pip
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
@@ -1152,10 +1038,8 @@ steps:
   - create
 
 - name: Py2 2018.3(Git)
-  image: docker:edge-dind
+  image: saltstack/drone-salt-bootstrap-testing
   commands:
-  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
-  - gem install bundler
   - pip install -U pip
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
@@ -1167,10 +1051,8 @@ steps:
   - create
 
 - name: Py2 2019.2(Git)
-  image: docker:edge-dind
+  image: saltstack/drone-salt-bootstrap-testing
   commands:
-  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
-  - gem install bundler
   - pip install -U pip
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
@@ -1182,10 +1064,8 @@ steps:
   - create
 
 - name: Py2 2017.7(Stable)
-  image: docker:edge-dind
+  image: saltstack/drone-salt-bootstrap-testing
   commands:
-  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
-  - gem install bundler
   - pip install -U pip
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
@@ -1197,10 +1077,8 @@ steps:
   - create
 
 - name: Py2 2018.3(Stable)
-  image: docker:edge-dind
+  image: saltstack/drone-salt-bootstrap-testing
   commands:
-  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
-  - gem install bundler
   - pip install -U pip
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
@@ -1212,10 +1090,8 @@ steps:
   - create
 
 - name: Py2 2019.2(Stable)
-  image: docker:edge-dind
+  image: saltstack/drone-salt-bootstrap-testing
   commands:
-  - apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev
-  - gem install bundler
   - pip install -U pip
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
@@ -1228,7 +1104,7 @@ steps:
 
 services:
 - name: docker
-  image: docker:edge-dind
+  image: saltstack/drone-salt-bootstrap-testing
   command:
   - --storage-driver=overlay2
   privileged: true
@@ -1241,6 +1117,6 @@ depends_on:
 
 ---
 kind: signature
-hmac: f0ec6791f3166a8e1ddd866184713eeb670d93caefc3d1837235fe8abcb48049
+hmac: b7e8b81af5c37f4432730a739032d9bbfb32d125b7e55ca8e94d0c08f8e40e59
 
 ...

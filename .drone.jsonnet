@@ -76,7 +76,7 @@ local Build(distro) = {
     },
     {
       name: 'create',
-      image: 'docker:edge-dind',
+      image: 'saltstack/drone-salt-bootstrap-testing',
       environment: {
         DOCKER_HOST: 'tcp://docker:2375',
       },
@@ -84,8 +84,6 @@ local Build(distro) = {
         'throttle-build',
       ],
       commands: [
-        'apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev',
-        'gem install bundler',
         'bundle install --with docker --without opennebula ec2 windows vagrant',
         "echo 'Waiting for docker to start'",
         'sleep 10',  // give docker enough time to start
@@ -96,7 +94,7 @@ local Build(distro) = {
   ] + [
     {
       name: suite.name,
-      image: 'docker:edge-dind',
+      image: 'saltstack/drone-salt-bootstrap-testing',
       environment: {
         DOCKER_HOST: 'tcp://docker:2375',
       },
@@ -105,8 +103,6 @@ local Build(distro) = {
         'create',
       ],
       commands: [
-        'apk --update add wget python python-dev py-pip git ruby-bundler ruby-rdoc ruby-dev gcc ruby-dev make libc-dev openssl-dev libffi-dev',
-        'gem install bundler',
         'pip install -U pip',
         'pip install -r tests/requirements.txt',
         'bundle install --with docker --without opennebula ec2 windows vagrant',
@@ -118,7 +114,7 @@ local Build(distro) = {
   services: [
     {
       name: 'docker',
-      image: 'docker:edge-dind',
+      image: 'saltstack/drone-salt-bootstrap-testing',
       privileged: true,
       environment: {},
       command: [

@@ -1,4 +1,4 @@
 testinfra
 paramiko
-pywinrm
+pywinrm; sys.platform == 'win32'
 six>=1.10.0

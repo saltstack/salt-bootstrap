@@ -1,22 +1,50 @@
+local git_suites = [
+  { name: 'Py2 2017.7(Git)', slug: 'py2-git-2017-7', depends: [] },
+  { name: 'Py2 2018.3(Git)', slug: 'py2-git-2018-3', depends: ['Py2 2017.7(Git)'] },
+  { name: 'Py2 2019.2(Git)', slug: 'py2-git-2019-2', depends: ['Py2 2018.3(Git)'] },
+  // {name: 'Py2 develop(Stable)', slug: 'py2-git-develop'},  // Don't test against Salt's develop branch. Stability is not assured.
+];
+
+local stable_suites = [
+  { name: 'Py2 2017.7(Stable)', slug: 'py2-stable-2017-7', depends: ['Py2 2017.7(Git)'] },
+  { name: 'Py2 2018.3(Stable)', slug: 'py2-stable-2018-3', depends: ['Py2 2018.3(Git)'] },
+  { name: 'Py2 2019.2(Stable)', slug: 'py2-stable-2019-2', depends: ['Py2 2019.2(Git)'] },
+];
+
 local distros = [
-  { name: 'amazon', version: '1' },
-  { name: 'amazon', version: '2' },
-  //  { name: 'centos', version: '6' },
-  { name: 'centos', version: '7' },
-  { name: 'debian', version: '8' },
-  { name: 'debian', version: '9' },
-  //  { name: 'ubuntu', version: '1404' },
-  //  { name: 'ubuntu', version: '1604' },
-  { name: 'ubuntu', version: '1804' },
+  { name: 'Arch', slug: 'arch', multiplier: 0, depends: [] },
+  // { name: 'Amazon 1', slug: 'amazon-1', multiplier: 1, depends: [] },
+  // { name: 'Amazon 2', slug: 'amazon-2', multiplier: 2, depends: [] },
+  { name: 'CentOS 6', slug: 'centos-6', multiplier: 3, depends: [] },
+  { name: 'CentOS 7', slug: 'centos-7', multiplier: 4, depends: [] },
+  { name: 'Debian 8', slug: 'debian-8', multiplier: 5, depends: [] },
+  { name: 'Debian 9', slug: 'debian-9', multiplier: 6, depends: [] },
+  { name: 'Fedora 28', slug: 'fedora-28', multiplier: 6, depends: [] },
+  { name: 'Fedora 29', slug: 'fedora-29', multiplier: 5, depends: [] },
+  { name: 'Opensuse 15.0', slug: 'opensuse-15', multiplier: 4, depends: [] },
+  { name: 'Opensuse 42.3', slug: 'opensuse-42', multiplier: 3, depends: [] },
+  { name: 'Ubuntu 16.04', slug: 'ubuntu-1604', multiplier: 1, depends: [] },
+  { name: 'Ubuntu 18.04', slug: 'ubuntu-1804', multiplier: 0, depends: [] },
+];
+
+local stable_distros = [
+  'amazon-1',
+  'amazon-2',
+  'centos-6',
+  'centos-7',
+  'debian-8',
+  'debian-9',
+  'ubuntu-1604',
+  'ubuntu-1804',
 ];
 
 local Shellcheck() = {
   kind: 'pipeline',
-  name: 'run-shellcheck',
+  name: 'Lint',
 
   steps: [
     {
-      name: 'build',
+      name: 'shellcheck',
       image: 'koalaman/shellcheck-alpine',
       commands: [
         'shellcheck -s sh -f checkstyle bootstrap-salt.sh',
@@ -25,30 +53,84 @@ local Shellcheck() = {
   ],
 };
 
-local Build(os, os_version) = {
+
+local Build(distro) = {
   kind: 'pipeline',
-  name: std.format('build-%s-%s', [os, os_version]),
+  name: distro.name,
+  node: {
+    project: 'open',
+  },
+
+  local suites = if std.count(stable_distros, distro.slug) > 0 then git_suites + stable_suites else git_suites,
 
   steps: [
     {
-      name: 'build',
-      privileged: true,
-      image: 'saltstack/drone-plugin-kitchen',
-      settings: {
-        target: std.format('%s-%s', [os, os_version]),
-        requirements: 'tests/requirements.txt',
+      name: 'throttle-build',
+      image: 'alpine',
+      commands: [
+        std.format(
+          "sh -c 't=%(offset)s; echo Sleeping %(offset)s seconds; sleep %(offset)s'",
+          { offset: 5 * std.length(suites) * distro.multiplier }
+        ),
+      ],
+    },
+    {
+      name: 'create',
+      image: 'saltstack/drone-salt-bootstrap-testing',
+      environment: {
+        DOCKER_HOST: 'tcp://docker:2375',
       },
+      depends_on: [
+        'throttle-build',
+      ],
+      commands: [
+        'bundle install --with docker --without opennebula ec2 windows vagrant',
+        "echo 'Waiting for docker to start'",
+        'sleep 10',  // give docker enough time to start
+        'docker ps -a',
+        std.format('bundle exec kitchen create %s', [distro.slug]),
+      ],
+    },
+  ] + [
+    {
+      name: suite.name,
+      image: 'saltstack/drone-salt-bootstrap-testing',
+      environment: {
+        DOCKER_HOST: 'tcp://docker:2375',
+      },
+      depends_on: [
+        'throttle-build',
+        'create',
+      ],
+      commands: [
+        'pip install -U pip',
+        'pip install -r tests/requirements.txt',
+        'bundle install --with docker --without opennebula ec2 windows vagrant',
+        std.format('bundle exec kitchen test %s-%s', [suite.slug, distro.slug]),
+      ],
+    }
+    for suite in suites
+  ],
+  services: [
+    {
+      name: 'docker',
+      image: 'saltstack/drone-salt-bootstrap-testing',
+      privileged: true,
+      environment: {},
+      command: [
+        '--storage-driver=overlay2',
+      ],
     },
   ],
   depends_on: [
-    'run-shellcheck',
-  ],
+    'Lint',
+  ] + distro.depends,
 };
 
 
 [
   Shellcheck(),
 ] + [
-  Build(distro.name, distro.version)
+  Build(distro)
   for distro in distros
 ]

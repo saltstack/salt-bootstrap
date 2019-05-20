@@ -115,6 +115,7 @@ Mike Place                  cachedout              mp@saltstack.com
 N                           noelmcloughlin         noel.maclochlainn@gmail.com
 nasenbaer13                 nasenbaer13
 nevins-b                    nevins-b
+Nicholas Henry              nshenry03              nshenry03@gmail.com
 Nicole Thomas               rallytime              nicole@saltstack.com
 Niels Abspoel               aboe76                 aboe76@gmail.com
 Nitin Madhok                nmadhok                nmadhok@clemson.edu
@@ -129,6 +130,7 @@ Petr Michalec               epcim
 pjcreath                    pjcreath
 Prayag Verma                pra85                  prayag.verma@gmail.com
 ptonelli                    ptonelli
+Pulu Anau                   puluanau               pulu.anau@dominodatalab.com
 Randy Thompson              beardedeagle           randy@heroictek.com
 Raymond Barbiero            visualphoenix
 Rob Eden                    hedinfaok
@@ -139,6 +141,7 @@ Roman Mohr                  rmohr                  rmohr@redhat.com
 Ronald van Zantvoort        The-Loeki              ronald@pcextreme.nl
 RuriRyan                    RuriRyan               ryan@btsoft.eu
 Ryan Walder                 ryanwalder             ryanwalder@ucds.email
+Sam                         sticky-note            sammy.smati@skazy.nc
 Sebastian Wendel            sourceindex
 Sergey Paramonov            serge-p                serg.paramonov@s-vp.com
 Shane Lee                   twangboy               slee@saltstack.com
@@ -159,5 +162,6 @@ Whit Morriss                whitmo                 whit@nocoast.us
 Wolodja Wentland            babilen                w@babilen5.org
 Wout                        wfhg
 Yann Masson                 ymasson
+Yoan Blanc                  greut                  yoan@dosimple.ch
 Yushi Nakai                 nyushi
 ==========================  =====================  ============================

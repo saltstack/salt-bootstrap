@@ -1,5 +1,15 @@
 Version TBD (In Progress on the Develop Branch):
 
+Version 2019.05.20:
+    * Allow stable version selection for amazon linux (puluanau) #1328
+    * FreeBSD 12 support (sticky-note) #1329
+    * Apt wait for lock modification (ripesensor) #1335
+    * Opensuse 15 Git installation fixes (s0undt3ch) #1340 #1341
+    * Amazon Linux Image fixes (nshenry03) #1343
+    * apt_key_fetch fixes (greut) #1344
+    * CentOS Git and PIP installation m2crypto fixes (s0undt3ch) #1347
+    * CI process enhancements/fixes (s0undt3ch) #1347
+
 Version 2019.02.27:
     * Add support for bunsenlabs devian derivative (kevinquinnyo) #1300
     * Add support for TurnKey devian derivative (dafyddj) #1313

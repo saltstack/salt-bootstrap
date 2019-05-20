@@ -4,11 +4,11 @@ driver:
   use_sudo: false
   hostname: salt
   privileged: true
-  username: kitchen
+  username: root
   cap_add:
     - sys_admin
   disable_upstart: false
-  use_internal_docker_network: true
+  use_internal_docker_network: false
 
 provisioner:
   name: salt_solo
@@ -17,29 +17,17 @@ provisioner:
   salt_bootstrap_options: -MPfq git %s
   install_after_init_environment: true
   log_level: info
-  sudo: true
+  sudo: false
   require_chef: false
   formula: tests
-  state_top:
-    base:
-      '*':
-        - tests.accept_key
+  run_salt_call: false
+  init_environment: |
+    echo 'auto_accept: true' > /tmp/auto-accept-keys.conf
+    mkdir -p /etc/salt/master.d
+    mv /tmp/auto-accept-keys.conf /etc/salt/master.d/auto-accept-keys.conf
+    sh -c 't=$(shuf -i 1-15 -n 1); echo Sleeping $t seconds; sleep $t'
 
 platforms:
-  - name: fedora
-    driver_config:
-      image: fedora:latest
-      run_command: /usr/lib/systemd/systemd
-  - name: centos-7
-    driver_config:
-      run_command: /usr/lib/systemd/systemd
-  - name: centos-6
-    driver_config:
-      run_command: /sbin/init
-      provision_command:
-        - yum install -y upstart
-    provisioner:
-      salt_bootstrap_options: -MPfq -y -x python2.7 git %s
   - name: amazon-1
     driver_config:
       image: amazonlinux:1
@@ -52,18 +40,23 @@ platforms:
       image: amazonlinux:2
       platform: rhel
       run_command: /usr/lib/systemd/systemd
-  - name: ubuntu-18.04
+  - name: arch
     driver_config:
-      run_command: /lib/systemd/systemd
-  - name: ubuntu-16.04
+      image: archlinux/base
+      run_command: /usr/lib/systemd/systemd
+      provision_command:
+        - pacman -Syu --noconfirm --needed systemd grep awk procps which
+        - systemctl enable sshd
+  - name: centos-7
     driver_config:
-      run_command: /lib/systemd/systemd
-  - name: ubuntu-14.04
+      run_command: /usr/lib/systemd/systemd
+  - name: centos-6
     driver_config:
       run_command: /sbin/init
       provision_command:
-        - rm -f /sbin/initctl
-        - dpkg-divert --local --rename --remove /sbin/initctl
+        - yum install -y upstart
+    provisioner:
+      salt_bootstrap_options: -MPfq -y -x python2.7 git %s
   - name: debian-8
     driver_config:
       run_command: /lib/systemd/systemd
@@ -72,49 +65,77 @@ platforms:
   - name: debian-9
     driver_config:
       run_command: /lib/systemd/systemd
-  - name: arch
+  - name: fedora-28
     driver_config:
-      image: base/archlinux
+      image: fedora:28
+      run_command: /usr/lib/systemd/systemd
+  - name: fedora-29
+    driver_config:
+      image: fedora:29
+      run_command: /usr/lib/systemd/systemd
+  - name: opensuse-15
+    driver_config:
+      image: opensuse/leap:15.0
       run_command: /usr/lib/systemd/systemd
       provision_command:
-        - pacman -Syu --noconfirm systemd
-        - systemctl enable sshd
-  - name: opensuse
-    driver_config:
-      run_command: /usr/lib/systemd/systemd
-      provision_command:
+        - zypper --non-interactive install --auto-agree-with-licenses dbus-1
         - systemctl enable sshd.service
+    provisioner:
+      salt_bootstrap_options: -MPfq -y -x python2 git %s
+  - name: opensuse-42
+    driver_config:
+      image: opensuse/leap:42.3
+      run_command: /usr/lib/systemd/systemd
+      provision_command:
+        - zypper --non-interactive install --auto-agree-with-licenses dbus-1
+        - systemctl enable sshd.service
+  - name: ubuntu-18.04
+    driver_config:
+      run_command: /lib/systemd/systemd
+  - name: ubuntu-16.04
+    driver_config:
+      run_command: /lib/systemd/systemd
 
 suites:
-  - name: py2-git-2017.7
+  - name: py2-git-2017-7
     provisioner:
       salt_version: 2017.7
-    excludes:
-      - arch
-  - name: py2-git-2018.3
+  - name: py2-git-2018-3
     provisioner:
       salt_version: 2018.3
-  - name: py2-git-2019.2
+  - name: py2-git-2019-2
     provisioner:
       salt_version: 2019.2
-  - name: py2-git-develop
-    provisioner:
-      salt_version: develop
-  - name: py2-stable-2017.7
+  - name: py2-stable-2017-7
     provisioner:
       salt_version: 2017.7
       salt_bootstrap_options: -MP stable %s
     excludes:
       - arch
-      - centos-6
-      - fedora
-      - opensuse
-  - name: py2-stable-2018.3
+      - fedora-28
+      - fedora-29
+      - opensuse-15
+      - opensuse-42
+  - name: py2-stable-2018-3
     provisioner:
       salt_version: 2018.3
-      salt_bootstrap_options: -MP stable
+      salt_bootstrap_options: -MP stable %s
     excludes:
-      - centos-6
+      - arch
+      - fedora-28
+      - fedora-29
+      - opensuse-15
+      - opensuse-42
+  - name: py2-stable-2019-2
+    provisioner:
+      salt_version: 2019.2
+      salt_bootstrap_options: -MP stable %s
+    excludes:
+      - arch
+      - fedora-28
+      - fedora-29
+      - opensuse-15
+      - opensuse-42
 
 verifier:
   name: shell

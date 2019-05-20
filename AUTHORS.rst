@@ -40,6 +40,7 @@ Chris Buechler              cbuechler              cmb@pfsense.org
 Christer Edwards            cedwards
 Christian McHugh            mchugh19
 Clark Perkins               iclarkperkins          clark.perkins@digitalreasoning.com
+Dafydd Jones                dafyddj                dafydd@techneg.it
 Dag Viggo Lokøen            dagvl                  dag.viggo@lokoen.org
 Dan Mick                    dmick                  dan.mick@inktank.com
 Daniel Poelzleithner        poelzi
@@ -62,6 +63,7 @@ EYJ                         eyj
 fizmat                      fizmat
 Forrest Alvarez             gravyboat
 Fred Reimer                 freimer                freimer@freimer.org
+Gareth J. Greenaway         garethgreenaway        gareth@wiked.org
 Geoff Garside               geoffgarside           geoff@geoffgarside.co.uk
 George                      aflat                  gstock.public@gmail.com
 gdm85                       gdm85
@@ -85,6 +87,7 @@ Justin Anderson             justinta               justin.ta@outlook.com
 Justin Findlay              jfindlay               jfindlay@gmail.com
 Karl Grzeszczak             karlgrz
 Kenneth Wilke               KennethWilke
+Kevin Quinn                 kevinquinnyo           kevin.quinn@totalserversolutions.com
 Ky-Anh Huynh                icy
 lomeroe                     lomeroe
 Liu Xiaohui                 oreh                   herolxh@gmail.com
@@ -112,6 +115,7 @@ Mike Place                  cachedout              mp@saltstack.com
 N                           noelmcloughlin         noel.maclochlainn@gmail.com
 nasenbaer13                 nasenbaer13
 nevins-b                    nevins-b
+Nicholas Henry              nshenry03              nshenry03@gmail.com
 Nicole Thomas               rallytime              nicole@saltstack.com
 Niels Abspoel               aboe76                 aboe76@gmail.com
 Nitin Madhok                nmadhok                nmadhok@clemson.edu
@@ -126,6 +130,7 @@ Petr Michalec               epcim
 pjcreath                    pjcreath
 Prayag Verma                pra85                  prayag.verma@gmail.com
 ptonelli                    ptonelli
+Pulu Anau                   puluanau               pulu.anau@dominodatalab.com
 Randy Thompson              beardedeagle           randy@heroictek.com
 Raymond Barbiero            visualphoenix
 Rob Eden                    hedinfaok
@@ -136,6 +141,7 @@ Roman Mohr                  rmohr                  rmohr@redhat.com
 Ronald van Zantvoort        The-Loeki              ronald@pcextreme.nl
 RuriRyan                    RuriRyan               ryan@btsoft.eu
 Ryan Walder                 ryanwalder             ryanwalder@ucds.email
+Sam                         sticky-note            sammy.smati@skazy.nc
 Sebastian Wendel            sourceindex
 Sergey Paramonov            serge-p                serg.paramonov@s-vp.com
 Shane Lee                   twangboy               slee@saltstack.com
@@ -143,6 +149,7 @@ Shawn Butts                 shawnbutts
 Skyler Berg                 skylerberg             skylertheberg@gmail.com
 Stanislav B                 stanislavb
 Steve Groesz                wolfpackmars2          wolfpackmars2@yahoo.com
+Sven R                      hackacad               admin@hackacad.net
 sybix                       sybix
 Tate Eskew                  tateeskew
 Thomas S. Hatch             thatch45               thatch45@saltstack.com
@@ -155,5 +162,6 @@ Whit Morriss                whitmo                 whit@nocoast.us
 Wolodja Wentland            babilen                w@babilen5.org
 Wout                        wfhg
 Yann Masson                 ymasson
+Yoan Blanc                  greut                  yoan@dosimple.ch
 Yushi Nakai                 nyushi
 ==========================  =====================  ============================

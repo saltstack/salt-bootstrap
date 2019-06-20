@@ -2654,7 +2654,7 @@ __install_saltstack_ubuntu_repository() {
     if [ "$DISTRO_MAJOR_VERSION" -gt 16 ]; then
         __PACKAGES="${__PACKAGES} gnupg dirmngr"
     else
-        __PACKAGES="${__PACKAGES} gnupg-curl"
+        __PACKAGES="${__PACKAGES} gnupg curl"
     fi
 
     # Make sure https transport is available
@@ -3055,7 +3055,7 @@ __install_saltstack_debian_repository() {
     if [ "$DISTRO_MAJOR_VERSION" -ge 9 ]; then
         __PACKAGES="${__PACKAGES} gnupg2 dirmngr"
     else
-        __PACKAGES="${__PACKAGES} gnupg-curl"
+        __PACKAGES="${__PACKAGES} gnupg2 curl"
     fi
 
     # Make sure https transport is available

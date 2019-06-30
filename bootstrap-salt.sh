@@ -2698,6 +2698,12 @@ install_ubuntu_deps() {
         __PACKAGES="upstart"
     fi
 
+    if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 3 ]; then
+        PY_PKG_VER=3
+    else
+        PY_PKG_VER=""
+    fi
+
     if [ "$DISTRO_MAJOR_VERSION" -ge 16 ] && [ -z "$_PY_EXE" ]; then
         __PACKAGES="${__PACKAGES} python2.7"
     fi
@@ -2706,13 +2712,13 @@ install_ubuntu_deps() {
         __PACKAGES="${__PACKAGES} python-virtualenv"
     fi
     # Need python-apt for managing packages via Salt
-    __PACKAGES="${__PACKAGES} python-apt"
+    __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-apt"
 
     # requests is still used by many salt modules
-    __PACKAGES="${__PACKAGES} python-requests"
+    __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-requests"
 
     # YAML module is used for generating custom master/minion configs
-    __PACKAGES="${__PACKAGES} python-yaml"
+    __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-yaml"
 
     # Additionally install procps and pciutils which allows for Docker bootstraps. See 366#issuecomment-39666813
     __PACKAGES="${__PACKAGES} procps pciutils"

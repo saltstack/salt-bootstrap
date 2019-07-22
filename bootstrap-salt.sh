@@ -2648,14 +2648,8 @@ __install_saltstack_ubuntu_repository() {
         UBUNTU_CODENAME=${DISTRO_CODENAME}
     fi
 
-    __PACKAGES=''
-
     # Install downloader backend for GPG keys fetching
-    if [ "$DISTRO_MAJOR_VERSION" -gt 16 ]; then
-        __PACKAGES="${__PACKAGES} gnupg dirmngr"
-    else
-        __PACKAGES="${__PACKAGES} gnupg curl"
-    fi
+    __PACKAGES='wget'
 
     # Make sure https transport is available
     if [ "$HTTP_VAL" = "https" ] ; then
@@ -3049,14 +3043,8 @@ __install_saltstack_debian_repository() {
         __PY_VERSION_REPO="py3"
     fi
 
-    __PACKAGES=''
-
     # Install downloader backend for GPG keys fetching
-    if [ "$DISTRO_MAJOR_VERSION" -ge 9 ]; then
-        __PACKAGES="${__PACKAGES} gnupg2 dirmngr"
-    else
-        __PACKAGES="${__PACKAGES} gnupg2 curl"
-    fi
+    __PACKAGES='wget'
 
     # Make sure https transport is available
     if [ "$HTTP_VAL" = "https" ] ; then

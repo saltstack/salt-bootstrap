@@ -2651,6 +2651,11 @@ __install_saltstack_ubuntu_repository() {
     # Install downloader backend for GPG keys fetching
     __PACKAGES='wget'
 
+    # Required as it is not installed by default on Ubuntu 18+
+    if [ "$DISTRO_MAJOR_VERSION" -ge 18 ]; then
+        __PACKAGES="${__PACKAGES} gnupg"
+    fi
+
     # Make sure https transport is available
     if [ "$HTTP_VAL" = "https" ] ; then
         __PACKAGES="${__PACKAGES} apt-transport-https ca-certificates"
@@ -3045,6 +3050,11 @@ __install_saltstack_debian_repository() {
 
     # Install downloader backend for GPG keys fetching
     __PACKAGES='wget'
+
+    # Required as it is not installed by default on Debian 9+
+    if [ "$DISTRO_MAJOR_VERSION" -ge 9 ]; then
+        __PACKAGES="${__PACKAGES} gnupg2"
+    fi
 
     # Make sure https transport is available
     if [ "$HTTP_VAL" = "https" ] ; then

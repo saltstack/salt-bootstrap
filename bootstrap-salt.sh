@@ -3379,14 +3379,8 @@ install_debian_git_post() {
         # Install initscripts for Debian 7 "Wheezy"
         elif [ ! -f "/etc/init.d/salt-$fname" ] || \
             { [ -f "/etc/init.d/salt-$fname" ] && [ "$_FORCE_OVERWRITE" -eq $BS_TRUE ]; }; then
-            if [ -f "${_SALT_GIT_CHECKOUT_DIR}/pkg/salt-$fname.init" ]; then
-                __copyfile "${_SALT_GIT_CHECKOUT_DIR}/pkg/salt-${fname}.init" "/etc/init.d/salt-${fname}"
-                __copyfile "${_SALT_GIT_CHECKOUT_DIR}/pkg/salt-${fname}.environment" "/etc/default/salt-${fname}"
-            else
-                # Make sure wget is available
-                __check_command_exists wget || __apt_get_install_noinput wget || return 1
-                __fetch_url "/etc/init.d/salt-${fname}" "${HTTP_VAL}://anonscm.debian.org/cgit/pkg-salt/salt.git/plain/debian/salt-${fname}.init"
-            fi
+            __copyfile "${_SALT_GIT_CHECKOUT_DIR}/pkg/deb/salt-${fname}.init" "/etc/init.d/salt-${fname}"
+            __copyfile "${_SALT_GIT_CHECKOUT_DIR}/pkg/deb/salt-${fname}.environment" "/etc/default/salt-${fname}"
 
             if [ ! -f "/etc/init.d/salt-${fname}" ]; then
                 echowarn "The init script for salt-${fname} was not found, skipping it..."

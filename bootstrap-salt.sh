@@ -1001,7 +1001,7 @@ __gather_linux_system_info() {
         elif [ "${DISTRO_NAME}" = "OracleServer" ]; then
             # This the Oracle Linux Server 6.5
             DISTRO_NAME="Oracle Linux"
-        elif [ "${DISTRO_NAME}" = "AmazonAMI" ]; then
+        elif [ "${DISTRO_NAME}" = "AmazonAMI" ] || [ "${DISTRO_NAME}" = "Amazon" ]; then
             DISTRO_NAME="Amazon Linux AMI"
         elif [ "${DISTRO_NAME}" = "ManjaroLinux" ]; then
             DISTRO_NAME="Arch Linux"

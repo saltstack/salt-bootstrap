@@ -601,7 +601,11 @@ elif [ "$ITYPE" = "stable" ]; then
             STABLE_REV="$1"
             shift
         elif [ "$(echo "$1" | grep -E '^([0-9]*\.[0-9]*\.[0-9]*)$')" != "" ]; then
-            STABLE_REV="archive/$1"
+            if [ "$(uname)" = "Darwin" ]; then
+              STABLE_REV="$1"
+            else
+              STABLE_REV="archive/$1"
+            fi
             shift
         else
             echo "Unknown stable version: $1 (valid: 1.6, 1.7, 2014.1, 2014.7, 2015.5, 2015.8, 2016.3, 2016.11, 2017.7, 2018.3, 2019.2, latest, \$MAJOR.\$MINOR.\$PATCH)"
@@ -667,7 +671,11 @@ fi
 
 # Check if we're installing via a different Python executable and set major version variables
 if [ -n "$_PY_EXE" ]; then
-    _PY_PKG_VER=$(echo "$_PY_EXE" | sed -r "s/\\.//g")
+    if [ "$(uname)" = "Darwin" ]; then
+      _PY_PKG_VER=$(echo "$_PY_EXE" | sed "s/\\.//g")
+    else
+      _PY_PKG_VER=$(echo "$_PY_EXE" | sed -r "s/\\.//g")
+    fi
 
     _PY_MAJOR_VERSION=$(echo "$_PY_PKG_VER" | cut -c 7)
     if [ "$_PY_MAJOR_VERSION" != 3 ] && [ "$_PY_MAJOR_VERSION" != 2 ]; then
@@ -1244,6 +1252,16 @@ __gather_bsd_system_info() {
 
 
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  __gather_osx_system_info
+#   DESCRIPTION:  Discover MacOS X
+#----------------------------------------------------------------------------------------------------------------------
+__gather_osx_system_info() {
+    DISTRO_NAME="MacOSX"
+    DISTRO_VERSION=$(sw_vers -productVersion)
+}
+
+
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #          NAME:  __gather_system_info
 #   DESCRIPTION:  Discover which system and distribution we are running.
 #----------------------------------------------------------------------------------------------------------------------
@@ -1257,6 +1275,9 @@ __gather_system_info() {
             ;;
         openbsd|freebsd|netbsd )
             __gather_bsd_system_info
+            ;;
+        darwin )
+            __gather_osx_system_info
             ;;
         * )
             echoerror "${OS_NAME} not supported.";
@@ -6607,6 +6628,116 @@ daemons_running_voidlinux() {
 }
 #
 #   Ended VoidLinux Install Functions
+#
+#######################################################################################################################
+
+#######################################################################################################################
+#
+#   OS X / Darwin Install Functions
+#
+
+__macosx_get_packagesite() {
+    DARWIN_ARCH="x86_64"
+
+    __PY_VERSION_REPO="py2"
+    if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 3 ]; then
+        __PY_VERSION_REPO="py3"
+    fi
+
+    PKG="salt-${STABLE_REV}-${__PY_VERSION_REPO}-${DARWIN_ARCH}.pkg"
+    SALTPKGCONFURL="https://repo.saltstack.com/osx/${PKG}"
+}
+
+# Using a separate conf step to head for idempotent install...
+__configure_macosx_pkg_details() {
+    __macosx_get_packagesite || return 1
+    return 0
+}
+
+install_macosx_stable_deps() {
+    __configure_macosx_pkg_details || return 1
+    return 0
+}
+
+install_macosx_git_deps() {
+    install_macosx_stable_deps || return 1
+
+    __fetch_url "/tmp/get-pip.py" "https://bootstrap.pypa.io/get-pip.py" || return 1
+
+    if [ -n "$_PY_EXE" ]; then
+        _PYEXE=${_PY_EXE}
+    else
+        _PYEXE=python2.7
+    fi
+
+    # Install PIP
+    $_PYEXE /tmp/get-pip.py || return 1
+
+    __git_clone_and_checkout || return 1
+
+    __PIP_REQUIREMENTS="dev_python27.txt"
+    if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 3 ]; then
+        __PIP_REQUIREMENTS="dev_python34.txt"
+    fi
+
+    requirements_file="${_SALT_GIT_CHECKOUT_DIR}/requirements/${__PIP_REQUIREMENTS}"
+    pip install -U -r ${requirements_file} --install-option="--prefix=/opt/salt" || return 1
+
+    return 0
+}
+
+install_macosx_stable() {
+    install_macosx_stable_deps || return 1
+
+    /usr/bin/curl ${SALTPKGCONFURL} > /tmp/${PKG} || return 1
+
+    /usr/sbin/installer -pkg /tmp/${PKG} -target / || return 1
+
+    return 0
+}
+
+install_macosx_git() {
+
+    if [ -n "$_PY_EXE" ]; then
+        _PYEXE=${_PY_EXE}
+    else
+        _PYEXE=python2.7
+    fi
+
+    if [ -f "${_SALT_GIT_CHECKOUT_DIR}/salt/syspaths.py" ]; then
+        $_PYEXE setup.py --salt-config-dir="$_SALT_ETC_DIR" --salt-cache-dir="${_SALT_CACHE_DIR}" ${SETUP_PY_INSTALL_ARGS} install --prefix=/opt/salt || return 1
+    else
+        $_PYEXE setup.py ${SETUP_PY_INSTALL_ARGS} install --prefix=/opt/salt || return 1
+    fi
+
+    return 0
+}
+
+install_macosx_stable_post() {
+   if [ ! -f /etc/paths.d/salt ]; then
+       echo "/opt/salt/bin\n/usr/local/sbin\n" > /etc/paths.d/salt
+   fi
+
+   source /etc/profile
+
+   return 0
+}
+
+install_macosx_git_post() {
+    install_macosx_stable_post || return 1
+    return 0
+}
+
+install_macosx_restart_daemons() {
+    [ $_START_DAEMONS -eq $BS_FALSE ] && return
+
+    /bin/launchctl unload /Library/LaunchDaemons/com.saltstack.salt.minion.plist || return 1
+    /bin/launchctl load /Library/LaunchDaemons/com.saltstack.salt.minion.plist || return 1
+
+   return 0
+}
+#
+#   Ended OS X / Darwin Install Functions
 #
 #######################################################################################################################
 

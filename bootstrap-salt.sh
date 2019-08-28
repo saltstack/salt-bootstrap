@@ -6681,7 +6681,7 @@ install_macosx_git_deps() {
     fi
 
     requirements_file="${_SALT_GIT_CHECKOUT_DIR}/requirements/${__PIP_REQUIREMENTS}"
-    pip install -U -r ${requirements_file} --install-option="--prefix=/opt/salt" || return 1
+    pip install -U -r "${requirements_file}" --install-option="--prefix=/opt/salt" || return 1
 
     return 0
 }
@@ -6689,9 +6689,9 @@ install_macosx_git_deps() {
 install_macosx_stable() {
     install_macosx_stable_deps || return 1
 
-    /usr/bin/curl ${SALTPKGCONFURL} > /tmp/${PKG} || return 1
+    /usr/bin/curl "${SALTPKGCONFURL}" > "/tmp/${PKG}" || return 1
 
-    /usr/sbin/installer -pkg /tmp/${PKG} -target / || return 1
+    /usr/sbin/installer -pkg "/tmp/${PKG}" -target / || return 1
 
     return 0
 }
@@ -6715,9 +6715,10 @@ install_macosx_git() {
 
 install_macosx_stable_post() {
    if [ ! -f /etc/paths.d/salt ]; then
-       echo "/opt/salt/bin\n/usr/local/sbin\n" > /etc/paths.d/salt
+       print "%s\n" "/opt/salt/bin" "/usr/local/sbin" > /etc/paths.d/salt
    fi
 
+   # shellcheck disable=SC1091
    source /etc/profile
 
    return 0

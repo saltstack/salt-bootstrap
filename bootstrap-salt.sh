@@ -6719,7 +6719,7 @@ install_macosx_stable_post() {
    fi
 
    # shellcheck disable=SC1091
-   source /etc/profile
+   . /etc/profile
 
    return 0
 }

@@ -3753,13 +3753,33 @@ install_centos_stable_deps() {
         __install_saltstack_rhel_repository || return 1
     fi
 
-    __PACKAGES="yum-utils chkconfig"
-
-    # YAML module is used for generating custom master/minion configs
-    if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 3 ]; then
-        __PACKAGES="${__PACKAGES} python34-PyYAML"
+    if [ "$DISTRO_MAJOR_VERSION" -ge 8 ]; then
+        __PACKAGES="dnf-utils chkconfig"
     else
-        __PACKAGES="${__PACKAGES} PyYAML"
+        __PACKAGES="yum-utils chkconfig"
+    fi
+
+    if [ "$DISTRO_MAJOR_VERSION" -ge 8 ]; then
+        # YAML module is used for generating custom master/minion configs
+        if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 3 ]; then
+            __PACKAGES="${__PACKAGES} python3-pyyaml"
+        else
+            __PACKAGES="${__PACKAGES} python2-pyyaml"
+        fi
+    elif [ "$DISTRO_MAJOR_VERSION" -eq 7 ]; then
+        # YAML module is used for generating custom master/minion configs
+        if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 3 ]; then
+            __PACKAGES="${__PACKAGES} python36-PyYAML"
+        else
+            __PACKAGES="${__PACKAGES} PyYAML"
+        fi
+    else
+        # YAML module is used for generating custom master/minion configs
+        if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 3 ]; then
+            __PACKAGES="${__PACKAGES} python34-PyYAML"
+        else
+            __PACKAGES="${__PACKAGES} PyYAML"
+        fi
     fi
 
     # shellcheck disable=SC2086
@@ -3841,11 +3861,20 @@ install_centos_git_deps() {
 
     __git_clone_and_checkout || return 1
 
-    __PACKAGES="m2crypto"
+    if [ "$DISTRO_MAJOR_VERSION" -ge 8 ]; then
+        __PACKAGES="python3-m2crypto"
+    else
+        __PACKAGES="m2crypto"
+    fi
 
     if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 3 ]; then
-        # Packages are named python34-<whatever>
-        PY_PKG_VER=34
+        if [ "$DISTRO_MAJOR_VERSION" -ge 8 ]; then
+            # Packages are named python3-<whatever>
+            PY_PKG_VER=3
+        else
+            # Packages are named python36-<whatever>
+            PY_PKG_VER=36
+        fi
     else
         PY_PKG_VER=""
 

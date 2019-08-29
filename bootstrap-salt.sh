@@ -2276,8 +2276,10 @@ __overwriteconfig() {
         tempfile="/tmp/salt-config-$$"
     fi
 
+    if [ -n "$_PY_EXE" ]; then
+        good_python="$_PY_EXE"
     # If python does not have yaml installed we're on Arch and should use python2
-    if python -c "import yaml" 2> /dev/null; then
+    elif python -c "import yaml" 2> /dev/null; then
         good_python=python
     else
         good_python=python2

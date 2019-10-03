@@ -30,13 +30,12 @@ Brandon Clifford            brandon099             brandon.clifford@vivint.com
 Bret Fisher                 BretFisher             bret@fishbrains.com
 Brian Kruger                bkruger99              brian.kruger@elliemae.com
 bruce-one                   bruce-one
-Вячеслав Спиридонов         sp1r
+Bryce Larson                bryceml
 C. R. Oldham                cro                    cr@saltstack.com
 Cam                         camereonsparr
 Charles McLaughlin          cmclaughlin
-Megan Wilhite               Ch3LL                  megan.wilhite@gmail.com
-Chris Rebert                cvrebert               chris.rebert@hulu.com
 Chris Buechler              cbuechler              cmb@pfsense.org
+Chris Rebert                cvrebert               chris.rebert@hulu.com
 Christer Edwards            cedwards
 Christian McHugh            mchugh19
 Clark Perkins               iclarkperkins          clark.perkins@digitalreasoning.com
@@ -60,13 +59,14 @@ Eric Radman                 eradman                ericshane@eradman.com
 Erik Ankrom                 erikankrom
 Erik Johnson                terminalmage           erik@saltstack.com
 EYJ                         eyj
+Felippe Burk                felippeb
 fizmat                      fizmat
 Forrest Alvarez             gravyboat
 Fred Reimer                 freimer                freimer@freimer.org
 Gareth J. Greenaway         garethgreenaway        gareth@wiked.org
+gdm85                       gdm85
 Geoff Garside               geoffgarside           geoff@geoffgarside.co.uk
 George                      aflat                  gstock.public@gmail.com
-gdm85                       gdm85
 ggillies                    ggillies
 Giuseppe Iannello           giannello              giuseppe.iannello@brokenloop.net
 Gregory Meno                GregMeno               gregory.meno@inktank.com
@@ -74,8 +74,9 @@ Guillaume Derval            GuillaumeDerval        guillaume@guillaumederval.be
 gweis                       gweis
 Henrik Holmboe              holmboe
 Howard Mei                  HowardMei              howardleomei@gmail.com
-Jan Heidbrink               jheidbrink
 James Booth                 absolutejam            vvalentine1337@gmail.com
+Jan Heidbrink               jheidbrink
+Jared Bristow               jars99
 Jared E Stroud              jaredestroud           jaredestroud@gmail.com
 Jasper Lievisse Adriaanse   jasperla               jasper@humppa.nl
 JD                          decomposite
@@ -89,8 +90,8 @@ Karl Grzeszczak             karlgrz
 Kenneth Wilke               KennethWilke
 Kevin Quinn                 kevinquinnyo           kevin.quinn@totalserversolutions.com
 Ky-Anh Huynh                icy
-lomeroe                     lomeroe
 Liu Xiaohui                 oreh                   herolxh@gmail.com
+lomeroe                     lomeroe
 Lorenzo Perone              lopezio                lorenzo.perone@yellowspace.net
 Lubomir Host                lhost
 luthes                      luthes                 steve.luther@gmail.com
@@ -106,6 +107,7 @@ Matthew Mead-Briggs         mattmb
 Matthew Richardson          mrichar1
 Matthew Willson             ixela
 Matthieu Guegan             mguegan
+Megan Wilhite               Ch3LL                  megan.wilhite@gmail.com
 mfapouw                     mfapouw
 Michael A. Smith            kojiromike             michaels@syapse.com
 Michael Scherer             mscherer
@@ -164,4 +166,6 @@ Wout                        wfhg
 Yann Masson                 ymasson
 Yoan Blanc                  greut                  yoan@dosimple.ch
 Yushi Nakai                 nyushi
+Zahiar Ahmed                zahiar
+Вячеслав Спиридонов         sp1r
 ==========================  =====================  ============================

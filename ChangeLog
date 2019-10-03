@@ -1,5 +1,12 @@
 Version TBD (In Progress on the Develop Branch):
 
+Version 2019.10.03:
+    * Fix possible typo with `gnupg-curl` vs `gnupg curl` (zahiar)
+    * Install only python3 packges if requested on ubuntu (noelmcloughlin) #1356
+    * Fixing debian wheezy (bryceml) #1359
+    * Fixed Amazon Linux 2 detection when lsb_release is installed (jars99) #1361
+    * Mac OS Support (felippeb) #1363 #1364 #1365 #1366
+
 Version 2019.05.20:
     * Allow stable version selection for amazon linux (puluanau) #1328
     * FreeBSD 12 support (sticky-note) #1329

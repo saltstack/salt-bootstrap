@@ -499,7 +499,7 @@ exec 2>"$LOGPIPE"
 #              14               SIGALRM
 #              15               SIGTERM
 #----------------------------------------------------------------------------------------------------------------------
-APT_ERR=$(mktemp /tmp/apt_error.XXXX)
+APT_ERR=$(mktemp /tmp/apt_error.XXXXXX)
 __exit_cleanup() {
     EXIT_CODE=$?
 

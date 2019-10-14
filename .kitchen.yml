@@ -47,6 +47,9 @@ platforms:
       provision_command:
         - pacman -Syu --noconfirm --needed systemd grep awk procps which
         - systemctl enable sshd
+  - name: centos-8
+    driver_config:
+      run_command: /usr/lib/systemd/systemd
   - name: centos-7
     driver_config:
       run_command: /usr/lib/systemd/systemd
@@ -65,13 +68,16 @@ platforms:
   - name: debian-9
     driver_config:
       run_command: /lib/systemd/systemd
-  - name: fedora-28
+  - name: debian-10
     driver_config:
-      image: fedora:28
-      run_command: /usr/lib/systemd/systemd
+      run_command: /lib/systemd/systemd
   - name: fedora-29
     driver_config:
       image: fedora:29
+      run_command: /usr/lib/systemd/systemd
+  - name: fedora-30
+    driver_config:
+      image: fedora:30
       run_command: /usr/lib/systemd/systemd
   - name: opensuse-15
     driver_config:
@@ -114,6 +120,7 @@ suites:
       - arch
       - fedora-28
       - fedora-29
+      - fedora-30
       - opensuse-15
       - opensuse-42
   - name: py2-stable-2018-3
@@ -124,6 +131,7 @@ suites:
       - arch
       - fedora-28
       - fedora-29
+      - fedora-30
       - opensuse-15
       - opensuse-42
   - name: py2-stable-2019-2
@@ -134,6 +142,7 @@ suites:
       - arch
       - fedora-28
       - fedora-29
+      - fedora-30
       - opensuse-15
       - opensuse-42
 

@@ -24,13 +24,13 @@ steps:
 - name: throttle-build
   image: alpine
   commands:
-  - "sh -c 't=0; echo Sleeping 0 seconds; sleep 0'"
+  - sh -c 't=0; echo Sleeping 0 seconds; sleep 0'
 
 - name: create
   image: saltstack/drone-salt-bootstrap-testing
   commands:
   - bundle install --with docker --without opennebula ec2 windows vagrant
-  - "echo 'Waiting for docker to start'"
+  - echo 'Waiting for docker to start'
   - sleep 10
   - docker ps -a
   - bundle exec kitchen create arch
@@ -103,13 +103,13 @@ steps:
 - name: throttle-build
   image: alpine
   commands:
-  - "sh -c 't=90; echo Sleeping 90 seconds; sleep 90'"
+  - sh -c 't=90; echo Sleeping 90 seconds; sleep 90'
 
 - name: create
   image: saltstack/drone-salt-bootstrap-testing
   commands:
   - bundle install --with docker --without opennebula ec2 windows vagrant
-  - "echo 'Waiting for docker to start'"
+  - echo 'Waiting for docker to start'
   - sleep 10
   - docker ps -a
   - bundle exec kitchen create centos-6
@@ -221,13 +221,13 @@ steps:
 - name: throttle-build
   image: alpine
   commands:
-  - "sh -c 't=120; echo Sleeping 120 seconds; sleep 120'"
+  - sh -c 't=120; echo Sleeping 120 seconds; sleep 120'
 
 - name: create
   image: saltstack/drone-salt-bootstrap-testing
   commands:
   - bundle install --with docker --without opennebula ec2 windows vagrant
-  - "echo 'Waiting for docker to start'"
+  - echo 'Waiting for docker to start'
   - sleep 10
   - docker ps -a
   - bundle exec kitchen create centos-7
@@ -329,6 +329,85 @@ depends_on:
 
 ---
 kind: pipeline
+name: CentOS 8
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: throttle-build
+  image: alpine
+  commands:
+  - sh -c 't=60; echo Sleeping 60 seconds; sleep 60'
+
+- name: create
+  image: saltstack/drone-salt-bootstrap-testing
+  commands:
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - echo 'Waiting for docker to start'
+  - sleep 10
+  - docker ps -a
+  - bundle exec kitchen create centos-8
+  environment:
+    DOCKER_HOST: tcp://docker:2375
+  depends_on:
+  - throttle-build
+
+- name: Py2 2017.7(Git)
+  image: saltstack/drone-salt-bootstrap-testing
+  commands:
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - bundle exec kitchen test py2-git-2017-7-centos-8
+  environment:
+    DOCKER_HOST: tcp://docker:2375
+  depends_on:
+  - throttle-build
+  - create
+
+- name: Py2 2018.3(Git)
+  image: saltstack/drone-salt-bootstrap-testing
+  commands:
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - bundle exec kitchen test py2-git-2018-3-centos-8
+  environment:
+    DOCKER_HOST: tcp://docker:2375
+  depends_on:
+  - throttle-build
+  - create
+
+- name: Py2 2019.2(Git)
+  image: saltstack/drone-salt-bootstrap-testing
+  commands:
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - bundle exec kitchen test py2-git-2019-2-centos-8
+  environment:
+    DOCKER_HOST: tcp://docker:2375
+  depends_on:
+  - throttle-build
+  - create
+
+services:
+- name: docker
+  image: saltstack/drone-salt-bootstrap-testing
+  command:
+  - --storage-driver=overlay2
+  privileged: true
+
+node:
+  project: open
+
+depends_on:
+- Lint
+
+---
+kind: pipeline
 name: Debian 8
 
 platform:
@@ -339,13 +418,13 @@ steps:
 - name: throttle-build
   image: alpine
   commands:
-  - "sh -c 't=150; echo Sleeping 150 seconds; sleep 150'"
+  - sh -c 't=150; echo Sleeping 150 seconds; sleep 150'
 
 - name: create
   image: saltstack/drone-salt-bootstrap-testing
   commands:
   - bundle install --with docker --without opennebula ec2 windows vagrant
-  - "echo 'Waiting for docker to start'"
+  - echo 'Waiting for docker to start'
   - sleep 10
   - docker ps -a
   - bundle exec kitchen create debian-8
@@ -457,13 +536,13 @@ steps:
 - name: throttle-build
   image: alpine
   commands:
-  - "sh -c 't=180; echo Sleeping 180 seconds; sleep 180'"
+  - sh -c 't=180; echo Sleeping 180 seconds; sleep 180'
 
 - name: create
   image: saltstack/drone-salt-bootstrap-testing
   commands:
   - bundle install --with docker --without opennebula ec2 windows vagrant
-  - "echo 'Waiting for docker to start'"
+  - echo 'Waiting for docker to start'
   - sleep 10
   - docker ps -a
   - bundle exec kitchen create debian-9
@@ -565,7 +644,7 @@ depends_on:
 
 ---
 kind: pipeline
-name: Fedora 28
+name: Debian 10
 
 platform:
   os: linux
@@ -575,16 +654,16 @@ steps:
 - name: throttle-build
   image: alpine
   commands:
-  - "sh -c 't=90; echo Sleeping 90 seconds; sleep 90'"
+  - sh -c 't=90; echo Sleeping 90 seconds; sleep 90'
 
 - name: create
   image: saltstack/drone-salt-bootstrap-testing
   commands:
   - bundle install --with docker --without opennebula ec2 windows vagrant
-  - "echo 'Waiting for docker to start'"
+  - echo 'Waiting for docker to start'
   - sleep 10
   - docker ps -a
-  - bundle exec kitchen create fedora-28
+  - bundle exec kitchen create debian-10
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
@@ -596,7 +675,7 @@ steps:
   - pip install -U pip
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
-  - bundle exec kitchen test py2-git-2017-7-fedora-28
+  - bundle exec kitchen test py2-git-2017-7-debian-10
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
@@ -609,7 +688,7 @@ steps:
   - pip install -U pip
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
-  - bundle exec kitchen test py2-git-2018-3-fedora-28
+  - bundle exec kitchen test py2-git-2018-3-debian-10
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
@@ -622,7 +701,7 @@ steps:
   - pip install -U pip
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
-  - bundle exec kitchen test py2-git-2019-2-fedora-28
+  - bundle exec kitchen test py2-git-2019-2-debian-10
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
@@ -654,13 +733,13 @@ steps:
 - name: throttle-build
   image: alpine
   commands:
-  - "sh -c 't=75; echo Sleeping 75 seconds; sleep 75'"
+  - sh -c 't=75; echo Sleeping 75 seconds; sleep 75'
 
 - name: create
   image: saltstack/drone-salt-bootstrap-testing
   commands:
   - bundle install --with docker --without opennebula ec2 windows vagrant
-  - "echo 'Waiting for docker to start'"
+  - echo 'Waiting for docker to start'
   - sleep 10
   - docker ps -a
   - bundle exec kitchen create fedora-29
@@ -723,6 +802,85 @@ depends_on:
 
 ---
 kind: pipeline
+name: Fedora 30
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: throttle-build
+  image: alpine
+  commands:
+  - sh -c 't=90; echo Sleeping 90 seconds; sleep 90'
+
+- name: create
+  image: saltstack/drone-salt-bootstrap-testing
+  commands:
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - echo 'Waiting for docker to start'
+  - sleep 10
+  - docker ps -a
+  - bundle exec kitchen create fedora-30
+  environment:
+    DOCKER_HOST: tcp://docker:2375
+  depends_on:
+  - throttle-build
+
+- name: Py2 2017.7(Git)
+  image: saltstack/drone-salt-bootstrap-testing
+  commands:
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - bundle exec kitchen test py2-git-2017-7-fedora-30
+  environment:
+    DOCKER_HOST: tcp://docker:2375
+  depends_on:
+  - throttle-build
+  - create
+
+- name: Py2 2018.3(Git)
+  image: saltstack/drone-salt-bootstrap-testing
+  commands:
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - bundle exec kitchen test py2-git-2018-3-fedora-30
+  environment:
+    DOCKER_HOST: tcp://docker:2375
+  depends_on:
+  - throttle-build
+  - create
+
+- name: Py2 2019.2(Git)
+  image: saltstack/drone-salt-bootstrap-testing
+  commands:
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - bundle exec kitchen test py2-git-2019-2-fedora-30
+  environment:
+    DOCKER_HOST: tcp://docker:2375
+  depends_on:
+  - throttle-build
+  - create
+
+services:
+- name: docker
+  image: saltstack/drone-salt-bootstrap-testing
+  command:
+  - --storage-driver=overlay2
+  privileged: true
+
+node:
+  project: open
+
+depends_on:
+- Lint
+
+---
+kind: pipeline
 name: Opensuse 15.0
 
 platform:
@@ -733,13 +891,13 @@ steps:
 - name: throttle-build
   image: alpine
   commands:
-  - "sh -c 't=60; echo Sleeping 60 seconds; sleep 60'"
+  - sh -c 't=60; echo Sleeping 60 seconds; sleep 60'
 
 - name: create
   image: saltstack/drone-salt-bootstrap-testing
   commands:
   - bundle install --with docker --without opennebula ec2 windows vagrant
-  - "echo 'Waiting for docker to start'"
+  - echo 'Waiting for docker to start'
   - sleep 10
   - docker ps -a
   - bundle exec kitchen create opensuse-15
@@ -812,13 +970,13 @@ steps:
 - name: throttle-build
   image: alpine
   commands:
-  - "sh -c 't=45; echo Sleeping 45 seconds; sleep 45'"
+  - sh -c 't=45; echo Sleeping 45 seconds; sleep 45'
 
 - name: create
   image: saltstack/drone-salt-bootstrap-testing
   commands:
   - bundle install --with docker --without opennebula ec2 windows vagrant
-  - "echo 'Waiting for docker to start'"
+  - echo 'Waiting for docker to start'
   - sleep 10
   - docker ps -a
   - bundle exec kitchen create opensuse-42
@@ -891,13 +1049,13 @@ steps:
 - name: throttle-build
   image: alpine
   commands:
-  - "sh -c 't=30; echo Sleeping 30 seconds; sleep 30'"
+  - sh -c 't=30; echo Sleeping 30 seconds; sleep 30'
 
 - name: create
   image: saltstack/drone-salt-bootstrap-testing
   commands:
   - bundle install --with docker --without opennebula ec2 windows vagrant
-  - "echo 'Waiting for docker to start'"
+  - echo 'Waiting for docker to start'
   - sleep 10
   - docker ps -a
   - bundle exec kitchen create ubuntu-1604
@@ -1009,13 +1167,13 @@ steps:
 - name: throttle-build
   image: alpine
   commands:
-  - "sh -c 't=0; echo Sleeping 0 seconds; sleep 0'"
+  - sh -c 't=0; echo Sleeping 0 seconds; sleep 0'
 
 - name: create
   image: saltstack/drone-salt-bootstrap-testing
   commands:
   - bundle install --with docker --without opennebula ec2 windows vagrant
-  - "echo 'Waiting for docker to start'"
+  - echo 'Waiting for docker to start'
   - sleep 10
   - docker ps -a
   - bundle exec kitchen create ubuntu-1804
@@ -1117,6 +1275,6 @@ depends_on:
 
 ---
 kind: signature
-hmac: b7e8b81af5c37f4432730a739032d9bbfb32d125b7e55ca8e94d0c08f8e40e59
+hmac: c1fd67a1728978738324f80777165bb1aacd87f09f88b235e3a8b90dec5849c7
 
 ...

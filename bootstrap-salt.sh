@@ -891,7 +891,6 @@ __derive_debian_numeric_version() {
         elif [ "$INPUT_VERSION" = "stretch/sid" ]; then
             NUMERIC_VERSION=$(__parse_version_string "9.0")
         elif [ "$INPUT_VERSION" = "buster/sid" ]; then
-            # Let's start detecting the upcoming Debian 10 (Buster) release
             NUMERIC_VERSION=$(__parse_version_string "10.0")
         else
             echowarn "Unable to parse the Debian Version (codename: '$INPUT_VERSION')"
@@ -3059,17 +3058,8 @@ install_ubuntu_check_services() {
 #   Debian Install Functions
 #
 __install_saltstack_debian_repository() {
-    if [ "$DISTRO_MAJOR_VERSION" -eq 10 ]; then
-        # Packages for Debian 10 at repo.saltstack.com are not yet available
-        # Set up repository for Debian 9 for Debian 10 for now until support
-        # is available at repo.saltstack.com for Debian 10.
-        echowarn "Debian 10 distribution detected, but stable packages requested. Trying packages from Debian 9. You may experience problems."
-        DEBIAN_RELEASE="9"
-        DEBIAN_CODENAME="stretch"
-    else
-        DEBIAN_RELEASE="$DISTRO_MAJOR_VERSION"
-        DEBIAN_CODENAME="$DISTRO_CODENAME"
-    fi
+    DEBIAN_RELEASE="$DISTRO_MAJOR_VERSION"
+    DEBIAN_CODENAME="$DISTRO_CODENAME"
 
     __PY_VERSION_REPO="apt"
     if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 3 ]; then

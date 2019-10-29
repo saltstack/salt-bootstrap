@@ -3333,8 +3333,9 @@ install_debian_10_git_deps() {
         PY_PKG_VER=3
         __PACKAGES="python${PY_PKG_VER}-distutils"
     else
-        PY_PKG_VER=""
         _py="python"
+        PY_PKG_VER=""
+        __PACKAGES=""
     fi
 
     __install_tornado_pip ${_py}|| return 1

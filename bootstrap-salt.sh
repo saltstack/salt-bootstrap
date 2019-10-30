@@ -3891,7 +3891,7 @@ install_centos_git_deps() {
         __install_tornado_pip ${_py} || return 1
         __PACKAGES="${__PACKAGES} python3-m2crypto"
     else
-        __PACKAGES="${__PACKAGES} m2crypto ${PY_PKG_VER}-crypto"
+        __PACKAGES="${__PACKAGES} m2crypto python${PY_PKG_VER}-crypto"
     fi
 
     __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-jinja2"

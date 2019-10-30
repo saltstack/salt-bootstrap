@@ -2529,6 +2529,18 @@ __install_pip_pkgs() {
 }
 
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  __install_tornado_pip
+#    PARAMETERS:  python executable
+#   DESCRIPTION:  Return 0 or 1 if successfully able to install tornado<5.0
+#----------------------------------------------------------------------------------------------------------------------
+__install_tornado_pip() {
+    # OS needs tornado <5.0 from pip
+    __check_pip_allowed "You need to allow pip based installations (-P) for Tornado <5.0 in order to install Salt on Python 3"
+    ## install pip if its not installed and install tornado
+    __install_pip_pkgs "tornado<5.0" "${1}" || return 1
+}
+
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #          NAME:  __install_pip_deps
 #   DESCRIPTION:  Return 0 or 1 if successfully able to install pip packages via requirements file
 #    PARAMETERS:  requirements_file
@@ -3851,13 +3863,9 @@ install_centos_git_deps() {
 
     __git_clone_and_checkout || return 1
 
-    if [ "$DISTRO_MAJOR_VERSION" -ge 8 ]; then
-        __PACKAGES="python3-m2crypto"
-    else
-        __PACKAGES="m2crypto"
-    fi
 
     if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 3 ]; then
+        _py=${_PY_EXE}
         if [ "$DISTRO_MAJOR_VERSION" -ge 8 ]; then
             # Packages are named python3-<whatever>
             PY_PKG_VER=3
@@ -3866,6 +3874,7 @@ install_centos_git_deps() {
             PY_PKG_VER=36
         fi
     else
+        _py="python"
         PY_PKG_VER=""
 
         # Only Py2 needs python-futures
@@ -3877,7 +3886,14 @@ install_centos_git_deps() {
         fi
     fi
 
-    __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-crypto python${PY_PKG_VER}-jinja2"
+    if [ "$DISTRO_MAJOR_VERSION" -ge 8 ]; then
+        __install_tornado_pip ${_py} || return 1
+        __PACKAGES="python3-m2crypto"
+    else
+        __PACKAGES="m2crypto ${PY_PKG_VER}-crypto"
+    fi
+
+    __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-jinja2"
     __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-msgpack python${PY_PKG_VER}-requests"
     __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado python${PY_PKG_VER}-zmq"
 
@@ -3895,7 +3911,7 @@ install_centos_git_deps() {
         _PIP_PACKAGES="m2crypto!=0.33.0 jinja2 msgpack-python pycrypto PyYAML tornado<5.0 zmq futures>=2.0"
 
         # install swig and openssl on cent6
-        if [ "$DISTRO_MAJOR_VERSION" -eq 6 ]; then
+        if [ "$DISTRO_MAJOR_VERSION" -eq 6 ] || [ "$DISTRO_MAJOR_VERSION" -eq 8 ]; then
             __yum_install_noinput openssl-devel swig || return 1
         fi
 

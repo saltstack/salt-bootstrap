@@ -3864,6 +3864,7 @@ install_centos_git_deps() {
     __git_clone_and_checkout || return 1
 
 
+    [ -z "${__PACKAGES}" ] && __PACKAGES=""
     if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 3 ]; then
         _py=${_PY_EXE}
         if [ "$DISTRO_MAJOR_VERSION" -ge 8 ]; then

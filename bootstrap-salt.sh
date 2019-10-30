@@ -3339,10 +3339,10 @@ install_debian_10_git_deps() {
     fi
 
     __install_tornado_pip ${_py}|| return 1
-    # shellcheck disable=SC2086
     __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-msgpack python${PY_PKG_VER}-jinja2"
     __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado python${PY_PKG_VER}-yaml python${PY_PKG_VER}-zmq"
 
+    # shellcheck disable=SC2086
     __apt_get_install_noinput ${__PACKAGES} || return 1
 
     return 0

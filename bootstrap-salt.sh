@@ -3864,7 +3864,7 @@ install_centos_git_deps() {
     __git_clone_and_checkout || return 1
 
 
-    [ -z "${__PACKAGES}" ] && __PACKAGES=""
+    __PACKAGES=""
     if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 3 ]; then
         _py=${_PY_EXE}
         if [ "$DISTRO_MAJOR_VERSION" -ge 8 ]; then
@@ -3889,9 +3889,9 @@ install_centos_git_deps() {
 
     if [ "$DISTRO_MAJOR_VERSION" -ge 8 ]; then
         __install_tornado_pip ${_py} || return 1
-        __PACKAGES="python3-m2crypto"
+        __PACKAGES="${__PACKAGES} python3-m2crypto"
     else
-        __PACKAGES="m2crypto ${PY_PKG_VER}-crypto"
+        __PACKAGES="${__PACKAGES} m2crypto ${PY_PKG_VER}-crypto"
     fi
 
     __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-jinja2"

@@ -84,7 +84,7 @@ steps:
   - pip install -U pip
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
-  - bundle exec kitchen test py2-git-2019-2-arch
+  - bundle exec kitchen test py3-git-2019-2-arch
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:

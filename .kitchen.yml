@@ -71,13 +71,13 @@ platforms:
   - name: debian-10
     driver_config:
       run_command: /lib/systemd/systemd
-  - name: fedora-29
-    driver_config:
-      image: fedora:29
-      run_command: /usr/lib/systemd/systemd
   - name: fedora-30
     driver_config:
       image: fedora:30
+      run_command: /usr/lib/systemd/systemd
+  - name: fedora-31
+    driver_config:
+      image: fedora:31
       run_command: /usr/lib/systemd/systemd
   - name: opensuse-15
     driver_config:
@@ -88,13 +88,6 @@ platforms:
         - systemctl enable sshd.service
     provisioner:
       salt_bootstrap_options: -MPfq -y -x python2 git %s
-  - name: opensuse-42
-    driver_config:
-      image: opensuse/leap:42.3
-      run_command: /usr/lib/systemd/systemd
-      provision_command:
-        - zypper --non-interactive install --auto-agree-with-licenses dbus-1
-        - systemctl enable sshd.service
   - name: ubuntu-18.04
     driver_config:
       run_command: /lib/systemd/systemd
@@ -103,48 +96,66 @@ platforms:
       run_command: /lib/systemd/systemd
 
 suites:
-  - name: py2-git-2017-7
-    provisioner:
-      salt_version: 2017.7
   - name: py2-git-2018-3
     provisioner:
       salt_version: 2018.3
   - name: py2-git-2019-2
     provisioner:
       salt_version: 2019.2
-  - name: py2-stable-2017-7
+  - name: py2-git-master
     provisioner:
-      salt_version: 2017.7
-      salt_bootstrap_options: -MP stable %s
-    excludes:
-      - arch
-      - fedora-28
-      - fedora-29
-      - fedora-30
-      - opensuse-15
-      - opensuse-42
+      salt_version: master
   - name: py2-stable-2018-3
     provisioner:
       salt_version: 2018.3
       salt_bootstrap_options: -MP stable %s
     excludes:
       - arch
-      - fedora-28
-      - fedora-29
-      - fedora-30
       - opensuse-15
-      - opensuse-42
   - name: py2-stable-2019-2
     provisioner:
       salt_version: 2019.2
       salt_bootstrap_options: -MP stable %s
     excludes:
       - arch
-      - fedora-28
-      - fedora-29
-      - fedora-30
       - opensuse-15
-      - opensuse-42
+  - name: py3-git-2018-3
+    provisioner:
+      salt_version: 2018.3
+      salt_bootstrap_options: -x python3 -MPfq git %s
+    excludes:
+      - amazon-1
+      - centos-6
+      - debian-8
+      - opensuse-15
+  - name: py3-git-2019-2
+    provisioner:
+      salt_version: 2019.2
+      salt_bootstrap_options: -x python3 -MPfq git %s
+    excludes:
+      - amazon-1
+      - centos-6
+      - debian-8
+      - opensuse-15
+  - name: py3-stable-2018-3
+    provisioner:
+      salt_version: 2018.3
+      salt_bootstrap_options: -x python3 -MP stable %s
+    excludes:
+      - amazon-1
+      - centos-6
+      - debian-8
+      - opensuse-15
+  - name: py3-stable-2019-2
+    provisioner:
+      salt_version: 2019.2
+      salt_bootstrap_options: -x python3 -MP stable %s
+    excludes:
+      - amazon-1
+      - centos-6
+      - debian-8
+      - opensuse-15
+      - arch
 
 verifier:
   name: shell

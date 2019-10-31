@@ -1,14 +1,22 @@
 local git_suites = [
-  { name: 'Py2 2017.7(Git)', slug: 'py2-git-2017-7', depends: [] },
-  { name: 'Py2 2018.3(Git)', slug: 'py2-git-2018-3', depends: ['Py2 2017.7(Git)'] },
+  { name: 'Py2 2018.3(Git)', slug: 'py2-git-2018-3', depends: [] },
   { name: 'Py2 2019.2(Git)', slug: 'py2-git-2019-2', depends: ['Py2 2018.3(Git)'] },
   // {name: 'Py2 develop(Stable)', slug: 'py2-git-develop'},  // Don't test against Salt's develop branch. Stability is not assured.
 ];
 
+local git_py3_suites = [
+  { name: 'Py3 2018.3(Git)', slug: 'py3-git-2018-3', depends: [] },
+  { name: 'Py3 2019.2(Git)', slug: 'py3-git-2019-2', depends: ['Py3 2018.3(Git)'] },
+];
+
 local stable_suites = [
-  { name: 'Py2 2017.7(Stable)', slug: 'py2-stable-2017-7', depends: ['Py2 2017.7(Git)'] },
   { name: 'Py2 2018.3(Stable)', slug: 'py2-stable-2018-3', depends: ['Py2 2018.3(Git)'] },
   { name: 'Py2 2019.2(Stable)', slug: 'py2-stable-2019-2', depends: ['Py2 2019.2(Git)'] },
+];
+
+local stable_py3_suites = [
+  { name: 'Py3 2018.3(Stable)', slug: 'py3-stable-2018-3', depends: ['Py3 2018.3(Git)'] },
+  { name: 'Py3 2019.2(Stable)', slug: 'py3-stable-2019-2', depends: ['Py3 2019.2(Git)'] },
 ];
 
 local distros = [
@@ -21,10 +29,9 @@ local distros = [
   { name: 'Debian 8', slug: 'debian-8', multiplier: 5, depends: [] },
   { name: 'Debian 9', slug: 'debian-9', multiplier: 6, depends: [] },
   { name: 'Debian 10', slug: 'debian-10', multiplier: 6, depends: [] },
-  { name: 'Fedora 29', slug: 'fedora-29', multiplier: 5, depends: [] },
   { name: 'Fedora 30', slug: 'fedora-30', multiplier: 6, depends: [] },
+  { name: 'Fedora 31', slug: 'fedora-31', multiplier: 6, depends: [] },
   { name: 'Opensuse 15.0', slug: 'opensuse-15', multiplier: 4, depends: [] },
-  { name: 'Opensuse 42.3', slug: 'opensuse-42', multiplier: 3, depends: [] },
   { name: 'Ubuntu 16.04', slug: 'ubuntu-1604', multiplier: 1, depends: [] },
   { name: 'Ubuntu 18.04', slug: 'ubuntu-1804', multiplier: 0, depends: [] },
 ];
@@ -34,10 +41,29 @@ local stable_distros = [
   'amazon-2',
   'centos-6',
   'centos-7',
+  'centos-8',
   'debian-8',
   'debian-9',
+  'debian-10',
   'ubuntu-1604',
   'ubuntu-1804',
+];
+
+local py3_distros = [
+  'amazon-2',
+  'centos-7',
+  'centos-8',
+  'debian-9',
+  'debian-10',
+  'ubuntu-1604',
+  'ubuntu-1804',
+  'fedora-30',
+  'fedora-31',
+];
+
+local py2_blacklist = [
+  'centos-8',
+  'debian-10',
 ];
 
 local Shellcheck() = {
@@ -63,7 +89,13 @@ local Build(distro) = {
     project: 'open',
   },
 
-  local suites = if std.count(stable_distros, distro.slug) > 0 then git_suites + stable_suites else git_suites,
+  local suite =
+      if std.count(py2_blacklist, distro.slug) > 0 then
+          []
+      else if std.count(stable_distros, distro.slug) > 0 then
+          git_suites + stable_suites
+      else git_suites,
+  local suites = suite + if std.count(py3_distros, distro.slug) > 0 then git_py3_suites + stable_py3_suites else [],
 
   steps: [
     {

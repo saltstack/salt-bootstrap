@@ -1,14 +1,20 @@
 local git_suites = [
   { name: 'Py2 2018.3(Git)', slug: 'py2-git-2018-3', depends: [] },
   { name: 'Py2 2019.2(Git)', slug: 'py2-git-2019-2', depends: ['Py2 2018.3(Git)'] },
+  // {name: 'Py2 develop(Stable)', slug: 'py2-git-develop'},  // Don't test against Salt's develop branch. Stability is not assured.
+];
+
+local git_py3_suites = [
   { name: 'Py3 2018.3(Git)', slug: 'py3-git-2018-3', depends: [] },
   { name: 'Py3 2019.2(Git)', slug: 'py3-git-2019-2', depends: ['Py3 2018.3(Git)'] },
-  // {name: 'Py2 develop(Stable)', slug: 'py2-git-develop'},  // Don't test against Salt's develop branch. Stability is not assured.
 ];
 
 local stable_suites = [
   { name: 'Py2 2018.3(Stable)', slug: 'py2-stable-2018-3', depends: ['Py2 2018.3(Git)'] },
   { name: 'Py2 2019.2(Stable)', slug: 'py2-stable-2019-2', depends: ['Py2 2019.2(Git)'] },
+];
+
+local stable_py3_suites = [
   { name: 'Py3 2018.3(Stable)', slug: 'py3-stable-2018-3', depends: ['Py3 2018.3(Git)'] },
   { name: 'Py3 2019.2(Stable)', slug: 'py3-stable-2019-2', depends: ['Py3 2019.2(Git)'] },
 ];
@@ -44,6 +50,18 @@ local stable_distros = [
   'ubuntu-1804',
 ];
 
+local py3_distros = [
+  'amazon-2',
+  'centos-7',
+  'centos-8',
+  'debian-8',
+  'debian-9',
+  'debian-10',
+  'ubuntu-1604',
+  'ubuntu-1804',
+];
+
+
 local Shellcheck() = {
   kind: 'pipeline',
   name: 'Lint',
@@ -67,7 +85,8 @@ local Build(distro) = {
     project: 'open',
   },
 
-  local suites = if std.count(stable_distros, distro.slug) > 0 then git_suites + stable_suites else git_suites,
+  local suite = if std.count(stable_distros, distro.slug) > 0 then git_suites + stable_suites else git_suites,
+  local suites = suite + if std.count(py3_distros, distro.slug) > 0 then git_py3_suites + stable_py3_suites else [],
 
   steps: [
     {

@@ -3865,8 +3865,12 @@ install_centos_git_deps() {
 
 
     __PACKAGES=""
+    _install_m2crypto_req=false
     if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 3 ]; then
         _py=${_PY_EXE}
+        if [ "$DISTRO_MAJOR_VERSION" -gt 6 ]; then
+            _install_m2crypto_req=true
+        fi
         if [ "$DISTRO_MAJOR_VERSION" -ge 8 ]; then
             # Packages are named python3-<whatever>
             PY_PKG_VER=3
@@ -3875,6 +3879,9 @@ install_centos_git_deps() {
             PY_PKG_VER=36
         fi
     else
+        if [ "$DISTRO_MAJOR_VERSION" -eq 6 ]; then
+            _install_m2crypto_req=true
+        fi
         _py="python"
         PY_PKG_VER=""
 
@@ -3912,7 +3919,7 @@ install_centos_git_deps() {
         _PIP_PACKAGES="m2crypto!=0.33.0 jinja2 msgpack-python pycrypto PyYAML tornado<5.0 zmq futures>=2.0"
 
         # install swig and openssl on cent6
-        if [ "$DISTRO_MAJOR_VERSION" -eq 6 ] || [ "$DISTRO_MAJOR_VERSION" -eq 8 ]; then
+        if $_install_m2crypto_req; then
             __yum_install_noinput openssl-devel swig || return 1
         fi
 

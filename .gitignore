@@ -6,5 +6,6 @@
 .idea
 
 # test-kitchen
+.kitchen
 .bundle
 Gemfile.lock

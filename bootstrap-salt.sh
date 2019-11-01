@@ -3825,6 +3825,9 @@ install_fedora_stable_post() {
 
 install_fedora_git_deps() {
     if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 3 ]; then
+        if [ "$DISTRO_MAJOR_VERSION" -eq 31 ]; then
+                __install_tornado_pip $_PY_EXE
+        fi
         # Packages are named python3-<whatever>
         PY_PKG_VER=3
     else

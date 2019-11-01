@@ -1790,7 +1790,7 @@ elif [ "${DISTRO_NAME_L}" = "debian" ]; then
   __debian_codename_translation
 fi
 
-if [ "$(echo "${DISTRO_NAME_L}" | grep -E '(debian|ubuntu|centos|red_hat|oracle|scientific|amazon)')" = "" ] && [ "$ITYPE" = "stable" ] && [ "$STABLE_REV" != "latest" ]; then
+if [ "$(echo "${DISTRO_NAME_L}" | grep -E '(debian|ubuntu|centos|red_hat|oracle|scientific|amazon|fedora)')" = "" ] && [ "$ITYPE" = "stable" ] && [ "$STABLE_REV" != "latest" ]; then
     echoerror "${DISTRO_NAME} does not have major version pegged packages support"
     exit 1
 fi
@@ -2275,8 +2275,10 @@ __overwriteconfig() {
         tempfile="/tmp/salt-config-$$"
     fi
 
+    if [ -n "$_PY_EXE" ]; then
+        good_python="$_PY_EXE"
     # If python does not have yaml installed we're on Arch and should use python2
-    if python -c "import yaml" 2> /dev/null; then
+    elif python -c "import yaml" 2> /dev/null; then
         good_python=python
     else
         good_python=python2
@@ -3796,13 +3798,33 @@ install_centos_stable_deps() {
         __install_saltstack_rhel_repository || return 1
     fi
 
-    __PACKAGES="yum-utils chkconfig"
-
-    # YAML module is used for generating custom master/minion configs
-    if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 3 ]; then
-        __PACKAGES="${__PACKAGES} python34-PyYAML"
+    if [ "$DISTRO_MAJOR_VERSION" -ge 8 ]; then
+        __PACKAGES="dnf-utils chkconfig"
     else
-        __PACKAGES="${__PACKAGES} PyYAML"
+        __PACKAGES="yum-utils chkconfig"
+    fi
+
+    if [ "$DISTRO_MAJOR_VERSION" -ge 8 ]; then
+        # YAML module is used for generating custom master/minion configs
+        if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 3 ]; then
+            __PACKAGES="${__PACKAGES} python3-pyyaml"
+        else
+            __PACKAGES="${__PACKAGES} python2-pyyaml"
+        fi
+    elif [ "$DISTRO_MAJOR_VERSION" -eq 7 ]; then
+        # YAML module is used for generating custom master/minion configs
+        if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 3 ]; then
+            __PACKAGES="${__PACKAGES} python36-PyYAML"
+        else
+            __PACKAGES="${__PACKAGES} PyYAML"
+        fi
+    else
+        # YAML module is used for generating custom master/minion configs
+        if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 3 ]; then
+            __PACKAGES="${__PACKAGES} python34-PyYAML"
+        else
+            __PACKAGES="${__PACKAGES} PyYAML"
+        fi
     fi
 
     # shellcheck disable=SC2086
@@ -3884,12 +3906,26 @@ install_centos_git_deps() {
 
     __git_clone_and_checkout || return 1
 
-    __PACKAGES="m2crypto"
 
+    __PACKAGES=""
+    _install_m2crypto_req=false
     if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 3 ]; then
-        # Packages are named python34-<whatever>
-        PY_PKG_VER=34
+        _py=${_PY_EXE}
+        if [ "$DISTRO_MAJOR_VERSION" -gt 6 ]; then
+            _install_m2crypto_req=true
+        fi
+        if [ "$DISTRO_MAJOR_VERSION" -ge 8 ]; then
+            # Packages are named python3-<whatever>
+            PY_PKG_VER=3
+        else
+            # Packages are named python36-<whatever>
+            PY_PKG_VER=36
+        fi
     else
+        if [ "$DISTRO_MAJOR_VERSION" -eq 6 ]; then
+            _install_m2crypto_req=true
+        fi
+        _py="python"
         PY_PKG_VER=""
 
         # Only Py2 needs python-futures
@@ -3901,7 +3937,14 @@ install_centos_git_deps() {
         fi
     fi
 
-    __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-crypto python${PY_PKG_VER}-jinja2"
+    if [ "$DISTRO_MAJOR_VERSION" -ge 8 ]; then
+        __install_tornado_pip ${_py} || return 1
+        __PACKAGES="${__PACKAGES} python3-m2crypto"
+    else
+        __PACKAGES="${__PACKAGES} m2crypto python${PY_PKG_VER}-crypto"
+    fi
+
+    __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-jinja2"
     __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-msgpack python${PY_PKG_VER}-requests"
     __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado python${PY_PKG_VER}-zmq"
 
@@ -3919,7 +3962,7 @@ install_centos_git_deps() {
         _PIP_PACKAGES="m2crypto!=0.33.0 jinja2 msgpack-python pycrypto PyYAML tornado<5.0 zmq futures>=2.0"
 
         # install swig and openssl on cent6
-        if [ "$DISTRO_MAJOR_VERSION" -eq 6 ]; then
+        if $_install_m2crypto_req; then
             __yum_install_noinput openssl-devel swig || return 1
         fi
 

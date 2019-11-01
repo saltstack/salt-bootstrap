@@ -239,7 +239,7 @@ _CONFIG_ONLY=$BS_FALSE
 _PIP_ALLOWED=${BS_PIP_ALLOWED:-$BS_FALSE}
 _PIP_ALL=${BS_PIP_ALL:-$BS_FALSE}
 if uname -a | grep FreeBSD > /dev/null; then
-  SALT_ETC_DIR=${BS_SALT_ETC_DIR:-/usr/local/etc/salt}
+  _SALT_ETC_DIR=${BS_SALT_ETC_DIR:-/usr/local/etc/salt}
 else
   _SALT_ETC_DIR=${BS_SALT_ETC_DIR:-/etc/salt}
 fi

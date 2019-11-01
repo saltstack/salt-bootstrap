@@ -66,6 +66,11 @@ local py2_blacklist = [
   'debian-10',
 ];
 
+local blacklist_2018 = [
+  'centos-8',
+  'debian-10',
+];
+
 local Shellcheck() = {
   kind: 'pipeline',
   name: 'Lint',
@@ -95,7 +100,11 @@ local Build(distro) = {
       else if std.count(stable_distros, distro.slug) > 0 then
           git_suites + stable_suites
       else git_suites,
-  local suites = suite + if std.count(py3_distros, distro.slug) > 0 then git_py3_suites + stable_py3_suites else [],
+  local suites = suite + if std.count(blacklist_2018, distro.slug) > 0 then
+                             git_py3_suites + stable_py3_suites[1:]
+                         else if std.count(py3_distros, distro.slug) > 0 then
+                             git_py3_suites + stable_py3_suites
+                         else [],
 
   steps: [
     {

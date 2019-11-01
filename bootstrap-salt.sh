@@ -2518,9 +2518,16 @@ __install_pip_pkgs() {
 
     # Install pip and pip dependencies
     if ! __check_command_exists "${_pip_cmd} --version"; then
-        __PACKAGES="${_py_pkg}-setuptools ${_py_pkg}-pip gcc ${_py_pkg}-devel"
+        __PACKAGES="${_py_pkg}-setuptools ${_py_pkg}-pip gcc"
         # shellcheck disable=SC2086
-        __yum_install_noinput ${__PACKAGES} || return 1
+        if [ "$DISTRO_NAME_L" = "debian" ];then
+            __PACKAGES="${__PACKAGES} ${_py_pkg}-dev"
+            __apt_get_install_noinput ${__PACKAGES} || return 1
+        else
+            __PACKAGES="${__PACKAGES} ${_py_pkg}-devel"
+            __yum_install_noinput ${__PACKAGES} || return 1
+        fi
+
     fi
 
     echoinfo "Installing pip packages: ${_pip_pkgs} using ${_py_exe}"
@@ -3154,6 +3161,24 @@ install_debian_deps() {
     return 0
 }
 
+install_debian_git_pre() {
+    if ! __check_command_exists git; then
+        __apt_get_install_noinput git || return 1
+    fi
+
+    if [ "$_INSECURE_DL" -eq $BS_FALSE ] && [ "${_SALT_REPO_URL%%://*}" = "https" ]; then
+        __apt_get_install_noinput ca-certificates
+    fi
+
+    __git_clone_and_checkout || return 1
+
+    # Let's trigger config_salt()
+    if [ "$_TEMP_CONFIG_DIR" = "null" ]; then
+        _TEMP_CONFIG_DIR="${_SALT_GIT_CHECKOUT_DIR}/conf/"
+        CONFIG_SALT_FUNC="config_salt"
+    fi
+}
+
 install_debian_git_deps() {
     if ! __check_command_exists git; then
         __apt_get_install_noinput git || return 1
@@ -3303,7 +3328,25 @@ install_debian_9_git_deps() {
 }
 
 install_debian_10_git_deps() {
-    install_debian_9_git_deps || return 1
+    install_debian_git_pre || return 1
+
+    if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 3 ]; then
+        _py=${_PY_EXE}
+        PY_PKG_VER=3
+        __PACKAGES="python${PY_PKG_VER}-distutils"
+    else
+        _py="python"
+        PY_PKG_VER=""
+        __PACKAGES=""
+    fi
+
+    __install_tornado_pip ${_py}|| return 1
+    __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-msgpack python${PY_PKG_VER}-jinja2"
+    __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado python${PY_PKG_VER}-yaml python${PY_PKG_VER}-zmq"
+
+    # shellcheck disable=SC2086
+    __apt_get_install_noinput ${__PACKAGES} || return 1
+
     return 0
 }
 

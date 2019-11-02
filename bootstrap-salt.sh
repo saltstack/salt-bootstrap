@@ -1794,7 +1794,7 @@ elif [ "${DISTRO_NAME_L}" = "debian" ]; then
   __debian_codename_translation
 fi
 
-if [ "$(echo "${DISTRO_NAME_L}" | grep -E '(debian|ubuntu|centos|red_hat|oracle|scientific|amazon)')" = "" ] && [ "$ITYPE" = "stable" ] && [ "$STABLE_REV" != "latest" ]; then
+if [ "$(echo "${DISTRO_NAME_L}" | grep -E '(debian|ubuntu|centos|red_hat|oracle|scientific|amazon|fedora)')" = "" ] && [ "$ITYPE" = "stable" ] && [ "$STABLE_REV" != "latest" ]; then
     echoerror "${DISTRO_NAME} does not have major version pegged packages support"
     exit 1
 fi
@@ -2279,8 +2279,10 @@ __overwriteconfig() {
         tempfile="/tmp/salt-config-$$"
     fi
 
+    if [ -n "$_PY_EXE" ]; then
+        good_python="$_PY_EXE"
     # If python does not have yaml installed we're on Arch and should use python2
-    if python -c "import yaml" 2> /dev/null; then
+    elif python -c "import yaml" 2> /dev/null; then
         good_python=python
     else
         good_python=python2
@@ -2520,14 +2522,33 @@ __install_pip_pkgs() {
 
     # Install pip and pip dependencies
     if ! __check_command_exists "${_pip_cmd} --version"; then
-        __PACKAGES="${_py_pkg}-setuptools ${_py_pkg}-pip gcc ${_py_pkg}-devel"
+        __PACKAGES="${_py_pkg}-setuptools ${_py_pkg}-pip gcc"
         # shellcheck disable=SC2086
-        __yum_install_noinput ${__PACKAGES} || return 1
+        if [ "$DISTRO_NAME_L" = "debian" ];then
+            __PACKAGES="${__PACKAGES} ${_py_pkg}-dev"
+            __apt_get_install_noinput ${__PACKAGES} || return 1
+        else
+            __PACKAGES="${__PACKAGES} ${_py_pkg}-devel"
+            __yum_install_noinput ${__PACKAGES} || return 1
+        fi
+
     fi
 
     echoinfo "Installing pip packages: ${_pip_pkgs} using ${_py_exe}"
     # shellcheck disable=SC2086
     ${_pip_cmd} install ${_pip_pkgs} || return 1
+}
+
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  __install_tornado_pip
+#    PARAMETERS:  python executable
+#   DESCRIPTION:  Return 0 or 1 if successfully able to install tornado<5.0
+#----------------------------------------------------------------------------------------------------------------------
+__install_tornado_pip() {
+    # OS needs tornado <5.0 from pip
+    __check_pip_allowed "You need to allow pip based installations (-P) for Tornado <5.0 in order to install Salt on Python 3"
+    ## install pip if its not installed and install tornado
+    __install_pip_pkgs "tornado<5.0" "${1}" || return 1
 }
 
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
@@ -3144,6 +3165,24 @@ install_debian_deps() {
     return 0
 }
 
+install_debian_git_pre() {
+    if ! __check_command_exists git; then
+        __apt_get_install_noinput git || return 1
+    fi
+
+    if [ "$_INSECURE_DL" -eq $BS_FALSE ] && [ "${_SALT_REPO_URL%%://*}" = "https" ]; then
+        __apt_get_install_noinput ca-certificates
+    fi
+
+    __git_clone_and_checkout || return 1
+
+    # Let's trigger config_salt()
+    if [ "$_TEMP_CONFIG_DIR" = "null" ]; then
+        _TEMP_CONFIG_DIR="${_SALT_GIT_CHECKOUT_DIR}/conf/"
+        CONFIG_SALT_FUNC="config_salt"
+    fi
+}
+
 install_debian_git_deps() {
     if ! __check_command_exists git; then
         __apt_get_install_noinput git || return 1
@@ -3293,7 +3332,25 @@ install_debian_9_git_deps() {
 }
 
 install_debian_10_git_deps() {
-    install_debian_9_git_deps || return 1
+    install_debian_git_pre || return 1
+
+    if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 3 ]; then
+        _py=${_PY_EXE}
+        PY_PKG_VER=3
+        __PACKAGES="python${PY_PKG_VER}-distutils"
+    else
+        _py="python"
+        PY_PKG_VER=""
+        __PACKAGES=""
+    fi
+
+    __install_tornado_pip ${_py}|| return 1
+    __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-msgpack python${PY_PKG_VER}-jinja2"
+    __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado python${PY_PKG_VER}-yaml python${PY_PKG_VER}-zmq"
+
+    # shellcheck disable=SC2086
+    __apt_get_install_noinput ${__PACKAGES} || return 1
+
     return 0
 }
 
@@ -3745,13 +3802,33 @@ install_centos_stable_deps() {
         __install_saltstack_rhel_repository || return 1
     fi
 
-    __PACKAGES="yum-utils chkconfig"
-
-    # YAML module is used for generating custom master/minion configs
-    if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 3 ]; then
-        __PACKAGES="${__PACKAGES} python34-PyYAML"
+    if [ "$DISTRO_MAJOR_VERSION" -ge 8 ]; then
+        __PACKAGES="dnf-utils chkconfig"
     else
-        __PACKAGES="${__PACKAGES} PyYAML"
+        __PACKAGES="yum-utils chkconfig"
+    fi
+
+    if [ "$DISTRO_MAJOR_VERSION" -ge 8 ]; then
+        # YAML module is used for generating custom master/minion configs
+        if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 3 ]; then
+            __PACKAGES="${__PACKAGES} python3-pyyaml"
+        else
+            __PACKAGES="${__PACKAGES} python2-pyyaml"
+        fi
+    elif [ "$DISTRO_MAJOR_VERSION" -eq 7 ]; then
+        # YAML module is used for generating custom master/minion configs
+        if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 3 ]; then
+            __PACKAGES="${__PACKAGES} python36-PyYAML"
+        else
+            __PACKAGES="${__PACKAGES} PyYAML"
+        fi
+    else
+        # YAML module is used for generating custom master/minion configs
+        if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 3 ]; then
+            __PACKAGES="${__PACKAGES} python34-PyYAML"
+        else
+            __PACKAGES="${__PACKAGES} PyYAML"
+        fi
     fi
 
     # shellcheck disable=SC2086
@@ -3833,12 +3910,26 @@ install_centos_git_deps() {
 
     __git_clone_and_checkout || return 1
 
-    __PACKAGES="m2crypto"
 
+    __PACKAGES=""
+    _install_m2crypto_req=false
     if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 3 ]; then
-        # Packages are named python34-<whatever>
-        PY_PKG_VER=34
+        _py=${_PY_EXE}
+        if [ "$DISTRO_MAJOR_VERSION" -gt 6 ]; then
+            _install_m2crypto_req=true
+        fi
+        if [ "$DISTRO_MAJOR_VERSION" -ge 8 ]; then
+            # Packages are named python3-<whatever>
+            PY_PKG_VER=3
+        else
+            # Packages are named python36-<whatever>
+            PY_PKG_VER=36
+        fi
     else
+        if [ "$DISTRO_MAJOR_VERSION" -eq 6 ]; then
+            _install_m2crypto_req=true
+        fi
+        _py="python"
         PY_PKG_VER=""
 
         # Only Py2 needs python-futures
@@ -3850,7 +3941,14 @@ install_centos_git_deps() {
         fi
     fi
 
-    __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-crypto python${PY_PKG_VER}-jinja2"
+    if [ "$DISTRO_MAJOR_VERSION" -ge 8 ]; then
+        __install_tornado_pip ${_py} || return 1
+        __PACKAGES="${__PACKAGES} python3-m2crypto"
+    else
+        __PACKAGES="${__PACKAGES} m2crypto python${PY_PKG_VER}-crypto"
+    fi
+
+    __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-jinja2"
     __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-msgpack python${PY_PKG_VER}-requests"
     __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado python${PY_PKG_VER}-zmq"
 
@@ -3868,7 +3966,7 @@ install_centos_git_deps() {
         _PIP_PACKAGES="m2crypto!=0.33.0 jinja2 msgpack-python pycrypto PyYAML tornado<5.0 zmq futures>=2.0"
 
         # install swig and openssl on cent6
-        if [ "$DISTRO_MAJOR_VERSION" -eq 6 ]; then
+        if $_install_m2crypto_req; then
             __yum_install_noinput openssl-devel swig || return 1
         fi
 

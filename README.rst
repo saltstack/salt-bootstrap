@@ -213,9 +213,10 @@ Tornado 5/6 Workaround
 Salt does not support tornado>=5.0 currently. This support will not be added until the neon
 release.  In order to work around this requirement on OSs that no longer have the tornado 4 package
 available in their repositories we are pip installing tornado<5.0 in the bootstrap script. This
-requires the user to pass -P to the bootstrap script to ensure tornado is pip installed. If a user
-does not pass this argument they will be warned that it is required for the tornado 5 workaround.
-So far the OSs that are using this workaround are Debian 10, Centos 8 and Fedora 31.
+requires the user to pass -P to the bootstrap script if installing via git to ensure tornado is pip
+installed.  If a user does not pass this argument they will be warned that it is required for the
+tornado 5 workaround. So far the OSs that are using this workaround are Debian 10, Centos 8 and
+Fedora 31.
 
 Supported Operating Systems
 ---------------------------

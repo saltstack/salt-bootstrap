@@ -1,5 +1,11 @@
 Version TBD (In Progress on the Develop Branch):
 
+Version 2019.11.04:
+	* Fix busybox mktemp compatibility (stanzgy) #1369
+	* Install debian 10 packages on debian 10 instead of 9 (kiemlicz) #1375
+	* move centos to python36, use python specified by -x (Ch3LL,bryceml) #1380
+	* Add debian 10 git install support (Ch3LL) #1378
+
 Version 2019.10.03:
     * Fix possible typo with `gnupg-curl` vs `gnupg curl` (zahiar)
     * Install only python3 packges if requested on ubuntu (noelmcloughlin) #1356

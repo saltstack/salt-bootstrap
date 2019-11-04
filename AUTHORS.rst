@@ -89,6 +89,7 @@ Justin Findlay              jfindlay               jfindlay@gmail.com
 Karl Grzeszczak             karlgrz
 Kenneth Wilke               KennethWilke
 Kevin Quinn                 kevinquinnyo           kevin.quinn@totalserversolutions.com
+kiemlicz                    kiemlicz
 Ky-Anh Huynh                icy
 Liu Xiaohui                 oreh                   herolxh@gmail.com
 lomeroe                     lomeroe
@@ -150,6 +151,7 @@ Shane Lee                   twangboy               slee@saltstack.com
 Shawn Butts                 shawnbutts
 Skyler Berg                 skylerberg             skylertheberg@gmail.com
 Stanislav B                 stanislavb
+stanzgy                     stanzgy                stanzgy@gmail.com
 Steve Groesz                wolfpackmars2          wolfpackmars2@yahoo.com
 Sven R                      hackacad               admin@hackacad.net
 sybix                       sybix

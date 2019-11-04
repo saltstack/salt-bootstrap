@@ -997,26 +997,26 @@ steps:
   depends_on:
   - throttle-build
 
-- name: Py2 2018.3(Git)
+- name: Py3 2018.3(Git)
   image: saltstack/drone-salt-bootstrap-testing
   commands:
   - pip install -U pip
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
-  - bundle exec kitchen test py2-git-2018-3-fedora-31
+  - bundle exec kitchen test py3-git-2018-3-fedora-31
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
   - create
 
-- name: Py2 2019.2(Git)
+- name: Py3 2019.2(Git)
   image: saltstack/drone-salt-bootstrap-testing
   commands:
   - pip install -U pip
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
-  - bundle exec kitchen test py2-git-2019-2-fedora-31
+  - bundle exec kitchen test py3-git-2019-2-fedora-31
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
@@ -1392,6 +1392,6 @@ depends_on:
 
 ---
 kind: signature
-hmac: fae909d28bd67c6bfcee0f01f05540c9683aa1a19b7436c5f0a65c5505701db1
+hmac: b84d3ddb4ecabcdf7d454cb6552acf79dfa777d7f9453f0b329ae02980c9f3cd
 
 ...

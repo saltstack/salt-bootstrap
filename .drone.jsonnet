@@ -60,11 +60,13 @@ local py3_distros = [
   'ubuntu-1604',
   'ubuntu-1804',
   'fedora-30',
+  'fedora-31',
 ];
 
 local py2_blacklist = [
   'centos-8',
   'debian-10',
+  'fedora-31',
 ];
 
 local blacklist_2018 = [

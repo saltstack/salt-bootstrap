@@ -28,6 +28,7 @@ sum** of the downloaded ``bootstrap-salt.sh`` file.
 
 The SHA256 sum of the ``bootstrap-salt.sh`` file, per release, is:
 
+- 2019.11.04: ``905924fccd4ebf168d19ba598bf10af53efe02302b792aeb15433e73fd3ad1d2``
 - 2019.10.03: ``34f196f06d586ce9e1b9907660ea6e67caf57abcecfea66e0343697e3fd0d17d``
 - 2019.05.20: ``46fb5e4b7815efafd69fd703f033fe86e7b584b6770f7e0b936995bcae1cedd8``
 - 2019.02.27: ``23728e4b5e54f564062070e3be53c5602b55c24c9a76671968abbf3d609258cb``
@@ -207,6 +208,14 @@ Installing the latest develop branch of Salt:
 
   curl -L https://bootstrap.saltstack.com | sudo sh -s -- git develop
 
+Tornado 5/6 Workaround
+----------------------
+Salt does not support tornado>=5.0 currently. This support will not be added until the neon
+release.  In order to work around this requirement on OSs that no longer have the tornado 4 package
+available in their repositories we are pip installing tornado<5.0 in the bootstrap script. This
+requires the user to pass -P to the bootstrap script to ensure tornado is pip installed. If a user
+does not pass this argument they will be warned that it is required for the tornado 5 workaround.
+So far the OSs that are using this workaround are Debian 10, Centos 8 and Fedora 31.
 
 Supported Operating Systems
 ---------------------------

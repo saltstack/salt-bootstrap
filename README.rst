@@ -208,16 +208,6 @@ Installing the latest develop branch of Salt:
 
   curl -L https://bootstrap.saltstack.com | sudo sh -s -- git develop
 
-Tornado 5/6 Workaround
-----------------------
-Salt does not support tornado>=5.0 currently. This support will not be added until the neon
-release.  In order to work around this requirement on OSs that no longer have the tornado 4 package
-available in their repositories we are pip installing tornado<5.0 in the bootstrap script. This
-requires the user to pass -P to the bootstrap script if installing via git to ensure tornado is pip
-installed.  If a user does not pass this argument they will be warned that it is required for the
-tornado 5 workaround. So far the OSs that are using this workaround are Debian 10, Centos 8 and
-Fedora 31.
-
 Supported Operating Systems
 ---------------------------
 
@@ -362,7 +352,9 @@ Some distributions support installing Salt to use Python 3 instead of Python 2. 
 this offering, while limited, is as follows:
 
 - CentOS 7
+- Centos 8
 - Debian 9
+- Debian 10
 - Fedora (only git installations)
 - Ubuntu 16.04
 - Ubuntu 18.04
@@ -376,6 +368,16 @@ Installing the Python 3 packages for Salt is done via the ``-x`` option:
     sh bootstrap-salt.sh -x python3
 
 See the ``-x`` option for more information.
+
+Tornado 5/6 Workaround
+----------------------
+Salt does not support tornado>=5.0 currently. This support will not be added until the neon
+release.  In order to work around this requirement on OSs that no longer have the tornado 4 package
+available in their repositories we are pip installing tornado<5.0 in the bootstrap script. This
+requires the user to pass -P to the bootstrap script if installing via git to ensure tornado is pip
+installed.  If a user does not pass this argument they will be warned that it is required for the
+tornado 5 workaround. So far the OSs that are using this workaround are Debian 10, Centos 8 and
+Fedora 31.
 
 Testing
 -------

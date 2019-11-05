@@ -208,6 +208,7 @@ Installing the latest develop branch of Salt:
 
   curl -L https://bootstrap.saltstack.com | sudo sh -s -- git develop
 
+
 Supported Operating Systems
 ---------------------------
 

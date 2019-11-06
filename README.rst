@@ -28,6 +28,7 @@ sum** of the downloaded ``bootstrap-salt.sh`` file.
 
 The SHA256 sum of the ``bootstrap-salt.sh`` file, per release, is:
 
+- 2019.11.04: ``905924fccd4ebf168d19ba598bf10af53efe02302b792aeb15433e73fd3ad1d2``
 - 2019.10.03: ``34f196f06d586ce9e1b9907660ea6e67caf57abcecfea66e0343697e3fd0d17d``
 - 2019.05.20: ``46fb5e4b7815efafd69fd703f033fe86e7b584b6770f7e0b936995bcae1cedd8``
 - 2019.02.27: ``23728e4b5e54f564062070e3be53c5602b55c24c9a76671968abbf3d609258cb``
@@ -352,7 +353,9 @@ Some distributions support installing Salt to use Python 3 instead of Python 2. 
 this offering, while limited, is as follows:
 
 - CentOS 7
+- Centos 8
 - Debian 9
+- Debian 10
 - Fedora (only git installations)
 - Ubuntu 16.04
 - Ubuntu 18.04
@@ -366,6 +369,16 @@ Installing the Python 3 packages for Salt is done via the ``-x`` option:
     sh bootstrap-salt.sh -x python3
 
 See the ``-x`` option for more information.
+
+Tornado 5/6 Workaround
+----------------------
+Salt does not support tornado>=5.0 currently. This support will not be added until the neon
+release.  In order to work around this requirement on OSs that no longer have the tornado 4 package
+available in their repositories we are pip installing tornado<5.0 in the bootstrap script. This
+requires the user to pass -P to the bootstrap script if installing via git to ensure tornado is pip
+installed.  If a user does not pass this argument they will be warned that it is required for the
+tornado 5 workaround. So far the OSs that are using this workaround are Debian 10, Centos 8 and
+Fedora 31.
 
 Testing
 -------

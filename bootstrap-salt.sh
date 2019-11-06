@@ -1981,7 +1981,7 @@ __git_clone_and_checkout() {
     fi
 
     case ${OS_NAME_L} in
-        openbsd|freebsd|netbsd )
+        openbsd|freebsd|netbsd|darwin )
             __TAG_REGEX_MATCH=$(echo "${GIT_REV}" | sed -E 's/^(v?[0-9]{1,4}\.[0-9]{1,2})(\.[0-9]{1,2})?.*$/MATCH/')
             ;;
         * )

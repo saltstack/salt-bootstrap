@@ -6808,14 +6808,18 @@ install_macosx_git() {
 }
 
 install_macosx_stable_post() {
-   if [ ! -f /etc/paths.d/salt ]; then
-       print "%s\n" "/opt/salt/bin" "/usr/local/sbin" > /etc/paths.d/salt
-   fi
+    if [ ! -f /etc/paths.d/salt ]; then
+        print "%s\n" "/opt/salt/bin" "/usr/local/sbin" > /etc/paths.d/salt
+    fi
 
-   # shellcheck disable=SC1091
-   . /etc/profile
+     # Don'f fail because of unknown variable on the next step
+    set +o nounset
+    # shellcheck disable=SC1091
+    . /etc/profile
+    # Revert nounset to it's previous state
+    set -o nounset
 
-   return 0
+    return 0
 }
 
 install_macosx_git_post() {

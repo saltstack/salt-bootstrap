@@ -213,9 +213,10 @@ Supported Operating Systems
 ---------------------------
 
 The salt-bootstrap script officially supports the distributions outlined in
-`Salt's Supported Operating Systems`_ document. The operating systems listed below should reflect
-this document but may become out of date. If an operating system is listed below, but is not
-listed on the official supported operating systems document, the level of support is "best-effort".
+`Salt's Supported Operating Systems`_ document, except for Solaris and AIX. The operating systems
+listed below should reflect this document but may become out of date. If an operating system is
+listed below, but is not listed on the official supported operating systems document, the level of
+support is "best-effort".
 
 Since Salt is written in Python, the packages available from `SaltStack's corporate repository`_
 are CPU architecture independent and could be installed on any hardware supported by Linux kernel.
@@ -242,7 +243,7 @@ Debian and derivatives
 ~~~~~~~~~~~~~~~~~~~~~~
 
 - Cumulus Linux 2/3
-- Debian GNU/Linux 7/8/9
+- Debian GNU/Linux 7/8/9/10
 - Devuan GNU/Linux 1/2
 - Kali Linux 1.0 (based on Debian 7)
 - Linux Mint Debian Edition 1 (based on Debian 8)
@@ -265,11 +266,12 @@ Red Hat family
 ~~~~~~~~~~~~~~
 
 - Amazon Linux 2012.3 and later
-- CentOS 6/7
+- Amazon Linux 2
+- CentOS 6/7/8
 - Cloud Linux 6/7
-- Fedora 27/28 (install latest stable from standard repositories)
+- Fedora 30/31 (install latest stable from standard repositories)
 - Oracle Linux 6/7
-- Red Hat Enterprise Linux 6/7
+- Red Hat Enterprise Linux 6/7/8
 - Scientific Linux 6/7
 
 

@@ -436,7 +436,7 @@ Salt components, custom configurations, and even `pre-accepted Minion keys`_ alr
 .. _`pre-accepted Minion keys`: https://docs.saltstack.com/en/latest/topics/tutorials/preseed_key.html
 .. _`read the source`: https://github.com/saltstack/salt-bootstrap/blob/develop/bootstrap-salt.sh
 .. _`Salt`: https://saltstack.com/community/
-.. _`Salt's Supported Operating Systems`: http://saltstack.com/wp-content/uploads/2016/08/SaltStack-Supported-Operating-Systems.pdf
+.. _`Salt's Supported Operating Systems`: http://get.saltstack.com/rs/304-PHQ-615/images/SaltStack-Supported-Operating-Systems.pdf
 .. _`SaltStack's corporate repository`: https://repo.saltstack.com/
 .. _`SaltStack's Debian repository`: http://repo.saltstack.com/#debian
 .. _`SaltStack's Ubuntu repository`: http://repo.saltstack.com/#ubuntu

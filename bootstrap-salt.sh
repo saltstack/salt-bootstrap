@@ -239,9 +239,9 @@ _CONFIG_ONLY=$BS_FALSE
 _PIP_ALLOWED=${BS_PIP_ALLOWED:-$BS_FALSE}
 _PIP_ALL=${BS_PIP_ALL:-$BS_FALSE}
 if uname -a | grep FreeBSD > /dev/null; then
-  _SALT_ETC_DIR=${BS_SALT_ETC_DIR:-/usr/local/etc/salt}
+    _SALT_ETC_DIR=${BS_SALT_ETC_DIR:-/usr/local/etc/salt}
 else
-  _SALT_ETC_DIR=${BS_SALT_ETC_DIR:-/etc/salt}
+    _SALT_ETC_DIR=${BS_SALT_ETC_DIR:-/etc/salt}
 fi
 _SALT_CACHE_DIR=${BS_SALT_CACHE_DIR:-/var/cache/salt}
 _PKI_DIR=${_SALT_ETC_DIR}/pki
@@ -5275,63 +5275,114 @@ __configure_freebsd_pkg_details() {
     echo 'not hijacking pkg repo configurations'
 }
 
-install_freebsd_9_stable_deps() {
-    _SALT_ETC_DIR=${BS_SALT_ETC_DIR:-/usr/local/etc/salt}
-    _PKI_DIR=${_SALT_ETC_DIR}/pki
-
-    if [ $_DISABLE_REPOS -eq $BS_FALSE ]; then
-        #make variables available even if pkg already installed
-        __freebsd_get_packagesite
-
-        if [ ! -x /usr/local/sbin/pkg ]; then
-          pkg install -y pkg
-        fi
-    fi
-    return 0
-}
-
-install_freebsd_10_stable_deps() {
-    install_freebsd_9_stable_deps
-}
-
-install_freebsd_11_stable_deps() {
-    install_freebsd_9_stable_deps
-}
-
-install_freebsd_12_stable_deps() {
-    install_freebsd_9_stable_deps
+install_freebsd_deps() {
+    pkg install -y pkg
 }
 
 install_freebsd_git_deps() {
-    echo 'do not need to git on FreeBSD salt install'
-}
+    install_freebsd_9_stable_deps || return 1
 
-install_freebsd_9_stable() {
-    pkg install -y py36-salt
+    # shellcheck disable=SC2086
+    SALT_DEPENDENCIES=$(/usr/local/sbin/pkg search -R -d sysutils/py-salt | grep -i origin | sed -e 's/^[[:space:]]*//' | tail -n +2 | awk -F\" '{print $2}' | tr '\n' ' ')
+    SALT_DEPENDENCIES=$(/usr/local/sbin/pkg search -R -d py36-salt | grep 'origin:' \
+        | tail -n +2 | awk -F\" '{print $2}' | sed 's#.*/py-#py36-#g')
+    # shellcheck disable=SC2086
+    /usr/local/sbin/pkg install -y ${SALT_DEPENDENCIES} || return 1
+
+    if ! __check_command_exists git; then
+        /usr/local/sbin/pkg install -y git || return 1
+    fi
+
+    /usr/local/sbin/pkg install -y www/py-requests || return 1
+
+    __git_clone_and_checkout || return 1
+
+    echodebug "Adapting paths to FreeBSD"
+    # The list of files was taken from Salt's BSD port Makefile
+    for file in doc/man/salt-key.1 doc/man/salt-cp.1 doc/man/salt-minion.1 \
+                doc/man/salt-syndic.1 doc/man/salt-master.1 doc/man/salt-run.1 \
+                doc/man/salt.7 doc/man/salt.1 doc/man/salt-call.1; do
+        [ ! -f $file ] && continue
+        echodebug "Patching ${file}"
+        sed -in -e "s|/etc/salt|${_SALT_ETC_DIR}|" \
+                -e "s|/srv/salt|${_SALT_ETC_DIR}/states|" \
+                -e "s|/srv/pillar|${_SALT_ETC_DIR}/pillar|" ${file}
+    done
+    if [ ! -f salt/syspaths.py ]; then
+        # We still can't provide the system paths, salt 0.16.x
+        # Let's patch salt's source and adapt paths to what's expected on FreeBSD
+        echodebug "Replacing occurrences of '/etc/salt' with ${_SALT_ETC_DIR}"
+        # The list of files was taken from Salt's BSD port Makefile
+        for file in conf/minion conf/master salt/config.py salt/client.py \
+                    salt/modules/mysql.py salt/utils/parsers.py salt/modules/tls.py \
+                    salt/modules/postgres.py salt/utils/migrations.py; do
+            [ ! -f $file ] && continue
+            echodebug "Patching ${file}"
+            sed -in -e "s|/etc/salt|${_SALT_ETC_DIR}|" \
+                    -e "s|/srv/salt|${_SALT_ETC_DIR}/states|" \
+                    -e "s|/srv/pillar|${_SALT_ETC_DIR}/pillar|" ${file}
+        done
+    fi
+    echodebug "Finished patching"
+
+    # Let's trigger config_salt()
+    if [ "$_TEMP_CONFIG_DIR" = "null" ]; then
+        _TEMP_CONFIG_DIR="${_SALT_GIT_CHECKOUT_DIR}/conf/"
+        CONFIG_SALT_FUNC="config_salt"
+
+    fi
+
     return 0
 }
 
-install_freebsd_10_stable() {
-    pkg install -y py36-salt
+install_freebsd_stable() {
+#
+# installing latest version of salt from FreeBSD CURRENT ports repo
+#
+    # shellcheck disable=SC2086
+    /usr/local/sbin/pkg install -y py36-salt || return 1
+
     return 0
-}
-
-install_freebsd_11_stable() {
-  pkg install -y py36-salt
-  return 0
-}
-
-install_freebsd_12_stable() {
-  pkg install -y py36-salt
-  return 0
 }
 
 install_freebsd_git() {
-  echo 'do not need to git on FreeBSD salt install'    
-  return 0
+
+    # /usr/local/bin/python2 in FreeBSD is a symlink to /usr/local/bin/python2.7
+    __PYTHON_PATH=$(readlink -f "$(command -v python2)")
+    __ESCAPED_PYTHON_PATH=$(echo "${__PYTHON_PATH}" | sed 's/\//\\\//g')
+
+    # Install from git
+    if [ ! -f salt/syspaths.py ]; then
+        # We still can't provide the system paths, salt 0.16.x
+        ${__PYTHON_PATH} setup.py ${SETUP_PY_INSTALL_ARGS} install || return 1
+    else
+        ${__PYTHON_PATH} setup.py \
+            --salt-root-dir=/ \
+            --salt-config-dir="${_SALT_ETC_DIR}" \
+            --salt-cache-dir="${_SALT_CACHE_DIR}" \
+            --salt-sock-dir=/var/run/salt \
+            --salt-srv-root-dir="${_SALT_ETC_DIR}" \
+            --salt-base-file-roots-dir="${_SALT_ETC_DIR}/states" \
+            --salt-base-pillar-roots-dir="${_SALT_ETC_DIR}/pillar" \
+            --salt-base-master-roots-dir="${_SALT_ETC_DIR}/salt-master" \
+            --salt-logs-dir=/var/log/salt \
+            --salt-pidfile-dir=/var/run \
+            ${SETUP_PY_INSTALL_ARGS} install \
+            || return 1
+    fi
+
+    for script in salt_api salt_master salt_minion salt_proxy salt_syndic; do
+        __fetch_url "/usr/local/etc/rc.d/${script}" "https://raw.githubusercontent.com/freebsd/freebsd-ports/master/sysutils/py-salt/files/${script}.in" || return 1
+        sed -i '' 's/%%PREFIX%%/\/usr\/local/g' /usr/local/etc/rc.d/${script}
+        sed -i '' "s/%%PYTHON_CMD%%/${__ESCAPED_PYTHON_PATH}/g" /usr/local/etc/rc.d/${script}
+        chmod +x /usr/local/etc/rc.d/${script} || return 1
+    done
+
+    # And we're good to go
+    return 0
 }
 
-install_freebsd_9_stable_post() {
+install_freebsd_stable_post() {
     for fname in api master minion syndic; do
         # Skip salt-api since the service should be opt-in and not necessarily started on boot
         [ $fname = "api" ] && continue
@@ -5341,32 +5392,23 @@ install_freebsd_9_stable_post() {
         [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
         [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
 
-        enable_string="salt_${fname}_enable=\"YES\""
+        enable_string="salt_${fname}_enable=YES"
         grep "$enable_string" /etc/rc.conf >/dev/null 2>&1
-        [ $? -eq 1 ] && echo "$enable_string" >> /etc/rc.conf
+        [ $? -eq 1 ] && sysrc $enable_string
+
     done
 }
 
-install_freebsd_10_stable_post() {
-    install_freebsd_9_stable_post
-}
-
-install_freebsd_11_stable_post() {
-    install_freebsd_9_stable_post
-}
-
-install_freebsd_12_stable_post() {
-    install_freebsd_9_stable_post
-}
-
 install_freebsd_git_post() {
-    echo 'no git post for freebsd'
+    if [ -f $salt_conf_file ]; then
+        rm -f $salt_conf_file
+    fi
+    install_freebsd_stable_post || return 1
     return 0
 }
 
 install_freebsd_restart_daemons() {
     [ $_START_DAEMONS -eq $BS_FALSE ] && return
-    /usr/sbin/sysrc salt_minion_enable="YES"
 
     for fname in api master minion syndic; do
         # Skip salt-api since the service should be opt-in and not necessarily started on boot

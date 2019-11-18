@@ -5293,7 +5293,7 @@ install_freebsd_git_deps() {
         /usr/local/sbin/pkg install -y git || return 1
     fi
 
-    /usr/local/sbin/pkg install -y www/py-requests || return 1
+    /usr/local/sbin/pkg install -y www/py36-requests || return 1
 
     __git_clone_and_checkout || return 1
 

@@ -5280,7 +5280,7 @@ install_freebsd_deps() {
 }
 
 install_freebsd_git_deps() {
-    install_freebsd_9_stable_deps || return 1
+    install_freebsd_stable_deps || return 1
 
     # shellcheck disable=SC2086
     SALT_DEPENDENCIES=$(/usr/local/sbin/pkg search -R -d sysutils/py-salt | grep -i origin | sed -e 's/^[[:space:]]*//' | tail -n +2 | awk -F\" '{print $2}' | tr '\n' ' ')

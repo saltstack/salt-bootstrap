@@ -5268,7 +5268,7 @@ __freebsd_get_packagesite() {
 
 # Using a separate conf step to head for idempotent install...
 __configure_freebsd_pkg_details() {
-    _SALT_ETC_DIR=${BS_SALT_ETC_DIR:-/usr/local/etc/salt}
+    _SALT_ETC_DIR="/usr/local/etc/salt"
 }
 
 install_freebsd_deps() {

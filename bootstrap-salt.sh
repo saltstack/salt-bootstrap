@@ -238,11 +238,7 @@ _ECHO_DEBUG=${BS_ECHO_DEBUG:-$BS_FALSE}
 _CONFIG_ONLY=$BS_FALSE
 _PIP_ALLOWED=${BS_PIP_ALLOWED:-$BS_FALSE}
 _PIP_ALL=${BS_PIP_ALL:-$BS_FALSE}
-if uname -a | grep FreeBSD > /dev/null; then
-    _SALT_ETC_DIR=${BS_SALT_ETC_DIR:-/usr/local/etc/salt}
-else
-    _SALT_ETC_DIR=${BS_SALT_ETC_DIR:-/etc/salt}
-fi
+_SALT_ETC_DIR=${BS_SALT_ETC_DIR:-/etc/salt}
 _SALT_CACHE_DIR=${BS_SALT_CACHE_DIR:-/var/cache/salt}
 _PKI_DIR=${_SALT_ETC_DIR}/pki
 _FORCE_OVERWRITE=${BS_FORCE_OVERWRITE:-$BS_FALSE}
@@ -5272,18 +5268,17 @@ __freebsd_get_packagesite() {
 
 # Using a separate conf step to head for idempotent install...
 __configure_freebsd_pkg_details() {
-    echo 'not hijacking pkg repo configurations'
+    _SALT_ETC_DIR=${BS_SALT_ETC_DIR:-/usr/local/etc/salt}
 }
 
 install_freebsd_deps() {
+    __configure_freebsd_pkg_details()
     pkg install -y pkg
 }
 
 install_freebsd_git_deps() {
     install_freebsd_stable_deps || return 1
 
-    # shellcheck disable=SC2086
-    SALT_DEPENDENCIES=$(/usr/local/sbin/pkg search -R -d sysutils/py-salt | grep -i origin | sed -e 's/^[[:space:]]*//' | tail -n +2 | awk -F\" '{print $2}' | tr '\n' ' ')
     SALT_DEPENDENCIES=$(/usr/local/sbin/pkg search -R -d py36-salt | grep 'origin:' \
         | tail -n +2 | awk -F\" '{print $2}' | sed 's#.*/py-#py36-#g')
     # shellcheck disable=SC2086

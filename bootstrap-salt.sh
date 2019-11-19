@@ -5272,7 +5272,7 @@ __configure_freebsd_pkg_details() {
 }
 
 install_freebsd_deps() {
-    __configure_freebsd_pkg_details()
+    __configure_freebsd_pkg_details
     pkg install -y pkg
 }
 

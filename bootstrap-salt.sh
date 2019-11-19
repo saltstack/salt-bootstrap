@@ -5240,32 +5240,6 @@ install_arch_check_services() {
 #   FreeBSD Install Functions
 #
 
-__freebsd_get_packagesite() {
-    if [ "$CPU_ARCH_L" = "amd64" ]; then
-        BSD_ARCH="x86:64"
-    elif [ "$CPU_ARCH_L" = "x86_64" ]; then
-        BSD_ARCH="x86:64"
-    elif [ "$CPU_ARCH_L" = "i386" ]; then
-        BSD_ARCH="x86:32"
-    elif [ "$CPU_ARCH_L" = "i686" ]; then
-        BSD_ARCH="x86:32"
-    fi
-
-    # Since the variable might not be set, don't, momentarily treat it as a
-    # failure
-    set +o nounset
-
-    # ABI is a std format for identifying release / architecture combos
-    ABI="freebsd:${DISTRO_MAJOR_VERSION}:${BSD_ARCH}"
-    _PACKAGESITE="http://pkg.freebsd.org/${ABI}/latest"
-    # Awkwardly, we want the `${ABI}` to be in conf file without escaping
-    PKGCONFURL="pkg+http://pkg.freebsd.org/\${ABI}/latest"
-    SALTPKGCONFURL="http://repo.saltstack.com/freebsd/\${ABI}/"
-
-    # Treat unset variables as errors once more
-    set -o nounset
-}
-
 # Using a separate conf step to head for idempotent install...
 __configure_freebsd_pkg_details() {
     _SALT_ETC_DIR="/usr/local/etc/salt"

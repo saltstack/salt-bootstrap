@@ -3653,9 +3653,11 @@ install_fedora_git() {
     fi
 
     if [ -f "${_SALT_GIT_CHECKOUT_DIR}/salt/syspaths.py" ]; then
-        ${_PYEXE} setup.py --salt-config-dir="$_SALT_ETC_DIR" --salt-cache-dir="${_SALT_CACHE_DIR}" ${SETUP_PY_INSTALL_ARGS} install --prefix=/usr || return 1
+        # shellcheck disable=SC2086
+        "${_PYEXE}" setup.py --salt-config-dir="$_SALT_ETC_DIR" --salt-cache-dir="${_SALT_CACHE_DIR}" ${SETUP_PY_INSTALL_ARGS} install --prefix=/usr || return 1
     else
-        ${_PYEXE} setup.py ${SETUP_PY_INSTALL_ARGS} install --prefix=/usr || return 1
+        # shellcheck disable=SC2086
+        "${_PYEXE}" setup.py ${SETUP_PY_INSTALL_ARGS} install --prefix=/usr || return 1
     fi
     return 0
 }
@@ -4013,9 +4015,11 @@ install_centos_git() {
     fi
 
     if [ -f "${_SALT_GIT_CHECKOUT_DIR}/salt/syspaths.py" ]; then
-        $_PYEXE setup.py --salt-config-dir="$_SALT_ETC_DIR" --salt-cache-dir="${_SALT_CACHE_DIR}" ${SETUP_PY_INSTALL_ARGS} install --prefix=/usr || return 1
+        # shellcheck disable=SC2086
+        "${_PYEXE}" setup.py --salt-config-dir="$_SALT_ETC_DIR" --salt-cache-dir="${_SALT_CACHE_DIR}" ${SETUP_PY_INSTALL_ARGS} install --prefix=/usr || return 1
     else
-        $_PYEXE setup.py ${SETUP_PY_INSTALL_ARGS} install --prefix=/usr || return 1
+        # shellcheck disable=SC2086
+        "${_PYEXE}" setup.py ${SETUP_PY_INSTALL_ARGS} install --prefix=/usr || return 1
     fi
 
     return 0
@@ -4590,8 +4594,10 @@ install_alpine_linux_stable() {
 
 install_alpine_linux_git() {
     if [ -f "${_SALT_GIT_CHECKOUT_DIR}/salt/syspaths.py" ]; then
+        # shellcheck disable=SC2086
         python2 setup.py --salt-config-dir="$_SALT_ETC_DIR" --salt-cache-dir="${_SALT_CACHE_DIR}" ${SETUP_PY_INSTALL_ARGS} install || return 1
     else
+        # shellcheck disable=SC2086
         python2 setup.py ${SETUP_PY_INSTALL_ARGS} install || return 1
     fi
 }
@@ -5163,8 +5169,10 @@ install_arch_linux_stable() {
 
 install_arch_linux_git() {
     if [ -f "${_SALT_GIT_CHECKOUT_DIR}/salt/syspaths.py" ]; then
+        # shellcheck disable=SC2086
         python2 setup.py --salt-config-dir="$_SALT_ETC_DIR" --salt-cache-dir="${_SALT_CACHE_DIR}" ${SETUP_PY_INSTALL_ARGS} install || return 1
     else
+        # shellcheck disable=SC2086
         python2 setup.py ${SETUP_PY_INSTALL_ARGS} install || return 1
     fi
     return 0
@@ -5371,9 +5379,11 @@ install_freebsd_git() {
     # Install from git
     if [ ! -f salt/syspaths.py ]; then
         # We still can't provide the system paths, salt 0.16.x
-        ${__PYTHON_PATH} setup.py ${SETUP_PY_INSTALL_ARGS} install || return 1
+        # shellcheck disable=SC2086
+        "${__PYTHON_PATH}" setup.py ${SETUP_PY_INSTALL_ARGS} install || return 1
     else
-        ${__PYTHON_PATH} setup.py \
+        # shellcheck disable=SC2086
+        "${__PYTHON_PATH}" setup.py \
             --salt-root-dir=/ \
             --salt-config-dir="${_SALT_ETC_DIR}" \
             --salt-cache-dir="${_SALT_CACHE_DIR}" \
@@ -5482,6 +5492,7 @@ install_openbsd_git() {
     #
     if [ ! -f salt/syspaths.py ]; then
         # We still can't provide the system paths, salt 0.16.x
+        # shellcheck disable=SC2086
         /usr/local/bin/python2.7 setup.py ${SETUP_PY_INSTALL_ARGS} install || return 1
     fi
     return 0
@@ -5640,6 +5651,7 @@ install_smartos_stable() {
 install_smartos_git() {
     # Use setuptools in order to also install dependencies
     # lets force our config path on the setup for now, since salt/syspaths.py only  got fixed in 2015.5.0
+    # shellcheck disable=SC2086
     USE_SETUPTOOLS=1 /opt/local/bin/python setup.py --salt-config-dir="$_SALT_ETC_DIR" --salt-cache-dir="${_SALT_CACHE_DIR}" ${SETUP_PY_INSTALL_ARGS} install || return 1
     return 0
 }
@@ -5918,6 +5930,7 @@ install_opensuse_stable() {
 }
 
 install_opensuse_git() {
+    # shellcheck disable=SC2086
     python setup.py ${SETUP_PY_INSTALL_ARGS} install --prefix=/usr || return 1
     return 0
 }
@@ -6123,7 +6136,8 @@ install_opensuse_15_git() {
         _PYEXE=python3
     fi
 
-    ${_PYEXE} setup.py ${SETUP_PY_INSTALL_ARGS} install --prefix=/usr || return 1
+    # shellcheck disable=SC2086
+    "${_PYEXE}" setup.py ${SETUP_PY_INSTALL_ARGS} install --prefix=/usr || return 1
     return 0
 }
 
@@ -6645,7 +6659,7 @@ install_macosx_git_deps() {
     fi
 
     # Install PIP
-    $_PYEXE /tmp/get-pip.py || return 1
+    "${_PYEXE}" /tmp/get-pip.py || return 1
 
     __git_clone_and_checkout || return 1
 
@@ -6679,9 +6693,11 @@ install_macosx_git() {
     fi
 
     if [ -f "${_SALT_GIT_CHECKOUT_DIR}/salt/syspaths.py" ]; then
-        $_PYEXE setup.py --salt-config-dir="$_SALT_ETC_DIR" --salt-cache-dir="${_SALT_CACHE_DIR}" ${SETUP_PY_INSTALL_ARGS} install --prefix=/opt/salt || return 1
+        # shellcheck disable=2086
+        "${_PYEXE}" setup.py --salt-config-dir="$_SALT_ETC_DIR" --salt-cache-dir="${_SALT_CACHE_DIR}" ${SETUP_PY_INSTALL_ARGS} install --prefix=/opt/salt || return 1
     else
-        $_PYEXE setup.py ${SETUP_PY_INSTALL_ARGS} install --prefix=/opt/salt || return 1
+        # shellcheck disable=2086
+        "${_PYEXE}" setup.py ${SETUP_PY_INSTALL_ARGS} install --prefix=/opt/salt || return 1
     fi
 
     return 0

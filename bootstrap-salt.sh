@@ -5369,9 +5369,6 @@ install_freebsd_stable_post() {
 }
 
 install_freebsd_git_post() {
-    if [ -f $salt_conf_file ]; then
-        rm -f $salt_conf_file
-    fi
     install_freebsd_stable_post || return 1
     return 0
 }

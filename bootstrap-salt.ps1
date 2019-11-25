@@ -211,27 +211,10 @@ Else {
 }
 
 #===============================================================================
-# Figure out the latest version if no version is passed
+# Use version "Latest" if no version is passed
 #===============================================================================
-# If version isn't supplied, use latest.
 If (!$version) {
-    # Find latest version of Salt Minion
-    $repo = Invoke-Restmethod "$repourl"
-    $regex = "<\s*a\s*[^>]*?href\s*=\s*[`"']*([^`"'>]+)[^>]*?>"
-    $returnMatches = New-Object System.Collections.ArrayList
-    $resultingMatches = [Regex]::Matches($repo, $regex, "IgnoreCase")
-    foreach($match in $resultingMatches) {
-        $cleanedMatch = $match.Groups[1].Value.Trim()
-        [void] $returnMatches.Add($cleanedMatch)
-    }
-    If ($arch -eq 'x86') {
-        $returnMatches = $returnMatches | Where {$_ -like "Salt-Minion*x86-Setup.exe"}
-    }
-    Else {
-        $returnMatches = $returnMatches | Where {$_ -like "Salt-Minion*AMD64-Setup.exe"}
-    }
-
-    $version = $($returnMatches[$returnMatches.Count -1]).Split(("n-","-A","-x","-P"),([System.StringSplitOptions]::RemoveEmptyEntries))[1]
+    $version = "Latest"
 }
 
 $versionSection = $version

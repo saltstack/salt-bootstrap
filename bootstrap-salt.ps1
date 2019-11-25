@@ -83,7 +83,7 @@ Param(
     [Parameter(Mandatory=$false,ValueFromPipeline=$true)]
     # Doesn't support versions prior to "2017.7.0"
     [ValidateSet("2","3")]
-    [string]$pythonVersion = "",
+    [string]$pythonVersion = "2",
 
     [Parameter(Mandatory=$false,ValueFromPipeline=$true)]
     [ValidateSet("true","false")]
@@ -214,18 +214,16 @@ Else {
 # Use version "Latest" if no version is passed
 #===============================================================================
 If (!$version) {
-    $version = "Latest"
-}
-
-$versionSection = $version
-
-$year = $version.Substring(0, 4)
-If ([int]$year -ge 2017) {
-    If ($pythonVersion -eq "3") {
-        $versionSection = "$version-Py3"
-    }
-    Else {
-        $versionSection = "$version-Py2"
+    $versionSection = "Latest-Py$pythonVersion"
+} else {
+    $versionSection = $version
+    $year = $version.Substring(0, 4)
+    If ([int]$year -ge 2017) {
+        If ($pythonVersion -eq "3") {
+            $versionSection = "$version-Py3"
+        } Else {
+            $versionSection = "$version-Py2"
+        }
     }
 }
 
@@ -270,6 +268,7 @@ While (!$service) {
 
 If($runservice) {
     # Start service
+    Write-Output "Starting the Salt minion service"
     Start-Service -Name "salt-minion" -ErrorAction SilentlyContinue
 
     # Check if service is started, otherwise retry starting the

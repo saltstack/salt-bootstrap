@@ -83,7 +83,7 @@ Param(
     [Parameter(Mandatory=$false,ValueFromPipeline=$true)]
     # Doesn't support versions prior to "2017.7.0"
     [ValidateSet("2","3")]
-    [string]$pythonVersion = "",
+    [string]$pythonVersion = "2",
 
     [Parameter(Mandatory=$false,ValueFromPipeline=$true)]
     [ValidateSet("true","false")]
@@ -211,38 +211,19 @@ Else {
 }
 
 #===============================================================================
-# Figure out the latest version if no version is passed
+# Use version "Latest" if no version is passed
 #===============================================================================
-# If version isn't supplied, use latest.
 If (!$version) {
-    # Find latest version of Salt Minion
-    $repo = Invoke-Restmethod "$repourl"
-    $regex = "<\s*a\s*[^>]*?href\s*=\s*[`"']*([^`"'>]+)[^>]*?>"
-    $returnMatches = New-Object System.Collections.ArrayList
-    $resultingMatches = [Regex]::Matches($repo, $regex, "IgnoreCase")
-    foreach($match in $resultingMatches) {
-        $cleanedMatch = $match.Groups[1].Value.Trim()
-        [void] $returnMatches.Add($cleanedMatch)
-    }
-    If ($arch -eq 'x86') {
-        $returnMatches = $returnMatches | Where {$_ -like "Salt-Minion*x86-Setup.exe"}
-    }
-    Else {
-        $returnMatches = $returnMatches | Where {$_ -like "Salt-Minion*AMD64-Setup.exe"}
-    }
-
-    $version = $($returnMatches[$returnMatches.Count -1]).Split(("n-","-A","-x","-P"),([System.StringSplitOptions]::RemoveEmptyEntries))[1]
-}
-
-$versionSection = $version
-
-$year = $version.Substring(0, 4)
-If ([int]$year -ge 2017) {
-    If ($pythonVersion -eq "3") {
-        $versionSection = "$version-Py3"
-    }
-    Else {
-        $versionSection = "$version-Py2"
+    $versionSection = "Latest-Py$pythonVersion"
+} else {
+    $versionSection = $version
+    $year = $version.Substring(0, 4)
+    If ([int]$year -ge 2017) {
+        If ($pythonVersion -eq "3") {
+            $versionSection = "$version-Py3"
+        } Else {
+            $versionSection = "$version-Py2"
+        }
     }
 }
 
@@ -287,6 +268,7 @@ While (!$service) {
 
 If($runservice) {
     # Start service
+    Write-Output "Starting the Salt minion service"
     Start-Service -Name "salt-minion" -ErrorAction SilentlyContinue
 
     # Check if service is started, otherwise retry starting the

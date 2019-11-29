@@ -674,7 +674,7 @@ if [ -n "$_PY_EXE" ]; then
     if [ "$(uname)" = "Darwin" ]; then
       _PY_PKG_VER=$(echo "$_PY_EXE" | sed "s/\\.//g")
     else
-      _PY_PKG_VER=$(echo "$_PY_EXE" | sed -r "s/\\.//g")
+      _PY_PKG_VER=$(echo "$_PY_EXE" | sed -E "s/\\.//g")
     fi
 
     _PY_MAJOR_VERSION=$(echo "$_PY_PKG_VER" | cut -c 7)
@@ -933,11 +933,11 @@ __strip_duplicates() {
 __sort_release_files() {
     KNOWN_RELEASE_FILES=$(echo "(arch|alpine|centos|debian|ubuntu|fedora|redhat|suse|\
         mandrake|mandriva|gentoo|slackware|turbolinux|unitedlinux|void|lsb|system|\
-        oracle|os)(-|_)(release|version)" | sed -r 's:[[:space:]]::g')
+        oracle|os)(-|_)(release|version)" | sed -E 's:[[:space:]]::g')
     primary_release_files=""
     secondary_release_files=""
     # Sort know VS un-known files first
-    for release_file in $(echo "${@}" | sed -r 's:[[:space:]]:\n:g' | sort -f | uniq); do
+    for release_file in $(echo "${@}" | sed -E 's:[[:space:]]:\n:g' | sort -f | uniq); do
         match=$(echo "$release_file" | grep -E -i "${KNOWN_RELEASE_FILES}")
         if [ "${match}" != "" ]; then
             primary_release_files="${primary_release_files} ${release_file}"
@@ -962,7 +962,7 @@ __sort_release_files() {
     done
 
     # Echo the results collapsing multiple white-space into a single white-space
-    echo "${primary_release_files} ${secondary_release_files}" | sed -r 's:[[:space:]]+:\n:g'
+    echo "${primary_release_files} ${secondary_release_files}" | sed -E 's:[[:space:]]+:\n:g'
 }
 
 
@@ -1181,17 +1181,17 @@ __gather_sunos_system_info() {
             case "$line" in
                 *OpenIndiana*oi_[0-9]*)
                     DISTRO_NAME="OpenIndiana"
-                    DISTRO_VERSION=$(echo "$line" | sed -nr "s/OpenIndiana(.*)oi_([[:digit:]]+)(.*)/\\2/p")
+                    DISTRO_VERSION=$(echo "$line" | sed -nE "s/OpenIndiana(.*)oi_([[:digit:]]+)(.*)/\\2/p")
                     break
                     ;;
                 *OpenSolaris*snv_[0-9]*)
                     DISTRO_NAME="OpenSolaris"
-                    DISTRO_VERSION=$(echo "$line" | sed -nr "s/OpenSolaris(.*)snv_([[:digit:]]+)(.*)/\\2/p")
+                    DISTRO_VERSION=$(echo "$line" | sed -nE "s/OpenSolaris(.*)snv_([[:digit:]]+)(.*)/\\2/p")
                     break
                     ;;
                 *Oracle*Solaris*[0-9]*)
                     DISTRO_NAME="Oracle Solaris"
-                    DISTRO_VERSION=$(echo "$line" | sed -nr "s/(Oracle Solaris) ([[:digit:]]+)(.*)/\\2/p")
+                    DISTRO_VERSION=$(echo "$line" | sed -nE "s/(Oracle Solaris) ([[:digit:]]+)(.*)/\\2/p")
                     break
                     ;;
                 *Solaris*)
@@ -1712,7 +1712,7 @@ echoinfo "  Distribution: ${DISTRO_NAME} ${DISTRO_VERSION}"
 echo
 
 # Simplify distro name naming on functions
-DISTRO_NAME_L=$(echo "$DISTRO_NAME" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-zA-Z0-9_ ]//g' | sed -re 's/([[:space:]])+/_/g')
+DISTRO_NAME_L=$(echo "$DISTRO_NAME" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-zA-Z0-9_ ]//g' | sed -Ee 's/([[:space:]])+/_/g')
 
 # Simplify version naming on functions
 if [ "$DISTRO_VERSION" = "" ] || [ ${_SIMPLIFY_VERSION} -eq $BS_FALSE ]; then
@@ -1790,7 +1790,7 @@ elif [ "${DISTRO_NAME_L}" = "debian" ]; then
   __debian_codename_translation
 fi
 
-if [ "$(echo "${DISTRO_NAME_L}" | grep -E '(debian|ubuntu|centos|red_hat|oracle|scientific|amazon|fedora)')" = "" ] && [ "$ITYPE" = "stable" ] && [ "$STABLE_REV" != "latest" ]; then
+if [ "$(echo "${DISTRO_NAME_L}" | grep -E '(debian|ubuntu|centos|red_hat|oracle|scientific|amazon|fedora|macosx)')" = "" ] && [ "$ITYPE" = "stable" ] && [ "$STABLE_REV" != "latest" ]; then
     echoerror "${DISTRO_NAME} does not have major version pegged packages support"
     exit 1
 fi
@@ -1981,7 +1981,7 @@ __git_clone_and_checkout() {
     fi
 
     case ${OS_NAME_L} in
-        openbsd|freebsd|netbsd )
+        openbsd|freebsd|netbsd|darwin )
             __TAG_REGEX_MATCH=$(echo "${GIT_REV}" | sed -E 's/^(v?[0-9]{1,4}\.[0-9]{1,2})(\.[0-9]{1,2})?.*$/MATCH/')
             ;;
         * )
@@ -2507,7 +2507,7 @@ __activate_virtualenv() {
 __install_pip_pkgs() {
     _pip_pkgs="$1"
     _py_exe="$2"
-    _py_pkg=$(echo "$_py_exe" | sed -r "s/\\.//g")
+    _py_pkg=$(echo "$_py_exe" | sed -E "s/\\.//g")
     _pip_cmd="${_py_exe} -m pip"
 
     if [ "${_py_exe}" = "" ]; then
@@ -6750,6 +6750,11 @@ install_macosx_stable_deps() {
 install_macosx_git_deps() {
     install_macosx_stable_deps || return 1
 
+    if ! echo "$PATH" | grep -q /usr/local/bin; then
+        echowarn "/usr/local/bin was not found in \$PATH. Adding it for the duration of the script execution."
+        export PATH=/usr/local/bin:$PATH
+    fi
+
     __fetch_url "/tmp/get-pip.py" "https://bootstrap.pypa.io/get-pip.py" || return 1
 
     if [ -n "$_PY_EXE" ]; then
@@ -6802,14 +6807,18 @@ install_macosx_git() {
 }
 
 install_macosx_stable_post() {
-   if [ ! -f /etc/paths.d/salt ]; then
-       print "%s\n" "/opt/salt/bin" "/usr/local/sbin" > /etc/paths.d/salt
-   fi
+    if [ ! -f /etc/paths.d/salt ]; then
+        print "%s\n" "/opt/salt/bin" "/usr/local/sbin" > /etc/paths.d/salt
+    fi
 
-   # shellcheck disable=SC1091
-   . /etc/profile
+     # Don'f fail because of unknown variable on the next step
+    set +o nounset
+    # shellcheck disable=SC1091
+    . /etc/profile
+    # Revert nounset to it's previous state
+    set -o nounset
 
-   return 0
+    return 0
 }
 
 install_macosx_git_post() {

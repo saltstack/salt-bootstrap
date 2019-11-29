@@ -6750,8 +6750,7 @@ install_macosx_stable_deps() {
 install_macosx_git_deps() {
     install_macosx_stable_deps || return 1
 
-    echo "$PATH" | grep -q /usr/local/bin
-    if [  $? -eq 1 ]; then
+    if ! echo "$PATH" | grep -q /usr/local/bin; then
         echowarn "/usr/local/bin was not found in \$PATH. Adding it for the duration of the script execution."
         export PATH=/usr/local/bin:$PATH
     fi

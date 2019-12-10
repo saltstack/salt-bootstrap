@@ -437,6 +437,18 @@ The ``Dockerfile`` here inherits the Ubuntu 14.04 public image with Upstart conf
 system. Use it as an example or starting point of how to make your own Docker images with suitable
 Salt components, custom configurations, and even `pre-accepted Minion keys`_ already installed.
 
+Updating Drone Pipelines
+========================
+
+You should install and configure the drone-cli as shown here: https://docs.drone.io/cli/install/
+
+Make edits to .drone.jsonnet and then save them into the .drone.yml by doing the following:
+
+.. code:: console
+
+  drone jsonnet --format --stream
+  drone sign saltstack/salt-bootstrap --save
+
 .. _Contributing Guidelines: https://github.com/saltstack/salt-bootstrap/blob/develop/CONTRIBUTING.md
 .. _Docker: https://www.docker.com/
 .. _`pre-accepted Minion keys`: https://docs.saltstack.com/en/latest/topics/tutorials/preseed_key.html

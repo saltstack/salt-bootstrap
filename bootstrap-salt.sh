@@ -2110,7 +2110,7 @@ __copyfile() {
         dfile=$2
         overwrite=$3
     else
-        echoerror "Wrong number of arguments for __copyfile()"
+        echoerror "Wrong number of arguments for __copyfile\(\)"
         echoinfo "USAGE: __copyfile <source> <dest>  OR  __copyfile <source> <dest> <overwrite>"
         exit 1
     fi
@@ -2158,7 +2158,7 @@ __movefile() {
         dfile=$2
         overwrite=$3
     else
-        echoerror "Wrong number of arguments for __movefile()"
+        echoerror "Wrong number of arguments for __movefile\(\)"
         echoinfo "USAGE: __movefile <source> <dest>  OR  __movefile <source> <dest> <overwrite>"
         exit 1
     fi
@@ -2215,7 +2215,7 @@ __linkfile() {
         linkname=$2
         overwrite=$3
     else
-        echoerror "Wrong number of arguments for __linkfile()"
+        echoerror "Wrong number of arguments for __linkfile\(\)"
         echoinfo "USAGE: __linkfile <target> <link>  OR  __linkfile <tagret> <link> <overwrite>"
         exit 1
     fi
@@ -2260,7 +2260,7 @@ __overwriteconfig() {
         target=$1
         json=$2
     else
-        echoerror "Wrong number of arguments for __convert_json_to_yaml_str()"
+        echoerror "Wrong number of arguments for __convert_json_to_yaml_str\(\)"
         echoinfo "USAGE: __convert_json_to_yaml_str <configfile> <jsonstring>"
         exit 1
     fi
@@ -4832,13 +4832,12 @@ install_amazon_linux_ami_2_git_deps() {
         yum -y install ca-certificates || return 1
     fi
 
-        if __check_command_exists python3; then
+    if __check_command_exists python3; then
             if ! __check_command_exists pip3; then
                 __yum_install_noinput python3-pip
             fi
             PIP_EXE='/bin/pip3'
             _PY_EXE='python3'
-        fi
     else
         PIP_EXE='pip'
         if __check_command_exists python2.7; then
@@ -4942,13 +4941,13 @@ install_amazon_linux_ami_2_deps() {
         if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 3 ]; then
             __PY_VERSION_REPO="py3"
             PY_PKG_VER=3
-            repo_name="SaltStack Python 3 repo for Amazon Linux 2.0"
+            repo_name="SaltStack Python 3 repo for Amazon Linux 2"
         fi
 
         base_url="$HTTP_VAL://${_REPO_URL}/${__PY_VERSION_REPO}/amazon/2/\$basearch/$repo_rev/"
-        gpg_key="${base_url}SALTSTACK-GPG-KEY.pub
+        gpg_key="${base_url}SALTSTACK-GPG-KEY.pub"
         if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -ne 3 ]; then
-            ${base_url}base/RPM-GPG-KEY-CentOS-7"
+            "${base_url}base/RPM-GPG-KEY-CentOS-7"
         fi
 
         # This should prob be refactored to use __install_saltstack_rhel_repository()
@@ -5593,11 +5592,11 @@ install_smartos_git_deps() {
     if [ -f "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" ]; then
         # Install whichever tornado is in the requirements file
         __REQUIRED_TORNADO="$(grep tornado "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt")"
-        __check_pip_allowed "You need to allow pip based installations (-P) in order to install the python package '${__REQUIRED_TORNADO}'"
+        __check_pip_allowed "You need to allow pip based installations \(-P\) in order to install the python package '${__REQUIRED_TORNADO}'"
 
         # Install whichever futures is in the requirements file
         __REQUIRED_FUTURES="$(grep futures "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt")"
-        __check_pip_allowed "You need to allow pip based installations (-P) in order to install the python package '${__REQUIRED_FUTURES}'"
+        __check_pip_allowed "You need to allow pip based installations \(-P\) in order to install the python package '${__REQUIRED_FUTURES}'"
 
         if [ "${__REQUIRED_TORNADO}" != "" ]; then
             if ! __check_command_exists pip; then
@@ -6722,7 +6721,7 @@ config_salt() {
     [ "$_TEMP_CONFIG_DIR" = "null" ] && return
 
     if [ "$_CONFIG_ONLY" -eq $BS_TRUE ]; then
-        echowarn "Passing -C (config only) option implies -F (forced overwrite)."
+        echowarn "Passing -C \(config only\) option implies -F \(forced overwrite\)."
 
         if [ "$_FORCE_OVERWRITE" -ne $BS_TRUE ]; then
             echowarn "Overwriting configs in 11 seconds!"
@@ -7102,9 +7101,9 @@ fi
 # Install dependencies
 if [ ${_NO_DEPS} -eq $BS_FALSE ] && [ $_CONFIG_ONLY -eq $BS_FALSE ]; then
     # Only execute function is not in config mode only
-    echoinfo "Running ${DEPS_INSTALL_FUNC}()"
+    echoinfo "Running ${DEPS_INSTALL_FUNC}\(\)"
     if ! ${DEPS_INSTALL_FUNC}; then
-        echoerror "Failed to run ${DEPS_INSTALL_FUNC}()!!!"
+        echoerror "Failed to run ${DEPS_INSTALL_FUNC}\(\)!!!"
         exit 1
     fi
 fi
@@ -7126,9 +7125,9 @@ if [ "$_CUSTOM_MASTER_CONFIG" != "null" ] || [ "$_CUSTOM_MINION_CONFIG" != "null
 
     if [ ${_NO_DEPS} -eq $BS_FALSE ] && [ $_CONFIG_ONLY -eq $BS_TRUE ]; then
         # Execute function to satisfy dependencies for configuration step
-        echoinfo "Running ${DEPS_INSTALL_FUNC}()"
+        echoinfo "Running ${DEPS_INSTALL_FUNC}\(\)"
         if ! ${DEPS_INSTALL_FUNC}; then
-            echoerror "Failed to run ${DEPS_INSTALL_FUNC}()!!!"
+            echoerror "Failed to run ${DEPS_INSTALL_FUNC}\(\)!!!"
             exit 1
         fi
     fi
@@ -7136,9 +7135,9 @@ fi
 
 # Configure Salt
 if [ "$CONFIG_SALT_FUNC" != "null" ] && [ "$_TEMP_CONFIG_DIR" != "null" ]; then
-    echoinfo "Running ${CONFIG_SALT_FUNC}()"
+    echoinfo "Running ${CONFIG_SALT_FUNC}\(\)"
     if ! ${CONFIG_SALT_FUNC}; then
-        echoerror "Failed to run ${CONFIG_SALT_FUNC}()!!!"
+        echoerror "Failed to run ${CONFIG_SALT_FUNC}\(\)!!!"
         exit 1
     fi
 fi
@@ -7159,9 +7158,9 @@ fi
 
 # Pre-seed master keys
 if [ "$PRESEED_MASTER_FUNC" != "null" ] && [ "$_TEMP_KEYS_DIR" != "null" ]; then
-    echoinfo "Running ${PRESEED_MASTER_FUNC}()"
+    echoinfo "Running ${PRESEED_MASTER_FUNC}\(\)"
     if ! ${PRESEED_MASTER_FUNC}; then
-        echoerror "Failed to run ${PRESEED_MASTER_FUNC}()!!!"
+        echoerror "Failed to run ${PRESEED_MASTER_FUNC}\(\)!!!"
         exit 1
     fi
 fi
@@ -7169,49 +7168,49 @@ fi
 # Install Salt
 if [ "$_CONFIG_ONLY" -eq $BS_FALSE ]; then
     # Only execute function is not in config mode only
-    echoinfo "Running ${INSTALL_FUNC}()"
+    echoinfo "Running ${INSTALL_FUNC}\(\)"
     if ! ${INSTALL_FUNC}; then
-        echoerror "Failed to run ${INSTALL_FUNC}()!!!"
+        echoerror "Failed to run ${INSTALL_FUNC}\(\)!!!"
         exit 1
     fi
 fi
 
 # Run any post install function. Only execute function if not in config mode only
 if [ "$POST_INSTALL_FUNC" != "null" ] && [ "$_CONFIG_ONLY" -eq $BS_FALSE ]; then
-    echoinfo "Running ${POST_INSTALL_FUNC}()"
+    echoinfo "Running ${POST_INSTALL_FUNC}\(\)"
     if ! ${POST_INSTALL_FUNC}; then
-        echoerror "Failed to run ${POST_INSTALL_FUNC}()!!!"
+        echoerror "Failed to run ${POST_INSTALL_FUNC}\(\)!!!"
         exit 1
     fi
 fi
 
 # Run any check services function, Only execute function if not in config mode only
 if [ "$CHECK_SERVICES_FUNC" != "null" ] && [ "$_CONFIG_ONLY" -eq $BS_FALSE ]; then
-    echoinfo "Running ${CHECK_SERVICES_FUNC}()"
+    echoinfo "Running ${CHECK_SERVICES_FUNC}\(\)"
     if ! ${CHECK_SERVICES_FUNC}; then
-        echoerror "Failed to run ${CHECK_SERVICES_FUNC}()!!!"
+        echoerror "Failed to run ${CHECK_SERVICES_FUNC}\(\)!!!"
         exit 1
     fi
 fi
 
 # Run any start daemons function
 if [ "$STARTDAEMONS_INSTALL_FUNC" != "null" ] && [ ${_START_DAEMONS} -eq $BS_TRUE ]; then
-    echoinfo "Running ${STARTDAEMONS_INSTALL_FUNC}()"
+    echoinfo "Running ${STARTDAEMONS_INSTALL_FUNC}\(\)"
     echodebug "Waiting ${_SLEEP} seconds for processes to settle before checking for them"
     sleep ${_SLEEP}
     if ! ${STARTDAEMONS_INSTALL_FUNC}; then
-        echoerror "Failed to run ${STARTDAEMONS_INSTALL_FUNC}()!!!"
+        echoerror "Failed to run ${STARTDAEMONS_INSTALL_FUNC}\(\)!!!"
         exit 1
     fi
 fi
 
 # Check if the installed daemons are running or not
 if [ "$DAEMONS_RUNNING_FUNC" != "null" ] && [ ${_START_DAEMONS} -eq $BS_TRUE ]; then
-    echoinfo "Running ${DAEMONS_RUNNING_FUNC}()"
+    echoinfo "Running ${DAEMONS_RUNNING_FUNC}\(\)"
     echodebug "Waiting ${_SLEEP} seconds for processes to settle before checking for them"
     sleep ${_SLEEP}  # Sleep a little bit to let daemons start
     if ! ${DAEMONS_RUNNING_FUNC}; then
-        echoerror "Failed to run ${DAEMONS_RUNNING_FUNC}()!!!"
+        echoerror "Failed to run ${DAEMONS_RUNNING_FUNC}\(\)!!!"
 
         for fname in api master minion syndic; do
             # Skip salt-api since the service should be opt-in and not necessarily started on boot

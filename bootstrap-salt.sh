@@ -2542,7 +2542,7 @@ __install_pip_pkgs() {
 #----------------------------------------------------------------------------------------------------------------------
 __install_tornado_pip() {
     # OS needs tornado <5.0 from pip
-    __check_pip_allowed "You need to allow pip based installations (-P) for Tornado <5.0 in order to install Salt on Python 3"
+    __check_pip_allowed "You need to allow pip based installations \(-P\) for Tornado <5.0 in order to install Salt on Python 3"
     ## install pip if its not installed and install tornado
     __install_pip_pkgs "tornado<5.0" "${1}" || return 1
 }
@@ -3620,7 +3620,7 @@ install_fedora_git_deps() {
     # Fedora 28+ needs tornado <5.0 from pip
     # https://github.com/saltstack/salt-bootstrap/issues/1220
     if [ "${PY_PKG_VER}" -eq 3 ] && [ "$DISTRO_MAJOR_VERSION" -ge 28 ]; then
-        __check_pip_allowed "You need to allow pip based installations (-P) for Tornado <5.0 in order to install Salt on Python 3"
+        __check_pip_allowed "You need to allow pip based installations \(-P\) for Tornado <5.0 in order to install Salt on Python 3"
         grep tornado "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" | while IFS='
 '         read -r dep; do
             "${_PY_EXE}" -m pip install "${dep}" || return 1
@@ -4793,7 +4793,7 @@ install_amazon_linux_ami_git_deps() {
     __PIP_PACKAGES=""
 
     if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
-        __check_pip_allowed "You need to allow pip based installations (-P) in order to install apache-libcloud"
+        __check_pip_allowed "You need to allow pip based installations \(-P\) in order to install apache-libcloud"
         __PACKAGES="${__PACKAGES} python27-pip"
         __PIP_PACKAGES="${__PIP_PACKAGES} apache-libcloud>=$_LIBCLOUD_MIN_VERSION"
     fi
@@ -4858,7 +4858,7 @@ install_amazon_linux_ami_2_git_deps() {
     __PIP_PACKAGES=""
 
     if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
-        __check_pip_allowed "You need to allow pip based installations (-P) in order to install apache-libcloud"
+        __check_pip_allowed "You need to allow pip based installations \(-P\) in order to install apache-libcloud"
         if [ $PARSED_VERSION -eq 2 ]; then
             if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 3 ]; then
                 __PACKAGES="${__PACKAGES} python3-pip"

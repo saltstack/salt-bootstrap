@@ -80,98 +80,6 @@ depends_on:
 
 ---
 kind: pipeline
-name: Amazon 1
-
-platform:
-  os: linux
-  arch: amd64
-
-steps:
-- name: throttle-build
-  image: alpine
-  commands:
-  - sh -c 't=24; echo Sleeping 24 seconds; sleep 24'
-
-- name: create
-  image: saltstack/drone-salt-bootstrap-testing
-  commands:
-  - bundle install --with docker --without opennebula ec2 windows vagrant
-  - echo 'Waiting for docker to start'
-  - sleep 15
-  - docker ps -a
-  - bundle exec kitchen create amazon-1
-  environment:
-    DOCKER_HOST: tcp://docker:2375
-  depends_on:
-  - throttle-build
-
-- name: Py2 2018.3(Git)
-  image: saltstack/drone-salt-bootstrap-testing
-  commands:
-  - pip install -U pip
-  - pip install -r tests/requirements.txt
-  - bundle install --with docker --without opennebula ec2 windows vagrant
-  - bundle exec kitchen test py2-git-2018-3-amazon-1
-  environment:
-    DOCKER_HOST: tcp://docker:2375
-  depends_on:
-  - throttle-build
-  - create
-
-- name: Py2 2019.2(Git)
-  image: saltstack/drone-salt-bootstrap-testing
-  commands:
-  - pip install -U pip
-  - pip install -r tests/requirements.txt
-  - bundle install --with docker --without opennebula ec2 windows vagrant
-  - bundle exec kitchen test py2-git-2019-2-amazon-1
-  environment:
-    DOCKER_HOST: tcp://docker:2375
-  depends_on:
-  - throttle-build
-  - create
-
-- name: Py2 2018.3(Stable)
-  image: saltstack/drone-salt-bootstrap-testing
-  commands:
-  - pip install -U pip
-  - pip install -r tests/requirements.txt
-  - bundle install --with docker --without opennebula ec2 windows vagrant
-  - bundle exec kitchen test py2-stable-2018-3-amazon-1
-  environment:
-    DOCKER_HOST: tcp://docker:2375
-  depends_on:
-  - throttle-build
-  - create
-
-- name: Py2 2019.2(Stable)
-  image: saltstack/drone-salt-bootstrap-testing
-  commands:
-  - pip install -U pip
-  - pip install -r tests/requirements.txt
-  - bundle install --with docker --without opennebula ec2 windows vagrant
-  - bundle exec kitchen test py2-stable-2019-2-amazon-1
-  environment:
-    DOCKER_HOST: tcp://docker:2375
-  depends_on:
-  - throttle-build
-  - create
-
-services:
-- name: docker
-  image: saltstack/drone-salt-bootstrap-testing
-  command:
-  - --storage-driver=overlay2
-  privileged: true
-
-node:
-  project: open
-
-depends_on:
-- Lint
-
----
-kind: pipeline
 name: Amazon 2
 
 platform:
@@ -1418,6 +1326,6 @@ depends_on:
 
 ---
 kind: signature
-hmac: 75351adc28ff8346787e9fc0c42330fb60d5df79580cf5718d814dcc7a530cf7
+hmac: 2965bebb9df629cca7184c1b3e63b55a4b5a364927a04d66f7e9abab840323de
 
 ...

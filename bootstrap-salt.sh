@@ -4857,10 +4857,10 @@ install_amazon_linux_ami_2_git_deps() {
     __PACKAGES=""
     __PIP_PACKAGES=""
 
-    if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
+    if [ "$_INSTALL_CLOUD" -eq "$BS_TRUE" ]; then
         __check_pip_allowed "You need to allow pip based installations \(-P\) in order to install apache-libcloud"
-        if [ "$PARSED_VERSION" -eq 2 ]; then
-            if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 3 ]; then
+        if [ "$PARSED_VERSION" -eq "2" ]; then
+            if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq "3" ]; then
                 __PACKAGES="${__PACKAGES} python3-pip"
             else
                 __PACKAGES="${__PACKAGES} python2-pip"

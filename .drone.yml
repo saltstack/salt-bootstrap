@@ -31,7 +31,7 @@ steps:
   commands:
   - bundle install --with docker --without opennebula ec2 windows vagrant
   - echo 'Waiting for docker to start'
-  - sleep 10
+  - sleep 15
   - docker ps -a
   - bundle exec kitchen create arch
   environment:
@@ -90,14 +90,14 @@ steps:
 - name: throttle-build
   image: alpine
   commands:
-  - sh -c 't=20; echo Sleeping 20 seconds; sleep 20'
+  - sh -c 't=24; echo Sleeping 24 seconds; sleep 24'
 
 - name: create
   image: saltstack/drone-salt-bootstrap-testing
   commands:
   - bundle install --with docker --without opennebula ec2 windows vagrant
   - echo 'Waiting for docker to start'
-  - sleep 10
+  - sleep 15
   - docker ps -a
   - bundle exec kitchen create amazon-1
   environment:
@@ -182,14 +182,14 @@ steps:
 - name: throttle-build
   image: alpine
   commands:
-  - sh -c 't=80; echo Sleeping 80 seconds; sleep 80'
+  - sh -c 't=96; echo Sleeping 96 seconds; sleep 96'
 
 - name: create
   image: saltstack/drone-salt-bootstrap-testing
   commands:
   - bundle install --with docker --without opennebula ec2 windows vagrant
   - echo 'Waiting for docker to start'
-  - sleep 10
+  - sleep 15
   - docker ps -a
   - bundle exec kitchen create amazon-2
   environment:
@@ -326,14 +326,14 @@ steps:
 - name: throttle-build
   image: alpine
   commands:
-  - sh -c 't=60; echo Sleeping 60 seconds; sleep 60'
+  - sh -c 't=72; echo Sleeping 72 seconds; sleep 72'
 
 - name: create
   image: saltstack/drone-salt-bootstrap-testing
   commands:
   - bundle install --with docker --without opennebula ec2 windows vagrant
   - echo 'Waiting for docker to start'
-  - sleep 10
+  - sleep 15
   - docker ps -a
   - bundle exec kitchen create centos-6
   environment:
@@ -418,14 +418,14 @@ steps:
 - name: throttle-build
   image: alpine
   commands:
-  - sh -c 't=160; echo Sleeping 160 seconds; sleep 160'
+  - sh -c 't=192; echo Sleeping 192 seconds; sleep 192'
 
 - name: create
   image: saltstack/drone-salt-bootstrap-testing
   commands:
   - bundle install --with docker --without opennebula ec2 windows vagrant
   - echo 'Waiting for docker to start'
-  - sleep 10
+  - sleep 15
   - docker ps -a
   - bundle exec kitchen create centos-7
   environment:
@@ -562,14 +562,14 @@ steps:
 - name: throttle-build
   image: alpine
   commands:
-  - sh -c 't=60; echo Sleeping 60 seconds; sleep 60'
+  - sh -c 't=90; echo Sleeping 90 seconds; sleep 90'
 
 - name: create
   image: saltstack/drone-salt-bootstrap-testing
   commands:
   - bundle install --with docker --without opennebula ec2 windows vagrant
   - echo 'Waiting for docker to start'
-  - sleep 10
+  - sleep 15
   - docker ps -a
   - bundle exec kitchen create centos-8
   environment:
@@ -641,14 +641,14 @@ steps:
 - name: throttle-build
   image: alpine
   commands:
-  - sh -c 't=100; echo Sleeping 100 seconds; sleep 100'
+  - sh -c 't=144; echo Sleeping 144 seconds; sleep 144'
 
 - name: create
   image: saltstack/drone-salt-bootstrap-testing
   commands:
   - bundle install --with docker --without opennebula ec2 windows vagrant
   - echo 'Waiting for docker to start'
-  - sleep 10
+  - sleep 15
   - docker ps -a
   - bundle exec kitchen create debian-8
   environment:
@@ -740,7 +740,7 @@ steps:
   commands:
   - bundle install --with docker --without opennebula ec2 windows vagrant
   - echo 'Waiting for docker to start'
-  - sleep 10
+  - sleep 15
   - docker ps -a
   - bundle exec kitchen create debian-9
   environment:
@@ -877,14 +877,14 @@ steps:
 - name: throttle-build
   image: alpine
   commands:
-  - sh -c 't=90; echo Sleeping 90 seconds; sleep 90'
+  - sh -c 't=72; echo Sleeping 72 seconds; sleep 72'
 
 - name: create
   image: saltstack/drone-salt-bootstrap-testing
   commands:
   - bundle install --with docker --without opennebula ec2 windows vagrant
   - echo 'Waiting for docker to start'
-  - sleep 10
+  - sleep 15
   - docker ps -a
   - bundle exec kitchen create debian-10
   environment:
@@ -956,14 +956,14 @@ steps:
 - name: throttle-build
   image: alpine
   commands:
-  - sh -c 't=180; echo Sleeping 180 seconds; sleep 180'
+  - sh -c 't=108; echo Sleeping 108 seconds; sleep 108'
 
 - name: create
   image: saltstack/drone-salt-bootstrap-testing
   commands:
   - bundle install --with docker --without opennebula ec2 windows vagrant
   - echo 'Waiting for docker to start'
-  - sleep 10
+  - sleep 15
   - docker ps -a
   - bundle exec kitchen create fedora-30
   environment:
@@ -1074,14 +1074,14 @@ steps:
 - name: throttle-build
   image: alpine
   commands:
-  - sh -c 't=40; echo Sleeping 40 seconds; sleep 40'
+  - sh -c 't=24; echo Sleeping 24 seconds; sleep 24'
 
 - name: create
   image: saltstack/drone-salt-bootstrap-testing
   commands:
   - bundle install --with docker --without opennebula ec2 windows vagrant
   - echo 'Waiting for docker to start'
-  - sleep 10
+  - sleep 15
   - docker ps -a
   - bundle exec kitchen create opensuse-15
   environment:
@@ -1140,14 +1140,14 @@ steps:
 - name: throttle-build
   image: alpine
   commands:
-  - sh -c 't=40; echo Sleeping 40 seconds; sleep 40'
+  - sh -c 't=48; echo Sleeping 48 seconds; sleep 48'
 
 - name: create
   image: saltstack/drone-salt-bootstrap-testing
   commands:
   - bundle install --with docker --without opennebula ec2 windows vagrant
   - echo 'Waiting for docker to start'
-  - sleep 10
+  - sleep 15
   - docker ps -a
   - bundle exec kitchen create ubuntu-1604
   environment:
@@ -1291,7 +1291,7 @@ steps:
   commands:
   - bundle install --with docker --without opennebula ec2 windows vagrant
   - echo 'Waiting for docker to start'
-  - sleep 10
+  - sleep 15
   - docker ps -a
   - bundle exec kitchen create ubuntu-1804
   environment:
@@ -1418,6 +1418,6 @@ depends_on:
 
 ---
 kind: signature
-hmac: 36e72916e48ce52fc701835c18a781e89d8a6fc6b47650abc3506aff4f131783
+hmac: 75351adc28ff8346787e9fc0c42330fb60d5df79580cf5718d814dcc7a530cf7
 
 ...

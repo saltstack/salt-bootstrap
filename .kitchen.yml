@@ -85,6 +85,7 @@ platforms:
       run_command: /usr/lib/systemd/systemd
       provision_command:
         - zypper --non-interactive install --auto-agree-with-licenses dbus-1
+        - zypper --non-interactive install --auto-agree-with-licenses sudo openssh which curl
         - systemctl enable sshd.service
     provisioner:
       salt_bootstrap_options: -MPfq -y -x python2 git %s

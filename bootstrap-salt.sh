@@ -4935,6 +4935,7 @@ install_amazon_linux_ami_2_deps() {
 
         __PY_VERSION_REPO="yum"
         PY_PKG_VER=""
+        _PY_MAJOR_VERSION=$(echo "$_PY_PKG_VER" | cut -c 7)
         repo_name="SaltStack repo for Amazon Linux 2.0"
         if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 3 ]; then
             __PY_VERSION_REPO="py3"

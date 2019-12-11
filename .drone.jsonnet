@@ -21,16 +21,16 @@ local stable_py3_suites = [
 
 local distros = [
   { name: 'Arch', slug: 'arch', multiplier: 0, depends: [] },
-  // { name: 'Amazon 1', slug: 'amazon-1', multiplier: 1, depends: [] },
-  // { name: 'Amazon 2', slug: 'amazon-2', multiplier: 2, depends: [] },
+//  { name: 'Amazon 1', slug: 'amazon-1', multiplier: 1, depends: [] },
+  { name: 'Amazon 2', slug: 'amazon-2', multiplier: 2, depends: [] },
   { name: 'CentOS 6', slug: 'centos-6', multiplier: 3, depends: [] },
   { name: 'CentOS 7', slug: 'centos-7', multiplier: 4, depends: [] },
-  { name: 'CentOS 8', slug: 'centos-8', multiplier: 4, depends: [] },
-  { name: 'Debian 8', slug: 'debian-8', multiplier: 5, depends: [] },
-  { name: 'Debian 9', slug: 'debian-9', multiplier: 6, depends: [] },
-  { name: 'Debian 10', slug: 'debian-10', multiplier: 6, depends: [] },
-  { name: 'Fedora 30', slug: 'fedora-30', multiplier: 6, depends: [] },
-  { name: 'Opensuse 15.0', slug: 'opensuse-15', multiplier: 4, depends: [] },
+  { name: 'CentOS 8', slug: 'centos-8', multiplier: 5, depends: [] },
+  { name: 'Debian 8', slug: 'debian-8', multiplier: 6, depends: [] },
+  { name: 'Debian 9', slug: 'debian-9', multiplier: 5, depends: [] },
+  { name: 'Debian 10', slug: 'debian-10', multiplier: 4, depends: [] },
+  { name: 'Fedora 30', slug: 'fedora-30', multiplier: 3, depends: [] },
+  { name: 'Opensuse 15.0', slug: 'opensuse-15', multiplier: 2, depends: [] },
   { name: 'Ubuntu 16.04', slug: 'ubuntu-1604', multiplier: 1, depends: [] },
   { name: 'Ubuntu 18.04', slug: 'ubuntu-1804', multiplier: 0, depends: [] },
 ];
@@ -111,7 +111,7 @@ local Build(distro) = {
       commands: [
         std.format(
           "sh -c 't=%(offset)s; echo Sleeping %(offset)s seconds; sleep %(offset)s'",
-          { offset: 5 * std.length(suites) * distro.multiplier }
+          { offset: 6 * std.length(suites) * distro.multiplier }
         ),
       ],
     },
@@ -127,7 +127,7 @@ local Build(distro) = {
       commands: [
         'bundle install --with docker --without opennebula ec2 windows vagrant',
         "echo 'Waiting for docker to start'",
-        'sleep 10',  // give docker enough time to start
+        'sleep 15',  // give docker enough time to start
         'docker ps -a',
         std.format('bundle exec kitchen create %s', [distro.slug]),
       ],

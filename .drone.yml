@@ -80,6 +80,242 @@ depends_on:
 
 ---
 kind: pipeline
+name: Amazon 1
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: throttle-build
+  image: alpine
+  commands:
+  - sh -c 't=20; echo Sleeping 20 seconds; sleep 20'
+
+- name: create
+  image: saltstack/drone-salt-bootstrap-testing
+  commands:
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - echo 'Waiting for docker to start'
+  - sleep 10
+  - docker ps -a
+  - bundle exec kitchen create amazon-1
+  environment:
+    DOCKER_HOST: tcp://docker:2375
+  depends_on:
+  - throttle-build
+
+- name: Py2 2018.3(Git)
+  image: saltstack/drone-salt-bootstrap-testing
+  commands:
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - bundle exec kitchen test py2-git-2018-3-amazon-1
+  environment:
+    DOCKER_HOST: tcp://docker:2375
+  depends_on:
+  - throttle-build
+  - create
+
+- name: Py2 2019.2(Git)
+  image: saltstack/drone-salt-bootstrap-testing
+  commands:
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - bundle exec kitchen test py2-git-2019-2-amazon-1
+  environment:
+    DOCKER_HOST: tcp://docker:2375
+  depends_on:
+  - throttle-build
+  - create
+
+- name: Py2 2018.3(Stable)
+  image: saltstack/drone-salt-bootstrap-testing
+  commands:
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - bundle exec kitchen test py2-stable-2018-3-amazon-1
+  environment:
+    DOCKER_HOST: tcp://docker:2375
+  depends_on:
+  - throttle-build
+  - create
+
+- name: Py2 2019.2(Stable)
+  image: saltstack/drone-salt-bootstrap-testing
+  commands:
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - bundle exec kitchen test py2-stable-2019-2-amazon-1
+  environment:
+    DOCKER_HOST: tcp://docker:2375
+  depends_on:
+  - throttle-build
+  - create
+
+services:
+- name: docker
+  image: saltstack/drone-salt-bootstrap-testing
+  command:
+  - --storage-driver=overlay2
+  privileged: true
+
+node:
+  project: open
+
+depends_on:
+- Lint
+
+---
+kind: pipeline
+name: Amazon 2
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: throttle-build
+  image: alpine
+  commands:
+  - sh -c 't=80; echo Sleeping 80 seconds; sleep 80'
+
+- name: create
+  image: saltstack/drone-salt-bootstrap-testing
+  commands:
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - echo 'Waiting for docker to start'
+  - sleep 10
+  - docker ps -a
+  - bundle exec kitchen create amazon-2
+  environment:
+    DOCKER_HOST: tcp://docker:2375
+  depends_on:
+  - throttle-build
+
+- name: Py2 2018.3(Git)
+  image: saltstack/drone-salt-bootstrap-testing
+  commands:
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - bundle exec kitchen test py2-git-2018-3-amazon-2
+  environment:
+    DOCKER_HOST: tcp://docker:2375
+  depends_on:
+  - throttle-build
+  - create
+
+- name: Py2 2019.2(Git)
+  image: saltstack/drone-salt-bootstrap-testing
+  commands:
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - bundle exec kitchen test py2-git-2019-2-amazon-2
+  environment:
+    DOCKER_HOST: tcp://docker:2375
+  depends_on:
+  - throttle-build
+  - create
+
+- name: Py2 2018.3(Stable)
+  image: saltstack/drone-salt-bootstrap-testing
+  commands:
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - bundle exec kitchen test py2-stable-2018-3-amazon-2
+  environment:
+    DOCKER_HOST: tcp://docker:2375
+  depends_on:
+  - throttle-build
+  - create
+
+- name: Py2 2019.2(Stable)
+  image: saltstack/drone-salt-bootstrap-testing
+  commands:
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - bundle exec kitchen test py2-stable-2019-2-amazon-2
+  environment:
+    DOCKER_HOST: tcp://docker:2375
+  depends_on:
+  - throttle-build
+  - create
+
+- name: Py3 2018.3(Git)
+  image: saltstack/drone-salt-bootstrap-testing
+  commands:
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - bundle exec kitchen test py3-git-2018-3-amazon-2
+  environment:
+    DOCKER_HOST: tcp://docker:2375
+  depends_on:
+  - throttle-build
+  - create
+
+- name: Py3 2019.2(Git)
+  image: saltstack/drone-salt-bootstrap-testing
+  commands:
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - bundle exec kitchen test py3-git-2019-2-amazon-2
+  environment:
+    DOCKER_HOST: tcp://docker:2375
+  depends_on:
+  - throttle-build
+  - create
+
+- name: Py3 2018.3(Stable)
+  image: saltstack/drone-salt-bootstrap-testing
+  commands:
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - bundle exec kitchen test py3-stable-2018-3-amazon-2
+  environment:
+    DOCKER_HOST: tcp://docker:2375
+  depends_on:
+  - throttle-build
+  - create
+
+- name: Py3 2019.2(Stable)
+  image: saltstack/drone-salt-bootstrap-testing
+  commands:
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - bundle exec kitchen test py3-stable-2019-2-amazon-2
+  environment:
+    DOCKER_HOST: tcp://docker:2375
+  depends_on:
+  - throttle-build
+  - create
+
+services:
+- name: docker
+  image: saltstack/drone-salt-bootstrap-testing
+  command:
+  - --storage-driver=overlay2
+  privileged: true
+
+node:
+  project: open
+
+depends_on:
+- Lint
+
+---
+kind: pipeline
 name: CentOS 6
 
 platform:
@@ -1182,6 +1418,6 @@ depends_on:
 
 ---
 kind: signature
-hmac: 6f9e82fb6d1fc4166a76b998fecb456cb5e931f5c2914d023008e30fba1c8822
+hmac: 36e72916e48ce52fc701835c18a781e89d8a6fc6b47650abc3506aff4f131783
 
 ...

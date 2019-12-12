@@ -851,7 +851,7 @@ steps:
 - name: throttle-build
   image: alpine
   commands:
-  - sh -c 't=108; echo Sleeping 108 seconds; sleep 108'
+  - sh -c 't=72; echo Sleeping 72 seconds; sleep 72'
 
 - name: create
   image: saltstack/drone-salt-bootstrap-testing
@@ -912,32 +912,6 @@ steps:
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
   - bundle exec kitchen test py3-git-2019-2-fedora-30
-  environment:
-    DOCKER_HOST: tcp://docker:2375
-  depends_on:
-  - throttle-build
-  - create
-
-- name: Py3 2018.3(Stable)
-  image: saltstack/drone-salt-bootstrap-testing
-  commands:
-  - pip install -U pip
-  - pip install -r tests/requirements.txt
-  - bundle install --with docker --without opennebula ec2 windows vagrant
-  - bundle exec kitchen test py3-stable-2018-3-fedora-30
-  environment:
-    DOCKER_HOST: tcp://docker:2375
-  depends_on:
-  - throttle-build
-  - create
-
-- name: Py3 2019.2(Stable)
-  image: saltstack/drone-salt-bootstrap-testing
-  commands:
-  - pip install -U pip
-  - pip install -r tests/requirements.txt
-  - bundle install --with docker --without opennebula ec2 windows vagrant
-  - bundle exec kitchen test py3-stable-2019-2-fedora-30
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
@@ -1313,6 +1287,6 @@ depends_on:
 
 ---
 kind: signature
-hmac: 01bfd9713517348f9861dd811b44531bb17d6cf1e6635083aa27415824f36bed
+hmac: da059b4d6fe84b6de7a7406e52a05e1c8c3666782b0e7191cecc5803014c4d60
 
 ...

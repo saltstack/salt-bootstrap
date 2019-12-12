@@ -4940,7 +4940,7 @@ install_amazon_linux_ami_2_deps() {
         __PY_VERSION_REPO="yum"
         PY_PKG_VER=""
         _PY_MAJOR_VERSION=$(echo "$_PY_PKG_VER" | cut -c 7)
-        repo_name="SaltStack repo for Amazon Linux 2.0"
+        repo_name="SaltStack repo for Amazon Linux 2"
         if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 3 ]; then
             __PY_VERSION_REPO="py3"
             PY_PKG_VER=3
@@ -4948,9 +4948,9 @@ install_amazon_linux_ami_2_deps() {
         fi
 
         base_url="$HTTP_VAL://${_REPO_URL}/${__PY_VERSION_REPO}/amazon/2/\$basearch/$repo_rev/"
-        gpg_key="${base_url}SALTSTACK-GPG-KEY.pub"
-        if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -ne 3 ]; then
-            "${base_url}base/RPM-GPG-KEY-CentOS-7"
+        gpg_key="${base_url}SALTSTACK-GPG-KEY.pub,${base_url}base/RPM-GPG-KEY-CentOS-7"
+        if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 3 ]; then
+            gpg_key="${base_url}SALTSTACK-GPG-KEY.pub"
         fi
 
         # This should prob be refactored to use __install_saltstack_rhel_repository()

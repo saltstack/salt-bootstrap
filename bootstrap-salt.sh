@@ -4834,6 +4834,7 @@ install_amazon_linux_ami_2_git_deps() {
         yum -y install ca-certificates || return 1
     fi
 
+    install_amazon_linux_ami_2_deps || return 1
     if __check_command_exists python3; then
             if ! __check_command_exists pip3; then
                 __yum_install_noinput python3-pip
@@ -4850,7 +4851,6 @@ install_amazon_linux_ami_2_git_deps() {
             _PY_EXE='python2.7'
         fi
     fi
-    install_amazon_linux_ami_2_deps || return 1
 
     if ! __check_command_exists git; then
         __yum_install_noinput git || return 1
@@ -4936,14 +4936,16 @@ install_amazon_linux_ami_2_deps() {
 
     if [ $_DISABLE_REPOS -eq $BS_FALSE ] || [ "$_CUSTOM_REPO_URL" != "null" ]; then
         __REPO_FILENAME="saltstack-repo.repo"
-
         __PY_VERSION_REPO="yum"
         PY_PKG_VER=""
         _PY_MAJOR_VERSION=$(echo "$_PY_PKG_VER" | cut -c 7)
+        repo_label="saltstack-repo"
         repo_name="SaltStack repo for Amazon Linux 2"
         if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 3 ]; then
+            __REPO_FILENAME="saltstack-py3-repo.repo"
             __PY_VERSION_REPO="py3"
             PY_PKG_VER=3
+            repo_label="saltstack-py3-repo"
             repo_name="SaltStack Python 3 repo for Amazon Linux 2"
         fi
 
@@ -4958,7 +4960,7 @@ install_amazon_linux_ami_2_deps() {
         # amazon linux yum file.
         if [ ! -s "/etc/yum.repos.d/${__REPO_FILENAME}" ]; then
           cat <<_eof > "/etc/yum.repos.d/${__REPO_FILENAME}"
-[saltstack-repo]
+[$repo_label]
 name=$repo_name
 failovermethod=priority
 priority=10
@@ -4973,10 +4975,9 @@ _eof
     # Package python-ordereddict-1.1-2.el6.noarch is obsoleted by python26-2.6.9-2.88.amzn1.x86_64
     # which is already installed
     if [ "${PY_PKG_VER}" -eq 3 ]; then
-    __PACKAGES="${pkg_append}${PY_PKG_VER}-m2crypto ${pkg_append}${PY_PKG_VER}-pyyaml"
-
+        __PACKAGES="python3 ${pkg_append}${PY_PKG_VER}-m2crypto ${pkg_append}${PY_PKG_VER}-pyyaml"
     else
-    __PACKAGES="m2crypto PyYAML ${pkg_append}-futures"
+        __PACKAGES="m2crypto PyYAML ${pkg_append}-futures"
     fi
 
     __PACKAGES="${__PACKAGES} ${pkg_append}${PY_PKG_VER}-crypto ${pkg_append}${PY_PKG_VER}-jinja2 procps-ng"

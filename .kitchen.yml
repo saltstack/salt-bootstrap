@@ -131,6 +131,7 @@ suites:
       - centos-6
       - debian-8
       - opensuse-15
+      - amazon-2
   - name: py3-git-2019-2
     provisioner:
       salt_version: 2019.2
@@ -149,6 +150,7 @@ suites:
       - centos-6
       - debian-8
       - opensuse-15
+      - amazon-2
   - name: py3-stable-2019-2
     provisioner:
       salt_version: 2019.2

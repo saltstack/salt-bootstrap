@@ -20,7 +20,7 @@ local stable_py3_suites = [
 ];
 
 local distros = [
-//  { name: 'Arch', slug: 'arch', multiplier: 0, depends: [] },
+  { name: 'Arch', slug: 'arch', multiplier: 0, depends: [] },
 //  { name: 'Amazon 1', slug: 'amazon-1', multiplier: 1, depends: [] },
   { name: 'Amazon 2', slug: 'amazon-2', multiplier: 2, depends: [] },
   { name: 'CentOS 6', slug: 'centos-6', multiplier: 3, depends: [] },
@@ -50,6 +50,7 @@ local stable_distros = [
 
 local py3_distros = [
   'amazon-2',
+  'arch',
   'centos-7',
   'centos-8',
   'debian-9',
@@ -148,7 +149,7 @@ local Build(distro) = {
       commands: [
         'bundle install --with docker --without opennebula ec2 windows vagrant',
         "echo 'Waiting for docker to start'",
-        'sleep 30',  // give docker enough time to start
+        'sleep 20',  // give docker enough time to start
         'docker ps -a',
         std.format('bundle exec kitchen create %s', [distro.slug]),
       ],

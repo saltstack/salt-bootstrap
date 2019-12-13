@@ -41,7 +41,7 @@ platforms:
       platform: rhel
       run_command: /usr/lib/systemd/systemd
       provision_command:
-        - yum install -y procps-ng
+        - yum -y install procps-ng
   - name: arch
     driver_config:
       image: archlinux/base

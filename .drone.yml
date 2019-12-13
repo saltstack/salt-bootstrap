@@ -31,7 +31,7 @@ steps:
   commands:
   - bundle install --with docker --without opennebula ec2 windows vagrant
   - echo 'Waiting for docker to start'
-  - sleep 15
+  - sleep 30
   - docker ps -a
   - bundle exec kitchen create arch
   environment:
@@ -123,7 +123,7 @@ steps:
   commands:
   - bundle install --with docker --without opennebula ec2 windows vagrant
   - echo 'Waiting for docker to start'
-  - sleep 15
+  - sleep 30
   - docker ps -a
   - bundle exec kitchen create amazon-2
   environment:
@@ -241,7 +241,7 @@ steps:
   commands:
   - bundle install --with docker --without opennebula ec2 windows vagrant
   - echo 'Waiting for docker to start'
-  - sleep 15
+  - sleep 30
   - docker ps -a
   - bundle exec kitchen create centos-6
   environment:
@@ -333,7 +333,7 @@ steps:
   commands:
   - bundle install --with docker --without opennebula ec2 windows vagrant
   - echo 'Waiting for docker to start'
-  - sleep 15
+  - sleep 30
   - docker ps -a
   - bundle exec kitchen create centos-7
   environment:
@@ -477,7 +477,7 @@ steps:
   commands:
   - bundle install --with docker --without opennebula ec2 windows vagrant
   - echo 'Waiting for docker to start'
-  - sleep 15
+  - sleep 30
   - docker ps -a
   - bundle exec kitchen create centos-8
   environment:
@@ -543,7 +543,7 @@ steps:
   commands:
   - bundle install --with docker --without opennebula ec2 windows vagrant
   - echo 'Waiting for docker to start'
-  - sleep 15
+  - sleep 30
   - docker ps -a
   - bundle exec kitchen create debian-8
   environment:
@@ -635,7 +635,7 @@ steps:
   commands:
   - bundle install --with docker --without opennebula ec2 windows vagrant
   - echo 'Waiting for docker to start'
-  - sleep 15
+  - sleep 30
   - docker ps -a
   - bundle exec kitchen create debian-9
   environment:
@@ -779,7 +779,7 @@ steps:
   commands:
   - bundle install --with docker --without opennebula ec2 windows vagrant
   - echo 'Waiting for docker to start'
-  - sleep 15
+  - sleep 30
   - docker ps -a
   - bundle exec kitchen create debian-10
   environment:
@@ -845,7 +845,7 @@ steps:
   commands:
   - bundle install --with docker --without opennebula ec2 windows vagrant
   - echo 'Waiting for docker to start'
-  - sleep 15
+  - sleep 30
   - docker ps -a
   - bundle exec kitchen create fedora-30
   environment:
@@ -937,7 +937,7 @@ steps:
   commands:
   - bundle install --with docker --without opennebula ec2 windows vagrant
   - echo 'Waiting for docker to start'
-  - sleep 15
+  - sleep 30
   - docker ps -a
   - bundle exec kitchen create opensuse-15
   environment:
@@ -1003,7 +1003,7 @@ steps:
   commands:
   - bundle install --with docker --without opennebula ec2 windows vagrant
   - echo 'Waiting for docker to start'
-  - sleep 15
+  - sleep 30
   - docker ps -a
   - bundle exec kitchen create ubuntu-1604
   environment:
@@ -1147,7 +1147,7 @@ steps:
   commands:
   - bundle install --with docker --without opennebula ec2 windows vagrant
   - echo 'Waiting for docker to start'
-  - sleep 15
+  - sleep 30
   - docker ps -a
   - bundle exec kitchen create ubuntu-1804
   environment:
@@ -1274,6 +1274,6 @@ depends_on:
 
 ---
 kind: signature
-hmac: d34adb5aae5ec297aaf275c1fc17ae87369b57b0d043be2a6c15b294456a57a3
+hmac: 5b2b9370523a7c47e068ffd8e99fda323bfa69f4d2a489b8e96241028ebd1967
 
 ...

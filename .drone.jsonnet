@@ -149,7 +149,7 @@ local Build(distro) = {
       commands: [
         'bundle install --with docker --without opennebula ec2 windows vagrant',
         "echo 'Waiting for docker to start'",
-        'sleep 15',  // give docker enough time to start
+        'sleep 30',  // give docker enough time to start
         'docker ps -a',
         std.format('bundle exec kitchen create %s', [distro.slug]),
       ],

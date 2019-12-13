@@ -65,6 +65,32 @@ steps:
   - throttle-build
   - create
 
+- name: Py3 2018.3(Git)
+  image: saltstack/drone-salt-bootstrap-testing
+  commands:
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - bundle exec kitchen test py3-git-2018-3-arch
+  environment:
+    DOCKER_HOST: tcp://docker:2375
+  depends_on:
+  - throttle-build
+  - create
+
+- name: Py3 2019.2(Git)
+  image: saltstack/drone-salt-bootstrap-testing
+  commands:
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - bundle exec kitchen test py3-git-2019-2-arch
+  environment:
+    DOCKER_HOST: tcp://docker:2375
+  depends_on:
+  - throttle-build
+  - create
+
 services:
 - name: docker
   image: saltstack/drone-salt-bootstrap-testing
@@ -1248,6 +1274,6 @@ depends_on:
 
 ---
 kind: signature
-hmac: a1e3b561c227bc7ec6fa8c0319d4c55d98f42c7311015123d63cf78292e9d318
+hmac: d34adb5aae5ec297aaf275c1fc17ae87369b57b0d043be2a6c15b294456a57a3
 
 ...

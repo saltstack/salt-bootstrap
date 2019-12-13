@@ -67,6 +67,7 @@ local py2_blacklist = [
 local blacklist_2018 = [
   'centos-8',
   'debian-10',
+  'amazon-2',
 ];
 
 local Shellcheck() = {
@@ -104,7 +105,11 @@ local Build(distro) = {
     else
       [],
 
-  local temp_git_py3_suites = if std.count(py3_distros, distro.slug) > 0 then
+  local temp_git_py3_suites = if std.count(py3_distros, distro.slug) < 1 then
+      []
+    else if std.count(blacklist_2018, distro.slug) > 0 then
+      git_py3_suites[1:]
+    else if std.count(py3_distros, distro.slug) > 0 then
       git_py3_suites
     else
       [],

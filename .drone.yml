@@ -14,72 +14,6 @@ steps:
 
 ---
 kind: pipeline
-name: Arch
-
-platform:
-  os: linux
-  arch: amd64
-
-steps:
-- name: throttle-build
-  image: alpine
-  commands:
-  - sh -c 't=0; echo Sleeping 0 seconds; sleep 0'
-
-- name: create
-  image: saltstack/drone-salt-bootstrap-testing
-  commands:
-  - bundle install --with docker --without opennebula ec2 windows vagrant
-  - echo 'Waiting for docker to start'
-  - sleep 30
-  - docker ps -a
-  - bundle exec kitchen create arch
-  environment:
-    DOCKER_HOST: tcp://docker:2375
-  depends_on:
-  - throttle-build
-
-- name: Py2 2018.3(Git)
-  image: saltstack/drone-salt-bootstrap-testing
-  commands:
-  - pip install -U pip
-  - pip install -r tests/requirements.txt
-  - bundle install --with docker --without opennebula ec2 windows vagrant
-  - bundle exec kitchen test py2-git-2018-3-arch
-  environment:
-    DOCKER_HOST: tcp://docker:2375
-  depends_on:
-  - throttle-build
-  - create
-
-- name: Py2 2019.2(Git)
-  image: saltstack/drone-salt-bootstrap-testing
-  commands:
-  - pip install -U pip
-  - pip install -r tests/requirements.txt
-  - bundle install --with docker --without opennebula ec2 windows vagrant
-  - bundle exec kitchen test py2-git-2019-2-arch
-  environment:
-    DOCKER_HOST: tcp://docker:2375
-  depends_on:
-  - throttle-build
-  - create
-
-services:
-- name: docker
-  image: saltstack/drone-salt-bootstrap-testing
-  command:
-  - --storage-driver=overlay2
-  privileged: true
-
-node:
-  project: open
-
-depends_on:
-- Lint
-
----
-kind: pipeline
 name: Amazon 2
 
 platform:
@@ -1248,6 +1182,6 @@ depends_on:
 
 ---
 kind: signature
-hmac: 1501ae2ebbd8a40fdb84727c1144aaf4b58e3aa4a4d354e49f820acb213d4a4e
+hmac: b6b552aff7d2d8de9fc31b11c86faae9d5da0f58499fd529210c94854e70b45b
 
 ...

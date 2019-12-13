@@ -20,7 +20,7 @@ local stable_py3_suites = [
 ];
 
 local distros = [
-  { name: 'Arch', slug: 'arch', multiplier: 0, depends: [] },
+//  { name: 'Arch', slug: 'arch', multiplier: 0, depends: [] },
 //  { name: 'Amazon 1', slug: 'amazon-1', multiplier: 1, depends: [] },
   { name: 'Amazon 2', slug: 'amazon-2', multiplier: 2, depends: [] },
   { name: 'CentOS 6', slug: 'centos-6', multiplier: 3, depends: [] },

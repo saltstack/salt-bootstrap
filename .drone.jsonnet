@@ -67,7 +67,6 @@ local py2_blacklist = [
 local blacklist_2018 = [
   'centos-8',
   'debian-10',
-  'amazon-2',
 ];
 
 local Shellcheck() = {

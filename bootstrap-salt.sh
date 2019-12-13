@@ -270,6 +270,7 @@ _QUIET_GIT_INSTALLATION=$BS_FALSE
 _REPO_URL="repo.saltstack.com"
 _PY_EXE=""
 _INSTALL_PY="$BS_FALSE"
+_TORNADO_MAX_PY3_VERSION="5.0"
 
 # Defaults for install arguments
 ITYPE="stable"
@@ -4866,6 +4867,7 @@ install_amazon_linux_ami_2_git_deps() {
         if [ "$PARSED_VERSION" -eq "2" ]; then
             if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq "3" ]; then
                 __PACKAGES="${__PACKAGES} python3-pip"
+                __PIP_PACKAGES="${__PIP_PACKAGES} tornado<$_TORNADO_MAX_PY3_VERSION"
             else
                 __PACKAGES="${__PACKAGES} python2-pip"
             fi
@@ -4879,7 +4881,7 @@ install_amazon_linux_ami_2_git_deps() {
         # We're on the develop branch, install whichever tornado is on the requirements file
         __REQUIRED_TORNADO="$(grep tornado "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt")"
         if [ "${__REQUIRED_TORNADO}" != "" ]; then
-            __PACKAGES="${__PACKAGES} ${pkg_append}-tornado"
+            __PACKAGES="${__PACKAGES} ${pkg_append}${PY_PKG_VER}-tornado"
         fi
     fi
 

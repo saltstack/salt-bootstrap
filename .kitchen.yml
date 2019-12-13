@@ -135,7 +135,7 @@ suites:
   - name: py3-git-2019-2
     provisioner:
       salt_version: 2019.2
-      salt_bootstrap_options: -y -x python3 -MPfq git %s
+      salt_bootstrap_options: -x python3 -MPfq git %s
     excludes:
       - amazon-1
       - centos-6

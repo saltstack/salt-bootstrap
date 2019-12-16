@@ -47,7 +47,9 @@ platforms:
       image: archlinux/base
       run_command: /usr/lib/systemd/systemd
       provision_command:
-        - pacman-key --refresh-keys
+        - rm -fR /etc/pacman.d/gnupg
+        - pacman-key --init
+        - pacman-key --populate archlinux
         - pacman -Syu --noconfirm --needed systemd grep awk procps which
         - systemctl enable sshd
   - name: centos-8

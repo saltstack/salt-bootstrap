@@ -838,7 +838,7 @@ steps:
 - name: throttle-build
   image: alpine
   commands:
-  - sh -c 't=72; echo Sleeping 72 seconds; sleep 72'
+  - sh -c 't=144; echo Sleeping 144 seconds; sleep 144'
 
 - name: create
   image: saltstack/drone-salt-bootstrap-testing
@@ -879,6 +879,32 @@ steps:
   - throttle-build
   - create
 
+- name: Py2 2018.3(Stable)
+  image: saltstack/drone-salt-bootstrap-testing
+  commands:
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - bundle exec kitchen test py2-stable-2018-3-fedora-30
+  environment:
+    DOCKER_HOST: tcp://docker:2375
+  depends_on:
+  - throttle-build
+  - create
+
+- name: Py2 2019.2(Stable)
+  image: saltstack/drone-salt-bootstrap-testing
+  commands:
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - bundle exec kitchen test py2-stable-2019-2-fedora-30
+  environment:
+    DOCKER_HOST: tcp://docker:2375
+  depends_on:
+  - throttle-build
+  - create
+
 - name: Py3 2018.3(Git)
   image: saltstack/drone-salt-bootstrap-testing
   commands:
@@ -899,6 +925,32 @@ steps:
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
   - bundle exec kitchen test py3-git-2019-2-fedora-30
+  environment:
+    DOCKER_HOST: tcp://docker:2375
+  depends_on:
+  - throttle-build
+  - create
+
+- name: Py3 2018.3(Stable)
+  image: saltstack/drone-salt-bootstrap-testing
+  commands:
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - bundle exec kitchen test py3-stable-2018-3-fedora-30
+  environment:
+    DOCKER_HOST: tcp://docker:2375
+  depends_on:
+  - throttle-build
+  - create
+
+- name: Py3 2019.2(Stable)
+  image: saltstack/drone-salt-bootstrap-testing
+  commands:
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - bundle exec kitchen test py3-stable-2019-2-fedora-30
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
@@ -1274,6 +1326,6 @@ depends_on:
 
 ---
 kind: signature
-hmac: 93a6ec723c8cd2d30cb3926f1faaffc1876b68438b8be2abaece471941026d78
+hmac: 59c8f7c861aea35dba9890b536519e10b6e41452bb6c15f88b6a7dbc6e158506
 
 ...

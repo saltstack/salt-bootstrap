@@ -44,6 +44,7 @@ local stable_distros = [
   'debian-8',
   'debian-9',
   'debian-10',
+  'fedora-30',
   'ubuntu-1604',
   'ubuntu-1804',
 ];

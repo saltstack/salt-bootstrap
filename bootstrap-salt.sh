@@ -1974,7 +1974,7 @@ __yum_install_noinput() {
 __dnf_install_noinput() {
 
     dnf -y install "${@}" || return $?
-}   # ----------  end of function __yum_install_noinput  ----------
+}   # ----------  end of function __dnf_install_noinput  ----------
 
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #          NAME:  __git_clone_and_checkout

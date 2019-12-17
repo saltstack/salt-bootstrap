@@ -2025,6 +2025,14 @@ __yum_install_noinput() {
     fi
 }   # ----------  end of function __yum_install_noinput  ----------
 
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  __dnf_install_noinput
+#   DESCRIPTION:  (DRY) dnf install with noinput options
+#----------------------------------------------------------------------------------------------------------------------
+__dnf_install_noinput() {
+
+    dnf -y install "${@}" || return $?
+}   # ----------  end of function __dnf_install_noinput  ----------
 
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #          NAME:  __git_clone_and_checkout
@@ -2575,7 +2583,11 @@ __install_pip_pkgs() {
             __apt_get_install_noinput ${__PACKAGES} || return 1
         else
             __PACKAGES="${__PACKAGES} ${_py_pkg}-devel"
-            __yum_install_noinput ${__PACKAGES} || return 1
+            if [ "$DISTRO_NAME_L" = "fedora" ];then
+              __dnf_install_noinput ${__PACKAGES} || return 1
+            else
+              __yum_install_noinput ${__PACKAGES} || return 1
+            fi
         fi
 
     fi

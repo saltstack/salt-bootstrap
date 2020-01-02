@@ -1,4 +1,4 @@
-#!/bin/sh -
+!/bin/sh -
 
 # WARNING: Changes to this file in the salt repo will be overwritten!
 # Please submit pull requests against the salt-bootstrap repo:
@@ -23,7 +23,7 @@
 #======================================================================================================================
 set -o nounset                              # Treat unset variables as an error
 
-__ScriptVersion="2019.12.19"
+__ScriptVersion="2019.11.04"
 __ScriptName="bootstrap-salt.sh"
 
 __ScriptFullName="$0"

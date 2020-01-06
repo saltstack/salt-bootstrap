@@ -40,6 +40,8 @@ platforms:
       image: amazonlinux:2
       platform: rhel
       run_command: /usr/lib/systemd/systemd
+      provision_command:
+        - yum -y install procps-ng
   - name: arch
     driver_config:
       image: archlinux/base
@@ -129,6 +131,7 @@ suites:
       - centos-6
       - debian-8
       - opensuse-15
+      - amazon-2
   - name: py3-git-2019-2
     provisioner:
       salt_version: 2019.2
@@ -147,6 +150,7 @@ suites:
       - centos-6
       - debian-8
       - opensuse-15
+      - amazon-2
   - name: py3-stable-2019-2
     provisioner:
       salt_version: 2019.2

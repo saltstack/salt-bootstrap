@@ -44,12 +44,14 @@ local stable_distros = [
   'debian-8',
   'debian-9',
   'debian-10',
+  'fedora-30',
   'ubuntu-1604',
   'ubuntu-1804',
 ];
 
 local py3_distros = [
   'amazon-2',
+  'arch',
   'centos-7',
   'centos-8',
   'debian-9',
@@ -67,6 +69,7 @@ local py2_blacklist = [
 local blacklist_2018 = [
   'centos-8',
   'debian-10',
+  'amazon-2',
 ];
 
 local Shellcheck() = {
@@ -92,17 +95,37 @@ local Build(distro) = {
     project: 'open',
   },
 
-  local suite =
-      if std.count(py2_blacklist, distro.slug) > 0 then
-          []
-      else if std.count(stable_distros, distro.slug) > 0 then
-          git_suites + stable_suites
-      else git_suites,
-  local suites = suite + if std.count(blacklist_2018, distro.slug) > 0 then
-                             git_py3_suites + stable_py3_suites[1:]
-                         else if std.count(py3_distros, distro.slug) > 0 then
-                             git_py3_suites + stable_py3_suites
-                         else [],
+  local temp_git_suites = if std.count(py2_blacklist, distro.slug) > 0 then
+      []
+    else
+      git_suites,
+
+  local temp_stable_suites = if std.count(py2_blacklist, distro.slug) > 0 then
+      []
+    else if std.count(stable_distros, distro.slug) > 0 then
+      stable_suites
+    else
+      [],
+
+  local temp_git_py3_suites = if std.count(py3_distros, distro.slug) < 1 then
+      []
+    else if std.count(blacklist_2018, distro.slug) > 0 then
+      git_py3_suites[1:]
+    else if std.count(py3_distros, distro.slug) > 0 then
+      git_py3_suites
+    else
+      [],
+
+  local temp_stable_py3_suites = if std.count(stable_distros, distro.slug) < 1 then
+      []
+    else if std.count(blacklist_2018, distro.slug) > 0 then
+      stable_py3_suites[1:]
+    else if std.count(py3_distros, distro.slug) > 0 then
+      stable_py3_suites
+    else
+      [],
+
+  local suites = temp_git_suites + temp_stable_suites + temp_git_py3_suites + temp_stable_py3_suites,
 
   steps: [
     {
@@ -127,7 +150,7 @@ local Build(distro) = {
       commands: [
         'bundle install --with docker --without opennebula ec2 windows vagrant',
         "echo 'Waiting for docker to start'",
-        'sleep 15',  // give docker enough time to start
+        'sleep 20',  // give docker enough time to start
         'docker ps -a',
         std.format('bundle exec kitchen create %s', [distro.slug]),
       ],

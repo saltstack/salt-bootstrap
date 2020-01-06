@@ -83,7 +83,7 @@ platforms:
       run_command: /usr/lib/systemd/systemd
   - name: opensuse-15
     driver_config:
-      image: opensuse/leap:15.0
+      image: opensuse/leap:15.1
       run_command: /usr/lib/systemd/systemd
       provision_command:
         - zypper --non-interactive install --auto-agree-with-licenses dbus-1

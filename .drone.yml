@@ -972,7 +972,7 @@ depends_on:
 
 ---
 kind: pipeline
-name: Opensuse 15.0
+name: Opensuse 15.1
 
 platform:
   os: linux
@@ -1326,6 +1326,6 @@ depends_on:
 
 ---
 kind: signature
-hmac: 59c8f7c861aea35dba9890b536519e10b6e41452bb6c15f88b6a7dbc6e158506
+hmac: 9c01a5f3f8d8fe0b09aad2cc73976678a432edf3c81aafdff0d17e52ce4cc7f8
 
 ...

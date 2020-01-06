@@ -30,7 +30,7 @@ local distros = [
   { name: 'Debian 9', slug: 'debian-9', multiplier: 5, depends: [] },
   { name: 'Debian 10', slug: 'debian-10', multiplier: 4, depends: [] },
   { name: 'Fedora 30', slug: 'fedora-30', multiplier: 3, depends: [] },
-  { name: 'Opensuse 15.0', slug: 'opensuse-15', multiplier: 2, depends: [] },
+  { name: 'Opensuse 15.1', slug: 'opensuse-15', multiplier: 2, depends: [] },
   { name: 'Ubuntu 16.04', slug: 'ubuntu-1604', multiplier: 1, depends: [] },
   { name: 'Ubuntu 18.04', slug: 'ubuntu-1804', multiplier: 0, depends: [] },
 ];

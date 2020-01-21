@@ -28,6 +28,7 @@ sum** of the downloaded ``bootstrap-salt.sh`` file.
 
 The SHA256 sum of the ``bootstrap-salt.sh`` file, per release, is:
 
+- 2019.11.04: ``905924fccd4ebf168d19ba598bf10af53efe02302b792aeb15433e73fd3ad1d2``
 - 2019.10.03: ``34f196f06d586ce9e1b9907660ea6e67caf57abcecfea66e0343697e3fd0d17d``
 - 2019.05.20: ``46fb5e4b7815efafd69fd703f033fe86e7b584b6770f7e0b936995bcae1cedd8``
 - 2019.02.27: ``23728e4b5e54f564062070e3be53c5602b55c24c9a76671968abbf3d609258cb``
@@ -212,9 +213,10 @@ Supported Operating Systems
 ---------------------------
 
 The salt-bootstrap script officially supports the distributions outlined in
-`Salt's Supported Operating Systems`_ document. The operating systems listed below should reflect
-this document but may become out of date. If an operating system is listed below, but is not
-listed on the official supported operating systems document, the level of support is "best-effort".
+`Salt's Supported Operating Systems`_ document, except for Solaris and AIX. The operating systems
+listed below should reflect this document but may become out of date. If an operating system is
+listed below, but is not listed on the official supported operating systems document, the level of
+support is "best-effort".
 
 Since Salt is written in Python, the packages available from `SaltStack's corporate repository`_
 are CPU architecture independent and could be installed on any hardware supported by Linux kernel.
@@ -241,7 +243,7 @@ Debian and derivatives
 ~~~~~~~~~~~~~~~~~~~~~~
 
 - Cumulus Linux 2/3
-- Debian GNU/Linux 7/8/9
+- Debian GNU/Linux 7/8/9/10
 - Devuan GNU/Linux 1/2
 - Kali Linux 1.0 (based on Debian 7)
 - Linux Mint Debian Edition 1 (based on Debian 8)
@@ -264,11 +266,12 @@ Red Hat family
 ~~~~~~~~~~~~~~
 
 - Amazon Linux 2012.3 and later
-- CentOS 6/7
+- Amazon Linux 2
+- CentOS 6/7/8
 - Cloud Linux 6/7
-- Fedora 27/28 (install latest stable from standard repositories)
+- Fedora 30/31 (install latest stable from standard repositories)
 - Oracle Linux 6/7
-- Red Hat Enterprise Linux 6/7
+- Red Hat Enterprise Linux 6/7/8
 - Scientific Linux 6/7
 
 
@@ -352,7 +355,9 @@ Some distributions support installing Salt to use Python 3 instead of Python 2. 
 this offering, while limited, is as follows:
 
 - CentOS 7
+- Centos 8
 - Debian 9
+- Debian 10
 - Fedora (only git installations)
 - Ubuntu 16.04
 - Ubuntu 18.04
@@ -366,6 +371,18 @@ Installing the Python 3 packages for Salt is done via the ``-x`` option:
     sh bootstrap-salt.sh -x python3
 
 See the ``-x`` option for more information.
+
+The earliest release of Salt that supports Python3 is `2018.3.4`.
+
+Tornado 5/6 Workaround
+----------------------
+Salt does not support tornado>=5.0 currently. This support will not be added until the neon
+release.  In order to work around this requirement on OSs that no longer have the tornado 4 package
+available in their repositories we are pip installing tornado<5.0 in the bootstrap script. This
+requires the user to pass -P to the bootstrap script if installing via git to ensure tornado is pip
+installed.  If a user does not pass this argument they will be warned that it is required for the
+tornado 5 workaround. So far the OSs that are using this workaround are Debian 10, Centos 8 and
+Fedora 31.
 
 Testing
 -------
@@ -421,7 +438,7 @@ Salt components, custom configurations, and even `pre-accepted Minion keys`_ alr
 .. _`pre-accepted Minion keys`: https://docs.saltstack.com/en/latest/topics/tutorials/preseed_key.html
 .. _`read the source`: https://github.com/saltstack/salt-bootstrap/blob/develop/bootstrap-salt.sh
 .. _`Salt`: https://saltstack.com/community/
-.. _`Salt's Supported Operating Systems`: http://saltstack.com/wp-content/uploads/2016/08/SaltStack-Supported-Operating-Systems.pdf
+.. _`Salt's Supported Operating Systems`: http://get.saltstack.com/rs/304-PHQ-615/images/SaltStack-Supported-Operating-Systems.pdf
 .. _`SaltStack's corporate repository`: https://repo.saltstack.com/
 .. _`SaltStack's Debian repository`: http://repo.saltstack.com/#debian
 .. _`SaltStack's Ubuntu repository`: http://repo.saltstack.com/#ubuntu

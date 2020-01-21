@@ -372,6 +372,8 @@ Installing the Python 3 packages for Salt is done via the ``-x`` option:
 
 See the ``-x`` option for more information.
 
+The earliest release of Salt that supports Python3 is `2018.3.4`.
+
 Tornado 5/6 Workaround
 ----------------------
 Salt does not support tornado>=5.0 currently. This support will not be added until the neon

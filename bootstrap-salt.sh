@@ -270,6 +270,7 @@ _QUIET_GIT_INSTALLATION=$BS_FALSE
 _REPO_URL="repo.saltstack.com"
 _PY_EXE=""
 _INSTALL_PY="$BS_FALSE"
+_TORNADO_MAX_PY3_VERSION="5.0"
 
 # Defaults for install arguments
 ITYPE="stable"
@@ -2911,9 +2912,11 @@ install_ubuntu_git() {
     fi
 
     if [ -f "${_SALT_GIT_CHECKOUT_DIR}/salt/syspaths.py" ]; then
-        ${_PYEXE} setup.py --salt-config-dir="$_SALT_ETC_DIR" --salt-cache-dir="${_SALT_CACHE_DIR}" ${SETUP_PY_INSTALL_ARGS} install --install-layout=deb || return 1
+        # shellcheck disable=SC2086
+        "${_PYEXE}" setup.py --salt-config-dir="$_SALT_ETC_DIR" --salt-cache-dir="${_SALT_CACHE_DIR}" ${SETUP_PY_INSTALL_ARGS} install --install-layout=deb || return 1
     else
-        ${_PYEXE} setup.py ${SETUP_PY_INSTALL_ARGS} install --install-layout=deb || return 1
+        # shellcheck disable=SC2086
+        "${_PYEXE}" setup.py ${SETUP_PY_INSTALL_ARGS} install --install-layout=deb || return 1
     fi
 
     return 0
@@ -3395,9 +3398,11 @@ install_debian_git() {
     fi
 
     if [ -f "${_SALT_GIT_CHECKOUT_DIR}/salt/syspaths.py" ]; then
-        ${_PYEXE} setup.py --salt-config-dir="$_SALT_ETC_DIR" --salt-cache-dir="${_SALT_CACHE_DIR}" ${SETUP_PY_INSTALL_ARGS} install --install-layout=deb || return 1
+        # shellcheck disable=SC2086
+        "${_PYEXE}" setup.py --salt-config-dir="$_SALT_ETC_DIR" --salt-cache-dir="${_SALT_CACHE_DIR}" ${SETUP_PY_INSTALL_ARGS} install --install-layout=deb || return 1
     else
-        ${_PYEXE} setup.py ${SETUP_PY_INSTALL_ARGS} install --install-layout=deb || return 1
+        # shellcheck disable=SC2086
+        "${_PYEXE}" setup.py ${SETUP_PY_INSTALL_ARGS} install --install-layout=deb || return 1
     fi
 }
 
@@ -4830,16 +4835,23 @@ install_amazon_linux_ami_2_git_deps() {
         yum -y install ca-certificates || return 1
     fi
 
-    PIP_EXE='pip'
-    if __check_command_exists python2.7; then
-        if ! __check_command_exists pip2.7; then
-            __yum_install_noinput python2-pip
-        fi
-        PIP_EXE='/bin/pip'
-        _PY_EXE='python2.7'
-    fi
-
     install_amazon_linux_ami_2_deps || return 1
+    if __check_command_exists python3; then
+            if ! __check_command_exists pip3; then
+                __yum_install_noinput python3-pip
+            fi
+            PIP_EXE='/bin/pip3'
+            _PY_EXE='python3'
+    else
+        PIP_EXE='pip'
+        if __check_command_exists python2.7; then
+            if ! __check_command_exists pip2.7; then
+                __yum_install_noinput python2-pip
+            fi
+            PIP_EXE='/bin/pip'
+            _PY_EXE='python2.7'
+        fi
+    fi
 
     if ! __check_command_exists git; then
         __yum_install_noinput git || return 1
@@ -4850,9 +4862,18 @@ install_amazon_linux_ami_2_git_deps() {
     __PACKAGES=""
     __PIP_PACKAGES=""
 
-    if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
+    if [ "$_INSTALL_CLOUD" -eq "$BS_TRUE" ]; then
         __check_pip_allowed "You need to allow pip based installations (-P) in order to install apache-libcloud"
-        __PACKAGES="${__PACKAGES} python27-pip"
+        if [ "$PARSED_VERSION" -eq "2" ]; then
+            if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq "3" ]; then
+                __PACKAGES="${__PACKAGES} python3-pip"
+                __PIP_PACKAGES="${__PIP_PACKAGES} tornado<$_TORNADO_MAX_PY3_VERSION"
+            else
+                __PACKAGES="${__PACKAGES} python2-pip"
+            fi
+        else
+            __PACKAGES="${__PACKAGES} python27-pip"
+        fi
         __PIP_PACKAGES="${__PIP_PACKAGES} apache-libcloud>=$_LIBCLOUD_MIN_VERSION"
     fi
 
@@ -4860,7 +4881,7 @@ install_amazon_linux_ami_2_git_deps() {
         # We're on the develop branch, install whichever tornado is on the requirements file
         __REQUIRED_TORNADO="$(grep tornado "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt")"
         if [ "${__REQUIRED_TORNADO}" != "" ]; then
-            __PACKAGES="${__PACKAGES} ${pkg_append}-tornado"
+            __PACKAGES="${__PACKAGES} ${pkg_append}${PY_PKG_VER}-tornado"
         fi
     fi
 
@@ -4917,18 +4938,31 @@ install_amazon_linux_ami_2_deps() {
 
     if [ $_DISABLE_REPOS -eq $BS_FALSE ] || [ "$_CUSTOM_REPO_URL" != "null" ]; then
         __REPO_FILENAME="saltstack-repo.repo"
+        __PY_VERSION_REPO="yum"
+        PY_PKG_VER=""
+        _PY_MAJOR_VERSION=$(echo "$_PY_PKG_VER" | cut -c 7)
+        repo_label="saltstack-repo"
+        repo_name="SaltStack repo for Amazon Linux 2"
+        if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 3 ]; then
+            __REPO_FILENAME="saltstack-py3-repo.repo"
+            __PY_VERSION_REPO="py3"
+            PY_PKG_VER=3
+            repo_label="saltstack-py3-repo"
+            repo_name="SaltStack Python 3 repo for Amazon Linux 2"
+        fi
 
-        base_url="$HTTP_VAL://${_REPO_URL}/yum/amazon/2/\$basearch/$repo_rev/"
-        gpg_key="${base_url}SALTSTACK-GPG-KEY.pub
-        ${base_url}base/RPM-GPG-KEY-CentOS-7"
-        repo_name="SaltStack repo for Amazon Linux 2.0"
+        base_url="$HTTP_VAL://${_REPO_URL}/${__PY_VERSION_REPO}/amazon/2/\$basearch/$repo_rev/"
+        gpg_key="${base_url}SALTSTACK-GPG-KEY.pub,${base_url}base/RPM-GPG-KEY-CentOS-7"
+        if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 3 ]; then
+            gpg_key="${base_url}SALTSTACK-GPG-KEY.pub"
+        fi
 
         # This should prob be refactored to use __install_saltstack_rhel_repository()
         # With args passed in to do the right thing.  Reformatted to be more like the
         # amazon linux yum file.
         if [ ! -s "/etc/yum.repos.d/${__REPO_FILENAME}" ]; then
           cat <<_eof > "/etc/yum.repos.d/${__REPO_FILENAME}"
-[saltstack-repo]
+[$repo_label]
 name=$repo_name
 failovermethod=priority
 priority=10
@@ -4942,9 +4976,14 @@ _eof
 
     # Package python-ordereddict-1.1-2.el6.noarch is obsoleted by python26-2.6.9-2.88.amzn1.x86_64
     # which is already installed
-    __PACKAGES="m2crypto ${pkg_append}-crypto ${pkg_append}-jinja2 PyYAML procps-ng"
-    __PACKAGES="${__PACKAGES} ${pkg_append}-msgpack ${pkg_append}-requests ${pkg_append}-zmq"
-    __PACKAGES="${__PACKAGES} ${pkg_append}-futures"
+    if [ "${PY_PKG_VER}" -eq 3 ]; then
+        __PACKAGES="${pkg_append}${PY_PKG_VER}-m2crypto ${pkg_append}${PY_PKG_VER}-pyyaml"
+    else
+        __PACKAGES="m2crypto PyYAML ${pkg_append}-futures"
+    fi
+
+    __PACKAGES="${__PACKAGES} ${pkg_append}${PY_PKG_VER}-crypto ${pkg_append}${PY_PKG_VER}-jinja2 procps-ng"
+    __PACKAGES="${__PACKAGES} ${pkg_append}${PY_PKG_VER}-msgpack ${pkg_append}${PY_PKG_VER}-requests ${pkg_append}${PY_PKG_VER}-zmq"
 
     # shellcheck disable=SC2086
     __yum_install_noinput ${__PACKAGES} || return 1
@@ -5025,6 +5064,12 @@ install_amazon_linux_ami_2_testing_post() {
     install_centos_testing_post || return 1
     return 0
 }
+
+install_amazon_linux_ami_2_check_services() {
+    install_centos_check_services || return 1
+    return 0
+}
+
 #
 #   Ended Amazon Linux AMI Install Functions
 #

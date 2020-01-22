@@ -5298,16 +5298,16 @@ install_freebsd_deps() {
 install_freebsd_git_deps() {
     install_freebsd_stable_deps || return 1
 
-    SALT_DEPENDENCIES=$(/usr/local/sbin/pkg search -R -d py36-salt | grep 'origin:' \
-        | tail -n +2 | awk -F\" '{print $2}' | sed 's#.*/py-#py36-#g')
+    SALT_DEPENDENCIES=$(/usr/local/sbin/pkg search -R -d sysutils/py-salt | grep 'origin:' \
+        | tail -n +2 | awk -F\" '{print $2}')
     # shellcheck disable=SC2086
     /usr/local/sbin/pkg install -y ${SALT_DEPENDENCIES} || return 1
 
     if ! __check_command_exists git; then
-        /usr/local/sbin/pkg install -y git || return 1
+        /usr/local/sbin/pkg install -y devel/git-lite || return 1
     fi
 
-    /usr/local/sbin/pkg install -y py36-requests || return 1
+    /usr/local/sbin/pkg install -y www/py-requests || return 1
 
     __git_clone_and_checkout || return 1
 
@@ -5354,7 +5354,7 @@ install_freebsd_stable() {
 # installing latest version of salt from FreeBSD CURRENT ports repo
 #
     # shellcheck disable=SC2086
-    /usr/local/sbin/pkg install -y py36-salt || return 1
+    /usr/local/sbin/pkg install -y sysutils/py-salt || return 1
 
     return 0
 }

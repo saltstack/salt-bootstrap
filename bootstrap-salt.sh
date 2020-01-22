@@ -5296,7 +5296,7 @@ install_freebsd_deps() {
 }
 
 install_freebsd_git_deps() {
-    install_freebsd_stable_deps || return 1
+    install_freebsd_deps || return 1
 
     SALT_DEPENDENCIES=$(/usr/local/sbin/pkg search -R -d sysutils/py-salt | grep 'origin:' \
         | tail -n +2 | awk -F\" '{print $2}')
@@ -5361,8 +5361,8 @@ install_freebsd_stable() {
 
 install_freebsd_git() {
 
-    # /usr/local/bin/python2 in FreeBSD is a symlink to /usr/local/bin/python2.7
-    __PYTHON_PATH=$(readlink -f "$(command -v python2)")
+    # /usr/local/bin/python3 in FreeBSD is a symlink to /usr/local/bin/python3.7
+    __PYTHON_PATH=$(readlink -f "$(command -v python3)")
     __ESCAPED_PYTHON_PATH=$(echo "${__PYTHON_PATH}" | sed 's/\//\\\//g')
 
     # Install from git

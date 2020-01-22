@@ -5301,7 +5301,7 @@ install_freebsd_git_deps() {
     SALT_DEPENDENCIES=$(/usr/local/sbin/pkg search -R -d sysutils/py-salt | grep 'origin:' \
         | tail -n +2 | awk -F\" '{print $2}')
     # shellcheck disable=SC2086
-    /usr/local/sbin/pkg install -y ${SALT_DEPENDENCIES} || return 1
+    /usr/local/sbin/pkg install -y ${SALT_DEPENDENCIES} python || return 1
 
     if ! __check_command_exists git; then
         /usr/local/sbin/pkg install -y devel/git || return 1

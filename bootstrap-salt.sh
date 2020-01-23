@@ -5354,7 +5354,7 @@ install_freebsd_stable() {
 # installing latest version of salt from FreeBSD CURRENT ports repo
 #
     # shellcheck disable=SC2086
-    /usr/local/sbin/pkg install -y py36-salt || return 1
+    /usr/local/sbin/pkg install -g -y 'py3?-salt' || return 1
 
     return 0
 }

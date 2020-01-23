@@ -5296,7 +5296,7 @@ install_freebsd_deps() {
 }
 
 install_freebsd_git_deps() {
-    install_freebsd_stable_deps || return 1
+    install_freebsd_deps || return 1
 
     SALT_DEPENDENCIES=$(/usr/local/sbin/pkg search -R -d py36-salt | grep 'origin:' \
         | tail -n +2 | awk -F\" '{print $2}' | sed 's#.*/py-#py36-#g')
@@ -5350,9 +5350,9 @@ install_freebsd_git_deps() {
 }
 
 install_freebsd_stable() {
-#
-# installing latest version of salt from FreeBSD CURRENT ports repo
-#
+    #
+    # installing latest version of salt from FreeBSD CURRENT ports repo
+    #
     # shellcheck disable=SC2086
     /usr/local/sbin/pkg install -y py36-salt || return 1
 
@@ -5360,7 +5360,6 @@ install_freebsd_stable() {
 }
 
 install_freebsd_git() {
-
     # /usr/local/bin/python2 in FreeBSD is a symlink to /usr/local/bin/python2.7
     __PYTHON_PATH=$(readlink -f "$(command -v python2)")
     __ESCAPED_PYTHON_PATH=$(echo "${__PYTHON_PATH}" | sed 's/\//\\\//g')

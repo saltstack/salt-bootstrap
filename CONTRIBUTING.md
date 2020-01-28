@@ -15,7 +15,7 @@ The Salt Bootstrap issue tracker is used for feature requests and bug reports.
 
 A bug is a *demonstrable problem* that is caused by the code in the repository.
 
-Please read the following guidelines before you 
+Please read the following guidelines before you
 [file an issue](https://github.com/saltstack/salt-bootstrap/issues/new).
 
 1. **Use the GitHub issue search** -- check if the issue has
@@ -25,7 +25,7 @@ Please read the following guidelines before you
    please try to bootstrap using the bootstrap scirpt from the develop branch. The
    issue you are having might have already been fixed and it's just not yet included
    in the stable release.
-    
+
     ```
     curl -o bootstrap-salt.sh -L https://raw.githubusercontent.com/saltstack/salt-bootstrap/develop/bootstrap-salt.sh
     sudo sh bootstrap-salt.sh git develop
@@ -73,7 +73,7 @@ easily solved another way, which is a great reason to ask first.
 
 Fixes for issues are very welcome!
 
-Once you've fixed the issue you have in hand, create a 
+Once you've fixed the issue you have in hand, create a
 [pull request](https://help.github.com/articles/creating-a-pull-request/).
 
 Salt Bootstrap maintainers will review your fix. If everything is OK and all
@@ -102,7 +102,7 @@ repo from the PR, etc.
 
 #### Lint Check
 
-The pull request test that matters the most, and the contributor is directly 
+The pull request test that matters the most, and the contributor is directly
 responsible for fixing, is the Lint check. This check *must* be passing before
 the contribution can be merged into the codebase.
 
@@ -149,7 +149,7 @@ Typically, SaltStack's release team determines when it would be good to release
 a new stable version.
 
 Timing the release usually involves an analysis of the following:
- 
+
 - Updates for major feature releases in [Salt](https://github.com/saltstack/salt)
 - Support for new versions of major operating systems
 - Types of fixes submitted to `develop` since the last release

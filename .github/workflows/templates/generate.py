@@ -131,9 +131,11 @@ def generate_test_jobs():
     with open('../main.yml', 'w') as wfh:
         with open('main.yml') as rfh:
             wfh.write(
-                rfh.read().format(
-                    lint_job=lint_job,
-                    test_jobs=test_jobs,
+                '{}\n'.format(
+                    rfh.read().format(
+                        lint_job=lint_job,
+                        test_jobs=test_jobs,
+                    ).strip()
                 )
             )
 

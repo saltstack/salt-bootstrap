@@ -2807,5 +2807,3 @@ jobs:
         if: always()
         run: |
           bundle exec kitchen destroy py3-git-2019-2-ubuntu-1804
-
-

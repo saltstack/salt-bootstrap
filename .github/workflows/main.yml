@@ -8,6 +8,28 @@ on: [push, pull_request]
 
 jobs:
 
+  generate-actions-workflow:
+    name: Generate The Actions Workflow
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.7
+
+      - name: Install Pre-Commit
+        run: |
+          pip install -U pip
+          pip install pre-commit
+          pre-commit install
+
+      - name: Generate Workflow Actions
+        run: |
+          pre-commit run -v generate-actions-workflow
+
+
   Lint:
     runs-on: ubuntu-latest
     container: koalaman/shellcheck-alpine:v0.6.0
@@ -16,7 +38,6 @@ jobs:
       - name: ShellCheck
         run: |
           shellcheck -s sh -f checkstyle bootstrap-salt.sh
-
 
 
   amazon-2-2019-2-py2-stable:

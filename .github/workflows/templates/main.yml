@@ -7,5 +7,4 @@ name: Testing
 on: [push, pull_request]
 
 jobs:
-{lint_job}
-{test_jobs}
+{jobs}

@@ -128,13 +128,19 @@ def generate_test_jobs():
     with open('lint.yml') as rfh:
         lint_job = '\n{}\n'.format(rfh.read())
 
+    with open('pre-commit.yml') as rfh:
+        pre_commit_job = '\n{}\n'.format(rfh.read())
+
     with open('../main.yml', 'w') as wfh:
         with open('main.yml') as rfh:
             wfh.write(
                 '{}\n'.format(
                     rfh.read().format(
-                        lint_job=lint_job,
-                        test_jobs=test_jobs,
+                        jobs='{pre_commit}{lint}{test}'.format(
+                            lint=lint_job,
+                            test=test_jobs,
+                            pre_commit=pre_commit_job,
+                        )
                     ).strip()
                 )
             )

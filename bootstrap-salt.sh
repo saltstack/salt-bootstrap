@@ -293,7 +293,7 @@ __usage() {
     - stable [version]    Install a specific version. Only supported for
                           packages available at repo.saltstack.com
     - testing             RHEL-family specific: configure EPEL testing repo
-    - git                 Install from the head of the develop branch
+    - git                 Install from the head of the master branch
     - git [ref]           Install from any git ref (such as a branch, tag, or
                           commit)
 
@@ -584,7 +584,7 @@ fi
 # If doing a git install, check what branch/tag/sha will be checked out
 if [ "$ITYPE" = "git" ]; then
     if [ "$#" -eq 0 ];then
-        GIT_REV="develop"
+        GIT_REV="master"
     else
         GIT_REV="$1"
         shift
@@ -4550,7 +4550,7 @@ install_alpine_linux_git_deps() {
     __git_clone_and_checkout || return 1
 
     if [ -f "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" ]; then
-        # We're on the develop branch, install whichever tornado is on the requirements file
+        # We're on the master branch, install whichever tornado is on the requirements file
         __REQUIRED_TORNADO="$(grep tornado "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt")"
         if [ "${__REQUIRED_TORNADO}" != "" ]; then
             apk -U add py2-tornado || return 1
@@ -4603,7 +4603,7 @@ install_alpine_linux_post() {
         [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
 
         if [ -f /sbin/rc-update ]; then
-            script_url="${_SALTSTACK_REPO_URL%.git}/raw/develop/pkg/alpine/salt-$fname"
+            script_url="${_SALTSTACK_REPO_URL%.git}/raw/master/pkg/alpine/salt-$fname"
             [ -f "/etc/init.d/salt-$fname" ] || __fetch_url "/etc/init.d/salt-$fname" "$script_url"
 
             # shellcheck disable=SC2181
@@ -4804,7 +4804,7 @@ install_amazon_linux_ami_git_deps() {
     fi
 
     if [ -f "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" ]; then
-        # We're on the develop branch, install whichever tornado is on the requirements file
+        # We're on the master branch, install whichever tornado is on the requirements file
         __REQUIRED_TORNADO="$(grep tornado "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt")"
         if [ "${__REQUIRED_TORNADO}" != "" ]; then
             __PACKAGES="${__PACKAGES} ${pkg_append}-tornado"
@@ -4878,7 +4878,7 @@ install_amazon_linux_ami_2_git_deps() {
     fi
 
     if [ -f "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" ]; then
-        # We're on the develop branch, install whichever tornado is on the requirements file
+        # We're on the master branch, install whichever tornado is on the requirements file
         __REQUIRED_TORNADO="$(grep tornado "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt")"
         if [ "${__REQUIRED_TORNADO}" != "" ]; then
             __PACKAGES="${__PACKAGES} ${pkg_append}${PY_PKG_VER}-tornado"
@@ -5125,7 +5125,7 @@ install_arch_linux_git_deps() {
     __git_clone_and_checkout || return 1
 
     if [ -f "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" ]; then
-        # We're on the develop branch, install whichever tornado is on the requirements file
+        # We're on the master branch, install whichever tornado is on the requirements file
         __REQUIRED_TORNADO="$(grep tornado "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt")"
         if [ "${__REQUIRED_TORNADO}" != "" ]; then
             pacman -Su --noconfirm --needed python2-tornado
@@ -5566,12 +5566,12 @@ install_smartos_deps() {
         if [ ! -f "$_SALT_ETC_DIR/minion" ] && [ ! -f "$_TEMP_CONFIG_DIR/minion" ]; then
             # shellcheck disable=SC2086
             curl $_CURL_ARGS -s -o "$_TEMP_CONFIG_DIR/minion" -L \
-                https://raw.githubusercontent.com/saltstack/salt/develop/conf/minion || return 1
+                https://raw.githubusercontent.com/saltstack/salt/master/conf/minion || return 1
         fi
         if [ ! -f "$_SALT_ETC_DIR/master" ] && [ ! -f $_TEMP_CONFIG_DIR/master ]; then
             # shellcheck disable=SC2086
             curl $_CURL_ARGS -s -o "$_TEMP_CONFIG_DIR/master" -L \
-                https://raw.githubusercontent.com/saltstack/salt/develop/conf/master || return 1
+                https://raw.githubusercontent.com/saltstack/salt/master/conf/master || return 1
         fi
     fi
 
@@ -5658,7 +5658,7 @@ install_smartos_post() {
             if [ ! -f "$_TEMP_CONFIG_DIR/salt-$fname.xml" ]; then
                 # shellcheck disable=SC2086
                 curl $_CURL_ARGS -s -o "$_TEMP_CONFIG_DIR/salt-$fname.xml" -L \
-                    "https://raw.githubusercontent.com/saltstack/salt/develop/pkg/smartos/salt-$fname.xml"
+                    "https://raw.githubusercontent.com/saltstack/salt/master/pkg/smartos/salt-$fname.xml"
             fi
             svccfg import "$_TEMP_CONFIG_DIR/salt-$fname.xml"
             if [ "${VIRTUAL_TYPE}" = "global" ]; then
@@ -5869,7 +5869,7 @@ install_opensuse_git_deps() {
     __PACKAGES="libzmq5 python-Jinja2 python-m2crypto python-msgpack-python python-pycrypto python-pyzmq python-xml python-futures"
 
     if [ -f "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" ]; then
-        # We're on the develop branch, install whichever tornado is on the requirements file
+        # We're on the master branch, install whichever tornado is on the requirements file
         __REQUIRED_TORNADO="$(grep tornado "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt")"
         if [ "${__REQUIRED_TORNADO}" != "" ]; then
             __PACKAGES="${__PACKAGES} python-tornado"
@@ -6088,7 +6088,7 @@ install_opensuse_15_git_deps() {
     __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-xml"
 
     if [ -f "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" ]; then
-        # We're on the develop branch, install whichever tornado is on the requirements file
+        # We're on the master branch, install whichever tornado is on the requirements file
         __REQUIRED_TORNADO="$(grep tornado "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt")"
         if [ "${__REQUIRED_TORNADO}" != "" ]; then
             __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
@@ -6178,7 +6178,7 @@ install_suse_12_git_deps() {
     __PACKAGES="${__PACKAGES} python-pyzmq python-xml"
 
     if [ -f "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" ]; then
-        # We're on the develop branch, install whichever tornado is on the requirements file
+        # We're on the master branch, install whichever tornado is on the requirements file
         __REQUIRED_TORNADO="$(grep tornado "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt")"
         if [ "${__REQUIRED_TORNADO}" != "" ]; then
             __PACKAGES="${__PACKAGES} python-tornado"
@@ -6274,7 +6274,7 @@ install_suse_11_git_deps() {
     __PACKAGES="${__PACKAGES} python-pyzmq python-xml python-zypp"
 
     if [ -f "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" ]; then
-        # We're on the develop branch, install whichever tornado is on the requirements file
+        # We're on the master branch, install whichever tornado is on the requirements file
         __REQUIRED_TORNADO="$(grep tornado "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt")"
         if [ "${__REQUIRED_TORNADO}" != "" ]; then
             __PACKAGES="${__PACKAGES} python-tornado"

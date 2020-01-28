@@ -27,11 +27,15 @@ jobs:
 
       - name: Generate Workflow Actions
         run: |
-          pre-commit run -v generate-actions-workflow
+          pre-commit run -av generate-actions-workflow
 
 
-  Lint:
+  lint:
+    name: Lint
     runs-on: ubuntu-latest
+
+    needs: generate-actions-workflow
+
     container: koalaman/shellcheck-alpine:v0.6.0
     steps:
       - uses: actions/checkout@v1
@@ -44,7 +48,7 @@ jobs:
     name: Amazon 2 v2019.2 Py2 Stable
     runs-on: ubuntu-latest
 
-    needs: Lint
+    needs: lint
 
     steps:
       - uses: actions/checkout@v1
@@ -89,7 +93,7 @@ jobs:
     name: Amazon 2 v2019.2 Py2 Git
     runs-on: ubuntu-latest
 
-    needs: Lint
+    needs: lint
 
     steps:
       - uses: actions/checkout@v1
@@ -134,7 +138,7 @@ jobs:
     name: Amazon 2 v2019.2 Py3 Stable
     runs-on: ubuntu-latest
 
-    needs: Lint
+    needs: lint
 
     steps:
       - uses: actions/checkout@v1
@@ -179,7 +183,7 @@ jobs:
     name: Amazon 2 v2019.2 Py3 Git
     runs-on: ubuntu-latest
 
-    needs: Lint
+    needs: lint
 
     steps:
       - uses: actions/checkout@v1
@@ -224,7 +228,7 @@ jobs:
     name: Amazon 2 v3000 Py2 Git
     runs-on: ubuntu-latest
 
-    needs: Lint
+    needs: lint
 
     steps:
       - uses: actions/checkout@v1
@@ -269,7 +273,7 @@ jobs:
     name: Amazon 2 v3000 Py3 Git
     runs-on: ubuntu-latest
 
-    needs: Lint
+    needs: lint
 
     steps:
       - uses: actions/checkout@v1
@@ -314,7 +318,7 @@ jobs:
     name: Amazon 2 Latest packaged release
     runs-on: ubuntu-latest
 
-    needs: Lint
+    needs: lint
 
     steps:
       - uses: actions/checkout@v1
@@ -359,7 +363,7 @@ jobs:
     name: Arch v2018.3 Py2 Git
     runs-on: ubuntu-latest
 
-    needs: Lint
+    needs: lint
 
     steps:
       - uses: actions/checkout@v1
@@ -404,7 +408,7 @@ jobs:
     name: Arch v2018.3 Py3 Git
     runs-on: ubuntu-latest
 
-    needs: Lint
+    needs: lint
 
     steps:
       - uses: actions/checkout@v1
@@ -449,7 +453,7 @@ jobs:
     name: Arch v2019.2 Py2 Git
     runs-on: ubuntu-latest
 
-    needs: Lint
+    needs: lint
 
     steps:
       - uses: actions/checkout@v1
@@ -494,7 +498,7 @@ jobs:
     name: Arch v2019.2 Py3 Git
     runs-on: ubuntu-latest
 
-    needs: Lint
+    needs: lint
 
     steps:
       - uses: actions/checkout@v1
@@ -539,7 +543,7 @@ jobs:
     name: Arch v3000 Py2 Git
     runs-on: ubuntu-latest
 
-    needs: Lint
+    needs: lint
 
     steps:
       - uses: actions/checkout@v1
@@ -584,7 +588,7 @@ jobs:
     name: Arch v3000 Py3 Git
     runs-on: ubuntu-latest
 
-    needs: Lint
+    needs: lint
 
     steps:
       - uses: actions/checkout@v1
@@ -629,7 +633,7 @@ jobs:
     name: CentOS 6 v2018.3 Py2 Stable
     runs-on: ubuntu-latest
 
-    needs: Lint
+    needs: lint
 
     steps:
       - uses: actions/checkout@v1
@@ -674,7 +678,7 @@ jobs:
     name: CentOS 6 v2018.3 Py2 Git
     runs-on: ubuntu-latest
 
-    needs: Lint
+    needs: lint
 
     steps:
       - uses: actions/checkout@v1
@@ -719,7 +723,7 @@ jobs:
     name: CentOS 6 v2019.2 Py2 Stable
     runs-on: ubuntu-latest
 
-    needs: Lint
+    needs: lint
 
     steps:
       - uses: actions/checkout@v1
@@ -764,7 +768,7 @@ jobs:
     name: CentOS 6 v2019.2 Py2 Git
     runs-on: ubuntu-latest
 
-    needs: Lint
+    needs: lint
 
     steps:
       - uses: actions/checkout@v1
@@ -809,7 +813,7 @@ jobs:
     name: CentOS 6 v3000 Py2 Git
     runs-on: ubuntu-latest
 
-    needs: Lint
+    needs: lint
 
     steps:
       - uses: actions/checkout@v1
@@ -854,7 +858,7 @@ jobs:
     name: CentOS 6 Latest packaged release
     runs-on: ubuntu-latest
 
-    needs: Lint
+    needs: lint
 
     steps:
       - uses: actions/checkout@v1
@@ -899,7 +903,7 @@ jobs:
     name: CentOS 7 v2018.3 Py2 Stable
     runs-on: ubuntu-latest
 
-    needs: Lint
+    needs: lint
 
     steps:
       - uses: actions/checkout@v1
@@ -944,7 +948,7 @@ jobs:
     name: CentOS 7 v2018.3 Py2 Git
     runs-on: ubuntu-latest
 
-    needs: Lint
+    needs: lint
 
     steps:
       - uses: actions/checkout@v1
@@ -989,7 +993,7 @@ jobs:
     name: CentOS 7 v2018.3 Py3 Stable
     runs-on: ubuntu-latest
 
-    needs: Lint
+    needs: lint
 
     steps:
       - uses: actions/checkout@v1
@@ -1034,7 +1038,7 @@ jobs:
     name: CentOS 7 v2018.3 Py3 Git
     runs-on: ubuntu-latest
 
-    needs: Lint
+    needs: lint
 
     steps:
       - uses: actions/checkout@v1
@@ -1079,7 +1083,7 @@ jobs:
     name: CentOS 7 v2019.2 Py2 Stable
     runs-on: ubuntu-latest
 
-    needs: Lint
+    needs: lint
 
     steps:
       - uses: actions/checkout@v1
@@ -1124,7 +1128,7 @@ jobs:
     name: CentOS 7 v2019.2 Py2 Git
     runs-on: ubuntu-latest
 
-    needs: Lint
+    needs: lint
 
     steps:
       - uses: actions/checkout@v1
@@ -1169,7 +1173,7 @@ jobs:
     name: CentOS 7 v2019.2 Py3 Stable
     runs-on: ubuntu-latest
 
-    needs: Lint
+    needs: lint
 
     steps:
       - uses: actions/checkout@v1
@@ -1214,7 +1218,7 @@ jobs:
     name: CentOS 7 v2019.2 Py3 Git
     runs-on: ubuntu-latest
 
-    needs: Lint
+    needs: lint
 
     steps:
       - uses: actions/checkout@v1
@@ -1259,7 +1263,7 @@ jobs:
     name: CentOS 7 v3000 Py2 Git
     runs-on: ubuntu-latest
 
-    needs: Lint
+    needs: lint
 
     steps:
       - uses: actions/checkout@v1
@@ -1304,7 +1308,7 @@ jobs:
     name: CentOS 7 v3000 Py3 Git
     runs-on: ubuntu-latest
 
-    needs: Lint
+    needs: lint
 
     steps:
       - uses: actions/checkout@v1
@@ -1349,7 +1353,7 @@ jobs:
     name: CentOS 7 Latest packaged release
     runs-on: ubuntu-latest
 
-    needs: Lint
+    needs: lint
 
     steps:
       - uses: actions/checkout@v1
@@ -1394,7 +1398,7 @@ jobs:
     name: CentOS 8 v2019.2 Py3 Stable
     runs-on: ubuntu-latest
 
-    needs: Lint
+    needs: lint
 
     steps:
       - uses: actions/checkout@v1
@@ -1439,7 +1443,7 @@ jobs:
     name: CentOS 8 v2019.2 Py3 Git
     runs-on: ubuntu-latest
 
-    needs: Lint
+    needs: lint
 
     steps:
       - uses: actions/checkout@v1
@@ -1484,7 +1488,7 @@ jobs:
     name: CentOS 8 v3000 Py3 Git
     runs-on: ubuntu-latest
 
-    needs: Lint
+    needs: lint
 
     steps:
       - uses: actions/checkout@v1
@@ -1529,7 +1533,7 @@ jobs:
     name: Debian 10 v2019.2 Py3 Stable
     runs-on: ubuntu-latest
 
-    needs: Lint
+    needs: lint
 
     steps:
       - uses: actions/checkout@v1
@@ -1574,7 +1578,7 @@ jobs:
     name: Debian 10 v2019.2 Py3 Git
     runs-on: ubuntu-latest
 
-    needs: Lint
+    needs: lint
 
     steps:
       - uses: actions/checkout@v1
@@ -1619,7 +1623,7 @@ jobs:
     name: Debian 10 v3000 Py3 Git
     runs-on: ubuntu-latest
 
-    needs: Lint
+    needs: lint
 
     steps:
       - uses: actions/checkout@v1
@@ -1664,7 +1668,7 @@ jobs:
     name: Debian 8 v2018.3 Py2 Stable
     runs-on: ubuntu-latest
 
-    needs: Lint
+    needs: lint
 
     steps:
       - uses: actions/checkout@v1
@@ -1709,7 +1713,7 @@ jobs:
     name: Debian 8 v2018.3 Py2 Git
     runs-on: ubuntu-latest
 
-    needs: Lint
+    needs: lint
 
     steps:
       - uses: actions/checkout@v1
@@ -1754,7 +1758,7 @@ jobs:
     name: Debian 8 v2019.2 Py2 Stable
     runs-on: ubuntu-latest
 
-    needs: Lint
+    needs: lint
 
     steps:
       - uses: actions/checkout@v1
@@ -1799,7 +1803,7 @@ jobs:
     name: Debian 8 v2019.2 Py2 Git
     runs-on: ubuntu-latest
 
-    needs: Lint
+    needs: lint
 
     steps:
       - uses: actions/checkout@v1
@@ -1844,7 +1848,7 @@ jobs:
     name: Debian 8 v3000 Py2 Git
     runs-on: ubuntu-latest
 
-    needs: Lint
+    needs: lint
 
     steps:
       - uses: actions/checkout@v1
@@ -1889,7 +1893,7 @@ jobs:
     name: Debian 8 Latest packaged release
     runs-on: ubuntu-latest
 
-    needs: Lint
+    needs: lint
 
     steps:
       - uses: actions/checkout@v1
@@ -1934,7 +1938,7 @@ jobs:
     name: Debian 9 v2018.3 Py2 Stable
     runs-on: ubuntu-latest
 
-    needs: Lint
+    needs: lint
 
     steps:
       - uses: actions/checkout@v1
@@ -1979,7 +1983,7 @@ jobs:
     name: Debian 9 v2018.3 Py2 Git
     runs-on: ubuntu-latest
 
-    needs: Lint
+    needs: lint
 
     steps:
       - uses: actions/checkout@v1
@@ -2024,7 +2028,7 @@ jobs:
     name: Debian 9 v2018.3 Py3 Stable
     runs-on: ubuntu-latest
 
-    needs: Lint
+    needs: lint
 
     steps:
       - uses: actions/checkout@v1
@@ -2069,7 +2073,7 @@ jobs:
     name: Debian 9 v2018.3 Py3 Git
     runs-on: ubuntu-latest
 
-    needs: Lint
+    needs: lint
 
     steps:
       - uses: actions/checkout@v1
@@ -2114,7 +2118,7 @@ jobs:
     name: Debian 9 v2019.2 Py2 Stable
     runs-on: ubuntu-latest
 
-    needs: Lint
+    needs: lint
 
     steps:
       - uses: actions/checkout@v1
@@ -2159,7 +2163,7 @@ jobs:
     name: Debian 9 v2019.2 Py2 Git
     runs-on: ubuntu-latest
 
-    needs: Lint
+    needs: lint
 
     steps:
       - uses: actions/checkout@v1
@@ -2204,7 +2208,7 @@ jobs:
     name: Debian 9 v2019.2 Py3 Stable
     runs-on: ubuntu-latest
 
-    needs: Lint
+    needs: lint
 
     steps:
       - uses: actions/checkout@v1
@@ -2249,7 +2253,7 @@ jobs:
     name: Debian 9 v2019.2 Py3 Git
     runs-on: ubuntu-latest
 
-    needs: Lint
+    needs: lint
 
     steps:
       - uses: actions/checkout@v1
@@ -2294,7 +2298,7 @@ jobs:
     name: Debian 9 v3000 Py2 Git
     runs-on: ubuntu-latest
 
-    needs: Lint
+    needs: lint
 
     steps:
       - uses: actions/checkout@v1
@@ -2339,7 +2343,7 @@ jobs:
     name: Debian 9 v3000 Py3 Git
     runs-on: ubuntu-latest
 
-    needs: Lint
+    needs: lint
 
     steps:
       - uses: actions/checkout@v1
@@ -2384,7 +2388,7 @@ jobs:
     name: Debian 9 Latest packaged release
     runs-on: ubuntu-latest
 
-    needs: Lint
+    needs: lint
 
     steps:
       - uses: actions/checkout@v1
@@ -2429,7 +2433,7 @@ jobs:
     name: Fedora 30 v2018.3 Py2 Stable
     runs-on: ubuntu-latest
 
-    needs: Lint
+    needs: lint
 
     steps:
       - uses: actions/checkout@v1
@@ -2474,7 +2478,7 @@ jobs:
     name: Fedora 30 v2018.3 Py2 Git
     runs-on: ubuntu-latest
 
-    needs: Lint
+    needs: lint
 
     steps:
       - uses: actions/checkout@v1
@@ -2519,7 +2523,7 @@ jobs:
     name: Fedora 30 v2018.3 Py3 Stable
     runs-on: ubuntu-latest
 
-    needs: Lint
+    needs: lint
 
     steps:
       - uses: actions/checkout@v1
@@ -2564,7 +2568,7 @@ jobs:
     name: Fedora 30 v2018.3 Py3 Git
     runs-on: ubuntu-latest
 
-    needs: Lint
+    needs: lint
 
     steps:
       - uses: actions/checkout@v1
@@ -2609,7 +2613,7 @@ jobs:
     name: Fedora 30 v2019.2 Py2 Stable
     runs-on: ubuntu-latest
 
-    needs: Lint
+    needs: lint
 
     steps:
       - uses: actions/checkout@v1
@@ -2654,7 +2658,7 @@ jobs:
     name: Fedora 30 v2019.2 Py2 Git
     runs-on: ubuntu-latest
 
-    needs: Lint
+    needs: lint
 
     steps:
       - uses: actions/checkout@v1
@@ -2699,7 +2703,7 @@ jobs:
     name: Fedora 30 v2019.2 Py3 Stable
     runs-on: ubuntu-latest
 
-    needs: Lint
+    needs: lint
 
     steps:
       - uses: actions/checkout@v1
@@ -2744,7 +2748,7 @@ jobs:
     name: Fedora 30 v2019.2 Py3 Git
     runs-on: ubuntu-latest
 
-    needs: Lint
+    needs: lint
 
     steps:
       - uses: actions/checkout@v1
@@ -2789,7 +2793,7 @@ jobs:
     name: Fedora 30 v3000 Py2 Git
     runs-on: ubuntu-latest
 
-    needs: Lint
+    needs: lint
 
     steps:
       - uses: actions/checkout@v1
@@ -2834,7 +2838,7 @@ jobs:
     name: Fedora 30 v3000 Py3 Git
     runs-on: ubuntu-latest
 
-    needs: Lint
+    needs: lint
 
     steps:
       - uses: actions/checkout@v1
@@ -2879,7 +2883,7 @@ jobs:
     name: Fedora 30 Latest packaged release
     runs-on: ubuntu-latest
 
-    needs: Lint
+    needs: lint
 
     steps:
       - uses: actions/checkout@v1
@@ -2924,7 +2928,7 @@ jobs:
     name: Opensuse 15 v2018.3 Py2 Git
     runs-on: ubuntu-latest
 
-    needs: Lint
+    needs: lint
 
     steps:
       - uses: actions/checkout@v1
@@ -2969,7 +2973,7 @@ jobs:
     name: Opensuse 15 v2019.2 Py2 Git
     runs-on: ubuntu-latest
 
-    needs: Lint
+    needs: lint
 
     steps:
       - uses: actions/checkout@v1
@@ -3014,7 +3018,7 @@ jobs:
     name: Opensuse 15 v3000 Py2 Git
     runs-on: ubuntu-latest
 
-    needs: Lint
+    needs: lint
 
     steps:
       - uses: actions/checkout@v1
@@ -3059,7 +3063,7 @@ jobs:
     name: Opensuse 15 Latest packaged release
     runs-on: ubuntu-latest
 
-    needs: Lint
+    needs: lint
 
     steps:
       - uses: actions/checkout@v1
@@ -3104,7 +3108,7 @@ jobs:
     name: Ubuntu 16.04 v2018.3 Py2 Stable
     runs-on: ubuntu-latest
 
-    needs: Lint
+    needs: lint
 
     steps:
       - uses: actions/checkout@v1
@@ -3149,7 +3153,7 @@ jobs:
     name: Ubuntu 16.04 v2018.3 Py2 Git
     runs-on: ubuntu-latest
 
-    needs: Lint
+    needs: lint
 
     steps:
       - uses: actions/checkout@v1
@@ -3194,7 +3198,7 @@ jobs:
     name: Ubuntu 16.04 v2018.3 Py3 Stable
     runs-on: ubuntu-latest
 
-    needs: Lint
+    needs: lint
 
     steps:
       - uses: actions/checkout@v1
@@ -3239,7 +3243,7 @@ jobs:
     name: Ubuntu 16.04 v2018.3 Py3 Git
     runs-on: ubuntu-latest
 
-    needs: Lint
+    needs: lint
 
     steps:
       - uses: actions/checkout@v1
@@ -3284,7 +3288,7 @@ jobs:
     name: Ubuntu 16.04 v2019.2 Py2 Stable
     runs-on: ubuntu-latest
 
-    needs: Lint
+    needs: lint
 
     steps:
       - uses: actions/checkout@v1
@@ -3329,7 +3333,7 @@ jobs:
     name: Ubuntu 16.04 v2019.2 Py2 Git
     runs-on: ubuntu-latest
 
-    needs: Lint
+    needs: lint
 
     steps:
       - uses: actions/checkout@v1
@@ -3374,7 +3378,7 @@ jobs:
     name: Ubuntu 16.04 v2019.2 Py3 Stable
     runs-on: ubuntu-latest
 
-    needs: Lint
+    needs: lint
 
     steps:
       - uses: actions/checkout@v1
@@ -3419,7 +3423,7 @@ jobs:
     name: Ubuntu 16.04 v2019.2 Py3 Git
     runs-on: ubuntu-latest
 
-    needs: Lint
+    needs: lint
 
     steps:
       - uses: actions/checkout@v1
@@ -3464,7 +3468,7 @@ jobs:
     name: Ubuntu 16.04 v3000 Py2 Git
     runs-on: ubuntu-latest
 
-    needs: Lint
+    needs: lint
 
     steps:
       - uses: actions/checkout@v1
@@ -3509,7 +3513,7 @@ jobs:
     name: Ubuntu 16.04 v3000 Py3 Git
     runs-on: ubuntu-latest
 
-    needs: Lint
+    needs: lint
 
     steps:
       - uses: actions/checkout@v1
@@ -3554,7 +3558,7 @@ jobs:
     name: Ubuntu 16.04 Latest packaged release
     runs-on: ubuntu-latest
 
-    needs: Lint
+    needs: lint
 
     steps:
       - uses: actions/checkout@v1
@@ -3599,7 +3603,7 @@ jobs:
     name: Ubuntu 18.04 v2018.3 Py2 Stable
     runs-on: ubuntu-latest
 
-    needs: Lint
+    needs: lint
 
     steps:
       - uses: actions/checkout@v1
@@ -3644,7 +3648,7 @@ jobs:
     name: Ubuntu 18.04 v2018.3 Py2 Git
     runs-on: ubuntu-latest
 
-    needs: Lint
+    needs: lint
 
     steps:
       - uses: actions/checkout@v1
@@ -3689,7 +3693,7 @@ jobs:
     name: Ubuntu 18.04 v2018.3 Py3 Stable
     runs-on: ubuntu-latest
 
-    needs: Lint
+    needs: lint
 
     steps:
       - uses: actions/checkout@v1
@@ -3734,7 +3738,7 @@ jobs:
     name: Ubuntu 18.04 v2018.3 Py3 Git
     runs-on: ubuntu-latest
 
-    needs: Lint
+    needs: lint
 
     steps:
       - uses: actions/checkout@v1
@@ -3779,7 +3783,7 @@ jobs:
     name: Ubuntu 18.04 v2019.2 Py2 Stable
     runs-on: ubuntu-latest
 
-    needs: Lint
+    needs: lint
 
     steps:
       - uses: actions/checkout@v1
@@ -3824,7 +3828,7 @@ jobs:
     name: Ubuntu 18.04 v2019.2 Py2 Git
     runs-on: ubuntu-latest
 
-    needs: Lint
+    needs: lint
 
     steps:
       - uses: actions/checkout@v1
@@ -3869,7 +3873,7 @@ jobs:
     name: Ubuntu 18.04 v2019.2 Py3 Stable
     runs-on: ubuntu-latest
 
-    needs: Lint
+    needs: lint
 
     steps:
       - uses: actions/checkout@v1
@@ -3914,7 +3918,7 @@ jobs:
     name: Ubuntu 18.04 v2019.2 Py3 Git
     runs-on: ubuntu-latest
 
-    needs: Lint
+    needs: lint
 
     steps:
       - uses: actions/checkout@v1
@@ -3959,7 +3963,7 @@ jobs:
     name: Ubuntu 18.04 v3000 Py2 Git
     runs-on: ubuntu-latest
 
-    needs: Lint
+    needs: lint
 
     steps:
       - uses: actions/checkout@v1
@@ -4004,7 +4008,7 @@ jobs:
     name: Ubuntu 18.04 v3000 Py3 Git
     runs-on: ubuntu-latest
 
-    needs: Lint
+    needs: lint
 
     steps:
       - uses: actions/checkout@v1
@@ -4049,7 +4053,7 @@ jobs:
     name: Ubuntu 18.04 Latest packaged release
     runs-on: ubuntu-latest
 
-    needs: Lint
+    needs: lint
 
     steps:
       - uses: actions/checkout@v1

@@ -1990,6 +1990,22 @@ __git_clone_and_checkout() {
             ;;
     esac
 
+    if [ "$__TAG_REGEX_MATCH" != "MATCH" ]; then
+        case ${OS_NAME_L} in
+            openbsd|freebsd|netbsd|darwin )
+                __NEW_VS_TAG_REGEX_MATCH=$(echo "${GIT_REV}" | sed -E 's/^(v?3[0-9]{3}(\.[0-9]{1,2})?).*$/MATCH/')
+                ;;
+            * )
+                __NEW_VS_TAG_REGEX_MATCH=$(echo "${GIT_REV}" | sed 's/^.*\(v\?3[[:digit:]]\{3\}\(\.[[:digit:]]\{1,2\}\)\?\).*$/MATCH/')
+                ;;
+        esac
+
+        if [ "$__NEW_VS_TAG_REGEX_MATCH" = "MATCH" ]; then
+            __TAG_REGEX_MATCH="${__NEW_VS_TAG_REGEX_MATCH}"
+        fi
+    fi
+
+
     __SALT_GIT_CHECKOUT_PARENT_DIR=$(dirname "${_SALT_GIT_CHECKOUT_DIR}" 2>/dev/null)
     __SALT_GIT_CHECKOUT_PARENT_DIR="${__SALT_GIT_CHECKOUT_PARENT_DIR:-/tmp/git}"
     __SALT_CHECKOUT_REPONAME="$(basename "${_SALT_GIT_CHECKOUT_DIR}" 2>/dev/null)"

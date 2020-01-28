@@ -6,7 +6,7 @@ import datetime
 os.chdir(os.path.abspath(os.path.dirname(__file__)))
 
 LINUX_DISTROS = [
-    'amazon-1',
+#    'amazon-1',
     'amazon-2',
     'arch',
     'centos-6',

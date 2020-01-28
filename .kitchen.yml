@@ -162,6 +162,13 @@ suites:
       - opensuse-15
       - arch
 
+  - name: latest
+    provisioner:
+      salt_version: latest
+      salt_bootstrap_options: -MP stable %s
+    excludes:
+      - arch
+
 verifier:
   name: shell
   remote_exec: false

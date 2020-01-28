@@ -60,6 +60,13 @@ BLACKLIST_2018 = [
 SALT_BRANCHES = [
     '2018-3',
     '2019-2',
+    'latest'
+]
+
+LATEST_BLACKLIST = [
+    'arch',         # No packages are built
+    'centos-8',     # Once Neon is out, this can be removed from here
+    'debian-10'     # Once Neon is out, this can be removed from here
 ]
 
 DISTRO_DISPLAY_NAMES = {
@@ -85,6 +92,32 @@ def generate_test_jobs():
 
     for distro in LINUX_DISTROS + OSX + WINDOWS:
         for branch in SALT_BRANCHES:
+            if branch == 'latest':
+                if distro in LATEST_BLACKLIST:
+                    continue
+                if distro in LINUX_DISTROS:
+                    template = 'linux.yml'
+                elif distro in OSX:
+                    template = 'osx.yml'
+                elif distro in WINDOWS:
+                    template = 'windows.yml'
+                else:
+                    print("Don't know how to handle {}".format(distro))
+
+                with open(template) as rfh:
+                    test_jobs += '\n{}\n'.format(
+                        rfh.read().replace(
+                            '{python_version}-{bootstrap_type}-{branch}-{distro}',
+                            '{branch}-{distro}'
+                        ).format(
+                            distro=distro,
+                            branch=branch,
+                            display_name='{} Latest packaged release'.format(
+                                DISTRO_DISPLAY_NAMES[distro],
+                            )
+                        )
+                    )
+                continue
             for python_version in ('py2', 'py3'):
                 for bootstrap_type in ('stable', 'git'):
                     if bootstrap_type == 'stable' and distro not in STABLE_DISTROS:
@@ -123,7 +156,6 @@ def generate_test_jobs():
                                 )
                             )
                         )
-
 
     with open('lint.yml') as rfh:
         lint_job = '\n{}\n'.format(rfh.read())

@@ -60,10 +60,22 @@ BLACKLIST_2018 = [
 SALT_BRANCHES = [
     '2018-3',
     '2019-2',
+    '3000',
     'latest'
 ]
 
-LATEST_BLACKLIST = [
+BRANCH_DISPLAY_NAMES = {
+    '2018-3': 'v2018.3',
+    '2019-2': 'v2019.2',
+    '3000': 'v3000',
+    'latest': 'Latest'
+}
+
+STABLE_BRANCH_BLACKLIST = [
+    '3000'
+]
+
+LATEST_PKG_BLACKLIST = [
     'arch',         # No packages are built
     'centos-8',     # Once Neon is out, this can be removed from here
     'debian-10'     # Once Neon is out, this can be removed from here
@@ -93,7 +105,7 @@ def generate_test_jobs():
     for distro in LINUX_DISTROS + OSX + WINDOWS:
         for branch in SALT_BRANCHES:
             if branch == 'latest':
-                if distro in LATEST_BLACKLIST:
+                if distro in LATEST_PKG_BLACKLIST:
                     continue
                 if distro in LINUX_DISTROS:
                     template = 'linux.yml'
@@ -118,9 +130,13 @@ def generate_test_jobs():
                         )
                     )
                 continue
+
             for python_version in ('py2', 'py3'):
                 for bootstrap_type in ('stable', 'git'):
                     if bootstrap_type == 'stable' and distro not in STABLE_DISTROS:
+                        continue
+
+                    if bootstrap_type == 'stable' and branch in STABLE_BRANCH_BLACKLIST:
                         continue
 
                     if branch == '2018-3' and distro in BLACKLIST_2018:
@@ -150,7 +166,7 @@ def generate_test_jobs():
                                 bootstrap_type=bootstrap_type,
                                 display_name='{} {} {} {}'.format(
                                     DISTRO_DISPLAY_NAMES[distro],
-                                    branch.replace('-', '.'),
+                                    BRANCH_DISPLAY_NAMES[branch],
                                     python_version.capitalize(),
                                     bootstrap_type.capitalize()
                                 )

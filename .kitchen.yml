@@ -105,6 +105,9 @@ suites:
   - name: py2-git-2019-2
     provisioner:
       salt_version: 2019.2
+  - name: py2-git-3000
+    provisioner:
+      salt_version: 3000.0rc2
   - name: py2-git-master
     provisioner:
       salt_version: master
@@ -122,6 +125,7 @@ suites:
     excludes:
       - arch
       - opensuse-15
+
   - name: py3-git-2018-3
     provisioner:
       salt_version: 2018.3
@@ -132,6 +136,15 @@ suites:
       - debian-8
       - opensuse-15
       - amazon-2
+  - name: py3-git-3000
+    provisioner:
+      salt_version: 3000.0rc2
+      salt_bootstrap_options: -x python3 -MPfq git %s
+    excludes:
+      - amazon-1
+      - centos-6
+      - debian-8
+      - opensuse-15
   - name: py3-git-2019-2
     provisioner:
       salt_version: 2019.2

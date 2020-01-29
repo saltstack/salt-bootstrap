@@ -329,7 +329,7 @@ UNIX systems
 **BSD**:
 
 - OpenBSD (``pip`` installation)
-- FreeBSD 9/10/11/12
+- FreeBSD 11/12
 
 **SunOS**:
 

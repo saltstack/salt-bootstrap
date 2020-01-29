@@ -1,0 +1,12 @@
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+
+    needs: generate-actions-workflow
+
+    container: koalaman/shellcheck-alpine:v0.6.0
+    steps:
+      - uses: actions/checkout@v1
+      - name: ShellCheck
+        run: |
+          shellcheck -s sh -f checkstyle bootstrap-salt.sh

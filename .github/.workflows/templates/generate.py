@@ -45,6 +45,7 @@ PY2_BLACKLIST = [
 ]
 
 PY3_BLACKLIST = [
+    'arch',
     'amazon-1',
     'centos-6',
     'debian-8',

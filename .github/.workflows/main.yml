@@ -47,6 +47,7 @@ jobs:
   py2-stable-2019-2-amazon-2:
     name: Amazon 2 v2019.2 Py2 Stable
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     needs: lint
 
@@ -92,6 +93,7 @@ jobs:
   py2-git-2019-2-amazon-2:
     name: Amazon 2 v2019.2 Py2 Git
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     needs: lint
 
@@ -137,6 +139,7 @@ jobs:
   py3-stable-2019-2-amazon-2:
     name: Amazon 2 v2019.2 Py3 Stable
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     needs: lint
 
@@ -182,6 +185,7 @@ jobs:
   py3-git-2019-2-amazon-2:
     name: Amazon 2 v2019.2 Py3 Git
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     needs: lint
 
@@ -227,6 +231,7 @@ jobs:
   py2-git-3000-amazon-2:
     name: Amazon 2 v3000 Py2 Git
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     needs: lint
 
@@ -272,6 +277,7 @@ jobs:
   py3-git-3000-amazon-2:
     name: Amazon 2 v3000 Py3 Git
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     needs: lint
 
@@ -317,6 +323,7 @@ jobs:
   latest-amazon-2:
     name: Amazon 2 Latest packaged release
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     needs: lint
 
@@ -362,6 +369,7 @@ jobs:
   py2-git-2018-3-arch:
     name: Arch v2018.3 Py2 Git
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     needs: lint
 
@@ -407,6 +415,7 @@ jobs:
   py3-git-2018-3-arch:
     name: Arch v2018.3 Py3 Git
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     needs: lint
 
@@ -452,6 +461,7 @@ jobs:
   py2-git-2019-2-arch:
     name: Arch v2019.2 Py2 Git
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     needs: lint
 
@@ -497,6 +507,7 @@ jobs:
   py3-git-2019-2-arch:
     name: Arch v2019.2 Py3 Git
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     needs: lint
 
@@ -542,6 +553,7 @@ jobs:
   py2-git-3000-arch:
     name: Arch v3000 Py2 Git
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     needs: lint
 
@@ -587,6 +599,7 @@ jobs:
   py3-git-3000-arch:
     name: Arch v3000 Py3 Git
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     needs: lint
 
@@ -632,6 +645,7 @@ jobs:
   py2-stable-2018-3-centos-6:
     name: CentOS 6 v2018.3 Py2 Stable
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     needs: lint
 
@@ -677,6 +691,7 @@ jobs:
   py2-git-2018-3-centos-6:
     name: CentOS 6 v2018.3 Py2 Git
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     needs: lint
 
@@ -722,6 +737,7 @@ jobs:
   py2-stable-2019-2-centos-6:
     name: CentOS 6 v2019.2 Py2 Stable
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     needs: lint
 
@@ -767,6 +783,7 @@ jobs:
   py2-git-2019-2-centos-6:
     name: CentOS 6 v2019.2 Py2 Git
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     needs: lint
 
@@ -812,6 +829,7 @@ jobs:
   py2-git-3000-centos-6:
     name: CentOS 6 v3000 Py2 Git
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     needs: lint
 
@@ -857,6 +875,7 @@ jobs:
   latest-centos-6:
     name: CentOS 6 Latest packaged release
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     needs: lint
 
@@ -902,6 +921,7 @@ jobs:
   py2-stable-2018-3-centos-7:
     name: CentOS 7 v2018.3 Py2 Stable
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     needs: lint
 
@@ -947,6 +967,7 @@ jobs:
   py2-git-2018-3-centos-7:
     name: CentOS 7 v2018.3 Py2 Git
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     needs: lint
 
@@ -992,6 +1013,7 @@ jobs:
   py3-stable-2018-3-centos-7:
     name: CentOS 7 v2018.3 Py3 Stable
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     needs: lint
 
@@ -1037,6 +1059,7 @@ jobs:
   py3-git-2018-3-centos-7:
     name: CentOS 7 v2018.3 Py3 Git
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     needs: lint
 
@@ -1082,6 +1105,7 @@ jobs:
   py2-stable-2019-2-centos-7:
     name: CentOS 7 v2019.2 Py2 Stable
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     needs: lint
 
@@ -1127,6 +1151,7 @@ jobs:
   py2-git-2019-2-centos-7:
     name: CentOS 7 v2019.2 Py2 Git
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     needs: lint
 
@@ -1172,6 +1197,7 @@ jobs:
   py3-stable-2019-2-centos-7:
     name: CentOS 7 v2019.2 Py3 Stable
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     needs: lint
 
@@ -1217,6 +1243,7 @@ jobs:
   py3-git-2019-2-centos-7:
     name: CentOS 7 v2019.2 Py3 Git
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     needs: lint
 
@@ -1262,6 +1289,7 @@ jobs:
   py2-git-3000-centos-7:
     name: CentOS 7 v3000 Py2 Git
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     needs: lint
 
@@ -1307,6 +1335,7 @@ jobs:
   py3-git-3000-centos-7:
     name: CentOS 7 v3000 Py3 Git
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     needs: lint
 
@@ -1352,6 +1381,7 @@ jobs:
   latest-centos-7:
     name: CentOS 7 Latest packaged release
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     needs: lint
 
@@ -1397,6 +1427,7 @@ jobs:
   py3-stable-2019-2-centos-8:
     name: CentOS 8 v2019.2 Py3 Stable
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     needs: lint
 
@@ -1442,6 +1473,7 @@ jobs:
   py3-git-2019-2-centos-8:
     name: CentOS 8 v2019.2 Py3 Git
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     needs: lint
 
@@ -1487,6 +1519,7 @@ jobs:
   py3-git-3000-centos-8:
     name: CentOS 8 v3000 Py3 Git
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     needs: lint
 
@@ -1532,6 +1565,7 @@ jobs:
   py3-stable-2019-2-debian-10:
     name: Debian 10 v2019.2 Py3 Stable
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     needs: lint
 
@@ -1577,6 +1611,7 @@ jobs:
   py3-git-2019-2-debian-10:
     name: Debian 10 v2019.2 Py3 Git
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     needs: lint
 
@@ -1622,6 +1657,7 @@ jobs:
   py3-git-3000-debian-10:
     name: Debian 10 v3000 Py3 Git
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     needs: lint
 
@@ -1667,6 +1703,7 @@ jobs:
   py2-stable-2018-3-debian-8:
     name: Debian 8 v2018.3 Py2 Stable
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     needs: lint
 
@@ -1712,6 +1749,7 @@ jobs:
   py2-git-2018-3-debian-8:
     name: Debian 8 v2018.3 Py2 Git
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     needs: lint
 
@@ -1757,6 +1795,7 @@ jobs:
   py2-stable-2019-2-debian-8:
     name: Debian 8 v2019.2 Py2 Stable
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     needs: lint
 
@@ -1802,6 +1841,7 @@ jobs:
   py2-git-2019-2-debian-8:
     name: Debian 8 v2019.2 Py2 Git
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     needs: lint
 
@@ -1847,6 +1887,7 @@ jobs:
   py2-git-3000-debian-8:
     name: Debian 8 v3000 Py2 Git
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     needs: lint
 
@@ -1892,6 +1933,7 @@ jobs:
   latest-debian-8:
     name: Debian 8 Latest packaged release
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     needs: lint
 
@@ -1937,6 +1979,7 @@ jobs:
   py2-stable-2018-3-debian-9:
     name: Debian 9 v2018.3 Py2 Stable
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     needs: lint
 
@@ -1982,6 +2025,7 @@ jobs:
   py2-git-2018-3-debian-9:
     name: Debian 9 v2018.3 Py2 Git
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     needs: lint
 
@@ -2027,6 +2071,7 @@ jobs:
   py3-stable-2018-3-debian-9:
     name: Debian 9 v2018.3 Py3 Stable
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     needs: lint
 
@@ -2072,6 +2117,7 @@ jobs:
   py3-git-2018-3-debian-9:
     name: Debian 9 v2018.3 Py3 Git
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     needs: lint
 
@@ -2117,6 +2163,7 @@ jobs:
   py2-stable-2019-2-debian-9:
     name: Debian 9 v2019.2 Py2 Stable
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     needs: lint
 
@@ -2162,6 +2209,7 @@ jobs:
   py2-git-2019-2-debian-9:
     name: Debian 9 v2019.2 Py2 Git
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     needs: lint
 
@@ -2207,6 +2255,7 @@ jobs:
   py3-stable-2019-2-debian-9:
     name: Debian 9 v2019.2 Py3 Stable
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     needs: lint
 
@@ -2252,6 +2301,7 @@ jobs:
   py3-git-2019-2-debian-9:
     name: Debian 9 v2019.2 Py3 Git
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     needs: lint
 
@@ -2297,6 +2347,7 @@ jobs:
   py2-git-3000-debian-9:
     name: Debian 9 v3000 Py2 Git
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     needs: lint
 
@@ -2342,6 +2393,7 @@ jobs:
   py3-git-3000-debian-9:
     name: Debian 9 v3000 Py3 Git
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     needs: lint
 
@@ -2387,6 +2439,7 @@ jobs:
   latest-debian-9:
     name: Debian 9 Latest packaged release
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     needs: lint
 
@@ -2432,6 +2485,7 @@ jobs:
   py2-stable-2018-3-fedora-30:
     name: Fedora 30 v2018.3 Py2 Stable
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     needs: lint
 
@@ -2477,6 +2531,7 @@ jobs:
   py2-git-2018-3-fedora-30:
     name: Fedora 30 v2018.3 Py2 Git
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     needs: lint
 
@@ -2522,6 +2577,7 @@ jobs:
   py3-stable-2018-3-fedora-30:
     name: Fedora 30 v2018.3 Py3 Stable
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     needs: lint
 
@@ -2567,6 +2623,7 @@ jobs:
   py3-git-2018-3-fedora-30:
     name: Fedora 30 v2018.3 Py3 Git
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     needs: lint
 
@@ -2612,6 +2669,7 @@ jobs:
   py2-stable-2019-2-fedora-30:
     name: Fedora 30 v2019.2 Py2 Stable
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     needs: lint
 
@@ -2657,6 +2715,7 @@ jobs:
   py2-git-2019-2-fedora-30:
     name: Fedora 30 v2019.2 Py2 Git
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     needs: lint
 
@@ -2702,6 +2761,7 @@ jobs:
   py3-stable-2019-2-fedora-30:
     name: Fedora 30 v2019.2 Py3 Stable
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     needs: lint
 
@@ -2747,6 +2807,7 @@ jobs:
   py3-git-2019-2-fedora-30:
     name: Fedora 30 v2019.2 Py3 Git
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     needs: lint
 
@@ -2792,6 +2853,7 @@ jobs:
   py2-git-3000-fedora-30:
     name: Fedora 30 v3000 Py2 Git
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     needs: lint
 
@@ -2837,6 +2899,7 @@ jobs:
   py3-git-3000-fedora-30:
     name: Fedora 30 v3000 Py3 Git
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     needs: lint
 
@@ -2882,6 +2945,7 @@ jobs:
   latest-fedora-30:
     name: Fedora 30 Latest packaged release
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     needs: lint
 
@@ -2927,6 +2991,7 @@ jobs:
   py2-git-2018-3-opensuse-15:
     name: Opensuse 15 v2018.3 Py2 Git
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     needs: lint
 
@@ -2972,6 +3037,7 @@ jobs:
   py2-git-2019-2-opensuse-15:
     name: Opensuse 15 v2019.2 Py2 Git
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     needs: lint
 
@@ -3017,6 +3083,7 @@ jobs:
   py2-git-3000-opensuse-15:
     name: Opensuse 15 v3000 Py2 Git
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     needs: lint
 
@@ -3062,6 +3129,7 @@ jobs:
   latest-opensuse-15:
     name: Opensuse 15 Latest packaged release
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     needs: lint
 
@@ -3107,6 +3175,7 @@ jobs:
   py2-stable-2018-3-ubuntu-1604:
     name: Ubuntu 16.04 v2018.3 Py2 Stable
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     needs: lint
 
@@ -3152,6 +3221,7 @@ jobs:
   py2-git-2018-3-ubuntu-1604:
     name: Ubuntu 16.04 v2018.3 Py2 Git
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     needs: lint
 
@@ -3197,6 +3267,7 @@ jobs:
   py3-stable-2018-3-ubuntu-1604:
     name: Ubuntu 16.04 v2018.3 Py3 Stable
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     needs: lint
 
@@ -3242,6 +3313,7 @@ jobs:
   py3-git-2018-3-ubuntu-1604:
     name: Ubuntu 16.04 v2018.3 Py3 Git
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     needs: lint
 
@@ -3287,6 +3359,7 @@ jobs:
   py2-stable-2019-2-ubuntu-1604:
     name: Ubuntu 16.04 v2019.2 Py2 Stable
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     needs: lint
 
@@ -3332,6 +3405,7 @@ jobs:
   py2-git-2019-2-ubuntu-1604:
     name: Ubuntu 16.04 v2019.2 Py2 Git
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     needs: lint
 
@@ -3377,6 +3451,7 @@ jobs:
   py3-stable-2019-2-ubuntu-1604:
     name: Ubuntu 16.04 v2019.2 Py3 Stable
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     needs: lint
 
@@ -3422,6 +3497,7 @@ jobs:
   py3-git-2019-2-ubuntu-1604:
     name: Ubuntu 16.04 v2019.2 Py3 Git
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     needs: lint
 
@@ -3467,6 +3543,7 @@ jobs:
   py2-git-3000-ubuntu-1604:
     name: Ubuntu 16.04 v3000 Py2 Git
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     needs: lint
 
@@ -3512,6 +3589,7 @@ jobs:
   py3-git-3000-ubuntu-1604:
     name: Ubuntu 16.04 v3000 Py3 Git
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     needs: lint
 
@@ -3557,6 +3635,7 @@ jobs:
   latest-ubuntu-1604:
     name: Ubuntu 16.04 Latest packaged release
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     needs: lint
 
@@ -3602,6 +3681,7 @@ jobs:
   py2-stable-2018-3-ubuntu-1804:
     name: Ubuntu 18.04 v2018.3 Py2 Stable
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     needs: lint
 
@@ -3647,6 +3727,7 @@ jobs:
   py2-git-2018-3-ubuntu-1804:
     name: Ubuntu 18.04 v2018.3 Py2 Git
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     needs: lint
 
@@ -3692,6 +3773,7 @@ jobs:
   py3-stable-2018-3-ubuntu-1804:
     name: Ubuntu 18.04 v2018.3 Py3 Stable
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     needs: lint
 
@@ -3737,6 +3819,7 @@ jobs:
   py3-git-2018-3-ubuntu-1804:
     name: Ubuntu 18.04 v2018.3 Py3 Git
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     needs: lint
 
@@ -3782,6 +3865,7 @@ jobs:
   py2-stable-2019-2-ubuntu-1804:
     name: Ubuntu 18.04 v2019.2 Py2 Stable
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     needs: lint
 
@@ -3827,6 +3911,7 @@ jobs:
   py2-git-2019-2-ubuntu-1804:
     name: Ubuntu 18.04 v2019.2 Py2 Git
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     needs: lint
 
@@ -3872,6 +3957,7 @@ jobs:
   py3-stable-2019-2-ubuntu-1804:
     name: Ubuntu 18.04 v2019.2 Py3 Stable
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     needs: lint
 
@@ -3917,6 +4003,7 @@ jobs:
   py3-git-2019-2-ubuntu-1804:
     name: Ubuntu 18.04 v2019.2 Py3 Git
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     needs: lint
 
@@ -3962,6 +4049,7 @@ jobs:
   py2-git-3000-ubuntu-1804:
     name: Ubuntu 18.04 v3000 Py2 Git
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     needs: lint
 
@@ -4007,6 +4095,7 @@ jobs:
   py3-git-3000-ubuntu-1804:
     name: Ubuntu 18.04 v3000 Py3 Git
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     needs: lint
 
@@ -4052,6 +4141,7 @@ jobs:
   latest-ubuntu-1804:
     name: Ubuntu 18.04 Latest packaged release
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     needs: lint
 

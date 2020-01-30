@@ -5968,8 +5968,8 @@ __check_and_refresh_suse_pkg_repo() {
 
 __version_lte() {
     if ! __check_command_exists python; then
-        zypper zypper --non-interactive install --replacefiles --auto-agree-with-licenses python || \
-             zypper zypper --non-interactive install --auto-agree-with-licenses python || return 1
+        zypper --non-interactive install --replacefiles --auto-agree-with-licenses python || \
+             zypper --non-interactive install --auto-agree-with-licenses python || return 1
     fi
 
     if [ "$(python -c 'import sys; V1=tuple([int(i) for i in sys.argv[1].split(".")]); V2=tuple([int(i) for i in sys.argv[2].split(".")]); print V1<=V2' "$1" "$2")" = "True" ]; then

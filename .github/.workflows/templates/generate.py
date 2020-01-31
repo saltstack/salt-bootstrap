@@ -49,7 +49,6 @@ PY3_BLACKLIST = [
     'amazon-1',
     'centos-6',
     'debian-8',
-    'opensuse-15'
 ]
 
 BLACKLIST_2018 = [

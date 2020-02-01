@@ -3831,40 +3831,57 @@ install_fedora_git_deps() {
         PY_PKG_VER=2
     fi
 
-    __PACKAGES="${__PACKAGES:=}"
+    __PACKAGES=""
+    if ! __check_command_exists ps; then
+        __PACKAGES="${__PACKAGES} procps-ng"
+    fi
     if ! __check_command_exists git; then
         __PACKAGES="${__PACKAGES} git"
     fi
-    install_fedora_deps || return 1
+
+    # shellcheck disable=SC2086
+    if [ -n "${__PACKAGES}" ]; then
+        dnf install -y ${__PACKAGES} || return 1
+        __PACKAGES=""
+    fi
 
     __git_clone_and_checkout || return 1
 
     if [ "${_POST_NEON_INSTALL}" -eq $BS_FALSE ]; then
 
-        __PACKAGES="${__PACKAGES:=}"
         if [ "$_INSECURE_DL" -eq $BS_FALSE ] && [ "${_SALT_REPO_URL%%://*}" = "https" ]; then
             __PACKAGES="${__PACKAGES} ca-certificates"
         fi
         if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
             __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-libcloud python${PY_PKG_VER}-netaddr"
         fi
-        __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-systemd"
+        __check_pip_allowed "You need to allow pip based installations (-P) for Tornado <5.0 in order to install Salt"
+        __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-systemd python${PY_PKG_VER}-pip"
 
-        # Fedora 28+ ships with tornado 5.0+ which is broken for salt on py3
-        # https://github.com/saltstack/salt-bootstrap/issues/1220
-        if [ "${PY_PKG_VER}" -lt 3 ] || [ "$DISTRO_MAJOR_VERSION" -lt 28 ]; then
-            __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
+        install_fedora_deps || return 1
+
+        if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 3 ]; then
+            if __check_command_exists python3; then
+                __python="python3"
+            fi
+        elif [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 2 ]; then
+            if __check_command_exists python2; then
+                __python="python2"
+            fi
+        else
+            if ! __check_command_exists python; then
+                echoerror "Unable to find a python binary?!"
+                return 1
+            fi
+            # Let's hope it's the right one
+            __python="python"
         fi
 
-        # Fedora 28+ needs tornado <5.0 from pip
-        # https://github.com/saltstack/salt-bootstrap/issues/1220
-        if [ "${PY_PKG_VER}" -eq 3 ] && [ "$DISTRO_MAJOR_VERSION" -ge 28 ]; then
-            __check_pip_allowed "You need to allow pip based installations (-P) for Tornado <5.0 in order to install Salt on Python 3"
-            grep tornado "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" | while IFS='
+        grep tornado "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" | while IFS='
     '         read -r dep; do
-                "${_PY_EXE}" -m pip install "${dep}" || return 1
+                echodebug "Running '${__python}' -m pip install '${dep}'"
+                "${__python}" -m pip install "${dep}" || return 1
             done
-        fi
     else
         __PACKAGES="python${PY_PKG_VER}-devel python${PY_PKG_VER}-pip python${PY_PKG_VER}-setuptools gcc"
         # shellcheck disable=SC2086

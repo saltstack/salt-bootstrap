@@ -79,10 +79,14 @@ platforms:
     driver_config:
       image: fedora:30
       run_command: /usr/lib/systemd/systemd
+      provision_command:
+        - dnf -y install procps-ng
   - name: fedora-31
     driver_config:
       image: fedora:31
       run_command: /usr/lib/systemd/systemd
+      provision_command:
+        - dnf -y install procps-ng
   - name: opensuse-15
     driver_config:
       image: opensuse/leap:15.1

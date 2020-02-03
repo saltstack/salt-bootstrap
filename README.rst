@@ -364,7 +364,8 @@ this offering, while limited, is as follows:
 - Ubuntu 16.04
 - Ubuntu 18.04
 
-On Fedora 28, PIP installation must be allowed (-P) due to incompatibility with the shipped Tornado library.
+On Fedora, PIP installation must be allowed (-P) due to incompatibility with the shipped Tornado
+library.
 
 Installing the Python 3 packages for Salt is done via the ``-x`` option:
 

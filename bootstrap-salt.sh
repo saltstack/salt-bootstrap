@@ -3769,30 +3769,24 @@ install_fedora_deps() {
         dnf -y update || return 1
     fi
 
-    if [ "${_POST_NEON_INSTALL}" -eq $BS_FALSE ]; then
-        __PACKAGES="${__PACKAGES:=}"
-        if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 3 ]; then
-            # Packages are named python3-<whatever>
-            PY_PKG_VER=3
-            __PACKAGES="${__PACKAGES} python3-m2crypto python3-PyYAML"
-        else
-            PY_PKG_VER=2
-            __PACKAGES="${__PACKAGES} m2crypto"
-            if [ "$DISTRO_MAJOR_VERSION" -ge 28 ]; then
-              __PACKAGES="${__PACKAGES} python2-pyyaml"
-            else
-              __PACKAGES="${__PACKAGES} PyYAML"
-           fi
-        fi
-        __PACKAGES="${__PACKAGES} dnf-utils libyaml procps-ng python${PY_PKG_VER}-crypto python${PY_PKG_VER}-jinja2"
-        __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-msgpack python${PY_PKG_VER}-requests python${PY_PKG_VER}-zmq"
-        if [ "${_EXTRA_PACKAGES}" != "" ]; then
-            echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
-        fi
-
-        # shellcheck disable=SC2086
-        dnf install -y ${__PACKAGES} ${_EXTRA_PACKAGES} || return 1
+    __PACKAGES="${__PACKAGES:=}"
+    if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 3 ]; then
+        # Packages are named python3-<whatever>
+        PY_PKG_VER=3
+    else
+        PY_PKG_VER=2
     fi
+
+    __PACKAGES="${__PACKAGES} dnf-utils libyaml procps-ng python${PY_PKG_VER}-crypto python${PY_PKG_VER}-jinja2"
+    __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-msgpack python${PY_PKG_VER}-requests python${PY_PKG_VER}-zmq"
+    __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-pip python${PY_PKG_VER}-m2crypto python${PY_PKG_VER}-pyyaml"
+    __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-systemd"
+    if [ "${_EXTRA_PACKAGES}" != "" ]; then
+        echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
+    fi
+
+    # shellcheck disable=SC2086
+    __dnf_install_noinput ${__PACKAGES} ${_EXTRA_PACKAGES} || return 1
 
     return 0
 }
@@ -3814,7 +3808,34 @@ install_fedora_stable() {
     fi
 
     # shellcheck disable=SC2086
-    dnf install -y ${__PACKAGES} || return 1
+    __dnf_install_noinput ${__PACKAGES} || return 1
+
+    if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 3 ]; then
+        if __check_command_exists python3; then
+            __python="python3"
+        fi
+    elif [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 2 ]; then
+        if __check_command_exists python2; then
+            __python="python2"
+        fi
+    else
+        if ! __check_command_exists python; then
+            echoerror "Unable to find a python binary?!"
+            return 1
+        fi
+        # Let's hope it's the right one
+        __python="python"
+    fi
+
+    if [ "${_POST_NEON_INSTALL}" -eq $BS_FALSE ]; then
+        __check_pip_allowed "You need to allow pip based installations (-P) for Tornado <5.0 in order to install Salt"
+        __installed_tornado_rpm=$(rpm -qa | grep python${PY_PKG_VER}-tornado)
+        if [ -n "${__installed_tornado_rpm}" ]; then
+            rpm -e --nodeps "${__installed_tornado_rpm}" || return 1
+        fi
+        echodebug "Running '${__python}' -m pip install 'tornado<5.0'"
+        "${__python}" -m pip install --target /usr/lib/python3.7/site-packages "tornado<5" || return 1
+    fi
 
     return 0
 }
@@ -3837,9 +3858,6 @@ install_fedora_stable_post() {
 
 install_fedora_git_deps() {
     if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 3 ]; then
-        if [ "$DISTRO_MAJOR_VERSION" -eq 31 ]; then
-            __install_tornado_pip "${_PY_EXE}"|| return 1
-        fi
         # Packages are named python3-<whatever>
         PY_PKG_VER=3
     else
@@ -3854,9 +3872,9 @@ install_fedora_git_deps() {
         __PACKAGES="${__PACKAGES} git"
     fi
 
-    # shellcheck disable=SC2086
     if [ -n "${__PACKAGES}" ]; then
-        dnf install -y ${__PACKAGES} || return 1
+        # shellcheck disable=SC2086
+        __dnf_install_noinput ${__PACKAGES} || return 1
         __PACKAGES=""
     fi
 
@@ -3870,8 +3888,6 @@ install_fedora_git_deps() {
         if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
             __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-libcloud python${PY_PKG_VER}-netaddr"
         fi
-        __check_pip_allowed "You need to allow pip based installations (-P) for Tornado <5.0 in order to install Salt"
-        __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-systemd python${PY_PKG_VER}-pip"
 
         install_fedora_deps || return 1
 
@@ -3900,7 +3916,7 @@ install_fedora_git_deps() {
     else
         __PACKAGES="python${PY_PKG_VER}-devel python${PY_PKG_VER}-pip python${PY_PKG_VER}-setuptools gcc"
         # shellcheck disable=SC2086
-        dnf install -y ${__PACKAGES} || return 1
+        __dnf_install_noinput ${__PACKAGES} || return 1
     fi
 
     # Let's trigger config_salt()

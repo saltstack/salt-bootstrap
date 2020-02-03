@@ -838,7 +838,7 @@ steps:
 - name: throttle-build
   image: alpine
   commands:
-  - sh -c 't=192; echo Sleeping 192 seconds; sleep 192'
+  - sh -c 't=96; echo Sleeping 96 seconds; sleep 96'
 
 - name: create
   image: saltstack/drone-salt-bootstrap-testing
@@ -852,58 +852,6 @@ steps:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
   - throttle-build
-
-- name: Py2 2018.3(Git)
-  image: saltstack/drone-salt-bootstrap-testing
-  commands:
-  - pip install -U pip
-  - pip install -r tests/requirements.txt
-  - bundle install --with docker --without opennebula ec2 windows vagrant
-  - bundle exec kitchen test py2-git-2018-3-fedora-30
-  environment:
-    DOCKER_HOST: tcp://docker:2375
-  depends_on:
-  - throttle-build
-  - create
-
-- name: Py2 2019.2(Git)
-  image: saltstack/drone-salt-bootstrap-testing
-  commands:
-  - pip install -U pip
-  - pip install -r tests/requirements.txt
-  - bundle install --with docker --without opennebula ec2 windows vagrant
-  - bundle exec kitchen test py2-git-2019-2-fedora-30
-  environment:
-    DOCKER_HOST: tcp://docker:2375
-  depends_on:
-  - throttle-build
-  - create
-
-- name: Py2 2018.3(Stable)
-  image: saltstack/drone-salt-bootstrap-testing
-  commands:
-  - pip install -U pip
-  - pip install -r tests/requirements.txt
-  - bundle install --with docker --without opennebula ec2 windows vagrant
-  - bundle exec kitchen test py2-stable-2018-3-fedora-30
-  environment:
-    DOCKER_HOST: tcp://docker:2375
-  depends_on:
-  - throttle-build
-  - create
-
-- name: Py2 2019.2(Stable)
-  image: saltstack/drone-salt-bootstrap-testing
-  commands:
-  - pip install -U pip
-  - pip install -r tests/requirements.txt
-  - bundle install --with docker --without opennebula ec2 windows vagrant
-  - bundle exec kitchen test py2-stable-2019-2-fedora-30
-  environment:
-    DOCKER_HOST: tcp://docker:2375
-  depends_on:
-  - throttle-build
-  - create
 
 - name: Py3 2018.3(Git)
   image: saltstack/drone-salt-bootstrap-testing
@@ -1392,6 +1340,6 @@ depends_on:
 
 ---
 kind: signature
-hmac: b84d3ddb4ecabcdf7d454cb6552acf79dfa777d7f9453f0b329ae02980c9f3cd
+hmac: 08cacaea37ae92bd156f41af4af3c80da1f2aa535bc41a9efe2f2922c7b51e99
 
 ...

@@ -66,6 +66,7 @@ local py3_distros = [
 local py2_blacklist = [
   'centos-8',
   'debian-10',
+  'fedora-30',
   'fedora-31',
 ];
 

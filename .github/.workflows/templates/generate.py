@@ -16,7 +16,7 @@ LINUX_DISTROS = [
     'debian-8',
     'debian-9',
     'fedora-30',
-    #'fedora-31',
+    'fedora-31',
     'opensuse-15',
     'ubuntu-1604',
     'ubuntu-1804'

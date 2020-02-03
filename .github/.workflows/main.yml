@@ -2850,6 +2850,282 @@ jobs:
           bundle exec kitchen destroy latest-fedora-30
 
 
+  py3-stable-2018-3-fedora-31:
+    name: Fedora 31 v2018.3 Py3 Stable
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    needs: lint
+
+    steps:
+      - uses: actions/checkout@v1
+      - name: Setup Ruby
+        uses: actions/setup-ruby@v1
+        with:
+          ruby-version: 2.6.x
+
+      - name: Install Bundler
+        run: |
+          gem install bundler
+
+      - name: Setup Bundle
+        run: |
+          bundle install --with docker --without opennebula ec2 windows vagrant
+
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.7
+
+      - name: Install Python Dependencies
+        run: |
+          pip install -U pip
+          pip install -r tests/requirements.txt
+
+      - name: Create Test Container
+        run: |
+          bundle exec kitchen create py3-stable-2018-3-fedora-31 || bundle exec kitchen create py3-stable-2018-3-fedora-31
+
+      - name: Test Bootstrap In Test Container
+        run: |
+          bundle exec kitchen verify py3-stable-2018-3-fedora-31
+
+      - name: Destroy Test Container
+        if: always()
+        run: |
+          bundle exec kitchen destroy py3-stable-2018-3-fedora-31
+
+
+  py3-git-2018-3-fedora-31:
+    name: Fedora 31 v2018.3 Py3 Git
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    needs: lint
+
+    steps:
+      - uses: actions/checkout@v1
+      - name: Setup Ruby
+        uses: actions/setup-ruby@v1
+        with:
+          ruby-version: 2.6.x
+
+      - name: Install Bundler
+        run: |
+          gem install bundler
+
+      - name: Setup Bundle
+        run: |
+          bundle install --with docker --without opennebula ec2 windows vagrant
+
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.7
+
+      - name: Install Python Dependencies
+        run: |
+          pip install -U pip
+          pip install -r tests/requirements.txt
+
+      - name: Create Test Container
+        run: |
+          bundle exec kitchen create py3-git-2018-3-fedora-31 || bundle exec kitchen create py3-git-2018-3-fedora-31
+
+      - name: Test Bootstrap In Test Container
+        run: |
+          bundle exec kitchen verify py3-git-2018-3-fedora-31
+
+      - name: Destroy Test Container
+        if: always()
+        run: |
+          bundle exec kitchen destroy py3-git-2018-3-fedora-31
+
+
+  py3-stable-2019-2-fedora-31:
+    name: Fedora 31 v2019.2 Py3 Stable
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    needs: lint
+
+    steps:
+      - uses: actions/checkout@v1
+      - name: Setup Ruby
+        uses: actions/setup-ruby@v1
+        with:
+          ruby-version: 2.6.x
+
+      - name: Install Bundler
+        run: |
+          gem install bundler
+
+      - name: Setup Bundle
+        run: |
+          bundle install --with docker --without opennebula ec2 windows vagrant
+
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.7
+
+      - name: Install Python Dependencies
+        run: |
+          pip install -U pip
+          pip install -r tests/requirements.txt
+
+      - name: Create Test Container
+        run: |
+          bundle exec kitchen create py3-stable-2019-2-fedora-31 || bundle exec kitchen create py3-stable-2019-2-fedora-31
+
+      - name: Test Bootstrap In Test Container
+        run: |
+          bundle exec kitchen verify py3-stable-2019-2-fedora-31
+
+      - name: Destroy Test Container
+        if: always()
+        run: |
+          bundle exec kitchen destroy py3-stable-2019-2-fedora-31
+
+
+  py3-git-2019-2-fedora-31:
+    name: Fedora 31 v2019.2 Py3 Git
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    needs: lint
+
+    steps:
+      - uses: actions/checkout@v1
+      - name: Setup Ruby
+        uses: actions/setup-ruby@v1
+        with:
+          ruby-version: 2.6.x
+
+      - name: Install Bundler
+        run: |
+          gem install bundler
+
+      - name: Setup Bundle
+        run: |
+          bundle install --with docker --without opennebula ec2 windows vagrant
+
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.7
+
+      - name: Install Python Dependencies
+        run: |
+          pip install -U pip
+          pip install -r tests/requirements.txt
+
+      - name: Create Test Container
+        run: |
+          bundle exec kitchen create py3-git-2019-2-fedora-31 || bundle exec kitchen create py3-git-2019-2-fedora-31
+
+      - name: Test Bootstrap In Test Container
+        run: |
+          bundle exec kitchen verify py3-git-2019-2-fedora-31
+
+      - name: Destroy Test Container
+        if: always()
+        run: |
+          bundle exec kitchen destroy py3-git-2019-2-fedora-31
+
+
+  py3-git-3000-fedora-31:
+    name: Fedora 31 v3000 Py3 Git
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    needs: lint
+
+    steps:
+      - uses: actions/checkout@v1
+      - name: Setup Ruby
+        uses: actions/setup-ruby@v1
+        with:
+          ruby-version: 2.6.x
+
+      - name: Install Bundler
+        run: |
+          gem install bundler
+
+      - name: Setup Bundle
+        run: |
+          bundle install --with docker --without opennebula ec2 windows vagrant
+
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.7
+
+      - name: Install Python Dependencies
+        run: |
+          pip install -U pip
+          pip install -r tests/requirements.txt
+
+      - name: Create Test Container
+        run: |
+          bundle exec kitchen create py3-git-3000-fedora-31 || bundle exec kitchen create py3-git-3000-fedora-31
+
+      - name: Test Bootstrap In Test Container
+        run: |
+          bundle exec kitchen verify py3-git-3000-fedora-31
+
+      - name: Destroy Test Container
+        if: always()
+        run: |
+          bundle exec kitchen destroy py3-git-3000-fedora-31
+
+
+  latest-fedora-31:
+    name: Fedora 31 Latest packaged release
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    needs: lint
+
+    steps:
+      - uses: actions/checkout@v1
+      - name: Setup Ruby
+        uses: actions/setup-ruby@v1
+        with:
+          ruby-version: 2.6.x
+
+      - name: Install Bundler
+        run: |
+          gem install bundler
+
+      - name: Setup Bundle
+        run: |
+          bundle install --with docker --without opennebula ec2 windows vagrant
+
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.7
+
+      - name: Install Python Dependencies
+        run: |
+          pip install -U pip
+          pip install -r tests/requirements.txt
+
+      - name: Create Test Container
+        run: |
+          bundle exec kitchen create latest-fedora-31 || bundle exec kitchen create latest-fedora-31
+
+      - name: Test Bootstrap In Test Container
+        run: |
+          bundle exec kitchen verify latest-fedora-31
+
+      - name: Destroy Test Container
+        if: always()
+        run: |
+          bundle exec kitchen destroy latest-fedora-31
+
+
   py2-git-2018-3-opensuse-15:
     name: Opensuse 15 v2018.3 Py2 Git
     runs-on: ubuntu-latest

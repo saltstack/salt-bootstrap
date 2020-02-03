@@ -17,6 +17,7 @@ LINUX_DISTROS = [
     'debian-9',
     'fedora-30',
     'fedora-31',
+    'fedora-32',
     'opensuse-15',
     'ubuntu-1604',
     'ubuntu-1804'
@@ -41,14 +42,17 @@ STABLE_DISTROS = [
 PY2_BLACKLIST = [
     'centos-8',
     'debian-10',
+    'fedora-30',
     'fedora-31',
+    'fedora-32'
 ]
 
 PY3_BLACKLIST = [
-    'arch',
+    'arch',         # Defaults to Py3.8
     'amazon-1',
     'centos-6',
     'debian-8',
+    'fedora-32'     # Defaults to Py3.8
 ]
 
 BLACKLIST_2018 = [
@@ -93,6 +97,7 @@ DISTRO_DISPLAY_NAMES = {
     'debian-9': 'Debian 9',
     'fedora-30': 'Fedora 30',
     'fedora-31': 'Fedora 31',
+    'fedora-32': 'Fedora 32',
     'opensuse-15': 'Opensuse 15',
     'ubuntu-1604': 'Ubuntu 16.04',
     'ubuntu-1804': 'Ubuntu 18.04'

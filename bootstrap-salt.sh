@@ -5096,14 +5096,15 @@ _eof
 
     fi
 
-    # Package python-ordereddict-1.1-2.el6.noarch is obsoleted by python26-2.6.9-2.88.amzn1.x86_64
-    # which is already installed
-    __PACKAGES="m2crypto ${pkg_append}-crypto ${pkg_append}-jinja2 ${pkg_append}-PyYAML"
-    __PACKAGES="${__PACKAGES} ${pkg_append}-msgpack ${pkg_append}-requests ${pkg_append}-zmq"
-    __PACKAGES="${__PACKAGES} ${pkg_append}-futures"
-
-    # shellcheck disable=SC2086
-    __yum_install_noinput ${__PACKAGES} || return 1
+    if [ "${_POST_NEON_INSTALL}" -eq $BS_FALSE ]; then
+        # Package python-ordereddict-1.1-2.el6.noarch is obsoleted by python26-2.6.9-2.88.amzn1.x86_64
+        # which is already installed
+        __PACKAGES="m2crypto ${pkg_append}-crypto ${pkg_append}-jinja2 ${pkg_append}-PyYAML"
+        __PACKAGES="${__PACKAGES} ${pkg_append}-msgpack ${pkg_append}-requests ${pkg_append}-zmq"
+        __PACKAGES="${__PACKAGES} ${pkg_append}-futures"
+        # shellcheck disable=SC2086
+        __yum_install_noinput ${__PACKAGES} || return 1
+    fi
 
     if [ "${_EXTRA_PACKAGES}" != "" ]; then
         echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
@@ -5332,19 +5333,21 @@ _eof
 
     fi
 
-    # Package python-ordereddict-1.1-2.el6.noarch is obsoleted by python26-2.6.9-2.88.amzn1.x86_64
-    # which is already installed
-    if [ -n "${PY_PKG_VER}" ] && [ "${PY_PKG_VER}" -eq 3 ]; then
-        __PACKAGES="${pkg_append}${PY_PKG_VER}-m2crypto ${pkg_append}${PY_PKG_VER}-pyyaml"
-    else
-        __PACKAGES="m2crypto PyYAML ${pkg_append}-futures"
+    if [ "${_POST_NEON_INSTALL}" -eq $BS_FALSE ]; then
+        # Package python-ordereddict-1.1-2.el6.noarch is obsoleted by python26-2.6.9-2.88.amzn1.x86_64
+        # which is already installed
+        if [ -n "${PY_PKG_VER}" ] && [ "${PY_PKG_VER}" -eq 3 ]; then
+            __PACKAGES="${pkg_append}${PY_PKG_VER}-m2crypto ${pkg_append}${PY_PKG_VER}-pyyaml"
+        else
+            __PACKAGES="m2crypto PyYAML ${pkg_append}-futures"
+        fi
+
+        __PACKAGES="${__PACKAGES} ${pkg_append}${PY_PKG_VER}-crypto ${pkg_append}${PY_PKG_VER}-jinja2 procps-ng"
+        __PACKAGES="${__PACKAGES} ${pkg_append}${PY_PKG_VER}-msgpack ${pkg_append}${PY_PKG_VER}-requests ${pkg_append}${PY_PKG_VER}-zmq"
+
+        # shellcheck disable=SC2086
+        __yum_install_noinput ${__PACKAGES} || return 1
     fi
-
-    __PACKAGES="${__PACKAGES} ${pkg_append}${PY_PKG_VER}-crypto ${pkg_append}${PY_PKG_VER}-jinja2 procps-ng"
-    __PACKAGES="${__PACKAGES} ${pkg_append}${PY_PKG_VER}-msgpack ${pkg_append}${PY_PKG_VER}-requests ${pkg_append}${PY_PKG_VER}-zmq"
-
-    # shellcheck disable=SC2086
-    __yum_install_noinput ${__PACKAGES} || return 1
 
     if [ "${_EXTRA_PACKAGES}" != "" ]; then
         echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"

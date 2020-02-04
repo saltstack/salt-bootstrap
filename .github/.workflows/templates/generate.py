@@ -65,6 +65,7 @@ SALT_BRANCHES = [
     '2018-3',
     '2019-2',
     '3000',
+    'master',
     'latest'
 ]
 
@@ -72,6 +73,7 @@ BRANCH_DISPLAY_NAMES = {
     '2018-3': 'v2018.3',
     '2019-2': 'v2019.2',
     '3000': 'v3000',
+    'master': 'Master',
     'latest': 'Latest'
 }
 
@@ -138,6 +140,8 @@ def generate_test_jobs():
 
             for python_version in ('py2', 'py3'):
                 for bootstrap_type in ('stable', 'git'):
+                    if bootstrap_type == 'stable' and branch == 'master':
+                        continue
                     if bootstrap_type == 'stable' and distro not in STABLE_DISTROS:
                         continue
 

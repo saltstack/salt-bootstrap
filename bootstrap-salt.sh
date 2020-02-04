@@ -5334,7 +5334,7 @@ _eof
 
     # Package python-ordereddict-1.1-2.el6.noarch is obsoleted by python26-2.6.9-2.88.amzn1.x86_64
     # which is already installed
-    if [ "${PY_PKG_VER}" -eq 3 ]; then
+    if [ -n "${PY_PKG_VER}" ] && [ "${PY_PKG_VER}" -eq 3 ]; then
         __PACKAGES="${pkg_append}${PY_PKG_VER}-m2crypto ${pkg_append}${PY_PKG_VER}-pyyaml"
     else
         __PACKAGES="m2crypto PyYAML ${pkg_append}-futures"

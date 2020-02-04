@@ -16,7 +16,8 @@ LINUX_DISTROS = [
     'debian-8',
     'debian-9',
     'fedora-30',
-    #'fedora-31',
+    'fedora-31',
+    'fedora-32',
     'opensuse-15',
     'ubuntu-1604',
     'ubuntu-1804'
@@ -41,14 +42,17 @@ STABLE_DISTROS = [
 PY2_BLACKLIST = [
     'centos-8',
     'debian-10',
+    'fedora-30',
     'fedora-31',
+    'fedora-32'
 ]
 
 PY3_BLACKLIST = [
+    'arch',         # Defaults to Py3.8
     'amazon-1',
     'centos-6',
     'debian-8',
-    'opensuse-15'
+    'fedora-32'     # Defaults to Py3.8
 ]
 
 BLACKLIST_2018 = [
@@ -61,6 +65,7 @@ SALT_BRANCHES = [
     '2018-3',
     '2019-2',
     '3000',
+    'master',
     'latest'
 ]
 
@@ -68,6 +73,7 @@ BRANCH_DISPLAY_NAMES = {
     '2018-3': 'v2018.3',
     '2019-2': 'v2019.2',
     '3000': 'v3000',
+    'master': 'Master',
     'latest': 'Latest'
 }
 
@@ -93,6 +99,7 @@ DISTRO_DISPLAY_NAMES = {
     'debian-9': 'Debian 9',
     'fedora-30': 'Fedora 30',
     'fedora-31': 'Fedora 31',
+    'fedora-32': 'Fedora 32',
     'opensuse-15': 'Opensuse 15',
     'ubuntu-1604': 'Ubuntu 16.04',
     'ubuntu-1804': 'Ubuntu 18.04'
@@ -133,6 +140,8 @@ def generate_test_jobs():
 
             for python_version in ('py2', 'py3'):
                 for bootstrap_type in ('stable', 'git'):
+                    if bootstrap_type == 'stable' and branch == 'master':
+                        continue
                     if bootstrap_type == 'stable' and distro not in STABLE_DISTROS:
                         continue
 

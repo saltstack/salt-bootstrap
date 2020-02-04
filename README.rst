@@ -358,13 +358,15 @@ this offering, while limited, is as follows:
 
 - CentOS 7
 - Centos 8
+- Debian 8
 - Debian 9
 - Debian 10
 - Fedora (only git installations)
 - Ubuntu 16.04
 - Ubuntu 18.04
 
-On Fedora 28, PIP installation must be allowed (-P) due to incompatibility with the shipped Tornado library.
+On Fedora, PIP installation must be allowed (-P) due to incompatibility with the shipped Tornado
+library.
 
 Installing the Python 3 packages for Salt is done via the ``-x`` option:
 
@@ -434,6 +436,18 @@ Salt is ready and working in the Docker container with the Minion authenticated 
 The ``Dockerfile`` here inherits the Ubuntu 14.04 public image with Upstart configured as the init
 system. Use it as an example or starting point of how to make your own Docker images with suitable
 Salt components, custom configurations, and even `pre-accepted Minion keys`_ already installed.
+
+Updating Drone Pipelines
+========================
+
+You should install and configure the drone-cli as shown here: https://docs.drone.io/cli/install/
+
+Make edits to .drone.jsonnet and then save them into the .drone.yml by doing the following:
+
+.. code:: console
+
+  drone jsonnet --format --stream
+  drone sign saltstack/salt-bootstrap --save
 
 .. _Contributing Guidelines: https://github.com/saltstack/salt-bootstrap/blob/develop/CONTRIBUTING.md
 .. _Docker: https://www.docker.com/

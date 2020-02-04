@@ -190,6 +190,17 @@ suites:
       - debian-8
       - opensuse-15
       - arch
+  - name: py3-git-master
+    provisioner:
+      salt_version: master
+      salt_bootstrap_options: -x python3 -MPfq -D git %s
+    excludes:
+      - arch
+      - amazon-1
+      - centos-6
+      - debian-8
+      - fedora-32
+      - opensuse-15
 
   - name: latest
     provisioner:

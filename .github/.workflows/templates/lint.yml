@@ -9,4 +9,4 @@
       - uses: actions/checkout@v1
       - name: ShellCheck
         run: |
-          shellcheck -s sh -f checkstyle bootstrap-salt.sh
+          shellcheck -s sh -f tty bootstrap-salt.sh

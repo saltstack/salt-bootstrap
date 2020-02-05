@@ -28,6 +28,7 @@ sum** of the downloaded ``bootstrap-salt.sh`` file.
 
 The SHA256 sum of the ``bootstrap-salt.sh`` file, per release, is:
 
+- 2020.02.04: ``ce877651b4938e3480f76b1629f582437f6ca8b73d7199fdb9e905e86fe85b34``
 - 2020.01.29: ``e9afdfa877998c1c7f0e141a6728b33d0d24348e197aab2b9bde4fe6bc6db1b2``
 - 2020.01.21: ``53299aa0dfbf7ab381f3856bb7babfc04a1d6525be11db0b9466277b1e4d0c1a``
 - 2019.11.04: ``905924fccd4ebf168d19ba598bf10af53efe02302b792aeb15433e73fd3ad1d2``
@@ -358,13 +359,15 @@ this offering, while limited, is as follows:
 
 - CentOS 7
 - Centos 8
+- Debian 8
 - Debian 9
 - Debian 10
 - Fedora (only git installations)
 - Ubuntu 16.04
 - Ubuntu 18.04
 
-On Fedora 28, PIP installation must be allowed (-P) due to incompatibility with the shipped Tornado library.
+On Fedora, PIP installation must be allowed (-P) due to incompatibility with the shipped Tornado
+library.
 
 Installing the Python 3 packages for Salt is done via the ``-x`` option:
 
@@ -434,6 +437,18 @@ Salt is ready and working in the Docker container with the Minion authenticated 
 The ``Dockerfile`` here inherits the Ubuntu 14.04 public image with Upstart configured as the init
 system. Use it as an example or starting point of how to make your own Docker images with suitable
 Salt components, custom configurations, and even `pre-accepted Minion keys`_ already installed.
+
+Updating Drone Pipelines
+========================
+
+You should install and configure the drone-cli as shown here: https://docs.drone.io/cli/install/
+
+Make edits to .drone.jsonnet and then save them into the .drone.yml by doing the following:
+
+.. code:: console
+
+  drone jsonnet --format --stream
+  drone sign saltstack/salt-bootstrap --save
 
 .. _Contributing Guidelines: https://github.com/saltstack/salt-bootstrap/blob/develop/CONTRIBUTING.md
 .. _Docker: https://www.docker.com/

@@ -27,9 +27,10 @@ local distros = [
   { name: 'CentOS 7', slug: 'centos-7', multiplier: 4, depends: [] },
   { name: 'CentOS 8', slug: 'centos-8', multiplier: 5, depends: [] },
   { name: 'Debian 8', slug: 'debian-8', multiplier: 6, depends: [] },
-  { name: 'Debian 9', slug: 'debian-9', multiplier: 5, depends: [] },
-  { name: 'Debian 10', slug: 'debian-10', multiplier: 4, depends: [] },
-  { name: 'Fedora 30', slug: 'fedora-30', multiplier: 3, depends: [] },
+  { name: 'Debian 9', slug: 'debian-9', multiplier: 7, depends: [] },
+  { name: 'Debian 10', slug: 'debian-10', multiplier: 5, depends: [] },
+  { name: 'Fedora 30', slug: 'fedora-30', multiplier: 4, depends: [] },
+  { name: 'Fedora 31', slug: 'fedora-31', multiplier: 3, depends: [] },
   { name: 'Opensuse 15.1', slug: 'opensuse-15', multiplier: 2, depends: [] },
   { name: 'Ubuntu 16.04', slug: 'ubuntu-1604', multiplier: 1, depends: [] },
   { name: 'Ubuntu 18.04', slug: 'ubuntu-1804', multiplier: 0, depends: [] },
@@ -59,11 +60,14 @@ local py3_distros = [
   'ubuntu-1604',
   'ubuntu-1804',
   'fedora-30',
+  'fedora-31',
 ];
 
 local py2_blacklist = [
   'centos-8',
   'debian-10',
+  'fedora-30',
+  'fedora-31',
 ];
 
 local blacklist_2018 = [

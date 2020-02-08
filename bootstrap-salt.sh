@@ -1446,6 +1446,9 @@ __ubuntu_codename_translation() {
         "18")
             DISTRO_CODENAME="bionic"
             ;;
+        "20")
+            DISTRO_CODENAME="focal"
+            ;;
         *)
             DISTRO_CODENAME="trusty"
             ;;
@@ -2578,7 +2581,7 @@ __install_pip_pkgs() {
     if ! __check_command_exists "${_pip_cmd} --version"; then
         __PACKAGES="${_py_pkg}-setuptools ${_py_pkg}-pip gcc"
         # shellcheck disable=SC2086
-        if [ "$DISTRO_NAME_L" = "debian" ];then
+        if [ "$DISTRO_NAME_L" = "debian" ] || [ "$DISTRO_NAME_L" = "ubuntu" ];then
             __PACKAGES="${__PACKAGES} ${_py_pkg}-dev"
             __apt_get_install_noinput ${__PACKAGES} || return 1
         else
@@ -2872,9 +2875,9 @@ __enable_universe_repository() {
 
 __install_saltstack_ubuntu_repository() {
     # Workaround for latest non-LTS ubuntu
-    if [ "$DISTRO_MAJOR_VERSION" -gt 18 ] || \
+    if [ "$DISTRO_MAJOR_VERSION" -eq 19 ] || \
         { [ "$DISTRO_MAJOR_VERSION" -eq 18 ] && [ "$DISTRO_MINOR_VERSION" -eq 10 ]; }; then
-        echowarn "Non-LTS Ubuntu detected, but stable packages requested. Trying packages for latest LTS release. You may experience problems."
+        echowarn "Non-LTS Ubuntu detected, but stable packages requested. Trying packages for previous LTS release. You may experience problems."
         UBUNTU_VERSION=18.04
         UBUNTU_CODENAME="bionic"
     else

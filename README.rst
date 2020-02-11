@@ -20,6 +20,8 @@ This ``README`` file is not the absolute truth as to what the bootstrap script i
 that, please read the generated help by passing ``-h`` to the script or even better,
 `read the source`_.
 
+Also, to secure your Salt installation, check out these instructions for `hardening salt`_.
+
 Bootstrap
 =========
 
@@ -461,6 +463,7 @@ Make edits to .drone.jsonnet and then save them into the .drone.yml by doing the
 .. _`SaltStack's Ubuntu repository`: http://repo.saltstack.com/#ubuntu
 .. _`Ubuntu's release schedule`: https://wiki.ubuntu.com/Releases
 .. _Vagrant: http://www.vagrantup.com
+.. _hardening salt: https://docs.saltstack.com/en/latest/topics/hardening.html
 
 .. |build|  image:: https://drone.saltstack.com/api/badges/saltstack/salt-bootstrap/status.svg
     :target: https://drone.saltstack.com/saltstack/salt-bootstrap

@@ -6217,7 +6217,7 @@ __zypper() {
     if [ "$?" -gt "99" ] && [ "$?" -le "104" ]; then
         return 0
     fi
-  	return $?
+    return $?
 }
 
 __zypper_install() {

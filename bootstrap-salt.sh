@@ -6211,7 +6211,13 @@ __zypper() {
         sleep 1
     done
 
-    zypper --non-interactive "${@}"; return $?
+    zypper --non-interactive "${@}"; 
+    # Return codes between 100 and 104 are only informations, not errors
+    # https://en.opensuse.org/SDB:Zypper_manual#EXIT_CODES
+    if [ "$?" -qt "99" ] && [ "$?" -le "104" ]; then
+        return 0
+    fi
+  	return $?
 }
 
 __zypper_install() {
@@ -6222,22 +6228,7 @@ __zypper_install() {
         # In case of file conflicts replace old files.
         # Option present in zypper 1.10.4 and newer:
         # https://github.com/openSUSE/zypper/blob/95655728d26d6d5aef7796b675f4cc69bc0c05c0/package/zypper.changes#L253
-        __zypper install --auto-agree-with-licenses --replacefiles "${@}"
-
-        # Return codes between 100 and 104 are only informations, not errors
-        # https://en.opensuse.org/SDB:Zypper_manual#EXIT_CODES
-        rc="$?"
-        if [ "$rc" -qt "99" ] && [ "$rc" -le "104" ]; then
-            rc="0"
-        fi
-    	return "$rc"
-    else
-        __zypper install --auto-agree-with-licenses "${@}"
-        rc="$?"
-        if [ "$rc" -qt "99" ] && [ "$rc" -le "104" ]; then
-            rc="0"
-        fi
-    	return "$rc"
+        __zypper install --auto-agree-with-licenses --replacefiles "${@}"; return $?
     fi
 }
 

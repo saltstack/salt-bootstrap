@@ -6214,7 +6214,7 @@ __zypper() {
     zypper --non-interactive "${@}"; 
     # Return codes between 100 and 104 are only informations, not errors
     # https://en.opensuse.org/SDB:Zypper_manual#EXIT_CODES
-    if [ "$?" -qt "99" ] && [ "$?" -le "104" ]; then
+    if [ "$?" -gt "99" ] && [ "$?" -le "104" ]; then
         return 0
     fi
   	return $?

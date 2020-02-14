@@ -1,0 +1,165 @@
+[1mdiff --git a/bootstrap-salt.sh b/bootstrap-salt.sh[m
+[1mindex 7b76fc7..2435316 100755[m
+[1m--- a/bootstrap-salt.sh[m
+[1m+++ b/bootstrap-salt.sh[m
+[36m@@ -1,5 +1,7 @@[m
+ #!/bin/sh -[m
+ [m
+[32m+[m[32m## UCC Version[m
+[32m+[m
+ # WARNING: Changes to this file in the salt repo will be overwritten![m
+ # Please submit pull requests against the salt-bootstrap repo:[m
+ # https://github.com/saltstack/salt-bootstrap[m
+[36m@@ -1609,14 +1611,16 @@[m [m__check_end_of_life_versions() {[m
+             #[m
+             # < 11 SP4[m
+             # < 12 SP2[m
+[31m-            SUSE_PATCHLEVEL=$(awk '/PATCHLEVEL/ {print $3}' /etc/SuSE-release )[m
+[32m+[m[32m            # < 15 SP1[m
+[32m+[m[32m            SUSE_PATCHLEVEL=$(awk -F'=' '/VERSION_ID/ { print $2 }' /etc/os-release | sed 's/[[:digit:]]\+\.//g' )[m
+             if [ "${SUSE_PATCHLEVEL}" = "" ]; then[m
+                 SUSE_PATCHLEVEL="00"[m
+             fi[m
+             if [ "$DISTRO_MAJOR_VERSION" -lt 11 ] || \[m
+                 { [ "$DISTRO_MAJOR_VERSION" -eq 11 ] && [ "$SUSE_PATCHLEVEL" -lt 04 ]; } || \[m
+[32m+[m[32m                { [ "$DISTRO_MAJOR_VERSION" -eq 15 ] && [ "$SUSE_PATCHLEVEL" -lt 01 ]; } || \[m
+                 { [ "$DISTRO_MAJOR_VERSION" -eq 12 ] && [ "$SUSE_PATCHLEVEL" -lt 02 ]; }; then[m
+[31m-                echoerror "Versions lower than SuSE 11 SP4 or 12 SP2 are not supported."[m
+[32m+[m[32m                echoerror "Versions lower than SuSE 11 SP4, 12 SP2 or 15 SP1 are not supported."[m
+                 echoerror "Please consider upgrading to the next stable"[m
+                 echoerror "    https://www.suse.com/lifecycle/"[m
+                 exit 1[m
+[36m@@ -6220,9 +6224,22 @@[m [m__zypper_install() {[m
+         # In case of file conflicts replace old files.[m
+         # Option present in zypper 1.10.4 and newer:[m
+         # https://github.com/openSUSE/zypper/blob/95655728d26d6d5aef7796b675f4cc69bc0c05c0/package/zypper.changes#L253[m
+[31m-        __zypper install --auto-agree-with-licenses --replacefiles "${@}"; return $?[m
+[32m+[m[32m        __zypper install --auto-agree-with-licenses --replacefiles "${@}"[m
+[32m+[m
+[32m+[m[32m        # Return codes between 100 and 104 are only informations, not errors[m
+[32m+[m[32m        # https://en.opensuse.org/SDB:Zypper_manual#EXIT_CODES[m
+[32m+[m[32m        rc="$?"[m
+[32m+[m[32m        if [ "$rc" -qt "99" ] && [ "$rc" -le "104" ]; then[m
+[32m+[m[32m            rc="0"[m
+[32m+[m[32m        fi[m
+[32m+[m[41m    [m	[32mreturn "$rc"[m
+     else[m
+[31m-        __zypper install --auto-agree-with-licenses "${@}"; return $?[m
+[32m+[m[32m        __zypper install --auto-agree-with-licenses "${@}"[m
+[32m+[m[32m        rc="$?"[m
+[32m+[m[32m        if [ "$rc" -qt "99" ] && [ "$rc" -le "104" ]; then[m
+[32m+[m[32m            rc="0"[m
+[32m+[m[32m        fi[m
+[32m+[m[41m    [m	[32mreturn "$rc"[m
+     fi[m
+ }[m
+ [m
+[36m@@ -6578,6 +6595,108 @@[m [minstall_opensuse_15_git() {[m
+ #[m
+ #######################################################################################################################[m
+ [m
+[32m+[m[32m#######################################################################################################################[m
+[32m+[m[32m#[m
+[32m+[m[32m#   SUSE Enterprise 15[m
+[32m+[m[32m#[m
+[32m+[m
+[32m+[m[32minstall_suse_15_stable_deps() {[m
+[32m+[m[32m    __opensuse_prep_install || return 1[m
+[32m+[m
+[32m+[m[32m    # YAML module is used for generating custom master/minion configs[m
+[32m+[m[32m    # requests is still used by many salt modules[m
+[32m+[m[32m    # Salt needs python-zypp installed in order to use the zypper module[m
+[32m+[m[32m    __PACKAGES="python3-PyYAML python3-requests python3-zypp"[m
+[32m+[m
+[32m+[m[32m    if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then[m
+[32m+[m[32m        __PACKAGES="${__PACKAGES} python3-apache-libcloud"[m
+[32m+[m[32m    fi[m
+[32m+[m
+[32m+[m[32m    # shellcheck disable=SC2086,SC2090[m
+[32m+[m[32m    __zypper_install ${__PACKAGES} || return 1[m
+[32m+[m
+[32m+[m[32m    # SLES 11 SP3 ships with both python-M2Crypto-0.22.* and python-m2crypto-0.21 and we will be asked which[m
+[32m+[m[32m    # we want to install, even with --non-interactive.[m
+[32m+[m[32m    # Let's try to install the higher version first and then the lower one in case of failure[m
+[32m+[m[32m    __zypper_install 'python3-M2Crypto>=0.22' || __zypper_install 'python3-M2Crypto>=0.21' || return 1[m
+[32m+[m
+[32m+[m[32m    if [ "${_EXTRA_PACKAGES}" != "" ]; then[m
+[32m+[m[32m        echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"[m
+[32m+[m[32m        # shellcheck disable=SC2086[m
+[32m+[m[32m        __zypper_install ${_EXTRA_PACKAGES} || return 1[m
+[32m+[m[32m    fi[m
+[32m+[m
+[32m+[m[32m    return 0[m
+[32m+[m[32m}[m
+[32m+[m
+[32m+[m[32minstall_suse_15_git_deps() {[m
+[32m+[m[32m    install_suse_15_stable_deps || return 1[m
+[32m+[m
+[32m+[m[32m    if ! __check_command_exists git; then[m
+[32m+[m[32m        __zypper_install git-core  || return 1[m
+[32m+[m[32m    fi[m
+[32m+[m
+[32m+[m[32m    __git_clone_and_checkout || return 1[m
+[32m+[m
+[32m+[m[32m    __PACKAGES=""[m
+[32m+[m[32m    # shellcheck disable=SC2089[m
+[32m+[m[32m    __PACKAGES="${__PACKAGES} libzmq4 python3-Jinja2 python3-msgpack-python python3-pycrypto"[m
+[32m+[m[32m    __PACKAGES="${__PACKAGES} python3-pyzmq python3-xml"[m
+[32m+[m
+[32m+[m[32m    if [ -f "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" ]; then[m
+[32m+[m[32m        # We're on the master branch, install whichever tornado is on the requirements file[m
+[32m+[m[32m        __REQUIRED_TORNADO="$(grep tornado "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt")"[m
+[32m+[m[32m        if [ "${__REQUIRED_TORNADO}" != "" ]; then[m
+[32m+[m[32m            __PACKAGES="${__PACKAGES} python3-tornado"[m
+[32m+[m[32m        fi[m
+[32m+[m[32m    fi[m
+[32m+[m
+[32m+[m[32m    if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then[m
+[32m+[m[32m        __PACKAGES="${__PACKAGES} python3-apache-libcloud"[m
+[32m+[m[32m    fi[m
+[32m+[m
+[32m+[m[32m    # shellcheck disable=SC2086[m
+[32m+[m[32m    __zypper_install ${__PACKAGES} || return 1[m
+[32m+[m
+[32m+[m[32m    # Let's trigger config_salt()[m
+[32m+[m[32m    if [ "$_TEMP_CONFIG_DIR" = "null" ]; then[m
+[32m+[m[32m        _TEMP_CONFIG_DIR="${_SALT_GIT_CHECKOUT_DIR}/conf/"[m
+[32m+[m[32m        CONFIG_SALT_FUNC="config_salt"[m
+[32m+[m[32m    fi[m
+[32m+[m
+[32m+[m[32m    return 0[m
+[32m+[m[32m}[m
+[32m+[m
+[32m+[m[32minstall_suse_15_stable() {[m
+[32m+[m[32m    install_opensuse_stable || return 1[m
+[32m+[m[32m    return 0[m
+[32m+[m[32m}[m
+[32m+[m
+[32m+[m[32minstall_suse_15_git() {[m
+[32m+[m[32m    install_opensuse_git || return 1[m
+[32m+[m[32m    return 0[m
+[32m+[m[32m}[m
+[32m+[m
+[32m+[m[32minstall_suse_15_stable_post() {[m
+[32m+[m[32m    install_opensuse_stable_post || return 1[m
+[32m+[m[32m    return 0[m
+[32m+[m[32m}[m
+[32m+[m
+[32m+[m[32minstall_suse_15_git_post() {[m
+[32m+[m[32m    install_opensuse_git_post || return 1[m
+[32m+[m[32m    return 0[m
+[32m+[m[32m}[m
+[32m+[m
+[32m+[m[32minstall_suse_15_restart_daemons() {[m
+[32m+[m[32m    install_opensuse_restart_daemons || return 1[m
+[32m+[m[32m    return 0[m
+[32m+[m[32m}[m
+[32m+[m
+[32m+[m[32m#[m
+[32m+[m[32m#   End of SUSE Enterprise 15[m
+[32m+[m[32m#[m
+[32m+[m[32m#######################################################################################################################[m
+[32m+[m
+ #######################################################################################################################[m
+ #[m
+ #   SUSE Enterprise 12[m

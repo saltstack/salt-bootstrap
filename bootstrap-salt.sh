@@ -1610,7 +1610,7 @@ __check_end_of_life_versions() {
             # < 11 SP4
             # < 12 SP2
             # < 15 SP1
-            SUSE_PATCHLEVEL=$(awk -F'=' '/VERSION_ID/ { print $2 }' /etc/os-release | sed 's/[[:digit:]]\+\.//g' )
+            SUSE_PATCHLEVEL=$(awk -F'=' '/VERSION_ID/ { print $2 }' /etc/os-release | grep -oP "\.\K\w+")
             if [ "${SUSE_PATCHLEVEL}" = "" ]; then
                 SUSE_PATCHLEVEL="00"
             fi

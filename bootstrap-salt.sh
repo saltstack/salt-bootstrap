@@ -6211,7 +6211,7 @@ __zypper() {
         sleep 1
     done
 
-    zypper --non-interactive "${@}"; 
+    zypper --non-interactive "${@}"
     # Return codes between 100 and 104 are only informations, not errors
     # https://en.opensuse.org/SDB:Zypper_manual#EXIT_CODES
     if [ "$?" -gt "99" ] && [ "$?" -le "104" ]; then
@@ -6229,6 +6229,8 @@ __zypper_install() {
         # Option present in zypper 1.10.4 and newer:
         # https://github.com/openSUSE/zypper/blob/95655728d26d6d5aef7796b675f4cc69bc0c05c0/package/zypper.changes#L253
         __zypper install --auto-agree-with-licenses --replacefiles "${@}"; return $?
+    else
+        __zypper install --auto-agree-with-licenses "${@}"; return $?
     fi
 }
 

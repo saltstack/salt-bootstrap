@@ -6350,16 +6350,12 @@ install_opensuse_stable() {
 }
 
 install_opensuse_git() {
-    if [ -z "$_PY_EXE" ]; then
-        _PY_EXE="python"
-    fi
-
     if [ "${_POST_NEON_INSTALL}" -eq $BS_TRUE ]; then
          __install_salt_from_repo_post_neon "${_PY_EXE}" || return 1
         return 0
     fi
 
-    "${_PY_EXE}" setup.py ${SETUP_PY_INSTALL_ARGS} install --prefix=/usr || return 1
+    python setup.py ${SETUP_PY_INSTALL_ARGS} install --prefix=/usr || return 1
     return 0
 }
 
@@ -6602,11 +6598,12 @@ install_suse_15_stable_deps() {
 }
 
 install_suse_15_git_deps() {
+    install_suse_15_stable_deps || return 1
+
     if ! __check_command_exists git; then
         __zypper_install git-core  || return 1
     fi
 
-    install_suse_15_stable_deps || return 1
     install_opensuse_15_git_deps || return 1
 
     return 0
@@ -6716,7 +6713,7 @@ install_suse_12_git_deps() {
 
 install_suse_12_stable() {
     install_opensuse_stable || return 1
-    return 0    
+    return 0
 }
 
 install_suse_12_git() {

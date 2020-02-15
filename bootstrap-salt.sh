@@ -6596,29 +6596,7 @@ install_opensuse_15_git() {
 
 install_suse_15_stable_deps() {
     __opensuse_prep_install || return 1
-
-    # YAML module is used for generating custom master/minion configs
-    # requests is still used by many salt modules
-    # Salt needs python-zypp installed in order to use the zypper module
-    __PACKAGES="python3-PyYAML python3-requests python3-zypp-plugin"   
-
-    if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
-        __PACKAGES="${__PACKAGES} python3-apache-libcloud"
-    fi
-
-    # shellcheck disable=SC2086,SC2090
-    __zypper_install ${__PACKAGES} || return 1
-
-    # SLES 11 SP3 ships with both python-M2Crypto-0.22.* and python-m2crypto-0.21 and we will be asked which
-    # we want to install, even with --non-interactive.
-    # Let's try to install the higher version first and then the lower one in case of failure
-    __zypper_install 'python3-M2Crypto>=0.22' || __zypper_install 'python3-M2Crypto>=0.21' || return 1
-
-    if [ "${_EXTRA_PACKAGES}" != "" ]; then
-        echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
-        # shellcheck disable=SC2086
-        __zypper_install ${_EXTRA_PACKAGES} || return 1
-    fi
+    install_opensuse_15_stable_deps || return 1
 
     return 0
 }

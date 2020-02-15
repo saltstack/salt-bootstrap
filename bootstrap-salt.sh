@@ -6629,7 +6629,7 @@ install_suse_15_git_deps() {
 
     __PACKAGES=""
     # shellcheck disable=SC2089
-    __PACKAGES="${__PACKAGES} libzmq4 python3-Jinja2 python3-msgpack-python python3-pycrypto"
+    __PACKAGES="${__PACKAGES} libzmq5 python3-Jinja2 python3-msgpack-python python3-pycrypto"
     __PACKAGES="${__PACKAGES} python3-pyzmq python3-xml"
 
     if [ -f "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" ]; then

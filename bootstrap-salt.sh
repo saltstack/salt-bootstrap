@@ -6358,7 +6358,7 @@ install_opensuse_git() {
          __install_salt_from_repo_post_neon "${_PY_EXE}" || return 1
         return 0
     fi
-    
+
     "${_PY_EXE}" setup.py ${SETUP_PY_INSTALL_ARGS} install --prefix=/usr || return 1
     return 0
 }
@@ -6640,8 +6640,7 @@ install_suse_15_stable() {
 }
 
 install_suse_15_git() {
-    _PY_EXE="python3"
-    install_opensuse_git || return 1
+    install_opensuse_15_git || return 1
     return 0
 }
 
@@ -6739,7 +6738,7 @@ install_suse_12_git_deps() {
 
 install_suse_12_stable() {
     install_opensuse_stable || return 1
-    return 0
+    return 0    
 }
 
 install_suse_12_git() {

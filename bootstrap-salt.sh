@@ -6350,13 +6350,16 @@ install_opensuse_stable() {
 }
 
 install_opensuse_git() {
+    if [ -z "$_PY_EXE" ]; then
+        _PY_EXE="python"
+    fi
 
     if [ "${_POST_NEON_INSTALL}" -eq $BS_TRUE ]; then
          __install_salt_from_repo_post_neon "${_PY_EXE}" || return 1
         return 0
     fi
-
-    python setup.py ${SETUP_PY_INSTALL_ARGS} install --prefix=/usr || return 1
+    
+    "${_PY_EXE}" setup.py ${SETUP_PY_INSTALL_ARGS} install --prefix=/usr || return 1
     return 0
 }
 
@@ -6597,7 +6600,7 @@ install_suse_15_stable_deps() {
     # YAML module is used for generating custom master/minion configs
     # requests is still used by many salt modules
     # Salt needs python-zypp installed in order to use the zypper module
-    __PACKAGES="python3-PyYAML python3-requests python3-zypp"
+    __PACKAGES="python3-PyYAML python3-requests python3-zypp-plugin"   
 
     if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
         __PACKAGES="${__PACKAGES} python3-apache-libcloud"
@@ -6621,39 +6624,12 @@ install_suse_15_stable_deps() {
 }
 
 install_suse_15_git_deps() {
-    install_suse_15_stable_deps || return 1
-
     if ! __check_command_exists git; then
         __zypper_install git-core  || return 1
     fi
 
-    __git_clone_and_checkout || return 1
-
-    __PACKAGES=""
-    # shellcheck disable=SC2089
-    __PACKAGES="${__PACKAGES} libzmq5 python3-Jinja2 python3-msgpack-python python3-pycrypto"
-    __PACKAGES="${__PACKAGES} python3-pyzmq python3-xml"
-
-    if [ -f "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" ]; then
-        # We're on the master branch, install whichever tornado is on the requirements file
-        __REQUIRED_TORNADO="$(grep tornado "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt")"
-        if [ "${__REQUIRED_TORNADO}" != "" ]; then
-            __PACKAGES="${__PACKAGES} python3-tornado"
-        fi
-    fi
-
-    if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
-        __PACKAGES="${__PACKAGES} python3-apache-libcloud"
-    fi
-
-    # shellcheck disable=SC2086
-    __zypper_install ${__PACKAGES} || return 1
-
-    # Let's trigger config_salt()
-    if [ "$_TEMP_CONFIG_DIR" = "null" ]; then
-        _TEMP_CONFIG_DIR="${_SALT_GIT_CHECKOUT_DIR}/conf/"
-        CONFIG_SALT_FUNC="config_salt"
-    fi
+    install_suse_15_stable_deps || return 1
+    install_opensuse_15_git_deps || return 1
 
     return 0
 }
@@ -6664,6 +6640,7 @@ install_suse_15_stable() {
 }
 
 install_suse_15_git() {
+    _PY_EXE="python3"
     install_opensuse_git || return 1
     return 0
 }

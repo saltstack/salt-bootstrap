@@ -6350,7 +6350,6 @@ install_opensuse_stable() {
 }
 
 install_opensuse_git() {
-    
     if [ "${_POST_NEON_INSTALL}" -eq $BS_TRUE ]; then
          __install_salt_from_repo_post_neon "${_PY_EXE}" || return 1
         return 0

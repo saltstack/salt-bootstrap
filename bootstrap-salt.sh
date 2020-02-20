@@ -1609,14 +1609,16 @@ __check_end_of_life_versions() {
             #
             # < 11 SP4
             # < 12 SP2
-            SUSE_PATCHLEVEL=$(awk '/PATCHLEVEL/ {print $3}' /etc/SuSE-release )
+            # < 15 SP1
+            SUSE_PATCHLEVEL=$(awk -F'=' '/VERSION_ID/ { print $2 }' /etc/os-release | grep -oP "\.\K\w+")
             if [ "${SUSE_PATCHLEVEL}" = "" ]; then
                 SUSE_PATCHLEVEL="00"
             fi
             if [ "$DISTRO_MAJOR_VERSION" -lt 11 ] || \
                 { [ "$DISTRO_MAJOR_VERSION" -eq 11 ] && [ "$SUSE_PATCHLEVEL" -lt 04 ]; } || \
+                { [ "$DISTRO_MAJOR_VERSION" -eq 15 ] && [ "$SUSE_PATCHLEVEL" -lt 01 ]; } || \
                 { [ "$DISTRO_MAJOR_VERSION" -eq 12 ] && [ "$SUSE_PATCHLEVEL" -lt 02 ]; }; then
-                echoerror "Versions lower than SuSE 11 SP4 or 12 SP2 are not supported."
+                echoerror "Versions lower than SuSE 11 SP4, 12 SP2 or 15 SP1 are not supported."
                 echoerror "Please consider upgrading to the next stable"
                 echoerror "    https://www.suse.com/lifecycle/"
                 exit 1
@@ -6209,7 +6211,13 @@ __zypper() {
         sleep 1
     done
 
-    zypper --non-interactive "${@}"; return $?
+    zypper --non-interactive "${@}"
+    # Return codes between 100 and 104 are only informations, not errors
+    # https://en.opensuse.org/SDB:Zypper_manual#EXIT_CODES
+    if [ "$?" -gt "99" ] && [ "$?" -le "104" ]; then
+        return 0
+    fi
+    return $?
 }
 
 __zypper_install() {
@@ -6342,7 +6350,6 @@ install_opensuse_stable() {
 }
 
 install_opensuse_git() {
-
     if [ "${_POST_NEON_INSTALL}" -eq $BS_TRUE ]; then
          __install_salt_from_repo_post_neon "${_PY_EXE}" || return 1
         return 0
@@ -6575,6 +6582,60 @@ install_opensuse_15_git() {
 
 #
 #   End of openSUSE Leap 15
+#
+#######################################################################################################################
+
+#######################################################################################################################
+#
+#   SUSE Enterprise 15
+#
+
+install_suse_15_stable_deps() {
+    __opensuse_prep_install || return 1
+    install_opensuse_15_stable_deps || return 1
+
+    return 0
+}
+
+install_suse_15_git_deps() {
+    install_suse_15_stable_deps || return 1
+
+    if ! __check_command_exists git; then
+        __zypper_install git-core  || return 1
+    fi
+
+    install_opensuse_15_git_deps || return 1
+
+    return 0
+}
+
+install_suse_15_stable() {
+    install_opensuse_stable || return 1
+    return 0
+}
+
+install_suse_15_git() {
+    install_opensuse_15_git || return 1
+    return 0
+}
+
+install_suse_15_stable_post() {
+    install_opensuse_stable_post || return 1
+    return 0
+}
+
+install_suse_15_git_post() {
+    install_opensuse_git_post || return 1
+    return 0
+}
+
+install_suse_15_restart_daemons() {
+    install_opensuse_restart_daemons || return 1
+    return 0
+}
+
+#
+#   End of SUSE Enterprise 15
 #
 #######################################################################################################################
 

@@ -56,7 +56,7 @@ local stable_distros = [
 
 local py3_distros = [
   'amazon-2',
-  'arch',
+//  'arch',
   'centos-7',
   'centos-8',
   'debian-9',

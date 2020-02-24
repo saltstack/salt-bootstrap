@@ -1,4 +1,7 @@
 Version TBD (In Progress on the Develop Branch):
+	* Fix SLES 15 install (max298) #1431
+	* Fix 3000(Neon) stable install (sblaisot) #1433
+	* Fix Amazon Linux Py3 install (s0undt3ch) #1434
 
 Version 2020.02.04:
 	* Add support for the Salt Neon(3000) release (s0undt3ch) #1424

@@ -147,6 +147,7 @@ RuriRyan                    RuriRyan               ryan@btsoft.eu
 Ryan Walder                 ryanwalder             ryanwalder@ucds.email
 Sam                         sticky-note            sammy.smati@skazy.nc
 Sebastian Wendel            sourceindex
+Sebastien Blaisot           sblaisot
 Sergey Paramonov            serge-p                serg.paramonov@s-vp.com
 Shane Lee                   twangboy               slee@saltstack.com
 Shawn Butts                 shawnbutts

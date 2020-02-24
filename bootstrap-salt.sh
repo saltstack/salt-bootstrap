@@ -5240,7 +5240,12 @@ install_amazon_linux_ami_2_git_deps() {
             # We're on the master branch, install whichever tornado is on the requirements file
             __REQUIRED_TORNADO="$(grep tornado "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt")"
             if [ "${__REQUIRED_TORNADO}" != "" ]; then
-                __PACKAGES="${__PACKAGES} ${pkg_append}${PY_PKG_VER}-tornado"
+                if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq "3" ]; then
+                    __PACKAGES="${__PACKAGES} python3-pip"
+                    __PIP_PACKAGES="${__PIP_PACKAGES} tornado<$_TORNADO_MAX_PY3_VERSION"
+                else
+                    __PACKAGES="${__PACKAGES} ${pkg_append}${PY_PKG_VER}-tornado"
+                fi
             fi
         fi
 

@@ -65,26 +65,13 @@ steps:
   - throttle-build
   - create
 
-- name: Py3 2018.3(Git)
+- name: Py2 3000(Git)
   image: saltstack/drone-salt-bootstrap-testing
   commands:
   - pip install -U pip
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
-  - bundle exec kitchen test py3-git-2018-3-arch
-  environment:
-    DOCKER_HOST: tcp://docker:2375
-  depends_on:
-  - throttle-build
-  - create
-
-- name: Py3 2019.2(Git)
-  image: saltstack/drone-salt-bootstrap-testing
-  commands:
-  - pip install -U pip
-  - pip install -r tests/requirements.txt
-  - bundle install --with docker --without opennebula ec2 windows vagrant
-  - bundle exec kitchen test py3-git-2019-2-arch
+  - bundle exec kitchen test py2-git-3000-arch
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
@@ -116,7 +103,7 @@ steps:
 - name: throttle-build
   image: alpine
   commands:
-  - sh -c 't=72; echo Sleeping 72 seconds; sleep 72'
+  - sh -c 't=120; echo Sleeping 120 seconds; sleep 120'
 
 - name: create
   image: saltstack/drone-salt-bootstrap-testing
@@ -157,6 +144,19 @@ steps:
   - throttle-build
   - create
 
+- name: Py2 3000(Git)
+  image: saltstack/drone-salt-bootstrap-testing
+  commands:
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - bundle exec kitchen test py2-git-3000-amazon-2
+  environment:
+    DOCKER_HOST: tcp://docker:2375
+  depends_on:
+  - throttle-build
+  - create
+
 - name: Py2 2018.3(Stable)
   image: saltstack/drone-salt-bootstrap-testing
   commands:
@@ -183,6 +183,19 @@ steps:
   - throttle-build
   - create
 
+- name: Py2 3000(Stable)
+  image: saltstack/drone-salt-bootstrap-testing
+  commands:
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - bundle exec kitchen test py2-stable-3000-amazon-2
+  environment:
+    DOCKER_HOST: tcp://docker:2375
+  depends_on:
+  - throttle-build
+  - create
+
 - name: Py3 2019.2(Git)
   image: saltstack/drone-salt-bootstrap-testing
   commands:
@@ -196,6 +209,19 @@ steps:
   - throttle-build
   - create
 
+- name: Py3 3000(Git)
+  image: saltstack/drone-salt-bootstrap-testing
+  commands:
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - bundle exec kitchen test py3-git-3000-amazon-2
+  environment:
+    DOCKER_HOST: tcp://docker:2375
+  depends_on:
+  - throttle-build
+  - create
+
 - name: Py3 2019.2(Stable)
   image: saltstack/drone-salt-bootstrap-testing
   commands:
@@ -203,6 +229,19 @@ steps:
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
   - bundle exec kitchen test py3-stable-2019-2-amazon-2
+  environment:
+    DOCKER_HOST: tcp://docker:2375
+  depends_on:
+  - throttle-build
+  - create
+
+- name: Py3 3000(Stable)
+  image: saltstack/drone-salt-bootstrap-testing
+  commands:
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - bundle exec kitchen test py3-stable-3000-amazon-2
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
@@ -234,7 +273,7 @@ steps:
 - name: throttle-build
   image: alpine
   commands:
-  - sh -c 't=72; echo Sleeping 72 seconds; sleep 72'
+  - sh -c 't=108; echo Sleeping 108 seconds; sleep 108'
 
 - name: create
   image: saltstack/drone-salt-bootstrap-testing
@@ -275,6 +314,19 @@ steps:
   - throttle-build
   - create
 
+- name: Py2 3000(Git)
+  image: saltstack/drone-salt-bootstrap-testing
+  commands:
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - bundle exec kitchen test py2-git-3000-centos-6
+  environment:
+    DOCKER_HOST: tcp://docker:2375
+  depends_on:
+  - throttle-build
+  - create
+
 - name: Py2 2018.3(Stable)
   image: saltstack/drone-salt-bootstrap-testing
   commands:
@@ -295,6 +347,19 @@ steps:
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
   - bundle exec kitchen test py2-stable-2019-2-centos-6
+  environment:
+    DOCKER_HOST: tcp://docker:2375
+  depends_on:
+  - throttle-build
+  - create
+
+- name: Py2 3000(Stable)
+  image: saltstack/drone-salt-bootstrap-testing
+  commands:
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - bundle exec kitchen test py2-stable-3000-centos-6
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
@@ -326,7 +391,7 @@ steps:
 - name: throttle-build
   image: alpine
   commands:
-  - sh -c 't=192; echo Sleeping 192 seconds; sleep 192'
+  - sh -c 't=288; echo Sleeping 288 seconds; sleep 288'
 
 - name: create
   image: saltstack/drone-salt-bootstrap-testing
@@ -367,6 +432,19 @@ steps:
   - throttle-build
   - create
 
+- name: Py2 3000(Git)
+  image: saltstack/drone-salt-bootstrap-testing
+  commands:
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - bundle exec kitchen test py2-git-3000-centos-7
+  environment:
+    DOCKER_HOST: tcp://docker:2375
+  depends_on:
+  - throttle-build
+  - create
+
 - name: Py2 2018.3(Stable)
   image: saltstack/drone-salt-bootstrap-testing
   commands:
@@ -387,6 +465,19 @@ steps:
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
   - bundle exec kitchen test py2-stable-2019-2-centos-7
+  environment:
+    DOCKER_HOST: tcp://docker:2375
+  depends_on:
+  - throttle-build
+  - create
+
+- name: Py2 3000(Stable)
+  image: saltstack/drone-salt-bootstrap-testing
+  commands:
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - bundle exec kitchen test py2-stable-3000-centos-7
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
@@ -419,6 +510,19 @@ steps:
   - throttle-build
   - create
 
+- name: Py3 3000(Git)
+  image: saltstack/drone-salt-bootstrap-testing
+  commands:
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - bundle exec kitchen test py3-git-3000-centos-7
+  environment:
+    DOCKER_HOST: tcp://docker:2375
+  depends_on:
+  - throttle-build
+  - create
+
 - name: Py3 2018.3(Stable)
   image: saltstack/drone-salt-bootstrap-testing
   commands:
@@ -439,6 +543,19 @@ steps:
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
   - bundle exec kitchen test py3-stable-2019-2-centos-7
+  environment:
+    DOCKER_HOST: tcp://docker:2375
+  depends_on:
+  - throttle-build
+  - create
+
+- name: Py3 3000(Stable)
+  image: saltstack/drone-salt-bootstrap-testing
+  commands:
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - bundle exec kitchen test py3-stable-3000-centos-7
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
@@ -470,7 +587,7 @@ steps:
 - name: throttle-build
   image: alpine
   commands:
-  - sh -c 't=60; echo Sleeping 60 seconds; sleep 60'
+  - sh -c 't=120; echo Sleeping 120 seconds; sleep 120'
 
 - name: create
   image: saltstack/drone-salt-bootstrap-testing
@@ -498,6 +615,19 @@ steps:
   - throttle-build
   - create
 
+- name: Py3 3000(Git)
+  image: saltstack/drone-salt-bootstrap-testing
+  commands:
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - bundle exec kitchen test py3-git-3000-centos-8
+  environment:
+    DOCKER_HOST: tcp://docker:2375
+  depends_on:
+  - throttle-build
+  - create
+
 - name: Py3 2019.2(Stable)
   image: saltstack/drone-salt-bootstrap-testing
   commands:
@@ -505,6 +635,19 @@ steps:
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
   - bundle exec kitchen test py3-stable-2019-2-centos-8
+  environment:
+    DOCKER_HOST: tcp://docker:2375
+  depends_on:
+  - throttle-build
+  - create
+
+- name: Py3 3000(Stable)
+  image: saltstack/drone-salt-bootstrap-testing
+  commands:
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - bundle exec kitchen test py3-stable-3000-centos-8
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
@@ -536,7 +679,7 @@ steps:
 - name: throttle-build
   image: alpine
   commands:
-  - sh -c 't=144; echo Sleeping 144 seconds; sleep 144'
+  - sh -c 't=216; echo Sleeping 216 seconds; sleep 216'
 
 - name: create
   image: saltstack/drone-salt-bootstrap-testing
@@ -577,6 +720,19 @@ steps:
   - throttle-build
   - create
 
+- name: Py2 3000(Git)
+  image: saltstack/drone-salt-bootstrap-testing
+  commands:
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - bundle exec kitchen test py2-git-3000-debian-8
+  environment:
+    DOCKER_HOST: tcp://docker:2375
+  depends_on:
+  - throttle-build
+  - create
+
 - name: Py2 2018.3(Stable)
   image: saltstack/drone-salt-bootstrap-testing
   commands:
@@ -597,6 +753,19 @@ steps:
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
   - bundle exec kitchen test py2-stable-2019-2-debian-8
+  environment:
+    DOCKER_HOST: tcp://docker:2375
+  depends_on:
+  - throttle-build
+  - create
+
+- name: Py2 3000(Stable)
+  image: saltstack/drone-salt-bootstrap-testing
+  commands:
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - bundle exec kitchen test py2-stable-3000-debian-8
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
@@ -628,7 +797,7 @@ steps:
 - name: throttle-build
   image: alpine
   commands:
-  - sh -c 't=336; echo Sleeping 336 seconds; sleep 336'
+  - sh -c 't=504; echo Sleeping 504 seconds; sleep 504'
 
 - name: create
   image: saltstack/drone-salt-bootstrap-testing
@@ -669,6 +838,19 @@ steps:
   - throttle-build
   - create
 
+- name: Py2 3000(Git)
+  image: saltstack/drone-salt-bootstrap-testing
+  commands:
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - bundle exec kitchen test py2-git-3000-debian-9
+  environment:
+    DOCKER_HOST: tcp://docker:2375
+  depends_on:
+  - throttle-build
+  - create
+
 - name: Py2 2018.3(Stable)
   image: saltstack/drone-salt-bootstrap-testing
   commands:
@@ -689,6 +871,19 @@ steps:
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
   - bundle exec kitchen test py2-stable-2019-2-debian-9
+  environment:
+    DOCKER_HOST: tcp://docker:2375
+  depends_on:
+  - throttle-build
+  - create
+
+- name: Py2 3000(Stable)
+  image: saltstack/drone-salt-bootstrap-testing
+  commands:
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - bundle exec kitchen test py2-stable-3000-debian-9
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
@@ -721,6 +916,19 @@ steps:
   - throttle-build
   - create
 
+- name: Py3 3000(Git)
+  image: saltstack/drone-salt-bootstrap-testing
+  commands:
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - bundle exec kitchen test py3-git-3000-debian-9
+  environment:
+    DOCKER_HOST: tcp://docker:2375
+  depends_on:
+  - throttle-build
+  - create
+
 - name: Py3 2018.3(Stable)
   image: saltstack/drone-salt-bootstrap-testing
   commands:
@@ -741,6 +949,19 @@ steps:
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
   - bundle exec kitchen test py3-stable-2019-2-debian-9
+  environment:
+    DOCKER_HOST: tcp://docker:2375
+  depends_on:
+  - throttle-build
+  - create
+
+- name: Py3 3000(Stable)
+  image: saltstack/drone-salt-bootstrap-testing
+  commands:
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - bundle exec kitchen test py3-stable-3000-debian-9
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
@@ -772,7 +993,7 @@ steps:
 - name: throttle-build
   image: alpine
   commands:
-  - sh -c 't=60; echo Sleeping 60 seconds; sleep 60'
+  - sh -c 't=120; echo Sleeping 120 seconds; sleep 120'
 
 - name: create
   image: saltstack/drone-salt-bootstrap-testing
@@ -800,6 +1021,19 @@ steps:
   - throttle-build
   - create
 
+- name: Py3 3000(Git)
+  image: saltstack/drone-salt-bootstrap-testing
+  commands:
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - bundle exec kitchen test py3-git-3000-debian-10
+  environment:
+    DOCKER_HOST: tcp://docker:2375
+  depends_on:
+  - throttle-build
+  - create
+
 - name: Py3 2019.2(Stable)
   image: saltstack/drone-salt-bootstrap-testing
   commands:
@@ -807,6 +1041,19 @@ steps:
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
   - bundle exec kitchen test py3-stable-2019-2-debian-10
+  environment:
+    DOCKER_HOST: tcp://docker:2375
+  depends_on:
+  - throttle-build
+  - create
+
+- name: Py3 3000(Stable)
+  image: saltstack/drone-salt-bootstrap-testing
+  commands:
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - bundle exec kitchen test py3-stable-3000-debian-10
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
@@ -838,7 +1085,7 @@ steps:
 - name: throttle-build
   image: alpine
   commands:
-  - sh -c 't=96; echo Sleeping 96 seconds; sleep 96'
+  - sh -c 't=144; echo Sleeping 144 seconds; sleep 144'
 
 - name: create
   image: saltstack/drone-salt-bootstrap-testing
@@ -879,6 +1126,19 @@ steps:
   - throttle-build
   - create
 
+- name: Py3 3000(Git)
+  image: saltstack/drone-salt-bootstrap-testing
+  commands:
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - bundle exec kitchen test py3-git-3000-fedora-30
+  environment:
+    DOCKER_HOST: tcp://docker:2375
+  depends_on:
+  - throttle-build
+  - create
+
 - name: Py3 2018.3(Stable)
   image: saltstack/drone-salt-bootstrap-testing
   commands:
@@ -899,6 +1159,19 @@ steps:
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
   - bundle exec kitchen test py3-stable-2019-2-fedora-30
+  environment:
+    DOCKER_HOST: tcp://docker:2375
+  depends_on:
+  - throttle-build
+  - create
+
+- name: Py3 3000(Stable)
+  image: saltstack/drone-salt-bootstrap-testing
+  commands:
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - bundle exec kitchen test py3-stable-3000-fedora-30
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
@@ -930,7 +1203,7 @@ steps:
 - name: throttle-build
   image: alpine
   commands:
-  - sh -c 't=36; echo Sleeping 36 seconds; sleep 36'
+  - sh -c 't=54; echo Sleeping 54 seconds; sleep 54'
 
 - name: create
   image: saltstack/drone-salt-bootstrap-testing
@@ -971,6 +1244,19 @@ steps:
   - throttle-build
   - create
 
+- name: Py3 3000(Git)
+  image: saltstack/drone-salt-bootstrap-testing
+  commands:
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - bundle exec kitchen test py3-git-3000-fedora-31
+  environment:
+    DOCKER_HOST: tcp://docker:2375
+  depends_on:
+  - throttle-build
+  - create
+
 services:
 - name: docker
   image: saltstack/drone-salt-bootstrap-testing
@@ -996,7 +1282,7 @@ steps:
 - name: throttle-build
   image: alpine
   commands:
-  - sh -c 't=24; echo Sleeping 24 seconds; sleep 24'
+  - sh -c 't=36; echo Sleeping 36 seconds; sleep 36'
 
 - name: create
   image: saltstack/drone-salt-bootstrap-testing
@@ -1037,6 +1323,19 @@ steps:
   - throttle-build
   - create
 
+- name: Py2 3000(Git)
+  image: saltstack/drone-salt-bootstrap-testing
+  commands:
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - bundle exec kitchen test py2-git-3000-opensuse-15
+  environment:
+    DOCKER_HOST: tcp://docker:2375
+  depends_on:
+  - throttle-build
+  - create
+
 services:
 - name: docker
   image: saltstack/drone-salt-bootstrap-testing
@@ -1062,7 +1361,7 @@ steps:
 - name: throttle-build
   image: alpine
   commands:
-  - sh -c 't=48; echo Sleeping 48 seconds; sleep 48'
+  - sh -c 't=72; echo Sleeping 72 seconds; sleep 72'
 
 - name: create
   image: saltstack/drone-salt-bootstrap-testing
@@ -1103,6 +1402,19 @@ steps:
   - throttle-build
   - create
 
+- name: Py2 3000(Git)
+  image: saltstack/drone-salt-bootstrap-testing
+  commands:
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - bundle exec kitchen test py2-git-3000-ubuntu-1604
+  environment:
+    DOCKER_HOST: tcp://docker:2375
+  depends_on:
+  - throttle-build
+  - create
+
 - name: Py2 2018.3(Stable)
   image: saltstack/drone-salt-bootstrap-testing
   commands:
@@ -1123,6 +1435,19 @@ steps:
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
   - bundle exec kitchen test py2-stable-2019-2-ubuntu-1604
+  environment:
+    DOCKER_HOST: tcp://docker:2375
+  depends_on:
+  - throttle-build
+  - create
+
+- name: Py2 3000(Stable)
+  image: saltstack/drone-salt-bootstrap-testing
+  commands:
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - bundle exec kitchen test py2-stable-3000-ubuntu-1604
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
@@ -1155,6 +1480,19 @@ steps:
   - throttle-build
   - create
 
+- name: Py3 3000(Git)
+  image: saltstack/drone-salt-bootstrap-testing
+  commands:
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - bundle exec kitchen test py3-git-3000-ubuntu-1604
+  environment:
+    DOCKER_HOST: tcp://docker:2375
+  depends_on:
+  - throttle-build
+  - create
+
 - name: Py3 2018.3(Stable)
   image: saltstack/drone-salt-bootstrap-testing
   commands:
@@ -1175,6 +1513,19 @@ steps:
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
   - bundle exec kitchen test py3-stable-2019-2-ubuntu-1604
+  environment:
+    DOCKER_HOST: tcp://docker:2375
+  depends_on:
+  - throttle-build
+  - create
+
+- name: Py3 3000(Stable)
+  image: saltstack/drone-salt-bootstrap-testing
+  commands:
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - bundle exec kitchen test py3-stable-3000-ubuntu-1604
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
@@ -1247,6 +1598,19 @@ steps:
   - throttle-build
   - create
 
+- name: Py2 3000(Git)
+  image: saltstack/drone-salt-bootstrap-testing
+  commands:
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - bundle exec kitchen test py2-git-3000-ubuntu-1804
+  environment:
+    DOCKER_HOST: tcp://docker:2375
+  depends_on:
+  - throttle-build
+  - create
+
 - name: Py2 2018.3(Stable)
   image: saltstack/drone-salt-bootstrap-testing
   commands:
@@ -1267,6 +1631,19 @@ steps:
   - pip install -r tests/requirements.txt
   - bundle install --with docker --without opennebula ec2 windows vagrant
   - bundle exec kitchen test py2-stable-2019-2-ubuntu-1804
+  environment:
+    DOCKER_HOST: tcp://docker:2375
+  depends_on:
+  - throttle-build
+  - create
+
+- name: Py2 3000(Stable)
+  image: saltstack/drone-salt-bootstrap-testing
+  commands:
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - bundle exec kitchen test py2-stable-3000-ubuntu-1804
   environment:
     DOCKER_HOST: tcp://docker:2375
   depends_on:
@@ -1299,6 +1676,19 @@ steps:
   - throttle-build
   - create
 
+- name: Py3 3000(Git)
+  image: saltstack/drone-salt-bootstrap-testing
+  commands:
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - bundle exec kitchen test py3-git-3000-ubuntu-1804
+  environment:
+    DOCKER_HOST: tcp://docker:2375
+  depends_on:
+  - throttle-build
+  - create
+
 - name: Py3 2018.3(Stable)
   image: saltstack/drone-salt-bootstrap-testing
   commands:
@@ -1325,6 +1715,19 @@ steps:
   - throttle-build
   - create
 
+- name: Py3 3000(Stable)
+  image: saltstack/drone-salt-bootstrap-testing
+  commands:
+  - pip install -U pip
+  - pip install -r tests/requirements.txt
+  - bundle install --with docker --without opennebula ec2 windows vagrant
+  - bundle exec kitchen test py3-stable-3000-ubuntu-1804
+  environment:
+    DOCKER_HOST: tcp://docker:2375
+  depends_on:
+  - throttle-build
+  - create
+
 services:
 - name: docker
   image: saltstack/drone-salt-bootstrap-testing
@@ -1340,6 +1743,6 @@ depends_on:
 
 ---
 kind: signature
-hmac: 08cacaea37ae92bd156f41af4af3c80da1f2aa535bc41a9efe2f2922c7b51e99
+hmac: 541f7de01e4a4321197c3667ecc63abf147d1f7133a819e7bff1cf64ca83a4e0
 
 ...

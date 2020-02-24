@@ -606,7 +606,7 @@ elif [ "$ITYPE" = "stable" ]; then
         if [ "$(echo "$1" | grep -E '^(latest|1\.6|1\.7|2014\.1|2014\.7|2015\.5|2015\.8|2016\.3|2016\.11|2017\.7|2018\.3|2019\.2|3000)$')" != "" ]; then
             STABLE_REV="$1"
             shift
-        elif [ "$(echo "$1" | grep -E '^(2[0-9]*\.[0-9]*\.[0-9]*|[3-9][0-9]*(\.[0-9]*)?)$')" != "" ]; then
+        elif [ "$(echo "$1" | grep -E '^(2[0-9]*\.[0-9]*\.[0-9]*|[3-9][0-9]{3}*(\.[0-9]*)?)$')" != "" ]; then
             if [ "$(uname)" = "Darwin" ]; then
               STABLE_REV="$1"
             else
@@ -5240,7 +5240,12 @@ install_amazon_linux_ami_2_git_deps() {
             # We're on the master branch, install whichever tornado is on the requirements file
             __REQUIRED_TORNADO="$(grep tornado "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt")"
             if [ "${__REQUIRED_TORNADO}" != "" ]; then
-                __PACKAGES="${__PACKAGES} ${pkg_append}${PY_PKG_VER}-tornado"
+                if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq "3" ]; then
+                    __PACKAGES="${__PACKAGES} python3-pip"
+                    __PIP_PACKAGES="${__PIP_PACKAGES} tornado<$_TORNADO_MAX_PY3_VERSION"
+                else
+                    __PACKAGES="${__PACKAGES} ${pkg_append}${PY_PKG_VER}-tornado"
+                fi
             fi
         fi
 

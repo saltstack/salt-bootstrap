@@ -2497,7 +2497,7 @@ __install_pip_deps() {
             echoerror "Pip not installed: required for -a installs"
             exit 1
         fi
-        pip install -U virtualenv
+        pip install -U virtualenv==16.7.3
         __activate_virtualenv || return 1
     else
         echoerror "Must have virtualenv dir specified for -a installs"

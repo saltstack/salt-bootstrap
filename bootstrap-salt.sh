@@ -2516,10 +2516,10 @@ __install_pip_deps() {
         __PIP_PACKAGES="${__PIP_PACKAGES} 'apache-libcloud>=$_LIBCLOUD_MIN_VERSION'"
     fi
 
-    # HACK: msgpack added here to prevent v1.x from getting installed later
-    pip install -U msgpack==0.6.1
     # shellcheck disable=SC2086,SC2090
     pip install -U -r ${requirements_file} ${__PIP_PACKAGES}
+    # HACK: msgpack added here to prevent v1.x from getting installed later
+    pip install -U msgpack==0.6.1
 }   # ----------  end of function __install_pip_deps  ----------
 
 

@@ -384,8 +384,8 @@ The earliest release of Salt that supports Python3 is `2018.3.4`.
 
 Tornado 5/6 Workaround
 ----------------------
-Salt does not support tornado>=5.0 currently. This support will not be added until the neon
-release.  In order to work around this requirement on OSs that no longer have the tornado 4 package
+Salt does not support tornado>=5.0 currently. This support will be included in an upcoming release.
+In order to work around this requirement on OSs that no longer have the tornado 4 package
 available in their repositories we are pip installing tornado<5.0 in the bootstrap script. This
 requires the user to pass -P to the bootstrap script if installing via git to ensure tornado is pip
 installed.  If a user does not pass this argument they will be warned that it is required for the

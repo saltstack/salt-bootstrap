@@ -787,8 +787,7 @@ fi
 
 # Set the python exe if unset and version is >= 2019.2
 if [ "$_PY_EXE" = "" ] && [ "$(echo "$STABLE_REV" | grep -E '^(latest|2019\.2|3000)$')" != "" ]; then
-    which python3 > /dev/null
-    if [ $? -eq 0 ]; then
+    if __check_command_exists python3; then
         _PY_EXE="python3"
         _PY_PKG_VER="python3"
         _PY_MAJOR_VERSION=3

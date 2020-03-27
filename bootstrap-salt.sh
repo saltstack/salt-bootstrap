@@ -1010,7 +1010,8 @@ __gather_linux_system_info() {
             # Skip setting DISTRO_NAME this time, splitting CamelCase has failed.
             # See https://github.com/saltstack/salt-bootstrap/issues/918
             [ "$n" = "$DISTRO_NAME" ] && DISTRO_NAME="" || DISTRO_NAME="$n"
-        elif [ "${DISTRO_NAME}" = "openSUSE project" ]; then
+        elif [ "$( echo "${DISTRO_NAME}" | grep openSUSE )" != "" ]; then
+            # lsb_release -si returns "openSUSE Tumbleweed" on openSUSE tumbleweed
             # lsb_release -si returns "openSUSE project" on openSUSE 12.3
             # lsb_release -si returns "openSUSE" on openSUSE 15.n
             DISTRO_NAME="opensuse"
@@ -1131,7 +1132,7 @@ __gather_linux_system_info() {
                         n="SUSE"
                         v="${rv}"
                         ;;
-                    opensuse-leap  )
+                    opensuse-* )
                         n="opensuse"
                         v="${rv}"
                         ;;
@@ -1736,7 +1737,7 @@ echoinfo "  Distribution: ${DISTRO_NAME} ${DISTRO_VERSION}"
 echo
 
 # Simplify distro name naming on functions
-DISTRO_NAME_L=$(echo "$DISTRO_NAME" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-zA-Z0-9_ ]//g' | sed -Ee 's/([[:space:]])+/_/g')
+DISTRO_NAME_L=$(echo "$DISTRO_NAME" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-zA-Z0-9_ ]//g' | sed -Ee 's/([[:space:]])+/_/g' | sed -Ee 's/tumbleweed//' )
 
 # Simplify version naming on functions
 if [ "$DISTRO_VERSION" = "" ] || [ ${_SIMPLIFY_VERSION} -eq $BS_FALSE ]; then
@@ -6388,7 +6389,7 @@ install_opensuse_stable_post() {
         [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
         [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
 
-        if [ -f /bin/systemctl ]; then
+        if [ -f /bin/systemctl ] || [ -f /usr/bin/systemctl ]; then
             systemctl is-enabled salt-$fname.service || (systemctl preset salt-$fname.service && systemctl enable salt-$fname.service)
             sleep 1
             systemctl daemon-reload

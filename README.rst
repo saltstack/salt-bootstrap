@@ -156,7 +156,7 @@ or with python version 3:
 
 .. code:: console
 
-  python -c 'import urllib.request; print(urllib.request.urlopen("https://bootstrap.saltstack.com").read())' > bootstrap-salt.sh
+  python -c 'import urllib.request; print(urllib.request.urlopen("https://bootstrap.saltstack.com").read().decode("ascii"))' > bootstrap-salt.sh
 
 Install using fetch
 ~~~~~~~~~~~~~~~~~~~

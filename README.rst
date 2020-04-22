@@ -152,6 +152,11 @@ All Python versions should support the following in-line code:
   python -c 'import urllib; print urllib.urlopen("https://bootstrap.saltstack.com").read()' > bootstrap-salt.sh
   sudo sh bootstrap-salt.sh git develop
 
+or with python version 3:
+
+.. code:: console
+
+  python -c 'import urllib.request; print(urllib.request.urlopen("https://bootstrap.saltstack.com").read())' > bootstrap-salt.sh
 
 Install using fetch
 ~~~~~~~~~~~~~~~~~~~

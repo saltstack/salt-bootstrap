@@ -362,7 +362,6 @@ this offering, while limited, is as follows:
 
 - CentOS 7
 - Centos 8
-- Debian 8
 - Debian 9
 - Debian 10
 - Fedora (only git installations)

@@ -145,18 +145,19 @@ If you already have Python installed, ``python 2.7``, then it's as easy as:
   python -m urllib "https://bootstrap.saltstack.com" > bootstrap-salt.sh
   sudo sh bootstrap-salt.sh git develop
 
-All Python versions should support the following in-line code:
+With python version 2, the following in-line code should always work:
 
 .. code:: console
 
   python -c 'import urllib; print urllib.urlopen("https://bootstrap.saltstack.com").read()' > bootstrap-salt.sh
   sudo sh bootstrap-salt.sh git develop
 
-or with python version 3:
+With python version 3:
 
 .. code:: console
 
   python3 -c 'import urllib.request; print(urllib.request.urlopen("https://bootstrap.saltstack.com").read().decode("ascii"))' > bootstrap-salt.sh
+  sudo sh bootstrap-salt.sh git develop
 
 Install using fetch
 ~~~~~~~~~~~~~~~~~~~

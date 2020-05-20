@@ -5698,11 +5698,7 @@ install_freebsd_git_deps() {
 
     if [ "${_POST_NEON_INSTALL}" -eq $BS_FALSE ]; then
 
-        if ! __check_command_exists jq; then
-            /usr/local/sbin/pkg install -y jq || return 1
-        fi
-
-        SALT_DEPENDENCIES=$(/usr/local/sbin/pkg search -R -d --raw-format json py37-salt | jq -r '.deps|keys[]')
+        SALT_DEPENDENCIES=$(/usr/local/sbin/pkg rquery %dn py37-salt)
         # shellcheck disable=SC2086
         /usr/local/sbin/pkg install -y ${SALT_DEPENDENCIES} python || return 1
 

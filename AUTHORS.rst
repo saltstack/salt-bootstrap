@@ -50,6 +50,7 @@ denmat                      denmat
 Denys Havrysh               vutny                  denys.gavrysh@gmail.com
 deployboy                   deployboy
 Diego Woitasen              diegows                diego@flugel.it
+Dmitry Kuzmenko             DmitryKuzmenko         dmitry.kuzmenko@dsr-corporation.com
 EHJ-52n                     EHJ-52n                EHJ-52n@users.noreply.github.com
 ek9                         ek9
 Elias Probst                eliasp

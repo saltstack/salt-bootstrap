@@ -785,7 +785,6 @@ if [ -d "${_VIRTUALENV_DIR}" ]; then
     exit 1
 fi
 
-
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #         NAME:  __fetch_url
 #  DESCRIPTION:  Retrieves a URL and writes it to a given path

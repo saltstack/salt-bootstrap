@@ -138,14 +138,21 @@ def generate_test_jobs():
                 continue
 
             for python_version in ('py2', 'py3'):
-                for bootstrap_type in ('stable', 'git'):
-                    if bootstrap_type == 'stable' and branch == 'master':
-                        continue
-                    if bootstrap_type == 'stable' and distro not in STABLE_DISTROS:
-                        continue
 
-                    if bootstrap_type == 'stable' and branch in STABLE_BRANCH_BLACKLIST:
-                        continue
+                if branch == 'master' and python_version == 'py2':
+                    # Salt's master branch no longer supports Python 2
+                    continue
+
+                for bootstrap_type in ('stable', 'git'):
+                    if bootstrap_type == 'stable':
+                        if branch == 'master':
+                            # For the master branch there's no stable build
+                            continue
+                        if distro not in STABLE_DISTROS:
+                            continue
+
+                        if branch in STABLE_BRANCH_BLACKLIST:
+                            continue
 
                     if branch == '2018-3' and distro in BLACKLIST_2018:
                         continue

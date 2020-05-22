@@ -143,6 +143,13 @@ def generate_test_jobs():
                     # Salt's master branch no longer supports Python 2
                     continue
 
+                try:
+                    if int(branch) >= 3000 and python_version == 'py2':
+                        # Salt's 300X versions no longer supports Python 2
+                        continue
+                except ValueError:
+                    pass
+
                 for bootstrap_type in ('stable', 'git'):
                     if bootstrap_type == 'stable':
                         if branch == 'master':

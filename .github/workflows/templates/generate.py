@@ -69,6 +69,12 @@ SALT_BRANCHES = [
     'latest'
 ]
 
+SALT_POST_3000_BLACKLIST = [
+    'centos-6',
+    'debian-8',
+    'fedora-30',
+]
+
 BRANCH_DISPLAY_NAMES = {
     '2018-3': 'v2018.3',
     '2019-2': 'v2019.2',
@@ -110,6 +116,15 @@ def generate_test_jobs():
 
     for distro in LINUX_DISTROS + OSX + WINDOWS:
         for branch in SALT_BRANCHES:
+
+            if branch == 'master' and distro in SALT_POST_3000_BLACKLIST:
+                continue
+            try:
+                if int(branch) >= 3000 and distro in SALT_POST_3000_BLACKLIST:
+                    continue
+            except ValueError:
+                pass
+
             if branch == 'latest':
                 if distro in LATEST_PKG_BLACKLIST:
                     continue

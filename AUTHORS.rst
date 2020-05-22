@@ -68,6 +68,7 @@ gdm85                       gdm85
 Geoff Garside               geoffgarside           geoff@geoffgarside.co.uk
 George                      aflat                  gstock.public@gmail.com
 ggillies                    ggillies
+Gilles Debunne              gdebunne
 Giuseppe Iannello           giannello              giuseppe.iannello@brokenloop.net
 Gregory Meno                GregMeno               gregory.meno@inktank.com
 Guillaume Derval            GuillaumeDerval        guillaume@guillaumederval.be

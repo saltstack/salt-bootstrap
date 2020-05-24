@@ -28,7 +28,7 @@ Please read the following guidelines before you
 
     ```
     curl -o bootstrap-salt.sh -L https://raw.githubusercontent.com/saltstack/salt-bootstrap/develop/bootstrap-salt.sh
-    sudo sh bootstrap-salt.sh git develop
+    sudo sh bootstrap-salt.sh git master
     ```
 
 3. **Isolate the demonstrable problem** -- make sure that the

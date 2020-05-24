@@ -69,6 +69,12 @@ SALT_BRANCHES = [
     'latest'
 ]
 
+SALT_POST_3000_BLACKLIST = [
+    'centos-6',
+    'debian-8',
+    'fedora-30',
+]
+
 BRANCH_DISPLAY_NAMES = {
     '2018-3': 'v2018.3',
     '2019-2': 'v2019.2',
@@ -110,6 +116,15 @@ def generate_test_jobs():
 
     for distro in LINUX_DISTROS + OSX + WINDOWS:
         for branch in SALT_BRANCHES:
+
+            if branch == 'master' and distro in SALT_POST_3000_BLACKLIST:
+                continue
+            try:
+                if int(branch) >= 3000 and distro in SALT_POST_3000_BLACKLIST:
+                    continue
+            except ValueError:
+                pass
+
             if branch == 'latest':
                 if distro in LATEST_PKG_BLACKLIST:
                     continue
@@ -138,14 +153,28 @@ def generate_test_jobs():
                 continue
 
             for python_version in ('py2', 'py3'):
-                for bootstrap_type in ('stable', 'git'):
-                    if bootstrap_type == 'stable' and branch == 'master':
-                        continue
-                    if bootstrap_type == 'stable' and distro not in STABLE_DISTROS:
-                        continue
 
-                    if bootstrap_type == 'stable' and branch in STABLE_BRANCH_BLACKLIST:
+                if branch == 'master' and python_version == 'py2':
+                    # Salt's master branch no longer supports Python 2
+                    continue
+
+                try:
+                    if int(branch) >= 3000 and python_version == 'py2':
+                        # Salt's 300X versions no longer supports Python 2
                         continue
+                except ValueError:
+                    pass
+
+                for bootstrap_type in ('stable', 'git'):
+                    if bootstrap_type == 'stable':
+                        if branch == 'master':
+                            # For the master branch there's no stable build
+                            continue
+                        if distro not in STABLE_DISTROS:
+                            continue
+
+                        if branch in STABLE_BRANCH_BLACKLIST:
+                            continue
 
                     if branch == '2018-3' and distro in BLACKLIST_2018:
                         continue

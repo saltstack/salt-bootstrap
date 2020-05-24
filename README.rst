@@ -80,7 +80,7 @@ Using ``curl`` to install latest development version from GitHub:
 .. code:: console
 
   curl -o bootstrap-salt.sh -L https://bootstrap.saltstack.com
-  sudo sh bootstrap-salt.sh git develop
+  sudo sh bootstrap-salt.sh git master
 
 If you want to install a specific release version (based on the Git tags):
 
@@ -101,7 +101,7 @@ If all you want is to install a ``salt-master`` using latest Git:
 .. code:: console
 
   curl -o bootstrap-salt.sh -L https://bootstrap.saltstack.com
-  sudo sh bootstrap-salt.sh -M -N git develop
+  sudo sh bootstrap-salt.sh -M -N git master
 
 If your host has Internet access only via HTTP proxy:
 
@@ -143,15 +143,21 @@ If you already have Python installed, ``python 2.7``, then it's as easy as:
 .. code:: console
 
   python -m urllib "https://bootstrap.saltstack.com" > bootstrap-salt.sh
-  sudo sh bootstrap-salt.sh git develop
+  sudo sh bootstrap-salt.sh git master
 
-All Python versions should support the following in-line code:
+With python version 2, the following in-line code should always work:
 
 .. code:: console
 
   python -c 'import urllib; print urllib.urlopen("https://bootstrap.saltstack.com").read()' > bootstrap-salt.sh
-  sudo sh bootstrap-salt.sh git develop
+  sudo sh bootstrap-salt.sh git master
 
+With python version 3:
+
+.. code:: console
+
+  python3 -c 'import urllib.request; print(urllib.request.urlopen("https://bootstrap.saltstack.com").read().decode("ascii"))' > bootstrap-salt.sh
+  sudo sh bootstrap-salt.sh git develop
 
 Install using fetch
 ~~~~~~~~~~~~~~~~~~~
@@ -208,11 +214,11 @@ Using ``wget`` to install your distribution's stable packages:
 
   wget -O - https://bootstrap.saltstack.com | sudo sh
 
-Installing the latest develop branch of Salt:
+Installing the latest master branch of Salt:
 
 .. code:: console
 
-  curl -L https://bootstrap.saltstack.com | sudo sh -s -- git develop
+  curl -L https://bootstrap.saltstack.com | sudo sh -s -- git master
 
 
 Supported Operating Systems
@@ -236,7 +242,7 @@ You also may need to disable repository configuration and allow ``pip`` installa
 
 .. code:: console
 
-  sudo sh bootstrap-salt.sh -r -P git develop
+  sudo sh bootstrap-salt.sh -r -P git master
 
 **NOTE**
 
@@ -301,7 +307,7 @@ in combination with the ``git`` installation method.
 Ubuntu and derivatives
 ~~~~~~~~~~~~~~~~~~~~~~
 
-- KDE neon (based on Ubuntu 16.04)
+- KDE neon (based on Ubuntu 18.04)
 - Linux Mint 17/18
 - Ubuntu 14.04/16.04/18.04 and subsequent non-LTS releases (see below)
 
@@ -362,7 +368,6 @@ this offering, while limited, is as follows:
 
 - CentOS 7
 - Centos 8
-- Debian 8
 - Debian 9
 - Debian 10
 - Fedora (only git installations)

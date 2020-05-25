@@ -1153,7 +1153,7 @@ __install_python() {
         echoinfo "$DISTRO_NAME_L"
         case "$DISTRO_NAME_L" in
             "red_hat"|"centos")
-                __PYTHON_REPO_URL="https://centos${DISTRO_MAJOR_VERSION}.iuscommunity.org/ius-release.rpm"
+                __PYTHON_REPO_URL="https://repo.ius.io/ius-release-el${DISTRO_MAJOR_VERSION}.rpm"
                 ;;
             *)
                 echoerror "Installing a repo to provide a python package is only supported on Redhat/CentOS.

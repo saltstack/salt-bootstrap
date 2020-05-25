@@ -91,6 +91,7 @@ Justin Anderson             justinta               justin.ta@outlook.com
 Justin Findlay              jfindlay               jfindlay@gmail.com
                             kgbsd
 Karl Grzeszczak             karlgrz
+Ken Crowell                 oeuftete               kcrowell@saltstack.com
 Kenneth Wilke               KennethWilke
 Kevin Quinn                 kevinquinnyo           kevin.quinn@totalserversolutions.com
 kiemlicz                    kiemlicz

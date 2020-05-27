@@ -5515,11 +5515,19 @@ install_arch_linux_stable_deps() {
         pacman-db-upgrade || return 1
     fi
 
+    if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 2 ]; then
+        PY_PKG_VER=2
+    else
+        PY_PKG_VER=""
+    fi
+
     # YAML module is used for generating custom master/minion configs
-    pacman -Su --noconfirm --needed python2-yaml
+    # shellcheck disable=SC2086
+    pacman -Su --noconfirm --needed python${PY_PKG_VER}-yaml
 
     if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
-        pacman -Su --noconfirm --needed python2-apache-libcloud || return 1
+        # shellcheck disable=SC2086
+        pacman -Su --noconfirm --needed python${PY_PKG_VER}-apache-libcloud || return 1
     fi
 
     if [ "${_EXTRA_PACKAGES}" != "" ]; then

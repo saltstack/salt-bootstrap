@@ -81,6 +81,7 @@ Jan Heidbrink               jheidbrink
 Jared Bristow               jars99
 Jared E Stroud              jaredestroud           jaredestroud@gmail.com
 Jasper Lievisse Adriaanse   jasperla               jasper@humppa.nl
+Jaydeep                     jay1648
 JD                          decomposite
 Jeff Hui                    jeffh                  jeff@jeffhui.net
 Jeff Strunk                 jstrunk

@@ -693,6 +693,7 @@ if [ -n "$_PY_EXE" ]; then
     echoinfo "Detected -x option. Using $_PY_EXE to install Salt."
 else
     _PY_PKG_VER=""
+    _PY_MAJOR_VERSION=""
 fi
 
 # If the configuration directory or archive does not exist, error out
@@ -2781,6 +2782,18 @@ EOM
     return 0
 }   # ----------  end of function __install_salt_from_repo_post_neon  ----------
 
+
+if [ "${_POST_NEON_INSTALL}" -eq $BS_FALSE ]; then
+    if [ "x${_PY_MAJOR_VERSION}" = "x" ]; then
+        # Default to python 2 for pre Neon installs
+        _PY_MAJOR_VERSION=2
+    fi
+else
+    if [ "x${_PY_MAJOR_VERSION}" = "x" ]; then
+        # Default to python 3 for post Neon install
+        _PY_MAJOR_VERSION=3
+    fi
+fi
 
 #######################################################################################################################
 #
@@ -5193,23 +5206,19 @@ install_amazon_linux_ami_2_git_deps() {
     fi
 
     install_amazon_linux_ami_2_deps || return 1
-    if __check_command_exists python3; then
-            if ! __check_command_exists pip3; then
-                __yum_install_noinput python3-pip
-            fi
-            PIP_EXE='/bin/pip3'
-            _PY_EXE='python3'
-            PY_PKG_VER=3
+
+    if [ "$_PY_MAJOR_VERSION" -eq 2 ]; then
+        PY_PKG_VER=2
+        PIP_EXE='/bin/pip'
     else
-        PIP_EXE='pip'
-        if __check_command_exists python2.7; then
-            if ! __check_command_exists pip2.7; then
-                __yum_install_noinput python2-pip
-            fi
-            PIP_EXE='/bin/pip'
-            _PY_EXE='python2.7'
-            PY_PKG_VER=2
-        fi
+        PY_PKG_VER=3
+        PIP_EXE='/bin/pip3'
+    fi
+    __PACKAGES="python${PY_PKG_VER}-pip"
+
+    if ! __check_command_exists "${PIP_EXE}"; then
+        # shellcheck disable=SC2086
+        __yum_install_noinput ${__PACKAGES} || return 1
     fi
 
     if ! __check_command_exists git; then
@@ -5243,12 +5252,16 @@ install_amazon_linux_ami_2_git_deps() {
             __REQUIRED_TORNADO="$(grep tornado "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt")"
             if [ "${__REQUIRED_TORNADO}" != "" ]; then
                 if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq "3" ]; then
-                    __PACKAGES="${__PACKAGES} python3-pip"
                     __PIP_PACKAGES="${__PIP_PACKAGES} tornado<$_TORNADO_MAX_PY3_VERSION"
                 else
                     __PACKAGES="${__PACKAGES} ${pkg_append}${PY_PKG_VER}-tornado"
                 fi
             fi
+        fi
+
+        if [ "${__PIP_PACKAGES}" != "" ]; then
+            __check_pip_allowed "You need to allow pip based installations (-P) in order to install ${__PIP_PACKAGES}"
+            __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-pip"
         fi
 
         if [ "${__PACKAGES}" != "" ]; then
@@ -5311,7 +5324,6 @@ install_amazon_linux_ami_2_deps() {
         __REPO_FILENAME="saltstack-repo.repo"
         __PY_VERSION_REPO="yum"
         PY_PKG_VER=""
-        _PY_MAJOR_VERSION=$(echo "$_PY_PKG_VER" | cut -c 7)
         repo_label="saltstack-repo"
         repo_name="SaltStack repo for Amazon Linux 2"
         if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 3 ]; then

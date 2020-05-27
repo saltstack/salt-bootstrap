@@ -3379,6 +3379,15 @@ install_debian_deps() {
         __apt_get_upgrade_noinput || return 1
     fi
 
+    if [ "$DISTRO_MAJOR_VERSION" -ge 10 ]; then
+        # Default Debian 10 to Py3
+        if [ "x${_PY_EXE}" = "x" ]; then
+            _PY_EXE=python3
+            _PY_MAJOR_VERSION=3
+            PY_PKG_VER=3
+        fi
+    fi
+
     if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 3 ]; then
         PY_PKG_VER=3
     else

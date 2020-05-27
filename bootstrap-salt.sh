@@ -3813,19 +3813,30 @@ install_fedora_deps() {
 }
 
 install_fedora_stable() {
+    if [ "$STABLE_REV" = "latest" ]; then
+        __SALT_VERSION=""
+    else
+        __SALT_VERSION="$(dnf list --showduplicates salt | grep "$STABLE_REV" | head -n 1 | awk '{print $2}')"
+        if [ "x${__SALT_VERSION}" = "x" ]; then
+            echoerror "Could not find a stable install for Salt ${STABLE_REV}"
+            exit 1
+        fi
+        echoinfo "Installing Stable Package Version ${__SALT_VERSION}"
+        __SALT_VERSION="-${__SALT_VERSION}"
+    fi
     __PACKAGES=""
 
     if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ];then
-        __PACKAGES="${__PACKAGES} salt-cloud"
+        __PACKAGES="${__PACKAGES} salt-cloud${__SALT_VERSION}"
     fi
     if [ "$_INSTALL_MASTER" -eq $BS_TRUE ]; then
-        __PACKAGES="${__PACKAGES} salt-master"
+        __PACKAGES="${__PACKAGES} salt-master${__SALT_VERSION}"
     fi
     if [ "$_INSTALL_MINION" -eq $BS_TRUE ]; then
-        __PACKAGES="${__PACKAGES} salt-minion"
+        __PACKAGES="${__PACKAGES} salt-minion${__SALT_VERSION}"
     fi
     if [ "$_INSTALL_SYNDIC" -eq $BS_TRUE ]; then
-        __PACKAGES="${__PACKAGES} salt-syndic"
+        __PACKAGES="${__PACKAGES} salt-syndic${__SALT_VERSION}"
     fi
 
     # shellcheck disable=SC2086

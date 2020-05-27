@@ -44,15 +44,14 @@ PY2_BLACKLIST = [
     'debian-10',
     'fedora-30',
     'fedora-31',
-    'fedora-32'
+    'fedora-32',
+    'opensuse-15'
 ]
 
 PY3_BLACKLIST = [
-#    'arch',         # Defaults to Py3.8
     'amazon-1',
     'centos-6',
     'debian-8',
-#    'fedora-32'     # Defaults to Py3.8
 ]
 
 BLACKLIST_2018 = [
@@ -88,8 +87,6 @@ STABLE_BRANCH_BLACKLIST = [
 
 LATEST_PKG_BLACKLIST = [
     'arch',         # No packages are built
-#    'centos-8',     # Once Neon is out, this can be removed from here
-#    'debian-10'     # Once Neon is out, this can be removed from here
 ]
 
 DISTRO_DISPLAY_NAMES = {

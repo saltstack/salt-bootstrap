@@ -176,12 +176,9 @@ def generate_test_jobs():
                         if branch in STABLE_BRANCH_BLACKLIST:
                             continue
 
-                        if distro.startswith("fedora"):
-                            if branch == "2018-3":
-                                # There's no 2018.3.x stable builds on Fedora
-                                continue
-                            if distro == "fedora-32" and branch in ("2019-2",):
-                                continue
+                        if distro.startswith("fedora") and branch != "latest":
+                            # Fedora does not keep old builds around
+                            continue
 
                     if branch == '2018-3' and distro in BLACKLIST_2018:
                         continue

@@ -185,7 +185,9 @@ def generate_test_jobs():
                             if distro in ("arch", "fedora-32"):
                                 allowed_branches = ["master"]
                                 try:
-                                    allowed_branches.append(str(int(branch)))
+                                    int_branch = int(branch)
+                                    if int_branch > 3000:
+                                        allowed_branches.append(branch)
                                 except ValueError:
                                     pass
                                 if branch not in allowed_branches:

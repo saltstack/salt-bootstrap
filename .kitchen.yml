@@ -168,7 +168,6 @@ suites:
       salt_version: 3000
       salt_bootstrap_options: -x python3 -MPfq git %s
     excludes:
-      - arch
       - amazon-1
       - centos-6
       - debian-8
@@ -215,12 +214,9 @@ suites:
       salt_version: master
       salt_bootstrap_options: -x python3 -MPfq -D git %s
     excludes:
-      - arch
       - amazon-1
       - centos-6
       - debian-8
-      - fedora-32
-      - opensuse-15
 
   - name: latest
     provisioner:

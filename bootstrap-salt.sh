@@ -2003,6 +2003,12 @@ __rpm_import_gpg() {
     tempfile="$(__temp_gpg_pub)"
 
     __fetch_url "$tempfile" "$url" || return 1
+
+    # At least on CentOS 8, a missing newline at the end causes:
+    #   error: /tmp/salt-gpg-n1gKUb1u.pub: key 1 not an armored public key.
+    # shellcheck disable=SC1003,SC2086
+    sed -i -e '$a\' $tempfile
+
     rpm --import "$tempfile" || return 1
     rm -f "$tempfile"
 
@@ -4107,6 +4113,14 @@ _eof
 install_centos_stable_deps() {
     if [ "$_UPGRADE_SYS" -eq $BS_TRUE ]; then
         yum -y update || return 1
+    fi
+
+    if [ "$DISTRO_MAJOR_VERSION" -ge 8 ]; then
+        # CentOS/RHEL 8 Default to Py3
+        if [ "x${_PY_EXE}" = "x" ]; then
+            _PY_EXE=python3
+            _PY_MAJOR_VERSION=3
+        fi
     fi
 
     if [ "$_DISABLE_REPOS" -eq "$BS_TRUE" ] && [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 3 ]; then

@@ -30,6 +30,7 @@ sum** of the downloaded ``bootstrap-salt.sh`` file.
 
 The SHA256 sum of the ``bootstrap-salt.sh`` file, per release, is:
 
+- 2020.02.24: ``efc46700aca78b8e51d7af9b06293f52ad495f3a8179c6bfb21a8c97ee41f1b7``
 - 2020.02.04: ``ce877651b4938e3480f76b1629f582437f6ca8b73d7199fdb9e905e86fe85b34``
 - 2020.01.29: ``e9afdfa877998c1c7f0e141a6728b33d0d24348e197aab2b9bde4fe6bc6db1b2``
 - 2020.01.21: ``53299aa0dfbf7ab381f3856bb7babfc04a1d6525be11db0b9466277b1e4d0c1a``
@@ -79,7 +80,7 @@ Using ``curl`` to install latest development version from GitHub:
 .. code:: console
 
   curl -o bootstrap-salt.sh -L https://bootstrap.saltstack.com
-  sudo sh bootstrap-salt.sh git develop
+  sudo sh bootstrap-salt.sh git master
 
 If you want to install a specific release version (based on the Git tags):
 
@@ -100,7 +101,7 @@ If all you want is to install a ``salt-master`` using latest Git:
 .. code:: console
 
   curl -o bootstrap-salt.sh -L https://bootstrap.saltstack.com
-  sudo sh bootstrap-salt.sh -M -N git develop
+  sudo sh bootstrap-salt.sh -M -N git master
 
 If your host has Internet access only via HTTP proxy:
 
@@ -142,15 +143,21 @@ If you already have Python installed, ``python 2.7``, then it's as easy as:
 .. code:: console
 
   python -m urllib "https://bootstrap.saltstack.com" > bootstrap-salt.sh
-  sudo sh bootstrap-salt.sh git develop
+  sudo sh bootstrap-salt.sh git master
 
-All Python versions should support the following in-line code:
+With python version 2, the following in-line code should always work:
 
 .. code:: console
 
   python -c 'import urllib; print urllib.urlopen("https://bootstrap.saltstack.com").read()' > bootstrap-salt.sh
-  sudo sh bootstrap-salt.sh git develop
+  sudo sh bootstrap-salt.sh git master
 
+With python version 3:
+
+.. code:: console
+
+  python3 -c 'import urllib.request; print(urllib.request.urlopen("https://bootstrap.saltstack.com").read().decode("ascii"))' > bootstrap-salt.sh
+  sudo sh bootstrap-salt.sh git develop
 
 Install using fetch
 ~~~~~~~~~~~~~~~~~~~
@@ -207,11 +214,11 @@ Using ``wget`` to install your distribution's stable packages:
 
   wget -O - https://bootstrap.saltstack.com | sudo sh
 
-Installing the latest develop branch of Salt:
+Installing the latest master branch of Salt:
 
 .. code:: console
 
-  curl -L https://bootstrap.saltstack.com | sudo sh -s -- git develop
+  curl -L https://bootstrap.saltstack.com | sudo sh -s -- git master
 
 
 Supported Operating Systems
@@ -235,7 +242,7 @@ You also may need to disable repository configuration and allow ``pip`` installa
 
 .. code:: console
 
-  sudo sh bootstrap-salt.sh -r -P git develop
+  sudo sh bootstrap-salt.sh -r -P git master
 
 **NOTE**
 
@@ -300,7 +307,7 @@ in combination with the ``git`` installation method.
 Ubuntu and derivatives
 ~~~~~~~~~~~~~~~~~~~~~~
 
-- KDE neon (based on Ubuntu 16.04)
+- KDE neon (based on Ubuntu 18.04)
 - Linux Mint 17/18
 - Ubuntu 14.04/16.04/18.04 and subsequent non-LTS releases (see below)
 
@@ -361,7 +368,6 @@ this offering, while limited, is as follows:
 
 - CentOS 7
 - Centos 8
-- Debian 8
 - Debian 9
 - Debian 10
 - Fedora (only git installations)
@@ -383,8 +389,8 @@ The earliest release of Salt that supports Python3 is `2018.3.4`.
 
 Tornado 5/6 Workaround
 ----------------------
-Salt does not support tornado>=5.0 currently. This support will not be added until the neon
-release.  In order to work around this requirement on OSs that no longer have the tornado 4 package
+Salt does not support tornado>=5.0 currently. This support will be included in an upcoming release.
+In order to work around this requirement on OSs that no longer have the tornado 4 package
 available in their repositories we are pip installing tornado<5.0 in the bootstrap script. This
 requires the user to pass -P to the bootstrap script if installing via git to ensure tornado is pip
 installed.  If a user does not pass this argument they will be warned that it is required for the

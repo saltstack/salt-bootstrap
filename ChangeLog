@@ -1,5 +1,21 @@
 Version TBD (In Progress on the Develop Branch):
 
+Version 2020.05.28:
+	* Fix Opensuse Tumbleweed (noelmcloughlin) #1441
+	* Remove Debian 8 from Python 3 supported list (jay1648) #1448
+	* Fixed deps parsing for FreeBSD git installs (cedwards) #1462
+	* Added support for the upcoming Sodium release (s0undt3ch) #1466
+	* Fixed KDE Neon detection (ender8282) #1466
+	* Updated README python 2 and 3 installations (gdebunne) #1466
+	* Updated README and CONTRIBUTING to prefer Salt's master branch (DmitryKuzmenko) #1466
+	* Fixed IUS repo addresses (oeuftete) #1469
+	* Updated tests to assert target Python and Salt versions (s0undt3ch) #1470
+	* Fixed Amazon 2 -x support (s0undt3ch) #1470
+	* Fix Fedora stable installs for older releases (s0undt3ch) #1470
+	* Fix CentOS 8 installations (s0undt3ch) #1470
+	* Default Debian 10 to Py3 (s0undt3ch) #1470
+	* Fix Arch Linux installs (s0undt3ch) #1470
+
 Version 2020.02.24:
 	* Fix SLES 15 install (max298) #1431
 	* Fix 3000(Neon) stable install (sblaisot) #1433

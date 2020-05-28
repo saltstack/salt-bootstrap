@@ -1,7 +1,7 @@
   {python_version}-{bootstrap_type}-{branch}-{distro}:
     name: {display_name}
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
 
     needs: lint
 

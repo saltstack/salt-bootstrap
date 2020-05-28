@@ -44,15 +44,14 @@ PY2_BLACKLIST = [
     'debian-10',
     'fedora-30',
     'fedora-31',
-    'fedora-32'
+    'fedora-32',
+    'opensuse-15'
 ]
 
 PY3_BLACKLIST = [
-    'arch',         # Defaults to Py3.8
     'amazon-1',
     'centos-6',
     'debian-8',
-    'fedora-32'     # Defaults to Py3.8
 ]
 
 BLACKLIST_2018 = [
@@ -69,6 +68,12 @@ SALT_BRANCHES = [
     'latest'
 ]
 
+SALT_POST_3000_BLACKLIST = [
+    'centos-6',
+    'debian-8',
+    'fedora-30',
+]
+
 BRANCH_DISPLAY_NAMES = {
     '2018-3': 'v2018.3',
     '2019-2': 'v2019.2',
@@ -82,8 +87,6 @@ STABLE_BRANCH_BLACKLIST = [
 
 LATEST_PKG_BLACKLIST = [
     'arch',         # No packages are built
-    'centos-8',     # Once Neon is out, this can be removed from here
-    'debian-10'     # Once Neon is out, this can be removed from here
 ]
 
 DISTRO_DISPLAY_NAMES = {
@@ -110,6 +113,15 @@ def generate_test_jobs():
 
     for distro in LINUX_DISTROS + OSX + WINDOWS:
         for branch in SALT_BRANCHES:
+
+            if branch == 'master' and distro in SALT_POST_3000_BLACKLIST:
+                continue
+            try:
+                if int(branch) >= 3000 and distro in SALT_POST_3000_BLACKLIST:
+                    continue
+            except ValueError:
+                pass
+
             if branch == 'latest':
                 if distro in LATEST_PKG_BLACKLIST:
                     continue
@@ -138,15 +150,46 @@ def generate_test_jobs():
                 continue
 
             for python_version in ('py2', 'py3'):
+
+                if branch == 'master' and python_version == 'py2':
+                    # Salt's master branch no longer supports Python 2
+                    continue
+
+                try:
+                    if int(branch) >= 3000 and python_version == 'py2':
+                        # Salt's 300X versions no longer supports Python 2
+                        continue
+                except ValueError:
+                    pass
+
                 for bootstrap_type in ('stable', 'git'):
-                    if bootstrap_type == 'stable' and branch == 'master':
-                        continue
-                    if bootstrap_type == 'stable' and distro not in STABLE_DISTROS:
-                        continue
+                    if bootstrap_type == 'stable':
+                        if branch == 'master':
+                            # For the master branch there's no stable build
+                            continue
+                        if distro not in STABLE_DISTROS:
+                            continue
 
-                    if bootstrap_type == 'stable' and branch in STABLE_BRANCH_BLACKLIST:
-                        continue
+                        if branch in STABLE_BRANCH_BLACKLIST:
+                            continue
 
+                        if distro.startswith("fedora") and branch != "latest":
+                            # Fedora does not keep old builds around
+                            continue
+
+                    if bootstrap_type == "git":
+                        if python_version == "py3":
+                            if distro in ("arch", "fedora-32"):
+                                allowed_branches = ["master"]
+                                try:
+                                    int_branch = int(branch)
+                                    if int_branch > 3000:
+                                        allowed_branches.append(branch)
+                                except ValueError:
+                                    pass
+                                if branch not in allowed_branches:
+                                    # Arch and Fedora default to py3.8
+                                    continue
                     if branch == '2018-3' and distro in BLACKLIST_2018:
                         continue
 

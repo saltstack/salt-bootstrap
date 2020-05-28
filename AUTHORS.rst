@@ -50,6 +50,7 @@ denmat                      denmat
 Denys Havrysh               vutny                  denys.gavrysh@gmail.com
 deployboy                   deployboy
 Diego Woitasen              diegows                diego@flugel.it
+Dmitry Kuzmenko             DmitryKuzmenko         dmitry.kuzmenko@dsr-corporation.com
 EHJ-52n                     EHJ-52n                EHJ-52n@users.noreply.github.com
 ek9                         ek9
 Elias Probst                eliasp
@@ -68,6 +69,7 @@ gdm85                       gdm85
 Geoff Garside               geoffgarside           geoff@geoffgarside.co.uk
 George                      aflat                  gstock.public@gmail.com
 ggillies                    ggillies
+Gilles Debunne              gdebunne
 Giuseppe Iannello           giannello              giuseppe.iannello@brokenloop.net
 Gregory Meno                GregMeno               gregory.meno@inktank.com
 Guillaume Derval            GuillaumeDerval        guillaume@guillaumederval.be
@@ -79,15 +81,18 @@ Jan Heidbrink               jheidbrink
 Jared Bristow               jars99
 Jared E Stroud              jaredestroud           jaredestroud@gmail.com
 Jasper Lievisse Adriaanse   jasperla               jasper@humppa.nl
+Jaydeep                     jay1648
 JD                          decomposite
 Jeff Hui                    jeffh                  jeff@jeffhui.net
 Jeff Strunk                 jstrunk
+John Hubbard                ender8282              ender8282@gmail.com
 Jorge Schrauwen             sjorge                 sjorge@blackdot.be
 Juan A. Moyano              wincus                 wincus.public@gmail.com
 Justin Anderson             justinta               justin.ta@outlook.com
 Justin Findlay              jfindlay               jfindlay@gmail.com
                             kgbsd
 Karl Grzeszczak             karlgrz
+Ken Crowell                 oeuftete               kcrowell@saltstack.com
 Kenneth Wilke               KennethWilke
 Kevin Quinn                 kevinquinnyo           kevin.quinn@totalserversolutions.com
 kiemlicz                    kiemlicz

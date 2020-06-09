@@ -1470,10 +1470,11 @@ __debian_derivatives_translation() {
     # If the file does not exist, return
     [ ! -f /etc/os-release ] && return
 
-    DEBIAN_DERIVATIVES="(cumulus_.+|devuan|kali|linuxmint|raspbian|bunsenlabs|turnkey)"
+    DEBIAN_DERIVATIVES="(cumulus|devuan|kali|linuxmint|raspbian|bunsenlabs|turnkey)"
     # Mappings
     cumulus_2_debian_base="7.0"
     cumulus_3_debian_base="8.0"
+    cumulus_4_debian_base="10.0"
     devuan_1_debian_base="8.0"
     devuan_2_debian_base="9.0"
     kali_1_debian_base="7.0"
@@ -1489,7 +1490,7 @@ __debian_derivatives_translation() {
 
     if [ "${match}" != "" ]; then
         case $match in
-            cumulus_*)
+            cumulus*)
                 _major=$(echo "$DISTRO_VERSION" | sed 's/^\([0-9]*\).*/\1/g')
                 _debian_derivative="cumulus"
                 ;;

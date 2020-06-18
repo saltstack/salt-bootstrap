@@ -103,6 +103,9 @@ platforms:
         - systemctl enable sshd.service
     provisioner:
       salt_bootstrap_options: -MPfq -y -x python2 git %s
+  - name: ubuntu-20.04
+    driver_config:
+      run_command: /lib/systemd/systemd
   - name: ubuntu-18.04
     driver_config:
       run_command: /lib/systemd/systemd
@@ -111,9 +114,6 @@ platforms:
       run_command: /lib/systemd/systemd
 
 suites:
-  - name: py2-git-2018-3
-    provisioner:
-      salt_version: 2018.3
   - name: py2-git-2019-2
     provisioner:
       salt_version: 2019.2
@@ -123,16 +123,6 @@ suites:
   - name: py2-git-master
     provisioner:
       salt_version: master
-  - name: py2-stable-2018-3
-    provisioner:
-      salt_version: 2018.3
-      salt_bootstrap_options: -MP stable %s
-    excludes:
-      - arch
-      - opensuse-15
-      - fedora-30
-      - fedora-31
-      - fedora-32
   - name: py2-stable-2019-2
     provisioner:
       salt_version: 2019.2
@@ -143,6 +133,7 @@ suites:
       - fedora-30
       - fedora-31
       - fedora-32
+      - ubuntu-2004
   - name: py2-stable-3000
     provisioner:
       salt_version: 3000
@@ -153,16 +144,8 @@ suites:
       - fedora-30
       - fedora-31
       - fedora-32
+      - ubuntu-2004
 
-  - name: py3-git-2018-3
-    provisioner:
-      salt_version: 2018.3
-      salt_bootstrap_options: -x python3 -MPfq git %s
-    excludes:
-      - amazon-1
-      - centos-6
-      - debian-8
-      - amazon-2
   - name: py3-git-3000
     provisioner:
       salt_version: 3000
@@ -171,6 +154,7 @@ suites:
       - amazon-1
       - centos-6
       - debian-8
+      - ubuntu-2004
   - name: py3-git-2019-2
     provisioner:
       salt_version: 2019.2
@@ -179,16 +163,15 @@ suites:
       - amazon-1
       - centos-6
       - debian-8
-  - name: py3-stable-2018-3
+      - ubuntu-2004
+  - name: py3-git-3001
     provisioner:
-      salt_version: 2018.3
-      salt_bootstrap_options: -x python3 -MP stable %s
+      salt_version: 3001
+      salt_bootstrap_options: -x python3 -MPfq git %s
     excludes:
       - amazon-1
       - centos-6
       - debian-8
-      - opensuse-15
-      - amazon-2
   - name: py3-stable-2019-2
     provisioner:
       salt_version: 2019.2
@@ -199,9 +182,21 @@ suites:
       - debian-8
       - opensuse-15
       - arch
+      - ubuntu-2004
   - name: py3-stable-3000
     provisioner:
       salt_version: 3000
+      salt_bootstrap_options: -x python3 -MP stable %s
+    excludes:
+      - amazon-1
+      - centos-6
+      - debian-8
+      - opensuse-15
+      - arch
+      - ubuntu-2004
+  - name: py3-stable-3001
+    provisioner:
+      salt_version: 3001
       salt_bootstrap_options: -x python3 -MP stable %s
     excludes:
       - amazon-1

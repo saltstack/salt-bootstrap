@@ -792,11 +792,12 @@ fi
 #----------------------------------------------------------------------------------------------------------------------
 __fetch_url() {
     # shellcheck disable=SC2086
-    curl $_CURL_ARGS -L -s -o "$1" "$2" >/dev/null 2>&1        ||
+    curl $_CURL_ARGS -L -s -f -o "$1" "$2" >/dev/null 2>&1     ||
         wget $_WGET_ARGS -q -O "$1" "$2" >/dev/null 2>&1       ||
             fetch $_FETCH_ARGS -q -o "$1" "$2" >/dev/null 2>&1 ||  # FreeBSD
                 fetch -q -o "$1" "$2" >/dev/null 2>&1          ||  # Pre FreeBSD 10
-                    ftp -o "$1" "$2" >/dev/null 2>&1               # OpenBSD
+                    ftp -o "$1" "$2" >/dev/null 2>&1           ||  # OpenBSD
+                        (echoerror "$2 failed to download to $1"; exit 1)
 }
 
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
@@ -3001,6 +3002,15 @@ install_ubuntu_stable_deps() {
         echodebug "On Ubuntu systems we increase the default sleep value to 10."
         echodebug "See https://github.com/saltstack/salt/issues/12248 for more info."
         _SLEEP=10
+    fi
+
+    if [ "$DISTRO_MAJOR_VERSION" -ge 20 ]; then
+        # Default Ubuntu 20.04 to Py3
+        if [ "x${_PY_EXE}" = "x" ]; then
+            _PY_EXE=python3
+            _PY_MAJOR_VERSION=3
+            PY_PKG_VER=3
+        fi
     fi
 
     if [ $_START_DAEMONS -eq $BS_FALSE ]; then

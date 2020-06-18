@@ -4144,10 +4144,9 @@ install_centos_stable_deps() {
     fi
 
     if [ "$_DISABLE_REPOS" -eq "$BS_TRUE" ] && [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 3 ]; then
-        echoerror "Detected -r or -R option while installing Salt packages for Python 3."
-        echoerror "Python 3 packages for Salt require the EPEL repository to be installed."
-        echoerror "The -r and -R options are incompatible with -x and Python 3 bootstrap installs."
-        return 1
+        echowarn "Detected -r or -R option while installing Salt packages for Python 3."
+        echowarn "Python 3 packages for older Salt releases requires the EPEL repository to be installed."
+        echowarn "Installing the EPEL repository automatically is disabled when using the -r or -R options."
     fi
 
     if [ "$_DISABLE_REPOS" -eq "$BS_FALSE" ]; then

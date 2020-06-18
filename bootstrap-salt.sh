@@ -3004,6 +3004,15 @@ install_ubuntu_stable_deps() {
         _SLEEP=10
     fi
 
+    if [ "$DISTRO_MAJOR_VERSION" -ge 20 ]; then
+        # Default Ubuntu 20.04 to Py3
+        if [ "x${_PY_EXE}" = "x" ]; then
+            _PY_EXE=python3
+            _PY_MAJOR_VERSION=3
+            PY_PKG_VER=3
+        fi
+    fi
+
     if [ $_START_DAEMONS -eq $BS_FALSE ]; then
         echowarn "Not starting daemons on Debian based distributions is not working mostly because starting them is the default behaviour."
     fi

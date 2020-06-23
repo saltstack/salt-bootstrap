@@ -20,7 +20,8 @@ LINUX_DISTROS = [
     'fedora-32',
     'opensuse-15',
     'ubuntu-1604',
-    'ubuntu-1804'
+    'ubuntu-1804',
+    'ubuntu-2004',
 ]
 OSX = WINDOWS = []
 
@@ -35,8 +36,10 @@ STABLE_DISTROS = [
     'debian-9',
     'fedora-30',
     'fedora-31',
+    'fedora-32',
     'ubuntu-1604',
     'ubuntu-1804',
+    'ubuntu-2004',
 ]
 
 PY2_BLACKLIST = [
@@ -45,7 +48,8 @@ PY2_BLACKLIST = [
     'fedora-30',
     'fedora-31',
     'fedora-32',
-    'opensuse-15'
+    'opensuse-15',
+    'ubuntu-2004',
 ]
 
 PY3_BLACKLIST = [
@@ -54,16 +58,18 @@ PY3_BLACKLIST = [
     'debian-8',
 ]
 
-BLACKLIST_2018 = [
-    'amazon-2',
-    'centos-8',
-    'debian-10',
+BLACKLIST_2019 = [
+    'ubuntu-2004',
+]
+
+BLACKLIST_3000 = [
+    'ubuntu-2004',
 ]
 
 SALT_BRANCHES = [
-    '2018-3',
     '2019-2',
     '3000',
+    '3001',
     'master',
     'latest'
 ]
@@ -75,9 +81,9 @@ SALT_POST_3000_BLACKLIST = [
 ]
 
 BRANCH_DISPLAY_NAMES = {
-    '2018-3': 'v2018.3',
     '2019-2': 'v2019.2',
     '3000': 'v3000',
+    '3001': 'v3001',
     'master': 'Master',
     'latest': 'Latest'
 }
@@ -104,7 +110,8 @@ DISTRO_DISPLAY_NAMES = {
     'fedora-32': 'Fedora 32',
     'opensuse-15': 'Opensuse 15',
     'ubuntu-1604': 'Ubuntu 16.04',
-    'ubuntu-1804': 'Ubuntu 18.04'
+    'ubuntu-1804': 'Ubuntu 18.04',
+    'ubuntu-2004': 'Ubuntu 20.04',
 }
 
 
@@ -190,7 +197,10 @@ def generate_test_jobs():
                                 if branch not in allowed_branches:
                                     # Arch and Fedora default to py3.8
                                     continue
-                    if branch == '2018-3' and distro in BLACKLIST_2018:
+                    if branch == '2019-2' and distro in BLACKLIST_2019:
+                        continue
+
+                    if branch == '3000' and distro in BLACKLIST_3000:
                         continue
 
                     if python_version == 'py2' and distro in PY2_BLACKLIST:

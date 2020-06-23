@@ -30,7 +30,7 @@ Brandon Clifford            brandon099             brandon.clifford@vivint.com
 Bret Fisher                 BretFisher             bret@fishbrains.com
 Brian Kruger                bkruger99              brian.kruger@elliemae.com
 bruce-one                   bruce-one
-Bryce Larson                bryceml
+Bryce Larson                bryceml                blarson@saltstack.com
 C. R. Oldham                cro                    cr@saltstack.com
 Cam                         camereonsparr
 Charles McLaughlin          cmclaughlin
@@ -45,6 +45,7 @@ Dan Mick                    dmick                  dan.mick@inktank.com
 Daniel Poelzleithner        poelzi
 Daniel Wallace              gtmanfred              danielwallace@gtmanfred.com
 Darko Cerdic                darkocerdic
+Daryl Turner                darylturner            d.turner@arkadin.com
 David J. Felix              DavidJFelix
 denmat                      denmat
 Denys Havrysh               vutny                  denys.gavrysh@gmail.com
@@ -77,6 +78,7 @@ gweis                       gweis
 Henrik Holmboe              holmboe
 Howard Mei                  HowardMei              howardleomei@gmail.com
 James Booth                 absolutejam            vvalentine1337@gmail.com
+Jamie Alessio               jalessio               jamie@stoic.net
 Jan Heidbrink               jheidbrink
 Jared Bristow               jars99
 Jared E Stroud              jaredestroud           jaredestroud@gmail.com

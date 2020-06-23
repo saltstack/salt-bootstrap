@@ -1,5 +1,16 @@
 Version TBD (In Progress on the Develop Branch):
 
+Version 2020.06.23:
+	* Fix for Cumulus Linux 4.1 (darylturner) #1474
+	* Fix file download exit code, improve error message on failed download (bryceml) #1478
+	* Add support for Ubuntu 20.04 (bryceml) #1479
+	* Default Ubuntu 20.04 to Py3 since there isn't a Py2 release for it (bryceml) #1480
+	* Warn instead of exit when using -R and -x python3 on centos to allow installing python3
+	versions of salt on centos from other repos.  Old unsupported releases probably need to
+	manually install epel-release before running the bootstrap script for versions before 2018.3.5
+	and before 2019.2.1 (bryceml) #1482
+	* Start maintaining .sha256 files for the bootstrap script
+
 Version 2020.05.28:
 	* Fix Opensuse Tumbleweed (noelmcloughlin) #1441
 	* Remove Debian 8 from Python 3 supported list (jay1648) #1448

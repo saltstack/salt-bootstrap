@@ -50,6 +50,10 @@ The SHA256 sum of the ``bootstrap-salt.sh`` file, per release, is:
 If you're looking for a *one-liner* to install Salt, please scroll to the bottom and use the
 instructions for `Installing via an Insecure One-Liner`_.
 
+There are also .sha256 files for verifying against in the repo for the stable branch.  You can also
+get the correct sha256 sum for the stable release from https://bootstrap.saltstack.com/sha256 and
+https://winbootstrap.saltstack.com/sha256
+
 Contributing
 ------------
 

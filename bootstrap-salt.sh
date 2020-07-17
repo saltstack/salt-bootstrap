@@ -5746,6 +5746,7 @@ install_arch_check_services() {
 # Using a separate conf step to head for idempotent install...
 __configure_freebsd_pkg_details() {
     _SALT_ETC_DIR="/usr/local/etc/salt"
+    _POST_NEON_PIP_INSTALL_ARGS="--prefix=/usr/local"
 }
 
 install_freebsd_deps() {
@@ -5769,7 +5770,7 @@ install_freebsd_git_deps() {
 
         /usr/local/sbin/pkg install -y py37-requests || return 1
     else
-        /usr/local/sbin/pkg install -y python python-pip python-setuptools || return 1
+        /usr/local/sbin/pkg install -y python py37-pip py37-setuptools libzmq4 libunwind || return 1
     fi
 
     echodebug "Adapting paths to FreeBSD"
@@ -5828,6 +5829,13 @@ install_freebsd_git() {
 
     if [ "${_POST_NEON_INSTALL}" -eq $BS_TRUE ]; then
          __install_salt_from_repo_post_neon "${__PYTHON_PATH}" || return 1
+    for script in salt_api salt_master salt_minion salt_proxy salt_syndic; do
+        __fetch_url "/usr/local/etc/rc.d/${script}" "https://raw.githubusercontent.com/freebsd/freebsd-ports/master/sysutils/py-salt/files/${script}.in" || return 1
+        sed -i '' 's/%%PREFIX%%/\/usr\/local/g' /usr/local/etc/rc.d/${script}
+        sed -i '' "s/%%PYTHON_CMD%%/${__ESCAPED_PYTHON_PATH}/g" /usr/local/etc/rc.d/${script}
+        chmod +x /usr/local/etc/rc.d/${script} || return 1
+    done
+
         return 0
     fi
 

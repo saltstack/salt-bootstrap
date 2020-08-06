@@ -4541,6 +4541,16 @@ install_red_hat_linux_git_deps() {
     return 0
 }
 
+install_red_hat_enterprise_stable_deps() {
+    install_red_hat_linux_stable_deps || return 1
+    return 0
+}
+
+install_red_hat_enterprise_git_deps() {
+    install_red_hat_linux_git_deps || return 1
+    return 0
+}
+
 install_red_hat_enterprise_linux_stable_deps() {
     install_red_hat_linux_stable_deps || return 1
     return 0
@@ -4578,6 +4588,16 @@ install_red_hat_linux_stable() {
 
 install_red_hat_linux_git() {
     install_centos_git || return 1
+    return 0
+}
+
+install_red_hat_enterprise_stable() {
+    install_red_hat_linux_stable || return 1
+    return 0
+}
+
+install_red_hat_enterprise_git() {
+    install_red_hat_linux_git || return 1
     return 0
 }
 
@@ -4623,6 +4643,21 @@ install_red_hat_linux_restart_daemons() {
 
 install_red_hat_linux_git_post() {
     install_centos_git_post || return 1
+    return 0
+}
+
+install_red_hat_enterprise_stable_post() {
+    install_red_hat_linux_stable_post || return 1
+    return 0
+}
+
+install_red_hat_enterprise_restart_daemons() {
+    install_red_hat_linux_restart_daemons || return 1
+    return 0
+}
+
+install_red_hat_enterprise_git_post() {
+    install_red_hat_linux_git_post || return 1
     return 0
 }
 
@@ -4682,6 +4717,21 @@ install_red_hat_linux_testing() {
 }
 
 install_red_hat_linux_testing_post() {
+    install_centos_testing_post || return 1
+    return 0
+}
+
+install_red_hat_enterprise_testing_deps() {
+    install_centos_testing_deps || return 1
+    return 0
+}
+
+install_red_hat_enterprise_testing() {
+    install_centos_testing || return 1
+    return 0
+}
+
+install_red_hat_enterprise_testing_post() {
     install_centos_testing_post || return 1
     return 0
 }

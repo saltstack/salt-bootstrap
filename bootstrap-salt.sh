@@ -296,6 +296,7 @@ __usage() {
                           for packages available at repo.saltstack.com
     - stable [version]    Install a specific version. Only supported for
                           packages available at repo.saltstack.com
+                          To pin a 3xxx minor version, specify it as 3xxx.0
     - testing             RHEL-family specific: configure EPEL testing repo
     - git                 Install from the head of the master branch
     - git [ref]           Install from any git ref (such as a branch, tag, or

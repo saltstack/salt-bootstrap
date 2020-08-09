@@ -606,11 +606,15 @@ elif [ "$ITYPE" = "stable" ]; then
         if [ "$(echo "$1" | grep -E '^(latest|1\.6|1\.7|2014\.1|2014\.7|2015\.5|2015\.8|2016\.3|2016\.11|2017\.7|2018\.3|2019\.2|3000|3001)$')" != "" ]; then
             STABLE_REV="$1"
             shift
-        elif [ "$(echo "$1" | grep -E '^(2[0-9]*\.[0-9]*\.[0-9]*|[3-9][0-9]{3}*(\.[0-9]*)?)$')" != "" ]; then
-            if [ "$(uname)" = "Darwin" ]; then
-              STABLE_REV="$1"
+        elif [ "$(echo "$1" | grep -E '^(2[0-9]*\.[0-9]*\.[0-9]*|[3-9][0-9]{3}(\.[0-9]*)?)$')" != "" ]; then
+            # Handle the 3xxx.0 version as 3xxx archive (pin to minor) and strip the fake ".0" suffix
+            if [ "$(echo "$1" | grep -E '[3-9][0-9]{3}\.0$')" != "" ]; then
+                STABLE_REV=$(echo "$1" | sed -e 's/\.0$//')
             else
-              STABLE_REV="archive/$1"
+                STABLE_REV="$1"
+            fi
+            if [ "$(uname)" != "Darwin" ]; then
+                STABLE_REV="archive/$STABLE_REV"
             fi
             shift
         else

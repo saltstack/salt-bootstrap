@@ -194,6 +194,17 @@ suites:
       - opensuse-15
       - arch
       - ubuntu-2004
+  - name: py3-stable-3000-pin
+    provisioner:
+      salt_version: 3000
+      salt_bootstrap_options: -x python3 -MP stable 3000.0
+    excludes:
+      - amazon-1
+      - centos-6
+      - debian-8
+      - opensuse-15
+      - arch
+      - ubuntu-2004
   - name: py3-stable-3001
     provisioner:
       salt_version: 3001

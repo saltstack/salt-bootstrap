@@ -70,6 +70,7 @@ SALT_BRANCHES = [
     '2019-2',
     '3000',
     '3001',
+    '3001-0',
     'master',
     'latest'
 ]
@@ -84,6 +85,7 @@ BRANCH_DISPLAY_NAMES = {
     '2019-2': 'v2019.2',
     '3000': 'v3000',
     '3001': 'v3001',
+    '3001-0': 'v3001.0',
     'master': 'Master',
     'latest': 'Latest'
 }
@@ -163,7 +165,7 @@ def generate_test_jobs():
                     continue
 
                 try:
-                    if int(branch) >= 3000 and python_version == 'py2':
+                    if int(branch.split('-')[0]) >= 3000 and python_version == 'py2':
                         # Salt's 300X versions no longer supports Python 2
                         continue
                 except ValueError:
@@ -185,6 +187,10 @@ def generate_test_jobs():
                             continue
 
                     if bootstrap_type == "git":
+                        # .0 versions are a virtual version for pinning to the first point release of a major release, such as 3001, there is no git version.
+                        if branch.endswith('-0'):
+                            continue
+
                         if python_version == "py3":
                             if distro in ("arch", "fedora-32"):
                                 allowed_branches = ["master"]

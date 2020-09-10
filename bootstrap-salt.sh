@@ -275,6 +275,7 @@ _POST_NEON_INSTALL=$BS_FALSE
 _MINIMUM_PIP_VERSION="9.0.1"
 _MINIMUM_SETUPTOOLS_VERSION="9.1"
 _POST_NEON_PIP_INSTALL_ARGS="--prefix=/usr"
+_INSTALL_DEPS_ONLY=$BS_FALSE
 
 # Defaults for install arguments
 ITYPE="stable"
@@ -296,7 +297,6 @@ __usage() {
                           for packages available at repo.saltproject.io
     - stable [version]    Install a specific version. Only supported for
                           packages available at repo.saltproject.io
-                          To pin a 3xxx minor version, specify it as 3xxx.0
     - testing             RHEL-family specific: configure EPEL testing repo
     - git                 Install from the head of the master branch
     - git [ref]           Install from any git ref (such as a branch, tag, or
@@ -401,12 +401,17 @@ __usage() {
             sh bootstrap.sh -P -y -x python2.7 git v2017.7.2
         The above will install python27 and install the git version of salt using the
         python2.7 executable. This only works for git and pip installations.
+    -z  Set up the package repository for the target operating system and install salt dependencies,
+        even when no packages are being installed. Automatically sets -N.
+        For example:
+            sh bootstrap.sh -z
+        The above will configure the SaltStack package repository on the server and install dependencies.
 
 EOT
 }   # ----------  end of function __usage  ----------
 
 
-while getopts ':hvnDc:g:Gyx:wk:s:MSNXCPFUKIA:i:Lp:dH:bflV:J:j:rR:aq' opt
+while getopts ':hvnDc:g:Gyx:wk:s:MSNXCPFUKIA:i:Lp:dH:bflV:J:j:rR:aqz' opt
 do
   case "${opt}" in
 
@@ -453,6 +458,7 @@ do
     q )  _QUIET_GIT_INSTALLATION=$BS_TRUE               ;;
     x )  _PY_EXE="$OPTARG"                              ;;
     y )  _INSTALL_PY="$BS_TRUE"                         ;;
+    z )  _INSTALL_DEPS_ONLY=$BS_TRUE                    ;;
 
     \?)  echo
          echoerror "Option does not exist : $OPTARG"
@@ -643,7 +649,7 @@ if [ "$($whoami)" != "root" ]; then
 fi
 
 # Check that we're actually installing one of minion/master/syndic
-if [ "$_INSTALL_MINION" -eq $BS_FALSE ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && [ "$_CONFIG_ONLY" -eq $BS_FALSE ]; then
+if [ "$_INSTALL_MINION" -eq $BS_FALSE ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && [ "$_CONFIG_ONLY" -eq $BS_FALSE ] && [ "$_INSTALL_DEPS_ONLY" -eq $BS_FALSE ]; then
     echowarn "Nothing to install or configure"
     exit 1
 fi
@@ -7966,7 +7972,7 @@ fi
 
 
 # Install dependencies
-if [ ${_NO_DEPS} -eq $BS_FALSE ] && [ $_CONFIG_ONLY -eq $BS_FALSE ]; then
+if [ ${_NO_DEPS} -eq $BS_FALSE ] && [ $_CONFIG_ONLY -eq $BS_FALSE ] && [ $_INSTALL_DEPS_ONLY -eq $BS_TRUE ]; then
     # Only execute function is not in config mode only
     echoinfo "Running ${DEPS_INSTALL_FUNC}()"
     if ! ${DEPS_INSTALL_FUNC}; then
@@ -8033,7 +8039,7 @@ if [ "$PRESEED_MASTER_FUNC" != "null" ] && [ "$_TEMP_KEYS_DIR" != "null" ]; then
 fi
 
 # Install Salt
-if [ "$_CONFIG_ONLY" -eq $BS_FALSE ]; then
+if [ "$_CONFIG_ONLY" -eq $BS_FALSE ] && [ "$_INSTALL_DEPS_ONLY" -eq $BS_FALSE ]; then
     # Only execute function is not in config mode only
     echoinfo "Running ${INSTALL_FUNC}()"
     if ! ${INSTALL_FUNC}; then

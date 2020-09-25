@@ -1806,7 +1806,7 @@ elif [ "${DISTRO_NAME_L}" = "debian" ]; then
   __debian_codename_translation
 fi
 
-if [ "$(echo "${DISTRO_NAME_L}" | grep -E '(debian|ubuntu|centos|red_hat|oracle|scientific|amazon|fedora|macosx)')" = "" ] && [ "$ITYPE" = "stable" ] && [ "$STABLE_REV" != "latest" ]; then
+if [ "$(echo "${DISTRO_NAME_L}" | grep -E '(debian|ubuntu|centos|gentoo|red_hat|oracle|scientific|amazon|fedora|macosx)')" = "" ] && [ "$ITYPE" = "stable" ] && [ "$STABLE_REV" != "latest" ]; then
     echoerror "${DISTRO_NAME} does not have major version pegged packages support"
     exit 1
 fi
@@ -2512,11 +2512,11 @@ __check_services_openbsd() {
 }   # ----------  end of function __check_services_openbsd  ----------
 
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
-#          NAME:  __check_services_alpine
+#          NAME:  __check_services_openrc
 #   DESCRIPTION:  Return 0 or 1 in case the service is enabled or not
 #    PARAMETERS:  servicename
 #----------------------------------------------------------------------------------------------------------------------
-__check_services_alpine() {
+__check_services_openrc() {
     if [ $# -eq 0 ]; then
         echoerror "You need to pass a service name to check!"
         exit 1
@@ -2535,7 +2535,7 @@ __check_services_alpine() {
         echodebug "Service ${servicename} is NOT enabled"
         return 1
     fi
-}   # ----------  end of function __check_services_openbsd  ----------
+}   # ----------  end of function __check_services_openrc  ----------
 
 
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
@@ -5108,7 +5108,7 @@ install_alpine_linux_check_services() {
         [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
         [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
 
-        __check_services_alpine salt-$fname || return 1
+        __check_services_openrc salt-$fname || return 1
     done
 
     return 0
@@ -7004,26 +7004,37 @@ install_suse_check_services() {
 #    Gentoo Install Functions.
 #
 __autounmask() {
-    emerge --autounmask-write --autounmask-only "${@}"; return $?
-}
-
-__emerge() {
-    if [ "$_GENTOO_USE_BINHOST" -eq $BS_TRUE ]; then
-        emerge --getbinpkg "${@}"; return $?
-    fi
-    emerge "${@}"; return $?
-}
-
-__gentoo_config_protection() {
-    # usually it's a good thing to have config files protected by portage, but
+    # Unmask package(s) and accept changes
+    #
+    # Usually it's a good thing to have config files protected by portage, but
     # in this case this would require to interrupt the bootstrapping script at
     # this point, manually merge the changes using etc-update/dispatch-conf/
     # cfg-update and then restart the bootstrapping script, so instead we allow
     # at this point to modify certain config files directly
-    export CONFIG_PROTECT_MASK="${CONFIG_PROTECT_MASK:-} /etc/portage/package.accept_keywords /etc/portage/package.keywords /etc/portage/package.license /etc/portage/package.unmask /etc/portage/package.use"
+    export CONFIG_PROTECT_MASK="${CONFIG_PROTECT_MASK:-}
+        /etc/portage/package.accept_keywords
+        /etc/portage/package.keywords
+        /etc/portage/package.license
+        /etc/portage/package.unmask
+        /etc/portage/package.use"
+    emerge --autounmask --autounmask-continue --autounmask-only --autounmask-write "${@}"; return $?
+}
 
-    # emerge currently won't write to files that aren't there, so we need to ensure their presence
-    touch /etc/portage/package.accept_keywords /etc/portage/package.keywords /etc/portage/package.license /etc/portage/package.unmask /etc/portage/package.use
+__emerge() {
+    EMERGE_FLAGS='-q'
+    if [ "$_ECHO_DEBUG" -eq $BS_TRUE ]; then
+        EMERGE_FLAGS='-v'
+    fi
+
+    # Do not re-emerge packages that are already installed
+    EMERGE_FLAGS="${EMERGE_FLAGS} --noreplace"
+
+    if [ "$_GENTOO_USE_BINHOST" -eq $BS_TRUE ]; then
+        EMERGE_FLAGS="${EMERGE_FLAGS} --getbinpkg"
+    fi
+
+    # shellcheck disable=SC2086
+    emerge ${EMERGE_FLAGS} "${@}"; return $?
 }
 
 __gentoo_pre_dep() {
@@ -7043,52 +7054,142 @@ __gentoo_pre_dep() {
     if [ ! -d /etc/portage ]; then
         mkdir /etc/portage
     fi
+
+    # Enable python 3.6 if installing pre Neon Salt release
+    if [ "${_POST_NEON_INSTALL}" -eq $BS_FALSE ]; then
+        if ! emerge --info | sed 's/.*\(PYTHON_TARGETS="[^"]*"\).*/\1/' | grep -q 'python3_6' ; then
+            echo "PYTHON_TARGETS=\"\${PYTHON_TARGETS} python3_6\"" >> /etc/portage/make.conf
+        fi
+    fi
 }
 
 __gentoo_post_dep() {
-    # ensures dev-lib/crypto++ compiles happily
-    __emerge --oneshot 'sys-devel/libtool'
-    # the -o option asks it to emerge the deps but not the package.
-    __gentoo_config_protection
-
-    if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
-        __autounmask 'dev-python/libcloud'
-        __emerge -v 'dev-python/libcloud'
-    fi
-
-    __autounmask 'dev-python/requests'
-    __autounmask 'app-admin/salt'
-
-    __emerge -vo 'dev-python/requests'
-    __emerge -vo 'app-admin/salt'
-
     if [ "${_EXTRA_PACKAGES}" != "" ]; then
         echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
         # shellcheck disable=SC2086
         __autounmask ${_EXTRA_PACKAGES} || return 1
         # shellcheck disable=SC2086
-        __emerge -v ${_EXTRA_PACKAGES} || return 1
+        __emerge ${_EXTRA_PACKAGES} || return 1
     fi
+
+    return 0
 }
 
 install_gentoo_deps() {
     __gentoo_pre_dep || return 1
+
+    # Make sure that the 'libcloud' use flag is set when Salt Cloud support is requested
+    if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
+        SALT_USE_FILE='/etc/portage/package.use'
+        if [ -d '/etc/portage/package.use' ]; then
+            SALT_USE_FILE='/etc/portage/package.use/salt'
+        fi
+
+        SALT_USE_FLAGS="$(grep -E '^[<>=~]*app-admin/salt.*' ${SALT_USE_FILE} 2>/dev/null)"
+        SALT_USE_FLAG_LIBCLOUD="$(echo "${SALT_USE_FLAGS}" | grep ' libcloud' 2>/dev/null)"
+
+        # Set the libcloud use flag, if it is not set yet
+        if [ -z "${SALT_USE_FLAGS}" ]; then
+            echo "app-admin/salt libcloud" >> ${SALT_USE_FILE}
+        elif [ -z "${SALT_USE_FLAG_LIBCLOUD}" ]; then
+            sed 's#^\([<>=~]*app-admin/salt[^ ]*\)\(.*\)#\1 libcloud\2#g' -i ${SALT_USE_FILE}
+        fi
+    fi
+
     __gentoo_post_dep || return 1
 }
 
 install_gentoo_git_deps() {
     __gentoo_pre_dep || return 1
+
+    GENTOO_GIT_PACKAGES=""
+
+    # Install pip if it does not exist
+    if ! __check_command_exists pip ; then
+        GENTOO_GIT_PACKAGES="${GENTOO_GIT_PACKAGES} dev-python/pip"
+    fi
+
+    # Install GIT if it does not exist
+    if ! __check_command_exists git ; then
+        GENTOO_GIT_PACKAGES="${GENTOO_GIT_PACKAGES} dev-vcs/git"
+    fi
+
+    # Salt <3000 does not automatically install dependencies. It has to be done manually.
+    if [ "${_POST_NEON_INSTALL}" -eq $BS_FALSE ]; then
+        # Install Python 3.6 if it does not exist
+        if ! __check_command_exists python3.6 ; then
+            GENTOO_GIT_PACKAGES="${GENTOO_GIT_PACKAGES} dev-lang/python:3.6"
+        fi
+
+        GENTOO_GIT_PACKAGES="${GENTOO_GIT_PACKAGES}
+            sys-apps/pciutils
+            dev-python/pyyaml
+            dev-python/pyzmq
+            dev-python/libnacl
+            dev-python/pycryptodome
+            dev-python/py
+            dev-python/requests
+            dev-python/msgpack
+            dev-python/jinja
+            dev-python/pyasn1
+            dev-python/markupsafe
+            dev-python/cython
+            dev-python/six
+            dev-python/idna
+            dev-python/pycurl
+            <www-servers/tornado-5.0"
+    fi
+
+    # Install libcloud when Salt Cloud support was requested
+    if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
+        GENTOO_GIT_PACKAGES="${GENTOO_GIT_PACKAGES} dev-python/libcloud"
+    fi
+
+    if [ -n "${GENTOO_GIT_PACKAGES}" ]; then
+        # shellcheck disable=SC2086
+        __autounmask ${GENTOO_GIT_PACKAGES} || return 1
+        # shellcheck disable=SC2086
+        __emerge ${GENTOO_GIT_PACKAGES} || return 1
+    fi
+
+    __git_clone_and_checkout || return 1
     __gentoo_post_dep || return 1
 }
 
 install_gentoo_stable() {
-    __gentoo_config_protection
-    __emerge -v 'app-admin/salt' || return 1
+    GENTOO_SALT_PACKAGE="app-admin/salt"
+
+    STABLE_REV_WITHOUT_PREFIX=$(echo "${STABLE_REV}" | sed 's#archive/##')
+    if [ "${STABLE_REV_WITHOUT_PREFIX}" != "latest" ]; then
+        GENTOO_SALT_PACKAGE="=app-admin/salt-${STABLE_REV_WITHOUT_PREFIX}*"
+    fi
+
+    # shellcheck disable=SC2086
+    __autounmask ${GENTOO_SALT_PACKAGE} || return 1
+    # shellcheck disable=SC2086
+    __emerge ${GENTOO_SALT_PACKAGE} || return 1
 }
 
 install_gentoo_git() {
-    __gentoo_config_protection
-    __emerge -v '=app-admin/salt-9999' || return 1
+    if [ "${_POST_NEON_INSTALL}" -eq $BS_TRUE ]; then
+        __install_salt_from_repo_post_neon "${_PY_EXE}" || return 1
+        return 0
+    fi
+
+    # Tornado 4.3 ebuild supports only Python 3.6, use Python 3.6 as the default Python 3 interpreter
+    if [ "$_PY_EXE" = "python3" ] || [ -z "$_PY_EXE" ]; then
+        _PYEXE=python3.6
+    else
+        _PYEXE=${_PY_EXE}
+    fi
+
+    if [ -f "${_SALT_GIT_CHECKOUT_DIR}/salt/syspaths.py" ]; then
+        "${_PYEXE}" setup.py --salt-config-dir="$_SALT_ETC_DIR" --salt-cache-dir="${_SALT_CACHE_DIR}" ${SETUP_PY_INSTALL_ARGS} install || return 1
+    else
+        "${_PYEXE}" setup.py ${SETUP_PY_INSTALL_ARGS} install || return 1
+    fi
+
+    return 0
 }
 
 install_gentoo_post() {
@@ -7101,47 +7202,84 @@ install_gentoo_post() {
         [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
         [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
 
-        if [ -d "/run/systemd/system" ]; then
-            systemctl enable salt-$fname.service
-            systemctl start salt-$fname.service
+        if __check_command_exists systemctl ; then
+            systemctl is-enabled salt-$fname.service > /dev/null 2>&1 || (
+                systemctl preset salt-$fname.service > /dev/null 2>&1 &&
+                systemctl enable salt-$fname.service > /dev/null 2>&1
+            )
         else
-            rc-update add salt-$fname default
-            /etc/init.d/salt-$fname start
+            # Salt minion cannot start in a docker container because the "net" service is not available
+            if [ $fname = "minion" ] && [ -f /.dockerenv ]; then
+                sed '/need net/d' -i /etc/init.d/salt-$fname
+            fi
+
+            rc-update add "salt-$fname" > /dev/null 2>&1 || return 1
         fi
     done
+}
+
+install_gentoo_git_post() {
+    for fname in api master minion syndic; do
+        # Skip if not meant to be installed
+        [ $fname = "api" ] && \
+            ([ "$_INSTALL_MASTER" -eq $BS_FALSE ] || ! __check_command_exists "salt-${fname}") && continue
+        [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
+        [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
+        [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
+
+        if __check_command_exists systemctl ; then
+            __copyfile "${_SALT_GIT_CHECKOUT_DIR}/pkg/salt-${fname}.service" "/lib/systemd/system/salt-${fname}.service"
+
+            # Skip salt-api since the service should be opt-in and not necessarily started on boot
+            [ $fname = "api" ] && continue
+
+            systemctl is-enabled salt-$fname.service > /dev/null 2>&1 || (
+                systemctl preset salt-$fname.service > /dev/null 2>&1 &&
+                systemctl enable salt-$fname.service > /dev/null 2>&1
+            )
+        else
+            cat <<_eof > "/etc/init.d/salt-${fname}"
+#!/sbin/openrc-run
+# Copyright 1999-2015 Gentoo Foundation
+# Distributed under the terms of the GNU General Public License v2
+
+command="/usr/bin/salt-${fname}"
+command_args="\${SALT_OPTS}"
+command_background="1"
+pidfile="/var/run/salt-${fname}.pid"
+name="SALT ${fname} daemon"
+retry="20"
+
+depend() {
+        use net logger
+}
+_eof
+            chmod +x /etc/init.d/salt-$fname
+
+            cat <<_eof > "/etc/conf.d/salt-${fname}"
+# /etc/conf.d/salt-${fname}: config file for /etc/init.d/salt-master
+
+# see man pages for salt-${fname} or run 'salt-${fname} --help'
+# for valid cmdline options
+SALT_OPTS="--log-level=warning"
+_eof
+
+            # Skip salt-api since the service should be opt-in and not necessarily started on boot
+            [ $fname = "api" ] && continue
+
+            rc-update add "salt-$fname" > /dev/null 2>&1 || return 1
+        fi
+    done
+
+    return 0
 }
 
 install_gentoo_restart_daemons() {
     [ $_START_DAEMONS -eq $BS_FALSE ] && return
 
-    for fname in api master minion syndic; do
-        # Skip salt-api since the service should be opt-in and not necessarily started on boot
-        [ $fname = "api" ] && continue
-
-        # Skip if not meant to be installed
-        [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
-        [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
-        [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
-
-        if [ -d "/run/systemd/system" ]; then
-            systemctl stop salt-$fname > /dev/null 2>&1
-            systemctl start salt-$fname.service && continue
-            echodebug "Failed to start salt-$fname using systemd"
-            if [ "$_ECHO_DEBUG" -eq $BS_TRUE ]; then
-                systemctl status salt-$fname.service
-                journalctl -xe
-            fi
-        else
-            /etc/init.d/salt-$fname stop > /dev/null 2>&1
-            /etc/init.d/salt-$fname start
-        fi
-    done
-}
-
-install_gentoo_check_services() {
-    if [ ! -d "/run/systemd/system" ]; then
-        # Not running systemd!? Don't check!
-        return 0
+    # Ensure upstart configs / systemd units are loaded
+    if __check_command_exists systemctl ; then
+        systemctl daemon-reload
     fi
 
     for fname in api master minion syndic; do
@@ -7153,7 +7291,39 @@ install_gentoo_check_services() {
         [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
         [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
 
-        __check_services_systemd salt-$fname || return 1
+        if __check_command_exists systemctl ; then
+            systemctl stop salt-$fname > /dev/null 2>&1
+            systemctl start salt-$fname.service && continue
+            echodebug "Failed to start salt-$fname using systemd"
+            if [ "$_ECHO_DEBUG" -eq $BS_TRUE ]; then
+                systemctl status salt-$fname.service
+                journalctl -xe
+            fi
+        else
+            # Disable stdin to fix shell session hang on killing tee pipe
+            rc-service salt-$fname stop < /dev/null > /dev/null 2>&1
+            rc-service salt-$fname start < /dev/null || return 1
+        fi
+    done
+
+    return 0
+}
+
+install_gentoo_check_services() {
+    for fname in api master minion syndic; do
+        # Skip salt-api since the service should be opt-in and not necessarily started on boot
+        [ $fname = "api" ] && continue
+
+        # Skip if not meant to be installed
+        [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
+        [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
+        [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
+
+        if __check_command_exists systemctl ; then
+            __check_services_systemd salt-$fname || return 1
+        else
+            __check_services_openrc salt-$fname || return 1
+        fi
     done
 
     return 0

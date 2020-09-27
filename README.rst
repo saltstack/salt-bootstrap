@@ -227,6 +227,27 @@ Installing the latest master branch of Salt:
   curl -L https://bootstrap.saltstack.com | sudo sh -s -- git master
 
 
+Install on Windows
+~~~~~~~~~~~~~~~~~~
+
+Using ``PowerShell`` to install latest stable version:
+
+.. code:: console
+
+  Invoke-WebRequest -Uri https://winbootstrap.saltstack.com -OutFile C:\Temp\bootstrap-salt.ps1
+  Set-ExecutionPolicy -ExecutionPolicy Unrestricted -Scope CurrentUser
+  C:\Temp\bootstrap-salt.ps1
+  Set-ExecutionPolicy -ExecutionPolicy Undefined -Scope CurrentUser
+
+
+Using ``cygwin`` to install latest stable version:
+
+.. code:: console
+
+  curl -o bootstrap-salt.ps1 -L https://winbootstrap.saltstack.com
+  "/cygdrive/c/WINDOWS/System32/WindowsPowerShell/v1.0/powershell.exe" -NoProfile -InputFormat None -ExecutionPolicy Bypass -Command "[System.Net.ServicePointManager]::SecurityProtocol = 3072; iex ./bootstrap-salt.ps1"
+
+
 Supported Operating Systems
 ---------------------------
 

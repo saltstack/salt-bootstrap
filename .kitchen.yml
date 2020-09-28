@@ -98,14 +98,12 @@ platforms:
       image: gentoo/stage3:latest
       run_command: /sbin/init
       provision_command:
-        - emerge-webrsync
         - rc-update add sshd default
   - name: gentoo-systemd
     driver_config:
       image: gentoo/stage3:systemd
       run_command: /lib/systemd/systemd
       provision_command:
-        - emerge-webrsync
         - systemctl enable sshd.service
   - name: opensuse-15
     driver_config:

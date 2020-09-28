@@ -7056,7 +7056,7 @@ __gentoo_pre_dep() {
     fi
 
     # Enable python 3.6 if installing pre Neon Salt release
-    if [ "${_POST_NEON_INSTALL}" -eq $BS_FALSE ]; then
+    if echo "${STABLE_REV}" | grep -q "2019" ; then
         if ! emerge --info | sed 's/.*\(PYTHON_TARGETS="[^"]*"\).*/\1/' | grep -q 'python3_6' ; then
             echo "PYTHON_TARGETS=\"\${PYTHON_TARGETS} python3_6\"" >> /etc/portage/make.conf
         fi

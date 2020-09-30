@@ -93,6 +93,18 @@ platforms:
       run_command: /usr/lib/systemd/systemd
       provision_command:
         - dnf -y install procps-ng
+  - name: gentoo
+    driver_config:
+      image: gentoo/stage3:latest
+      run_command: /sbin/init
+      provision_command:
+        - rc-update add sshd default
+  - name: gentoo-systemd
+    driver_config:
+      image: gentoo/stage3:systemd
+      run_command: /lib/systemd/systemd
+      provision_command:
+        - systemctl enable sshd.service
   - name: opensuse-15
     driver_config:
       image: opensuse/leap:15.1
@@ -117,12 +129,21 @@ suites:
   - name: py2-git-2019-2
     provisioner:
       salt_version: 2019.2
+    excludes:
+      - gentoo
+      - gentoo-systemd
   - name: py2-git-3000
     provisioner:
       salt_version: 3000
+    excludes:
+      - gentoo
+      - gentoo-systemd
   - name: py2-git-master
     provisioner:
       salt_version: master
+    excludes:
+      - gentoo
+      - gentoo-systemd
   - name: py2-stable-2019-2
     provisioner:
       salt_version: 2019.2
@@ -133,6 +154,8 @@ suites:
       - fedora-30
       - fedora-31
       - fedora-32
+      - gentoo
+      - gentoo-systemd
       - ubuntu-2004
   - name: py2-stable-3000
     provisioner:
@@ -144,6 +167,8 @@ suites:
       - fedora-30
       - fedora-31
       - fedora-32
+      - gentoo
+      - gentoo-systemd
       - ubuntu-2004
 
   - name: py3-git-3000

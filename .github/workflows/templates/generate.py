@@ -18,6 +18,8 @@ LINUX_DISTROS = [
     'fedora-30',
     'fedora-31',
     'fedora-32',
+    'gentoo',
+    'gentoo-systemd',
     'opensuse-15',
     'ubuntu-1604',
     'ubuntu-1804',
@@ -37,6 +39,8 @@ STABLE_DISTROS = [
     'fedora-30',
     'fedora-31',
     'fedora-32',
+    'gentoo',
+    'gentoo-systemd',
     'ubuntu-1604',
     'ubuntu-1804',
     'ubuntu-2004',
@@ -48,6 +52,8 @@ PY2_BLACKLIST = [
     'fedora-30',
     'fedora-31',
     'fedora-32',
+    'gentoo',
+    'gentoo-systemd',
     'opensuse-15',
     'ubuntu-2004',
 ]
@@ -110,17 +116,26 @@ DISTRO_DISPLAY_NAMES = {
     'fedora-30': 'Fedora 30',
     'fedora-31': 'Fedora 31',
     'fedora-32': 'Fedora 32',
+    'gentoo': 'Gentoo',
+    'gentoo-systemd': 'Gentoo (systemd)',
     'opensuse-15': 'Opensuse 15',
     'ubuntu-1604': 'Ubuntu 16.04',
     'ubuntu-1804': 'Ubuntu 18.04',
     'ubuntu-2004': 'Ubuntu 20.04',
 }
 
+TIMEOUT_DEFAULT = 20
+TIMEOUT_OVERRIDES = {
+    'gentoo': 45,
+    'gentoo-systemd': 45,
+}
 
 def generate_test_jobs():
     test_jobs = ''
 
     for distro in LINUX_DISTROS + OSX + WINDOWS:
+        timeout_minutes = TIMEOUT_OVERRIDES[distro] if distro in TIMEOUT_OVERRIDES else TIMEOUT_DEFAULT
+
         for branch in SALT_BRANCHES:
 
             if branch == 'master' and distro in SALT_POST_3000_BLACKLIST:
@@ -153,7 +168,8 @@ def generate_test_jobs():
                             branch=branch,
                             display_name='{} Latest packaged release'.format(
                                 DISTRO_DISPLAY_NAMES[distro],
-                            )
+                            ),
+                            timeout_minutes=timeout_minutes
                         )
                     )
                 continue
@@ -236,7 +252,8 @@ def generate_test_jobs():
                                     BRANCH_DISPLAY_NAMES[branch],
                                     python_version.capitalize(),
                                     bootstrap_type.capitalize()
-                                )
+                                ),
+                                timeout_minutes=timeout_minutes
                             )
                         )
 

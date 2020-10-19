@@ -1,5 +1,14 @@
 Version TBD (In Progress on the Develop Branch):
 
+Version 2020.10.19:
+	* Fix v3000+ with git install on FreeBSD (krionbsd) #1487
+	* Update README giving ONE example of WINDOWS bootstrapping. Default to python3 instead of
+	python2. (noelmcloughlin) #1496
+	* Support git and stable salt-bootstrap on Gentoo. (ijansky) #1500
+	* Add support for Linux Mint 20. (taigrr) #1502
+	* Adding missing functions for Red Hat 8. (mbochenk) #1489
+	* Allow pinning minor 3xxx versions. (max-arnold) #1491
+
 Version 2020.06.23:
 	* Fix for Cumulus Linux 4.1 (darylturner) #1474
 	* Fix file download exit code, improve error message on failed download (bryceml) #1478
@@ -38,8 +47,8 @@ Version 2020.02.04:
 	* Drop support for Debian < 8 (s0undt3ch) #1424
 
 Version 2020.01.29:
-    * FreeBSD fixes (cedwards) #1413
-    * Support the upcoming Neon release (s0undt3ch) #1420
+	* FreeBSD fixes (cedwards) #1413
+	* Support the upcoming Neon release (s0undt3ch) #1420
 
 Version 2020.01.21:
     * FreeBSD fixes (kgbsd) #1376

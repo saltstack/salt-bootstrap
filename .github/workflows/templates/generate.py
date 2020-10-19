@@ -18,6 +18,8 @@ LINUX_DISTROS = [
     'fedora-30',
     'fedora-31',
     'fedora-32',
+    'gentoo',
+    'gentoo-systemd',
     'opensuse-15',
     'ubuntu-1604',
     'ubuntu-1804',
@@ -37,6 +39,8 @@ STABLE_DISTROS = [
     'fedora-30',
     'fedora-31',
     'fedora-32',
+    'gentoo',
+    'gentoo-systemd',
     'ubuntu-1604',
     'ubuntu-1804',
     'ubuntu-2004',
@@ -48,6 +52,8 @@ PY2_BLACKLIST = [
     'fedora-30',
     'fedora-31',
     'fedora-32',
+    'gentoo',
+    'gentoo-systemd',
     'opensuse-15',
     'ubuntu-2004',
 ]
@@ -70,6 +76,7 @@ SALT_BRANCHES = [
     '2019-2',
     '3000',
     '3001',
+    '3001-0',
     'master',
     'latest'
 ]
@@ -84,6 +91,7 @@ BRANCH_DISPLAY_NAMES = {
     '2019-2': 'v2019.2',
     '3000': 'v3000',
     '3001': 'v3001',
+    '3001-0': 'v3001.0',
     'master': 'Master',
     'latest': 'Latest'
 }
@@ -108,17 +116,26 @@ DISTRO_DISPLAY_NAMES = {
     'fedora-30': 'Fedora 30',
     'fedora-31': 'Fedora 31',
     'fedora-32': 'Fedora 32',
+    'gentoo': 'Gentoo',
+    'gentoo-systemd': 'Gentoo (systemd)',
     'opensuse-15': 'Opensuse 15',
     'ubuntu-1604': 'Ubuntu 16.04',
     'ubuntu-1804': 'Ubuntu 18.04',
     'ubuntu-2004': 'Ubuntu 20.04',
 }
 
+TIMEOUT_DEFAULT = 20
+TIMEOUT_OVERRIDES = {
+    'gentoo': 45,
+    'gentoo-systemd': 45,
+}
 
 def generate_test_jobs():
     test_jobs = ''
 
     for distro in LINUX_DISTROS + OSX + WINDOWS:
+        timeout_minutes = TIMEOUT_OVERRIDES[distro] if distro in TIMEOUT_OVERRIDES else TIMEOUT_DEFAULT
+
         for branch in SALT_BRANCHES:
 
             if branch == 'master' and distro in SALT_POST_3000_BLACKLIST:
@@ -151,7 +168,8 @@ def generate_test_jobs():
                             branch=branch,
                             display_name='{} Latest packaged release'.format(
                                 DISTRO_DISPLAY_NAMES[distro],
-                            )
+                            ),
+                            timeout_minutes=timeout_minutes
                         )
                     )
                 continue
@@ -163,7 +181,7 @@ def generate_test_jobs():
                     continue
 
                 try:
-                    if int(branch) >= 3000 and python_version == 'py2':
+                    if int(branch.split('-')[0]) >= 3000 and python_version == 'py2':
                         # Salt's 300X versions no longer supports Python 2
                         continue
                 except ValueError:
@@ -185,6 +203,10 @@ def generate_test_jobs():
                             continue
 
                     if bootstrap_type == "git":
+                        # .0 versions are a virtual version for pinning to the first point release of a major release, such as 3001, there is no git version.
+                        if branch.endswith('-0'):
+                            continue
+
                         if python_version == "py3":
                             if distro in ("arch", "fedora-32"):
                                 allowed_branches = ["master"]
@@ -230,7 +252,8 @@ def generate_test_jobs():
                                     BRANCH_DISPLAY_NAMES[branch],
                                     python_version.capitalize(),
                                     bootstrap_type.capitalize()
-                                )
+                                ),
+                                timeout_minutes=timeout_minutes
                             )
                         )
 

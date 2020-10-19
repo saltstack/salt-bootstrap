@@ -77,6 +77,7 @@ Guillaume Derval            GuillaumeDerval        guillaume@guillaumederval.be
 gweis                       gweis
 Henrik Holmboe              holmboe
 Howard Mei                  HowardMei              howardleomei@gmail.com
+Ivo Jánský                  ijansky
 James Booth                 absolutejam            vvalentine1337@gmail.com
 Jamie Alessio               jalessio               jamie@stoic.net
 Jan Heidbrink               jheidbrink
@@ -98,6 +99,7 @@ Ken Crowell                 oeuftete               kcrowell@saltstack.com
 Kenneth Wilke               KennethWilke
 Kevin Quinn                 kevinquinnyo           kevin.quinn@totalserversolutions.com
 kiemlicz                    kiemlicz
+Kirill Ponomarev            krionbsd               krion@freebsd.org
 Ky-Anh Huynh                icy
 Liu Xiaohui                 oreh                   herolxh@gmail.com
 lomeroe                     lomeroe
@@ -116,6 +118,7 @@ Matthew Mead-Briggs         mattmb
 Matthew Richardson          mrichar1
 Matthew Willson             ixela
 Matthieu Guegan             mguegan
+Max Arnold                  max-arnold
 Megan Wilhite               Ch3LL                  megan.wilhite@gmail.com
 mfapouw                     mfapouw
 Michael A. Smith            kojiromike             michaels@syapse.com
@@ -129,6 +132,7 @@ nevins-b                    nevins-b
 Nicholas Henry              nshenry03              nshenry03@gmail.com
 Nicole Thomas               rallytime              nicole@saltstack.com
 Niels Abspoel               aboe76                 aboe76@gmail.com
+Nikita                      mbochenk
 Nitin Madhok                nmadhok                nmadhok@clemson.edu
 panticz                     panticz
 Paul Brian                  lifeisstillgood        paul@mikadosoftware.com
@@ -164,6 +168,7 @@ stanzgy                     stanzgy                stanzgy@gmail.com
 Steve Groesz                wolfpackmars2          wolfpackmars2@yahoo.com
 Sven R                      hackacad               admin@hackacad.net
 sybix                       sybix
+Tai Groot                   taigrr                 tai@taigrr.com
 Tate Eskew                  tateeskew
 Thomas S. Hatch             thatch45               thatch45@saltstack.com
 Tobias Jungel               toanju                 Tobias.Jungel@gmail.com

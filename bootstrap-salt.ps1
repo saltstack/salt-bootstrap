@@ -85,7 +85,7 @@ Param(
     [Parameter(Mandatory=$false,ValueFromPipeline=$true)]
     # Doesn't support Python versions prior to "2017.7.0"
     [ValidateSet("2","3")]
-    [string]$pythonVersion = "2",
+    [string]$pythonVersion = "3",
 
     [Parameter(Mandatory=$false,ValueFromPipeline=$true)]
     [ValidateSet("true","false")]

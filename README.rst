@@ -28,8 +28,11 @@ Bootstrap
 In every two-step installation example, you would be well-served to **verify against the SHA256
 sum** of the downloaded ``bootstrap-salt.sh`` file.
 
+.. _sha256sums:
+
 The SHA256 sum of the ``bootstrap-salt.sh`` file, per release, is:
 
+- 2020.06.23: ``1d07db867c195c864d0ae70664524f2099cc9a46872953293c67c3f239d4f4f5``
 - 2020.05.28: ``6b3ea15c78f01060ab12fc01c0bb18480eaf36858c7ba188b200c0fb11aac173``
 - 2020.02.24: ``efc46700aca78b8e51d7af9b06293f52ad495f3a8179c6bfb21a8c97ee41f1b7``
 - 2020.02.04: ``ce877651b4938e3480f76b1629f582437f6ca8b73d7199fdb9e905e86fe85b34``
@@ -224,6 +227,27 @@ Installing the latest master branch of Salt:
 .. code:: console
 
   curl -L https://bootstrap.saltstack.com | sudo sh -s -- git master
+
+
+Install on Windows
+~~~~~~~~~~~~~~~~~~
+
+Using ``PowerShell`` to install latest stable version:
+
+.. code:: console
+
+  Invoke-WebRequest -Uri https://winbootstrap.saltstack.com -OutFile C:\Temp\bootstrap-salt.ps1
+  Set-ExecutionPolicy -ExecutionPolicy Unrestricted -Scope CurrentUser
+  C:\Temp\bootstrap-salt.ps1
+  Set-ExecutionPolicy -ExecutionPolicy Undefined -Scope CurrentUser
+
+
+Using ``cygwin`` to install latest stable version:
+
+.. code:: console
+
+  curl -o bootstrap-salt.ps1 -L https://winbootstrap.saltstack.com
+  "/cygdrive/c/WINDOWS/System32/WindowsPowerShell/v1.0/powershell.exe" -NoProfile -InputFormat None -ExecutionPolicy Bypass -Command "[System.Net.ServicePointManager]::SecurityProtocol = 3072; iex ./bootstrap-salt.ps1"
 
 
 Supported Operating Systems
@@ -476,8 +500,8 @@ Make edits to .drone.jsonnet and then save them into the .drone.yml by doing the
 .. _Vagrant: http://www.vagrantup.com
 .. _hardening salt: https://docs.saltstack.com/en/latest/topics/hardening.html
 
-.. |build|  image:: https://drone.saltstack.com/api/badges/saltstack/salt-bootstrap/status.svg
-    :target: https://drone.saltstack.com/saltstack/salt-bootstrap
-    :alt: Build status on Linux
+.. |build|  image:: https://github.com/saltstack/salt-bootstrap/workflows/Testing/badge.svg?branch=develop
+    :target: https://github.com/saltstack/salt-bootstrap/actions?query=branch%3Adevelop
+    :alt: Build Status
 
 .. vim: fenc=utf-8 spell spl=en cc=100 tw=99 fo=want sts=2 sw=2 et

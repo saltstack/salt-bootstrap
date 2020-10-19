@@ -28,6 +28,8 @@ Bootstrap
 In every two-step installation example, you would be well-served to **verify against the SHA256
 sum** of the downloaded ``bootstrap-salt.sh`` file.
 
+.. _sha256sums:
+
 The SHA256 sum of the ``bootstrap-salt.sh`` file, per release, is:
 
 - 2020.06.23: ``1d07db867c195c864d0ae70664524f2099cc9a46872953293c67c3f239d4f4f5``
@@ -498,8 +500,8 @@ Make edits to .drone.jsonnet and then save them into the .drone.yml by doing the
 .. _Vagrant: http://www.vagrantup.com
 .. _hardening salt: https://docs.saltstack.com/en/latest/topics/hardening.html
 
-.. |build|  image:: https://drone.saltstack.com/api/badges/saltstack/salt-bootstrap/status.svg
-    :target: https://drone.saltstack.com/saltstack/salt-bootstrap
-    :alt: Build status on Linux
+.. |build|  image:: https://github.com/saltstack/salt-bootstrap/workflows/Testing/badge.svg?branch=develop
+    :target: https://github.com/saltstack/salt-bootstrap/actions?query=branch%3Adevelop
+    :alt: Build Status
 
 .. vim: fenc=utf-8 spell spl=en cc=100 tw=99 fo=want sts=2 sw=2 et

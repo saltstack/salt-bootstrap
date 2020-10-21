@@ -1,4 +1,4 @@
-name: Scripts-Checksums
+name: Checksums
 
 on:
   push:

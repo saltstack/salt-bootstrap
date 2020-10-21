@@ -126,8 +126,8 @@ DISTRO_DISPLAY_NAMES = {
 
 TIMEOUT_DEFAULT = 20
 TIMEOUT_OVERRIDES = {
-    'gentoo': 45,
-    'gentoo-systemd': 45,
+    'gentoo': 50,
+    'gentoo-systemd': 50,
 }
 
 def generate_test_jobs():

@@ -12,38 +12,42 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
+        if: github.repository == 'saltstack/salt-bootstrap'
         with:
           ref: stable
 
       - name: Get bootstrap-salt.sh sha256sum
+        if: github.repository == 'saltstack/salt-bootstrap'
         run: |
           echo "SH=$(sha256sum bootstrap-salt.sh | awk '{ print $1 }')" >> $GITHUB_ENV
           echo "PS1=$(sha256sum bootstrap-salt.ps1 | awk '{ print $1 }')" >> $GITHUB_ENV
           echo "BS_VERSION=$(sh bootstrap-salt.sh -v | awk '{ print $4 }')" >> $GITHUB_ENV
 
-      - name: Set up Python 3.7
-        uses: actions/setup-python@v1
-        with:
-          python-version: 3.7
-
       - name: Update Checksums
+        if: github.repository == 'saltstack/salt-bootstrap'
         run: |
           echo ${{ env.SH }} > bootstrap-salt.sh.sha256
           echo ${{ env.PS1 }} > bootstrap-salt.ps1.sha256
           git config --global user.name 'SaltStack GH Automation'
           git config --global user.email 'actions@github.com'
           git add *.sha256
-          git commit -am "Update sha256 checksums"
-          git push
+          git commit -am "Update sha256 checksums" && git push || true
 
       - uses: actions/checkout@v2
+        if: github.repository == 'saltstack/salt-bootstrap'
         with:
           ref: develop
 
+      - name: Set up Python 3.7
+        if: github.repository == 'saltstack/salt-bootstrap'
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.7
+
       - name: Update Latest Release on README
+        if: github.repository == 'saltstack/salt-bootstrap'
         run: |
           python3 .github/workflows/scripts/update-release-shasum.py ${{ env.BS_VERSION }} ${{ env.SH }}
           git config --global user.name 'SaltStack GH Automation'
           git config --global user.email 'actions@github.com'
-          git commit -am "Update README.rst with latest release sha256sum"
-          git push
+          git commit -am "Update README.rst with latest release sha256sum" && git push || true

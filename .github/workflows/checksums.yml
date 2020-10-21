@@ -2,8 +2,8 @@ name: Checksums
 
 on:
   push:
-    tags:
-      - '*'
+    branches:
+      - stable
 
 jobs:
   checksums:

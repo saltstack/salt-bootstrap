@@ -1,4 +1,4 @@
-name: Checksums
+name: Scripts-Checksums
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
 
 jobs:
   checksums:
-    name: Update Release Checksums
+    name: Update Scripts Checksums
     runs-on: ubuntu-latest
 
     steps:
@@ -33,26 +33,4 @@ jobs:
         uses: peter-evans/create-pull-request@v3
         with:
           commit-message: Update sha256 checksums
-          delete-branch: true
-
-      - uses: actions/checkout@v2
-        if: github.repository == 'saltstack/salt-bootstrap'
-        with:
-          ref: develop
-
-      - name: Set up Python 3.7
-        if: github.repository == 'saltstack/salt-bootstrap'
-        uses: actions/setup-python@v1
-        with:
-          python-version: 3.7
-
-      - name: Update Latest Release on README
-        if: github.repository == 'saltstack/salt-bootstrap'
-        run: |
-          python3 .github/workflows/scripts/update-release-shasum.py ${{ env.BS_VERSION }} ${{ env.SH }}
-
-      - name: Create Pull Request Against Develop
-        uses: peter-evans/create-pull-request@v3
-        with:
-          commit-message: Update README.rst with latest release sha256sum
           delete-branch: true

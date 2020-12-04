@@ -900,6 +900,8 @@ __derive_debian_numeric_version() {
             NUMERIC_VERSION=$(__parse_version_string "9.0")
         elif [ "$INPUT_VERSION" = "buster/sid" ]; then
             NUMERIC_VERSION=$(__parse_version_string "10.0")
+        elif [ "$INPUT_VERSION" = "bullseye/sid" ]; then
+            NUMERIC_VERSION=$(__parse_version_string "11.0")
         else
             echowarn "Unable to parse the Debian Version (codename: '$INPUT_VERSION')"
         fi
@@ -1554,6 +1556,9 @@ __debian_codename_translation() {
             ;;
         "10")
             DISTRO_CODENAME="buster"
+            ;;
+        "11")
+            DISTRO_CODENAME="bullseye"
             ;;
         *)
             DISTRO_CODENAME="jessie"
@@ -3339,8 +3344,17 @@ install_ubuntu_check_services() {
 #   Debian Install Functions
 #
 __install_saltstack_debian_repository() {
-    DEBIAN_RELEASE="$DISTRO_MAJOR_VERSION"
-    DEBIAN_CODENAME="$DISTRO_CODENAME"
+    if [ "$DISTRO_MAJOR_VERSION" -eq 11 ]; then
+        # Packages for Debian 11 at repo.saltstack.com are not yet available
+        # Set up repository for Debian 10 for Debian 11 for now until support
+        # is available at repo.saltstack.com for Debian 11.
+        echowarn "Debian 11 distribution detected, but stable packages requested. Trying packages from Debian 10. You may experience problems."
+        DEBIAN_RELEASE="10"
+        DEBIAN_CODENAME="buster"
+    else
+        DEBIAN_RELEASE="$DISTRO_MAJOR_VERSION"
+        DEBIAN_CODENAME="$DISTRO_CODENAME"
+    fi
 
     __PY_VERSION_REPO="apt"
     if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 3 ]; then

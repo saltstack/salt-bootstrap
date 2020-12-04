@@ -300,9 +300,9 @@ repositories are not provided on `SaltStack's Debian repository`_ for Debian tes
 However, the bootstrap script will attempt to install the packages for the current stable
 version of Debian.
 
-For example, when installing Salt on Debian 10 (Buster), the bootstrap script will setup the
-repository for Debian 9 (Stretch) from `SaltStack's Debian repository`_ and install the
-Debian 9 packages.
+For example, when installing Salt on Debian 11 (Bullseye), the bootstrap script will setup the
+repository for Debian 10 (Buster) from `SaltStack's Debian repository`_ and install the
+Debian 10 packages.
 
 
 Red Hat family

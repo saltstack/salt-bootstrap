@@ -9,15 +9,12 @@ LINUX_DISTROS = [
 #    'amazon-1',
     'amazon-2',
     'arch',
-    'centos-6',
     'centos-7',
     'centos-8',
     'debian-10',
-    'debian-8',
     'debian-9',
-    'fedora-30',
-    'fedora-31',
     'fedora-32',
+    'fedora-33',
     'gentoo',
     'gentoo-systemd',
     'opensuse-15',
@@ -30,15 +27,12 @@ OSX = WINDOWS = []
 STABLE_DISTROS = [
     'amazon-1',
     'amazon-2',
-    'centos-6',
     'centos-7',
     'centos-8',
     'debian-10',
-    'debian-8',
     'debian-9',
-    'fedora-30',
-    'fedora-31',
     'fedora-32',
+    'fedora-33',
     'gentoo',
     'gentoo-systemd',
     'ubuntu-1604',
@@ -49,9 +43,8 @@ STABLE_DISTROS = [
 PY2_BLACKLIST = [
     'centos-8',
     'debian-10',
-    'fedora-30',
-    'fedora-31',
     'fedora-32',
+    'fedora-33',
     'gentoo',
     'gentoo-systemd',
     'opensuse-15',
@@ -60,15 +53,15 @@ PY2_BLACKLIST = [
 
 PY3_BLACKLIST = [
     'amazon-1',
-    'centos-6',
-    'debian-8',
 ]
 
 BLACKLIST_2019 = [
+    'fedora-33',
     'ubuntu-2004',
 ]
 
 BLACKLIST_3000 = [
+    'fedora-33',
     'ubuntu-2004',
 ]
 
@@ -77,14 +70,10 @@ SALT_BRANCHES = [
     '3000',
     '3001',
     '3001-0',
+    '3002',
+    '3002-0',
     'master',
     'latest'
-]
-
-SALT_POST_3000_BLACKLIST = [
-    'centos-6',
-    'debian-8',
-    'fedora-30',
 ]
 
 BRANCH_DISPLAY_NAMES = {
@@ -92,6 +81,8 @@ BRANCH_DISPLAY_NAMES = {
     '3000': 'v3000',
     '3001': 'v3001',
     '3001-0': 'v3001.0',
+    '3002': 'v3002',
+    '3002-0': 'v3002.0',
     'master': 'Master',
     'latest': 'Latest'
 }
@@ -107,15 +98,12 @@ DISTRO_DISPLAY_NAMES = {
     'amazon-1': 'Amazon 1',
     'amazon-2': 'Amazon 2',
     'arch': 'Arch',
-    'centos-6': 'CentOS 6',
     'centos-7': 'CentOS 7',
     'centos-8': 'CentOS 8',
     'debian-10': 'Debian 10',
-    'debian-8': 'Debian 8',
     'debian-9': 'Debian 9',
-    'fedora-30': 'Fedora 30',
-    'fedora-31': 'Fedora 31',
     'fedora-32': 'Fedora 32',
+    'fedora-33': 'Fedora 33',
     'gentoo': 'Gentoo',
     'gentoo-systemd': 'Gentoo (systemd)',
     'opensuse-15': 'Opensuse 15',
@@ -137,14 +125,6 @@ def generate_test_jobs():
         timeout_minutes = TIMEOUT_OVERRIDES[distro] if distro in TIMEOUT_OVERRIDES else TIMEOUT_DEFAULT
 
         for branch in SALT_BRANCHES:
-
-            if branch == 'master' and distro in SALT_POST_3000_BLACKLIST:
-                continue
-            try:
-                if int(branch) >= 3000 and distro in SALT_POST_3000_BLACKLIST:
-                    continue
-            except ValueError:
-                pass
 
             if branch == 'latest':
                 if distro in LATEST_PKG_BLACKLIST:

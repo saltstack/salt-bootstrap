@@ -57,42 +57,25 @@ platforms:
   - name: centos-7
     driver_config:
       run_command: /usr/lib/systemd/systemd
-  - name: centos-6
-    driver_config:
-      run_command: /sbin/init
-      provision_command:
-        - yum install -y upstart
-    provisioner:
-      salt_bootstrap_options: -MPfq -y -x python2.7 git %s
-  - name: debian-8
-    driver_config:
-      run_command: /lib/systemd/systemd
-      provision_command:
-        - apt-get install -y dbus
   - name: debian-9
     driver_config:
       run_command: /lib/systemd/systemd
   - name: debian-10
     driver_config:
       run_command: /lib/systemd/systemd
-  - name: fedora-30
-    driver_config:
-      image: fedora:30
-      run_command: /usr/lib/systemd/systemd
-      provision_command:
-        - dnf -y install procps-ng
-  - name: fedora-31
-    driver_config:
-      image: fedora:31
-      run_command: /usr/lib/systemd/systemd
-      provision_command:
-        - dnf -y install procps-ng
   - name: fedora-32
     driver_config:
       image: fedora:32
       run_command: /usr/lib/systemd/systemd
       provision_command:
         - dnf -y install procps-ng
+  - name: fedora-33
+    driver_config:
+      image: fedora:33
+      run_command: /usr/lib/systemd/systemd
+      provision_command:
+        - dnf -y install procps-ng
+        - sed -i 's/^PubkeyAcceptedKeyTypes.*$/&,ssh-rsa/' /etc/crypto-policies/back-ends/opensshserver.config
   - name: gentoo
     driver_config:
       image: gentoo/stage3:latest
@@ -151,9 +134,8 @@ suites:
     excludes:
       - arch
       - opensuse-15
-      - fedora-30
-      - fedora-31
       - fedora-32
+      - fedora-33
       - gentoo
       - gentoo-systemd
       - ubuntu-2004
@@ -164,9 +146,8 @@ suites:
     excludes:
       - arch
       - opensuse-15
-      - fedora-30
-      - fedora-31
       - fedora-32
+      - fedora-33
       - gentoo
       - gentoo-systemd
       - ubuntu-2004
@@ -177,8 +158,6 @@ suites:
       salt_bootstrap_options: -x python3 -MPfq git %s
     excludes:
       - amazon-1
-      - centos-6
-      - debian-8
       - ubuntu-2004
   - name: py3-git-2019-2
     provisioner:
@@ -186,8 +165,6 @@ suites:
       salt_bootstrap_options: -x python3 -MPfq git %s
     excludes:
       - amazon-1
-      - centos-6
-      - debian-8
       - ubuntu-2004
   - name: py3-git-3001
     provisioner:
@@ -195,16 +172,18 @@ suites:
       salt_bootstrap_options: -x python3 -MPfq git %s
     excludes:
       - amazon-1
-      - centos-6
-      - debian-8
+  - name: py3-git-3002
+    provisioner:
+      salt_version: 3002
+      salt_bootstrap_options: -x python3 -MPfq git %s
+    excludes:
+      - amazon-1
   - name: py3-stable-2019-2
     provisioner:
       salt_version: 2019.2
       salt_bootstrap_options: -x python3 -MP stable %s
     excludes:
       - amazon-1
-      - centos-6
-      - debian-8
       - opensuse-15
       - arch
       - ubuntu-2004
@@ -214,8 +193,6 @@ suites:
       salt_bootstrap_options: -x python3 -MP stable %s
     excludes:
       - amazon-1
-      - centos-6
-      - debian-8
       - opensuse-15
       - arch
       - ubuntu-2004
@@ -225,12 +202,9 @@ suites:
       salt_bootstrap_options: -x python3 -MP stable 3001.0
     excludes:
       - amazon-1
-      - centos-6
-      - debian-8
       - opensuse-15
-      - fedora-30
-      - fedora-31
       - fedora-32
+      - fedora-33
       - arch
   - name: py3-stable-3001
     provisioner:
@@ -238,8 +212,24 @@ suites:
       salt_bootstrap_options: -x python3 -MP stable %s
     excludes:
       - amazon-1
-      - centos-6
-      - debian-8
+      - opensuse-15
+      - arch
+  - name: py3-stable-3002-0
+    provisioner:
+      salt_version: 3002
+      salt_bootstrap_options: -x python3 -MP stable 3002.0
+    excludes:
+      - amazon-1
+      - opensuse-15
+      - fedora-32
+      - fedora-33
+      - arch
+  - name: py3-stable-3002
+    provisioner:
+      salt_version: 3002
+      salt_bootstrap_options: -x python3 -MP stable %s
+    excludes:
+      - amazon-1
       - opensuse-15
       - arch
   - name: py3-git-master
@@ -248,8 +238,6 @@ suites:
       salt_bootstrap_options: -x python3 -MPfq -D git %s
     excludes:
       - amazon-1
-      - centos-6
-      - debian-8
 
   - name: latest
     provisioner:

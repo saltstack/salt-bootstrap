@@ -33,5 +33,5 @@ def main(version, sha256sum):
         README_PATH.write_text(out_contents)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main(sys.argv[1], sys.argv[2])

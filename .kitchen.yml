@@ -82,12 +82,14 @@ platforms:
       run_command: /sbin/init
       provision_command:
         - rc-update add sshd default
+        - emerge --update --deep --with-bdeps=y --newuse @world
   - name: gentoo-systemd
     driver_config:
       image: gentoo/stage3:systemd
       run_command: /lib/systemd/systemd
       provision_command:
         - systemctl enable sshd.service
+        - emerge --update --deep --with-bdeps=y --newuse @world
   - name: opensuse-15
     driver_config:
       image: opensuse/leap:15.1

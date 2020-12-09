@@ -12,6 +12,7 @@ LINUX_DISTROS = [
     "centos-7",
     "centos-8",
     "debian-10",
+    "debian-11",
     "debian-9",
     "fedora-32",
     "fedora-33",
@@ -30,6 +31,7 @@ STABLE_DISTROS = [
     "centos-7",
     "centos-8",
     "debian-10",
+    "debian-11",
     "debian-9",
     "fedora-32",
     "fedora-33",
@@ -43,6 +45,7 @@ STABLE_DISTROS = [
 PY2_BLACKLIST = [
     "centos-8",
     "debian-10",
+    "debian-11",
     "fedora-32",
     "fedora-33",
     "gentoo",
@@ -56,13 +59,27 @@ PY3_BLACKLIST = [
 ]
 
 BLACKLIST_2019 = [
+    "debian-11",
     "fedora-33",
     "ubuntu-2004",
 ]
 
 BLACKLIST_3000 = [
+    "debian-11",
     "fedora-33",
     "ubuntu-2004",
+]
+
+BLACKLIST_3001 = [
+    "debian-11",
+]
+
+BLACKLIST_3001_0 = [
+    "debian-11",
+]
+
+BLACKLIST_3002_0 = [
+    "debian-11",
 ]
 
 SALT_BRANCHES = [
@@ -100,6 +117,7 @@ DISTRO_DISPLAY_NAMES = {
     "centos-7": "CentOS 7",
     "centos-8": "CentOS 8",
     "debian-10": "Debian 10",
+    "debian-11": "Debian 11",
     "debian-9": "Debian 9",
     "fedora-32": "Fedora 32",
     "fedora-33": "Fedora 33",
@@ -219,6 +237,15 @@ def generate_test_jobs():
                         continue
 
                     if branch == "3000" and distro in BLACKLIST_3000:
+                        continue
+
+                    if branch == "3001" and distro in BLACKLIST_3001:
+                        continue
+
+                    if branch == "3001-0" and distro in BLACKLIST_3001_0:
+                        continue
+
+                    if branch == "3002-0" and distro in BLACKLIST_3002_0:
                         continue
 
                     if python_version == "py2" and distro in PY2_BLACKLIST:

@@ -6,190 +6,186 @@ import datetime
 os.chdir(os.path.abspath(os.path.dirname(__file__)))
 
 LINUX_DISTROS = [
-#    'amazon-1',
-    'amazon-2',
-    'arch',
-    'centos-6',
-    'centos-7',
-    'centos-8',
-    'debian-10',
-    'debian-8',
-    'debian-9',
-    'fedora-30',
-    'fedora-31',
-    'fedora-32',
-    'gentoo',
-    'gentoo-systemd',
-    'opensuse-15',
-    'ubuntu-1604',
-    'ubuntu-1804',
-    'ubuntu-2004',
+    #'amazon-1',
+    "amazon-2",
+    "arch",
+    "centos-7",
+    "centos-8",
+    "debian-10",
+    "debian-9",
+    "fedora-32",
+    "fedora-33",
+    "gentoo",
+    "gentoo-systemd",
+    "opensuse-15",
+    "ubuntu-1604",
+    "ubuntu-1804",
+    "ubuntu-2004",
 ]
 OSX = WINDOWS = []
 
 STABLE_DISTROS = [
-    'amazon-1',
-    'amazon-2',
-    'centos-6',
-    'centos-7',
-    'centos-8',
-    'debian-10',
-    'debian-8',
-    'debian-9',
-    'fedora-30',
-    'fedora-31',
-    'fedora-32',
-    'gentoo',
-    'gentoo-systemd',
-    'ubuntu-1604',
-    'ubuntu-1804',
-    'ubuntu-2004',
+    "amazon-1",
+    "amazon-2",
+    "centos-7",
+    "centos-8",
+    "debian-10",
+    "debian-9",
+    "fedora-32",
+    "fedora-33",
+    "gentoo",
+    "gentoo-systemd",
+    "ubuntu-1604",
+    "ubuntu-1804",
+    "ubuntu-2004",
 ]
 
 PY2_BLACKLIST = [
-    'centos-8',
-    'debian-10',
-    'fedora-30',
-    'fedora-31',
-    'fedora-32',
-    'gentoo',
-    'gentoo-systemd',
-    'opensuse-15',
-    'ubuntu-2004',
+    "centos-8",
+    "debian-10",
+    "fedora-32",
+    "fedora-33",
+    "gentoo",
+    "gentoo-systemd",
+    "opensuse-15",
+    "ubuntu-2004",
 ]
 
 PY3_BLACKLIST = [
-    'amazon-1',
-    'centos-6',
-    'debian-8',
+    "amazon-1",
 ]
 
 BLACKLIST_2019 = [
-    'ubuntu-2004',
+    "fedora-33",
+    "ubuntu-2004",
 ]
 
 BLACKLIST_3000 = [
-    'ubuntu-2004',
+    "fedora-33",
+    "ubuntu-2004",
 ]
 
 SALT_BRANCHES = [
-    '2019-2',
-    '3000',
-    '3001',
-    '3001-0',
-    'master',
-    'latest'
-]
-
-SALT_POST_3000_BLACKLIST = [
-    'centos-6',
-    'debian-8',
-    'fedora-30',
+    "2019-2",
+    "3000",
+    "3001",
+    "3001-0",
+    "3002",
+    "3002-0",
+    "master",
+    "latest",
 ]
 
 BRANCH_DISPLAY_NAMES = {
-    '2019-2': 'v2019.2',
-    '3000': 'v3000',
-    '3001': 'v3001',
-    '3001-0': 'v3001.0',
-    'master': 'Master',
-    'latest': 'Latest'
+    "2019-2": "v2019.2",
+    "3000": "v3000",
+    "3001": "v3001",
+    "3001-0": "v3001.0",
+    "3002": "v3002",
+    "3002-0": "v3002.0",
+    "master": "Master",
+    "latest": "Latest",
 }
 
-STABLE_BRANCH_BLACKLIST = [
-]
+STABLE_BRANCH_BLACKLIST = []
 
 LATEST_PKG_BLACKLIST = [
-    'arch',         # No packages are built
+    "arch",  # No packages are built
 ]
 
 DISTRO_DISPLAY_NAMES = {
-    'amazon-1': 'Amazon 1',
-    'amazon-2': 'Amazon 2',
-    'arch': 'Arch',
-    'centos-6': 'CentOS 6',
-    'centos-7': 'CentOS 7',
-    'centos-8': 'CentOS 8',
-    'debian-10': 'Debian 10',
-    'debian-8': 'Debian 8',
-    'debian-9': 'Debian 9',
-    'fedora-30': 'Fedora 30',
-    'fedora-31': 'Fedora 31',
-    'fedora-32': 'Fedora 32',
-    'gentoo': 'Gentoo',
-    'gentoo-systemd': 'Gentoo (systemd)',
-    'opensuse-15': 'Opensuse 15',
-    'ubuntu-1604': 'Ubuntu 16.04',
-    'ubuntu-1804': 'Ubuntu 18.04',
-    'ubuntu-2004': 'Ubuntu 20.04',
+    "amazon-1": "Amazon 1",
+    "amazon-2": "Amazon 2",
+    "arch": "Arch",
+    "centos-7": "CentOS 7",
+    "centos-8": "CentOS 8",
+    "debian-10": "Debian 10",
+    "debian-9": "Debian 9",
+    "fedora-32": "Fedora 32",
+    "fedora-33": "Fedora 33",
+    "gentoo": "Gentoo",
+    "gentoo-systemd": "Gentoo (systemd)",
+    "opensuse-15": "Opensuse 15",
+    "ubuntu-1604": "Ubuntu 16.04",
+    "ubuntu-1804": "Ubuntu 18.04",
+    "ubuntu-2004": "Ubuntu 20.04",
 }
 
 TIMEOUT_DEFAULT = 20
 TIMEOUT_OVERRIDES = {
-    'gentoo': 50,
-    'gentoo-systemd': 50,
+    "gentoo": 50,
+    "gentoo-systemd": 50,
 }
+BRANCH_ONLY_OVERRIDES = [
+    "gentoo",
+    "gentoo-systemd",
+]
+
 
 def generate_test_jobs():
-    test_jobs = ''
+    test_jobs = ""
+    branch_only_test_jobs = ""
 
     for distro in LINUX_DISTROS + OSX + WINDOWS:
-        timeout_minutes = TIMEOUT_OVERRIDES[distro] if distro in TIMEOUT_OVERRIDES else TIMEOUT_DEFAULT
+        timeout_minutes = (
+            TIMEOUT_OVERRIDES[distro]
+            if distro in TIMEOUT_OVERRIDES
+            else TIMEOUT_DEFAULT
+        )
+        needs = "    needs: lint"
+        if distro in BRANCH_ONLY_OVERRIDES:
+            needs = ""
+        current_test_jobs = ""
 
         for branch in SALT_BRANCHES:
 
-            if branch == 'master' and distro in SALT_POST_3000_BLACKLIST:
-                continue
-            try:
-                if int(branch) >= 3000 and distro in SALT_POST_3000_BLACKLIST:
-                    continue
-            except ValueError:
-                pass
-
-            if branch == 'latest':
+            if branch == "latest":
                 if distro in LATEST_PKG_BLACKLIST:
                     continue
                 if distro in LINUX_DISTROS:
-                    template = 'linux.yml'
+                    template = "linux.yml"
                 elif distro in OSX:
-                    template = 'osx.yml'
+                    template = "osx.yml"
                 elif distro in WINDOWS:
-                    template = 'windows.yml'
+                    template = "windows.yml"
                 else:
                     print("Don't know how to handle {}".format(distro))
 
                 with open(template) as rfh:
-                    test_jobs += '\n{}\n'.format(
-                        rfh.read().replace(
-                            '{python_version}-{bootstrap_type}-{branch}-{distro}',
-                            '{branch}-{distro}'
-                        ).format(
+                    current_test_jobs += "\n{}\n".format(
+                        rfh.read()
+                        .replace(
+                            "{python_version}-{bootstrap_type}-{branch}-{distro}",
+                            "{branch}-{distro}",
+                        )
+                        .format(
                             distro=distro,
                             branch=branch,
-                            display_name='{} Latest packaged release'.format(
+                            display_name="{} Latest packaged release".format(
                                 DISTRO_DISPLAY_NAMES[distro],
                             ),
-                            timeout_minutes=timeout_minutes
+                            timeout_minutes=timeout_minutes,
+                            needs=needs,
                         )
                     )
                 continue
 
-            for python_version in ('py2', 'py3'):
+            for python_version in ("py2", "py3"):
 
-                if branch == 'master' and python_version == 'py2':
+                if branch == "master" and python_version == "py2":
                     # Salt's master branch no longer supports Python 2
                     continue
 
                 try:
-                    if int(branch.split('-')[0]) >= 3000 and python_version == 'py2':
+                    if int(branch.split("-")[0]) >= 3000 and python_version == "py2":
                         # Salt's 300X versions no longer supports Python 2
                         continue
                 except ValueError:
                     pass
 
-                for bootstrap_type in ('stable', 'git'):
-                    if bootstrap_type == 'stable':
-                        if branch == 'master':
+                for bootstrap_type in ("stable", "git"):
+                    if bootstrap_type == "stable":
+                        if branch == "master":
                             # For the master branch there's no stable build
                             continue
                         if distro not in STABLE_DISTROS:
@@ -204,7 +200,7 @@ def generate_test_jobs():
 
                     if bootstrap_type == "git":
                         # .0 versions are a virtual version for pinning to the first point release of a major release, such as 3001, there is no git version.
-                        if branch.endswith('-0'):
+                        if branch.endswith("-0"):
                             continue
 
                         if python_version == "py3":
@@ -219,64 +215,85 @@ def generate_test_jobs():
                                 if branch not in allowed_branches:
                                     # Arch and Fedora default to py3.8
                                     continue
-                    if branch == '2019-2' and distro in BLACKLIST_2019:
+                    if branch == "2019-2" and distro in BLACKLIST_2019:
                         continue
 
-                    if branch == '3000' and distro in BLACKLIST_3000:
+                    if branch == "3000" and distro in BLACKLIST_3000:
                         continue
 
-                    if python_version == 'py2' and distro in PY2_BLACKLIST:
+                    if python_version == "py2" and distro in PY2_BLACKLIST:
                         continue
 
-                    if python_version == 'py3' and distro in PY3_BLACKLIST:
+                    if python_version == "py3" and distro in PY3_BLACKLIST:
                         continue
 
                     if distro in LINUX_DISTROS:
-                        template = 'linux.yml'
+                        template = "linux.yml"
                     elif distro in OSX:
-                        template = 'osx.yml'
+                        template = "osx.yml"
                     elif distro in WINDOWS:
-                        template = 'windows.yml'
+                        template = "windows.yml"
                     else:
                         print("Don't know how to handle {}".format(distro))
 
                     with open(template) as rfh:
-                        test_jobs += '\n{}\n'.format(
+                        current_test_jobs += "\n{}\n".format(
                             rfh.read().format(
                                 distro=distro,
                                 branch=branch,
                                 python_version=python_version,
                                 bootstrap_type=bootstrap_type,
-                                display_name='{} {} {} {}'.format(
+                                display_name="{} {} {} {}".format(
                                     DISTRO_DISPLAY_NAMES[distro],
                                     BRANCH_DISPLAY_NAMES[branch],
                                     python_version.capitalize(),
-                                    bootstrap_type.capitalize()
+                                    bootstrap_type.capitalize(),
                                 ),
-                                timeout_minutes=timeout_minutes
+                                timeout_minutes=timeout_minutes,
+                                needs=needs,
                             )
                         )
+        if distro in BRANCH_ONLY_OVERRIDES:
+            branch_only_test_jobs += current_test_jobs
+        else:
+            test_jobs += current_test_jobs
 
-    with open('lint.yml') as rfh:
-        lint_job = '\n{}\n'.format(rfh.read())
+    with open("lint.yml") as rfh:
+        lint_job = "\n{}\n".format(rfh.read())
 
-    with open('pre-commit.yml') as rfh:
-        pre_commit_job = '\n{}\n'.format(rfh.read())
+    with open("pre-commit.yml") as rfh:
+        pre_commit_job = "\n{}\n".format(rfh.read())
 
-    with open('../main.yml', 'w') as wfh:
-        with open('main.yml') as rfh:
+    with open("../main.yml", "w") as wfh:
+        with open("main.yml") as rfh:
             wfh.write(
-                '{}\n'.format(
-                    rfh.read().format(
-                        jobs='{pre_commit}{lint}{test}'.format(
-                            lint=lint_job,
-                            test=test_jobs,
-                            pre_commit=pre_commit_job,
-                        )
-                    ).strip()
+                "{}\n".format(
+                    rfh.read()
+                    .format(
+                        jobs="{pre_commit}{lint}{test}".format(
+                            lint=lint_job, test=test_jobs, pre_commit=pre_commit_job,
+                        ),
+                        on="push, pull_request",
+                        name="Testing",
+                    )
+                    .strip()
+                )
+            )
+
+    with open("../main-branch-only.yml", "w") as wfh:
+        with open("main.yml") as rfh:
+            wfh.write(
+                "{}\n".format(
+                    rfh.read()
+                    .format(
+                        jobs="{test}".format(test=branch_only_test_jobs,),
+                        on="push",
+                        name="Branch Testing",
+                    )
+                    .strip()
                 )
             )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     generate_test_jobs()

@@ -21,4 +21,7 @@ def test_target_python_version(host, target_python_version):
 def test_target_salt_version(host, target_salt_version):
     with host.sudo():
         ret = host.salt("grains.item", "saltversion", "--timeout=120")
-        assert ret["saltversion"].startswith(target_salt_version)
+        if target_salt_version.endswith(".0"):
+            assert ret["saltversion"] == ".".join(target_salt_version.split(".")[:-1])
+        else:
+            assert ret["saltversion"].startswith(target_salt_version)

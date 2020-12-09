@@ -63,6 +63,10 @@ platforms:
   - name: debian-10
     driver_config:
       run_command: /lib/systemd/systemd
+  - name: debian-11
+    driver_config:
+      image: debian:bullseye
+      run_command: /lib/systemd/systemd
   - name: fedora-32
     driver_config:
       image: fedora:32
@@ -115,18 +119,24 @@ suites:
     provisioner:
       salt_version: 2019.2
     excludes:
+      - debian-10
+      - debian-11
       - gentoo
       - gentoo-systemd
   - name: py2-git-3000
     provisioner:
       salt_version: 3000
     excludes:
+      - debian-10
+      - debian-11
       - gentoo
       - gentoo-systemd
   - name: py2-git-master
     provisioner:
       salt_version: master
     excludes:
+      - debian-10
+      - debian-11
       - gentoo
       - gentoo-systemd
   - name: py2-stable-2019-2
@@ -138,6 +148,8 @@ suites:
       - opensuse-15
       - fedora-32
       - fedora-33
+      - debian-10
+      - debian-11
       - gentoo
       - gentoo-systemd
       - ubuntu-2004
@@ -148,6 +160,8 @@ suites:
     excludes:
       - arch
       - opensuse-15
+      - debian-10
+      - debian-11
       - fedora-32
       - fedora-33
       - gentoo
@@ -160,6 +174,7 @@ suites:
       salt_bootstrap_options: -x python3 -MPfq git %s
     excludes:
       - amazon-1
+      - debian-11
       - ubuntu-2004
   - name: py3-git-2019-2
     provisioner:
@@ -167,6 +182,7 @@ suites:
       salt_bootstrap_options: -x python3 -MPfq git %s
     excludes:
       - amazon-1
+      - debian-11
       - ubuntu-2004
   - name: py3-git-3001
     provisioner:
@@ -186,6 +202,7 @@ suites:
       salt_bootstrap_options: -x python3 -MP stable %s
     excludes:
       - amazon-1
+      - debian-11
       - opensuse-15
       - arch
       - ubuntu-2004
@@ -195,6 +212,7 @@ suites:
       salt_bootstrap_options: -x python3 -MP stable %s
     excludes:
       - amazon-1
+      - debian-11
       - opensuse-15
       - arch
       - ubuntu-2004
@@ -205,6 +223,7 @@ suites:
     excludes:
       - amazon-1
       - opensuse-15
+      - debian-11
       - fedora-32
       - fedora-33
       - arch
@@ -214,6 +233,7 @@ suites:
       salt_bootstrap_options: -x python3 -MP stable %s
     excludes:
       - amazon-1
+      - debian-11
       - opensuse-15
       - arch
   - name: py3-stable-3002-0
@@ -223,6 +243,7 @@ suites:
     excludes:
       - amazon-1
       - opensuse-15
+      - debian-11
       - fedora-32
       - fedora-33
       - arch

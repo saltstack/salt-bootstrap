@@ -7070,10 +7070,20 @@ __gentoo_pre_dep() {
         mkdir /etc/portage
     fi
 
-    # Enable python 3.6 if installing pre Neon Salt release
+    # Enable Python 3.6 target for pre Neon Salt release
     if echo "${STABLE_REV}" | grep -q "2019" || [ "${ITYPE}" = "git" ] && [ "${_POST_NEON_INSTALL}" -eq $BS_FALSE ]; then
-        if ! emerge --info | sed 's/.*\(PYTHON_TARGETS="[^"]*"\).*/\1/' | grep -q 'python3_6' ; then
-            echo "PYTHON_TARGETS=\"\${PYTHON_TARGETS} python3_6\"" >> /etc/portage/make.conf
+        EXTRA_PYTHON_TARGET=python3_6
+    fi
+
+    # Enable Python 3.7 target for Salt Neon using GIT
+    if [ "${ITYPE}" = "git" ] && [ "${GIT_REV}" = "v3000" ]; then
+        EXTRA_PYTHON_TARGET=python3_7
+    fi
+
+    if [ -n "${EXTRA_PYTHON_TARGET:-}" ]; then
+        if ! emerge --info | sed 's/.*\(PYTHON_TARGETS="[^"]*"\).*/\1/' | grep -q "${EXTRA_PYTHON_TARGET}" ; then
+            echo "PYTHON_TARGETS=\"\${PYTHON_TARGETS} ${EXTRA_PYTHON_TARGET}\"" >> /etc/portage/make.conf
+            emerge --update --deep --with-bdeps=y --newuse --quiet @world
         fi
     fi
 }
@@ -7117,26 +7127,19 @@ install_gentoo_deps() {
 install_gentoo_git_deps() {
     __gentoo_pre_dep || return 1
 
-    GENTOO_GIT_PACKAGES=""
-
     # Install pip if it does not exist
     if ! __check_command_exists pip ; then
-        GENTOO_GIT_PACKAGES="${GENTOO_GIT_PACKAGES} dev-python/pip"
+        GENTOO_GIT_PACKAGES="${GENTOO_GIT_PACKAGES:-} dev-python/pip"
     fi
 
     # Install GIT if it does not exist
     if ! __check_command_exists git ; then
-        GENTOO_GIT_PACKAGES="${GENTOO_GIT_PACKAGES} dev-vcs/git"
+        GENTOO_GIT_PACKAGES="${GENTOO_GIT_PACKAGES:-} dev-vcs/git"
     fi
 
     # Salt <3000 does not automatically install dependencies. It has to be done manually.
     if [ "${_POST_NEON_INSTALL}" -eq $BS_FALSE ]; then
-        # Install Python 3.6 if it does not exist
-        if ! __check_command_exists python3.6 ; then
-            GENTOO_GIT_PACKAGES="${GENTOO_GIT_PACKAGES} dev-lang/python:3.6"
-        fi
-
-        GENTOO_GIT_PACKAGES="${GENTOO_GIT_PACKAGES}
+        GENTOO_GIT_PACKAGES="${GENTOO_GIT_PACKAGES:-}
             sys-apps/pciutils
             dev-python/pyyaml
             dev-python/pyzmq
@@ -7157,10 +7160,10 @@ install_gentoo_git_deps() {
 
     # Install libcloud when Salt Cloud support was requested
     if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
-        GENTOO_GIT_PACKAGES="${GENTOO_GIT_PACKAGES} dev-python/libcloud"
+        GENTOO_GIT_PACKAGES="${GENTOO_GIT_PACKAGES:-} dev-python/libcloud"
     fi
 
-    if [ -n "${GENTOO_GIT_PACKAGES}" ]; then
+    if [ -n "${GENTOO_GIT_PACKAGES:-}" ]; then
         # shellcheck disable=SC2086
         __autounmask ${GENTOO_GIT_PACKAGES} || return 1
         # shellcheck disable=SC2086
@@ -7186,16 +7189,21 @@ install_gentoo_stable() {
 }
 
 install_gentoo_git() {
-    if [ "${_POST_NEON_INSTALL}" -eq $BS_TRUE ]; then
-        __install_salt_from_repo_post_neon "${_PY_EXE}" || return 1
-        return 0
+    _PYEXE=${_PY_EXE}
+
+    if [ "$_PY_EXE" = "python3" ] || [ -z "$_PY_EXE" ]; then
+        if [ "${GIT_REV}" = "v3000" ]; then
+            # Salt Neon does not support Python 3.8 and greater
+            _PYEXE=python3.7
+        elif [ "${_POST_NEON_INSTALL}" -eq $BS_FALSE ]; then
+            # Tornado 4.3 ebuild supports only Python 3.6, use Python 3.6 as the default Python 3 interpreter
+            _PYEXE=python3.6
+        fi
     fi
 
-    # Tornado 4.3 ebuild supports only Python 3.6, use Python 3.6 as the default Python 3 interpreter
-    if [ "$_PY_EXE" = "python3" ] || [ -z "$_PY_EXE" ]; then
-        _PYEXE=python3.6
-    else
-        _PYEXE=${_PY_EXE}
+    if [ "${_POST_NEON_INSTALL}" -eq $BS_TRUE ]; then
+        __install_salt_from_repo_post_neon "${_PYEXE}" || return 1
+        return 0
     fi
 
     if [ -f "${_SALT_GIT_CHECKOUT_DIR}/salt/syspaths.py" ]; then

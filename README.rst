@@ -28,8 +28,14 @@ Bootstrap
 In every two-step installation example, you would be well-served to **verify against the SHA256
 sum** of the downloaded ``bootstrap-salt.sh`` file.
 
+.. _sha256sums:
+
 The SHA256 sum of the ``bootstrap-salt.sh`` file, per release, is:
 
+- 2020.10.20: ``b47bfc8d63cccf22eb4cd94491d30cc1d571e184be25a5be7f775e7f2daaf6e2``
+- 2020.10.19: ``f6c3e2c52f98d115809044b09062219369957caf30228b594033f0543e202c52``
+- 2020.06.23: ``1d07db867c195c864d0ae70664524f2099cc9a46872953293c67c3f239d4f4f5``
+- 2020.05.28: ``6b3ea15c78f01060ab12fc01c0bb18480eaf36858c7ba188b200c0fb11aac173``
 - 2020.02.24: ``efc46700aca78b8e51d7af9b06293f52ad495f3a8179c6bfb21a8c97ee41f1b7``
 - 2020.02.04: ``ce877651b4938e3480f76b1629f582437f6ca8b73d7199fdb9e905e86fe85b34``
 - 2020.01.29: ``e9afdfa877998c1c7f0e141a6728b33d0d24348e197aab2b9bde4fe6bc6db1b2``
@@ -48,6 +54,10 @@ The SHA256 sum of the ``bootstrap-salt.sh`` file, per release, is:
 
 If you're looking for a *one-liner* to install Salt, please scroll to the bottom and use the
 instructions for `Installing via an Insecure One-Liner`_.
+
+There are also .sha256 files for verifying against in the repo for the stable branch.  You can also
+get the correct sha256 sum for the stable release from https://bootstrap.saltstack.com/sha256 and
+https://winbootstrap.saltstack.com/sha256
 
 Contributing
 ------------
@@ -221,6 +231,27 @@ Installing the latest master branch of Salt:
   curl -L https://bootstrap.saltstack.com | sudo sh -s -- git master
 
 
+Install on Windows
+~~~~~~~~~~~~~~~~~~
+
+Using ``PowerShell`` to install latest stable version:
+
+.. code:: console
+
+  Invoke-WebRequest -Uri https://winbootstrap.saltstack.com -OutFile C:\Temp\bootstrap-salt.ps1
+  Set-ExecutionPolicy -ExecutionPolicy Unrestricted -Scope CurrentUser
+  C:\Temp\bootstrap-salt.ps1
+  Set-ExecutionPolicy -ExecutionPolicy Undefined -Scope CurrentUser
+
+
+Using ``cygwin`` to install latest stable version:
+
+.. code:: console
+
+  curl -o bootstrap-salt.ps1 -L https://winbootstrap.saltstack.com
+  "/cygdrive/c/WINDOWS/System32/WindowsPowerShell/v1.0/powershell.exe" -NoProfile -InputFormat None -ExecutionPolicy Bypass -Command "[System.Net.ServicePointManager]::SecurityProtocol = 3072; iex ./bootstrap-salt.ps1"
+
+
 Supported Operating Systems
 ---------------------------
 
@@ -269,9 +300,9 @@ repositories are not provided on `SaltStack's Debian repository`_ for Debian tes
 However, the bootstrap script will attempt to install the packages for the current stable
 version of Debian.
 
-For example, when installing Salt on Debian 10 (Buster), the bootstrap script will setup the
-repository for Debian 9 (Stretch) from `SaltStack's Debian repository`_ and install the
-Debian 9 packages.
+For example, when installing Salt on Debian 11 (Bullseye), the bootstrap script will setup the
+repository for Debian 10 (Buster) from `SaltStack's Debian repository`_ and install the
+Debian 10 packages.
 
 
 Red Hat family
@@ -471,8 +502,8 @@ Make edits to .drone.jsonnet and then save them into the .drone.yml by doing the
 .. _Vagrant: http://www.vagrantup.com
 .. _hardening salt: https://docs.saltstack.com/en/latest/topics/hardening.html
 
-.. |build|  image:: https://drone.saltstack.com/api/badges/saltstack/salt-bootstrap/status.svg
-    :target: https://drone.saltstack.com/saltstack/salt-bootstrap
-    :alt: Build status on Linux
+.. |build|  image:: https://github.com/saltstack/salt-bootstrap/workflows/Testing/badge.svg?branch=develop
+    :target: https://github.com/saltstack/salt-bootstrap/actions?query=branch%3Adevelop
+    :alt: Build Status
 
 .. vim: fenc=utf-8 spell spl=en cc=100 tw=99 fo=want sts=2 sw=2 et

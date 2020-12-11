@@ -47,7 +47,7 @@ jobs:
   py2-stable-2019-2-amazon-2:
     name: Amazon 2 v2019.2 Py2 Stable
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
 
     needs: lint
 
@@ -93,7 +93,7 @@ jobs:
   py2-git-2019-2-amazon-2:
     name: Amazon 2 v2019.2 Py2 Git
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
 
     needs: lint
 
@@ -139,7 +139,7 @@ jobs:
   py3-stable-2019-2-amazon-2:
     name: Amazon 2 v2019.2 Py3 Stable
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
 
     needs: lint
 
@@ -185,7 +185,7 @@ jobs:
   py3-git-2019-2-amazon-2:
     name: Amazon 2 v2019.2 Py3 Git
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
 
     needs: lint
 
@@ -231,7 +231,7 @@ jobs:
   py3-stable-3000-amazon-2:
     name: Amazon 2 v3000 Py3 Stable
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
 
     needs: lint
 
@@ -277,7 +277,7 @@ jobs:
   py3-git-3000-amazon-2:
     name: Amazon 2 v3000 Py3 Git
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
 
     needs: lint
 
@@ -320,10 +320,286 @@ jobs:
           bundle exec kitchen destroy py3-git-3000-amazon-2
 
 
+  py3-stable-3001-amazon-2:
+    name: Amazon 2 v3001 Py3 Stable
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    needs: lint
+
+    steps:
+      - uses: actions/checkout@v1
+      - name: Setup Ruby
+        uses: actions/setup-ruby@v1
+        with:
+          ruby-version: 2.6.x
+
+      - name: Install Bundler
+        run: |
+          gem install bundler
+
+      - name: Setup Bundle
+        run: |
+          bundle install --with docker --without opennebula ec2 windows vagrant
+
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.7
+
+      - name: Install Python Dependencies
+        run: |
+          pip install -U pip
+          pip install -r tests/requirements.txt
+
+      - name: Create Test Container
+        run: |
+          bundle exec kitchen create py3-stable-3001-amazon-2 || bundle exec kitchen create py3-stable-3001-amazon-2
+
+      - name: Test Bootstrap In Test Container
+        run: |
+          bundle exec kitchen verify py3-stable-3001-amazon-2
+
+      - name: Destroy Test Container
+        if: always()
+        run: |
+          bundle exec kitchen destroy py3-stable-3001-amazon-2
+
+
+  py3-git-3001-amazon-2:
+    name: Amazon 2 v3001 Py3 Git
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    needs: lint
+
+    steps:
+      - uses: actions/checkout@v1
+      - name: Setup Ruby
+        uses: actions/setup-ruby@v1
+        with:
+          ruby-version: 2.6.x
+
+      - name: Install Bundler
+        run: |
+          gem install bundler
+
+      - name: Setup Bundle
+        run: |
+          bundle install --with docker --without opennebula ec2 windows vagrant
+
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.7
+
+      - name: Install Python Dependencies
+        run: |
+          pip install -U pip
+          pip install -r tests/requirements.txt
+
+      - name: Create Test Container
+        run: |
+          bundle exec kitchen create py3-git-3001-amazon-2 || bundle exec kitchen create py3-git-3001-amazon-2
+
+      - name: Test Bootstrap In Test Container
+        run: |
+          bundle exec kitchen verify py3-git-3001-amazon-2
+
+      - name: Destroy Test Container
+        if: always()
+        run: |
+          bundle exec kitchen destroy py3-git-3001-amazon-2
+
+
+  py3-stable-3001-0-amazon-2:
+    name: Amazon 2 v3001.0 Py3 Stable
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    needs: lint
+
+    steps:
+      - uses: actions/checkout@v1
+      - name: Setup Ruby
+        uses: actions/setup-ruby@v1
+        with:
+          ruby-version: 2.6.x
+
+      - name: Install Bundler
+        run: |
+          gem install bundler
+
+      - name: Setup Bundle
+        run: |
+          bundle install --with docker --without opennebula ec2 windows vagrant
+
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.7
+
+      - name: Install Python Dependencies
+        run: |
+          pip install -U pip
+          pip install -r tests/requirements.txt
+
+      - name: Create Test Container
+        run: |
+          bundle exec kitchen create py3-stable-3001-0-amazon-2 || bundle exec kitchen create py3-stable-3001-0-amazon-2
+
+      - name: Test Bootstrap In Test Container
+        run: |
+          bundle exec kitchen verify py3-stable-3001-0-amazon-2
+
+      - name: Destroy Test Container
+        if: always()
+        run: |
+          bundle exec kitchen destroy py3-stable-3001-0-amazon-2
+
+
+  py3-stable-3002-amazon-2:
+    name: Amazon 2 v3002 Py3 Stable
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    needs: lint
+
+    steps:
+      - uses: actions/checkout@v1
+      - name: Setup Ruby
+        uses: actions/setup-ruby@v1
+        with:
+          ruby-version: 2.6.x
+
+      - name: Install Bundler
+        run: |
+          gem install bundler
+
+      - name: Setup Bundle
+        run: |
+          bundle install --with docker --without opennebula ec2 windows vagrant
+
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.7
+
+      - name: Install Python Dependencies
+        run: |
+          pip install -U pip
+          pip install -r tests/requirements.txt
+
+      - name: Create Test Container
+        run: |
+          bundle exec kitchen create py3-stable-3002-amazon-2 || bundle exec kitchen create py3-stable-3002-amazon-2
+
+      - name: Test Bootstrap In Test Container
+        run: |
+          bundle exec kitchen verify py3-stable-3002-amazon-2
+
+      - name: Destroy Test Container
+        if: always()
+        run: |
+          bundle exec kitchen destroy py3-stable-3002-amazon-2
+
+
+  py3-git-3002-amazon-2:
+    name: Amazon 2 v3002 Py3 Git
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    needs: lint
+
+    steps:
+      - uses: actions/checkout@v1
+      - name: Setup Ruby
+        uses: actions/setup-ruby@v1
+        with:
+          ruby-version: 2.6.x
+
+      - name: Install Bundler
+        run: |
+          gem install bundler
+
+      - name: Setup Bundle
+        run: |
+          bundle install --with docker --without opennebula ec2 windows vagrant
+
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.7
+
+      - name: Install Python Dependencies
+        run: |
+          pip install -U pip
+          pip install -r tests/requirements.txt
+
+      - name: Create Test Container
+        run: |
+          bundle exec kitchen create py3-git-3002-amazon-2 || bundle exec kitchen create py3-git-3002-amazon-2
+
+      - name: Test Bootstrap In Test Container
+        run: |
+          bundle exec kitchen verify py3-git-3002-amazon-2
+
+      - name: Destroy Test Container
+        if: always()
+        run: |
+          bundle exec kitchen destroy py3-git-3002-amazon-2
+
+
+  py3-stable-3002-0-amazon-2:
+    name: Amazon 2 v3002.0 Py3 Stable
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    needs: lint
+
+    steps:
+      - uses: actions/checkout@v1
+      - name: Setup Ruby
+        uses: actions/setup-ruby@v1
+        with:
+          ruby-version: 2.6.x
+
+      - name: Install Bundler
+        run: |
+          gem install bundler
+
+      - name: Setup Bundle
+        run: |
+          bundle install --with docker --without opennebula ec2 windows vagrant
+
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.7
+
+      - name: Install Python Dependencies
+        run: |
+          pip install -U pip
+          pip install -r tests/requirements.txt
+
+      - name: Create Test Container
+        run: |
+          bundle exec kitchen create py3-stable-3002-0-amazon-2 || bundle exec kitchen create py3-stable-3002-0-amazon-2
+
+      - name: Test Bootstrap In Test Container
+        run: |
+          bundle exec kitchen verify py3-stable-3002-0-amazon-2
+
+      - name: Destroy Test Container
+        if: always()
+        run: |
+          bundle exec kitchen destroy py3-stable-3002-0-amazon-2
+
+
   py3-git-master-amazon-2:
     name: Amazon 2 Master Py3 Git
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
 
     needs: lint
 
@@ -369,7 +645,7 @@ jobs:
   latest-amazon-2:
     name: Amazon 2 Latest packaged release
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
 
     needs: lint
 
@@ -412,56 +688,10 @@ jobs:
           bundle exec kitchen destroy latest-amazon-2
 
 
-  py2-git-2018-3-arch:
-    name: Arch v2018.3 Py2 Git
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-
-    needs: lint
-
-    steps:
-      - uses: actions/checkout@v1
-      - name: Setup Ruby
-        uses: actions/setup-ruby@v1
-        with:
-          ruby-version: 2.6.x
-
-      - name: Install Bundler
-        run: |
-          gem install bundler
-
-      - name: Setup Bundle
-        run: |
-          bundle install --with docker --without opennebula ec2 windows vagrant
-
-      - name: Set up Python 3.7
-        uses: actions/setup-python@v1
-        with:
-          python-version: 3.7
-
-      - name: Install Python Dependencies
-        run: |
-          pip install -U pip
-          pip install -r tests/requirements.txt
-
-      - name: Create Test Container
-        run: |
-          bundle exec kitchen create py2-git-2018-3-arch || bundle exec kitchen create py2-git-2018-3-arch
-
-      - name: Test Bootstrap In Test Container
-        run: |
-          bundle exec kitchen verify py2-git-2018-3-arch
-
-      - name: Destroy Test Container
-        if: always()
-        run: |
-          bundle exec kitchen destroy py2-git-2018-3-arch
-
-
   py2-git-2019-2-arch:
     name: Arch v2019.2 Py2 Git
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
 
     needs: lint
 
@@ -504,10 +734,10 @@ jobs:
           bundle exec kitchen destroy py2-git-2019-2-arch
 
 
-  py2-stable-2018-3-centos-6:
-    name: CentOS 6 v2018.3 Py2 Stable
+  py3-git-3001-arch:
+    name: Arch v3001 Py3 Git
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
 
     needs: lint
 
@@ -538,22 +768,22 @@ jobs:
 
       - name: Create Test Container
         run: |
-          bundle exec kitchen create py2-stable-2018-3-centos-6 || bundle exec kitchen create py2-stable-2018-3-centos-6
+          bundle exec kitchen create py3-git-3001-arch || bundle exec kitchen create py3-git-3001-arch
 
       - name: Test Bootstrap In Test Container
         run: |
-          bundle exec kitchen verify py2-stable-2018-3-centos-6
+          bundle exec kitchen verify py3-git-3001-arch
 
       - name: Destroy Test Container
         if: always()
         run: |
-          bundle exec kitchen destroy py2-stable-2018-3-centos-6
+          bundle exec kitchen destroy py3-git-3001-arch
 
 
-  py2-git-2018-3-centos-6:
-    name: CentOS 6 v2018.3 Py2 Git
+  py3-git-3002-arch:
+    name: Arch v3002 Py3 Git
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
 
     needs: lint
 
@@ -584,22 +814,22 @@ jobs:
 
       - name: Create Test Container
         run: |
-          bundle exec kitchen create py2-git-2018-3-centos-6 || bundle exec kitchen create py2-git-2018-3-centos-6
+          bundle exec kitchen create py3-git-3002-arch || bundle exec kitchen create py3-git-3002-arch
 
       - name: Test Bootstrap In Test Container
         run: |
-          bundle exec kitchen verify py2-git-2018-3-centos-6
+          bundle exec kitchen verify py3-git-3002-arch
 
       - name: Destroy Test Container
         if: always()
         run: |
-          bundle exec kitchen destroy py2-git-2018-3-centos-6
+          bundle exec kitchen destroy py3-git-3002-arch
 
 
-  py2-stable-2019-2-centos-6:
-    name: CentOS 6 v2019.2 Py2 Stable
+  py3-git-master-arch:
+    name: Arch Master Py3 Git
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
 
     needs: lint
 
@@ -630,298 +860,22 @@ jobs:
 
       - name: Create Test Container
         run: |
-          bundle exec kitchen create py2-stable-2019-2-centos-6 || bundle exec kitchen create py2-stable-2019-2-centos-6
+          bundle exec kitchen create py3-git-master-arch || bundle exec kitchen create py3-git-master-arch
 
       - name: Test Bootstrap In Test Container
         run: |
-          bundle exec kitchen verify py2-stable-2019-2-centos-6
+          bundle exec kitchen verify py3-git-master-arch
 
       - name: Destroy Test Container
         if: always()
         run: |
-          bundle exec kitchen destroy py2-stable-2019-2-centos-6
-
-
-  py2-git-2019-2-centos-6:
-    name: CentOS 6 v2019.2 Py2 Git
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-
-    needs: lint
-
-    steps:
-      - uses: actions/checkout@v1
-      - name: Setup Ruby
-        uses: actions/setup-ruby@v1
-        with:
-          ruby-version: 2.6.x
-
-      - name: Install Bundler
-        run: |
-          gem install bundler
-
-      - name: Setup Bundle
-        run: |
-          bundle install --with docker --without opennebula ec2 windows vagrant
-
-      - name: Set up Python 3.7
-        uses: actions/setup-python@v1
-        with:
-          python-version: 3.7
-
-      - name: Install Python Dependencies
-        run: |
-          pip install -U pip
-          pip install -r tests/requirements.txt
-
-      - name: Create Test Container
-        run: |
-          bundle exec kitchen create py2-git-2019-2-centos-6 || bundle exec kitchen create py2-git-2019-2-centos-6
-
-      - name: Test Bootstrap In Test Container
-        run: |
-          bundle exec kitchen verify py2-git-2019-2-centos-6
-
-      - name: Destroy Test Container
-        if: always()
-        run: |
-          bundle exec kitchen destroy py2-git-2019-2-centos-6
-
-
-  latest-centos-6:
-    name: CentOS 6 Latest packaged release
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-
-    needs: lint
-
-    steps:
-      - uses: actions/checkout@v1
-      - name: Setup Ruby
-        uses: actions/setup-ruby@v1
-        with:
-          ruby-version: 2.6.x
-
-      - name: Install Bundler
-        run: |
-          gem install bundler
-
-      - name: Setup Bundle
-        run: |
-          bundle install --with docker --without opennebula ec2 windows vagrant
-
-      - name: Set up Python 3.7
-        uses: actions/setup-python@v1
-        with:
-          python-version: 3.7
-
-      - name: Install Python Dependencies
-        run: |
-          pip install -U pip
-          pip install -r tests/requirements.txt
-
-      - name: Create Test Container
-        run: |
-          bundle exec kitchen create latest-centos-6 || bundle exec kitchen create latest-centos-6
-
-      - name: Test Bootstrap In Test Container
-        run: |
-          bundle exec kitchen verify latest-centos-6
-
-      - name: Destroy Test Container
-        if: always()
-        run: |
-          bundle exec kitchen destroy latest-centos-6
-
-
-  py2-stable-2018-3-centos-7:
-    name: CentOS 7 v2018.3 Py2 Stable
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-
-    needs: lint
-
-    steps:
-      - uses: actions/checkout@v1
-      - name: Setup Ruby
-        uses: actions/setup-ruby@v1
-        with:
-          ruby-version: 2.6.x
-
-      - name: Install Bundler
-        run: |
-          gem install bundler
-
-      - name: Setup Bundle
-        run: |
-          bundle install --with docker --without opennebula ec2 windows vagrant
-
-      - name: Set up Python 3.7
-        uses: actions/setup-python@v1
-        with:
-          python-version: 3.7
-
-      - name: Install Python Dependencies
-        run: |
-          pip install -U pip
-          pip install -r tests/requirements.txt
-
-      - name: Create Test Container
-        run: |
-          bundle exec kitchen create py2-stable-2018-3-centos-7 || bundle exec kitchen create py2-stable-2018-3-centos-7
-
-      - name: Test Bootstrap In Test Container
-        run: |
-          bundle exec kitchen verify py2-stable-2018-3-centos-7
-
-      - name: Destroy Test Container
-        if: always()
-        run: |
-          bundle exec kitchen destroy py2-stable-2018-3-centos-7
-
-
-  py2-git-2018-3-centos-7:
-    name: CentOS 7 v2018.3 Py2 Git
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-
-    needs: lint
-
-    steps:
-      - uses: actions/checkout@v1
-      - name: Setup Ruby
-        uses: actions/setup-ruby@v1
-        with:
-          ruby-version: 2.6.x
-
-      - name: Install Bundler
-        run: |
-          gem install bundler
-
-      - name: Setup Bundle
-        run: |
-          bundle install --with docker --without opennebula ec2 windows vagrant
-
-      - name: Set up Python 3.7
-        uses: actions/setup-python@v1
-        with:
-          python-version: 3.7
-
-      - name: Install Python Dependencies
-        run: |
-          pip install -U pip
-          pip install -r tests/requirements.txt
-
-      - name: Create Test Container
-        run: |
-          bundle exec kitchen create py2-git-2018-3-centos-7 || bundle exec kitchen create py2-git-2018-3-centos-7
-
-      - name: Test Bootstrap In Test Container
-        run: |
-          bundle exec kitchen verify py2-git-2018-3-centos-7
-
-      - name: Destroy Test Container
-        if: always()
-        run: |
-          bundle exec kitchen destroy py2-git-2018-3-centos-7
-
-
-  py3-stable-2018-3-centos-7:
-    name: CentOS 7 v2018.3 Py3 Stable
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-
-    needs: lint
-
-    steps:
-      - uses: actions/checkout@v1
-      - name: Setup Ruby
-        uses: actions/setup-ruby@v1
-        with:
-          ruby-version: 2.6.x
-
-      - name: Install Bundler
-        run: |
-          gem install bundler
-
-      - name: Setup Bundle
-        run: |
-          bundle install --with docker --without opennebula ec2 windows vagrant
-
-      - name: Set up Python 3.7
-        uses: actions/setup-python@v1
-        with:
-          python-version: 3.7
-
-      - name: Install Python Dependencies
-        run: |
-          pip install -U pip
-          pip install -r tests/requirements.txt
-
-      - name: Create Test Container
-        run: |
-          bundle exec kitchen create py3-stable-2018-3-centos-7 || bundle exec kitchen create py3-stable-2018-3-centos-7
-
-      - name: Test Bootstrap In Test Container
-        run: |
-          bundle exec kitchen verify py3-stable-2018-3-centos-7
-
-      - name: Destroy Test Container
-        if: always()
-        run: |
-          bundle exec kitchen destroy py3-stable-2018-3-centos-7
-
-
-  py3-git-2018-3-centos-7:
-    name: CentOS 7 v2018.3 Py3 Git
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-
-    needs: lint
-
-    steps:
-      - uses: actions/checkout@v1
-      - name: Setup Ruby
-        uses: actions/setup-ruby@v1
-        with:
-          ruby-version: 2.6.x
-
-      - name: Install Bundler
-        run: |
-          gem install bundler
-
-      - name: Setup Bundle
-        run: |
-          bundle install --with docker --without opennebula ec2 windows vagrant
-
-      - name: Set up Python 3.7
-        uses: actions/setup-python@v1
-        with:
-          python-version: 3.7
-
-      - name: Install Python Dependencies
-        run: |
-          pip install -U pip
-          pip install -r tests/requirements.txt
-
-      - name: Create Test Container
-        run: |
-          bundle exec kitchen create py3-git-2018-3-centos-7 || bundle exec kitchen create py3-git-2018-3-centos-7
-
-      - name: Test Bootstrap In Test Container
-        run: |
-          bundle exec kitchen verify py3-git-2018-3-centos-7
-
-      - name: Destroy Test Container
-        if: always()
-        run: |
-          bundle exec kitchen destroy py3-git-2018-3-centos-7
+          bundle exec kitchen destroy py3-git-master-arch
 
 
   py2-stable-2019-2-centos-7:
     name: CentOS 7 v2019.2 Py2 Stable
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
 
     needs: lint
 
@@ -967,7 +921,7 @@ jobs:
   py2-git-2019-2-centos-7:
     name: CentOS 7 v2019.2 Py2 Git
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
 
     needs: lint
 
@@ -1013,7 +967,7 @@ jobs:
   py3-stable-2019-2-centos-7:
     name: CentOS 7 v2019.2 Py3 Stable
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
 
     needs: lint
 
@@ -1059,7 +1013,7 @@ jobs:
   py3-git-2019-2-centos-7:
     name: CentOS 7 v2019.2 Py3 Git
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
 
     needs: lint
 
@@ -1105,7 +1059,7 @@ jobs:
   py3-stable-3000-centos-7:
     name: CentOS 7 v3000 Py3 Stable
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
 
     needs: lint
 
@@ -1151,7 +1105,7 @@ jobs:
   py3-git-3000-centos-7:
     name: CentOS 7 v3000 Py3 Git
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
 
     needs: lint
 
@@ -1194,10 +1148,286 @@ jobs:
           bundle exec kitchen destroy py3-git-3000-centos-7
 
 
+  py3-stable-3001-centos-7:
+    name: CentOS 7 v3001 Py3 Stable
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    needs: lint
+
+    steps:
+      - uses: actions/checkout@v1
+      - name: Setup Ruby
+        uses: actions/setup-ruby@v1
+        with:
+          ruby-version: 2.6.x
+
+      - name: Install Bundler
+        run: |
+          gem install bundler
+
+      - name: Setup Bundle
+        run: |
+          bundle install --with docker --without opennebula ec2 windows vagrant
+
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.7
+
+      - name: Install Python Dependencies
+        run: |
+          pip install -U pip
+          pip install -r tests/requirements.txt
+
+      - name: Create Test Container
+        run: |
+          bundle exec kitchen create py3-stable-3001-centos-7 || bundle exec kitchen create py3-stable-3001-centos-7
+
+      - name: Test Bootstrap In Test Container
+        run: |
+          bundle exec kitchen verify py3-stable-3001-centos-7
+
+      - name: Destroy Test Container
+        if: always()
+        run: |
+          bundle exec kitchen destroy py3-stable-3001-centos-7
+
+
+  py3-git-3001-centos-7:
+    name: CentOS 7 v3001 Py3 Git
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    needs: lint
+
+    steps:
+      - uses: actions/checkout@v1
+      - name: Setup Ruby
+        uses: actions/setup-ruby@v1
+        with:
+          ruby-version: 2.6.x
+
+      - name: Install Bundler
+        run: |
+          gem install bundler
+
+      - name: Setup Bundle
+        run: |
+          bundle install --with docker --without opennebula ec2 windows vagrant
+
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.7
+
+      - name: Install Python Dependencies
+        run: |
+          pip install -U pip
+          pip install -r tests/requirements.txt
+
+      - name: Create Test Container
+        run: |
+          bundle exec kitchen create py3-git-3001-centos-7 || bundle exec kitchen create py3-git-3001-centos-7
+
+      - name: Test Bootstrap In Test Container
+        run: |
+          bundle exec kitchen verify py3-git-3001-centos-7
+
+      - name: Destroy Test Container
+        if: always()
+        run: |
+          bundle exec kitchen destroy py3-git-3001-centos-7
+
+
+  py3-stable-3001-0-centos-7:
+    name: CentOS 7 v3001.0 Py3 Stable
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    needs: lint
+
+    steps:
+      - uses: actions/checkout@v1
+      - name: Setup Ruby
+        uses: actions/setup-ruby@v1
+        with:
+          ruby-version: 2.6.x
+
+      - name: Install Bundler
+        run: |
+          gem install bundler
+
+      - name: Setup Bundle
+        run: |
+          bundle install --with docker --without opennebula ec2 windows vagrant
+
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.7
+
+      - name: Install Python Dependencies
+        run: |
+          pip install -U pip
+          pip install -r tests/requirements.txt
+
+      - name: Create Test Container
+        run: |
+          bundle exec kitchen create py3-stable-3001-0-centos-7 || bundle exec kitchen create py3-stable-3001-0-centos-7
+
+      - name: Test Bootstrap In Test Container
+        run: |
+          bundle exec kitchen verify py3-stable-3001-0-centos-7
+
+      - name: Destroy Test Container
+        if: always()
+        run: |
+          bundle exec kitchen destroy py3-stable-3001-0-centos-7
+
+
+  py3-stable-3002-centos-7:
+    name: CentOS 7 v3002 Py3 Stable
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    needs: lint
+
+    steps:
+      - uses: actions/checkout@v1
+      - name: Setup Ruby
+        uses: actions/setup-ruby@v1
+        with:
+          ruby-version: 2.6.x
+
+      - name: Install Bundler
+        run: |
+          gem install bundler
+
+      - name: Setup Bundle
+        run: |
+          bundle install --with docker --without opennebula ec2 windows vagrant
+
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.7
+
+      - name: Install Python Dependencies
+        run: |
+          pip install -U pip
+          pip install -r tests/requirements.txt
+
+      - name: Create Test Container
+        run: |
+          bundle exec kitchen create py3-stable-3002-centos-7 || bundle exec kitchen create py3-stable-3002-centos-7
+
+      - name: Test Bootstrap In Test Container
+        run: |
+          bundle exec kitchen verify py3-stable-3002-centos-7
+
+      - name: Destroy Test Container
+        if: always()
+        run: |
+          bundle exec kitchen destroy py3-stable-3002-centos-7
+
+
+  py3-git-3002-centos-7:
+    name: CentOS 7 v3002 Py3 Git
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    needs: lint
+
+    steps:
+      - uses: actions/checkout@v1
+      - name: Setup Ruby
+        uses: actions/setup-ruby@v1
+        with:
+          ruby-version: 2.6.x
+
+      - name: Install Bundler
+        run: |
+          gem install bundler
+
+      - name: Setup Bundle
+        run: |
+          bundle install --with docker --without opennebula ec2 windows vagrant
+
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.7
+
+      - name: Install Python Dependencies
+        run: |
+          pip install -U pip
+          pip install -r tests/requirements.txt
+
+      - name: Create Test Container
+        run: |
+          bundle exec kitchen create py3-git-3002-centos-7 || bundle exec kitchen create py3-git-3002-centos-7
+
+      - name: Test Bootstrap In Test Container
+        run: |
+          bundle exec kitchen verify py3-git-3002-centos-7
+
+      - name: Destroy Test Container
+        if: always()
+        run: |
+          bundle exec kitchen destroy py3-git-3002-centos-7
+
+
+  py3-stable-3002-0-centos-7:
+    name: CentOS 7 v3002.0 Py3 Stable
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    needs: lint
+
+    steps:
+      - uses: actions/checkout@v1
+      - name: Setup Ruby
+        uses: actions/setup-ruby@v1
+        with:
+          ruby-version: 2.6.x
+
+      - name: Install Bundler
+        run: |
+          gem install bundler
+
+      - name: Setup Bundle
+        run: |
+          bundle install --with docker --without opennebula ec2 windows vagrant
+
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.7
+
+      - name: Install Python Dependencies
+        run: |
+          pip install -U pip
+          pip install -r tests/requirements.txt
+
+      - name: Create Test Container
+        run: |
+          bundle exec kitchen create py3-stable-3002-0-centos-7 || bundle exec kitchen create py3-stable-3002-0-centos-7
+
+      - name: Test Bootstrap In Test Container
+        run: |
+          bundle exec kitchen verify py3-stable-3002-0-centos-7
+
+      - name: Destroy Test Container
+        if: always()
+        run: |
+          bundle exec kitchen destroy py3-stable-3002-0-centos-7
+
+
   py3-git-master-centos-7:
     name: CentOS 7 Master Py3 Git
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
 
     needs: lint
 
@@ -1243,7 +1473,7 @@ jobs:
   latest-centos-7:
     name: CentOS 7 Latest packaged release
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
 
     needs: lint
 
@@ -1289,7 +1519,7 @@ jobs:
   py3-stable-2019-2-centos-8:
     name: CentOS 8 v2019.2 Py3 Stable
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
 
     needs: lint
 
@@ -1335,7 +1565,7 @@ jobs:
   py3-git-2019-2-centos-8:
     name: CentOS 8 v2019.2 Py3 Git
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
 
     needs: lint
 
@@ -1381,7 +1611,7 @@ jobs:
   py3-stable-3000-centos-8:
     name: CentOS 8 v3000 Py3 Stable
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
 
     needs: lint
 
@@ -1427,7 +1657,7 @@ jobs:
   py3-git-3000-centos-8:
     name: CentOS 8 v3000 Py3 Git
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
 
     needs: lint
 
@@ -1470,10 +1700,286 @@ jobs:
           bundle exec kitchen destroy py3-git-3000-centos-8
 
 
+  py3-stable-3001-centos-8:
+    name: CentOS 8 v3001 Py3 Stable
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    needs: lint
+
+    steps:
+      - uses: actions/checkout@v1
+      - name: Setup Ruby
+        uses: actions/setup-ruby@v1
+        with:
+          ruby-version: 2.6.x
+
+      - name: Install Bundler
+        run: |
+          gem install bundler
+
+      - name: Setup Bundle
+        run: |
+          bundle install --with docker --without opennebula ec2 windows vagrant
+
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.7
+
+      - name: Install Python Dependencies
+        run: |
+          pip install -U pip
+          pip install -r tests/requirements.txt
+
+      - name: Create Test Container
+        run: |
+          bundle exec kitchen create py3-stable-3001-centos-8 || bundle exec kitchen create py3-stable-3001-centos-8
+
+      - name: Test Bootstrap In Test Container
+        run: |
+          bundle exec kitchen verify py3-stable-3001-centos-8
+
+      - name: Destroy Test Container
+        if: always()
+        run: |
+          bundle exec kitchen destroy py3-stable-3001-centos-8
+
+
+  py3-git-3001-centos-8:
+    name: CentOS 8 v3001 Py3 Git
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    needs: lint
+
+    steps:
+      - uses: actions/checkout@v1
+      - name: Setup Ruby
+        uses: actions/setup-ruby@v1
+        with:
+          ruby-version: 2.6.x
+
+      - name: Install Bundler
+        run: |
+          gem install bundler
+
+      - name: Setup Bundle
+        run: |
+          bundle install --with docker --without opennebula ec2 windows vagrant
+
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.7
+
+      - name: Install Python Dependencies
+        run: |
+          pip install -U pip
+          pip install -r tests/requirements.txt
+
+      - name: Create Test Container
+        run: |
+          bundle exec kitchen create py3-git-3001-centos-8 || bundle exec kitchen create py3-git-3001-centos-8
+
+      - name: Test Bootstrap In Test Container
+        run: |
+          bundle exec kitchen verify py3-git-3001-centos-8
+
+      - name: Destroy Test Container
+        if: always()
+        run: |
+          bundle exec kitchen destroy py3-git-3001-centos-8
+
+
+  py3-stable-3001-0-centos-8:
+    name: CentOS 8 v3001.0 Py3 Stable
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    needs: lint
+
+    steps:
+      - uses: actions/checkout@v1
+      - name: Setup Ruby
+        uses: actions/setup-ruby@v1
+        with:
+          ruby-version: 2.6.x
+
+      - name: Install Bundler
+        run: |
+          gem install bundler
+
+      - name: Setup Bundle
+        run: |
+          bundle install --with docker --without opennebula ec2 windows vagrant
+
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.7
+
+      - name: Install Python Dependencies
+        run: |
+          pip install -U pip
+          pip install -r tests/requirements.txt
+
+      - name: Create Test Container
+        run: |
+          bundle exec kitchen create py3-stable-3001-0-centos-8 || bundle exec kitchen create py3-stable-3001-0-centos-8
+
+      - name: Test Bootstrap In Test Container
+        run: |
+          bundle exec kitchen verify py3-stable-3001-0-centos-8
+
+      - name: Destroy Test Container
+        if: always()
+        run: |
+          bundle exec kitchen destroy py3-stable-3001-0-centos-8
+
+
+  py3-stable-3002-centos-8:
+    name: CentOS 8 v3002 Py3 Stable
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    needs: lint
+
+    steps:
+      - uses: actions/checkout@v1
+      - name: Setup Ruby
+        uses: actions/setup-ruby@v1
+        with:
+          ruby-version: 2.6.x
+
+      - name: Install Bundler
+        run: |
+          gem install bundler
+
+      - name: Setup Bundle
+        run: |
+          bundle install --with docker --without opennebula ec2 windows vagrant
+
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.7
+
+      - name: Install Python Dependencies
+        run: |
+          pip install -U pip
+          pip install -r tests/requirements.txt
+
+      - name: Create Test Container
+        run: |
+          bundle exec kitchen create py3-stable-3002-centos-8 || bundle exec kitchen create py3-stable-3002-centos-8
+
+      - name: Test Bootstrap In Test Container
+        run: |
+          bundle exec kitchen verify py3-stable-3002-centos-8
+
+      - name: Destroy Test Container
+        if: always()
+        run: |
+          bundle exec kitchen destroy py3-stable-3002-centos-8
+
+
+  py3-git-3002-centos-8:
+    name: CentOS 8 v3002 Py3 Git
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    needs: lint
+
+    steps:
+      - uses: actions/checkout@v1
+      - name: Setup Ruby
+        uses: actions/setup-ruby@v1
+        with:
+          ruby-version: 2.6.x
+
+      - name: Install Bundler
+        run: |
+          gem install bundler
+
+      - name: Setup Bundle
+        run: |
+          bundle install --with docker --without opennebula ec2 windows vagrant
+
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.7
+
+      - name: Install Python Dependencies
+        run: |
+          pip install -U pip
+          pip install -r tests/requirements.txt
+
+      - name: Create Test Container
+        run: |
+          bundle exec kitchen create py3-git-3002-centos-8 || bundle exec kitchen create py3-git-3002-centos-8
+
+      - name: Test Bootstrap In Test Container
+        run: |
+          bundle exec kitchen verify py3-git-3002-centos-8
+
+      - name: Destroy Test Container
+        if: always()
+        run: |
+          bundle exec kitchen destroy py3-git-3002-centos-8
+
+
+  py3-stable-3002-0-centos-8:
+    name: CentOS 8 v3002.0 Py3 Stable
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    needs: lint
+
+    steps:
+      - uses: actions/checkout@v1
+      - name: Setup Ruby
+        uses: actions/setup-ruby@v1
+        with:
+          ruby-version: 2.6.x
+
+      - name: Install Bundler
+        run: |
+          gem install bundler
+
+      - name: Setup Bundle
+        run: |
+          bundle install --with docker --without opennebula ec2 windows vagrant
+
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.7
+
+      - name: Install Python Dependencies
+        run: |
+          pip install -U pip
+          pip install -r tests/requirements.txt
+
+      - name: Create Test Container
+        run: |
+          bundle exec kitchen create py3-stable-3002-0-centos-8 || bundle exec kitchen create py3-stable-3002-0-centos-8
+
+      - name: Test Bootstrap In Test Container
+        run: |
+          bundle exec kitchen verify py3-stable-3002-0-centos-8
+
+      - name: Destroy Test Container
+        if: always()
+        run: |
+          bundle exec kitchen destroy py3-stable-3002-0-centos-8
+
+
   py3-git-master-centos-8:
     name: CentOS 8 Master Py3 Git
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
 
     needs: lint
 
@@ -1516,10 +2022,56 @@ jobs:
           bundle exec kitchen destroy py3-git-master-centos-8
 
 
+  latest-centos-8:
+    name: CentOS 8 Latest packaged release
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    needs: lint
+
+    steps:
+      - uses: actions/checkout@v1
+      - name: Setup Ruby
+        uses: actions/setup-ruby@v1
+        with:
+          ruby-version: 2.6.x
+
+      - name: Install Bundler
+        run: |
+          gem install bundler
+
+      - name: Setup Bundle
+        run: |
+          bundle install --with docker --without opennebula ec2 windows vagrant
+
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.7
+
+      - name: Install Python Dependencies
+        run: |
+          pip install -U pip
+          pip install -r tests/requirements.txt
+
+      - name: Create Test Container
+        run: |
+          bundle exec kitchen create latest-centos-8 || bundle exec kitchen create latest-centos-8
+
+      - name: Test Bootstrap In Test Container
+        run: |
+          bundle exec kitchen verify latest-centos-8
+
+      - name: Destroy Test Container
+        if: always()
+        run: |
+          bundle exec kitchen destroy latest-centos-8
+
+
   py3-stable-2019-2-debian-10:
     name: Debian 10 v2019.2 Py3 Stable
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
 
     needs: lint
 
@@ -1565,7 +2117,7 @@ jobs:
   py3-git-2019-2-debian-10:
     name: Debian 10 v2019.2 Py3 Git
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
 
     needs: lint
 
@@ -1611,7 +2163,7 @@ jobs:
   py3-stable-3000-debian-10:
     name: Debian 10 v3000 Py3 Stable
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
 
     needs: lint
 
@@ -1657,7 +2209,7 @@ jobs:
   py3-git-3000-debian-10:
     name: Debian 10 v3000 Py3 Git
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
 
     needs: lint
 
@@ -1700,10 +2252,286 @@ jobs:
           bundle exec kitchen destroy py3-git-3000-debian-10
 
 
+  py3-stable-3001-debian-10:
+    name: Debian 10 v3001 Py3 Stable
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    needs: lint
+
+    steps:
+      - uses: actions/checkout@v1
+      - name: Setup Ruby
+        uses: actions/setup-ruby@v1
+        with:
+          ruby-version: 2.6.x
+
+      - name: Install Bundler
+        run: |
+          gem install bundler
+
+      - name: Setup Bundle
+        run: |
+          bundle install --with docker --without opennebula ec2 windows vagrant
+
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.7
+
+      - name: Install Python Dependencies
+        run: |
+          pip install -U pip
+          pip install -r tests/requirements.txt
+
+      - name: Create Test Container
+        run: |
+          bundle exec kitchen create py3-stable-3001-debian-10 || bundle exec kitchen create py3-stable-3001-debian-10
+
+      - name: Test Bootstrap In Test Container
+        run: |
+          bundle exec kitchen verify py3-stable-3001-debian-10
+
+      - name: Destroy Test Container
+        if: always()
+        run: |
+          bundle exec kitchen destroy py3-stable-3001-debian-10
+
+
+  py3-git-3001-debian-10:
+    name: Debian 10 v3001 Py3 Git
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    needs: lint
+
+    steps:
+      - uses: actions/checkout@v1
+      - name: Setup Ruby
+        uses: actions/setup-ruby@v1
+        with:
+          ruby-version: 2.6.x
+
+      - name: Install Bundler
+        run: |
+          gem install bundler
+
+      - name: Setup Bundle
+        run: |
+          bundle install --with docker --without opennebula ec2 windows vagrant
+
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.7
+
+      - name: Install Python Dependencies
+        run: |
+          pip install -U pip
+          pip install -r tests/requirements.txt
+
+      - name: Create Test Container
+        run: |
+          bundle exec kitchen create py3-git-3001-debian-10 || bundle exec kitchen create py3-git-3001-debian-10
+
+      - name: Test Bootstrap In Test Container
+        run: |
+          bundle exec kitchen verify py3-git-3001-debian-10
+
+      - name: Destroy Test Container
+        if: always()
+        run: |
+          bundle exec kitchen destroy py3-git-3001-debian-10
+
+
+  py3-stable-3001-0-debian-10:
+    name: Debian 10 v3001.0 Py3 Stable
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    needs: lint
+
+    steps:
+      - uses: actions/checkout@v1
+      - name: Setup Ruby
+        uses: actions/setup-ruby@v1
+        with:
+          ruby-version: 2.6.x
+
+      - name: Install Bundler
+        run: |
+          gem install bundler
+
+      - name: Setup Bundle
+        run: |
+          bundle install --with docker --without opennebula ec2 windows vagrant
+
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.7
+
+      - name: Install Python Dependencies
+        run: |
+          pip install -U pip
+          pip install -r tests/requirements.txt
+
+      - name: Create Test Container
+        run: |
+          bundle exec kitchen create py3-stable-3001-0-debian-10 || bundle exec kitchen create py3-stable-3001-0-debian-10
+
+      - name: Test Bootstrap In Test Container
+        run: |
+          bundle exec kitchen verify py3-stable-3001-0-debian-10
+
+      - name: Destroy Test Container
+        if: always()
+        run: |
+          bundle exec kitchen destroy py3-stable-3001-0-debian-10
+
+
+  py3-stable-3002-debian-10:
+    name: Debian 10 v3002 Py3 Stable
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    needs: lint
+
+    steps:
+      - uses: actions/checkout@v1
+      - name: Setup Ruby
+        uses: actions/setup-ruby@v1
+        with:
+          ruby-version: 2.6.x
+
+      - name: Install Bundler
+        run: |
+          gem install bundler
+
+      - name: Setup Bundle
+        run: |
+          bundle install --with docker --without opennebula ec2 windows vagrant
+
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.7
+
+      - name: Install Python Dependencies
+        run: |
+          pip install -U pip
+          pip install -r tests/requirements.txt
+
+      - name: Create Test Container
+        run: |
+          bundle exec kitchen create py3-stable-3002-debian-10 || bundle exec kitchen create py3-stable-3002-debian-10
+
+      - name: Test Bootstrap In Test Container
+        run: |
+          bundle exec kitchen verify py3-stable-3002-debian-10
+
+      - name: Destroy Test Container
+        if: always()
+        run: |
+          bundle exec kitchen destroy py3-stable-3002-debian-10
+
+
+  py3-git-3002-debian-10:
+    name: Debian 10 v3002 Py3 Git
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    needs: lint
+
+    steps:
+      - uses: actions/checkout@v1
+      - name: Setup Ruby
+        uses: actions/setup-ruby@v1
+        with:
+          ruby-version: 2.6.x
+
+      - name: Install Bundler
+        run: |
+          gem install bundler
+
+      - name: Setup Bundle
+        run: |
+          bundle install --with docker --without opennebula ec2 windows vagrant
+
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.7
+
+      - name: Install Python Dependencies
+        run: |
+          pip install -U pip
+          pip install -r tests/requirements.txt
+
+      - name: Create Test Container
+        run: |
+          bundle exec kitchen create py3-git-3002-debian-10 || bundle exec kitchen create py3-git-3002-debian-10
+
+      - name: Test Bootstrap In Test Container
+        run: |
+          bundle exec kitchen verify py3-git-3002-debian-10
+
+      - name: Destroy Test Container
+        if: always()
+        run: |
+          bundle exec kitchen destroy py3-git-3002-debian-10
+
+
+  py3-stable-3002-0-debian-10:
+    name: Debian 10 v3002.0 Py3 Stable
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    needs: lint
+
+    steps:
+      - uses: actions/checkout@v1
+      - name: Setup Ruby
+        uses: actions/setup-ruby@v1
+        with:
+          ruby-version: 2.6.x
+
+      - name: Install Bundler
+        run: |
+          gem install bundler
+
+      - name: Setup Bundle
+        run: |
+          bundle install --with docker --without opennebula ec2 windows vagrant
+
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.7
+
+      - name: Install Python Dependencies
+        run: |
+          pip install -U pip
+          pip install -r tests/requirements.txt
+
+      - name: Create Test Container
+        run: |
+          bundle exec kitchen create py3-stable-3002-0-debian-10 || bundle exec kitchen create py3-stable-3002-0-debian-10
+
+      - name: Test Bootstrap In Test Container
+        run: |
+          bundle exec kitchen verify py3-stable-3002-0-debian-10
+
+      - name: Destroy Test Container
+        if: always()
+        run: |
+          bundle exec kitchen destroy py3-stable-3002-0-debian-10
+
+
   py3-git-master-debian-10:
     name: Debian 10 Master Py3 Git
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
 
     needs: lint
 
@@ -1746,10 +2574,10 @@ jobs:
           bundle exec kitchen destroy py3-git-master-debian-10
 
 
-  py2-stable-2018-3-debian-8:
-    name: Debian 8 v2018.3 Py2 Stable
+  latest-debian-10:
+    name: Debian 10 Latest packaged release
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
 
     needs: lint
 
@@ -1780,22 +2608,22 @@ jobs:
 
       - name: Create Test Container
         run: |
-          bundle exec kitchen create py2-stable-2018-3-debian-8 || bundle exec kitchen create py2-stable-2018-3-debian-8
+          bundle exec kitchen create latest-debian-10 || bundle exec kitchen create latest-debian-10
 
       - name: Test Bootstrap In Test Container
         run: |
-          bundle exec kitchen verify py2-stable-2018-3-debian-8
+          bundle exec kitchen verify latest-debian-10
 
       - name: Destroy Test Container
         if: always()
         run: |
-          bundle exec kitchen destroy py2-stable-2018-3-debian-8
+          bundle exec kitchen destroy latest-debian-10
 
 
-  py2-git-2018-3-debian-8:
-    name: Debian 8 v2018.3 Py2 Git
+  py3-stable-3002-debian-11:
+    name: Debian 11 v3002 Py3 Stable
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
 
     needs: lint
 
@@ -1826,22 +2654,22 @@ jobs:
 
       - name: Create Test Container
         run: |
-          bundle exec kitchen create py2-git-2018-3-debian-8 || bundle exec kitchen create py2-git-2018-3-debian-8
+          bundle exec kitchen create py3-stable-3002-debian-11 || bundle exec kitchen create py3-stable-3002-debian-11
 
       - name: Test Bootstrap In Test Container
         run: |
-          bundle exec kitchen verify py2-git-2018-3-debian-8
+          bundle exec kitchen verify py3-stable-3002-debian-11
 
       - name: Destroy Test Container
         if: always()
         run: |
-          bundle exec kitchen destroy py2-git-2018-3-debian-8
+          bundle exec kitchen destroy py3-stable-3002-debian-11
 
 
-  py2-stable-2019-2-debian-8:
-    name: Debian 8 v2019.2 Py2 Stable
+  py3-git-3002-debian-11:
+    name: Debian 11 v3002 Py3 Git
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
 
     needs: lint
 
@@ -1872,22 +2700,22 @@ jobs:
 
       - name: Create Test Container
         run: |
-          bundle exec kitchen create py2-stable-2019-2-debian-8 || bundle exec kitchen create py2-stable-2019-2-debian-8
+          bundle exec kitchen create py3-git-3002-debian-11 || bundle exec kitchen create py3-git-3002-debian-11
 
       - name: Test Bootstrap In Test Container
         run: |
-          bundle exec kitchen verify py2-stable-2019-2-debian-8
+          bundle exec kitchen verify py3-git-3002-debian-11
 
       - name: Destroy Test Container
         if: always()
         run: |
-          bundle exec kitchen destroy py2-stable-2019-2-debian-8
+          bundle exec kitchen destroy py3-git-3002-debian-11
 
 
-  py2-git-2019-2-debian-8:
-    name: Debian 8 v2019.2 Py2 Git
+  py3-git-master-debian-11:
+    name: Debian 11 Master Py3 Git
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
 
     needs: lint
 
@@ -1918,22 +2746,22 @@ jobs:
 
       - name: Create Test Container
         run: |
-          bundle exec kitchen create py2-git-2019-2-debian-8 || bundle exec kitchen create py2-git-2019-2-debian-8
+          bundle exec kitchen create py3-git-master-debian-11 || bundle exec kitchen create py3-git-master-debian-11
 
       - name: Test Bootstrap In Test Container
         run: |
-          bundle exec kitchen verify py2-git-2019-2-debian-8
+          bundle exec kitchen verify py3-git-master-debian-11
 
       - name: Destroy Test Container
         if: always()
         run: |
-          bundle exec kitchen destroy py2-git-2019-2-debian-8
+          bundle exec kitchen destroy py3-git-master-debian-11
 
 
-  latest-debian-8:
-    name: Debian 8 Latest packaged release
+  latest-debian-11:
+    name: Debian 11 Latest packaged release
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
 
     needs: lint
 
@@ -1964,206 +2792,22 @@ jobs:
 
       - name: Create Test Container
         run: |
-          bundle exec kitchen create latest-debian-8 || bundle exec kitchen create latest-debian-8
+          bundle exec kitchen create latest-debian-11 || bundle exec kitchen create latest-debian-11
 
       - name: Test Bootstrap In Test Container
         run: |
-          bundle exec kitchen verify latest-debian-8
+          bundle exec kitchen verify latest-debian-11
 
       - name: Destroy Test Container
         if: always()
         run: |
-          bundle exec kitchen destroy latest-debian-8
-
-
-  py2-stable-2018-3-debian-9:
-    name: Debian 9 v2018.3 Py2 Stable
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-
-    needs: lint
-
-    steps:
-      - uses: actions/checkout@v1
-      - name: Setup Ruby
-        uses: actions/setup-ruby@v1
-        with:
-          ruby-version: 2.6.x
-
-      - name: Install Bundler
-        run: |
-          gem install bundler
-
-      - name: Setup Bundle
-        run: |
-          bundle install --with docker --without opennebula ec2 windows vagrant
-
-      - name: Set up Python 3.7
-        uses: actions/setup-python@v1
-        with:
-          python-version: 3.7
-
-      - name: Install Python Dependencies
-        run: |
-          pip install -U pip
-          pip install -r tests/requirements.txt
-
-      - name: Create Test Container
-        run: |
-          bundle exec kitchen create py2-stable-2018-3-debian-9 || bundle exec kitchen create py2-stable-2018-3-debian-9
-
-      - name: Test Bootstrap In Test Container
-        run: |
-          bundle exec kitchen verify py2-stable-2018-3-debian-9
-
-      - name: Destroy Test Container
-        if: always()
-        run: |
-          bundle exec kitchen destroy py2-stable-2018-3-debian-9
-
-
-  py2-git-2018-3-debian-9:
-    name: Debian 9 v2018.3 Py2 Git
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-
-    needs: lint
-
-    steps:
-      - uses: actions/checkout@v1
-      - name: Setup Ruby
-        uses: actions/setup-ruby@v1
-        with:
-          ruby-version: 2.6.x
-
-      - name: Install Bundler
-        run: |
-          gem install bundler
-
-      - name: Setup Bundle
-        run: |
-          bundle install --with docker --without opennebula ec2 windows vagrant
-
-      - name: Set up Python 3.7
-        uses: actions/setup-python@v1
-        with:
-          python-version: 3.7
-
-      - name: Install Python Dependencies
-        run: |
-          pip install -U pip
-          pip install -r tests/requirements.txt
-
-      - name: Create Test Container
-        run: |
-          bundle exec kitchen create py2-git-2018-3-debian-9 || bundle exec kitchen create py2-git-2018-3-debian-9
-
-      - name: Test Bootstrap In Test Container
-        run: |
-          bundle exec kitchen verify py2-git-2018-3-debian-9
-
-      - name: Destroy Test Container
-        if: always()
-        run: |
-          bundle exec kitchen destroy py2-git-2018-3-debian-9
-
-
-  py3-stable-2018-3-debian-9:
-    name: Debian 9 v2018.3 Py3 Stable
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-
-    needs: lint
-
-    steps:
-      - uses: actions/checkout@v1
-      - name: Setup Ruby
-        uses: actions/setup-ruby@v1
-        with:
-          ruby-version: 2.6.x
-
-      - name: Install Bundler
-        run: |
-          gem install bundler
-
-      - name: Setup Bundle
-        run: |
-          bundle install --with docker --without opennebula ec2 windows vagrant
-
-      - name: Set up Python 3.7
-        uses: actions/setup-python@v1
-        with:
-          python-version: 3.7
-
-      - name: Install Python Dependencies
-        run: |
-          pip install -U pip
-          pip install -r tests/requirements.txt
-
-      - name: Create Test Container
-        run: |
-          bundle exec kitchen create py3-stable-2018-3-debian-9 || bundle exec kitchen create py3-stable-2018-3-debian-9
-
-      - name: Test Bootstrap In Test Container
-        run: |
-          bundle exec kitchen verify py3-stable-2018-3-debian-9
-
-      - name: Destroy Test Container
-        if: always()
-        run: |
-          bundle exec kitchen destroy py3-stable-2018-3-debian-9
-
-
-  py3-git-2018-3-debian-9:
-    name: Debian 9 v2018.3 Py3 Git
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-
-    needs: lint
-
-    steps:
-      - uses: actions/checkout@v1
-      - name: Setup Ruby
-        uses: actions/setup-ruby@v1
-        with:
-          ruby-version: 2.6.x
-
-      - name: Install Bundler
-        run: |
-          gem install bundler
-
-      - name: Setup Bundle
-        run: |
-          bundle install --with docker --without opennebula ec2 windows vagrant
-
-      - name: Set up Python 3.7
-        uses: actions/setup-python@v1
-        with:
-          python-version: 3.7
-
-      - name: Install Python Dependencies
-        run: |
-          pip install -U pip
-          pip install -r tests/requirements.txt
-
-      - name: Create Test Container
-        run: |
-          bundle exec kitchen create py3-git-2018-3-debian-9 || bundle exec kitchen create py3-git-2018-3-debian-9
-
-      - name: Test Bootstrap In Test Container
-        run: |
-          bundle exec kitchen verify py3-git-2018-3-debian-9
-
-      - name: Destroy Test Container
-        if: always()
-        run: |
-          bundle exec kitchen destroy py3-git-2018-3-debian-9
+          bundle exec kitchen destroy latest-debian-11
 
 
   py2-stable-2019-2-debian-9:
     name: Debian 9 v2019.2 Py2 Stable
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
 
     needs: lint
 
@@ -2209,7 +2853,7 @@ jobs:
   py2-git-2019-2-debian-9:
     name: Debian 9 v2019.2 Py2 Git
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
 
     needs: lint
 
@@ -2255,7 +2899,7 @@ jobs:
   py3-stable-2019-2-debian-9:
     name: Debian 9 v2019.2 Py3 Stable
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
 
     needs: lint
 
@@ -2301,7 +2945,7 @@ jobs:
   py3-git-2019-2-debian-9:
     name: Debian 9 v2019.2 Py3 Git
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
 
     needs: lint
 
@@ -2347,7 +2991,7 @@ jobs:
   py3-stable-3000-debian-9:
     name: Debian 9 v3000 Py3 Stable
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
 
     needs: lint
 
@@ -2393,7 +3037,7 @@ jobs:
   py3-git-3000-debian-9:
     name: Debian 9 v3000 Py3 Git
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
 
     needs: lint
 
@@ -2436,10 +3080,286 @@ jobs:
           bundle exec kitchen destroy py3-git-3000-debian-9
 
 
+  py3-stable-3001-debian-9:
+    name: Debian 9 v3001 Py3 Stable
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    needs: lint
+
+    steps:
+      - uses: actions/checkout@v1
+      - name: Setup Ruby
+        uses: actions/setup-ruby@v1
+        with:
+          ruby-version: 2.6.x
+
+      - name: Install Bundler
+        run: |
+          gem install bundler
+
+      - name: Setup Bundle
+        run: |
+          bundle install --with docker --without opennebula ec2 windows vagrant
+
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.7
+
+      - name: Install Python Dependencies
+        run: |
+          pip install -U pip
+          pip install -r tests/requirements.txt
+
+      - name: Create Test Container
+        run: |
+          bundle exec kitchen create py3-stable-3001-debian-9 || bundle exec kitchen create py3-stable-3001-debian-9
+
+      - name: Test Bootstrap In Test Container
+        run: |
+          bundle exec kitchen verify py3-stable-3001-debian-9
+
+      - name: Destroy Test Container
+        if: always()
+        run: |
+          bundle exec kitchen destroy py3-stable-3001-debian-9
+
+
+  py3-git-3001-debian-9:
+    name: Debian 9 v3001 Py3 Git
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    needs: lint
+
+    steps:
+      - uses: actions/checkout@v1
+      - name: Setup Ruby
+        uses: actions/setup-ruby@v1
+        with:
+          ruby-version: 2.6.x
+
+      - name: Install Bundler
+        run: |
+          gem install bundler
+
+      - name: Setup Bundle
+        run: |
+          bundle install --with docker --without opennebula ec2 windows vagrant
+
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.7
+
+      - name: Install Python Dependencies
+        run: |
+          pip install -U pip
+          pip install -r tests/requirements.txt
+
+      - name: Create Test Container
+        run: |
+          bundle exec kitchen create py3-git-3001-debian-9 || bundle exec kitchen create py3-git-3001-debian-9
+
+      - name: Test Bootstrap In Test Container
+        run: |
+          bundle exec kitchen verify py3-git-3001-debian-9
+
+      - name: Destroy Test Container
+        if: always()
+        run: |
+          bundle exec kitchen destroy py3-git-3001-debian-9
+
+
+  py3-stable-3001-0-debian-9:
+    name: Debian 9 v3001.0 Py3 Stable
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    needs: lint
+
+    steps:
+      - uses: actions/checkout@v1
+      - name: Setup Ruby
+        uses: actions/setup-ruby@v1
+        with:
+          ruby-version: 2.6.x
+
+      - name: Install Bundler
+        run: |
+          gem install bundler
+
+      - name: Setup Bundle
+        run: |
+          bundle install --with docker --without opennebula ec2 windows vagrant
+
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.7
+
+      - name: Install Python Dependencies
+        run: |
+          pip install -U pip
+          pip install -r tests/requirements.txt
+
+      - name: Create Test Container
+        run: |
+          bundle exec kitchen create py3-stable-3001-0-debian-9 || bundle exec kitchen create py3-stable-3001-0-debian-9
+
+      - name: Test Bootstrap In Test Container
+        run: |
+          bundle exec kitchen verify py3-stable-3001-0-debian-9
+
+      - name: Destroy Test Container
+        if: always()
+        run: |
+          bundle exec kitchen destroy py3-stable-3001-0-debian-9
+
+
+  py3-stable-3002-debian-9:
+    name: Debian 9 v3002 Py3 Stable
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    needs: lint
+
+    steps:
+      - uses: actions/checkout@v1
+      - name: Setup Ruby
+        uses: actions/setup-ruby@v1
+        with:
+          ruby-version: 2.6.x
+
+      - name: Install Bundler
+        run: |
+          gem install bundler
+
+      - name: Setup Bundle
+        run: |
+          bundle install --with docker --without opennebula ec2 windows vagrant
+
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.7
+
+      - name: Install Python Dependencies
+        run: |
+          pip install -U pip
+          pip install -r tests/requirements.txt
+
+      - name: Create Test Container
+        run: |
+          bundle exec kitchen create py3-stable-3002-debian-9 || bundle exec kitchen create py3-stable-3002-debian-9
+
+      - name: Test Bootstrap In Test Container
+        run: |
+          bundle exec kitchen verify py3-stable-3002-debian-9
+
+      - name: Destroy Test Container
+        if: always()
+        run: |
+          bundle exec kitchen destroy py3-stable-3002-debian-9
+
+
+  py3-git-3002-debian-9:
+    name: Debian 9 v3002 Py3 Git
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    needs: lint
+
+    steps:
+      - uses: actions/checkout@v1
+      - name: Setup Ruby
+        uses: actions/setup-ruby@v1
+        with:
+          ruby-version: 2.6.x
+
+      - name: Install Bundler
+        run: |
+          gem install bundler
+
+      - name: Setup Bundle
+        run: |
+          bundle install --with docker --without opennebula ec2 windows vagrant
+
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.7
+
+      - name: Install Python Dependencies
+        run: |
+          pip install -U pip
+          pip install -r tests/requirements.txt
+
+      - name: Create Test Container
+        run: |
+          bundle exec kitchen create py3-git-3002-debian-9 || bundle exec kitchen create py3-git-3002-debian-9
+
+      - name: Test Bootstrap In Test Container
+        run: |
+          bundle exec kitchen verify py3-git-3002-debian-9
+
+      - name: Destroy Test Container
+        if: always()
+        run: |
+          bundle exec kitchen destroy py3-git-3002-debian-9
+
+
+  py3-stable-3002-0-debian-9:
+    name: Debian 9 v3002.0 Py3 Stable
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    needs: lint
+
+    steps:
+      - uses: actions/checkout@v1
+      - name: Setup Ruby
+        uses: actions/setup-ruby@v1
+        with:
+          ruby-version: 2.6.x
+
+      - name: Install Bundler
+        run: |
+          gem install bundler
+
+      - name: Setup Bundle
+        run: |
+          bundle install --with docker --without opennebula ec2 windows vagrant
+
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.7
+
+      - name: Install Python Dependencies
+        run: |
+          pip install -U pip
+          pip install -r tests/requirements.txt
+
+      - name: Create Test Container
+        run: |
+          bundle exec kitchen create py3-stable-3002-0-debian-9 || bundle exec kitchen create py3-stable-3002-0-debian-9
+
+      - name: Test Bootstrap In Test Container
+        run: |
+          bundle exec kitchen verify py3-stable-3002-0-debian-9
+
+      - name: Destroy Test Container
+        if: always()
+        run: |
+          bundle exec kitchen destroy py3-stable-3002-0-debian-9
+
+
   py3-git-master-debian-9:
     name: Debian 9 Master Py3 Git
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
 
     needs: lint
 
@@ -2485,7 +3405,7 @@ jobs:
   latest-debian-9:
     name: Debian 9 Latest packaged release
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
 
     needs: lint
 
@@ -2528,10 +3448,10 @@ jobs:
           bundle exec kitchen destroy latest-debian-9
 
 
-  py3-stable-2018-3-fedora-30:
-    name: Fedora 30 v2018.3 Py3 Stable
+  py3-git-3001-fedora-32:
+    name: Fedora 32 v3001 Py3 Git
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
 
     needs: lint
 
@@ -2562,22 +3482,22 @@ jobs:
 
       - name: Create Test Container
         run: |
-          bundle exec kitchen create py3-stable-2018-3-fedora-30 || bundle exec kitchen create py3-stable-2018-3-fedora-30
+          bundle exec kitchen create py3-git-3001-fedora-32 || bundle exec kitchen create py3-git-3001-fedora-32
 
       - name: Test Bootstrap In Test Container
         run: |
-          bundle exec kitchen verify py3-stable-2018-3-fedora-30
+          bundle exec kitchen verify py3-git-3001-fedora-32
 
       - name: Destroy Test Container
         if: always()
         run: |
-          bundle exec kitchen destroy py3-stable-2018-3-fedora-30
+          bundle exec kitchen destroy py3-git-3001-fedora-32
 
 
-  py3-git-2018-3-fedora-30:
-    name: Fedora 30 v2018.3 Py3 Git
+  py3-git-3002-fedora-32:
+    name: Fedora 32 v3002 Py3 Git
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
 
     needs: lint
 
@@ -2608,22 +3528,22 @@ jobs:
 
       - name: Create Test Container
         run: |
-          bundle exec kitchen create py3-git-2018-3-fedora-30 || bundle exec kitchen create py3-git-2018-3-fedora-30
+          bundle exec kitchen create py3-git-3002-fedora-32 || bundle exec kitchen create py3-git-3002-fedora-32
 
       - name: Test Bootstrap In Test Container
         run: |
-          bundle exec kitchen verify py3-git-2018-3-fedora-30
+          bundle exec kitchen verify py3-git-3002-fedora-32
 
       - name: Destroy Test Container
         if: always()
         run: |
-          bundle exec kitchen destroy py3-git-2018-3-fedora-30
+          bundle exec kitchen destroy py3-git-3002-fedora-32
 
 
-  py3-stable-2019-2-fedora-30:
-    name: Fedora 30 v2019.2 Py3 Stable
+  py3-git-master-fedora-32:
+    name: Fedora 32 Master Py3 Git
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
 
     needs: lint
 
@@ -2654,482 +3574,22 @@ jobs:
 
       - name: Create Test Container
         run: |
-          bundle exec kitchen create py3-stable-2019-2-fedora-30 || bundle exec kitchen create py3-stable-2019-2-fedora-30
+          bundle exec kitchen create py3-git-master-fedora-32 || bundle exec kitchen create py3-git-master-fedora-32
 
       - name: Test Bootstrap In Test Container
         run: |
-          bundle exec kitchen verify py3-stable-2019-2-fedora-30
+          bundle exec kitchen verify py3-git-master-fedora-32
 
       - name: Destroy Test Container
         if: always()
         run: |
-          bundle exec kitchen destroy py3-stable-2019-2-fedora-30
-
-
-  py3-git-2019-2-fedora-30:
-    name: Fedora 30 v2019.2 Py3 Git
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-
-    needs: lint
-
-    steps:
-      - uses: actions/checkout@v1
-      - name: Setup Ruby
-        uses: actions/setup-ruby@v1
-        with:
-          ruby-version: 2.6.x
-
-      - name: Install Bundler
-        run: |
-          gem install bundler
-
-      - name: Setup Bundle
-        run: |
-          bundle install --with docker --without opennebula ec2 windows vagrant
-
-      - name: Set up Python 3.7
-        uses: actions/setup-python@v1
-        with:
-          python-version: 3.7
-
-      - name: Install Python Dependencies
-        run: |
-          pip install -U pip
-          pip install -r tests/requirements.txt
-
-      - name: Create Test Container
-        run: |
-          bundle exec kitchen create py3-git-2019-2-fedora-30 || bundle exec kitchen create py3-git-2019-2-fedora-30
-
-      - name: Test Bootstrap In Test Container
-        run: |
-          bundle exec kitchen verify py3-git-2019-2-fedora-30
-
-      - name: Destroy Test Container
-        if: always()
-        run: |
-          bundle exec kitchen destroy py3-git-2019-2-fedora-30
-
-
-  latest-fedora-30:
-    name: Fedora 30 Latest packaged release
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-
-    needs: lint
-
-    steps:
-      - uses: actions/checkout@v1
-      - name: Setup Ruby
-        uses: actions/setup-ruby@v1
-        with:
-          ruby-version: 2.6.x
-
-      - name: Install Bundler
-        run: |
-          gem install bundler
-
-      - name: Setup Bundle
-        run: |
-          bundle install --with docker --without opennebula ec2 windows vagrant
-
-      - name: Set up Python 3.7
-        uses: actions/setup-python@v1
-        with:
-          python-version: 3.7
-
-      - name: Install Python Dependencies
-        run: |
-          pip install -U pip
-          pip install -r tests/requirements.txt
-
-      - name: Create Test Container
-        run: |
-          bundle exec kitchen create latest-fedora-30 || bundle exec kitchen create latest-fedora-30
-
-      - name: Test Bootstrap In Test Container
-        run: |
-          bundle exec kitchen verify latest-fedora-30
-
-      - name: Destroy Test Container
-        if: always()
-        run: |
-          bundle exec kitchen destroy latest-fedora-30
-
-
-  py3-stable-2018-3-fedora-31:
-    name: Fedora 31 v2018.3 Py3 Stable
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-
-    needs: lint
-
-    steps:
-      - uses: actions/checkout@v1
-      - name: Setup Ruby
-        uses: actions/setup-ruby@v1
-        with:
-          ruby-version: 2.6.x
-
-      - name: Install Bundler
-        run: |
-          gem install bundler
-
-      - name: Setup Bundle
-        run: |
-          bundle install --with docker --without opennebula ec2 windows vagrant
-
-      - name: Set up Python 3.7
-        uses: actions/setup-python@v1
-        with:
-          python-version: 3.7
-
-      - name: Install Python Dependencies
-        run: |
-          pip install -U pip
-          pip install -r tests/requirements.txt
-
-      - name: Create Test Container
-        run: |
-          bundle exec kitchen create py3-stable-2018-3-fedora-31 || bundle exec kitchen create py3-stable-2018-3-fedora-31
-
-      - name: Test Bootstrap In Test Container
-        run: |
-          bundle exec kitchen verify py3-stable-2018-3-fedora-31
-
-      - name: Destroy Test Container
-        if: always()
-        run: |
-          bundle exec kitchen destroy py3-stable-2018-3-fedora-31
-
-
-  py3-git-2018-3-fedora-31:
-    name: Fedora 31 v2018.3 Py3 Git
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-
-    needs: lint
-
-    steps:
-      - uses: actions/checkout@v1
-      - name: Setup Ruby
-        uses: actions/setup-ruby@v1
-        with:
-          ruby-version: 2.6.x
-
-      - name: Install Bundler
-        run: |
-          gem install bundler
-
-      - name: Setup Bundle
-        run: |
-          bundle install --with docker --without opennebula ec2 windows vagrant
-
-      - name: Set up Python 3.7
-        uses: actions/setup-python@v1
-        with:
-          python-version: 3.7
-
-      - name: Install Python Dependencies
-        run: |
-          pip install -U pip
-          pip install -r tests/requirements.txt
-
-      - name: Create Test Container
-        run: |
-          bundle exec kitchen create py3-git-2018-3-fedora-31 || bundle exec kitchen create py3-git-2018-3-fedora-31
-
-      - name: Test Bootstrap In Test Container
-        run: |
-          bundle exec kitchen verify py3-git-2018-3-fedora-31
-
-      - name: Destroy Test Container
-        if: always()
-        run: |
-          bundle exec kitchen destroy py3-git-2018-3-fedora-31
-
-
-  py3-stable-2019-2-fedora-31:
-    name: Fedora 31 v2019.2 Py3 Stable
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-
-    needs: lint
-
-    steps:
-      - uses: actions/checkout@v1
-      - name: Setup Ruby
-        uses: actions/setup-ruby@v1
-        with:
-          ruby-version: 2.6.x
-
-      - name: Install Bundler
-        run: |
-          gem install bundler
-
-      - name: Setup Bundle
-        run: |
-          bundle install --with docker --without opennebula ec2 windows vagrant
-
-      - name: Set up Python 3.7
-        uses: actions/setup-python@v1
-        with:
-          python-version: 3.7
-
-      - name: Install Python Dependencies
-        run: |
-          pip install -U pip
-          pip install -r tests/requirements.txt
-
-      - name: Create Test Container
-        run: |
-          bundle exec kitchen create py3-stable-2019-2-fedora-31 || bundle exec kitchen create py3-stable-2019-2-fedora-31
-
-      - name: Test Bootstrap In Test Container
-        run: |
-          bundle exec kitchen verify py3-stable-2019-2-fedora-31
-
-      - name: Destroy Test Container
-        if: always()
-        run: |
-          bundle exec kitchen destroy py3-stable-2019-2-fedora-31
-
-
-  py3-git-2019-2-fedora-31:
-    name: Fedora 31 v2019.2 Py3 Git
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-
-    needs: lint
-
-    steps:
-      - uses: actions/checkout@v1
-      - name: Setup Ruby
-        uses: actions/setup-ruby@v1
-        with:
-          ruby-version: 2.6.x
-
-      - name: Install Bundler
-        run: |
-          gem install bundler
-
-      - name: Setup Bundle
-        run: |
-          bundle install --with docker --without opennebula ec2 windows vagrant
-
-      - name: Set up Python 3.7
-        uses: actions/setup-python@v1
-        with:
-          python-version: 3.7
-
-      - name: Install Python Dependencies
-        run: |
-          pip install -U pip
-          pip install -r tests/requirements.txt
-
-      - name: Create Test Container
-        run: |
-          bundle exec kitchen create py3-git-2019-2-fedora-31 || bundle exec kitchen create py3-git-2019-2-fedora-31
-
-      - name: Test Bootstrap In Test Container
-        run: |
-          bundle exec kitchen verify py3-git-2019-2-fedora-31
-
-      - name: Destroy Test Container
-        if: always()
-        run: |
-          bundle exec kitchen destroy py3-git-2019-2-fedora-31
-
-
-  py3-stable-3000-fedora-31:
-    name: Fedora 31 v3000 Py3 Stable
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-
-    needs: lint
-
-    steps:
-      - uses: actions/checkout@v1
-      - name: Setup Ruby
-        uses: actions/setup-ruby@v1
-        with:
-          ruby-version: 2.6.x
-
-      - name: Install Bundler
-        run: |
-          gem install bundler
-
-      - name: Setup Bundle
-        run: |
-          bundle install --with docker --without opennebula ec2 windows vagrant
-
-      - name: Set up Python 3.7
-        uses: actions/setup-python@v1
-        with:
-          python-version: 3.7
-
-      - name: Install Python Dependencies
-        run: |
-          pip install -U pip
-          pip install -r tests/requirements.txt
-
-      - name: Create Test Container
-        run: |
-          bundle exec kitchen create py3-stable-3000-fedora-31 || bundle exec kitchen create py3-stable-3000-fedora-31
-
-      - name: Test Bootstrap In Test Container
-        run: |
-          bundle exec kitchen verify py3-stable-3000-fedora-31
-
-      - name: Destroy Test Container
-        if: always()
-        run: |
-          bundle exec kitchen destroy py3-stable-3000-fedora-31
-
-
-  py3-git-3000-fedora-31:
-    name: Fedora 31 v3000 Py3 Git
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-
-    needs: lint
-
-    steps:
-      - uses: actions/checkout@v1
-      - name: Setup Ruby
-        uses: actions/setup-ruby@v1
-        with:
-          ruby-version: 2.6.x
-
-      - name: Install Bundler
-        run: |
-          gem install bundler
-
-      - name: Setup Bundle
-        run: |
-          bundle install --with docker --without opennebula ec2 windows vagrant
-
-      - name: Set up Python 3.7
-        uses: actions/setup-python@v1
-        with:
-          python-version: 3.7
-
-      - name: Install Python Dependencies
-        run: |
-          pip install -U pip
-          pip install -r tests/requirements.txt
-
-      - name: Create Test Container
-        run: |
-          bundle exec kitchen create py3-git-3000-fedora-31 || bundle exec kitchen create py3-git-3000-fedora-31
-
-      - name: Test Bootstrap In Test Container
-        run: |
-          bundle exec kitchen verify py3-git-3000-fedora-31
-
-      - name: Destroy Test Container
-        if: always()
-        run: |
-          bundle exec kitchen destroy py3-git-3000-fedora-31
-
-
-  py3-git-master-fedora-31:
-    name: Fedora 31 Master Py3 Git
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-
-    needs: lint
-
-    steps:
-      - uses: actions/checkout@v1
-      - name: Setup Ruby
-        uses: actions/setup-ruby@v1
-        with:
-          ruby-version: 2.6.x
-
-      - name: Install Bundler
-        run: |
-          gem install bundler
-
-      - name: Setup Bundle
-        run: |
-          bundle install --with docker --without opennebula ec2 windows vagrant
-
-      - name: Set up Python 3.7
-        uses: actions/setup-python@v1
-        with:
-          python-version: 3.7
-
-      - name: Install Python Dependencies
-        run: |
-          pip install -U pip
-          pip install -r tests/requirements.txt
-
-      - name: Create Test Container
-        run: |
-          bundle exec kitchen create py3-git-master-fedora-31 || bundle exec kitchen create py3-git-master-fedora-31
-
-      - name: Test Bootstrap In Test Container
-        run: |
-          bundle exec kitchen verify py3-git-master-fedora-31
-
-      - name: Destroy Test Container
-        if: always()
-        run: |
-          bundle exec kitchen destroy py3-git-master-fedora-31
-
-
-  latest-fedora-31:
-    name: Fedora 31 Latest packaged release
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-
-    needs: lint
-
-    steps:
-      - uses: actions/checkout@v1
-      - name: Setup Ruby
-        uses: actions/setup-ruby@v1
-        with:
-          ruby-version: 2.6.x
-
-      - name: Install Bundler
-        run: |
-          gem install bundler
-
-      - name: Setup Bundle
-        run: |
-          bundle install --with docker --without opennebula ec2 windows vagrant
-
-      - name: Set up Python 3.7
-        uses: actions/setup-python@v1
-        with:
-          python-version: 3.7
-
-      - name: Install Python Dependencies
-        run: |
-          pip install -U pip
-          pip install -r tests/requirements.txt
-
-      - name: Create Test Container
-        run: |
-          bundle exec kitchen create latest-fedora-31 || bundle exec kitchen create latest-fedora-31
-
-      - name: Test Bootstrap In Test Container
-        run: |
-          bundle exec kitchen verify latest-fedora-31
-
-      - name: Destroy Test Container
-        if: always()
-        run: |
-          bundle exec kitchen destroy latest-fedora-31
+          bundle exec kitchen destroy py3-git-master-fedora-32
 
 
   latest-fedora-32:
     name: Fedora 32 Latest packaged release
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
 
     needs: lint
 
@@ -3172,10 +3632,10 @@ jobs:
           bundle exec kitchen destroy latest-fedora-32
 
 
-  py2-git-2018-3-opensuse-15:
-    name: Opensuse 15 v2018.3 Py2 Git
+  py3-git-3001-fedora-33:
+    name: Fedora 33 v3001 Py3 Git
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
 
     needs: lint
 
@@ -3206,22 +3666,22 @@ jobs:
 
       - name: Create Test Container
         run: |
-          bundle exec kitchen create py2-git-2018-3-opensuse-15 || bundle exec kitchen create py2-git-2018-3-opensuse-15
+          bundle exec kitchen create py3-git-3001-fedora-33 || bundle exec kitchen create py3-git-3001-fedora-33
 
       - name: Test Bootstrap In Test Container
         run: |
-          bundle exec kitchen verify py2-git-2018-3-opensuse-15
+          bundle exec kitchen verify py3-git-3001-fedora-33
 
       - name: Destroy Test Container
         if: always()
         run: |
-          bundle exec kitchen destroy py2-git-2018-3-opensuse-15
+          bundle exec kitchen destroy py3-git-3001-fedora-33
 
 
-  py3-git-2018-3-opensuse-15:
-    name: Opensuse 15 v2018.3 Py3 Git
+  py3-git-3002-fedora-33:
+    name: Fedora 33 v3002 Py3 Git
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
 
     needs: lint
 
@@ -3252,22 +3712,22 @@ jobs:
 
       - name: Create Test Container
         run: |
-          bundle exec kitchen create py3-git-2018-3-opensuse-15 || bundle exec kitchen create py3-git-2018-3-opensuse-15
+          bundle exec kitchen create py3-git-3002-fedora-33 || bundle exec kitchen create py3-git-3002-fedora-33
 
       - name: Test Bootstrap In Test Container
         run: |
-          bundle exec kitchen verify py3-git-2018-3-opensuse-15
+          bundle exec kitchen verify py3-git-3002-fedora-33
 
       - name: Destroy Test Container
         if: always()
         run: |
-          bundle exec kitchen destroy py3-git-2018-3-opensuse-15
+          bundle exec kitchen destroy py3-git-3002-fedora-33
 
 
-  py2-git-2019-2-opensuse-15:
-    name: Opensuse 15 v2019.2 Py2 Git
+  py3-git-master-fedora-33:
+    name: Fedora 33 Master Py3 Git
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
 
     needs: lint
 
@@ -3298,22 +3758,68 @@ jobs:
 
       - name: Create Test Container
         run: |
-          bundle exec kitchen create py2-git-2019-2-opensuse-15 || bundle exec kitchen create py2-git-2019-2-opensuse-15
+          bundle exec kitchen create py3-git-master-fedora-33 || bundle exec kitchen create py3-git-master-fedora-33
 
       - name: Test Bootstrap In Test Container
         run: |
-          bundle exec kitchen verify py2-git-2019-2-opensuse-15
+          bundle exec kitchen verify py3-git-master-fedora-33
 
       - name: Destroy Test Container
         if: always()
         run: |
-          bundle exec kitchen destroy py2-git-2019-2-opensuse-15
+          bundle exec kitchen destroy py3-git-master-fedora-33
+
+
+  latest-fedora-33:
+    name: Fedora 33 Latest packaged release
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    needs: lint
+
+    steps:
+      - uses: actions/checkout@v1
+      - name: Setup Ruby
+        uses: actions/setup-ruby@v1
+        with:
+          ruby-version: 2.6.x
+
+      - name: Install Bundler
+        run: |
+          gem install bundler
+
+      - name: Setup Bundle
+        run: |
+          bundle install --with docker --without opennebula ec2 windows vagrant
+
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.7
+
+      - name: Install Python Dependencies
+        run: |
+          pip install -U pip
+          pip install -r tests/requirements.txt
+
+      - name: Create Test Container
+        run: |
+          bundle exec kitchen create latest-fedora-33 || bundle exec kitchen create latest-fedora-33
+
+      - name: Test Bootstrap In Test Container
+        run: |
+          bundle exec kitchen verify latest-fedora-33
+
+      - name: Destroy Test Container
+        if: always()
+        run: |
+          bundle exec kitchen destroy latest-fedora-33
 
 
   py3-git-2019-2-opensuse-15:
     name: Opensuse 15 v2019.2 Py3 Git
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
 
     needs: lint
 
@@ -3359,7 +3865,7 @@ jobs:
   py3-git-3000-opensuse-15:
     name: Opensuse 15 v3000 Py3 Git
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
 
     needs: lint
 
@@ -3402,10 +3908,102 @@ jobs:
           bundle exec kitchen destroy py3-git-3000-opensuse-15
 
 
+  py3-git-3001-opensuse-15:
+    name: Opensuse 15 v3001 Py3 Git
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    needs: lint
+
+    steps:
+      - uses: actions/checkout@v1
+      - name: Setup Ruby
+        uses: actions/setup-ruby@v1
+        with:
+          ruby-version: 2.6.x
+
+      - name: Install Bundler
+        run: |
+          gem install bundler
+
+      - name: Setup Bundle
+        run: |
+          bundle install --with docker --without opennebula ec2 windows vagrant
+
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.7
+
+      - name: Install Python Dependencies
+        run: |
+          pip install -U pip
+          pip install -r tests/requirements.txt
+
+      - name: Create Test Container
+        run: |
+          bundle exec kitchen create py3-git-3001-opensuse-15 || bundle exec kitchen create py3-git-3001-opensuse-15
+
+      - name: Test Bootstrap In Test Container
+        run: |
+          bundle exec kitchen verify py3-git-3001-opensuse-15
+
+      - name: Destroy Test Container
+        if: always()
+        run: |
+          bundle exec kitchen destroy py3-git-3001-opensuse-15
+
+
+  py3-git-3002-opensuse-15:
+    name: Opensuse 15 v3002 Py3 Git
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    needs: lint
+
+    steps:
+      - uses: actions/checkout@v1
+      - name: Setup Ruby
+        uses: actions/setup-ruby@v1
+        with:
+          ruby-version: 2.6.x
+
+      - name: Install Bundler
+        run: |
+          gem install bundler
+
+      - name: Setup Bundle
+        run: |
+          bundle install --with docker --without opennebula ec2 windows vagrant
+
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.7
+
+      - name: Install Python Dependencies
+        run: |
+          pip install -U pip
+          pip install -r tests/requirements.txt
+
+      - name: Create Test Container
+        run: |
+          bundle exec kitchen create py3-git-3002-opensuse-15 || bundle exec kitchen create py3-git-3002-opensuse-15
+
+      - name: Test Bootstrap In Test Container
+        run: |
+          bundle exec kitchen verify py3-git-3002-opensuse-15
+
+      - name: Destroy Test Container
+        if: always()
+        run: |
+          bundle exec kitchen destroy py3-git-3002-opensuse-15
+
+
   py3-git-master-opensuse-15:
     name: Opensuse 15 Master Py3 Git
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
 
     needs: lint
 
@@ -3451,7 +4049,7 @@ jobs:
   latest-opensuse-15:
     name: Opensuse 15 Latest packaged release
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
 
     needs: lint
 
@@ -3494,194 +4092,10 @@ jobs:
           bundle exec kitchen destroy latest-opensuse-15
 
 
-  py2-stable-2018-3-ubuntu-1604:
-    name: Ubuntu 16.04 v2018.3 Py2 Stable
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-
-    needs: lint
-
-    steps:
-      - uses: actions/checkout@v1
-      - name: Setup Ruby
-        uses: actions/setup-ruby@v1
-        with:
-          ruby-version: 2.6.x
-
-      - name: Install Bundler
-        run: |
-          gem install bundler
-
-      - name: Setup Bundle
-        run: |
-          bundle install --with docker --without opennebula ec2 windows vagrant
-
-      - name: Set up Python 3.7
-        uses: actions/setup-python@v1
-        with:
-          python-version: 3.7
-
-      - name: Install Python Dependencies
-        run: |
-          pip install -U pip
-          pip install -r tests/requirements.txt
-
-      - name: Create Test Container
-        run: |
-          bundle exec kitchen create py2-stable-2018-3-ubuntu-1604 || bundle exec kitchen create py2-stable-2018-3-ubuntu-1604
-
-      - name: Test Bootstrap In Test Container
-        run: |
-          bundle exec kitchen verify py2-stable-2018-3-ubuntu-1604
-
-      - name: Destroy Test Container
-        if: always()
-        run: |
-          bundle exec kitchen destroy py2-stable-2018-3-ubuntu-1604
-
-
-  py2-git-2018-3-ubuntu-1604:
-    name: Ubuntu 16.04 v2018.3 Py2 Git
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-
-    needs: lint
-
-    steps:
-      - uses: actions/checkout@v1
-      - name: Setup Ruby
-        uses: actions/setup-ruby@v1
-        with:
-          ruby-version: 2.6.x
-
-      - name: Install Bundler
-        run: |
-          gem install bundler
-
-      - name: Setup Bundle
-        run: |
-          bundle install --with docker --without opennebula ec2 windows vagrant
-
-      - name: Set up Python 3.7
-        uses: actions/setup-python@v1
-        with:
-          python-version: 3.7
-
-      - name: Install Python Dependencies
-        run: |
-          pip install -U pip
-          pip install -r tests/requirements.txt
-
-      - name: Create Test Container
-        run: |
-          bundle exec kitchen create py2-git-2018-3-ubuntu-1604 || bundle exec kitchen create py2-git-2018-3-ubuntu-1604
-
-      - name: Test Bootstrap In Test Container
-        run: |
-          bundle exec kitchen verify py2-git-2018-3-ubuntu-1604
-
-      - name: Destroy Test Container
-        if: always()
-        run: |
-          bundle exec kitchen destroy py2-git-2018-3-ubuntu-1604
-
-
-  py3-stable-2018-3-ubuntu-1604:
-    name: Ubuntu 16.04 v2018.3 Py3 Stable
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-
-    needs: lint
-
-    steps:
-      - uses: actions/checkout@v1
-      - name: Setup Ruby
-        uses: actions/setup-ruby@v1
-        with:
-          ruby-version: 2.6.x
-
-      - name: Install Bundler
-        run: |
-          gem install bundler
-
-      - name: Setup Bundle
-        run: |
-          bundle install --with docker --without opennebula ec2 windows vagrant
-
-      - name: Set up Python 3.7
-        uses: actions/setup-python@v1
-        with:
-          python-version: 3.7
-
-      - name: Install Python Dependencies
-        run: |
-          pip install -U pip
-          pip install -r tests/requirements.txt
-
-      - name: Create Test Container
-        run: |
-          bundle exec kitchen create py3-stable-2018-3-ubuntu-1604 || bundle exec kitchen create py3-stable-2018-3-ubuntu-1604
-
-      - name: Test Bootstrap In Test Container
-        run: |
-          bundle exec kitchen verify py3-stable-2018-3-ubuntu-1604
-
-      - name: Destroy Test Container
-        if: always()
-        run: |
-          bundle exec kitchen destroy py3-stable-2018-3-ubuntu-1604
-
-
-  py3-git-2018-3-ubuntu-1604:
-    name: Ubuntu 16.04 v2018.3 Py3 Git
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-
-    needs: lint
-
-    steps:
-      - uses: actions/checkout@v1
-      - name: Setup Ruby
-        uses: actions/setup-ruby@v1
-        with:
-          ruby-version: 2.6.x
-
-      - name: Install Bundler
-        run: |
-          gem install bundler
-
-      - name: Setup Bundle
-        run: |
-          bundle install --with docker --without opennebula ec2 windows vagrant
-
-      - name: Set up Python 3.7
-        uses: actions/setup-python@v1
-        with:
-          python-version: 3.7
-
-      - name: Install Python Dependencies
-        run: |
-          pip install -U pip
-          pip install -r tests/requirements.txt
-
-      - name: Create Test Container
-        run: |
-          bundle exec kitchen create py3-git-2018-3-ubuntu-1604 || bundle exec kitchen create py3-git-2018-3-ubuntu-1604
-
-      - name: Test Bootstrap In Test Container
-        run: |
-          bundle exec kitchen verify py3-git-2018-3-ubuntu-1604
-
-      - name: Destroy Test Container
-        if: always()
-        run: |
-          bundle exec kitchen destroy py3-git-2018-3-ubuntu-1604
-
-
   py2-stable-2019-2-ubuntu-1604:
     name: Ubuntu 16.04 v2019.2 Py2 Stable
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
 
     needs: lint
 
@@ -3727,7 +4141,7 @@ jobs:
   py2-git-2019-2-ubuntu-1604:
     name: Ubuntu 16.04 v2019.2 Py2 Git
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
 
     needs: lint
 
@@ -3773,7 +4187,7 @@ jobs:
   py3-stable-2019-2-ubuntu-1604:
     name: Ubuntu 16.04 v2019.2 Py3 Stable
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
 
     needs: lint
 
@@ -3819,7 +4233,7 @@ jobs:
   py3-git-2019-2-ubuntu-1604:
     name: Ubuntu 16.04 v2019.2 Py3 Git
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
 
     needs: lint
 
@@ -3865,7 +4279,7 @@ jobs:
   py3-stable-3000-ubuntu-1604:
     name: Ubuntu 16.04 v3000 Py3 Stable
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
 
     needs: lint
 
@@ -3911,7 +4325,7 @@ jobs:
   py3-git-3000-ubuntu-1604:
     name: Ubuntu 16.04 v3000 Py3 Git
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
 
     needs: lint
 
@@ -3954,10 +4368,286 @@ jobs:
           bundle exec kitchen destroy py3-git-3000-ubuntu-1604
 
 
+  py3-stable-3001-ubuntu-1604:
+    name: Ubuntu 16.04 v3001 Py3 Stable
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    needs: lint
+
+    steps:
+      - uses: actions/checkout@v1
+      - name: Setup Ruby
+        uses: actions/setup-ruby@v1
+        with:
+          ruby-version: 2.6.x
+
+      - name: Install Bundler
+        run: |
+          gem install bundler
+
+      - name: Setup Bundle
+        run: |
+          bundle install --with docker --without opennebula ec2 windows vagrant
+
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.7
+
+      - name: Install Python Dependencies
+        run: |
+          pip install -U pip
+          pip install -r tests/requirements.txt
+
+      - name: Create Test Container
+        run: |
+          bundle exec kitchen create py3-stable-3001-ubuntu-1604 || bundle exec kitchen create py3-stable-3001-ubuntu-1604
+
+      - name: Test Bootstrap In Test Container
+        run: |
+          bundle exec kitchen verify py3-stable-3001-ubuntu-1604
+
+      - name: Destroy Test Container
+        if: always()
+        run: |
+          bundle exec kitchen destroy py3-stable-3001-ubuntu-1604
+
+
+  py3-git-3001-ubuntu-1604:
+    name: Ubuntu 16.04 v3001 Py3 Git
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    needs: lint
+
+    steps:
+      - uses: actions/checkout@v1
+      - name: Setup Ruby
+        uses: actions/setup-ruby@v1
+        with:
+          ruby-version: 2.6.x
+
+      - name: Install Bundler
+        run: |
+          gem install bundler
+
+      - name: Setup Bundle
+        run: |
+          bundle install --with docker --without opennebula ec2 windows vagrant
+
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.7
+
+      - name: Install Python Dependencies
+        run: |
+          pip install -U pip
+          pip install -r tests/requirements.txt
+
+      - name: Create Test Container
+        run: |
+          bundle exec kitchen create py3-git-3001-ubuntu-1604 || bundle exec kitchen create py3-git-3001-ubuntu-1604
+
+      - name: Test Bootstrap In Test Container
+        run: |
+          bundle exec kitchen verify py3-git-3001-ubuntu-1604
+
+      - name: Destroy Test Container
+        if: always()
+        run: |
+          bundle exec kitchen destroy py3-git-3001-ubuntu-1604
+
+
+  py3-stable-3001-0-ubuntu-1604:
+    name: Ubuntu 16.04 v3001.0 Py3 Stable
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    needs: lint
+
+    steps:
+      - uses: actions/checkout@v1
+      - name: Setup Ruby
+        uses: actions/setup-ruby@v1
+        with:
+          ruby-version: 2.6.x
+
+      - name: Install Bundler
+        run: |
+          gem install bundler
+
+      - name: Setup Bundle
+        run: |
+          bundle install --with docker --without opennebula ec2 windows vagrant
+
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.7
+
+      - name: Install Python Dependencies
+        run: |
+          pip install -U pip
+          pip install -r tests/requirements.txt
+
+      - name: Create Test Container
+        run: |
+          bundle exec kitchen create py3-stable-3001-0-ubuntu-1604 || bundle exec kitchen create py3-stable-3001-0-ubuntu-1604
+
+      - name: Test Bootstrap In Test Container
+        run: |
+          bundle exec kitchen verify py3-stable-3001-0-ubuntu-1604
+
+      - name: Destroy Test Container
+        if: always()
+        run: |
+          bundle exec kitchen destroy py3-stable-3001-0-ubuntu-1604
+
+
+  py3-stable-3002-ubuntu-1604:
+    name: Ubuntu 16.04 v3002 Py3 Stable
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    needs: lint
+
+    steps:
+      - uses: actions/checkout@v1
+      - name: Setup Ruby
+        uses: actions/setup-ruby@v1
+        with:
+          ruby-version: 2.6.x
+
+      - name: Install Bundler
+        run: |
+          gem install bundler
+
+      - name: Setup Bundle
+        run: |
+          bundle install --with docker --without opennebula ec2 windows vagrant
+
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.7
+
+      - name: Install Python Dependencies
+        run: |
+          pip install -U pip
+          pip install -r tests/requirements.txt
+
+      - name: Create Test Container
+        run: |
+          bundle exec kitchen create py3-stable-3002-ubuntu-1604 || bundle exec kitchen create py3-stable-3002-ubuntu-1604
+
+      - name: Test Bootstrap In Test Container
+        run: |
+          bundle exec kitchen verify py3-stable-3002-ubuntu-1604
+
+      - name: Destroy Test Container
+        if: always()
+        run: |
+          bundle exec kitchen destroy py3-stable-3002-ubuntu-1604
+
+
+  py3-git-3002-ubuntu-1604:
+    name: Ubuntu 16.04 v3002 Py3 Git
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    needs: lint
+
+    steps:
+      - uses: actions/checkout@v1
+      - name: Setup Ruby
+        uses: actions/setup-ruby@v1
+        with:
+          ruby-version: 2.6.x
+
+      - name: Install Bundler
+        run: |
+          gem install bundler
+
+      - name: Setup Bundle
+        run: |
+          bundle install --with docker --without opennebula ec2 windows vagrant
+
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.7
+
+      - name: Install Python Dependencies
+        run: |
+          pip install -U pip
+          pip install -r tests/requirements.txt
+
+      - name: Create Test Container
+        run: |
+          bundle exec kitchen create py3-git-3002-ubuntu-1604 || bundle exec kitchen create py3-git-3002-ubuntu-1604
+
+      - name: Test Bootstrap In Test Container
+        run: |
+          bundle exec kitchen verify py3-git-3002-ubuntu-1604
+
+      - name: Destroy Test Container
+        if: always()
+        run: |
+          bundle exec kitchen destroy py3-git-3002-ubuntu-1604
+
+
+  py3-stable-3002-0-ubuntu-1604:
+    name: Ubuntu 16.04 v3002.0 Py3 Stable
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    needs: lint
+
+    steps:
+      - uses: actions/checkout@v1
+      - name: Setup Ruby
+        uses: actions/setup-ruby@v1
+        with:
+          ruby-version: 2.6.x
+
+      - name: Install Bundler
+        run: |
+          gem install bundler
+
+      - name: Setup Bundle
+        run: |
+          bundle install --with docker --without opennebula ec2 windows vagrant
+
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.7
+
+      - name: Install Python Dependencies
+        run: |
+          pip install -U pip
+          pip install -r tests/requirements.txt
+
+      - name: Create Test Container
+        run: |
+          bundle exec kitchen create py3-stable-3002-0-ubuntu-1604 || bundle exec kitchen create py3-stable-3002-0-ubuntu-1604
+
+      - name: Test Bootstrap In Test Container
+        run: |
+          bundle exec kitchen verify py3-stable-3002-0-ubuntu-1604
+
+      - name: Destroy Test Container
+        if: always()
+        run: |
+          bundle exec kitchen destroy py3-stable-3002-0-ubuntu-1604
+
+
   py3-git-master-ubuntu-1604:
     name: Ubuntu 16.04 Master Py3 Git
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
 
     needs: lint
 
@@ -4003,7 +4693,7 @@ jobs:
   latest-ubuntu-1604:
     name: Ubuntu 16.04 Latest packaged release
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
 
     needs: lint
 
@@ -4046,194 +4736,10 @@ jobs:
           bundle exec kitchen destroy latest-ubuntu-1604
 
 
-  py2-stable-2018-3-ubuntu-1804:
-    name: Ubuntu 18.04 v2018.3 Py2 Stable
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-
-    needs: lint
-
-    steps:
-      - uses: actions/checkout@v1
-      - name: Setup Ruby
-        uses: actions/setup-ruby@v1
-        with:
-          ruby-version: 2.6.x
-
-      - name: Install Bundler
-        run: |
-          gem install bundler
-
-      - name: Setup Bundle
-        run: |
-          bundle install --with docker --without opennebula ec2 windows vagrant
-
-      - name: Set up Python 3.7
-        uses: actions/setup-python@v1
-        with:
-          python-version: 3.7
-
-      - name: Install Python Dependencies
-        run: |
-          pip install -U pip
-          pip install -r tests/requirements.txt
-
-      - name: Create Test Container
-        run: |
-          bundle exec kitchen create py2-stable-2018-3-ubuntu-1804 || bundle exec kitchen create py2-stable-2018-3-ubuntu-1804
-
-      - name: Test Bootstrap In Test Container
-        run: |
-          bundle exec kitchen verify py2-stable-2018-3-ubuntu-1804
-
-      - name: Destroy Test Container
-        if: always()
-        run: |
-          bundle exec kitchen destroy py2-stable-2018-3-ubuntu-1804
-
-
-  py2-git-2018-3-ubuntu-1804:
-    name: Ubuntu 18.04 v2018.3 Py2 Git
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-
-    needs: lint
-
-    steps:
-      - uses: actions/checkout@v1
-      - name: Setup Ruby
-        uses: actions/setup-ruby@v1
-        with:
-          ruby-version: 2.6.x
-
-      - name: Install Bundler
-        run: |
-          gem install bundler
-
-      - name: Setup Bundle
-        run: |
-          bundle install --with docker --without opennebula ec2 windows vagrant
-
-      - name: Set up Python 3.7
-        uses: actions/setup-python@v1
-        with:
-          python-version: 3.7
-
-      - name: Install Python Dependencies
-        run: |
-          pip install -U pip
-          pip install -r tests/requirements.txt
-
-      - name: Create Test Container
-        run: |
-          bundle exec kitchen create py2-git-2018-3-ubuntu-1804 || bundle exec kitchen create py2-git-2018-3-ubuntu-1804
-
-      - name: Test Bootstrap In Test Container
-        run: |
-          bundle exec kitchen verify py2-git-2018-3-ubuntu-1804
-
-      - name: Destroy Test Container
-        if: always()
-        run: |
-          bundle exec kitchen destroy py2-git-2018-3-ubuntu-1804
-
-
-  py3-stable-2018-3-ubuntu-1804:
-    name: Ubuntu 18.04 v2018.3 Py3 Stable
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-
-    needs: lint
-
-    steps:
-      - uses: actions/checkout@v1
-      - name: Setup Ruby
-        uses: actions/setup-ruby@v1
-        with:
-          ruby-version: 2.6.x
-
-      - name: Install Bundler
-        run: |
-          gem install bundler
-
-      - name: Setup Bundle
-        run: |
-          bundle install --with docker --without opennebula ec2 windows vagrant
-
-      - name: Set up Python 3.7
-        uses: actions/setup-python@v1
-        with:
-          python-version: 3.7
-
-      - name: Install Python Dependencies
-        run: |
-          pip install -U pip
-          pip install -r tests/requirements.txt
-
-      - name: Create Test Container
-        run: |
-          bundle exec kitchen create py3-stable-2018-3-ubuntu-1804 || bundle exec kitchen create py3-stable-2018-3-ubuntu-1804
-
-      - name: Test Bootstrap In Test Container
-        run: |
-          bundle exec kitchen verify py3-stable-2018-3-ubuntu-1804
-
-      - name: Destroy Test Container
-        if: always()
-        run: |
-          bundle exec kitchen destroy py3-stable-2018-3-ubuntu-1804
-
-
-  py3-git-2018-3-ubuntu-1804:
-    name: Ubuntu 18.04 v2018.3 Py3 Git
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-
-    needs: lint
-
-    steps:
-      - uses: actions/checkout@v1
-      - name: Setup Ruby
-        uses: actions/setup-ruby@v1
-        with:
-          ruby-version: 2.6.x
-
-      - name: Install Bundler
-        run: |
-          gem install bundler
-
-      - name: Setup Bundle
-        run: |
-          bundle install --with docker --without opennebula ec2 windows vagrant
-
-      - name: Set up Python 3.7
-        uses: actions/setup-python@v1
-        with:
-          python-version: 3.7
-
-      - name: Install Python Dependencies
-        run: |
-          pip install -U pip
-          pip install -r tests/requirements.txt
-
-      - name: Create Test Container
-        run: |
-          bundle exec kitchen create py3-git-2018-3-ubuntu-1804 || bundle exec kitchen create py3-git-2018-3-ubuntu-1804
-
-      - name: Test Bootstrap In Test Container
-        run: |
-          bundle exec kitchen verify py3-git-2018-3-ubuntu-1804
-
-      - name: Destroy Test Container
-        if: always()
-        run: |
-          bundle exec kitchen destroy py3-git-2018-3-ubuntu-1804
-
-
   py2-stable-2019-2-ubuntu-1804:
     name: Ubuntu 18.04 v2019.2 Py2 Stable
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
 
     needs: lint
 
@@ -4279,7 +4785,7 @@ jobs:
   py2-git-2019-2-ubuntu-1804:
     name: Ubuntu 18.04 v2019.2 Py2 Git
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
 
     needs: lint
 
@@ -4325,7 +4831,7 @@ jobs:
   py3-stable-2019-2-ubuntu-1804:
     name: Ubuntu 18.04 v2019.2 Py3 Stable
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
 
     needs: lint
 
@@ -4371,7 +4877,7 @@ jobs:
   py3-git-2019-2-ubuntu-1804:
     name: Ubuntu 18.04 v2019.2 Py3 Git
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
 
     needs: lint
 
@@ -4417,7 +4923,7 @@ jobs:
   py3-stable-3000-ubuntu-1804:
     name: Ubuntu 18.04 v3000 Py3 Stable
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
 
     needs: lint
 
@@ -4463,7 +4969,7 @@ jobs:
   py3-git-3000-ubuntu-1804:
     name: Ubuntu 18.04 v3000 Py3 Git
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
 
     needs: lint
 
@@ -4506,10 +5012,286 @@ jobs:
           bundle exec kitchen destroy py3-git-3000-ubuntu-1804
 
 
+  py3-stable-3001-ubuntu-1804:
+    name: Ubuntu 18.04 v3001 Py3 Stable
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    needs: lint
+
+    steps:
+      - uses: actions/checkout@v1
+      - name: Setup Ruby
+        uses: actions/setup-ruby@v1
+        with:
+          ruby-version: 2.6.x
+
+      - name: Install Bundler
+        run: |
+          gem install bundler
+
+      - name: Setup Bundle
+        run: |
+          bundle install --with docker --without opennebula ec2 windows vagrant
+
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.7
+
+      - name: Install Python Dependencies
+        run: |
+          pip install -U pip
+          pip install -r tests/requirements.txt
+
+      - name: Create Test Container
+        run: |
+          bundle exec kitchen create py3-stable-3001-ubuntu-1804 || bundle exec kitchen create py3-stable-3001-ubuntu-1804
+
+      - name: Test Bootstrap In Test Container
+        run: |
+          bundle exec kitchen verify py3-stable-3001-ubuntu-1804
+
+      - name: Destroy Test Container
+        if: always()
+        run: |
+          bundle exec kitchen destroy py3-stable-3001-ubuntu-1804
+
+
+  py3-git-3001-ubuntu-1804:
+    name: Ubuntu 18.04 v3001 Py3 Git
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    needs: lint
+
+    steps:
+      - uses: actions/checkout@v1
+      - name: Setup Ruby
+        uses: actions/setup-ruby@v1
+        with:
+          ruby-version: 2.6.x
+
+      - name: Install Bundler
+        run: |
+          gem install bundler
+
+      - name: Setup Bundle
+        run: |
+          bundle install --with docker --without opennebula ec2 windows vagrant
+
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.7
+
+      - name: Install Python Dependencies
+        run: |
+          pip install -U pip
+          pip install -r tests/requirements.txt
+
+      - name: Create Test Container
+        run: |
+          bundle exec kitchen create py3-git-3001-ubuntu-1804 || bundle exec kitchen create py3-git-3001-ubuntu-1804
+
+      - name: Test Bootstrap In Test Container
+        run: |
+          bundle exec kitchen verify py3-git-3001-ubuntu-1804
+
+      - name: Destroy Test Container
+        if: always()
+        run: |
+          bundle exec kitchen destroy py3-git-3001-ubuntu-1804
+
+
+  py3-stable-3001-0-ubuntu-1804:
+    name: Ubuntu 18.04 v3001.0 Py3 Stable
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    needs: lint
+
+    steps:
+      - uses: actions/checkout@v1
+      - name: Setup Ruby
+        uses: actions/setup-ruby@v1
+        with:
+          ruby-version: 2.6.x
+
+      - name: Install Bundler
+        run: |
+          gem install bundler
+
+      - name: Setup Bundle
+        run: |
+          bundle install --with docker --without opennebula ec2 windows vagrant
+
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.7
+
+      - name: Install Python Dependencies
+        run: |
+          pip install -U pip
+          pip install -r tests/requirements.txt
+
+      - name: Create Test Container
+        run: |
+          bundle exec kitchen create py3-stable-3001-0-ubuntu-1804 || bundle exec kitchen create py3-stable-3001-0-ubuntu-1804
+
+      - name: Test Bootstrap In Test Container
+        run: |
+          bundle exec kitchen verify py3-stable-3001-0-ubuntu-1804
+
+      - name: Destroy Test Container
+        if: always()
+        run: |
+          bundle exec kitchen destroy py3-stable-3001-0-ubuntu-1804
+
+
+  py3-stable-3002-ubuntu-1804:
+    name: Ubuntu 18.04 v3002 Py3 Stable
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    needs: lint
+
+    steps:
+      - uses: actions/checkout@v1
+      - name: Setup Ruby
+        uses: actions/setup-ruby@v1
+        with:
+          ruby-version: 2.6.x
+
+      - name: Install Bundler
+        run: |
+          gem install bundler
+
+      - name: Setup Bundle
+        run: |
+          bundle install --with docker --without opennebula ec2 windows vagrant
+
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.7
+
+      - name: Install Python Dependencies
+        run: |
+          pip install -U pip
+          pip install -r tests/requirements.txt
+
+      - name: Create Test Container
+        run: |
+          bundle exec kitchen create py3-stable-3002-ubuntu-1804 || bundle exec kitchen create py3-stable-3002-ubuntu-1804
+
+      - name: Test Bootstrap In Test Container
+        run: |
+          bundle exec kitchen verify py3-stable-3002-ubuntu-1804
+
+      - name: Destroy Test Container
+        if: always()
+        run: |
+          bundle exec kitchen destroy py3-stable-3002-ubuntu-1804
+
+
+  py3-git-3002-ubuntu-1804:
+    name: Ubuntu 18.04 v3002 Py3 Git
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    needs: lint
+
+    steps:
+      - uses: actions/checkout@v1
+      - name: Setup Ruby
+        uses: actions/setup-ruby@v1
+        with:
+          ruby-version: 2.6.x
+
+      - name: Install Bundler
+        run: |
+          gem install bundler
+
+      - name: Setup Bundle
+        run: |
+          bundle install --with docker --without opennebula ec2 windows vagrant
+
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.7
+
+      - name: Install Python Dependencies
+        run: |
+          pip install -U pip
+          pip install -r tests/requirements.txt
+
+      - name: Create Test Container
+        run: |
+          bundle exec kitchen create py3-git-3002-ubuntu-1804 || bundle exec kitchen create py3-git-3002-ubuntu-1804
+
+      - name: Test Bootstrap In Test Container
+        run: |
+          bundle exec kitchen verify py3-git-3002-ubuntu-1804
+
+      - name: Destroy Test Container
+        if: always()
+        run: |
+          bundle exec kitchen destroy py3-git-3002-ubuntu-1804
+
+
+  py3-stable-3002-0-ubuntu-1804:
+    name: Ubuntu 18.04 v3002.0 Py3 Stable
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    needs: lint
+
+    steps:
+      - uses: actions/checkout@v1
+      - name: Setup Ruby
+        uses: actions/setup-ruby@v1
+        with:
+          ruby-version: 2.6.x
+
+      - name: Install Bundler
+        run: |
+          gem install bundler
+
+      - name: Setup Bundle
+        run: |
+          bundle install --with docker --without opennebula ec2 windows vagrant
+
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.7
+
+      - name: Install Python Dependencies
+        run: |
+          pip install -U pip
+          pip install -r tests/requirements.txt
+
+      - name: Create Test Container
+        run: |
+          bundle exec kitchen create py3-stable-3002-0-ubuntu-1804 || bundle exec kitchen create py3-stable-3002-0-ubuntu-1804
+
+      - name: Test Bootstrap In Test Container
+        run: |
+          bundle exec kitchen verify py3-stable-3002-0-ubuntu-1804
+
+      - name: Destroy Test Container
+        if: always()
+        run: |
+          bundle exec kitchen destroy py3-stable-3002-0-ubuntu-1804
+
+
   py3-git-master-ubuntu-1804:
     name: Ubuntu 18.04 Master Py3 Git
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
 
     needs: lint
 
@@ -4555,7 +5337,7 @@ jobs:
   latest-ubuntu-1804:
     name: Ubuntu 18.04 Latest packaged release
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
 
     needs: lint
 
@@ -4596,3 +5378,371 @@ jobs:
         if: always()
         run: |
           bundle exec kitchen destroy latest-ubuntu-1804
+
+
+  py3-stable-3001-ubuntu-2004:
+    name: Ubuntu 20.04 v3001 Py3 Stable
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    needs: lint
+
+    steps:
+      - uses: actions/checkout@v1
+      - name: Setup Ruby
+        uses: actions/setup-ruby@v1
+        with:
+          ruby-version: 2.6.x
+
+      - name: Install Bundler
+        run: |
+          gem install bundler
+
+      - name: Setup Bundle
+        run: |
+          bundle install --with docker --without opennebula ec2 windows vagrant
+
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.7
+
+      - name: Install Python Dependencies
+        run: |
+          pip install -U pip
+          pip install -r tests/requirements.txt
+
+      - name: Create Test Container
+        run: |
+          bundle exec kitchen create py3-stable-3001-ubuntu-2004 || bundle exec kitchen create py3-stable-3001-ubuntu-2004
+
+      - name: Test Bootstrap In Test Container
+        run: |
+          bundle exec kitchen verify py3-stable-3001-ubuntu-2004
+
+      - name: Destroy Test Container
+        if: always()
+        run: |
+          bundle exec kitchen destroy py3-stable-3001-ubuntu-2004
+
+
+  py3-git-3001-ubuntu-2004:
+    name: Ubuntu 20.04 v3001 Py3 Git
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    needs: lint
+
+    steps:
+      - uses: actions/checkout@v1
+      - name: Setup Ruby
+        uses: actions/setup-ruby@v1
+        with:
+          ruby-version: 2.6.x
+
+      - name: Install Bundler
+        run: |
+          gem install bundler
+
+      - name: Setup Bundle
+        run: |
+          bundle install --with docker --without opennebula ec2 windows vagrant
+
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.7
+
+      - name: Install Python Dependencies
+        run: |
+          pip install -U pip
+          pip install -r tests/requirements.txt
+
+      - name: Create Test Container
+        run: |
+          bundle exec kitchen create py3-git-3001-ubuntu-2004 || bundle exec kitchen create py3-git-3001-ubuntu-2004
+
+      - name: Test Bootstrap In Test Container
+        run: |
+          bundle exec kitchen verify py3-git-3001-ubuntu-2004
+
+      - name: Destroy Test Container
+        if: always()
+        run: |
+          bundle exec kitchen destroy py3-git-3001-ubuntu-2004
+
+
+  py3-stable-3001-0-ubuntu-2004:
+    name: Ubuntu 20.04 v3001.0 Py3 Stable
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    needs: lint
+
+    steps:
+      - uses: actions/checkout@v1
+      - name: Setup Ruby
+        uses: actions/setup-ruby@v1
+        with:
+          ruby-version: 2.6.x
+
+      - name: Install Bundler
+        run: |
+          gem install bundler
+
+      - name: Setup Bundle
+        run: |
+          bundle install --with docker --without opennebula ec2 windows vagrant
+
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.7
+
+      - name: Install Python Dependencies
+        run: |
+          pip install -U pip
+          pip install -r tests/requirements.txt
+
+      - name: Create Test Container
+        run: |
+          bundle exec kitchen create py3-stable-3001-0-ubuntu-2004 || bundle exec kitchen create py3-stable-3001-0-ubuntu-2004
+
+      - name: Test Bootstrap In Test Container
+        run: |
+          bundle exec kitchen verify py3-stable-3001-0-ubuntu-2004
+
+      - name: Destroy Test Container
+        if: always()
+        run: |
+          bundle exec kitchen destroy py3-stable-3001-0-ubuntu-2004
+
+
+  py3-stable-3002-ubuntu-2004:
+    name: Ubuntu 20.04 v3002 Py3 Stable
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    needs: lint
+
+    steps:
+      - uses: actions/checkout@v1
+      - name: Setup Ruby
+        uses: actions/setup-ruby@v1
+        with:
+          ruby-version: 2.6.x
+
+      - name: Install Bundler
+        run: |
+          gem install bundler
+
+      - name: Setup Bundle
+        run: |
+          bundle install --with docker --without opennebula ec2 windows vagrant
+
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.7
+
+      - name: Install Python Dependencies
+        run: |
+          pip install -U pip
+          pip install -r tests/requirements.txt
+
+      - name: Create Test Container
+        run: |
+          bundle exec kitchen create py3-stable-3002-ubuntu-2004 || bundle exec kitchen create py3-stable-3002-ubuntu-2004
+
+      - name: Test Bootstrap In Test Container
+        run: |
+          bundle exec kitchen verify py3-stable-3002-ubuntu-2004
+
+      - name: Destroy Test Container
+        if: always()
+        run: |
+          bundle exec kitchen destroy py3-stable-3002-ubuntu-2004
+
+
+  py3-git-3002-ubuntu-2004:
+    name: Ubuntu 20.04 v3002 Py3 Git
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    needs: lint
+
+    steps:
+      - uses: actions/checkout@v1
+      - name: Setup Ruby
+        uses: actions/setup-ruby@v1
+        with:
+          ruby-version: 2.6.x
+
+      - name: Install Bundler
+        run: |
+          gem install bundler
+
+      - name: Setup Bundle
+        run: |
+          bundle install --with docker --without opennebula ec2 windows vagrant
+
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.7
+
+      - name: Install Python Dependencies
+        run: |
+          pip install -U pip
+          pip install -r tests/requirements.txt
+
+      - name: Create Test Container
+        run: |
+          bundle exec kitchen create py3-git-3002-ubuntu-2004 || bundle exec kitchen create py3-git-3002-ubuntu-2004
+
+      - name: Test Bootstrap In Test Container
+        run: |
+          bundle exec kitchen verify py3-git-3002-ubuntu-2004
+
+      - name: Destroy Test Container
+        if: always()
+        run: |
+          bundle exec kitchen destroy py3-git-3002-ubuntu-2004
+
+
+  py3-stable-3002-0-ubuntu-2004:
+    name: Ubuntu 20.04 v3002.0 Py3 Stable
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    needs: lint
+
+    steps:
+      - uses: actions/checkout@v1
+      - name: Setup Ruby
+        uses: actions/setup-ruby@v1
+        with:
+          ruby-version: 2.6.x
+
+      - name: Install Bundler
+        run: |
+          gem install bundler
+
+      - name: Setup Bundle
+        run: |
+          bundle install --with docker --without opennebula ec2 windows vagrant
+
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.7
+
+      - name: Install Python Dependencies
+        run: |
+          pip install -U pip
+          pip install -r tests/requirements.txt
+
+      - name: Create Test Container
+        run: |
+          bundle exec kitchen create py3-stable-3002-0-ubuntu-2004 || bundle exec kitchen create py3-stable-3002-0-ubuntu-2004
+
+      - name: Test Bootstrap In Test Container
+        run: |
+          bundle exec kitchen verify py3-stable-3002-0-ubuntu-2004
+
+      - name: Destroy Test Container
+        if: always()
+        run: |
+          bundle exec kitchen destroy py3-stable-3002-0-ubuntu-2004
+
+
+  py3-git-master-ubuntu-2004:
+    name: Ubuntu 20.04 Master Py3 Git
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    needs: lint
+
+    steps:
+      - uses: actions/checkout@v1
+      - name: Setup Ruby
+        uses: actions/setup-ruby@v1
+        with:
+          ruby-version: 2.6.x
+
+      - name: Install Bundler
+        run: |
+          gem install bundler
+
+      - name: Setup Bundle
+        run: |
+          bundle install --with docker --without opennebula ec2 windows vagrant
+
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.7
+
+      - name: Install Python Dependencies
+        run: |
+          pip install -U pip
+          pip install -r tests/requirements.txt
+
+      - name: Create Test Container
+        run: |
+          bundle exec kitchen create py3-git-master-ubuntu-2004 || bundle exec kitchen create py3-git-master-ubuntu-2004
+
+      - name: Test Bootstrap In Test Container
+        run: |
+          bundle exec kitchen verify py3-git-master-ubuntu-2004
+
+      - name: Destroy Test Container
+        if: always()
+        run: |
+          bundle exec kitchen destroy py3-git-master-ubuntu-2004
+
+
+  latest-ubuntu-2004:
+    name: Ubuntu 20.04 Latest packaged release
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    needs: lint
+
+    steps:
+      - uses: actions/checkout@v1
+      - name: Setup Ruby
+        uses: actions/setup-ruby@v1
+        with:
+          ruby-version: 2.6.x
+
+      - name: Install Bundler
+        run: |
+          gem install bundler
+
+      - name: Setup Bundle
+        run: |
+          bundle install --with docker --without opennebula ec2 windows vagrant
+
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.7
+
+      - name: Install Python Dependencies
+        run: |
+          pip install -U pip
+          pip install -r tests/requirements.txt
+
+      - name: Create Test Container
+        run: |
+          bundle exec kitchen create latest-ubuntu-2004 || bundle exec kitchen create latest-ubuntu-2004
+
+      - name: Test Bootstrap In Test Container
+        run: |
+          bundle exec kitchen verify latest-ubuntu-2004
+
+      - name: Destroy Test Container
+        if: always()
+        run: |
+          bundle exec kitchen destroy latest-ubuntu-2004

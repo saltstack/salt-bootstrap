@@ -231,6 +231,8 @@ suites:
       - fedora-32
       - fedora-33
       - arch
+      - gentoo
+      - gentoo-systemd
   - name: py3-stable-3001
     provisioner:
       salt_version: 3001
@@ -251,6 +253,8 @@ suites:
       - fedora-32
       - fedora-33
       - arch
+      - gentoo
+      - gentoo-systemd
   - name: py3-stable-3002
     provisioner:
       salt_version: 3002

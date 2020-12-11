@@ -76,10 +76,14 @@ BLACKLIST_3001 = [
 
 BLACKLIST_3001_0 = [
     "debian-11",
+    "gentoo",
+    "gentoo-systemd",
 ]
 
 BLACKLIST_3002_0 = [
     "debian-11",
+    "gentoo",
+    "gentoo-systemd",
 ]
 
 SALT_BRANCHES = [
@@ -131,8 +135,8 @@ DISTRO_DISPLAY_NAMES = {
 
 TIMEOUT_DEFAULT = 20
 TIMEOUT_OVERRIDES = {
-    "gentoo": 50,
-    "gentoo-systemd": 50,
+    "gentoo": 70,
+    "gentoo-systemd": 70,
 }
 BRANCH_ONLY_OVERRIDES = [
     "gentoo",

@@ -11,7 +11,7 @@ jobs:
   py3-stable-2019-2-gentoo:
     name: Gentoo v2019.2 Py3 Stable
     runs-on: ubuntu-latest
-    timeout-minutes: 70
+    timeout-minutes: 90
 
 
 
@@ -57,7 +57,7 @@ jobs:
   py3-git-2019-2-gentoo:
     name: Gentoo v2019.2 Py3 Git
     runs-on: ubuntu-latest
-    timeout-minutes: 70
+    timeout-minutes: 90
 
 
 
@@ -103,7 +103,7 @@ jobs:
   py3-stable-3000-gentoo:
     name: Gentoo v3000 Py3 Stable
     runs-on: ubuntu-latest
-    timeout-minutes: 70
+    timeout-minutes: 90
 
 
 
@@ -149,7 +149,7 @@ jobs:
   py3-git-3000-gentoo:
     name: Gentoo v3000 Py3 Git
     runs-on: ubuntu-latest
-    timeout-minutes: 70
+    timeout-minutes: 90
 
 
 
@@ -195,7 +195,7 @@ jobs:
   py3-stable-3001-gentoo:
     name: Gentoo v3001 Py3 Stable
     runs-on: ubuntu-latest
-    timeout-minutes: 70
+    timeout-minutes: 90
 
 
 
@@ -241,7 +241,7 @@ jobs:
   py3-git-3001-gentoo:
     name: Gentoo v3001 Py3 Git
     runs-on: ubuntu-latest
-    timeout-minutes: 70
+    timeout-minutes: 90
 
 
 
@@ -287,7 +287,7 @@ jobs:
   py3-stable-3002-gentoo:
     name: Gentoo v3002 Py3 Stable
     runs-on: ubuntu-latest
-    timeout-minutes: 70
+    timeout-minutes: 90
 
 
 
@@ -333,7 +333,7 @@ jobs:
   py3-git-3002-gentoo:
     name: Gentoo v3002 Py3 Git
     runs-on: ubuntu-latest
-    timeout-minutes: 70
+    timeout-minutes: 90
 
 
 
@@ -379,7 +379,7 @@ jobs:
   py3-git-master-gentoo:
     name: Gentoo Master Py3 Git
     runs-on: ubuntu-latest
-    timeout-minutes: 70
+    timeout-minutes: 90
 
 
 
@@ -425,7 +425,7 @@ jobs:
   latest-gentoo:
     name: Gentoo Latest packaged release
     runs-on: ubuntu-latest
-    timeout-minutes: 70
+    timeout-minutes: 90
 
 
 
@@ -471,7 +471,7 @@ jobs:
   py3-stable-2019-2-gentoo-systemd:
     name: Gentoo (systemd) v2019.2 Py3 Stable
     runs-on: ubuntu-latest
-    timeout-minutes: 70
+    timeout-minutes: 90
 
 
 
@@ -517,7 +517,7 @@ jobs:
   py3-git-2019-2-gentoo-systemd:
     name: Gentoo (systemd) v2019.2 Py3 Git
     runs-on: ubuntu-latest
-    timeout-minutes: 70
+    timeout-minutes: 90
 
 
 
@@ -563,7 +563,7 @@ jobs:
   py3-stable-3000-gentoo-systemd:
     name: Gentoo (systemd) v3000 Py3 Stable
     runs-on: ubuntu-latest
-    timeout-minutes: 70
+    timeout-minutes: 90
 
 
 
@@ -609,7 +609,7 @@ jobs:
   py3-git-3000-gentoo-systemd:
     name: Gentoo (systemd) v3000 Py3 Git
     runs-on: ubuntu-latest
-    timeout-minutes: 70
+    timeout-minutes: 90
 
 
 
@@ -655,7 +655,7 @@ jobs:
   py3-stable-3001-gentoo-systemd:
     name: Gentoo (systemd) v3001 Py3 Stable
     runs-on: ubuntu-latest
-    timeout-minutes: 70
+    timeout-minutes: 90
 
 
 
@@ -701,7 +701,7 @@ jobs:
   py3-git-3001-gentoo-systemd:
     name: Gentoo (systemd) v3001 Py3 Git
     runs-on: ubuntu-latest
-    timeout-minutes: 70
+    timeout-minutes: 90
 
 
 
@@ -747,7 +747,7 @@ jobs:
   py3-stable-3002-gentoo-systemd:
     name: Gentoo (systemd) v3002 Py3 Stable
     runs-on: ubuntu-latest
-    timeout-minutes: 70
+    timeout-minutes: 90
 
 
 
@@ -793,7 +793,7 @@ jobs:
   py3-git-3002-gentoo-systemd:
     name: Gentoo (systemd) v3002 Py3 Git
     runs-on: ubuntu-latest
-    timeout-minutes: 70
+    timeout-minutes: 90
 
 
 
@@ -839,7 +839,7 @@ jobs:
   py3-git-master-gentoo-systemd:
     name: Gentoo (systemd) Master Py3 Git
     runs-on: ubuntu-latest
-    timeout-minutes: 70
+    timeout-minutes: 90
 
 
 
@@ -885,7 +885,7 @@ jobs:
   latest-gentoo-systemd:
     name: Gentoo (systemd) Latest packaged release
     runs-on: ubuntu-latest
-    timeout-minutes: 70
+    timeout-minutes: 90
 
 
 

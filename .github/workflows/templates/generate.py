@@ -135,8 +135,8 @@ DISTRO_DISPLAY_NAMES = {
 
 TIMEOUT_DEFAULT = 20
 TIMEOUT_OVERRIDES = {
-    "gentoo": 70,
-    "gentoo-systemd": 70,
+    "gentoo": 90,
+    "gentoo-systemd": 90,
 }
 BRANCH_ONLY_OVERRIDES = [
     "gentoo",

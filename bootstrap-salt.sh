@@ -7147,7 +7147,7 @@ install_gentoo_git_deps() {
             dev-python/pycryptodome
             dev-python/py
             dev-python/requests
-            dev-python/msgpack
+            <dev-python/msgpack-1.0
             dev-python/jinja
             dev-python/pyasn1
             dev-python/markupsafe

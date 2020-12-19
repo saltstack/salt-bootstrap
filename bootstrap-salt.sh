@@ -7083,7 +7083,7 @@ __gentoo_pre_dep() {
     if [ -n "${EXTRA_PYTHON_TARGET:-}" ]; then
         if ! emerge --info | sed 's/.*\(PYTHON_TARGETS="[^"]*"\).*/\1/' | grep -q "${EXTRA_PYTHON_TARGET}" ; then
             echo "PYTHON_TARGETS=\"\${PYTHON_TARGETS} ${EXTRA_PYTHON_TARGET}\"" >> /etc/portage/make.conf
-            emerge --update --deep --with-bdeps=y --newuse --quiet @world
+            emerge --deep --with-bdeps=y --newuse --quiet @world
         fi
     fi
 }
@@ -7198,6 +7198,8 @@ install_gentoo_git() {
         elif [ "${_POST_NEON_INSTALL}" -eq $BS_FALSE ]; then
             # Tornado 4.3 ebuild supports only Python 3.6, use Python 3.6 as the default Python 3 interpreter
             _PYEXE=python3.6
+        else
+            _PYEXE=$(emerge --info | grep -oE 'PYTHON_SINGLE_TARGET="[^"]*"' | sed -e 's/"//g' -e 's/_/./g' | cut -d= -f2)
         fi
     fi
 

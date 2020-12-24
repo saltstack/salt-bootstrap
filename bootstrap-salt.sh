@@ -4121,7 +4121,7 @@ __install_saltstack_rhel_repository() {
     # Instead, this should work correctly on all RHEL variants.
     base_url="${HTTP_VAL}://${_REPO_URL}/${__PY_VERSION_REPO}/redhat/${DISTRO_MAJOR_VERSION}/\$basearch/${repo_rev}/"
     if [ "${DISTRO_MAJOR_VERSION}" -eq 7 ]; then
-        gpg_key="${base_url}SALTSTACK-GPG-KEY.pub","${base_url}base/RPM-GPG-KEY-CentOS-7"
+        gpg_key="${base_url}SALTSTACK-GPG-KEY.pub,${base_url}base/RPM-GPG-KEY-CentOS-7"
     else
         gpg_key="${base_url}SALTSTACK-GPG-KEY.pub"
     fi

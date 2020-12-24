@@ -4130,7 +4130,7 @@ __install_saltstack_rhel_repository() {
     IFS=,
     gpg_key_urls=""
     for key in $gpg_key; do
-	gpg_key_urls+="${base_url}${key},"
+	gpg_key_urls=$(printf "${base_url}${key},%s" "$gpg_key_urls")
     done
     IFS=$Field_Separator
 

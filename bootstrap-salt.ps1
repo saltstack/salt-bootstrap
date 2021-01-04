@@ -210,6 +210,13 @@ If (Test-Path C:\tmp\minion) {
     $ConfiguredAnything = $True
 }
 
+# Check if grains config has been uploaded
+If (Test-Path C:\tmp\grains) {
+    New-Item C:\salt\conf\ -ItemType Directory -Force | Out-Null
+    Copy-Item -Path C:\tmp\grains -Destination C:\salt\conf\ -Force | Out-Null
+    $ConfiguredAnything = $True
+}
+
 If ($ConfigureOnly -and !$ConfiguredAnything) {
     Write-Output "No configuration or keys were copied over. No configuration was done!"
     exit 0

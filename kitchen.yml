@@ -48,6 +48,14 @@ platforms:
       image: quay.io/centos/centos:stream8
   - name: centos-8
   - name: centos-7
+  - name: rhel-8-ubi
+    driver_config:
+      image: registry.access.redhat.com/ubi8
+      run_command: /usr/lib/systemd/systemd
+  - name: rhel-7-ubi
+    driver_config:
+      image: registry.access.redhat.com/ubi7
+      run_command: /usr/lib/systemd/systemd
   - name: debian-9
     driver:
       run_command: /lib/systemd/systemd

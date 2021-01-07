@@ -4351,6 +4351,7 @@ install_centos_git_deps() {
             __PACKAGES="${__PACKAGES} m2crypto python${PY_PKG_VER}-crypto"
         fi
 
+        __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-setuptools"
         __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-jinja2"
         __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-msgpack python${PY_PKG_VER}-requests"
         __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado python${PY_PKG_VER}-zmq"

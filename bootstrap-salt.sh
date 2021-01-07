@@ -4217,6 +4217,14 @@ install_centos_stable_deps() {
                 __PACKAGES="${__PACKAGES} PyYAML"
             fi
         fi
+    else
+      if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 3 ]; then
+        if [ "$DISTRO_MAJOR_VERSION" -ge 8 ]; then
+            __PACKAGES="${__PACKAGES} python3-setuptools"
+        else
+            __PACKAGES="${__PACKAGES} python36-setuptools"
+        fi
+      fi
     fi
 
     # shellcheck disable=SC2086
@@ -4351,7 +4359,6 @@ install_centos_git_deps() {
             __PACKAGES="${__PACKAGES} m2crypto python${PY_PKG_VER}-crypto"
         fi
 
-        __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-setuptools"
         __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-jinja2"
         __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-msgpack python${PY_PKG_VER}-requests"
         __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado python${PY_PKG_VER}-zmq"

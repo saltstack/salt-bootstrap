@@ -4198,33 +4198,25 @@ install_centos_stable_deps() {
         if [ "$DISTRO_MAJOR_VERSION" -ge 8 ]; then
             # YAML module is used for generating custom master/minion configs
             if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 3 ]; then
-                __PACKAGES="${__PACKAGES} python3-pyyaml"
+                __PACKAGES="${__PACKAGES} python3-pyyaml python3-setuptools"
             else
                 __PACKAGES="${__PACKAGES} python2-pyyaml"
             fi
         elif [ "$DISTRO_MAJOR_VERSION" -eq 7 ]; then
             # YAML module is used for generating custom master/minion configs
             if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 3 ]; then
-                __PACKAGES="${__PACKAGES} python36-PyYAML"
+                __PACKAGES="${__PACKAGES} python36-PyYAML python36-setuptools"
             else
                 __PACKAGES="${__PACKAGES} PyYAML"
             fi
         else
             # YAML module is used for generating custom master/minion configs
             if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 3 ]; then
-                __PACKAGES="${__PACKAGES} python34-PyYAML"
+                __PACKAGES="${__PACKAGES} python34-PyYAML python34-setuptools"
             else
                 __PACKAGES="${__PACKAGES} PyYAML"
             fi
         fi
-    else
-      if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 3 ]; then
-        if [ "$DISTRO_MAJOR_VERSION" -ge 8 ]; then
-            __PACKAGES="${__PACKAGES} python3-setuptools"
-        else
-            __PACKAGES="${__PACKAGES} python36-setuptools"
-        fi
-      fi
     fi
 
     # shellcheck disable=SC2086

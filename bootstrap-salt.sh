@@ -4217,14 +4217,6 @@ install_centos_stable_deps() {
                 __PACKAGES="${__PACKAGES} PyYAML"
             fi
         fi
-    else
-      if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 3 ]; then
-        if [ "$DISTRO_MAJOR_VERSION" -ge 8 ]; then
-            __PACKAGES="${__PACKAGES} python3-setuptools"
-        else
-            __PACKAGES="${__PACKAGES} python36-setuptools"
-        fi
-      fi
     fi
 
     # shellcheck disable=SC2086

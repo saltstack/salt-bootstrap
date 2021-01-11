@@ -1,0 +1,44 @@
+  {python_version}-{bootstrap_type}-{branch}-{distro}:
+    name: {display_name}
+    runs-on: ubuntu-latest
+    timeout-minutes: {timeout_minutes}
+
+{needs}
+
+    steps:
+      - uses: actions/checkout@v1
+      - name: Setup Ruby
+        uses: actions/setup-ruby@v1
+        with:
+          ruby-version: 2.6.x
+
+      - name: Install Bundler
+        run: |
+          gem install bundler
+
+      - name: Setup Bundle
+        run: |
+          bundle install --with docker --without opennebula ec2 windows vagrant
+
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.7
+
+      - name: Install Python Dependencies
+        run: |
+          pip install -U pip
+          pip install -r tests/requirements.txt
+
+      - name: Create Test Container
+        run: |
+          bundle exec kitchen create {python_version}-{bootstrap_type}-{branch}-{distro} || bundle exec kitchen create {python_version}-{bootstrap_type}-{branch}-{distro}
+
+      - name: Test Bootstrap In Test Container
+        run: |
+          bundle exec kitchen verify {python_version}-{bootstrap_type}-{branch}-{distro}
+
+      - name: Destroy Test Container
+        if: always()
+        run: |
+          bundle exec kitchen destroy {python_version}-{bootstrap_type}-{branch}-{distro}

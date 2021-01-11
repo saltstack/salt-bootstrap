@@ -1,14 +1,67 @@
 Version TBD (In Progress on the Develop Branch):
 
+Version 2020.10.20:
+	* Add support to allow bootstrapping Salt 3002 (s0undt3ch) #1506
+
+Version 2020.10.19:
+	* Fix v3000+ with git install on FreeBSD (krionbsd) #1487
+	* Update README giving ONE example of WINDOWS bootstrapping. Default to python3 instead of
+	python2. (noelmcloughlin) #1496
+	* Support git and stable salt-bootstrap on Gentoo. (ijansky) #1500
+	* Add support for Linux Mint 20. (taigrr) #1502
+	* Adding missing functions for Red Hat 8. (mbochenk) #1489
+	* Allow pinning minor 3xxx versions. (max-arnold) #1491
+
+Version 2020.06.23:
+	* Fix for Cumulus Linux 4.1 (darylturner) #1474
+	* Fix file download exit code, improve error message on failed download (bryceml) #1478
+	* Add support for Ubuntu 20.04 (bryceml) #1479
+	* Default Ubuntu 20.04 to Py3 since there isn't a Py2 release for it (bryceml) #1480
+	* Warn instead of exit when using -R and -x python3 on centos to allow installing python3
+	versions of salt on centos from other repos.  Old unsupported releases probably need to
+	manually install epel-release before running the bootstrap script for versions before 2018.3.5
+	and before 2019.2.1 (bryceml) #1482
+	* Start maintaining .sha256 files for the bootstrap script
+
+Version 2020.05.28:
+	* Fix Opensuse Tumbleweed (noelmcloughlin) #1441
+	* Remove Debian 8 from Python 3 supported list (jay1648) #1448
+	* Fixed deps parsing for FreeBSD git installs (cedwards) #1462
+	* Added support for the upcoming Sodium release (s0undt3ch) #1466
+	* Fixed KDE Neon detection (ender8282) #1466
+	* Updated README python 2 and 3 installations (gdebunne) #1466
+	* Updated README and CONTRIBUTING to prefer Salt's master branch (DmitryKuzmenko) #1466
+	* Fixed IUS repo addresses (oeuftete) #1469
+	* Updated tests to assert target Python and Salt versions (s0undt3ch) #1470
+	* Fixed Amazon 2 -x support (s0undt3ch) #1470
+	* Fix Fedora stable installs for older releases (s0undt3ch) #1470
+	* Fix CentOS 8 installations (s0undt3ch) #1470
+	* Default Debian 10 to Py3 (s0undt3ch) #1470
+	* Fix Arch Linux installs (s0undt3ch) #1470
+
+Version 2020.02.24:
+	* Fix SLES 15 install (max298) #1431
+	* Fix 3000(Neon) stable install (sblaisot) #1433
+	* Fix Amazon Linux Py3 install (s0undt3ch) #1434
+
+Version 2020.02.04:
+	* Add support for the Salt Neon(3000) release (s0undt3ch) #1424
+	* Drop support for Fedora < 30 (s0undt3ch) #1424
+	* Drop support for Debian < 8 (s0undt3ch) #1424
+
+Version 2020.01.29:
+	* FreeBSD fixes (cedwards) #1413
+	* Support the upcoming Neon release (s0undt3ch) #1420
+
 Version 2020.01.21:
-	* FreeBSD fixes (kgbsd) #1376
-	* Fix macOS support (s0undt3ch) #1397
+    * FreeBSD fixes (kgbsd) #1376
+    * Fix macOS support (s0undt3ch) #1397
 
 Version 2019.11.04:
-	* Fix busybox mktemp compatibility (stanzgy) #1369
-	* Install debian 10 packages on debian 10 instead of 9 (kiemlicz) #1375
-	* move centos to python36, use python specified by -x (Ch3LL,bryceml) #1380
-	* Add debian 10 git install support (Ch3LL) #1378
+    * Fix busybox mktemp compatibility (stanzgy) #1369
+    * Install debian 10 packages on debian 10 instead of 9 (kiemlicz) #1375
+    * move centos to python36, use python specified by -x (Ch3LL,bryceml) #1380
+    * Add debian 10 git install support (Ch3LL) #1378
 
 Version 2019.10.03:
     * Fix possible typo with `gnupg-curl` vs `gnupg curl` (zahiar)

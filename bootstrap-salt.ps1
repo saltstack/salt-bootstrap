@@ -77,13 +77,15 @@
 Param(
     [Parameter(Mandatory=$false,ValueFromPipeline=$true)]
     # Doesn't support versions prior to "YYYY.M.R-B"
-    [ValidatePattern('^201\d\.\d{1,2}\.\d{1,2}(\-\d{1})?|(rc\d)$')]
+    # Supports new version and latest
+    # Option 1 means case insensitive
+    [ValidatePattern('^(\d{4}(\.\d{1,2}){0,2}(\-\d{1})?)|(latest)$', Options=1)]
     [string]$version = '',
 
     [Parameter(Mandatory=$false,ValueFromPipeline=$true)]
-    # Doesn't support versions prior to "2017.7.0"
+    # Doesn't support Python versions prior to "2017.7.0"
     [ValidateSet("2","3")]
-    [string]$pythonVersion = "2",
+    [string]$pythonVersion = "3",
 
     [Parameter(Mandatory=$false,ValueFromPipeline=$true)]
     [ValidateSet("true","false")]
@@ -99,8 +101,8 @@ Param(
     [string]$repourl= "https://repo.saltstack.com/windows"
 )
 
-# Powershell supports only TLS 1.0 by default. Add support up to TLS 1.2
-[System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]'Tls,Tls11,Tls12'
+# Powershell supports only TLS 1.0 by default. Add support for TLS 1.2
+[System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]'Tls12'
 
 #===============================================================================
 # Script Functions
@@ -213,7 +215,7 @@ Else {
 #===============================================================================
 # Use version "Latest" if no version is passed
 #===============================================================================
-If (!$version) {
+If ((!$version) -or ($version.ToLower() -eq 'latest')){
     $versionSection = "Latest-Py$pythonVersion"
 } else {
     $versionSection = $version

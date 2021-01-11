@@ -5835,6 +5835,8 @@ install_freebsd_git_deps() {
         /usr/local/sbin/pkg install -y ${SALT_DEPENDENCIES} python || return 1
 
         /usr/local/sbin/pkg install -y py37-requests || return 1
+        /usr/local/sbin/pkg install -y py37-tornado4 || return 1
+
     else
         /usr/local/sbin/pkg install -y python py37-pip py37-setuptools libzmq4 libunwind || return 1
     fi

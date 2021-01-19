@@ -99,6 +99,9 @@ Param(
 
     [Parameter(Mandatory=$false,ValueFromPipeline=$true)]
     [string]$repourl= "https://repo.saltproject.io/windows"
+
+    [Parameter(Mandatory=$false,ValueFromPipeline=$true)]
+    [switch]$ConfigureOnly
 )
 
 # Powershell supports only TLS 1.0 by default. Add support for TLS 1.2
@@ -181,6 +184,9 @@ Else {
 #===============================================================================
 # Ensure Directories are present, copy Vagrant Configs if found
 #===============================================================================
+
+$ConfiguredAnything = $False
+
 # Create C:\tmp\
 New-Item C:\tmp\ -ItemType directory -Force | Out-Null
 
@@ -192,6 +198,7 @@ If (Test-Path C:\tmp\minion.pem) {
     # Copy minion keys & config to correct location
     cp C:\tmp\minion.pem C:\salt\conf\pki\minion\
     cp C:\tmp\minion.pub C:\salt\conf\pki\minion\
+    $ConfiguredAnything = $True
 }
 
 # Check if minion config has been uploaded
@@ -200,6 +207,12 @@ If (Test-Path C:\tmp\minion.pem) {
 If (Test-Path C:\tmp\minion) {
     New-Item C:\salt\conf\ -ItemType Directory -Force | Out-Null
     Copy-Item -Path C:\tmp\minion -Destination C:\salt\conf\ -Force | Out-Null
+    $ConfiguredAnything = $True
+}
+
+If ($ConfigureOnly -and !$ConfiguredAnything) {
+    Write-Output "No configuration or keys were copied over. No configuration was done!"
+    exit 0
 }
 
 #===============================================================================
@@ -229,74 +242,81 @@ If ((!$version) -or ($version.ToLower() -eq 'latest')){
     }
 }
 
-#===============================================================================
-# Download minion setup file
-#===============================================================================
-$saltExe = "Salt-Minion-$versionSection-$arch-Setup.exe"
-Write-Output "Downloading Salt minion installer $saltExe"
-$webclient = New-Object System.Net.WebClient
-$url = "$repourl/$saltExe"
-$file = "C:\Windows\Temp\$saltExe"
-$webclient.DownloadFile($url, $file)
+If (!$ConfigureOnly) {
+    #===============================================================================
+    # Download minion setup file
+    #===============================================================================
+    $saltExe = "Salt-Minion-$versionSection-$arch-Setup.exe"
+    Write-Output "Downloading Salt minion installer $saltExe"
+    $webclient = New-Object System.Net.WebClient
+    $url = "$repourl/$saltExe"
+    $file = "C:\Windows\Temp\$saltExe"
+    $webclient.DownloadFile($url, $file)
 
-#===============================================================================
-# Set the parameters for the installer
-#===============================================================================
-# Unless specified, use the installer defaults
-# - id: <hostname>
-# - master: salt
-# - Start the service
-$parameters = ""
-If($minion -ne "not-specified") {$parameters = "/minion-name=$minion"}
-If($master -ne "not-specified") {$parameters = "$parameters /master=$master"}
-If($runservice -eq $false) {$parameters = "$parameters /start-service=0"}
+    #===============================================================================
+    # Set the parameters for the installer
+    #===============================================================================
+    # Unless specified, use the installer defaults
+    # - id: <hostname>
+    # - master: salt
+    # - Start the service
+    $parameters = ""
+    If($minion -ne "not-specified") {$parameters = "/minion-name=$minion"}
+    If($master -ne "not-specified") {$parameters = "$parameters /master=$master"}
+    If($runservice -eq $false) {$parameters = "$parameters /start-service=0"}
 
-#===============================================================================
-# Install minion silently
-#===============================================================================
-#Wait for process to exit before continuing.
-Write-Output "Installing Salt minion"
-Start-Process C:\Windows\Temp\$saltExe -ArgumentList "/S $parameters" -Wait -NoNewWindow -PassThru | Out-Null
+    #===============================================================================
+    # Install minion silently
+    #===============================================================================
+    #Wait for process to exit before continuing.
+    Write-Output "Installing Salt minion"
+    Start-Process C:\Windows\Temp\$saltExe -ArgumentList "/S $parameters" -Wait -NoNewWindow -PassThru | Out-Null
 
-#===============================================================================
-# Configure the minion service
-#===============================================================================
-# Wait for salt-minion service to be registered before trying to start it
-$service = Get-Service salt-minion -ErrorAction SilentlyContinue
-While (!$service) {
-  Start-Sleep -s 2
-  $service = Get-Service salt-minion -ErrorAction SilentlyContinue
-}
+    #===============================================================================
+    # Configure the minion service
+    #===============================================================================
+    # Wait for salt-minion service to be registered before trying to start it
+    $service = Get-Service salt-minion -ErrorAction SilentlyContinue
+    While (!$service) {
+      Start-Sleep -s 2
+      $service = Get-Service salt-minion -ErrorAction SilentlyContinue
+    }
 
-If($runservice) {
-    # Start service
-    Write-Output "Starting the Salt minion service"
-    Start-Service -Name "salt-minion" -ErrorAction SilentlyContinue
-
-    # Check if service is started, otherwise retry starting the
-    # service 4 times.
-    $try = 0
-    While (($service.Status -ne "Running") -and ($try -ne 4)) {
+    If($runservice) {
+        # Start service
+        Write-Output "Starting the Salt minion service"
         Start-Service -Name "salt-minion" -ErrorAction SilentlyContinue
-        $service = Get-Service salt-minion -ErrorAction SilentlyContinue
-        Start-Sleep -s 2
-        $try += 1
-    }
 
-    # If the salt-minion service is still not running, something probably
-    # went wrong and user intervention is required - report failure.
-    If ($service.Status -eq "Stopped") {
-        Write-Output -NoNewline "Failed to start salt minion"
-        exit 1
+        # Check if service is started, otherwise retry starting the
+        # service 4 times.
+        $try = 0
+        While (($service.Status -ne "Running") -and ($try -ne 4)) {
+            Start-Service -Name "salt-minion" -ErrorAction SilentlyContinue
+            $service = Get-Service salt-minion -ErrorAction SilentlyContinue
+            Start-Sleep -s 2
+            $try += 1
+        }
+
+        # If the salt-minion service is still not running, something probably
+        # went wrong and user intervention is required - report failure.
+        If ($service.Status -eq "Stopped") {
+            Write-Output -NoNewline "Failed to start salt minion"
+            exit 1
+        }
     }
-}
-Else {
-    Write-Output -NoNewline "Stopping salt minion and setting it to 'Manual'"
-    Set-Service "salt-minion" -StartupType "Manual"
-    Stop-Service "salt-minion"
+    Else {
+        Write-Output -NoNewline "Stopping salt minion and setting it to 'Manual'"
+        Set-Service "salt-minion" -StartupType "Manual"
+        Stop-Service "salt-minion"
+    }
 }
 
 #===============================================================================
 # Script Complete
 #===============================================================================
-Write-Output "Salt minion successfully installed"
+If ($ConfigureOnly) {
+    Write-Output "Salt minion successfully configured"
+}
+Else {
+    Write-Output "Salt minion successfully installed"
+}

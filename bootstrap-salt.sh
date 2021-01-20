@@ -6463,6 +6463,9 @@ install_opensuse_git_deps() {
         if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
             __PACKAGES="${__PACKAGES} python-apache-libcloud"
         fi
+    # Check for Tumbleweed
+    elif [ "${DISTRO_MAJOR_VERSION}" -ge 20210101 ]; then
+        __PACKAGES="python3-pip"
     else
         __PACKAGES="python-pip python-setuptools gcc"
     fi
@@ -6544,7 +6547,7 @@ install_opensuse_git_post() {
         [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
         [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
 
-        if [ -f /bin/systemctl ]; then
+        if command -v systemctl; then
             use_usr_lib=$BS_FALSE
 
             if [ "${DISTRO_MAJOR_VERSION}" -ge 15 ]; then

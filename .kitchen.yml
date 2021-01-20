@@ -95,6 +95,16 @@ platforms:
         - systemctl enable sshd.service
     provisioner:
       salt_bootstrap_options: -MPfq -y -x python2 git %s
+  - name: opensuse-tumbleweed
+    driver_config:
+      image: opensuse/tumbleweed:latest
+      run_command: /usr/lib/systemd/systemd
+      provision_command:
+        - zypper --non-interactive install --auto-agree-with-licenses dbus-1
+        - zypper --non-interactive install --auto-agree-with-licenses sudo openssh which curl systemd
+        - systemctl enable sshd.service
+    provisioner:
+      salt_bootstrap_options: -MPfq -y -x python3 git %s
   - name: ubuntu-20.04
     driver_config:
       run_command: /lib/systemd/systemd
@@ -129,6 +139,7 @@ suites:
     excludes:
       - arch
       - opensuse-15
+      - opensuse-tumbleweed
       - debian-10
       - debian-11
       - fedora-32
@@ -143,6 +154,7 @@ suites:
       salt_bootstrap_options: -x python3 -MPfq git %s
     excludes:
       - debian-11
+      - opensuse-tumbleweed
       - ubuntu-2004
   - name: py3-git-3001
     provisioner:
@@ -159,6 +171,7 @@ suites:
     excludes:
       - debian-11
       - opensuse-15
+      - opensuse-tumbleweed
       - arch
       - ubuntu-2004
   - name: py3-stable-3001-0
@@ -167,6 +180,7 @@ suites:
       salt_bootstrap_options: -x python3 -MP stable 3001.0
     excludes:
       - opensuse-15
+      - opensuse-tumbleweed
       - debian-11
       - fedora-32
       - fedora-33
@@ -180,6 +194,7 @@ suites:
     excludes:
       - debian-11
       - opensuse-15
+      - opensuse-tumbleweed
       - arch
   - name: py3-stable-3002-0
     provisioner:
@@ -187,6 +202,7 @@ suites:
       salt_bootstrap_options: -x python3 -MP stable 3002.0
     excludes:
       - opensuse-15
+      - opensuse-tumbleweed
       - debian-11
       - fedora-32
       - fedora-33
@@ -199,6 +215,7 @@ suites:
       salt_bootstrap_options: -x python3 -MP stable %s
     excludes:
       - opensuse-15
+      - opensuse-tumbleweed
       - arch
   - name: py3-git-master
     provisioner:

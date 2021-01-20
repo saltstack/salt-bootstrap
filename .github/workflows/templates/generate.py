@@ -18,6 +18,7 @@ LINUX_DISTROS = [
     "gentoo",
     "gentoo-systemd",
     "opensuse-15",
+    "opensuse-tumbleweed",
     "ubuntu-1604",
     "ubuntu-1804",
     "ubuntu-2004",
@@ -49,12 +50,14 @@ PY2_BLACKLIST = [
     "gentoo",
     "gentoo-systemd",
     "opensuse-15",
+    "opensuse-tumbleweed",
     "ubuntu-2004",
 ]
 
 BLACKLIST_3000 = [
     "debian-11",
     "fedora-33",
+    "opensuse-tumbleweed",
     "ubuntu-2004",
 ]
 
@@ -113,6 +116,7 @@ DISTRO_DISPLAY_NAMES = {
     "gentoo": "Gentoo",
     "gentoo-systemd": "Gentoo (systemd)",
     "opensuse-15": "Opensuse 15",
+    "opensuse-tumbleweed": "Opensuse Tumbleweed",
     "ubuntu-1604": "Ubuntu 16.04",
     "ubuntu-1804": "Ubuntu 18.04",
     "ubuntu-2004": "Ubuntu 20.04",

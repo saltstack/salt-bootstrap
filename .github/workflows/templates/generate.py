@@ -6,7 +6,6 @@ import datetime
 os.chdir(os.path.abspath(os.path.dirname(__file__)))
 
 LINUX_DISTROS = [
-    #'amazon-1',
     "amazon-2",
     "arch",
     "centos-7",
@@ -26,7 +25,6 @@ LINUX_DISTROS = [
 OSX = WINDOWS = []
 
 STABLE_DISTROS = [
-    "amazon-1",
     "amazon-2",
     "centos-7",
     "centos-8",
@@ -54,16 +52,6 @@ PY2_BLACKLIST = [
     "ubuntu-2004",
 ]
 
-PY3_BLACKLIST = [
-    "amazon-1",
-]
-
-BLACKLIST_2019 = [
-    "debian-11",
-    "fedora-33",
-    "ubuntu-2004",
-]
-
 BLACKLIST_3000 = [
     "debian-11",
     "fedora-33",
@@ -87,7 +75,6 @@ BLACKLIST_3002_0 = [
 ]
 
 SALT_BRANCHES = [
-    "2019-2",
     "3000",
     "3001",
     "3001-0",
@@ -98,7 +85,6 @@ SALT_BRANCHES = [
 ]
 
 BRANCH_DISPLAY_NAMES = {
-    "2019-2": "v2019.2",
     "3000": "v3000",
     "3001": "v3001",
     "3001-0": "v3001.0",
@@ -115,7 +101,6 @@ LATEST_PKG_BLACKLIST = [
 ]
 
 DISTRO_DISPLAY_NAMES = {
-    "amazon-1": "Amazon 1",
     "amazon-2": "Amazon 2",
     "arch": "Arch",
     "centos-7": "CentOS 7",
@@ -237,9 +222,6 @@ def generate_test_jobs():
                                 if branch not in allowed_branches:
                                     # Arch and Fedora default to py3.8
                                     continue
-                    if branch == "2019-2" and distro in BLACKLIST_2019:
-                        continue
-
                     if branch == "3000" and distro in BLACKLIST_3000:
                         continue
 
@@ -253,9 +235,6 @@ def generate_test_jobs():
                         continue
 
                     if python_version == "py2" and distro in PY2_BLACKLIST:
-                        continue
-
-                    if python_version == "py3" and distro in PY3_BLACKLIST:
                         continue
 
                     if distro in LINUX_DISTROS:

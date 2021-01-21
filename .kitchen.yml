@@ -28,13 +28,6 @@ provisioner:
     sh -c 't=$(shuf -i 1-15 -n 1); echo Sleeping $t seconds; sleep $t'
 
 platforms:
-  - name: amazon-1
-    driver_config:
-      image: amazonlinux:1
-      platform: rhel
-      run_command: /sbin/init
-      provision_command:
-        - yum install -y upstart
   - name: amazon-2
     driver_config:
       image: amazonlinux:2
@@ -113,14 +106,6 @@ platforms:
       run_command: /lib/systemd/systemd
 
 suites:
-  - name: py2-git-2019-2
-    provisioner:
-      salt_version: 2019.2
-    excludes:
-      - debian-10
-      - debian-11
-      - gentoo
-      - gentoo-systemd
   - name: py2-git-3000
     provisioner:
       salt_version: 3000
@@ -137,20 +122,6 @@ suites:
       - debian-11
       - gentoo
       - gentoo-systemd
-  - name: py2-stable-2019-2
-    provisioner:
-      salt_version: 2019.2
-      salt_bootstrap_options: -MP stable %s
-    excludes:
-      - arch
-      - opensuse-15
-      - fedora-32
-      - fedora-33
-      - debian-10
-      - debian-11
-      - gentoo
-      - gentoo-systemd
-      - ubuntu-2004
   - name: py2-stable-3000
     provisioner:
       salt_version: 3000
@@ -171,45 +142,21 @@ suites:
       salt_version: 3000
       salt_bootstrap_options: -x python3 -MPfq git %s
     excludes:
-      - amazon-1
-      - debian-11
-      - ubuntu-2004
-  - name: py3-git-2019-2
-    provisioner:
-      salt_version: 2019.2
-      salt_bootstrap_options: -x python3 -MPfq git %s
-    excludes:
-      - amazon-1
       - debian-11
       - ubuntu-2004
   - name: py3-git-3001
     provisioner:
       salt_version: 3001
       salt_bootstrap_options: -x python3 -MPfq git %s
-    excludes:
-      - amazon-1
   - name: py3-git-3002
     provisioner:
       salt_version: 3002
       salt_bootstrap_options: -x python3 -MPfq git %s
-    excludes:
-      - amazon-1
-  - name: py3-stable-2019-2
-    provisioner:
-      salt_version: 2019.2
-      salt_bootstrap_options: -x python3 -MP stable %s
-    excludes:
-      - amazon-1
-      - debian-11
-      - opensuse-15
-      - arch
-      - ubuntu-2004
   - name: py3-stable-3000
     provisioner:
       salt_version: 3000
       salt_bootstrap_options: -x python3 -MP stable %s
     excludes:
-      - amazon-1
       - debian-11
       - opensuse-15
       - arch
@@ -219,7 +166,6 @@ suites:
       salt_version: 3001
       salt_bootstrap_options: -x python3 -MP stable 3001.0
     excludes:
-      - amazon-1
       - opensuse-15
       - debian-11
       - fedora-32
@@ -232,7 +178,6 @@ suites:
       salt_version: 3001
       salt_bootstrap_options: -x python3 -MP stable %s
     excludes:
-      - amazon-1
       - debian-11
       - opensuse-15
       - arch
@@ -241,7 +186,6 @@ suites:
       salt_version: 3002
       salt_bootstrap_options: -x python3 -MP stable 3002.0
     excludes:
-      - amazon-1
       - opensuse-15
       - debian-11
       - fedora-32
@@ -254,15 +198,12 @@ suites:
       salt_version: 3002
       salt_bootstrap_options: -x python3 -MP stable %s
     excludes:
-      - amazon-1
       - opensuse-15
       - arch
   - name: py3-git-master
     provisioner:
       salt_version: master
       salt_bootstrap_options: -x python3 -MPfq -D git %s
-    excludes:
-      - amazon-1
 
   - name: latest
     provisioner:

@@ -57,7 +57,7 @@
     Name or IP of the master server. Installer defaults to "salt".
 
 .PARAMETER repourl
-    URL to the windows packages. Default is "https://repo.saltstack.com/windows"
+    URL to the windows packages. Default is "https://repo.saltproject.io/windows"
 
 .NOTES
     All of the parameters are optional. The default should be the latest
@@ -67,7 +67,7 @@
     Bootstrap GitHub Project (script home) - https://github.com/saltstack/salt-windows-bootstrap
     Original Vagrant Provisioner Project -https://github.com/saltstack/salty-vagrant
     Vagrant Project (utilizes this script) - https://github.com/mitchellh/vagrant
-    SaltStack Download Location - https://repo.saltstack.com/windows/
+    SaltStack Download Location - https://repo.saltproject.io/windows/
 #>
 
 #===============================================================================
@@ -98,7 +98,7 @@ Param(
     [string]$master = "not-specified",
 
     [Parameter(Mandatory=$false,ValueFromPipeline=$true)]
-    [string]$repourl= "https://repo.saltstack.com/windows"
+    [string]$repourl= "https://repo.saltproject.io/windows"
 )
 
 # Powershell supports only TLS 1.0 by default. Add support for TLS 1.2

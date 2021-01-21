@@ -14,11 +14,11 @@
 #
 #          BUGS: https://github.com/saltstack/salt-bootstrap/issues
 #
-#     COPYRIGHT: (c) 2012-2018 by the SaltStack Team, see AUTHORS.rst for more
+#     COPYRIGHT: (c) 2012-2021 by the SaltStack Team, see AUTHORS.rst for more
 #                details.
 #
 #       LICENSE: Apache 2.0
-#  ORGANIZATION: SaltStack (saltstack.com)
+#  ORGANIZATION: SaltStack (saltproject.io)
 #       CREATED: 10/15/2012 09:49:37 PM WEST
 #======================================================================================================================
 set -o nounset                              # Treat unset variables as an error
@@ -267,7 +267,7 @@ _CUSTOM_REPO_URL="null"
 _CUSTOM_MASTER_CONFIG="null"
 _CUSTOM_MINION_CONFIG="null"
 _QUIET_GIT_INSTALLATION=$BS_FALSE
-_REPO_URL="repo.saltstack.com"
+_REPO_URL="repo.saltproject.io"
 _PY_EXE=""
 _INSTALL_PY="$BS_FALSE"
 _TORNADO_MAX_PY3_VERSION="5.0"
@@ -293,9 +293,9 @@ __usage() {
     - stable              Install latest stable release. This is the default
                           install type
     - stable [branch]     Install latest version on a branch. Only supported
-                          for packages available at repo.saltstack.com
+                          for packages available at repo.saltproject.io
     - stable [version]    Install a specific version. Only supported for
-                          packages available at repo.saltstack.com
+                          packages available at repo.saltproject.io
                           To pin a 3xxx minor version, specify it as 3xxx.0
     - testing             RHEL-family specific: configure EPEL testing repo
     - git                 Install from the head of the master branch
@@ -377,8 +377,8 @@ __usage() {
         on the system.
     -R  Specify a custom repository URL. Assumes the custom repository URL
         points to a repository that mirrors Salt packages located at
-        repo.saltstack.com. The option passed with -R replaces the
-        "repo.saltstack.com". If -R is passed, -r is also set. Currently only
+        repo.saltproject.io. The option passed with -R replaces the
+        "repo.saltproject.io". If -R is passed, -r is also set. Currently only
         works on CentOS/RHEL and Debian based distributions.
     -J  Replace the Master config file with data passed in as a JSON string. If
         a Master config file is found, a reasonable effort will be made to save
@@ -721,7 +721,7 @@ if [ "$ITYPE" != "git" ]; then
     fi
 fi
 
-# Set the _REPO_URL value based on if -R was passed or not. Defaults to repo.saltstack.com.
+# Set the _REPO_URL value based on if -R was passed or not. Defaults to repo.saltproject.io.
 if [ "$_CUSTOM_REPO_URL" != "null" ]; then
     _REPO_URL="$_CUSTOM_REPO_URL"
 
@@ -3345,9 +3345,9 @@ install_ubuntu_check_services() {
 #
 __install_saltstack_debian_repository() {
     if [ "$DISTRO_MAJOR_VERSION" -eq 11 ]; then
-        # Packages for Debian 11 at repo.saltstack.com are not yet available
+        # Packages for Debian 11 at repo.saltproject.io are not yet available
         # Set up repository for Debian 10 for Debian 11 for now until support
-        # is available at repo.saltstack.com for Debian 11.
+        # is available at repo.saltproject.io for Debian 11.
         echowarn "Debian 11 distribution detected, but stable packages requested. Trying packages from Debian 10. You may experience problems."
         DEBIAN_RELEASE="10"
         DEBIAN_CODENAME="buster"
@@ -6320,7 +6320,7 @@ __set_suse_pkg_repo() {
         suse_pkg_url_base="https://download.opensuse.org/repositories/systemsmanagement:/saltstack"
         suse_pkg_url_path="${DISTRO_REPO}/systemsmanagement:saltstack.repo"
     else
-        suse_pkg_url_base="${HTTP_VAL}://repo.saltstack.com/opensuse"
+        suse_pkg_url_base="${HTTP_VAL}://repo.saltproject.io/opensuse"
         suse_pkg_url_path="${DISTRO_REPO}/systemsmanagement:saltstack:products.repo"
     fi
     SUSE_PKG_URL="$suse_pkg_url_base/$suse_pkg_url_path"
@@ -7452,7 +7452,7 @@ __macosx_get_packagesite() {
     fi
 
     PKG="salt-${STABLE_REV}-${__PY_VERSION_REPO}-${DARWIN_ARCH}.pkg"
-    SALTPKGCONFURL="https://repo.saltstack.com/osx/${PKG}"
+    SALTPKGCONFURL="https://repo.saltproject.io/osx/${PKG}"
 }
 
 # Using a separate conf step to head for idempotent install...

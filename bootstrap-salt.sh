@@ -2719,8 +2719,13 @@ EOM
 )
     if ! ${_py_exe} -c "$CHECK_PIP_VERSION_SCRIPT"; then
         # Upgrade pip to at least 1.2 which is when we can start using "python -m pip"
-        echodebug "Running '${_pip_cmd} install ${_POST_NEON_PIP_INSTALL_ARGS} pip>=${_MINIMUM_PIP_VERSION}'"
-        ${_pip_cmd} install ${_POST_NEON_PIP_INSTALL_ARGS} -v "pip>=${_MINIMUM_PIP_VERSION}"
+        if [ "${_py_version}" = "3.5" ]; then
+          echodebug "Running '${_pip_cmd} install ${_POST_NEON_PIP_INSTALL_ARGS} pip>=${_MINIMUM_PIP_VERSION},<21.0'"
+          ${_pip_cmd} install ${_POST_NEON_PIP_INSTALL_ARGS} -v "pip>=${_MINIMUM_PIP_VERSION},<21.0"
+        else
+          echodebug "Running '${_pip_cmd} install ${_POST_NEON_PIP_INSTALL_ARGS} pip>=${_MINIMUM_PIP_VERSION}'"
+          ${_pip_cmd} install ${_POST_NEON_PIP_INSTALL_ARGS} -v "pip>=${_MINIMUM_PIP_VERSION}"
+        fi
         sleep 1
         echodebug "PATH: ${PATH}"
         _pip_cmd="pip${_py_version}"

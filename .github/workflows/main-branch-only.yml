@@ -8,102 +8,10 @@ on: [push]
 
 jobs:
 
-  py3-stable-2019-2-gentoo:
-    name: Gentoo v2019.2 Py3 Stable
-    runs-on: ubuntu-latest
-    timeout-minutes: 50
-
-
-
-    steps:
-      - uses: actions/checkout@v1
-      - name: Setup Ruby
-        uses: actions/setup-ruby@v1
-        with:
-          ruby-version: 2.6.x
-
-      - name: Install Bundler
-        run: |
-          gem install bundler
-
-      - name: Setup Bundle
-        run: |
-          bundle install --with docker --without opennebula ec2 windows vagrant
-
-      - name: Set up Python 3.7
-        uses: actions/setup-python@v1
-        with:
-          python-version: 3.7
-
-      - name: Install Python Dependencies
-        run: |
-          pip install -U pip
-          pip install -r tests/requirements.txt
-
-      - name: Create Test Container
-        run: |
-          bundle exec kitchen create py3-stable-2019-2-gentoo || bundle exec kitchen create py3-stable-2019-2-gentoo
-
-      - name: Test Bootstrap In Test Container
-        run: |
-          bundle exec kitchen verify py3-stable-2019-2-gentoo
-
-      - name: Destroy Test Container
-        if: always()
-        run: |
-          bundle exec kitchen destroy py3-stable-2019-2-gentoo
-
-
-  py3-git-2019-2-gentoo:
-    name: Gentoo v2019.2 Py3 Git
-    runs-on: ubuntu-latest
-    timeout-minutes: 50
-
-
-
-    steps:
-      - uses: actions/checkout@v1
-      - name: Setup Ruby
-        uses: actions/setup-ruby@v1
-        with:
-          ruby-version: 2.6.x
-
-      - name: Install Bundler
-        run: |
-          gem install bundler
-
-      - name: Setup Bundle
-        run: |
-          bundle install --with docker --without opennebula ec2 windows vagrant
-
-      - name: Set up Python 3.7
-        uses: actions/setup-python@v1
-        with:
-          python-version: 3.7
-
-      - name: Install Python Dependencies
-        run: |
-          pip install -U pip
-          pip install -r tests/requirements.txt
-
-      - name: Create Test Container
-        run: |
-          bundle exec kitchen create py3-git-2019-2-gentoo || bundle exec kitchen create py3-git-2019-2-gentoo
-
-      - name: Test Bootstrap In Test Container
-        run: |
-          bundle exec kitchen verify py3-git-2019-2-gentoo
-
-      - name: Destroy Test Container
-        if: always()
-        run: |
-          bundle exec kitchen destroy py3-git-2019-2-gentoo
-
-
   py3-stable-3000-gentoo:
     name: Gentoo v3000 Py3 Stable
     runs-on: ubuntu-latest
-    timeout-minutes: 50
+    timeout-minutes: 90
 
 
 
@@ -149,7 +57,7 @@ jobs:
   py3-git-3000-gentoo:
     name: Gentoo v3000 Py3 Git
     runs-on: ubuntu-latest
-    timeout-minutes: 50
+    timeout-minutes: 90
 
 
 
@@ -195,7 +103,7 @@ jobs:
   py3-stable-3001-gentoo:
     name: Gentoo v3001 Py3 Stable
     runs-on: ubuntu-latest
-    timeout-minutes: 50
+    timeout-minutes: 90
 
 
 
@@ -241,7 +149,7 @@ jobs:
   py3-git-3001-gentoo:
     name: Gentoo v3001 Py3 Git
     runs-on: ubuntu-latest
-    timeout-minutes: 50
+    timeout-minutes: 90
 
 
 
@@ -284,56 +192,10 @@ jobs:
           bundle exec kitchen destroy py3-git-3001-gentoo
 
 
-  py3-stable-3001-0-gentoo:
-    name: Gentoo v3001.0 Py3 Stable
-    runs-on: ubuntu-latest
-    timeout-minutes: 50
-
-
-
-    steps:
-      - uses: actions/checkout@v1
-      - name: Setup Ruby
-        uses: actions/setup-ruby@v1
-        with:
-          ruby-version: 2.6.x
-
-      - name: Install Bundler
-        run: |
-          gem install bundler
-
-      - name: Setup Bundle
-        run: |
-          bundle install --with docker --without opennebula ec2 windows vagrant
-
-      - name: Set up Python 3.7
-        uses: actions/setup-python@v1
-        with:
-          python-version: 3.7
-
-      - name: Install Python Dependencies
-        run: |
-          pip install -U pip
-          pip install -r tests/requirements.txt
-
-      - name: Create Test Container
-        run: |
-          bundle exec kitchen create py3-stable-3001-0-gentoo || bundle exec kitchen create py3-stable-3001-0-gentoo
-
-      - name: Test Bootstrap In Test Container
-        run: |
-          bundle exec kitchen verify py3-stable-3001-0-gentoo
-
-      - name: Destroy Test Container
-        if: always()
-        run: |
-          bundle exec kitchen destroy py3-stable-3001-0-gentoo
-
-
   py3-stable-3002-gentoo:
     name: Gentoo v3002 Py3 Stable
     runs-on: ubuntu-latest
-    timeout-minutes: 50
+    timeout-minutes: 90
 
 
 
@@ -379,7 +241,7 @@ jobs:
   py3-git-3002-gentoo:
     name: Gentoo v3002 Py3 Git
     runs-on: ubuntu-latest
-    timeout-minutes: 50
+    timeout-minutes: 90
 
 
 
@@ -422,56 +284,10 @@ jobs:
           bundle exec kitchen destroy py3-git-3002-gentoo
 
 
-  py3-stable-3002-0-gentoo:
-    name: Gentoo v3002.0 Py3 Stable
-    runs-on: ubuntu-latest
-    timeout-minutes: 50
-
-
-
-    steps:
-      - uses: actions/checkout@v1
-      - name: Setup Ruby
-        uses: actions/setup-ruby@v1
-        with:
-          ruby-version: 2.6.x
-
-      - name: Install Bundler
-        run: |
-          gem install bundler
-
-      - name: Setup Bundle
-        run: |
-          bundle install --with docker --without opennebula ec2 windows vagrant
-
-      - name: Set up Python 3.7
-        uses: actions/setup-python@v1
-        with:
-          python-version: 3.7
-
-      - name: Install Python Dependencies
-        run: |
-          pip install -U pip
-          pip install -r tests/requirements.txt
-
-      - name: Create Test Container
-        run: |
-          bundle exec kitchen create py3-stable-3002-0-gentoo || bundle exec kitchen create py3-stable-3002-0-gentoo
-
-      - name: Test Bootstrap In Test Container
-        run: |
-          bundle exec kitchen verify py3-stable-3002-0-gentoo
-
-      - name: Destroy Test Container
-        if: always()
-        run: |
-          bundle exec kitchen destroy py3-stable-3002-0-gentoo
-
-
   py3-git-master-gentoo:
     name: Gentoo Master Py3 Git
     runs-on: ubuntu-latest
-    timeout-minutes: 50
+    timeout-minutes: 90
 
 
 
@@ -517,7 +333,7 @@ jobs:
   latest-gentoo:
     name: Gentoo Latest packaged release
     runs-on: ubuntu-latest
-    timeout-minutes: 50
+    timeout-minutes: 90
 
 
 
@@ -560,102 +376,10 @@ jobs:
           bundle exec kitchen destroy latest-gentoo
 
 
-  py3-stable-2019-2-gentoo-systemd:
-    name: Gentoo (systemd) v2019.2 Py3 Stable
-    runs-on: ubuntu-latest
-    timeout-minutes: 50
-
-
-
-    steps:
-      - uses: actions/checkout@v1
-      - name: Setup Ruby
-        uses: actions/setup-ruby@v1
-        with:
-          ruby-version: 2.6.x
-
-      - name: Install Bundler
-        run: |
-          gem install bundler
-
-      - name: Setup Bundle
-        run: |
-          bundle install --with docker --without opennebula ec2 windows vagrant
-
-      - name: Set up Python 3.7
-        uses: actions/setup-python@v1
-        with:
-          python-version: 3.7
-
-      - name: Install Python Dependencies
-        run: |
-          pip install -U pip
-          pip install -r tests/requirements.txt
-
-      - name: Create Test Container
-        run: |
-          bundle exec kitchen create py3-stable-2019-2-gentoo-systemd || bundle exec kitchen create py3-stable-2019-2-gentoo-systemd
-
-      - name: Test Bootstrap In Test Container
-        run: |
-          bundle exec kitchen verify py3-stable-2019-2-gentoo-systemd
-
-      - name: Destroy Test Container
-        if: always()
-        run: |
-          bundle exec kitchen destroy py3-stable-2019-2-gentoo-systemd
-
-
-  py3-git-2019-2-gentoo-systemd:
-    name: Gentoo (systemd) v2019.2 Py3 Git
-    runs-on: ubuntu-latest
-    timeout-minutes: 50
-
-
-
-    steps:
-      - uses: actions/checkout@v1
-      - name: Setup Ruby
-        uses: actions/setup-ruby@v1
-        with:
-          ruby-version: 2.6.x
-
-      - name: Install Bundler
-        run: |
-          gem install bundler
-
-      - name: Setup Bundle
-        run: |
-          bundle install --with docker --without opennebula ec2 windows vagrant
-
-      - name: Set up Python 3.7
-        uses: actions/setup-python@v1
-        with:
-          python-version: 3.7
-
-      - name: Install Python Dependencies
-        run: |
-          pip install -U pip
-          pip install -r tests/requirements.txt
-
-      - name: Create Test Container
-        run: |
-          bundle exec kitchen create py3-git-2019-2-gentoo-systemd || bundle exec kitchen create py3-git-2019-2-gentoo-systemd
-
-      - name: Test Bootstrap In Test Container
-        run: |
-          bundle exec kitchen verify py3-git-2019-2-gentoo-systemd
-
-      - name: Destroy Test Container
-        if: always()
-        run: |
-          bundle exec kitchen destroy py3-git-2019-2-gentoo-systemd
-
-
   py3-stable-3000-gentoo-systemd:
     name: Gentoo (systemd) v3000 Py3 Stable
     runs-on: ubuntu-latest
-    timeout-minutes: 50
+    timeout-minutes: 90
 
 
 
@@ -701,7 +425,7 @@ jobs:
   py3-git-3000-gentoo-systemd:
     name: Gentoo (systemd) v3000 Py3 Git
     runs-on: ubuntu-latest
-    timeout-minutes: 50
+    timeout-minutes: 90
 
 
 
@@ -747,7 +471,7 @@ jobs:
   py3-stable-3001-gentoo-systemd:
     name: Gentoo (systemd) v3001 Py3 Stable
     runs-on: ubuntu-latest
-    timeout-minutes: 50
+    timeout-minutes: 90
 
 
 
@@ -793,7 +517,7 @@ jobs:
   py3-git-3001-gentoo-systemd:
     name: Gentoo (systemd) v3001 Py3 Git
     runs-on: ubuntu-latest
-    timeout-minutes: 50
+    timeout-minutes: 90
 
 
 
@@ -836,56 +560,10 @@ jobs:
           bundle exec kitchen destroy py3-git-3001-gentoo-systemd
 
 
-  py3-stable-3001-0-gentoo-systemd:
-    name: Gentoo (systemd) v3001.0 Py3 Stable
-    runs-on: ubuntu-latest
-    timeout-minutes: 50
-
-
-
-    steps:
-      - uses: actions/checkout@v1
-      - name: Setup Ruby
-        uses: actions/setup-ruby@v1
-        with:
-          ruby-version: 2.6.x
-
-      - name: Install Bundler
-        run: |
-          gem install bundler
-
-      - name: Setup Bundle
-        run: |
-          bundle install --with docker --without opennebula ec2 windows vagrant
-
-      - name: Set up Python 3.7
-        uses: actions/setup-python@v1
-        with:
-          python-version: 3.7
-
-      - name: Install Python Dependencies
-        run: |
-          pip install -U pip
-          pip install -r tests/requirements.txt
-
-      - name: Create Test Container
-        run: |
-          bundle exec kitchen create py3-stable-3001-0-gentoo-systemd || bundle exec kitchen create py3-stable-3001-0-gentoo-systemd
-
-      - name: Test Bootstrap In Test Container
-        run: |
-          bundle exec kitchen verify py3-stable-3001-0-gentoo-systemd
-
-      - name: Destroy Test Container
-        if: always()
-        run: |
-          bundle exec kitchen destroy py3-stable-3001-0-gentoo-systemd
-
-
   py3-stable-3002-gentoo-systemd:
     name: Gentoo (systemd) v3002 Py3 Stable
     runs-on: ubuntu-latest
-    timeout-minutes: 50
+    timeout-minutes: 90
 
 
 
@@ -931,7 +609,7 @@ jobs:
   py3-git-3002-gentoo-systemd:
     name: Gentoo (systemd) v3002 Py3 Git
     runs-on: ubuntu-latest
-    timeout-minutes: 50
+    timeout-minutes: 90
 
 
 
@@ -974,56 +652,10 @@ jobs:
           bundle exec kitchen destroy py3-git-3002-gentoo-systemd
 
 
-  py3-stable-3002-0-gentoo-systemd:
-    name: Gentoo (systemd) v3002.0 Py3 Stable
-    runs-on: ubuntu-latest
-    timeout-minutes: 50
-
-
-
-    steps:
-      - uses: actions/checkout@v1
-      - name: Setup Ruby
-        uses: actions/setup-ruby@v1
-        with:
-          ruby-version: 2.6.x
-
-      - name: Install Bundler
-        run: |
-          gem install bundler
-
-      - name: Setup Bundle
-        run: |
-          bundle install --with docker --without opennebula ec2 windows vagrant
-
-      - name: Set up Python 3.7
-        uses: actions/setup-python@v1
-        with:
-          python-version: 3.7
-
-      - name: Install Python Dependencies
-        run: |
-          pip install -U pip
-          pip install -r tests/requirements.txt
-
-      - name: Create Test Container
-        run: |
-          bundle exec kitchen create py3-stable-3002-0-gentoo-systemd || bundle exec kitchen create py3-stable-3002-0-gentoo-systemd
-
-      - name: Test Bootstrap In Test Container
-        run: |
-          bundle exec kitchen verify py3-stable-3002-0-gentoo-systemd
-
-      - name: Destroy Test Container
-        if: always()
-        run: |
-          bundle exec kitchen destroy py3-stable-3002-0-gentoo-systemd
-
-
   py3-git-master-gentoo-systemd:
     name: Gentoo (systemd) Master Py3 Git
     runs-on: ubuntu-latest
-    timeout-minutes: 50
+    timeout-minutes: 90
 
 
 
@@ -1069,7 +701,7 @@ jobs:
   latest-gentoo-systemd:
     name: Gentoo (systemd) Latest packaged release
     runs-on: ubuntu-latest
-    timeout-minutes: 50
+    timeout-minutes: 90
 
 
 

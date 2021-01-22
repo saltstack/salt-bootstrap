@@ -56,8 +56,8 @@ If you're looking for a *one-liner* to install Salt, please scroll to the bottom
 instructions for `Installing via an Insecure One-Liner`_.
 
 There are also .sha256 files for verifying against in the repo for the stable branch.  You can also
-get the correct sha256 sum for the stable release from https://bootstrap.saltstack.com/sha256 and
-https://winbootstrap.saltstack.com/sha256
+get the correct sha256 sum for the stable release from https://bootstrap.saltproject.io/sha256 and
+https://winbootstrap.saltproject.io/sha256
 
 Contributing
 ------------
@@ -70,6 +70,127 @@ process.
 
 Examples
 --------
+
+To view the latest options and descriptions for ``salt-bootstrap``, use ``-h`` and the terminal:
+
+.. code:: console
+
+  ./salt-bootstrap.sh -h
+
+  Usage :  bootstrap-salt.sh [options] <install-type> [install-type-args]
+
+  Installation types:
+    - stable              Install latest stable release. This is the default
+                          install type
+    - stable [branch]     Install latest version on a branch. Only supported
+                          for packages available at repo.saltproject.io
+    - stable [version]    Install a specific version. Only supported for
+                          packages available at repo.saltproject.io
+                          To pin a 3xxx minor version, specify it as 3xxx.0
+    - testing             RHEL-family specific: configure EPEL testing repo
+    - git                 Install from the head of the master branch
+    - git [ref]           Install from any git ref (such as a branch, tag, or
+                          commit)
+
+  Examples:
+    - bootstrap-salt.sh
+    - bootstrap-salt.sh stable
+    - bootstrap-salt.sh stable 2017.7
+    - bootstrap-salt.sh stable 2017.7.2
+    - bootstrap-salt.sh testing
+    - bootstrap-salt.sh git
+    - bootstrap-salt.sh git 2017.7
+    - bootstrap-salt.sh git v2017.7.2
+    - bootstrap-salt.sh git 06f249901a2e2f1ed310d58ea3921a129f214358
+
+  Options:
+    -h  Display this message
+    -v  Display script version
+    -n  No colours
+    -D  Show debug output
+    -c  Temporary configuration directory
+    -g  Salt Git repository URL. Default: https://github.com/saltstack/salt.git
+    -w  Install packages from downstream package repository rather than
+        upstream, saltstack package repository. This is currently only
+        implemented for SUSE.
+    -k  Temporary directory holding the minion keys which will pre-seed
+        the master.
+    -s  Sleep time used when waiting for daemons to start, restart and when
+        checking for the services running. Default: 3
+    -L  Also install salt-cloud and required python-libcloud package
+    -M  Also install salt-master
+    -S  Also install salt-syndic
+    -N  Do not install salt-minion
+    -X  Do not start daemons after installation
+    -d  Disables checking if Salt services are enabled to start on system boot.
+        You can also do this by touching /tmp/disable_salt_checks on the target
+        host. Default: ${BS_FALSE}
+    -P  Allow pip based installations. On some distributions the required salt
+        packages or its dependencies are not available as a package for that
+        distribution. Using this flag allows the script to use pip as a last
+        resort method. NOTE: This only works for functions which actually
+        implement pip based installations.
+    -U  If set, fully upgrade the system prior to bootstrapping Salt
+    -I  If set, allow insecure connections while downloading any files. For
+        example, pass '--no-check-certificate' to 'wget' or '--insecure' to
+        'curl'. On Debian and Ubuntu, using this option with -U allows obtaining
+        GnuPG archive keys insecurely if distro has changed release signatures.
+    -F  Allow copied files to overwrite existing (config, init.d, etc)
+    -K  If set, keep the temporary files in the temporary directories specified
+        with -c and -k
+    -C  Only run the configuration function. Implies -F (forced overwrite).
+        To overwrite Master or Syndic configs, -M or -S, respectively, must
+        also be specified. Salt installation will be ommitted, but some of the
+        dependencies could be installed to write configuration with -j or -J.
+    -A  Pass the salt-master DNS name or IP. This will be stored under
+        ${BS_SALT_ETC_DIR}/minion.d/99-master-address.conf
+    -i  Pass the salt-minion id. This will be stored under
+        ${BS_SALT_ETC_DIR}/minion_id
+    -p  Extra-package to install while installing Salt dependencies. One package
+        per -p flag. You are responsible for providing the proper package name.
+    -H  Use the specified HTTP proxy for all download URLs (including https://).
+        For example: http://myproxy.example.com:3128
+    -b  Assume that dependencies are already installed and software sources are
+        set up. If git is selected, git tree is still checked out as dependency
+        step.
+    -f  Force shallow cloning for git installations.
+        This may result in an "n/a" in the version number.
+    -l  Disable ssl checks. When passed, switches "https" calls to "http" where
+        possible.
+    -V  Install Salt into virtualenv
+        (only available for Ubuntu based distributions)
+    -a  Pip install all Python pkg dependencies for Salt. Requires -V to install
+        all pip pkgs into the virtualenv.
+        (Only available for Ubuntu based distributions)
+    -r  Disable all repository configuration performed by this script. This
+        option assumes all necessary repository configuration is already present
+        on the system.
+    -R  Specify a custom repository URL. Assumes the custom repository URL
+        points to a repository that mirrors Salt packages located at
+        repo.saltproject.io. The option passed with -R replaces the
+        "repo.saltproject.io". If -R is passed, -r is also set. Currently only
+        works on CentOS/RHEL and Debian based distributions.
+    -J  Replace the Master config file with data passed in as a JSON string. If
+        a Master config file is found, a reasonable effort will be made to save
+        the file with a ".bak" extension. If used in conjunction with -C or -F,
+        no ".bak" file will be created as either of those options will force
+        a complete overwrite of the file.
+    -j  Replace the Minion config file with data passed in as a JSON string. If
+        a Minion config file is found, a reasonable effort will be made to save
+        the file with a ".bak" extension. If used in conjunction with -C or -F,
+        no ".bak" file will be created as either of those options will force
+        a complete overwrite of the file.
+    -q  Quiet salt installation from git (setup.py install -q)
+    -x  Changes the Python version used to install Salt.
+        For CentOS 6 git installations python2.7 is supported.
+        Fedora git installation, CentOS 7, Debian 9, Ubuntu 16.04 and 18.04 support python3.
+    -y  Installs a different python version on host. Currently this has only been
+        tested with CentOS 6 and is considered experimental. This will install the
+        ius repo on the box if disable repo is false. This must be used in conjunction
+        with -x <pythonversion>.  For example:
+            sh bootstrap.sh -P -y -x python2.7 git v2017.7.2
+        The above will install python27 and install the git version of salt using the
+        python2.7 executable. This only works for git and pip installations.
 
 The Salt Bootstrap script has a wide variety of options that can be passed as
 well as several ways of obtaining the bootstrap script itself. Note that the use of ``sudo``
@@ -85,40 +206,55 @@ Run the script without any parameters to get latest stable Salt packages for you
 Install using curl
 ~~~~~~~~~~~~~~~~~~
 
+If you want to install a package of a specific release version, from the SaltStack repo:
+
+.. code:: console
+
+  curl -o bootstrap-salt.sh -L https://bootstrap.saltproject.io
+  sudo sh bootstrap-salt.sh -P stable 3002.2
+
+If you want to install a specific release version, based on the Git tags:
+
+.. code:: console
+
+  curl -o bootstrap-salt.sh -L https://bootstrap.saltproject.io
+  sudo sh bootstrap-salt.sh git v3002.2
+
 Using ``curl`` to install latest development version from GitHub:
 
 .. code:: console
 
-  curl -o bootstrap-salt.sh -L https://bootstrap.saltstack.com
+  curl -o bootstrap-salt.sh -L https://bootstrap.saltproject.io
   sudo sh bootstrap-salt.sh git master
-
-If you want to install a specific release version (based on the Git tags):
-
-.. code:: console
-
-  curl -o bootstrap-salt.sh -L https://bootstrap.saltstack.com
-  sudo sh bootstrap-salt.sh git v2016.11.5
 
 To install a specific branch from a Git fork:
 
 .. code:: console
 
-  curl -o bootstrap-salt.sh -L https://bootstrap.saltstack.com
+  curl -o bootstrap-salt.sh -L https://bootstrap.saltproject.io
   sudo sh bootstrap-salt.sh -g https://github.com/myuser/salt.git git mybranch
 
 If all you want is to install a ``salt-master`` using latest Git:
 
 .. code:: console
 
-  curl -o bootstrap-salt.sh -L https://bootstrap.saltstack.com
+  curl -o bootstrap-salt.sh -L https://bootstrap.saltproject.io
   sudo sh bootstrap-salt.sh -M -N git master
 
-If your host has Internet access only via HTTP proxy:
+If your host has Internet access only via HTTP proxy, from the SaltStack repo:
 
 .. code:: console
 
   PROXY='http://user:password@myproxy.example.com:3128'
-  curl -o bootstrap-salt.sh -L -x "$PROXY" https://bootstrap.saltstack.com
+  curl -o bootstrap-salt.sh -L -x "$PROXY" https://bootstrap.saltproject.io
+  sudo sh bootstrap-salt.sh -P -H "$PROXY" stable
+
+If your host has Internet access only via HTTP proxy, installing via Git:
+
+.. code:: console
+
+  PROXY='http://user:password@myproxy.example.com:3128'
+  curl -o bootstrap-salt.sh -L -x "$PROXY" https://bootstrap.saltproject.io
   sudo sh bootstrap-salt.sh -H "$PROXY" git
 
 
@@ -129,19 +265,26 @@ Using ``wget`` to install your distribution's stable packages:
 
 .. code:: console
 
-  wget -O bootstrap-salt.sh https://bootstrap.saltstack.com
+  wget -O bootstrap-salt.sh https://bootstrap.saltproject.io
   sudo sh bootstrap-salt.sh
 
 Installing a specific version from git using ``wget``:
 
 .. code:: console
 
-  wget -O bootstrap-salt.sh https://bootstrap.saltstack.com
-  sudo sh bootstrap-salt.sh -P git v2016.11.5
+  wget -O bootstrap-salt.sh https://bootstrap.saltproject.io
+  sudo sh bootstrap-salt.sh git v3002.2
+
+Installing a specific version package from the SaltStack repo using ``wget``:
+
+.. code:: console
+
+  wget -O bootstrap-salt.sh https://bootstrap.saltproject.io
+  sudo sh bootstrap-salt.sh -P stable 3002.2
 
 **NOTE**
 
-On the above example we added ``-P`` which will allow PIP packages to be installed if required.
+On the above examples we added ``-P`` which will allow PIP packages to be installed if required.
 However, the ``-P`` flag is not necessary for Git-based bootstraps.
 
 
@@ -152,22 +295,22 @@ If you already have Python installed, ``python 2.7``, then it's as easy as:
 
 .. code:: console
 
-  python -m urllib "https://bootstrap.saltstack.com" > bootstrap-salt.sh
-  sudo sh bootstrap-salt.sh git master
+  python -m urllib "https://bootstrap.saltproject.io" > bootstrap-salt.sh
+  sudo sh bootstrap-salt.sh -P stable 3002.2
 
 With python version 2, the following in-line code should always work:
 
 .. code:: console
 
-  python -c 'import urllib; print urllib.urlopen("https://bootstrap.saltstack.com").read()' > bootstrap-salt.sh
+  python -c 'import urllib; print urllib.urlopen("https://bootstrap.saltproject.io").read()' > bootstrap-salt.sh
   sudo sh bootstrap-salt.sh git master
 
 With python version 3:
 
 .. code:: console
 
-  python3 -c 'import urllib.request; print(urllib.request.urlopen("https://bootstrap.saltstack.com").read().decode("ascii"))' > bootstrap-salt.sh
-  sudo sh bootstrap-salt.sh git develop
+  python3 -c 'import urllib.request; print(urllib.request.urlopen("https://bootstrap.saltproject.io").read().decode("ascii"))' > bootstrap-salt.sh
+  sudo sh bootstrap-salt.sh git v3002.2
 
 Install using fetch
 ~~~~~~~~~~~~~~~~~~~
@@ -177,7 +320,7 @@ have ``fetch`` available though:
 
 .. code:: console
 
-  fetch -o bootstrap-salt.sh https://bootstrap.saltstack.com
+  fetch -o bootstrap-salt.sh https://bootstrap.saltproject.io
   sudo sh bootstrap-salt.sh
 
 If you have any SSL issues install ``ca_root_nss``:
@@ -216,19 +359,25 @@ Installing the latest stable release of Salt (default):
 
 .. code:: console
 
-  curl -L https://bootstrap.saltstack.com | sudo sh
+  curl -L https://bootstrap.saltproject.io | sudo sh
 
 Using ``wget`` to install your distribution's stable packages:
 
 .. code:: console
 
-  wget -O - https://bootstrap.saltstack.com | sudo sh
+  wget -O - https://bootstrap.saltproject.io | sudo sh
 
-Installing the latest master branch of Salt:
+Installing a target version package of Salt from the SaltStack repo:
 
 .. code:: console
 
-  curl -L https://bootstrap.saltstack.com | sudo sh -s -- git master
+  curl -L https://bootstrap.saltproject.io | sudo sh -s -- stable 3002.2
+
+Installing the latest master branch of Salt from git:
+
+.. code:: console
+
+  curl -L https://bootstrap.saltproject.io | sudo sh -s -- git master
 
 
 Install on Windows
@@ -238,7 +387,7 @@ Using ``PowerShell`` to install latest stable version:
 
 .. code:: console
 
-  Invoke-WebRequest -Uri https://winbootstrap.saltstack.com -OutFile C:\Temp\bootstrap-salt.ps1
+  Invoke-WebRequest -Uri https://winbootstrap.saltproject.io -OutFile C:\Temp\bootstrap-salt.ps1
   Set-ExecutionPolicy -ExecutionPolicy Unrestricted -Scope CurrentUser
   C:\Temp\bootstrap-salt.ps1
   Set-ExecutionPolicy -ExecutionPolicy Undefined -Scope CurrentUser
@@ -248,7 +397,7 @@ Using ``cygwin`` to install latest stable version:
 
 .. code:: console
 
-  curl -o bootstrap-salt.ps1 -L https://winbootstrap.saltstack.com
+  curl -o bootstrap-salt.ps1 -L https://winbootstrap.saltproject.io
   "/cygdrive/c/WINDOWS/System32/WindowsPowerShell/v1.0/powershell.exe" -NoProfile -InputFormat None -ExecutionPolicy Bypass -Command "[System.Net.ServicePointManager]::SecurityProtocol = 3072; iex ./bootstrap-salt.ps1"
 
 
@@ -491,16 +640,16 @@ Make edits to .drone.jsonnet and then save them into the .drone.yml by doing the
 
 .. _Contributing Guidelines: https://github.com/saltstack/salt-bootstrap/blob/develop/CONTRIBUTING.md
 .. _Docker: https://www.docker.com/
-.. _`pre-accepted Minion keys`: https://docs.saltstack.com/en/latest/topics/tutorials/preseed_key.html
+.. _`pre-accepted Minion keys`: https://docs.saltproject.io/en/latest/topics/tutorials/preseed_key.html
 .. _`read the source`: https://github.com/saltstack/salt-bootstrap/blob/develop/bootstrap-salt.sh
-.. _`Salt`: https://saltstack.com/community/
+.. _`Salt`: https://saltproject.io/
 .. _`Salt's Supported Operating Systems`: http://get.saltstack.com/rs/304-PHQ-615/images/SaltStack-Supported-Operating-Systems.pdf
-.. _`SaltStack's corporate repository`: https://repo.saltstack.com/
-.. _`SaltStack's Debian repository`: http://repo.saltstack.com/#debian
-.. _`SaltStack's Ubuntu repository`: http://repo.saltstack.com/#ubuntu
+.. _`SaltStack's corporate repository`: https://repo.saltproject.io/
+.. _`SaltStack's Debian repository`: http://repo.saltproject.io/#debian
+.. _`SaltStack's Ubuntu repository`: http://repo.saltproject.io/#ubuntu
 .. _`Ubuntu's release schedule`: https://wiki.ubuntu.com/Releases
 .. _Vagrant: http://www.vagrantup.com
-.. _hardening salt: https://docs.saltstack.com/en/latest/topics/hardening.html
+.. _hardening salt: https://docs.saltproject.io/en/latest/topics/hardening.html
 
 .. |build|  image:: https://github.com/saltstack/salt-bootstrap/workflows/Testing/badge.svg?branch=develop
     :target: https://github.com/saltstack/salt-bootstrap/actions?query=branch%3Adevelop

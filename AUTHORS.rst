@@ -30,7 +30,7 @@ Brandon Clifford            brandon099             brandon.clifford@vivint.com
 Bret Fisher                 BretFisher             bret@fishbrains.com
 Brian Kruger                bkruger99              brian.kruger@elliemae.com
 bruce-one                   bruce-one
-Bryce Larson                bryceml                blarson@saltstack.com
+Bryce Larson                bryceml                brycel@vmware.com
 C. R. Oldham                cro                    cr@saltstack.com
 Cam                         camereonsparr
 Charles McLaughlin          cmclaughlin

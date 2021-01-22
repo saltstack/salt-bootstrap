@@ -166,7 +166,7 @@ The release process consists of the following steps:
 1. Update the version number in the bootstrap script. The version number is date-based, `<year.month.day>`.
    For example, version `2018.08.15` was released on August 15, 2018.
 1. Merge the `develop` branch into the `stable` branch.
-1. Update `bootstrap.saltstack.com` with the new stable release. The checksum on the
+1. Update `bootstrap.saltproject.io` with the new stable release. The checksum on the
    [README page](https://github.com/saltstack/salt-bootstrap/blob/develop/README.rst)
    should also be updated.
 1. Merge the new stable release into [Salt](https://github.com/saltstack/salt).

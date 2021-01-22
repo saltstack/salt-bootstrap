@@ -5817,6 +5817,7 @@ install_arch_check_services() {
 # Using a separate conf step to head for idempotent install...
 __configure_freebsd_pkg_details() {
     _SALT_ETC_DIR="/usr/local/etc/salt"
+    _PKI_DIR=${_SALT_ETC_DIR}/pki
     _POST_NEON_PIP_INSTALL_ARGS="--prefix=/usr/local"
 }
 

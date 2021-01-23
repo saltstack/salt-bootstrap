@@ -1545,12 +1545,6 @@ __debian_derivatives_translation() {
 __debian_codename_translation() {
 
     case $DISTRO_MAJOR_VERSION in
-        "7")
-            DISTRO_CODENAME="wheezy"
-            ;;
-        "8")
-            DISTRO_CODENAME="jessie"
-            ;;
         "9")
             DISTRO_CODENAME="stretch"
             ;;
@@ -1561,7 +1555,7 @@ __debian_codename_translation() {
             DISTRO_CODENAME="bullseye"
             ;;
         *)
-            DISTRO_CODENAME="jessie"
+            DISTRO_CODENAME="stretch"
             ;;
     esac
 }
@@ -1574,8 +1568,8 @@ __debian_codename_translation() {
 __check_end_of_life_versions() {
     case "${DISTRO_NAME_L}" in
         debian)
-            # Debian versions below 7 are not supported
-            if [ "$DISTRO_MAJOR_VERSION" -lt 8 ]; then
+            # Debian versions below 9 are not supported
+            if [ "$DISTRO_MAJOR_VERSION" -lt 9 ]; then
                 echoerror "End of life distributions are not supported."
                 echoerror "Please consider upgrading to the next stable. See:"
                 echoerror "    https://wiki.debian.org/DebianReleases"
@@ -1586,15 +1580,16 @@ __check_end_of_life_versions() {
         ubuntu)
             # Ubuntu versions not supported
             #
-            #  < 14.04
-            #  = 14.10
-            #  = 15.04, 15.10
+            #  < 16.04
             #  = 16.10
             #  = 17.04, 17.10
-            if [ "$DISTRO_MAJOR_VERSION" -lt 14 ] || \
-                [ "$DISTRO_MAJOR_VERSION" -eq 15 ] || \
+            #  = 18.10
+            #  = 19.04, 19.10
+            if [ "$DISTRO_MAJOR_VERSION" -lt 16 ] || \
                 [ "$DISTRO_MAJOR_VERSION" -eq 17 ] || \
-                { [ "$DISTRO_MAJOR_VERSION" -eq 16 ] && [ "$DISTRO_MINOR_VERSION" -eq 10 ]; }; then
+                [ "$DISTRO_MAJOR_VERSION" -eq 19 ] || \
+                { [ "$DISTRO_MAJOR_VERSION" -eq 16 ] && [ "$DISTRO_MINOR_VERSION" -eq 10 ]; } || \
+                { [ "$DISTRO_MAJOR_VERSION" -eq 18 ] && [ "$DISTRO_MINOR_VERSION" -eq 10 ]; }; then
                 echoerror "End of life distributions are not supported."
                 echoerror "Please consider upgrading to the next stable. See:"
                 echoerror "    https://wiki.ubuntu.com/Releases"
@@ -2912,11 +2907,10 @@ __enable_universe_repository() {
 
 __install_saltstack_ubuntu_repository() {
     # Workaround for latest non-LTS ubuntu
-    if [ "$DISTRO_MAJOR_VERSION" -eq 19 ] || \
-        { [ "$DISTRO_MAJOR_VERSION" -eq 18 ] && [ "$DISTRO_MINOR_VERSION" -eq 10 ]; }; then
+    if { [ "$DISTRO_MAJOR_VERSION" -eq 20 ] && [ "$DISTRO_MINOR_VERSION" -eq 10 ]; }; then
         echowarn "Non-LTS Ubuntu detected, but stable packages requested. Trying packages for previous LTS release. You may experience problems."
-        UBUNTU_VERSION=18.04
-        UBUNTU_CODENAME="bionic"
+        UBUNTU_VERSION=20.04
+        UBUNTU_CODENAME="focal"
     else
         UBUNTU_VERSION=${DISTRO_VERSION}
         UBUNTU_CODENAME=${DISTRO_CODENAME}

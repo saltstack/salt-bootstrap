@@ -98,7 +98,7 @@ Param(
     [string]$master = "not-specified",
 
     [Parameter(Mandatory=$false,ValueFromPipeline=$true)]
-    [string]$repourl= "https://repo.saltproject.io/windows"
+    [string]$repourl= "https://repo.saltproject.io/windows",
 
     [Parameter(Mandatory=$false,ValueFromPipeline=$true)]
     [switch]$ConfigureOnly

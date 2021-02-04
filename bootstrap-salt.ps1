@@ -98,7 +98,7 @@ Param(
     [string]$master = "not-specified",
 
     [Parameter(Mandatory=$false,ValueFromPipeline=$true)]
-    [string]$repourl= "https://repo.saltproject.io/windows"
+    [string]$repourl= "https://repo.saltproject.io/windows",
 
     [Parameter(Mandatory=$false,ValueFromPipeline=$true)]
     [switch]$ConfigureOnly
@@ -195,9 +195,8 @@ New-Item C:\tmp\ -ItemType directory -Force | Out-Null
 # Check if minion keys have been uploaded, copy to correct location
 If (Test-Path C:\tmp\minion.pem) {
     New-Item C:\salt\conf\pki\minion\ -ItemType Directory -Force | Out-Null
-    # Copy minion keys & config to correct location
-    cp C:\tmp\minion.pem C:\salt\conf\pki\minion\
-    cp C:\tmp\minion.pub C:\salt\conf\pki\minion\
+    Copy-Item -Path C:\tmp\minion.pem -Destination C:\salt\conf\pki\minion\ -Force | Out-Null
+    Copy-Item -Path C:\tmp\minion.pub -Destination C:\salt\conf\pki\minion\ -Force | Out-Null
     $ConfiguredAnything = $True
 }
 
@@ -207,6 +206,13 @@ If (Test-Path C:\tmp\minion.pem) {
 If (Test-Path C:\tmp\minion) {
     New-Item C:\salt\conf\ -ItemType Directory -Force | Out-Null
     Copy-Item -Path C:\tmp\minion -Destination C:\salt\conf\ -Force | Out-Null
+    $ConfiguredAnything = $True
+}
+
+# Check if grains config has been uploaded
+If (Test-Path C:\tmp\grains) {
+    New-Item C:\salt\conf\ -ItemType Directory -Force | Out-Null
+    Copy-Item -Path C:\tmp\grains -Destination C:\salt\conf\ -Force | Out-Null
     $ConfiguredAnything = $True
 }
 

@@ -6,6 +6,8 @@
 .idea
 
 # test-kitchen
-.kitchen
-.bundle
+.kitchen.local.yml
+kitchen.local.yml
+.kitchen/
+.bundle/
 Gemfile.lock

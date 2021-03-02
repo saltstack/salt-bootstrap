@@ -1,6 +1,18 @@
 Version TBD (In Progress on the Develop Branch):
 
 Version 2020.10.20:
+	* Debian 11 (bullseye/testing) support using Debian 10 packages (jpacura, bryceml) #1514
+	* Fix bootstrap on Gentoo (ijansky) #1516 #1518
+	* Fix project URLs (bryceml) #1526
+	* FreeBSD also needs the _PKI_DIR reset (krionbsd) #1523
+	* Fix openSUSE Tumbleweed support. (myii) #1525
+	* Fix Debian and Ubuntu version support. (jpacura) #1529
+	* Powershell: Implement configure only option (for Vagrant). (dafyddj) #1530
+	* Powershell: Handle Vagrant's `grains_config` option. (dafyddj) #1520
+	* apt-key is deprecated on Debian 10+ and Ubuntu 20+ (bryceml) #1533
+	* Fix python Tornado on FreeBSD. (krionbsd) #1522
+
+Version 2020.10.20:
 	* Add support to allow bootstrapping Salt 3002 (s0undt3ch) #1506
 
 Version 2020.10.19:

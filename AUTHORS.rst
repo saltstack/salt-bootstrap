@@ -78,6 +78,7 @@ gweis                       gweis
 Henrik Holmboe              holmboe
 Howard Mei                  HowardMei              howardleomei@gmail.com
 Ivo Jánský                  ijansky
+Imran Iqbal                 myii
 James Booth                 absolutejam            vvalentine1337@gmail.com
 Jamie Alessio               jalessio               jamie@stoic.net
 Jan Heidbrink               jheidbrink
@@ -90,6 +91,7 @@ Jeff Hui                    jeffh                  jeff@jeffhui.net
 Jeff Strunk                 jstrunk
 John Hubbard                ender8282              ender8282@gmail.com
 Jorge Schrauwen             sjorge                 sjorge@blackdot.be
+Joseph Pacura               jpacura
 Juan A. Moyano              wincus                 wincus.public@gmail.com
 Justin Anderson             justinta               justin.ta@outlook.com
 Justin Findlay              jfindlay               jfindlay@gmail.com

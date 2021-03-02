@@ -3,7 +3,7 @@
     runs-on: ubuntu-latest
     timeout-minutes: {timeout_minutes}
 
-    needs: lint
+{needs}
 
     steps:
       - uses: actions/checkout@v1

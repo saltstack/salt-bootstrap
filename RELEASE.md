@@ -6,6 +6,10 @@
 - If there's a new Salt release(major), update the script to add support for it.
 - Bump version for release
 - Open PR against develop with these changes.
-- Once the above PR is merged, open a PR against master with the changes from develop
-- Open a PR against salt with the new stable release.
-- Open a PR against kitchen-salt with the new stable release.
+- Once the above PR is merged, open a PR against stable with the changes from develop
+- Once the above PR is merged, wait until an automatic PR is opened against master which updates the checksums.
+- Once the above PR is merged, tag the release `v{version-here}` and push the tag.
+- Wait until an automatic PR is opened against the develop branch updating the release informtion. Merge it.
+- Check that an automated PR was opened against the salt repo updating the bootstrap script.
+
+- Victory!

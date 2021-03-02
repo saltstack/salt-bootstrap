@@ -1,4 +1,4 @@
-name: Scripts-Checksums
+name: Checksums
 
 on:
   push:
@@ -32,5 +32,6 @@ jobs:
       - name: Create Pull Request Against Master
         uses: peter-evans/create-pull-request@v3
         with:
+          title: Update sha256 checksums
           commit-message: Update sha256 checksums
           delete-branch: true

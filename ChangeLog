@@ -1,6 +1,6 @@
 Version TBD (In Progress on the Develop Branch):
 
-Version 2020.10.20:
+Version 2020.03.02:
 	* Debian 11 (bullseye/testing) support using Debian 10 packages (jpacura, bryceml) #1514
 	* Fix bootstrap on Gentoo (ijansky) #1516 #1518
 	* Fix project URLs (bryceml) #1526

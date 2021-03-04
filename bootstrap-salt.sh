@@ -787,6 +787,19 @@ if [ -d "${_VIRTUALENV_DIR}" ]; then
     exit 1
 fi
 
+# Set the python exe if unset and version is >= 2019.2
+if [ "$_PY_EXE" = "" ] && [ "$(echo "$STABLE_REV" | grep -E '^(latest|2019\.2|3000)$')" != "" ]; then
+    if __check_command_exists python3; then
+        _PY_EXE="python3"
+        _PY_PKG_VER="python3"
+        _PY_MAJOR_VERSION=3
+    else
+        _PY_EXE="python"
+        _PY_PKG_VER="python2"
+        _PY_MAJOR_VERSION=2
+    fi
+fi
+
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #         NAME:  __fetch_url
 #  DESCRIPTION:  Retrieves a URL and writes it to a given path

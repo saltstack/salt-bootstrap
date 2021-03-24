@@ -229,8 +229,6 @@ suites:
     provisioner:
       salt_version: latest
       salt_bootstrap_options: -MP stable %s
-    excludes:
-      - arch
 
 verifier:
   name: shell

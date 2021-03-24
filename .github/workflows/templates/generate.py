@@ -101,9 +101,7 @@ BRANCH_DISPLAY_NAMES = {
 
 STABLE_BRANCH_BLACKLIST = []
 
-LATEST_PKG_BLACKLIST = [
-    "arch",  # No packages are built
-]
+LATEST_PKG_BLACKLIST = []
 
 DISTRO_DISPLAY_NAMES = {
     "amazon-2": "Amazon 2",

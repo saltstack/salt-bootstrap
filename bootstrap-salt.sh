@@ -5633,7 +5633,7 @@ install_arch_linux_git_deps() {
     if [ "${_POST_NEON_INSTALL}" -eq $BS_FALSE ]; then
         pacman -R --noconfirm python2-distribute
         pacman -Su --noconfirm --needed python2-crypto python2-setuptools python2-jinja \
-            python2-m2crypto python2-futures python2-markupsafe python2-msgpack python2-psutil \
+            python2-m2crypto python2-markupsafe python2-msgpack python2-psutil \
             python2-pyzmq zeromq python2-requests python2-systemd || return 1
 
         if [ -f "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" ]; then
@@ -5675,7 +5675,7 @@ install_arch_linux_stable() {
     pacman -S --noconfirm --needed bash || return 1
     pacman -Su --noconfirm || return 1
     # We can now resume regular salt update
-    pacman -Syu --noconfirm salt python2-futures || return 1
+    pacman -Syu --noconfirm salt || return 1
     return 0
 }
 

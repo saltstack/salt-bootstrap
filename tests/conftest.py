@@ -9,7 +9,9 @@ log = logging.getLogger(__name__)
 
 @pytest.fixture(scope="session")
 def host():
-    if os.environ.get("KITCHEN_USERNAME") == "vagrant":
+    if os.environ.get("KITCHEN_USERNAME") == "vagrant" or "windows" in os.environ.get(
+        "KITCHEN_INSTANCE"
+    ):
         if "windows" in os.environ.get("KITCHEN_INSTANCE"):
             return testinfra.get_host(
                 "winrm://{KITCHEN_USERNAME}:{KITCHEN_PASSWORD}@{KITCHEN_HOSTNAME}:{KITCHEN_PORT}".format(

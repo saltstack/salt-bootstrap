@@ -1,0 +1,31 @@
+---
+driver:
+  name: proxy
+  host: localhost
+  reset_command: "exit 0"
+  port: 5985
+  username: kitchen
+  password: Password1
+
+provisioner:
+  salt_bootstrap_url: D:/a/salt-bootstrap/salt-bootstrap/bootstrap-salt.ps1
+  salt_bootstrap_options: -pythonVersion 3 -version %s
+  init_environment: ''
+
+platforms:
+  - name: windows-2019
+  - name: windows-2016
+
+suites:
+  - name: py3-stable-3001
+    provisioner:
+      salt_version: 3001.7
+  - name: py3-stable-3002
+    provisioner:
+      salt_version: 3002
+  - name: latest
+    provisioner:
+      salt_version: latest
+
+verifier:
+  command: pytest --cache-clear -v -s -ra --log-cli-level=debug -k "not test_ping" tests/integration/

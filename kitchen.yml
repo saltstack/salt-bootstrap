@@ -37,7 +37,7 @@ platforms:
         - yum -y install procps-ng
   - name: arch
     driver_config:
-      image: archlinux/base
+      image: archlinux/archlinux
       run_command: /usr/lib/systemd/systemd
       provision_command:
         - pacman -Syu --noconfirm --needed systemd grep awk procps which

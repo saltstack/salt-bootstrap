@@ -73,6 +73,20 @@ platforms:
       provision_command:
         - dnf -y install procps-ng
         - sed -i 's/^PubkeyAcceptedKeyTypes.*$/&,ssh-rsa/' /etc/crypto-policies/back-ends/opensshserver.config
+  - name: fedora-34
+    driver_config:
+      image: fedora:34
+      run_command: /usr/lib/systemd/systemd
+      provision_command:
+        - dnf -y install procps-ng
+        - sed -i 's/^PubkeyAcceptedKeyTypes.*$/&,ssh-rsa/' /etc/crypto-policies/back-ends/opensshserver.config
+  - name: fedora-35
+    driver_config:
+      image: fedora:35
+      run_command: /usr/lib/systemd/systemd
+      provision_command:
+        - dnf -y install procps-ng
+        - sed -i 's/^PubkeyAcceptedKeyTypes.*$/&,ssh-rsa/' /etc/crypto-policies/back-ends/opensshserver.config
   - name: gentoo
     driver_config:
       image: ksmanis/stage3:latest

@@ -436,7 +436,7 @@ Debian and derivatives
 ~~~~~~~~~~~~~~~~~~~~~~
 
 - Cumulus Linux 2/3
-- Debian GNU/Linux 7/8/9/10
+- Debian GNU/Linux 9/10
 - Devuan GNU/Linux 1/2
 - Kali Linux 1.0 (based on Debian 7)
 - Linux Mint Debian Edition 1 (based on Debian 8)
@@ -490,7 +490,7 @@ Ubuntu and derivatives
 
 - KDE neon (based on Ubuntu 18.04)
 - Linux Mint 17/18
-- Ubuntu 14.04/16.04/18.04 and subsequent non-LTS releases (see below)
+- Ubuntu 16.04/18.04/20.04 and subsequent non-LTS releases (see below)
 
 Ubuntu Best Effort Support: Non-LTS Releases
 ********************************************

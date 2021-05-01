@@ -2907,7 +2907,8 @@ __enable_universe_repository() {
 
 __install_saltstack_ubuntu_repository() {
     # Workaround for latest non-LTS ubuntu
-    if { [ "$DISTRO_MAJOR_VERSION" -eq 20 ] && [ "$DISTRO_MINOR_VERSION" -eq 10 ]; }; then
+    if { [ "$DISTRO_MAJOR_VERSION" -eq 20 ] && [ "$DISTRO_MINOR_VERSION" -eq 10 ]; } || \
+       { [ "$DISTRO_MAJOR_VERSION" -eq 21 ] && [ "$DISTRO_MINOR_VERSION" -eq 04 ]; }; then
         echowarn "Non-LTS Ubuntu detected, but stable packages requested. Trying packages for previous LTS release. You may experience problems."
         UBUNTU_VERSION=20.04
         UBUNTU_CODENAME="focal"

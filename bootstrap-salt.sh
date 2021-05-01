@@ -2739,9 +2739,14 @@ EOM
         echodebug "Installed pip version: $(${_pip_cmd} --version)"
     fi
 
-    # We also lock setuptools to <45 which is the latest release to support both py2 and py3
-    echodebug "Running '${_pip_cmd} install wheel setuptools>=${_MINIMUM_SETUPTOOLS_VERSION},<45'"
-    ${_pip_cmd} install ${_POST_NEON_PIP_INSTALL_ARGS} wheel "setuptools>=${_MINIMUM_SETUPTOOLS_VERSION},<45"
+    _setuptools_dep="setuptools>=${_MINIMUM_SETUPTOOLS_VERSION}"
+    if [ "$_PY_MAJOR_VERSION" -eq 2 ]; then
+        # We also lock setuptools to <45 which is the latest release to support both py2 and py3
+        _setuptools_dep="${_setuptools_dep},<45"
+    fi
+
+    echodebug "Running '${_pip_cmd} install wheel ${_setuptools_dep}'"
+    ${_pip_cmd} install ${_POST_NEON_PIP_INSTALL_ARGS} wheel "${_setuptools_dep}"
 
     echoinfo "Installing salt using ${_py_exe}"
     cd "${_SALT_GIT_CHECKOUT_DIR}" || return 1

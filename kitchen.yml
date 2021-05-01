@@ -89,13 +89,13 @@ platforms:
         - sed -i 's/^PubkeyAcceptedKeyTypes.*$/&,ssh-rsa/' /etc/crypto-policies/back-ends/opensshserver.config
   - name: gentoo
     driver_config:
-      image: ksmanis/stage3:latest
+      image: gentoo/stage3:latest
       run_command: /sbin/init
       provision_command:
         - rc-update add sshd default
   - name: gentoo-systemd
     driver_config:
-      image: ksmanis/stage3:systemd
+      image: gentoo/stage3:systemd
       run_command: /lib/systemd/systemd
       provision_command:
         - systemctl enable sshd.service

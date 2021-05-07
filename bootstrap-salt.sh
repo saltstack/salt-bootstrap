@@ -2914,18 +2914,9 @@ __enable_universe_repository() {
 }
 
 __install_saltstack_ubuntu_repository() {
-    # Workaround for non-LTS ubuntu 20.10
-    if { [ "$DISTRO_MAJOR_VERSION" -eq 20 ] && [ "$DISTRO_MINOR_VERSION" -eq 10 ]; }; then
-        echowarn "Non-LTS Ubuntu detected, but stable packages requested. Trying packages for previous LTS release. You may experience problems."
-        UBUNTU_VERSION=20.04
-        UBUNTU_CODENAME="focal"
-    else
-        UBUNTU_VERSION=${DISTRO_VERSION}
-        UBUNTU_CODENAME=${DISTRO_CODENAME}
-    fi
-
-    # Workaround for latest non-LTS ubuntu 21.04
-    if { [ "$DISTRO_MAJOR_VERSION" -eq 21 ] && [ "$DISTRO_MINOR_VERSION" -eq 04 ]; }; then
+    # Workaround for latest non-LTS Ubuntu
+    if { [ "$DISTRO_MAJOR_VERSION" -eq 20 ] && [ "$DISTRO_MINOR_VERSION" -eq 10 ]; } || \
+        { [ "$DISTRO_MAJOR_VERSION" -eq 21 ] && [ "$DISTRO_MINOR_VERSION" -eq 04 ]; }; then
         echowarn "Non-LTS Ubuntu detected, but stable packages requested. Trying packages for previous LTS release. You may experience problems."
         UBUNTU_VERSION=20.04
         UBUNTU_CODENAME="focal"

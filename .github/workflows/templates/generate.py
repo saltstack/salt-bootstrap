@@ -25,7 +25,7 @@ LINUX_DISTROS = [
     "ubuntu-1604",
     "ubuntu-1804",
     "ubuntu-2004",
-    "ubuntu-2104"
+    "ubuntu-2104",
 ]
 OSX = WINDOWS = []
 

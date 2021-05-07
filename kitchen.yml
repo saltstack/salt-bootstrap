@@ -122,6 +122,9 @@ platforms:
   - name: oraclelinux-7
     driver_config:
       run_command: /usr/lib/systemd/systemd
+  - name: ubuntu-21.04
+    driver_config:
+      run_command: /lib/systemd/systemd
   - name: ubuntu-20.04
     driver_config:
       run_command: /lib/systemd/systemd
@@ -164,6 +167,7 @@ suites:
       - gentoo
       - gentoo-systemd
       - ubuntu-2004
+      - ubuntu-2104
 
   - name: py3-git-3000
     provisioner:
@@ -173,6 +177,7 @@ suites:
       - debian-11
       - opensuse-tumbleweed
       - ubuntu-2004
+      - ubuntu-2104
   - name: py3-git-3001
     provisioner:
       salt_version: 3001
@@ -191,6 +196,7 @@ suites:
       - opensuse-tumbleweed
       - arch
       - ubuntu-2004
+      - ubuntu-2104
   - name: py3-stable-3001-0
     provisioner:
       salt_version: 3001
@@ -204,6 +210,7 @@ suites:
       - arch
       - gentoo
       - gentoo-systemd
+      - ubuntu-2104
   - name: py3-stable-3001
     provisioner:
       salt_version: 3001
@@ -213,6 +220,7 @@ suites:
       - opensuse-15
       - opensuse-tumbleweed
       - arch
+      - ubuntu-2104
   - name: py3-stable-3002-0
     provisioner:
       salt_version: 3002

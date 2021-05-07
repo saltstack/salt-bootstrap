@@ -1457,6 +1457,9 @@ __ubuntu_codename_translation() {
         "20")
             DISTRO_CODENAME="focal"
             ;;
+        "21")
+            DISTRO_CODENAME="hirsute"
+            ;;
         *)
             DISTRO_CODENAME="trusty"
             ;;
@@ -2911,8 +2914,18 @@ __enable_universe_repository() {
 }
 
 __install_saltstack_ubuntu_repository() {
-    # Workaround for latest non-LTS ubuntu
+    # Workaround for non-LTS ubuntu 20.10
     if { [ "$DISTRO_MAJOR_VERSION" -eq 20 ] && [ "$DISTRO_MINOR_VERSION" -eq 10 ]; }; then
+        echowarn "Non-LTS Ubuntu detected, but stable packages requested. Trying packages for previous LTS release. You may experience problems."
+        UBUNTU_VERSION=20.04
+        UBUNTU_CODENAME="focal"
+    else
+        UBUNTU_VERSION=${DISTRO_VERSION}
+        UBUNTU_CODENAME=${DISTRO_CODENAME}
+    fi
+
+    # Workaround for latest non-LTS ubuntu 21.04
+    if { [ "$DISTRO_MAJOR_VERSION" -eq 21 ] && [ "$DISTRO_MINOR_VERSION" -eq 04 ]; }; then
         echowarn "Non-LTS Ubuntu detected, but stable packages requested. Trying packages for previous LTS release. You may experience problems."
         UBUNTU_VERSION=20.04
         UBUNTU_CODENAME="focal"
@@ -3035,7 +3048,7 @@ install_ubuntu_stable_deps() {
 
     if [ "${_UPGRADE_SYS}" -eq $BS_TRUE ]; then
         if [ "${_INSECURE_DL}" -eq $BS_TRUE ]; then
-            if [ "$DISTRO_MAJOR_VERSION" -ge 20 ]; then
+            if [ "$DISTRO_MAJOR_VERSION" -ge 20 ] || [ "$DISTRO_MAJOR_VERSION" -ge 21 ]; then
                 __apt_get_install_noinput --allow-unauthenticated debian-archive-keyring && apt-get update || return 1
             else
                 __apt_get_install_noinput --allow-unauthenticated debian-archive-keyring &&

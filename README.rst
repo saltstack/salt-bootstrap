@@ -521,7 +521,7 @@ UNIX systems
 **BSD**:
 
 - OpenBSD (``pip`` installation)
-- FreeBSD 11/12
+- FreeBSD 11/12/13/14-CURRENT
 
 **SunOS**:
 

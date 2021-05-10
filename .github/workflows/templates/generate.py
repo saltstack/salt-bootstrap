@@ -91,6 +91,7 @@ BLACKLIST_3002_0 = [
     "debian-11",
     "gentoo",
     "gentoo-systemd",
+    "ubuntu-2104",
 ]
 
 SALT_BRANCHES = [

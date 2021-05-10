@@ -7525,7 +7525,7 @@ install_macosx_git_deps() {
 install_macosx_stable() {
     install_macosx_stable_deps || return 1
 
-    /usr/bin/curl "${SALTPKGCONFURL}" > "/tmp/${PKG}" || return 1
+    __fetch_url "/tmp/${PKG}" "${SALTPKGCONFURL}" || return 1
 
     /usr/sbin/installer -pkg "/tmp/${PKG}" -target / || return 1
 

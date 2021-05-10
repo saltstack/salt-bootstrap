@@ -25,6 +25,7 @@ LINUX_DISTROS = [
     "ubuntu-1604",
     "ubuntu-1804",
     "ubuntu-2004",
+    "ubuntu-2104",
 ]
 OSX = WINDOWS = []
 
@@ -45,6 +46,7 @@ STABLE_DISTROS = [
     "ubuntu-1604",
     "ubuntu-1804",
     "ubuntu-2004",
+    "ubuntu-2104",
 ]
 
 PY2_BLACKLIST = [
@@ -60,6 +62,7 @@ PY2_BLACKLIST = [
     "opensuse-15",
     "opensuse-tumbleweed",
     "ubuntu-2004",
+    "ubuntu-2104",
 ]
 
 BLACKLIST_3000 = [
@@ -69,22 +72,26 @@ BLACKLIST_3000 = [
     "fedora-35",
     "opensuse-tumbleweed",
     "ubuntu-2004",
+    "ubuntu-2104",
 ]
 
 BLACKLIST_3001 = [
     "debian-11",
+    "ubuntu-2104",
 ]
 
 BLACKLIST_3001_0 = [
     "debian-11",
     "gentoo",
     "gentoo-systemd",
+    "ubuntu-2104",
 ]
 
 BLACKLIST_3002_0 = [
     "debian-11",
     "gentoo",
     "gentoo-systemd",
+    "ubuntu-2104",
 ]
 
 SALT_BRANCHES = [
@@ -131,6 +138,7 @@ DISTRO_DISPLAY_NAMES = {
     "ubuntu-1604": "Ubuntu 16.04",
     "ubuntu-1804": "Ubuntu 18.04",
     "ubuntu-2004": "Ubuntu 20.04",
+    "ubuntu-2104": "Ubuntu 21.04",
 }
 
 TIMEOUT_DEFAULT = 20

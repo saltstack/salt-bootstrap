@@ -4137,7 +4137,7 @@ __install_saltstack_rhel_repository() {
     # Instead, this should work correctly on all RHEL variants.
     base_url="${HTTP_VAL}://${_REPO_URL}/${__PY_VERSION_REPO}/redhat/${DISTRO_MAJOR_VERSION}/\$basearch/${repo_rev}/"
     gpg_key="SALTSTACK-GPG-KEY.pub"
-    repo_file="/etc/yum.repos.d/saltstack.repo"
+    repo_file="/etc/yum.repos.d/salt.repo"
 
     if [ ! -s "$repo_file" ] || [ "$_FORCE_OVERWRITE" -eq $BS_TRUE ]; then
         cat <<_eof > "$repo_file"
@@ -4155,7 +4155,7 @@ _eof
         __rpm_import_gpg "${fetch_url}${gpg_key}" || return 1
         yum clean metadata || return 1
     elif [ "$repo_rev" != "latest" ]; then
-        echowarn "saltstack.repo already exists, ignoring salt version argument."
+        echowarn "salt.repo already exists, ignoring salt version argument."
         echowarn "Use -F (forced overwrite) to install $repo_rev."
     fi
 
@@ -5212,7 +5212,7 @@ install_amazon_linux_ami_deps() {
     fi
 
     if [ $_DISABLE_REPOS -eq $BS_FALSE ] || [ "$_CUSTOM_REPO_URL" != "null" ]; then
-        __REPO_FILENAME="saltstack-repo.repo"
+        __REPO_FILENAME="salt.repo"
 
         # Set a few vars to make life easier.
         if [ $_USEAWS -eq $BS_TRUE ]; then
@@ -5447,13 +5447,13 @@ install_amazon_linux_ami_2_deps() {
     fi
 
     if [ $_DISABLE_REPOS -eq $BS_FALSE ] || [ "$_CUSTOM_REPO_URL" != "null" ]; then
-        __REPO_FILENAME="saltstack-repo.repo"
+        __REPO_FILENAME="salt.repo"
         __PY_VERSION_REPO="yum"
         PY_PKG_VER=""
         repo_label="saltstack-repo"
         repo_name="SaltStack repo for Amazon Linux 2"
         if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 3 ]; then
-            __REPO_FILENAME="saltstack-py3-repo.repo"
+            __REPO_FILENAME="salt.repo"
             __PY_VERSION_REPO="py3"
             PY_PKG_VER=3
             repo_label="saltstack-py3-repo"

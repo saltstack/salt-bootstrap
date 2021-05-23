@@ -144,6 +144,10 @@ suites:
       - debian-11
       - gentoo
       - gentoo-systemd
+      - freebsd-130
+      - freebsd-122
+      - freebsd-114
+      - openbsd-6
   - name: py2-git-master
     provisioner:
       salt_version: master
@@ -152,6 +156,10 @@ suites:
       - debian-11
       - gentoo
       - gentoo-systemd
+      - freebsd-130
+      - freebsd-122
+      - freebsd-114
+      - openbsd-6
   - name: py2-stable-3000
     provisioner:
       salt_version: 3000
@@ -168,6 +176,10 @@ suites:
       - gentoo-systemd
       - ubuntu-2004
       - ubuntu-2104
+      - freebsd-130
+      - freebsd-122
+      - freebsd-114
+      - openbsd-6
 
   - name: py3-git-3000
     provisioner:
@@ -197,6 +209,10 @@ suites:
       - arch
       - ubuntu-2004
       - ubuntu-2104
+      - freebsd-130
+      - freebsd-122
+      - freebsd-114
+      - openbsd-6
   - name: py3-stable-3001-0
     provisioner:
       salt_version: 3001
@@ -211,6 +227,10 @@ suites:
       - gentoo
       - gentoo-systemd
       - ubuntu-2104
+      - freebsd-130
+      - freebsd-122
+      - freebsd-114
+      - openbsd-6
   - name: py3-stable-3001
     provisioner:
       salt_version: 3001
@@ -221,6 +241,10 @@ suites:
       - opensuse-tumbleweed
       - arch
       - ubuntu-2104
+      - freebsd-130
+      - freebsd-122
+      - freebsd-114
+      - openbsd-6
   - name: py3-stable-3002-0
     provisioner:
       salt_version: 3002
@@ -234,6 +258,10 @@ suites:
       - arch
       - gentoo
       - gentoo-systemd
+      - freebsd-130
+      - freebsd-122
+      - freebsd-114
+      - openbsd-6
   - name: py3-stable-3002
     provisioner:
       salt_version: 3002
@@ -242,6 +270,10 @@ suites:
       - opensuse-15
       - opensuse-tumbleweed
       - arch
+      - freebsd-130
+      - freebsd-122
+      - freebsd-114
+      - openbsd-6
   - name: py3-git-master
     provisioner:
       salt_version: master

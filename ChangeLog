@@ -1,5 +1,11 @@
 Version TBD (In Progress on the Develop Branch):
 
+Version 2021.06.23:
+	* Use salt.list instead of saltstack.list (bryceml) #1563
+	* Use fetch_url function for curl (xeacott) #1562
+	* Add Ubuntu 21.04 support (krionbsd) #1559
+	* Remove python2-futures package for ArchLinux (myii) #1546
+
 Version 2020.03.02:
 	* Debian 11 (bullseye/testing) support using Debian 10 packages (jpacura, bryceml) #1514
 	* Fix bootstrap on Gentoo (ijansky) #1516 #1518

@@ -4598,6 +4598,144 @@ jobs:
           bundle exec kitchen destroy latest-oraclelinux-8
 
 
+  py3-git-3002-rockylinux-8:
+    name: Rocky Linux 8 v3002 Py3 Git
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    needs: lint
+
+    steps:
+      - uses: actions/checkout@v1
+      - name: Setup Ruby
+        uses: actions/setup-ruby@v1
+        with:
+          ruby-version: 2.6.x
+
+      - name: Install Bundler
+        run: |
+          gem install bundler
+
+      - name: Setup Bundle
+        run: |
+          bundle install --with docker --without opennebula ec2 windows vagrant
+
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.7
+
+      - name: Install Python Dependencies
+        run: |
+          pip install -U pip
+          pip install -r tests/requirements.txt
+
+      - name: Create Test Container
+        run: |
+          bundle exec kitchen create py3-git-3002-rockylinux-8 || bundle exec kitchen create py3-git-3002-rockylinux-8
+
+      - name: Test Bootstrap In Test Container
+        run: |
+          bundle exec kitchen verify py3-git-3002-rockylinux-8
+
+      - name: Destroy Test Container
+        if: always()
+        run: |
+          bundle exec kitchen destroy py3-git-3002-rockylinux-8
+
+
+  py3-git-master-rockylinux-8:
+    name: Rocky Linux 8 Master Py3 Git
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    needs: lint
+
+    steps:
+      - uses: actions/checkout@v1
+      - name: Setup Ruby
+        uses: actions/setup-ruby@v1
+        with:
+          ruby-version: 2.6.x
+
+      - name: Install Bundler
+        run: |
+          gem install bundler
+
+      - name: Setup Bundle
+        run: |
+          bundle install --with docker --without opennebula ec2 windows vagrant
+
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.7
+
+      - name: Install Python Dependencies
+        run: |
+          pip install -U pip
+          pip install -r tests/requirements.txt
+
+      - name: Create Test Container
+        run: |
+          bundle exec kitchen create py3-git-master-rockylinux-8 || bundle exec kitchen create py3-git-master-rockylinux-8
+
+      - name: Test Bootstrap In Test Container
+        run: |
+          bundle exec kitchen verify py3-git-master-rockylinux-8
+
+      - name: Destroy Test Container
+        if: always()
+        run: |
+          bundle exec kitchen destroy py3-git-master-rockylinux-8
+
+
+  latest-rockylinux-8:
+    name: Rocky Linux 8 Latest packaged release
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    needs: lint
+
+    steps:
+      - uses: actions/checkout@v1
+      - name: Setup Ruby
+        uses: actions/setup-ruby@v1
+        with:
+          ruby-version: 2.6.x
+
+      - name: Install Bundler
+        run: |
+          gem install bundler
+
+      - name: Setup Bundle
+        run: |
+          bundle install --with docker --without opennebula ec2 windows vagrant
+
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.7
+
+      - name: Install Python Dependencies
+        run: |
+          pip install -U pip
+          pip install -r tests/requirements.txt
+
+      - name: Create Test Container
+        run: |
+          bundle exec kitchen create latest-rockylinux-8 || bundle exec kitchen create latest-rockylinux-8
+
+      - name: Test Bootstrap In Test Container
+        run: |
+          bundle exec kitchen verify latest-rockylinux-8
+
+      - name: Destroy Test Container
+        if: always()
+        run: |
+          bundle exec kitchen destroy latest-rockylinux-8
+
+
   py3-stable-3000-ubuntu-1804:
     name: Ubuntu 18.04 v3000 Py3 Stable
     runs-on: ubuntu-latest

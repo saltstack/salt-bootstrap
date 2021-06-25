@@ -22,6 +22,7 @@ LINUX_DISTROS = [
     "opensuse-tumbleweed",
     "oraclelinux-7",
     "oraclelinux-8",
+    "rockylinux-8",
     "ubuntu-1804",
     "ubuntu-2004",
     "ubuntu-2104",
@@ -59,6 +60,7 @@ PY2_BLACKLIST = [
     "opensuse-15",
     "opensuse-tumbleweed",
     "oraclelinux-8",
+    "rockylinux-8",
     "ubuntu-2004",
     "ubuntu-2104",
 ]
@@ -69,12 +71,14 @@ BLACKLIST_3000 = [
     "fedora-34",
     "fedora-35",
     "opensuse-tumbleweed",
+    "rockylinux-8",
     "ubuntu-2004",
     "ubuntu-2104",
 ]
 
 BLACKLIST_3001 = [
     "debian-11",
+    "rockylinux-8",
     "ubuntu-2104",
 ]
 
@@ -82,6 +86,7 @@ BLACKLIST_3001_0 = [
     "debian-11",
     "gentoo",
     "gentoo-systemd",
+    "rockylinux-8",
     "ubuntu-2104",
 ]
 
@@ -89,6 +94,7 @@ BLACKLIST_3002_0 = [
     "debian-11",
     "gentoo",
     "gentoo-systemd",
+    "rockylinux-8",
     "ubuntu-2104",
 ]
 
@@ -133,6 +139,7 @@ DISTRO_DISPLAY_NAMES = {
     "opensuse-tumbleweed": "Opensuse Tumbleweed",
     "oraclelinux-7": "Oracle Linux 7",
     "oraclelinux-8": "Oracle Linux 8",
+    "rockylinux-8": "Rocky Linux 8",
     "ubuntu-1804": "Ubuntu 18.04",
     "ubuntu-2004": "Ubuntu 20.04",
     "ubuntu-2104": "Ubuntu 21.04",

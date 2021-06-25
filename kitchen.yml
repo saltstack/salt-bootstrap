@@ -113,6 +113,9 @@ platforms:
         - systemctl enable sshd.service
     provisioner:
       salt_bootstrap_options: -MPfq -y -x python3 git %s
+  - name: oraclelinux-8
+    driver_config:
+      run_command: /usr/lib/systemd/systemd
   - name: oraclelinux-7
     driver_config:
       run_command: /usr/lib/systemd/systemd

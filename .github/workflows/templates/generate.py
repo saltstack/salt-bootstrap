@@ -13,7 +13,6 @@ LINUX_DISTROS = [
     "debian-10",
     "debian-11",
     "debian-9",
-    "fedora-32",
     "fedora-33",
     "fedora-34",
     "fedora-35",
@@ -36,7 +35,6 @@ STABLE_DISTROS = [
     "debian-10",
     "debian-11",
     "debian-9",
-    "fedora-32",
     "fedora-33",
     "fedora-34",
     "fedora-35",
@@ -53,7 +51,6 @@ PY2_BLACKLIST = [
     "centos-8",
     "debian-10",
     "debian-11",
-    "fedora-32",
     "fedora-33",
     "fedora-34",
     "fedora-35",
@@ -126,7 +123,6 @@ DISTRO_DISPLAY_NAMES = {
     "debian-10": "Debian 10",
     "debian-11": "Debian 11",
     "debian-9": "Debian 9",
-    "fedora-32": "Fedora 32",
     "fedora-33": "Fedora 33",
     "fedora-34": "Fedora 34",
     "fedora-35": "Fedora 35",
@@ -234,7 +230,7 @@ def generate_test_jobs():
                             continue
 
                         if python_version == "py3":
-                            if distro in ("arch", "fedora-32"):
+                            if distro in ("arch"):
                                 allowed_branches = ["master"]
                                 try:
                                     int_branch = int(branch)

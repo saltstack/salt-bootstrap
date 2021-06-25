@@ -119,6 +119,10 @@ platforms:
   - name: oraclelinux-7
     driver_config:
       run_command: /usr/lib/systemd/systemd
+  - name: rockylinux-8
+    driver_config:
+      image: rockylinux/rockylinux
+      run_command: /usr/lib/systemd/systemd
   - name: ubuntu-21.04
     driver_config:
       run_command: /lib/systemd/systemd

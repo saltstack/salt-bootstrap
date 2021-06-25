@@ -28,6 +28,9 @@ provisioner:
     sh -c 't=$(shuf -i 1-15 -n 1); echo Sleeping $t seconds; sleep $t'
 
 platforms:
+  - name: almalinux-8
+    driver_config:
+      run_command: /usr/lib/systemd/systemd
   - name: amazon-2
     driver_config:
       image: amazonlinux:2

@@ -6,6 +6,7 @@ import datetime
 os.chdir(os.path.abspath(os.path.dirname(__file__)))
 
 LINUX_DISTROS = [
+    "almalinux-8",
     "amazon-2",
     "arch",
     "centos-7",
@@ -49,6 +50,7 @@ STABLE_DISTROS = [
 ]
 
 PY2_BLACKLIST = [
+    "almalinux-8",
     "centos-8",
     "debian-10",
     "debian-11",
@@ -66,6 +68,7 @@ PY2_BLACKLIST = [
 ]
 
 BLACKLIST_3000 = [
+    "almalinux-8",
     "debian-11",
     "fedora-33",
     "fedora-34",
@@ -77,12 +80,14 @@ BLACKLIST_3000 = [
 ]
 
 BLACKLIST_3001 = [
+    "almalinux-8",
     "debian-11",
     "rockylinux-8",
     "ubuntu-2104",
 ]
 
 BLACKLIST_3001_0 = [
+    "almalinux-8",
     "debian-11",
     "gentoo",
     "gentoo-systemd",
@@ -91,6 +96,7 @@ BLACKLIST_3001_0 = [
 ]
 
 BLACKLIST_3002_0 = [
+    "almalinux-8",
     "debian-11",
     "gentoo",
     "gentoo-systemd",
@@ -123,6 +129,7 @@ STABLE_BRANCH_BLACKLIST = []
 LATEST_PKG_BLACKLIST = []
 
 DISTRO_DISPLAY_NAMES = {
+    "almalinux-8": "AlmaLinux 8",
     "amazon-2": "Amazon 2",
     "arch": "Arch",
     "centos-7": "CentOS 7",

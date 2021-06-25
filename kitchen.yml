@@ -60,12 +60,6 @@ platforms:
     driver_config:
       image: debian:bullseye
       run_command: /lib/systemd/systemd
-  - name: fedora-32
-    driver_config:
-      image: fedora:32
-      run_command: /usr/lib/systemd/systemd
-      provision_command:
-        - dnf -y install procps-ng
   - name: fedora-33
     driver_config:
       image: fedora:33
@@ -170,7 +164,6 @@ suites:
       - opensuse-tumbleweed
       - debian-10
       - debian-11
-      - fedora-32
       - fedora-33
       - gentoo
       - gentoo-systemd
@@ -221,7 +214,6 @@ suites:
       - opensuse-15
       - opensuse-tumbleweed
       - debian-11
-      - fedora-32
       - fedora-33
       - arch
       - gentoo
@@ -253,7 +245,6 @@ suites:
       - opensuse-15
       - opensuse-tumbleweed
       - debian-11
-      - fedora-32
       - fedora-33
       - arch
       - gentoo

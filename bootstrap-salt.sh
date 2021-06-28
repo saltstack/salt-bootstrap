@@ -23,7 +23,7 @@
 #======================================================================================================================
 set -o nounset                              # Treat unset variables as an error
 
-__ScriptVersion="2021.03.02"
+__ScriptVersion="2021.06.23"
 __ScriptName="bootstrap-salt.sh"
 
 __ScriptFullName="$0"
@@ -572,7 +572,7 @@ fi
 echoinfo "Running version: ${__ScriptVersion}"
 echoinfo "Executed by: ${CALLER}"
 echoinfo "Command line: '${__ScriptFullName} ${__ScriptArgs}'"
-#echowarn "Running the unstable version of ${__ScriptName}"
+echowarn "Running the unstable version of ${__ScriptName}"
 
 # Define installation type
 if [ "$#" -gt 0 ];then
@@ -1457,6 +1457,9 @@ __ubuntu_codename_translation() {
         "20")
             DISTRO_CODENAME="focal"
             ;;
+        "21")
+            DISTRO_CODENAME="hirsute"
+            ;;
         *)
             DISTRO_CODENAME="trusty"
             ;;
@@ -1580,15 +1583,11 @@ __check_end_of_life_versions() {
         ubuntu)
             # Ubuntu versions not supported
             #
-            #  < 16.04
-            #  = 16.10
-            #  = 17.04, 17.10
+            #  < 18.04
             #  = 18.10
             #  = 19.04, 19.10
-            if [ "$DISTRO_MAJOR_VERSION" -lt 16 ] || \
-                [ "$DISTRO_MAJOR_VERSION" -eq 17 ] || \
+            if [ "$DISTRO_MAJOR_VERSION" -lt 18 ] || \
                 [ "$DISTRO_MAJOR_VERSION" -eq 19 ] || \
-                { [ "$DISTRO_MAJOR_VERSION" -eq 16 ] && [ "$DISTRO_MINOR_VERSION" -eq 10 ]; } || \
                 { [ "$DISTRO_MAJOR_VERSION" -eq 18 ] && [ "$DISTRO_MINOR_VERSION" -eq 10 ]; }; then
                 echoerror "End of life distributions are not supported."
                 echoerror "Please consider upgrading to the next stable. See:"
@@ -1633,8 +1632,8 @@ __check_end_of_life_versions() {
             ;;
 
         fedora)
-            # Fedora lower than 27 are no longer supported
-            if [ "$DISTRO_MAJOR_VERSION" -lt 30 ]; then
+            # Fedora lower than 33 are no longer supported
+            if [ "$DISTRO_MAJOR_VERSION" -lt 33 ]; then
                 echoerror "End of life distributions are not supported."
                 echoerror "Please consider upgrading to the next stable. See:"
                 echoerror "    https://fedoraproject.org/wiki/Releases"
@@ -2739,9 +2738,14 @@ EOM
         echodebug "Installed pip version: $(${_pip_cmd} --version)"
     fi
 
-    # We also lock setuptools to <45 which is the latest release to support both py2 and py3
-    echodebug "Running '${_pip_cmd} install wheel setuptools>=${_MINIMUM_SETUPTOOLS_VERSION},<45'"
-    ${_pip_cmd} install ${_POST_NEON_PIP_INSTALL_ARGS} wheel "setuptools>=${_MINIMUM_SETUPTOOLS_VERSION},<45"
+    _setuptools_dep="setuptools>=${_MINIMUM_SETUPTOOLS_VERSION}"
+    if [ "$_PY_MAJOR_VERSION" -eq 2 ]; then
+        # We also lock setuptools to <45 which is the latest release to support both py2 and py3
+        _setuptools_dep="${_setuptools_dep},<45"
+    fi
+
+    echodebug "Running '${_pip_cmd} install wheel ${_setuptools_dep}'"
+    ${_pip_cmd} install ${_POST_NEON_PIP_INSTALL_ARGS} wheel "${_setuptools_dep}"
 
     echoinfo "Installing salt using ${_py_exe}"
     cd "${_SALT_GIT_CHECKOUT_DIR}" || return 1
@@ -2906,8 +2910,9 @@ __enable_universe_repository() {
 }
 
 __install_saltstack_ubuntu_repository() {
-    # Workaround for latest non-LTS ubuntu
-    if { [ "$DISTRO_MAJOR_VERSION" -eq 20 ] && [ "$DISTRO_MINOR_VERSION" -eq 10 ]; }; then
+    # Workaround for latest non-LTS Ubuntu
+    if { [ "$DISTRO_MAJOR_VERSION" -eq 20 ] && [ "$DISTRO_MINOR_VERSION" -eq 10 ]; } || \
+        { [ "$DISTRO_MAJOR_VERSION" -eq 21 ] && [ "$DISTRO_MINOR_VERSION" -eq 04 ]; }; then
         echowarn "Non-LTS Ubuntu detected, but stable packages requested. Trying packages for previous LTS release. You may experience problems."
         UBUNTU_VERSION=20.04
         UBUNTU_CODENAME="focal"
@@ -2939,7 +2944,7 @@ __install_saltstack_ubuntu_repository() {
 
     # SaltStack's stable Ubuntu repository:
     SALTSTACK_UBUNTU_URL="${HTTP_VAL}://${_REPO_URL}/${__PY_VERSION_REPO}/ubuntu/${UBUNTU_VERSION}/${__REPO_ARCH}/${STABLE_REV}"
-    echo "$__REPO_ARCH_DEB $SALTSTACK_UBUNTU_URL $UBUNTU_CODENAME main" > /etc/apt/sources.list.d/saltstack.list
+    echo "$__REPO_ARCH_DEB $SALTSTACK_UBUNTU_URL $UBUNTU_CODENAME main" > /etc/apt/sources.list.d/salt.list
 
     __apt_key_fetch "$SALTSTACK_UBUNTU_URL/salt-archive-keyring.gpg" || return 1
 
@@ -3030,7 +3035,7 @@ install_ubuntu_stable_deps() {
 
     if [ "${_UPGRADE_SYS}" -eq $BS_TRUE ]; then
         if [ "${_INSECURE_DL}" -eq $BS_TRUE ]; then
-            if [ "$DISTRO_MAJOR_VERSION" -ge 20 ]; then
+            if [ "$DISTRO_MAJOR_VERSION" -ge 20 ] || [ "$DISTRO_MAJOR_VERSION" -ge 21 ]; then
                 __apt_get_install_noinput --allow-unauthenticated debian-archive-keyring && apt-get update || return 1
             else
                 __apt_get_install_noinput --allow-unauthenticated debian-archive-keyring &&
@@ -3382,7 +3387,7 @@ __install_saltstack_debian_repository() {
 
     # amd64 is just a part of repository URI, 32-bit pkgs are hosted under the same location
     SALTSTACK_DEBIAN_URL="${HTTP_VAL}://${_REPO_URL}/${__PY_VERSION_REPO}/debian/${DEBIAN_RELEASE}/${__REPO_ARCH}/${STABLE_REV}"
-    echo "$__REPO_ARCH_DEB $SALTSTACK_DEBIAN_URL $DEBIAN_CODENAME main" > "/etc/apt/sources.list.d/saltstack.list"
+    echo "$__REPO_ARCH_DEB $SALTSTACK_DEBIAN_URL $DEBIAN_CODENAME main" > "/etc/apt/sources.list.d/salt.list"
 
     __apt_key_fetch "$SALTSTACK_DEBIAN_URL/salt-archive-keyring.gpg" || return 1
 
@@ -4128,7 +4133,7 @@ __install_saltstack_rhel_repository() {
     # Instead, this should work correctly on all RHEL variants.
     base_url="${HTTP_VAL}://${_REPO_URL}/${__PY_VERSION_REPO}/redhat/${DISTRO_MAJOR_VERSION}/\$basearch/${repo_rev}/"
     gpg_key="SALTSTACK-GPG-KEY.pub"
-    repo_file="/etc/yum.repos.d/saltstack.repo"
+    repo_file="/etc/yum.repos.d/salt.repo"
 
     if [ ! -s "$repo_file" ] || [ "$_FORCE_OVERWRITE" -eq $BS_TRUE ]; then
         cat <<_eof > "$repo_file"
@@ -4146,7 +4151,7 @@ _eof
         __rpm_import_gpg "${fetch_url}${gpg_key}" || return 1
         yum clean metadata || return 1
     elif [ "$repo_rev" != "latest" ]; then
-        echowarn "saltstack.repo already exists, ignoring salt version argument."
+        echowarn "salt.repo already exists, ignoring salt version argument."
         echowarn "Use -F (forced overwrite) to install $repo_rev."
     fi
 
@@ -5203,7 +5208,7 @@ install_amazon_linux_ami_deps() {
     fi
 
     if [ $_DISABLE_REPOS -eq $BS_FALSE ] || [ "$_CUSTOM_REPO_URL" != "null" ]; then
-        __REPO_FILENAME="saltstack-repo.repo"
+        __REPO_FILENAME="salt.repo"
 
         # Set a few vars to make life easier.
         if [ $_USEAWS -eq $BS_TRUE ]; then
@@ -5438,13 +5443,13 @@ install_amazon_linux_ami_2_deps() {
     fi
 
     if [ $_DISABLE_REPOS -eq $BS_FALSE ] || [ "$_CUSTOM_REPO_URL" != "null" ]; then
-        __REPO_FILENAME="saltstack-repo.repo"
+        __REPO_FILENAME="salt.repo"
         __PY_VERSION_REPO="yum"
         PY_PKG_VER=""
         repo_label="saltstack-repo"
         repo_name="SaltStack repo for Amazon Linux 2"
         if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 3 ]; then
-            __REPO_FILENAME="saltstack-py3-repo.repo"
+            __REPO_FILENAME="salt.repo"
             __PY_VERSION_REPO="py3"
             PY_PKG_VER=3
             repo_label="saltstack-py3-repo"
@@ -5633,7 +5638,7 @@ install_arch_linux_git_deps() {
     if [ "${_POST_NEON_INSTALL}" -eq $BS_FALSE ]; then
         pacman -R --noconfirm python2-distribute
         pacman -Su --noconfirm --needed python2-crypto python2-setuptools python2-jinja \
-            python2-m2crypto python2-futures python2-markupsafe python2-msgpack python2-psutil \
+            python2-m2crypto python2-markupsafe python2-msgpack python2-psutil \
             python2-pyzmq zeromq python2-requests python2-systemd || return 1
 
         if [ -f "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" ]; then
@@ -5675,7 +5680,7 @@ install_arch_linux_stable() {
     pacman -S --noconfirm --needed bash || return 1
     pacman -Su --noconfirm || return 1
     # We can now resume regular salt update
-    pacman -Syu --noconfirm salt python2-futures || return 1
+    pacman -Syu --noconfirm salt || return 1
     return 0
 }
 
@@ -7516,7 +7521,7 @@ install_macosx_git_deps() {
 install_macosx_stable() {
     install_macosx_stable_deps || return 1
 
-    /usr/bin/curl "${SALTPKGCONFURL}" > "/tmp/${PKG}" || return 1
+    __fetch_url "/tmp/${PKG}" "${SALTPKGCONFURL}" || return 1
 
     /usr/sbin/installer -pkg "/tmp/${PKG}" -target / || return 1
 

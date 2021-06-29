@@ -1,0 +1,47 @@
+---
+driver:
+  name: vagrant
+  vm_hostname: salt
+  username: vagrant
+  cache_directory: false
+  customize:
+    usbxhci: 'off'
+  gui: false
+  linked_clone: true
+  ssh:
+    shell: /bin/sh
+
+provisioner:
+  init_environment: |
+    echo 'auto_accept: true' > /tmp/auto-accept-keys.conf
+    sudo mkdir -p /usr/local/etc/salt/master.d
+    sudo mv /tmp/auto-accept-keys.conf /usr/local/etc/salt/master.d/auto-accept-keys.conf
+    sudo pkg install -y shuf
+    sh -c 't=$(shuf -i 1-15 -n 1); echo Sleeping $t seconds; sleep $t'
+  sudo: true
+
+platforms:
+  - name: freebsd-130
+    driver:
+      box: bento/freebsd-13.0
+  - name: freebsd-122
+    driver:
+      box: bento/freebsd-12.2
+  - name: freebsd-114
+    driver:
+      box: bento/freebsd-11.4
+  - name: openbsd-6
+    driver:
+      box: generic/openbsd6
+      ssh:
+        shell: /bin/ksh
+    provisioner:
+      init_environment: |
+        echo 'auto_accept: true' > /tmp/auto-accept-keys.conf
+        sudo mkdir -p /etc/salt/master.d
+        sudo mv /tmp/auto-accept-keys.conf /etc/salt/master.d/auto-accept-keys.conf
+        sudo pkg_add coreutils
+        sh -c 't=$(gshuf -i 1-15 -n 1); echo Sleeping $t seconds; sleep $t'
+
+verifier:
+  command: pytest --cache-clear -v -s -ra --log-cli-level=debug -k "not test_ping" tests/integration/

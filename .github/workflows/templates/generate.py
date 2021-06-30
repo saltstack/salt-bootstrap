@@ -88,6 +88,7 @@ BLACKLIST_3001 = [
 
 BLACKLIST_3001_0 = [
     "almalinux-8",
+    "amazon-2",
     "debian-11",
     "gentoo",
     "gentoo-systemd",
@@ -97,6 +98,7 @@ BLACKLIST_3001_0 = [
 
 BLACKLIST_3002_0 = [
     "almalinux-8",
+    "amazon-2",
     "debian-11",
     "gentoo",
     "gentoo-systemd",

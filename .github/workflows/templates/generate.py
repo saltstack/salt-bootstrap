@@ -6,6 +6,7 @@ import datetime
 os.chdir(os.path.abspath(os.path.dirname(__file__)))
 
 LINUX_DISTROS = [
+    "almalinux-8",
     "amazon-2",
     "arch",
     "centos-7",
@@ -13,16 +14,19 @@ LINUX_DISTROS = [
     "debian-10",
     "debian-11",
     "debian-9",
-    "fedora-32",
     "fedora-33",
+    "fedora-34",
+    "fedora-35",
     "gentoo",
     "gentoo-systemd",
     "opensuse-15",
     "opensuse-tumbleweed",
     "oraclelinux-7",
-    "ubuntu-1604",
+    "oraclelinux-8",
+    "rockylinux-8",
     "ubuntu-1804",
     "ubuntu-2004",
+    "ubuntu-2104",
 ]
 OSX = WINDOWS = []
 
@@ -33,50 +37,71 @@ STABLE_DISTROS = [
     "debian-10",
     "debian-11",
     "debian-9",
-    "fedora-32",
     "fedora-33",
+    "fedora-34",
+    "fedora-35",
     "gentoo",
     "gentoo-systemd",
     "oraclelinux-7",
-    "ubuntu-1604",
+    "oraclelinux-8",
     "ubuntu-1804",
     "ubuntu-2004",
+    "ubuntu-2104",
 ]
 
 PY2_BLACKLIST = [
+    "almalinux-8",
     "centos-8",
     "debian-10",
     "debian-11",
-    "fedora-32",
     "fedora-33",
+    "fedora-34",
+    "fedora-35",
     "gentoo",
     "gentoo-systemd",
     "opensuse-15",
     "opensuse-tumbleweed",
+    "oraclelinux-8",
+    "rockylinux-8",
     "ubuntu-2004",
+    "ubuntu-2104",
 ]
 
 BLACKLIST_3000 = [
+    "almalinux-8",
     "debian-11",
     "fedora-33",
+    "fedora-34",
+    "fedora-35",
     "opensuse-tumbleweed",
+    "rockylinux-8",
     "ubuntu-2004",
+    "ubuntu-2104",
 ]
 
 BLACKLIST_3001 = [
+    "almalinux-8",
     "debian-11",
+    "rockylinux-8",
+    "ubuntu-2104",
 ]
 
 BLACKLIST_3001_0 = [
+    "almalinux-8",
     "debian-11",
     "gentoo",
     "gentoo-systemd",
+    "rockylinux-8",
+    "ubuntu-2104",
 ]
 
 BLACKLIST_3002_0 = [
+    "almalinux-8",
     "debian-11",
     "gentoo",
     "gentoo-systemd",
+    "rockylinux-8",
+    "ubuntu-2104",
 ]
 
 SALT_BRANCHES = [
@@ -101,11 +126,10 @@ BRANCH_DISPLAY_NAMES = {
 
 STABLE_BRANCH_BLACKLIST = []
 
-LATEST_PKG_BLACKLIST = [
-    "arch",  # No packages are built
-]
+LATEST_PKG_BLACKLIST = []
 
 DISTRO_DISPLAY_NAMES = {
+    "almalinux-8": "AlmaLinux 8",
     "amazon-2": "Amazon 2",
     "arch": "Arch",
     "centos-7": "CentOS 7",
@@ -113,16 +137,19 @@ DISTRO_DISPLAY_NAMES = {
     "debian-10": "Debian 10",
     "debian-11": "Debian 11",
     "debian-9": "Debian 9",
-    "fedora-32": "Fedora 32",
     "fedora-33": "Fedora 33",
+    "fedora-34": "Fedora 34",
+    "fedora-35": "Fedora 35",
     "gentoo": "Gentoo",
     "gentoo-systemd": "Gentoo (systemd)",
     "opensuse-15": "Opensuse 15",
     "opensuse-tumbleweed": "Opensuse Tumbleweed",
     "oraclelinux-7": "Oracle Linux 7",
-    "ubuntu-1604": "Ubuntu 16.04",
+    "oraclelinux-8": "Oracle Linux 8",
+    "rockylinux-8": "Rocky Linux 8",
     "ubuntu-1804": "Ubuntu 18.04",
     "ubuntu-2004": "Ubuntu 20.04",
+    "ubuntu-2104": "Ubuntu 21.04",
 }
 
 TIMEOUT_DEFAULT = 20
@@ -218,7 +245,7 @@ def generate_test_jobs():
                             continue
 
                         if python_version == "py3":
-                            if distro in ("arch", "fedora-32"):
+                            if distro in ("arch"):
                                 allowed_branches = ["master"]
                                 try:
                                     int_branch = int(branch)

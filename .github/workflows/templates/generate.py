@@ -117,7 +117,11 @@ BLACKLIST_3003 = [
 ]
 
 BLACKLIST_3003_0 = [
+    "almalinux-8",
     "amazon-2",
+    "gentoo",
+    "gentoo-systemd",
+    "rockylinux-8",
 ]
 
 SALT_BRANCHES = [

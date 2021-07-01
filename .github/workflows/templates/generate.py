@@ -96,6 +96,11 @@ BLACKLIST_3001_0 = [
     "ubuntu-2104",
 ]
 
+BLACKLIST_3002 = [
+    "almalinux-8",
+    "rockylinux-8",
+]
+
 BLACKLIST_3002_0 = [
     "almalinux-8",
     "amazon-2",
@@ -104,6 +109,11 @@ BLACKLIST_3002_0 = [
     "gentoo-systemd",
     "rockylinux-8",
     "ubuntu-2104",
+]
+
+BLACKLIST_3003 = [
+    "almalinux-8",
+    "rockylinux-8",
 ]
 
 BLACKLIST_3003_0 = [
@@ -275,7 +285,13 @@ def generate_test_jobs():
                     if branch == "3001-0" and distro in BLACKLIST_3001_0:
                         continue
 
+                    if branch == "3002" and distro in BLACKLIST_3002:
+                        continue
+
                     if branch == "3002-0" and distro in BLACKLIST_3002_0:
+                        continue
+
+                    if branch == "3003" and distro in BLACKLIST_3003:
                         continue
 
                     if branch == "3003-0" and distro in BLACKLIST_3003_0:

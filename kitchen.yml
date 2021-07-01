@@ -147,7 +147,6 @@ suites:
       - gentoo-systemd
       - freebsd-130
       - freebsd-122
-      - freebsd-114
       - openbsd-6
   - name: py2-git-master
     provisioner:
@@ -159,7 +158,6 @@ suites:
       - gentoo-systemd
       - freebsd-130
       - freebsd-122
-      - freebsd-114
       - openbsd-6
   - name: py2-stable-3000
     provisioner:
@@ -178,7 +176,6 @@ suites:
       - ubuntu-2104
       - freebsd-130
       - freebsd-122
-      - freebsd-114
       - openbsd-6
 
   - name: py3-git-3000
@@ -215,7 +212,6 @@ suites:
       - ubuntu-2104
       - freebsd-130
       - freebsd-122
-      - freebsd-114
       - openbsd-6
   - name: py3-stable-3001-0
     provisioner:
@@ -232,7 +228,6 @@ suites:
       - ubuntu-2104
       - freebsd-130
       - freebsd-122
-      - freebsd-114
       - openbsd-6
   - name: py3-stable-3001
     provisioner:
@@ -246,7 +241,6 @@ suites:
       - ubuntu-2104
       - freebsd-130
       - freebsd-122
-      - freebsd-114
       - openbsd-6
   - name: py3-stable-3002-0
     provisioner:
@@ -262,7 +256,6 @@ suites:
       - gentoo-systemd
       - freebsd-130
       - freebsd-122
-      - freebsd-114
       - openbsd-6
   - name: py3-stable-3003-0
     provisioner:
@@ -271,14 +264,12 @@ suites:
     excludes:
       - opensuse-15
       - opensuse-tumbleweed
-      - debian-11
       - fedora-33
       - arch
       - gentoo
       - gentoo-systemd
       - freebsd-130
       - freebsd-122
-      - freebsd-114
       - openbsd-6
   - name: py3-stable-3002
     provisioner:
@@ -290,7 +281,6 @@ suites:
       - arch
       - freebsd-130
       - freebsd-122
-      - freebsd-114
       - openbsd-6
   - name: py3-stable-3003
     provisioner:
@@ -302,7 +292,6 @@ suites:
       - arch
       - freebsd-130
       - freebsd-122
-      - freebsd-114
       - openbsd-6
   - name: py3-git-master
     provisioner:

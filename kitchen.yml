@@ -85,10 +85,10 @@ platforms:
         - systemctl enable sshd.service
   - name: opensuse-15
     driver_config:
-      image: opensuse/leap:15.1
+      image: opensuse/leap:15.3
       provision_command:
         - zypper --non-interactive install --auto-agree-with-licenses dbus-1
-        - zypper --non-interactive install --auto-agree-with-licenses sudo openssh which curl
+        - zypper --non-interactive install --auto-agree-with-licenses sudo openssh which curl systemd
         - systemctl enable sshd.service
     provisioner:
       salt_bootstrap_options: -MPfq -y -x python2 git %s

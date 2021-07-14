@@ -56,19 +56,15 @@ platforms:
       run_command: /lib/systemd/systemd
   - name: fedora-33
     driver:
-      provision_command:
+      provision_command: &fedora_provision_command
         - dnf -y install procps-ng
         - sed -i 's/^PubkeyAcceptedKeyTypes.*$/&,ssh-rsa/' /etc/crypto-policies/back-ends/opensshserver.config
   - name: fedora-34
     driver:
-      provision_command:
-        - dnf -y install procps-ng
-        - sed -i 's/^PubkeyAcceptedKeyTypes.*$/&,ssh-rsa/' /etc/crypto-policies/back-ends/opensshserver.config
+      provision_command: *fedora_provision_command
   - name: fedora-35
     driver:
-      provision_command:
-        - dnf -y install procps-ng
-        - sed -i 's/^PubkeyAcceptedKeyTypes.*$/&,ssh-rsa/' /etc/crypto-policies/back-ends/opensshserver.config
+      provision_command: *fedora_provision_command
   - name: gentoo
     driver:
       image: gentoo/stage3:latest
@@ -84,17 +80,14 @@ platforms:
   - name: opensuse-15
     driver:
       image: opensuse/leap:15.3
-      provision_command:
+      provision_command: &opensuse_provision_command
         - zypper --non-interactive install --auto-agree-with-licenses dbus-1
         - zypper --non-interactive install --auto-agree-with-licenses sudo openssh which curl systemd
         - systemctl enable sshd.service
   - name: opensuse-tumbleweed
     driver:
       image: opensuse/tumbleweed:latest
-      provision_command:
-        - zypper --non-interactive install --auto-agree-with-licenses dbus-1
-        - zypper --non-interactive install --auto-agree-with-licenses sudo openssh which curl systemd
-        - systemctl enable sshd.service
+      provision_command: *opensuse_provision_command
   - name: oraclelinux-8
   - name: oraclelinux-7
   - name: rockylinux-8

@@ -42,8 +42,6 @@ platforms:
       provision_command:
         - pacman -Syu --noconfirm --needed systemd grep awk procps which
         - systemctl enable sshd
-    provisioner:
-      salt_bootstrap_options: -MPfq -D -y -x python2 git %s
   - name: centos-8
   - name: centos-7
   - name: debian-9
@@ -90,8 +88,6 @@ platforms:
         - zypper --non-interactive install --auto-agree-with-licenses dbus-1
         - zypper --non-interactive install --auto-agree-with-licenses sudo openssh which curl systemd
         - systemctl enable sshd.service
-    provisioner:
-      salt_bootstrap_options: -MPfq -y -x python2 git %s
   - name: opensuse-tumbleweed
     driver:
       image: opensuse/tumbleweed:latest
@@ -99,8 +95,6 @@ platforms:
         - zypper --non-interactive install --auto-agree-with-licenses dbus-1
         - zypper --non-interactive install --auto-agree-with-licenses sudo openssh which curl systemd
         - systemctl enable sshd.service
-    provisioner:
-      salt_bootstrap_options: -MPfq -y -x python3 git %s
   - name: oraclelinux-8
   - name: oraclelinux-7
   - name: rockylinux-8

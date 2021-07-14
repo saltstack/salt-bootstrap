@@ -9,6 +9,7 @@ driver:
     - sys_admin
   disable_upstart: false
   use_internal_docker_network: false
+  run_command: /usr/lib/systemd/systemd
 
 provisioner:
   name: salt_solo
@@ -29,30 +30,22 @@ provisioner:
 
 platforms:
   - name: almalinux-8
-    driver_config:
-      run_command: /usr/lib/systemd/systemd
   - name: amazon-2
     driver_config:
       image: amazonlinux:2
       platform: rhel
-      run_command: /usr/lib/systemd/systemd
       provision_command:
         - yum -y install procps-ng
   - name: arch
     driver_config:
       image: archlinux/archlinux
-      run_command: /usr/lib/systemd/systemd
       provision_command:
         - pacman -Syu --noconfirm --needed systemd grep awk procps which
         - systemctl enable sshd
     provisioner:
       salt_bootstrap_options: -MPfq -D -y -x python2 git %s
   - name: centos-8
-    driver_config:
-      run_command: /usr/lib/systemd/systemd
   - name: centos-7
-    driver_config:
-      run_command: /usr/lib/systemd/systemd
   - name: debian-9
     driver_config:
       run_command: /lib/systemd/systemd
@@ -66,21 +59,18 @@ platforms:
   - name: fedora-33
     driver_config:
       image: fedora:33
-      run_command: /usr/lib/systemd/systemd
       provision_command:
         - dnf -y install procps-ng
         - sed -i 's/^PubkeyAcceptedKeyTypes.*$/&,ssh-rsa/' /etc/crypto-policies/back-ends/opensshserver.config
   - name: fedora-34
     driver_config:
       image: fedora:34
-      run_command: /usr/lib/systemd/systemd
       provision_command:
         - dnf -y install procps-ng
         - sed -i 's/^PubkeyAcceptedKeyTypes.*$/&,ssh-rsa/' /etc/crypto-policies/back-ends/opensshserver.config
   - name: fedora-35
     driver_config:
       image: fedora:35
-      run_command: /usr/lib/systemd/systemd
       provision_command:
         - dnf -y install procps-ng
         - sed -i 's/^PubkeyAcceptedKeyTypes.*$/&,ssh-rsa/' /etc/crypto-policies/back-ends/opensshserver.config
@@ -99,7 +89,6 @@ platforms:
   - name: opensuse-15
     driver_config:
       image: opensuse/leap:15.1
-      run_command: /usr/lib/systemd/systemd
       provision_command:
         - zypper --non-interactive install --auto-agree-with-licenses dbus-1
         - zypper --non-interactive install --auto-agree-with-licenses sudo openssh which curl
@@ -109,7 +98,6 @@ platforms:
   - name: opensuse-tumbleweed
     driver_config:
       image: opensuse/tumbleweed:latest
-      run_command: /usr/lib/systemd/systemd
       provision_command:
         - zypper --non-interactive install --auto-agree-with-licenses dbus-1
         - zypper --non-interactive install --auto-agree-with-licenses sudo openssh which curl systemd
@@ -117,15 +105,10 @@ platforms:
     provisioner:
       salt_bootstrap_options: -MPfq -y -x python3 git %s
   - name: oraclelinux-8
-    driver_config:
-      run_command: /usr/lib/systemd/systemd
   - name: oraclelinux-7
-    driver_config:
-      run_command: /usr/lib/systemd/systemd
   - name: rockylinux-8
     driver_config:
       image: rockylinux/rockylinux
-      run_command: /usr/lib/systemd/systemd
   - name: ubuntu-21.04
     driver_config:
       run_command: /lib/systemd/systemd

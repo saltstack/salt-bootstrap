@@ -50,36 +50,6 @@ STABLE_DISTROS = [
     "ubuntu-2104",
 ]
 
-PY2_BLACKLIST = [
-    "almalinux-8",
-    "centos-8",
-    "debian-10",
-    "debian-11",
-    "fedora-33",
-    "fedora-34",
-    "fedora-35",
-    "gentoo",
-    "gentoo-systemd",
-    "opensuse-15",
-    "opensuse-tumbleweed",
-    "oraclelinux-8",
-    "rockylinux-8",
-    "ubuntu-2004",
-    "ubuntu-2104",
-]
-
-BLACKLIST_3000 = [
-    "almalinux-8",
-    "debian-11",
-    "fedora-33",
-    "fedora-34",
-    "fedora-35",
-    "opensuse-tumbleweed",
-    "rockylinux-8",
-    "ubuntu-2004",
-    "ubuntu-2104",
-]
-
 BLACKLIST_3001 = [
     "almalinux-8",
     "debian-11",
@@ -124,7 +94,6 @@ BLACKLIST_3003_0 = [
 ]
 
 SALT_BRANCHES = [
-    "3000",
     "3001",
     "3001-0",
     "3002",
@@ -136,7 +105,6 @@ SALT_BRANCHES = [
 ]
 
 BRANCH_DISPLAY_NAMES = {
-    "3000": "v3000",
     "3001": "v3001",
     "3001-0": "v3001.0",
     "3002": "v3002",
@@ -234,18 +202,7 @@ def generate_test_jobs():
                     )
                 continue
 
-            for python_version in ("py2", "py3"):
-
-                if branch == "master" and python_version == "py2":
-                    # Salt's master branch no longer supports Python 2
-                    continue
-
-                try:
-                    if int(branch.split("-")[0]) >= 3000 and python_version == "py2":
-                        # Salt's 300X versions no longer supports Python 2
-                        continue
-                except ValueError:
-                    pass
+            for python_version in ("py3",):
 
                 for bootstrap_type in ("stable", "git"):
                     if bootstrap_type == "stable":
@@ -267,21 +224,6 @@ def generate_test_jobs():
                         if branch.endswith("-0"):
                             continue
 
-                        if python_version == "py3":
-                            if distro in ("arch"):
-                                allowed_branches = ["master"]
-                                try:
-                                    int_branch = int(branch)
-                                    if int_branch > 3000:
-                                        allowed_branches.append(branch)
-                                except ValueError:
-                                    pass
-                                if branch not in allowed_branches:
-                                    # Arch and Fedora default to py3.8
-                                    continue
-                    if branch == "3000" and distro in BLACKLIST_3000:
-                        continue
-
                     if branch == "3001" and distro in BLACKLIST_3001:
                         continue
 
@@ -298,9 +240,6 @@ def generate_test_jobs():
                         continue
 
                     if branch == "3003-0" and distro in BLACKLIST_3003_0:
-                        continue
-
-                    if python_version == "py2" and distro in PY2_BLACKLIST:
                         continue
 
                     if distro in LINUX_DISTROS:

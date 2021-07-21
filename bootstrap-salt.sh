@@ -268,7 +268,7 @@ _CUSTOM_MASTER_CONFIG="null"
 _CUSTOM_MINION_CONFIG="null"
 _QUIET_GIT_INSTALLATION=$BS_FALSE
 _REPO_URL="repo.saltproject.io"
-_PY_EXE=""
+_PY_EXE="python3"
 _INSTALL_PY="$BS_FALSE"
 _TORNADO_MAX_PY3_VERSION="5.0"
 _POST_NEON_INSTALL=$BS_FALSE
@@ -3015,15 +3015,6 @@ install_ubuntu_stable_deps() {
         _SLEEP=10
     fi
 
-    if [ "$DISTRO_MAJOR_VERSION" -ge 20 ]; then
-        # Default Ubuntu 20.04 to Py3
-        if [ "x${_PY_EXE}" = "x" ]; then
-            _PY_EXE=python3
-            _PY_MAJOR_VERSION=3
-            PY_PKG_VER=3
-        fi
-    fi
-
     if [ $_START_DAEMONS -eq $BS_FALSE ]; then
         echowarn "Not starting daemons on Debian based distributions is not working mostly because starting them is the default behaviour."
     fi
@@ -3416,15 +3407,6 @@ install_debian_deps() {
         fi
 
         __apt_get_upgrade_noinput || return 1
-    fi
-
-    if [ "$DISTRO_MAJOR_VERSION" -ge 10 ]; then
-        # Default Debian 10 to Py3
-        if [ "x${_PY_EXE}" = "x" ]; then
-            _PY_EXE=python3
-            _PY_MAJOR_VERSION=3
-            PY_PKG_VER=3
-        fi
     fi
 
     if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 3 ]; then
@@ -4161,14 +4143,6 @@ _eof
 install_centos_stable_deps() {
     if [ "$_UPGRADE_SYS" -eq $BS_TRUE ]; then
         yum -y update || return 1
-    fi
-
-    if [ "$DISTRO_MAJOR_VERSION" -ge 8 ]; then
-        # CentOS/RHEL 8 Default to Py3
-        if [ "x${_PY_EXE}" = "x" ]; then
-            _PY_EXE=python3
-            _PY_MAJOR_VERSION=3
-        fi
     fi
 
     if [ "$_DISABLE_REPOS" -eq "$BS_TRUE" ] && [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 3 ]; then

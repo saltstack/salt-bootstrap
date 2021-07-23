@@ -1642,8 +1642,8 @@ __check_end_of_life_versions() {
             ;;
 
         centos)
-            # CentOS versions lower than 6 are no longer supported
-            if [ "$DISTRO_MAJOR_VERSION" -lt 6 ]; then
+            # CentOS versions lower than 7 are no longer supported
+            if [ "$DISTRO_MAJOR_VERSION" -lt 7 ]; then
                 echoerror "End of life distributions are not supported."
                 echoerror "Please consider upgrading to the next stable. See:"
                 echoerror "    http://wiki.centos.org/Download"
@@ -1652,8 +1652,8 @@ __check_end_of_life_versions() {
             ;;
 
         red_hat*linux)
-            # Red Hat (Enterprise) Linux versions lower than 6 are no longer supported
-            if [ "$DISTRO_MAJOR_VERSION" -lt 6 ]; then
+            # Red Hat (Enterprise) Linux versions lower than 7 are no longer supported
+            if [ "$DISTRO_MAJOR_VERSION" -lt 7 ]; then
                 echoerror "End of life distributions are not supported."
                 echoerror "Please consider upgrading to the next stable. See:"
                 echoerror "    https://access.redhat.com/support/policy/updates/errata/"
@@ -1662,8 +1662,8 @@ __check_end_of_life_versions() {
             ;;
 
         oracle*linux)
-            # Oracle Linux versions lower than 6 are no longer supported
-            if [ "$DISTRO_MAJOR_VERSION" -lt 6 ]; then
+            # Oracle Linux versions lower than 7 are no longer supported
+            if [ "$DISTRO_MAJOR_VERSION" -lt 7 ]; then
                 echoerror "End of life distributions are not supported."
                 echoerror "Please consider upgrading to the next stable. See:"
                 echoerror "    http://www.oracle.com/us/support/library/elsp-lifetime-069338.pdf"
@@ -1672,8 +1672,8 @@ __check_end_of_life_versions() {
             ;;
 
         scientific*linux)
-            # Scientific Linux versions lower than 6 are no longer supported
-            if [ "$DISTRO_MAJOR_VERSION" -lt 6 ]; then
+            # Scientific Linux versions lower than 7 are no longer supported
+            if [ "$DISTRO_MAJOR_VERSION" -lt 7 ]; then
                 echoerror "End of life distributions are not supported."
                 echoerror "Please consider upgrading to the next stable. See:"
                 echoerror "    https://www.scientificlinux.org/downloads/sl-versions/"
@@ -1682,8 +1682,8 @@ __check_end_of_life_versions() {
             ;;
 
         cloud*linux)
-            # Cloud Linux versions lower than 6 are no longer supported
-            if [ "$DISTRO_MAJOR_VERSION" -lt 6 ]; then
+            # Cloud Linux versions lower than 7 are no longer supported
+            if [ "$DISTRO_MAJOR_VERSION" -lt 7 ]; then
                 echoerror "End of life distributions are not supported."
                 echoerror "Please consider upgrading to the next stable. See:"
                 echoerror "    https://docs.cloudlinux.com/index.html?cloudlinux_life-cycle.html"
@@ -1692,9 +1692,9 @@ __check_end_of_life_versions() {
             ;;
 
         amazon*linux*ami)
-            # Amazon Linux versions lower than 2012.0X no longer supported
+            # Amazon Linux versions 2018.XX and lower no longer supported
             # Except for Amazon Linux 2, which reset the major version counter
-            if [ "$DISTRO_MAJOR_VERSION" -lt 2012 ] && [ "$DISTRO_MAJOR_VERSION" -gt 10 ]; then
+            if [ "$DISTRO_MAJOR_VERSION" -le 2018 ] && [ "$DISTRO_MAJOR_VERSION" -gt 10 ]; then
                 echoerror "End of life distributions are not supported."
                 echoerror "Please consider upgrading to the next stable. See:"
                 echoerror "    https://aws.amazon.com/amazon-linux-ami/"

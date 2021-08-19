@@ -20,6 +20,7 @@ Andrew Dean                 ndrwdn                 ndrwdn@gmail.com
 Andy Boff                   caelor                 github@plek.me.uk
 Angelo Gründler             plueschopath           angelo.gruendler@w1r3.net
 Ari Aosved                  devaos                 ari.aosved@gmail.com
+Ari Maniatis                ari                    ari@ish.com.au
 Ashok Raja R                ashokrajar             ashokrajar@users.noreply.github.com
 Beau Hargis                 beaucephus             beau@customermobile.com
 Benjamin Drung              bdrung                 bdrung@debian.org

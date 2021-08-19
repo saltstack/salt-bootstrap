@@ -46,6 +46,7 @@ jobs:
         instance:
           - py3-stable-3001-windows-2019
           - py3-stable-3002-windows-2019
+          - py3-stable-3003-windows-2019
           - latest-windows-2019
     steps:
       - name: 'Check out code'
@@ -102,6 +103,7 @@ jobs:
         instance:
           - py3-stable-3001-windows-2016
           - py3-stable-3002-windows-2016
+          - py3-stable-3003-windows-2016
           - latest-windows-2016
     steps:
       - name: 'Check out code'

@@ -31,6 +31,7 @@ LINUX_DISTROS = [
 OSX = WINDOWS = []
 
 STABLE_DISTROS = [
+    "almalinux-8",
     "amazon-2",
     "centos-7",
     "centos-8",
@@ -82,12 +83,10 @@ BLACKLIST_3002_0 = [
 ]
 
 BLACKLIST_3003 = [
-    "almalinux-8",
     "rockylinux-8",
 ]
 
 BLACKLIST_3003_0 = [
-    "almalinux-8",
     "amazon-2",
     "gentoo",
     "gentoo-systemd",

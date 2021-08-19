@@ -23,7 +23,7 @@
 #======================================================================================================================
 set -o nounset                              # Treat unset variables as an error
 
-__ScriptVersion="2021.06.23"
+__ScriptVersion="2021.08.19"
 __ScriptName="bootstrap-salt.sh"
 
 __ScriptFullName="$0"
@@ -1642,8 +1642,8 @@ __check_end_of_life_versions() {
             ;;
 
         centos)
-            # CentOS versions lower than 6 are no longer supported
-            if [ "$DISTRO_MAJOR_VERSION" -lt 6 ]; then
+            # CentOS versions lower than 7 are no longer supported
+            if [ "$DISTRO_MAJOR_VERSION" -lt 7 ]; then
                 echoerror "End of life distributions are not supported."
                 echoerror "Please consider upgrading to the next stable. See:"
                 echoerror "    http://wiki.centos.org/Download"
@@ -1652,8 +1652,8 @@ __check_end_of_life_versions() {
             ;;
 
         red_hat*linux)
-            # Red Hat (Enterprise) Linux versions lower than 6 are no longer supported
-            if [ "$DISTRO_MAJOR_VERSION" -lt 6 ]; then
+            # Red Hat (Enterprise) Linux versions lower than 7 are no longer supported
+            if [ "$DISTRO_MAJOR_VERSION" -lt 7 ]; then
                 echoerror "End of life distributions are not supported."
                 echoerror "Please consider upgrading to the next stable. See:"
                 echoerror "    https://access.redhat.com/support/policy/updates/errata/"
@@ -1662,8 +1662,8 @@ __check_end_of_life_versions() {
             ;;
 
         oracle*linux)
-            # Oracle Linux versions lower than 6 are no longer supported
-            if [ "$DISTRO_MAJOR_VERSION" -lt 6 ]; then
+            # Oracle Linux versions lower than 7 are no longer supported
+            if [ "$DISTRO_MAJOR_VERSION" -lt 7 ]; then
                 echoerror "End of life distributions are not supported."
                 echoerror "Please consider upgrading to the next stable. See:"
                 echoerror "    http://www.oracle.com/us/support/library/elsp-lifetime-069338.pdf"
@@ -1672,8 +1672,8 @@ __check_end_of_life_versions() {
             ;;
 
         scientific*linux)
-            # Scientific Linux versions lower than 6 are no longer supported
-            if [ "$DISTRO_MAJOR_VERSION" -lt 6 ]; then
+            # Scientific Linux versions lower than 7 are no longer supported
+            if [ "$DISTRO_MAJOR_VERSION" -lt 7 ]; then
                 echoerror "End of life distributions are not supported."
                 echoerror "Please consider upgrading to the next stable. See:"
                 echoerror "    https://www.scientificlinux.org/downloads/sl-versions/"
@@ -1682,8 +1682,8 @@ __check_end_of_life_versions() {
             ;;
 
         cloud*linux)
-            # Cloud Linux versions lower than 6 are no longer supported
-            if [ "$DISTRO_MAJOR_VERSION" -lt 6 ]; then
+            # Cloud Linux versions lower than 7 are no longer supported
+            if [ "$DISTRO_MAJOR_VERSION" -lt 7 ]; then
                 echoerror "End of life distributions are not supported."
                 echoerror "Please consider upgrading to the next stable. See:"
                 echoerror "    https://docs.cloudlinux.com/index.html?cloudlinux_life-cycle.html"
@@ -1692,9 +1692,9 @@ __check_end_of_life_versions() {
             ;;
 
         amazon*linux*ami)
-            # Amazon Linux versions lower than 2012.0X no longer supported
+            # Amazon Linux versions 2018.XX and lower no longer supported
             # Except for Amazon Linux 2, which reset the major version counter
-            if [ "$DISTRO_MAJOR_VERSION" -lt 2012 ] && [ "$DISTRO_MAJOR_VERSION" -gt 10 ]; then
+            if [ "$DISTRO_MAJOR_VERSION" -le 2018 ] && [ "$DISTRO_MAJOR_VERSION" -gt 10 ]; then
                 echoerror "End of life distributions are not supported."
                 echoerror "Please consider upgrading to the next stable. See:"
                 echoerror "    https://aws.amazon.com/amazon-linux-ami/"
@@ -5843,15 +5843,15 @@ install_freebsd_git_deps() {
 
     if [ "${_POST_NEON_INSTALL}" -eq $BS_FALSE ]; then
 
-        SALT_DEPENDENCIES=$(/usr/local/sbin/pkg rquery %dn py37-salt)
+        SALT_DEPENDENCIES=$(/usr/local/sbin/pkg rquery %dn py38-salt)
         # shellcheck disable=SC2086
         /usr/local/sbin/pkg install -y ${SALT_DEPENDENCIES} python || return 1
 
-        /usr/local/sbin/pkg install -y py37-requests || return 1
-        /usr/local/sbin/pkg install -y py37-tornado4 || return 1
+        /usr/local/sbin/pkg install -y py38-requests || return 1
+        /usr/local/sbin/pkg install -y py38-tornado4 || return 1
 
     else
-        /usr/local/sbin/pkg install -y python py37-pip py37-setuptools libzmq4 libunwind || return 1
+        /usr/local/sbin/pkg install -y python py38-pip py38-setuptools libzmq4 libunwind || return 1
     fi
 
     echodebug "Adapting paths to FreeBSD"
@@ -5897,7 +5897,7 @@ install_freebsd_stable() {
 # installing latest version of salt from FreeBSD CURRENT ports repo
 #
     # shellcheck disable=SC2086
-    /usr/local/sbin/pkg install -y py37-salt || return 1
+    /usr/local/sbin/pkg install -y py38-salt || return 1
 
     return 0
 }

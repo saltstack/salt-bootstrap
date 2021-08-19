@@ -1,5 +1,10 @@
 Version TBD (In Progress on the Develop Branch):
 
+Version 2021.08.19:
+    * Update README with instructions to use salt-bootstrap custom version (ari) #1580
+    * Remove unsupported versions (bryceml) #1578
+    * Update FreeBSD default Python version to 3.8 (myii) #1574
+
 Version 2021.06.23:
 	* Use salt.list instead of saltstack.list (bryceml) #1563
 	* Use fetch_url function for curl (xeacott) #1562

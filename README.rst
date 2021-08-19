@@ -32,6 +32,7 @@ sum** of the downloaded ``bootstrap-salt.sh`` file.
 
 The SHA256 sum of the ``bootstrap-salt.sh`` file, per release, is:
 
+- 2021.06.23: ``35b397dd0a50f832af453c17f138fd29e3692e492d7f463c404a57e1fac10665``
 - 2021.03.02: ``91baa0073308f1be20c7be65238ef67e5733c75285314b302a5b2456e73a0758``
 - 2020.10.20: ``b47bfc8d63cccf22eb4cd94491d30cc1d571e184be25a5be7f775e7f2daaf6e2``
 - 2020.10.19: ``f6c3e2c52f98d115809044b09062219369957caf30228b594033f0543e202c52``
@@ -526,6 +527,23 @@ UNIX systems
 **SunOS**:
 
 - SmartOS (2015Q4 and later)
+
+
+Using a custom salt bootstrap
+-----------------------------
+
+By default the ``salt-cloud -p`` provisioning command will use the latest release from this 
+repository to bootstrap new minions. If 
+
+- your needs are not met by that script,
+- you want to lock salt bootstrap to a specific release, or
+- you want to use an unreleased development version of this script
+
+you can add your bootstrap-salt script to your salt cloud configuration and point to it with the
+``script`` attribute.
+
+`Read more`: https://docs.saltproject.io/en/latest/topics/cloud/deploy.html
+
 
 Unsupported Distributions
 -------------------------

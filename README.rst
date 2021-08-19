@@ -528,6 +528,23 @@ UNIX systems
 
 - SmartOS (2015Q4 and later)
 
+
+Using a custom salt bootstrap
+-----------------------------
+
+By default the ``salt-cloud -p`` provisioning command will use the latest release from this 
+repository to bootstrap new minions. If 
+
+- your needs are not met by that script,
+- you want to lock salt bootstrap to a specific release, or
+- you want to use an unreleased development version of this script
+
+you can add your bootstrap-salt script to your salt cloud configuration and point to it with the
+``script`` attribute.
+
+`Read more`: https://docs.saltproject.io/en/latest/topics/cloud/deploy.html
+
+
 Unsupported Distributions
 -------------------------
 

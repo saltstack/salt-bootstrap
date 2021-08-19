@@ -638,7 +638,8 @@ fi
 
 # Root permissions are required to run this script
 if [ "$($whoami)" != "root" ]; then
-    echoerror "Salt requires root privileges to install. Please re-run this script as root."
+    echowarn "Salt requires root privileges to install. Re-running this script as root..."
+    exec "su -l root -c $0"
     exit 1
 fi
 

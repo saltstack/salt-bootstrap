@@ -638,7 +638,7 @@ fi
 
 # Root permissions are required to run this script
 if [ "$($whoami)" != "root" ]; then
-    echowarn "Salt requires root privileges to install. Re-running this script as root..."
+    echowarn "Salt-bootstrap was run as $($whoami). Attempting to execute as root now. If there is no 'su' command available or the root password is not empty, this will fail. Run the script as root to fix this."
     exec "su -l root -c $0"
     exit 1
 fi

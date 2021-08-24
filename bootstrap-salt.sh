@@ -691,7 +691,9 @@ if [ -n "$_PY_EXE" ]; then
         exit 1
     fi
 
-    echoinfo "Detected -x option. Using $_PY_EXE to install Salt."
+    if [ "$_PY_EXE" != "python3" ]; then
+        echoinfo "Detected -x option. Using $_PY_EXE to install Salt."
+    fi
 else
     _PY_PKG_VER=""
     _PY_MAJOR_VERSION=""

@@ -98,12 +98,12 @@ To view the latest options and descriptions for ``salt-bootstrap``, use ``-h`` a
   Examples:
     - bootstrap-salt.sh
     - bootstrap-salt.sh stable
-    - bootstrap-salt.sh stable 2017.7
-    - bootstrap-salt.sh stable 2017.7.2
+    - bootstrap-salt.sh stable 3003.3
+    - bootstrap-salt.sh stable v3002.7
     - bootstrap-salt.sh testing
     - bootstrap-salt.sh git
-    - bootstrap-salt.sh git 2017.7
-    - bootstrap-salt.sh git v2017.7.2
+    - bootstrap-salt.sh git 3003.3
+    - bootstrap-salt.sh git v3002.7
     - bootstrap-salt.sh git 06f249901a2e2f1ed310d58ea3921a129f214358
 
   Options:
@@ -214,14 +214,14 @@ If you want to install a package of a specific release version, from the SaltSta
 .. code:: console
 
   curl -o bootstrap-salt.sh -L https://bootstrap.saltproject.io
-  sudo sh bootstrap-salt.sh -P stable 3002.2
+  sudo sh bootstrap-salt.sh -P stable 3003.3
 
 If you want to install a specific release version, based on the Git tags:
 
 .. code:: console
 
   curl -o bootstrap-salt.sh -L https://bootstrap.saltproject.io
-  sudo sh bootstrap-salt.sh git v3002.2
+  sudo sh bootstrap-salt.sh git v3003.3
 
 Using ``curl`` to install latest development version from GitHub:
 
@@ -276,14 +276,14 @@ Installing a specific version from git using ``wget``:
 .. code:: console
 
   wget -O bootstrap-salt.sh https://bootstrap.saltproject.io
-  sudo sh bootstrap-salt.sh git v3002.2
+  sudo sh bootstrap-salt.sh git v3003.3
 
 Installing a specific version package from the SaltStack repo using ``wget``:
 
 .. code:: console
 
   wget -O bootstrap-salt.sh https://bootstrap.saltproject.io
-  sudo sh bootstrap-salt.sh -P stable 3002.2
+  sudo sh bootstrap-salt.sh -P stable 3003.3
 
 **NOTE**
 
@@ -299,7 +299,7 @@ If you already have Python installed, ``python 2.7``, then it's as easy as:
 .. code:: console
 
   python -m urllib "https://bootstrap.saltproject.io" > bootstrap-salt.sh
-  sudo sh bootstrap-salt.sh -P stable 3002.2
+  sudo sh bootstrap-salt.sh -P stable 3003.3
 
 With python version 2, the following in-line code should always work:
 
@@ -313,7 +313,7 @@ With python version 3:
 .. code:: console
 
   python3 -c 'import urllib.request; print(urllib.request.urlopen("https://bootstrap.saltproject.io").read().decode("ascii"))' > bootstrap-salt.sh
-  sudo sh bootstrap-salt.sh git v3002.2
+  sudo sh bootstrap-salt.sh git v3003.3
 
 Install using fetch
 ~~~~~~~~~~~~~~~~~~~
@@ -374,7 +374,7 @@ Installing a target version package of Salt from the SaltStack repo:
 
 .. code:: console
 
-  curl -L https://bootstrap.saltproject.io | sudo sh -s -- stable 3002.2
+  curl -L https://bootstrap.saltproject.io | sudo sh -s -- stable 3003.3
 
 Installing the latest master branch of Salt from git:
 

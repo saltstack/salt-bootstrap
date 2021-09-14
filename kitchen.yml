@@ -104,56 +104,6 @@ platforms:
       run_command: /lib/systemd/systemd
 
 suites:
-  - name: py2-git-3000
-    provisioner:
-      salt_version: 3000
-    excludes:
-      - debian-10
-      - debian-11
-      - gentoo
-      - gentoo-systemd
-      - freebsd-130
-      - freebsd-122
-      - openbsd-6
-  - name: py2-git-master
-    provisioner:
-      salt_version: master
-    excludes:
-      - debian-10
-      - debian-11
-      - gentoo
-      - gentoo-systemd
-      - freebsd-130
-      - freebsd-122
-      - openbsd-6
-  - name: py2-stable-3000
-    provisioner:
-      salt_version: 3000
-      salt_bootstrap_options: -MP stable %s
-    excludes:
-      - arch
-      - opensuse-15
-      - opensuse-tumbleweed
-      - debian-10
-      - debian-11
-      - fedora-33
-      - gentoo
-      - gentoo-systemd
-      - ubuntu-2004
-      - ubuntu-2104
-      - freebsd-130
-      - freebsd-122
-      - openbsd-6
-
-  - name: py3-git-3000
-    provisioner:
-      salt_version: 3000
-      salt_bootstrap_options: -x python3 -MPfq git %s
-    excludes:
-      - debian-11
-      - opensuse-tumbleweed
-      - ubuntu-2004
-      - ubuntu-2104
   - name: py3-git-3001
     provisioner:
       salt_version: 3001
@@ -166,20 +116,6 @@ suites:
     provisioner:
       salt_version: 3003
       salt_bootstrap_options: -x python3 -MPfq git %s
-  - name: py3-stable-3000
-    provisioner:
-      salt_version: 3000
-      salt_bootstrap_options: -x python3 -MP stable %s
-    excludes:
-      - debian-11
-      - opensuse-15
-      - opensuse-tumbleweed
-      - arch
-      - ubuntu-2004
-      - ubuntu-2104
-      - freebsd-130
-      - freebsd-122
-      - openbsd-6
   - name: py3-stable-3001-0
     provisioner:
       salt_version: 3001

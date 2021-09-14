@@ -1,5 +1,10 @@
 Version TBD (In Progress on the Develop Branch):
 
+Version 2021.09.14:
+	* Update latest Salt version in README (krionbsd) #1588
+	* Make Python 3 the default (bryceml) #1577
+	* Don't output info if using the default -x value (bryceml) #1587
+
 Version 2021.08.19:
     * Update README with instructions to use salt-bootstrap custom version (ari) #1580
     * Remove unsupported versions (bryceml) #1578

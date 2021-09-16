@@ -1585,11 +1585,15 @@ __check_end_of_life_versions() {
         ubuntu)
             # Ubuntu versions not supported
             #
-            #  < 18.04
+            #  < 16.04
+            #  = 16.10
+            #  = 17.04, 17.10
             #  = 18.10
             #  = 19.04, 19.10
-            if [ "$DISTRO_MAJOR_VERSION" -lt 18 ] || \
+            if [ "$DISTRO_MAJOR_VERSION" -lt 16 ] || \
+                [ "$DISTRO_MAJOR_VERSION" -eq 17 ] || \
                 [ "$DISTRO_MAJOR_VERSION" -eq 19 ] || \
+                { [ "$DISTRO_MAJOR_VERSION" -eq 16 ] && [ "$DISTRO_MINOR_VERSION" -eq 10 ]; } || \
                 { [ "$DISTRO_MAJOR_VERSION" -eq 18 ] && [ "$DISTRO_MINOR_VERSION" -eq 10 ]; }; then
                 echoerror "End of life distributions are not supported."
                 echoerror "Please consider upgrading to the next stable. See:"

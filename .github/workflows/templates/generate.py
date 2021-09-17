@@ -24,6 +24,7 @@ LINUX_DISTROS = [
     "oraclelinux-7",
     "oraclelinux-8",
     "rockylinux-8",
+    "ubuntu-1604",
     "ubuntu-1804",
     "ubuntu-2004",
     "ubuntu-2104",
@@ -45,6 +46,7 @@ STABLE_DISTROS = [
     "gentoo-systemd",
     "oraclelinux-7",
     "oraclelinux-8",
+    "ubuntu-1604",
     "ubuntu-1804",
     "ubuntu-2004",
     "ubuntu-2104",
@@ -84,6 +86,7 @@ BLACKLIST_3002_0 = [
 
 BLACKLIST_3003 = [
     "rockylinux-8",
+    "ubuntu-1604",
 ]
 
 BLACKLIST_3003_0 = [
@@ -91,6 +94,7 @@ BLACKLIST_3003_0 = [
     "gentoo",
     "gentoo-systemd",
     "rockylinux-8",
+    "ubuntu-1604",
 ]
 
 SALT_BRANCHES = [
@@ -138,6 +142,7 @@ DISTRO_DISPLAY_NAMES = {
     "oraclelinux-7": "Oracle Linux 7",
     "oraclelinux-8": "Oracle Linux 8",
     "rockylinux-8": "Rocky Linux 8",
+    "ubuntu-1604": "Ubuntu 16.04",
     "ubuntu-1804": "Ubuntu 18.04",
     "ubuntu-2004": "Ubuntu 20.04",
     "ubuntu-2104": "Ubuntu 21.04",

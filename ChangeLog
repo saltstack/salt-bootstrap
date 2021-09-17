@@ -1,5 +1,9 @@
 Version TBD (In Progress on the Develop Branch):
 
+Version 2021.09.17:
+	* Re-add Ubuntu-16 support as it's still supported with 3001 and 3002 (krionbsd) #1594
+	* Add oncoming 3004 release (krionbsd) #1593
+
 Version 2021.09.14:
 	* Update latest Salt version in README (krionbsd) #1588
 	* Make Python 3 the default (bryceml) #1577

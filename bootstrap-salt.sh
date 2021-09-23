@@ -314,86 +314,86 @@ __usage() {
     - ${__ScriptName} git 06f249901a2e2f1ed310d58ea3921a129f214358
 
   Options:
-    -h  Display this message
-    -v  Display script version
-    -n  No colours
-    -D  Show debug output
+    -a  Pip install all Python pkg dependencies for Salt. Requires -V to install
+        all pip pkgs into the virtualenv.
+        (Only available for Ubuntu based distributions)
+    -A  Pass the salt-master DNS name or IP. This will be stored under
+        \${BS_SALT_ETC_DIR}/minion.d/99-master-address.conf
+    -b  Assume that dependencies are already installed and software sources are
+        set up. If git is selected, git tree is still checked out as dependency
+        step.
     -c  Temporary configuration directory
-    -g  Salt Git repository URL. Default: ${_SALTSTACK_REPO_URL}
-    -w  Install packages from downstream package repository rather than
-        upstream, saltstack package repository. This is currently only
-        implemented for SUSE.
-    -k  Temporary directory holding the minion keys which will pre-seed
-        the master.
-    -s  Sleep time used when waiting for daemons to start, restart and when
-        checking for the services running. Default: ${__DEFAULT_SLEEP}
-    -L  Also install salt-cloud and required python-libcloud package
-    -M  Also install salt-master
-    -S  Also install salt-syndic
-    -N  Do not install salt-minion
-    -X  Do not start daemons after installation
-    -d  Disables checking if Salt services are enabled to start on system boot.
-        You can also do this by touching /tmp/disable_salt_checks on the target
-        host. Default: \${BS_FALSE}
-    -P  Allow pip based installations. On some distributions the required salt
-        packages or its dependencies are not available as a package for that
-        distribution. Using this flag allows the script to use pip as a last
-        resort method. NOTE: This only works for functions which actually
-        implement pip based installations.
-    -U  If set, fully upgrade the system prior to bootstrapping Salt
-    -I  If set, allow insecure connections while downloading any files. For
-        example, pass '--no-check-certificate' to 'wget' or '--insecure' to
-        'curl'. On Debian and Ubuntu, using this option with -U allows obtaining
-        GnuPG archive keys insecurely if distro has changed release signatures.
-    -F  Allow copied files to overwrite existing (config, init.d, etc)
-    -K  If set, keep the temporary files in the temporary directories specified
-        with -c and -k
     -C  Only run the configuration function. Implies -F (forced overwrite).
         To overwrite Master or Syndic configs, -M or -S, respectively, must
         also be specified. Salt installation will be ommitted, but some of the
         dependencies could be installed to write configuration with -j or -J.
-    -A  Pass the salt-master DNS name or IP. This will be stored under
-        \${BS_SALT_ETC_DIR}/minion.d/99-master-address.conf
-    -i  Pass the salt-minion id. This will be stored under
-        \${BS_SALT_ETC_DIR}/minion_id
-    -p  Extra-package to install while installing Salt dependencies. One package
-        per -p flag. You are responsible for providing the proper package name.
-    -H  Use the specified HTTP proxy for all download URLs (including https://).
-        For example: http://myproxy.example.com:3128
-    -b  Assume that dependencies are already installed and software sources are
-        set up. If git is selected, git tree is still checked out as dependency
-        step.
+    -d  Disables checking if Salt services are enabled to start on system boot.
+        You can also do this by touching /tmp/disable_salt_checks on the target
+        host. Default: \${BS_FALSE}
+    -D  Show debug output
     -f  Force shallow cloning for git installations.
         This may result in an "n/a" in the version number.
-    -l  Disable ssl checks. When passed, switches "https" calls to "http" where
-        possible.
-    -V  Install Salt into virtualenv
-        (only available for Ubuntu based distributions)
-    -a  Pip install all Python pkg dependencies for Salt. Requires -V to install
-        all pip pkgs into the virtualenv.
-        (Only available for Ubuntu based distributions)
-    -r  Disable all repository configuration performed by this script. This
-        option assumes all necessary repository configuration is already present
-        on the system.
-    -R  Specify a custom repository URL. Assumes the custom repository URL
-        points to a repository that mirrors Salt packages located at
-        repo.saltproject.io. The option passed with -R replaces the
-        "repo.saltproject.io". If -R is passed, -r is also set. Currently only
-        works on CentOS/RHEL and Debian based distributions.
-    -J  Replace the Master config file with data passed in as a JSON string. If
-        a Master config file is found, a reasonable effort will be made to save
-        the file with a ".bak" extension. If used in conjunction with -C or -F,
-        no ".bak" file will be created as either of those options will force
-        a complete overwrite of the file.
+    -F  Allow copied files to overwrite existing (config, init.d, etc)
+    -g  Salt Git repository URL. Default: ${_SALTSTACK_REPO_URL}
+    -h  Display this message
+    -H  Use the specified HTTP proxy for all download URLs (including https://).
+        For example: http://myproxy.example.com:3128
+    -i  Pass the salt-minion id. This will be stored under
+        \${BS_SALT_ETC_DIR}/minion_id
+    -I  If set, allow insecure connections while downloading any files. For
+        example, pass '--no-check-certificate' to 'wget' or '--insecure' to
+        'curl'. On Debian and Ubuntu, using this option with -U allows obtaining
+        GnuPG archive keys insecurely if distro has changed release signatures.
     -j  Replace the Minion config file with data passed in as a JSON string. If
         a Minion config file is found, a reasonable effort will be made to save
         the file with a ".bak" extension. If used in conjunction with -C or -F,
         no ".bak" file will be created as either of those options will force
         a complete overwrite of the file.
+    -J  Replace the Master config file with data passed in as a JSON string. If
+        a Master config file is found, a reasonable effort will be made to save
+        the file with a ".bak" extension. If used in conjunction with -C or -F,
+        no ".bak" file will be created as either of those options will force
+        a complete overwrite of the file.
+    -k  Temporary directory holding the minion keys which will pre-seed
+        the master.
+    -K  If set, keep the temporary files in the temporary directories specified
+        with -c and -k
+    -l  Disable ssl checks. When passed, switches "https" calls to "http" where
+        possible.
+    -L  Also install salt-cloud and required python-libcloud package
+    -M  Also install salt-master
+    -n  No colours
+    -N  Do not install salt-minion
+    -p  Extra-package to install while installing Salt dependencies. One package
+        per -p flag. You are responsible for providing the proper package name.
+    -P  Allow pip based installations. On some distributions the required salt
+        packages or its dependencies are not available as a package for that
+        distribution. Using this flag allows the script to use pip as a last
+        resort method. NOTE: This only works for functions which actually
+        implement pip based installations.
     -q  Quiet salt installation from git (setup.py install -q)
+    -R  Specify a custom repository URL. Assumes the custom repository URL
+        points to a repository that mirrors Salt packages located at
+        repo.saltproject.io. The option passed with -R replaces the
+        "repo.saltproject.io". If -R is passed, -r is also set. Currently only
+        works on CentOS/RHEL and Debian based distributions.
+    -s  Sleep time used when waiting for daemons to start, restart and when
+        checking for the services running. Default: ${__DEFAULT_SLEEP}
+    -S  Also install salt-syndic
+    -r  Disable all repository configuration performed by this script. This
+        option assumes all necessary repository configuration is already present
+        on the system.
+    -U  If set, fully upgrade the system prior to bootstrapping Salt
+    -v  Display script version
+    -V  Install Salt into virtualenv
+        (only available for Ubuntu based distributions)
+    -w  Install packages from downstream package repository rather than
+        upstream, saltstack package repository. This is currently only
+        implemented for SUSE.
     -x  Changes the Python version used to install Salt.
         For CentOS 6 git installations python2.7 is supported.
         Fedora git installation, CentOS 7, Debian 9, Ubuntu 16.04 and 18.04 support python3.
+    -X  Do not start daemons after installation
     -y  Installs a different python version on host. Currently this has only been
         tested with CentOS 6 and is considered experimental. This will install the
         ius repo on the box if disable repo is false. This must be used in conjunction

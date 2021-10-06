@@ -5011,8 +5011,8 @@ install_alpine_linux_git_deps() {
             fi
         fi
     else
-        apk -U add python2 py2-pip py2-setuptools || return 1
-        _PY_EXE=python2
+        apk -U add python3 python3-dev py3-pip py3-setuptools g++ linux-headers zeromq-dev || return 1
+        _PY_EXE=python3
         return 0
     fi
 

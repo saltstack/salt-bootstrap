@@ -535,8 +535,8 @@ UNIX systems
 Using a custom salt bootstrap
 -----------------------------
 
-By default the ``salt-cloud -p`` provisioning command will use the latest release from this 
-repository to bootstrap new minions. If 
+By default the ``salt-cloud -p`` provisioning command will use the latest release from this
+repository to bootstrap new minions. If
 
 - your needs are not met by that script,
 - you want to lock salt bootstrap to a specific release, or

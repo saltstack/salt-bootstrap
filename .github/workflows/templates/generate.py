@@ -11,6 +11,7 @@ LINUX_DISTROS = [
     "arch",
     "centos-7",
     "centos-8",
+    "centos-stream8",
     "debian-10",
     "debian-11",
     "debian-9",
@@ -36,6 +37,7 @@ STABLE_DISTROS = [
     "amazon-2",
     "centos-7",
     "centos-8",
+    "centos-stream8",
     "debian-10",
     "debian-11",
     "debian-9",
@@ -54,6 +56,7 @@ STABLE_DISTROS = [
 
 BLACKLIST_3001 = [
     "almalinux-8",
+    "centos-stream8",
     "debian-11",
     "rockylinux-8",
     "ubuntu-2104",
@@ -62,6 +65,7 @@ BLACKLIST_3001 = [
 BLACKLIST_3001_0 = [
     "almalinux-8",
     "amazon-2",
+    "centos-stream8",
     "debian-11",
     "gentoo",
     "gentoo-systemd",
@@ -71,12 +75,14 @@ BLACKLIST_3001_0 = [
 
 BLACKLIST_3002 = [
     "almalinux-8",
+    "centos-stream8",
     "rockylinux-8",
 ]
 
 BLACKLIST_3002_0 = [
     "almalinux-8",
     "amazon-2",
+    "centos-stream8",
     "debian-11",
     "gentoo",
     "gentoo-systemd",
@@ -129,6 +135,7 @@ DISTRO_DISPLAY_NAMES = {
     "arch": "Arch",
     "centos-7": "CentOS 7",
     "centos-8": "CentOS 8",
+    "centos-stream8": "CentOS Stream 8",
     "debian-10": "Debian 10",
     "debian-11": "Debian 11",
     "debian-9": "Debian 9",

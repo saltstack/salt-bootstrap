@@ -4121,18 +4121,15 @@ __install_saltstack_rhel_repository() {
     # Instead, this should work correctly on all RHEL variants.
     base_url="${HTTP_VAL}://${_REPO_URL}/${__PY_VERSION_REPO}/redhat/${DISTRO_MAJOR_VERSION}/\$basearch/${repo_rev}/"
     if [ "${DISTRO_MAJOR_VERSION}" -eq 7 ]; then
-        gpg_key="SALTSTACK-GPG-KEY.pub,base/RPM-GPG-KEY-CentOS-7"
+        gpg_key="SALTSTACK-GPG-KEY.pub base/RPM-GPG-KEY-CentOS-7"
     else
         gpg_key="SALTSTACK-GPG-KEY.pub"
     fi
 
-    Field_Separator=$IFS
-    IFS=,
     gpg_key_urls=""
     for key in $gpg_key; do
-	gpg_key_urls=$(printf "${base_url}${key},%s" "$gpg_key_urls")
+        gpg_key_urls=$(printf "${base_url}${key},%s" "$gpg_key_urls")
     done
-    IFS=$Field_Separator
 
     repo_file="/etc/yum.repos.d/salt.repo"
 
@@ -4149,12 +4146,9 @@ enabled_metadata=1
 _eof
 
         fetch_url="${HTTP_VAL}://${_REPO_URL}/${__PY_VERSION_REPO}/redhat/${DISTRO_MAJOR_VERSION}/${CPU_ARCH_L}/${repo_rev}/"
-	Field_Separator=$IFS
-	IFS=,
-	for key in $gpg_key; do
+        for key in $gpg_key; do
             __rpm_import_gpg "${fetch_url}${key}" || return 1
         done
-	IFS=$Field_Separator
 
         yum clean metadata || return 1
     elif [ "$repo_rev" != "latest" ]; then

@@ -4120,7 +4120,17 @@ __install_saltstack_rhel_repository() {
     # Avoid using '$releasever' variable for yum.
     # Instead, this should work correctly on all RHEL variants.
     base_url="${HTTP_VAL}://${_REPO_URL}/${__PY_VERSION_REPO}/redhat/${DISTRO_MAJOR_VERSION}/\$basearch/${repo_rev}/"
-    gpg_key="SALTSTACK-GPG-KEY.pub"
+    if [ "${DISTRO_MAJOR_VERSION}" -eq 7 ]; then
+        gpg_key="SALTSTACK-GPG-KEY.pub base/RPM-GPG-KEY-CentOS-7"
+    else
+        gpg_key="SALTSTACK-GPG-KEY.pub"
+    fi
+
+    gpg_key_urls=""
+    for key in $gpg_key; do
+        gpg_key_urls=$(printf "${base_url}${key},%s" "$gpg_key_urls")
+    done
+
     repo_file="/etc/yum.repos.d/salt.repo"
 
     if [ ! -s "$repo_file" ] || [ "$_FORCE_OVERWRITE" -eq $BS_TRUE ]; then
@@ -4130,13 +4140,16 @@ name=SaltStack ${repo_rev} Release Channel for RHEL/CentOS \$releasever
 baseurl=${base_url}
 skip_if_unavailable=True
 gpgcheck=1
-gpgkey=${base_url}${gpg_key}
+gpgkey=${gpg_key_urls}
 enabled=1
 enabled_metadata=1
 _eof
 
         fetch_url="${HTTP_VAL}://${_REPO_URL}/${__PY_VERSION_REPO}/redhat/${DISTRO_MAJOR_VERSION}/${CPU_ARCH_L}/${repo_rev}/"
-        __rpm_import_gpg "${fetch_url}${gpg_key}" || return 1
+        for key in $gpg_key; do
+            __rpm_import_gpg "${fetch_url}${key}" || return 1
+        done
+
         yum clean metadata || return 1
     elif [ "$repo_rev" != "latest" ]; then
         echowarn "salt.repo already exists, ignoring salt version argument."
@@ -4179,21 +4192,21 @@ install_centos_stable_deps() {
         if [ "$DISTRO_MAJOR_VERSION" -ge 8 ]; then
             # YAML module is used for generating custom master/minion configs
             if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 3 ]; then
-                __PACKAGES="${__PACKAGES} python3-pyyaml"
+                __PACKAGES="${__PACKAGES} python3-pyyaml python3-setuptools"
             else
                 __PACKAGES="${__PACKAGES} python2-pyyaml"
             fi
         elif [ "$DISTRO_MAJOR_VERSION" -eq 7 ]; then
             # YAML module is used for generating custom master/minion configs
             if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 3 ]; then
-                __PACKAGES="${__PACKAGES} python36-PyYAML"
+                __PACKAGES="${__PACKAGES} python36-PyYAML python36-setuptools"
             else
                 __PACKAGES="${__PACKAGES} PyYAML"
             fi
         else
             # YAML module is used for generating custom master/minion configs
             if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 3 ]; then
-                __PACKAGES="${__PACKAGES} python34-PyYAML"
+                __PACKAGES="${__PACKAGES} python34-PyYAML python34-setuptools"
             else
                 __PACKAGES="${__PACKAGES} PyYAML"
             fi

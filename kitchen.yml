@@ -84,14 +84,18 @@ platforms:
   - name: opensuse-15
     driver:
       image: opensuse/leap:15.3
-      provision_command: &opensuse_provision_command
-        - zypper --non-interactive install --auto-agree-with-licenses dbus-1
-        - zypper --non-interactive install --auto-agree-with-licenses sudo openssh which curl systemd
-        - systemctl enable sshd.service
+      provision_command:
+        - &opensuse_provision_command_01 zypper --non-interactive install --auto-agree-with-licenses dbus-1
+        - &opensuse_provision_command_02 zypper --non-interactive install --auto-agree-with-licenses sudo openssh which curl systemd
+        - &opensuse_provision_command_03 systemctl enable sshd.service
   - name: opensuse-tumbleweed
     driver:
       image: opensuse/tumbleweed:latest
-      provision_command: *opensuse_provision_command
+      provision_command:
+        - *opensuse_provision_command_01
+        - *opensuse_provision_command_02
+        - *opensuse_provision_command_03
+        - echo "PubkeyAcceptedAlgorithms +ssh-rsa" | tee -a /etc/ssh/sshd_config
   - name: oraclelinux-8
   - name: oraclelinux-7
   - name: rockylinux-8

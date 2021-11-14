@@ -1492,6 +1492,7 @@ __debian_derivatives_translation() {
     raspbian_8_debian_base="8.0"
     raspbian_9_debian_base="9.0"
     raspbian_10_debian_base="10.0"
+    raspbian_11_debian_base="11.0"
     bunsenlabs_9_debian_base="9.0"
     turnkey_9_debian_base="9.0"
 

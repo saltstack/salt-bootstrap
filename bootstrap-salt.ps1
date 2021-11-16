@@ -133,13 +133,11 @@ If (!(Get-IsAdministrator)) {
 
         # Specify the current script path and name as a parameter`
         $parameters = ""
-        If($minion -ne "not-specified") {$parameters = "-minion $minion"}
-        If($master -ne "not-specified") {$parameters = "$parameters -master $master"}
-        If($runservice -eq $false) {$parameters = "$parameters -runservice false"}
-        If($version -ne '') {$parameters = "$parameters -version $version"}
-        If($pythonVersion -ne "") {$parameters = "$parameters -pythonVersion $pythonVersion"}
+        foreach ($boundParam in $PSBoundParameters.GetEnumerator())
+        {
+            $parameters = "$parameters -{0} '{1}'" -f $boundParam.Key, $boundParam.Value
+        }
         $newProcess.Arguments = $myInvocation.MyCommand.Definition, $parameters
-
         # Specify the current working directory
         $newProcess.WorkingDirectory = "$script_path"
 

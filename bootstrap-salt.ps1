@@ -138,6 +138,7 @@ If (!(Get-IsAdministrator)) {
             $parameters = "$parameters -{0} '{1}'" -f $boundParam.Key, $boundParam.Value
         }
         $newProcess.Arguments = $myInvocation.MyCommand.Definition, $parameters
+
         # Specify the current working directory
         $newProcess.WorkingDirectory = "$script_path"
 

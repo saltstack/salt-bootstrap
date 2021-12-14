@@ -24,9 +24,9 @@ platforms:
   - name: freebsd-130
     driver:
       box: bento/freebsd-13.0
-  - name: freebsd-122
+  - name: freebsd-123
     driver:
-      box: bento/freebsd-12.2
+      box: bento/freebsd-12.3
   - name: openbsd-6
     driver:
       box: generic/openbsd6

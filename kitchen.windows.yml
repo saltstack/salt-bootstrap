@@ -13,8 +13,8 @@ provisioner:
   init_environment: ''
 
 platforms:
+  - name: windows-2022
   - name: windows-2019
-  - name: windows-2016
 
 suites:
   - name: py3-stable-3001

@@ -36,18 +36,18 @@ jobs:
       - name: 'ShellCheck'
         run: |
           shellcheck -s sh -f tty bootstrap-salt.sh
-  test-2019:
-    runs-on: 'windows-2019'
+  test-2022:
+    runs-on: 'windows-2022'
     timeout-minutes: 20
     needs: 'lint'
     strategy:
       fail-fast: false
       matrix:
         instance:
-          - py3-stable-3001-windows-2019
-          - py3-stable-3002-windows-2019
-          - py3-stable-3003-windows-2019
-          - latest-windows-2019
+          - py3-stable-3001-windows-2022
+          - py3-stable-3002-windows-2022
+          - py3-stable-3003-windows-2022
+          - latest-windows-2022
     steps:
       - name: 'Check out code'
         uses: 'actions/checkout@v2'
@@ -91,18 +91,18 @@ jobs:
           pip install -r tests/requirements.txt
       - name: 'Run Test Kitchen'
         run: 'bundle exec kitchen test ${{ matrix.instance }}'
-  test-2016:
-    runs-on: 'windows-2016'
+  test-2019:
+    runs-on: 'windows-2019'
     timeout-minutes: 20
     needs: 'lint'
     strategy:
       fail-fast: false
       matrix:
         instance:
-          - py3-stable-3001-windows-2016
-          - py3-stable-3002-windows-2016
-          - py3-stable-3003-windows-2016
-          - latest-windows-2016
+          - py3-stable-3001-windows-2019
+          - py3-stable-3002-windows-2019
+          - py3-stable-3003-windows-2019
+          - latest-windows-2019
     steps:
       - name: 'Check out code'
         uses: 'actions/checkout@v2'

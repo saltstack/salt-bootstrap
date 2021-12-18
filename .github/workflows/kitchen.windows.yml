@@ -74,10 +74,8 @@ jobs:
           New-LocalUser $env:machine_user -Password $password
           Add-LocalGroupMember -Group "Administrators" -Member $env:machine_user
       - name: 'Set up WinRM'
-        run: >
-          Set-WSManQuickConfig -Force;
-          Set-WSManInstance -ResourceURI winrm/config/service
-          -ValueSet @{AllowUnencrypted="true"}
+        run: |
+          Set-WSManQuickConfig -Force
       - name: 'Run Bundler'
         run: |
           ruby --version
@@ -131,10 +129,8 @@ jobs:
           New-LocalUser $env:machine_user -Password $password
           Add-LocalGroupMember -Group "Administrators" -Member $env:machine_user
       - name: 'Set up WinRM'
-        run: >
-          Set-WSManQuickConfig -Force;
-          Set-WSManInstance -ResourceURI winrm/config/service
-          -ValueSet @{AllowUnencrypted="true"}
+        run: |
+          Set-WSManQuickConfig -Force
       - name: 'Run Bundler'
         run: |
           ruby --version

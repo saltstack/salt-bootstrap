@@ -7,9 +7,15 @@ driver:
   customize:
     usbxhci: 'off'
   gui: false
-  linked_clone: true
   ssh:
     shell: /bin/sh
+  <% unless ENV['CI'] %>
+  linked_clone: true
+  synced_folders:
+    - - '.kitchen/kitchen-vagrant/%{instance_name}/vagrant'
+      - '/vagrant'
+      - 'create: true, disabled: false'
+  <% end %>
 
 provisioner:
   init_environment: |
@@ -32,6 +38,7 @@ platforms:
       box: generic/openbsd6
       ssh:
         shell: /bin/ksh
+      synced_folders: []
     provisioner:
       init_environment: |
         echo 'auto_accept: true' > /tmp/auto-accept-keys.conf

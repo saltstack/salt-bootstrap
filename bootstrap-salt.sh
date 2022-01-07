@@ -1488,6 +1488,7 @@ __debian_derivatives_translation() {
     devuan_1_debian_base="8.0"
     devuan_2_debian_base="9.0"
     kali_1_debian_base="7.0"
+    kali_2021_debian_base="10.0"
     linuxmint_1_debian_base="8.0"
     raspbian_8_debian_base="8.0"
     raspbian_9_debian_base="9.0"
@@ -3769,6 +3770,13 @@ install_debian_git_post() {
             update-rc.d "salt-${fname}" defaults
         fi
     done
+}
+
+install_debian_2021_post() {
+    # Kali 2021 (debian derivative) disables all network services by default
+    # Using archlinux post function to enable salt systemd services
+    install_arch_linux_post || return 1
+    return 0
 }
 
 install_debian_restart_daemons() {

@@ -28,7 +28,7 @@ LINUX_DISTROS = [
     "ubuntu-1604",
     "ubuntu-1804",
     "ubuntu-2004",
-    "ubuntu-2104",
+    "ubuntu-2110",
 ]
 OSX = WINDOWS = []
 
@@ -51,7 +51,7 @@ STABLE_DISTROS = [
     "ubuntu-1604",
     "ubuntu-1804",
     "ubuntu-2004",
-    "ubuntu-2104",
+    "ubuntu-2110",
 ]
 
 BLACKLIST_3001 = [
@@ -59,7 +59,7 @@ BLACKLIST_3001 = [
     "centos-stream8",
     "debian-11",
     "rockylinux-8",
-    "ubuntu-2104",
+    "ubuntu-2110",
 ]
 
 BLACKLIST_3001_0 = [
@@ -70,7 +70,7 @@ BLACKLIST_3001_0 = [
     "gentoo",
     "gentoo-systemd",
     "rockylinux-8",
-    "ubuntu-2104",
+    "ubuntu-2110",
 ]
 
 BLACKLIST_3002 = [
@@ -87,7 +87,7 @@ BLACKLIST_3002_0 = [
     "gentoo",
     "gentoo-systemd",
     "rockylinux-8",
-    "ubuntu-2104",
+    "ubuntu-2110",
 ]
 
 BLACKLIST_3003 = [
@@ -152,7 +152,7 @@ DISTRO_DISPLAY_NAMES = {
     "ubuntu-1604": "Ubuntu 16.04",
     "ubuntu-1804": "Ubuntu 18.04",
     "ubuntu-2004": "Ubuntu 20.04",
-    "ubuntu-2104": "Ubuntu 21.04",
+    "ubuntu-2110": "Ubuntu 21.10",
 }
 
 TIMEOUT_DEFAULT = 20

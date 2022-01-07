@@ -103,7 +103,7 @@ platforms:
   - name: rockylinux-8
     driver:
       image: rockylinux/rockylinux
-  - name: ubuntu-21.04
+  - name: ubuntu-21.10
     driver:
       run_command: /lib/systemd/systemd
   - name: ubuntu-20.04
@@ -141,7 +141,7 @@ suites:
       - arch
       - gentoo
       - gentoo-systemd
-      - ubuntu-2104
+      - ubuntu-2110
       - freebsd-130
       - freebsd-123
       - openbsd-6
@@ -154,7 +154,7 @@ suites:
       - opensuse-15
       - opensuse-tumbleweed
       - arch
-      - ubuntu-2104
+      - ubuntu-2110
       - freebsd-130
       - freebsd-123
       - openbsd-6

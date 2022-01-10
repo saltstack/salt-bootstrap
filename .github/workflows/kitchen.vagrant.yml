@@ -50,6 +50,9 @@ jobs:
           - py3-git-3003-freebsd-130
           - py3-git-3003-freebsd-123
           # - py3-git-3003-openbsd-6
+          - py3-git-3004-freebsd-130
+          - py3-git-3004-freebsd-123
+          # - py3-git-3004-openbsd-6
           - py3-git-master-freebsd-130
           - py3-git-master-freebsd-123
           # - py3-git-master-openbsd-6

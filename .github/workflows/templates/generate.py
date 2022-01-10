@@ -103,6 +103,21 @@ BLACKLIST_3003_0 = [
     "ubuntu-1604",
 ]
 
+BLACKLIST_3004 = [
+    "rockylinux-8",
+    "ubuntu-1604",
+    "arch",
+]
+
+BLACKLIST_3004_0 = [
+    "amazon-2",
+    "gentoo",
+    "gentoo-systemd",
+    "rockylinux-8",
+    "ubuntu-1604",
+    "arch",
+]
+
 SALT_BRANCHES = [
     "3001",
     "3001-0",
@@ -110,6 +125,8 @@ SALT_BRANCHES = [
     "3002-0",
     "3003",
     "3003-0",
+    "3004",
+    "3004-0",
     "master",
     "latest",
 ]
@@ -121,6 +138,8 @@ BRANCH_DISPLAY_NAMES = {
     "3002-0": "v3002.0",
     "3003": "v3003",
     "3003-0": "v3003.0",
+    "3004": "v3004",
+    "3004-0": "v3004.0",
     "master": "Master",
     "latest": "Latest",
 }
@@ -254,6 +273,11 @@ def generate_test_jobs():
                     if branch == "3003-0" and distro in BLACKLIST_3003_0:
                         continue
 
+                    if branch == "3004" and distro in BLACKLIST_3004:
+                        continue
+
+                    if branch == "3004-0" and distro in BLACKLIST_3004_0:
+                        continue
                     if distro in LINUX_DISTROS:
                         template = "linux.yml"
                     elif distro in OSX:

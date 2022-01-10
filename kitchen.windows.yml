@@ -26,6 +26,9 @@ suites:
   - name: py3-stable-3003
     provisioner:
       salt_version: 3003
+  - name: py3-stable-3004
+    provisioner:
+      salt_version: 3004
   - name: latest
     provisioner:
       salt_version: latest

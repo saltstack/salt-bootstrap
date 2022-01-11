@@ -41,9 +41,6 @@ jobs:
       fail-fast: false
       matrix:
         instance:
-          - py3-git-3001-freebsd-130
-          - py3-git-3001-freebsd-123
-          # - py3-git-3001-openbsd-6
           - py3-git-3002-freebsd-130
           - py3-git-3002-freebsd-123
           # - py3-git-3002-openbsd-6

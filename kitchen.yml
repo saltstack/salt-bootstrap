@@ -117,10 +117,6 @@ platforms:
       run_command: /lib/systemd/systemd
 
 suites:
-  - name: py3-git-3001
-    provisioner:
-      salt_version: 3001
-      salt_bootstrap_options: -x python3 -MPfq git %s
   - name: py3-git-3002
     provisioner:
       salt_version: 3002
@@ -133,35 +129,6 @@ suites:
     provisioner:
       salt_version: 3004
       salt_bootstrap_options: -x python3 -MPfq git %s
-  - name: py3-stable-3001-0
-    provisioner:
-      salt_version: 3001
-      salt_bootstrap_options: -x python3 -MP stable 3001.0
-    excludes:
-      - opensuse-15
-      - opensuse-tumbleweed
-      - debian-11
-      - fedora-33
-      - arch
-      - gentoo
-      - gentoo-systemd
-      - ubuntu-2110
-      - freebsd-130
-      - freebsd-123
-      - openbsd-6
-  - name: py3-stable-3001
-    provisioner:
-      salt_version: 3001
-      salt_bootstrap_options: -x python3 -MP stable %s
-    excludes:
-      - debian-11
-      - opensuse-15
-      - opensuse-tumbleweed
-      - arch
-      - ubuntu-2110
-      - freebsd-130
-      - freebsd-123
-      - openbsd-6
   - name: py3-stable-3002-0
     provisioner:
       salt_version: 3002

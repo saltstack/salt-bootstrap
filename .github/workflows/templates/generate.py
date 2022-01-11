@@ -54,25 +54,6 @@ STABLE_DISTROS = [
     "ubuntu-2110",
 ]
 
-BLACKLIST_3001 = [
-    "almalinux-8",
-    "centos-stream8",
-    "debian-11",
-    "rockylinux-8",
-    "ubuntu-2110",
-]
-
-BLACKLIST_3001_0 = [
-    "almalinux-8",
-    "amazon-2",
-    "centos-stream8",
-    "debian-11",
-    "gentoo",
-    "gentoo-systemd",
-    "rockylinux-8",
-    "ubuntu-2110",
-]
-
 BLACKLIST_3002 = [
     "almalinux-8",
     "centos-stream8",
@@ -119,8 +100,6 @@ BLACKLIST_3004_0 = [
 ]
 
 SALT_BRANCHES = [
-    "3001",
-    "3001-0",
     "3002",
     "3002-0",
     "3003",
@@ -132,8 +111,6 @@ SALT_BRANCHES = [
 ]
 
 BRANCH_DISPLAY_NAMES = {
-    "3001": "v3001",
-    "3001-0": "v3001.0",
     "3002": "v3002",
     "3002-0": "v3002.0",
     "3003": "v3003",
@@ -251,15 +228,9 @@ def generate_test_jobs():
                             continue
 
                     if bootstrap_type == "git":
-                        # .0 versions are a virtual version for pinning to the first point release of a major release, such as 3001, there is no git version.
+                        # .0 versions are a virtual version for pinning to the first point release of a major release, such as 3002, there is no git version.
                         if branch.endswith("-0"):
                             continue
-
-                    if branch == "3001" and distro in BLACKLIST_3001:
-                        continue
-
-                    if branch == "3001-0" and distro in BLACKLIST_3001_0:
-                        continue
 
                     if branch == "3002" and distro in BLACKLIST_3002:
                         continue

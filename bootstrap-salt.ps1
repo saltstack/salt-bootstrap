@@ -186,6 +186,15 @@ Else {
 
 $ConfiguredAnything = $False
 
+$SaltRegKey = "HKLM:\SOFTWARE\Salt Project\Salt"
+$RootDir = If ((Get-ItemProperty $SaltRegKey).root_dir -ne $null) {
+    (Get-ItemProperty $SaltRegKey).root_dir
+} Else {
+    "C:\salt"
+}
+$ConfDir = "$RootDir\conf"
+$PkiDir = "$ConfDir\pki\minion"
+
 # Create C:\tmp\
 New-Item C:\tmp\ -ItemType directory -Force | Out-Null
 
@@ -193,9 +202,9 @@ New-Item C:\tmp\ -ItemType directory -Force | Out-Null
 # in C:\tmp
 # Check if minion keys have been uploaded, copy to correct location
 If (Test-Path C:\tmp\minion.pem) {
-    New-Item C:\salt\conf\pki\minion\ -ItemType Directory -Force | Out-Null
-    Copy-Item -Path C:\tmp\minion.pem -Destination C:\salt\conf\pki\minion\ -Force | Out-Null
-    Copy-Item -Path C:\tmp\minion.pub -Destination C:\salt\conf\pki\minion\ -Force | Out-Null
+    New-Item $PkiDir -ItemType Directory -Force | Out-Null
+    Copy-Item -Path C:\tmp\minion.pem -Destination $PkiDir -Force | Out-Null
+    Copy-Item -Path C:\tmp\minion.pub -Destination $PkiDir -Force | Out-Null
     $ConfiguredAnything = $True
 }
 
@@ -203,15 +212,15 @@ If (Test-Path C:\tmp\minion.pem) {
 # This should be done before the installer is run so that it can be updated with
 # id: and master: settings when the installer runs
 If (Test-Path C:\tmp\minion) {
-    New-Item C:\salt\conf\ -ItemType Directory -Force | Out-Null
-    Copy-Item -Path C:\tmp\minion -Destination C:\salt\conf\ -Force | Out-Null
+    New-Item $ConfDir -ItemType Directory -Force | Out-Null
+    Copy-Item -Path C:\tmp\minion -Destination $ConfDir -Force | Out-Null
     $ConfiguredAnything = $True
 }
 
 # Check if grains config has been uploaded
 If (Test-Path C:\tmp\grains) {
-    New-Item C:\salt\conf\ -ItemType Directory -Force | Out-Null
-    Copy-Item -Path C:\tmp\grains -Destination C:\salt\conf\ -Force | Out-Null
+    New-Item $ConfDir -ItemType Directory -Force | Out-Null
+    Copy-Item -Path C:\tmp\grains -Destination $ConfDir -Force | Out-Null
     $ConfiguredAnything = $True
 }
 

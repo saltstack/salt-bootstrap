@@ -58,6 +58,7 @@ BLACKLIST_3002 = [
     "almalinux-8",
     "centos-stream8",
     "rockylinux-8",
+    "debian-11",
 ]
 
 BLACKLIST_3002_0 = [
@@ -74,6 +75,7 @@ BLACKLIST_3002_0 = [
 BLACKLIST_3003 = [
     "rockylinux-8",
     "ubuntu-1604",
+    "debian-11",
 ]
 
 BLACKLIST_3003_0 = [
@@ -82,6 +84,7 @@ BLACKLIST_3003_0 = [
     "gentoo-systemd",
     "rockylinux-8",
     "ubuntu-1604",
+    "debian-11"
 ]
 
 BLACKLIST_3004 = [

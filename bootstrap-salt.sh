@@ -1591,11 +1591,13 @@ __check_end_of_life_versions() {
             #  = 17.04, 17.10
             #  = 18.10
             #  = 19.04, 19.10
+            #  = 20.10
             if [ "$DISTRO_MAJOR_VERSION" -lt 16 ] || \
                 [ "$DISTRO_MAJOR_VERSION" -eq 17 ] || \
                 [ "$DISTRO_MAJOR_VERSION" -eq 19 ] || \
                 { [ "$DISTRO_MAJOR_VERSION" -eq 16 ] && [ "$DISTRO_MINOR_VERSION" -eq 10 ]; } || \
-                { [ "$DISTRO_MAJOR_VERSION" -eq 18 ] && [ "$DISTRO_MINOR_VERSION" -eq 10 ]; }; then
+                { [ "$DISTRO_MAJOR_VERSION" -eq 18 ] && [ "$DISTRO_MINOR_VERSION" -eq 10 ]; } || \
+                { [ "$DISTRO_MAJOR_VERSION" -eq 20 ] && [ "$DISTRO_MINOR_VERSION" -eq 10 ]; }; then
                 echoerror "End of life distributions are not supported."
                 echoerror "Please consider upgrading to the next stable. See:"
                 echoerror "    https://wiki.ubuntu.com/Releases"
@@ -3350,17 +3352,8 @@ install_ubuntu_check_services() {
 #   Debian Install Functions
 #
 __install_saltstack_debian_repository() {
-    if [ "$DISTRO_MAJOR_VERSION" -eq 11 ]; then
-        # Packages for Debian 11 at repo.saltproject.io are not yet available
-        # Set up repository for Debian 10 for Debian 11 for now until support
-        # is available at repo.saltproject.io for Debian 11.
-        echowarn "Debian 11 distribution detected, but stable packages requested. Trying packages from Debian 10. You may experience problems."
-        DEBIAN_RELEASE="10"
-        DEBIAN_CODENAME="buster"
-    else
-        DEBIAN_RELEASE="$DISTRO_MAJOR_VERSION"
-        DEBIAN_CODENAME="$DISTRO_CODENAME"
-    fi
+    DEBIAN_RELEASE="$DISTRO_MAJOR_VERSION"
+    DEBIAN_CODENAME="$DISTRO_CODENAME"
 
     __PY_VERSION_REPO="apt"
     if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 3 ]; then

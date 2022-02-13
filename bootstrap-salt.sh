@@ -6010,7 +6010,7 @@ install_openbsd_git_deps() {
     __git_clone_and_checkout || return 1
 
     if [ "${_POST_NEON_INSTALL}" -eq $BS_TRUE ]; then
-        pkg_add -I -v py-pip py-setuptools
+        pkg_add -I -v py3-pip py3-setuptools
     fi
 
     #

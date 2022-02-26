@@ -57,14 +57,11 @@ platforms:
     driver:
       image: debian:bullseye
       run_command: /lib/systemd/systemd
-  - name: fedora-33
+  - name: fedora-34
     driver:
       provision_command: &fedora_provision_command
         - dnf -y install procps-ng
         - sed -i 's/^PubkeyAcceptedKeyTypes.*$/&,ssh-rsa/' /etc/crypto-policies/back-ends/opensshserver.config
-  - name: fedora-34
-    driver:
-      provision_command: *fedora_provision_command
   - name: fedora-35
     driver:
       provision_command: *fedora_provision_command
@@ -134,7 +131,6 @@ suites:
       - opensuse-15
       - opensuse-tumbleweed
       - debian-11
-      - fedora-33
       - arch
       - gentoo
       - gentoo-systemd
@@ -148,7 +144,6 @@ suites:
     excludes:
       - opensuse-15
       - opensuse-tumbleweed
-      - fedora-33
       - arch
       - gentoo
       - gentoo-systemd
@@ -184,7 +179,6 @@ suites:
     excludes:
       - opensuse-15
       - opensuse-tumbleweed
-      - fedora-33
       - arch
       - gentoo
       - gentoo-systemd

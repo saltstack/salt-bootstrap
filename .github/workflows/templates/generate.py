@@ -48,6 +48,7 @@ STABLE_DISTROS = [
     "gentoo-systemd",
     "oraclelinux-7",
     "oraclelinux-8",
+    "rockylinux-8",
     "ubuntu-1604",
     "ubuntu-1804",
     "ubuntu-2004",
@@ -88,7 +89,6 @@ BLACKLIST_3003_0 = [
 ]
 
 BLACKLIST_3004 = [
-    "rockylinux-8",
     "ubuntu-1604",
     "arch",
 ]
@@ -97,7 +97,6 @@ BLACKLIST_3004_0 = [
     "amazon-2",
     "gentoo",
     "gentoo-systemd",
-    "rockylinux-8",
     "ubuntu-1604",
     "arch",
 ]

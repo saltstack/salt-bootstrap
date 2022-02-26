@@ -101,8 +101,6 @@ platforms:
   - name: oraclelinux-8
   - name: oraclelinux-7
   - name: rockylinux-8
-    driver:
-      image: rockylinux/rockylinux
   - name: ubuntu-21.10
     driver:
       run_command: /lib/systemd/systemd

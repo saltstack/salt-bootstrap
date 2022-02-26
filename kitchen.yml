@@ -60,8 +60,8 @@ platforms:
   - name: fedora-34
     driver:
       provision_command: &fedora_provision_command
-        - dnf -y install procps-ng
-        - sed -i 's/^PubkeyAcceptedKeyTypes.*$/&,ssh-rsa/' /etc/crypto-policies/back-ends/opensshserver.config
+        - dnf -y install procps-ng crypto-policies-scripts
+        - update-crypto-policies --set LEGACY
   - name: fedora-35
     driver:
       provision_command: *fedora_provision_command

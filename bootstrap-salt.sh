@@ -945,7 +945,7 @@ __strip_duplicates() {
 __sort_release_files() {
     KNOWN_RELEASE_FILES=$(echo "(arch|alpine|centos|debian|ubuntu|fedora|redhat|suse|\
         mandrake|mandriva|gentoo|slackware|turbolinux|unitedlinux|void|lsb|system|\
-        oracle|os)(-|_)(release|version)" | sed -E 's:[[:space:]]::g')
+        oracle|os|almalinux)(-|_)(release|version)" | sed -E 's:[[:space:]]::g')
     primary_release_files=""
     secondary_release_files=""
     # Sort know VS un-known files first
@@ -959,7 +959,7 @@ __sort_release_files() {
     done
 
     # Now let's sort by know files importance, max important goes last in the max_prio list
-    max_prio="redhat-release centos-release oracle-release fedora-release"
+    max_prio="redhat-release centos-release oracle-release fedora-release almalinux-release"
     for entry in $max_prio; do
         if [ "$(echo "${primary_release_files}" | grep "$entry")" != "" ]; then
             primary_release_files=$(echo "${primary_release_files}" | sed -e "s:\\(.*\\)\\($entry\\)\\(.*\\):\\2 \\1 \\3:g")
@@ -1086,6 +1086,7 @@ __gather_linux_system_info() {
             unitedlinux        ) n="UnitedLinux"    ;;
             void               ) n="VoidLinux"      ;;
             oracle             ) n="Oracle Linux"   ;;
+            almalinux          ) n="AlmaLinux"      ;;
             system             )
                 while read -r line; do
                     [ "${n}x" != "systemx" ] && break
@@ -1815,14 +1816,14 @@ elif [ "${DISTRO_NAME_L}" = "debian" ]; then
   __debian_codename_translation
 fi
 
-if [ "$(echo "${DISTRO_NAME_L}" | grep -E '(debian|ubuntu|centos|gentoo|red_hat|oracle|scientific|amazon|fedora|macosx)')" = "" ] && [ "$ITYPE" = "stable" ] && [ "$STABLE_REV" != "latest" ]; then
+if [ "$(echo "${DISTRO_NAME_L}" | grep -E '(debian|ubuntu|centos|gentoo|red_hat|oracle|scientific|amazon|fedora|macosx|almalinux)')" = "" ] && [ "$ITYPE" = "stable" ] && [ "$STABLE_REV" != "latest" ]; then
     echoerror "${DISTRO_NAME} does not have major version pegged packages support"
     exit 1
 fi
 
 # Only RedHat based distros have testing support
 if [ "${ITYPE}" = "testing" ]; then
-    if [ "$(echo "${DISTRO_NAME_L}" | grep -E '(centos|red_hat|amazon|oracle)')" = "" ]; then
+    if [ "$(echo "${DISTRO_NAME_L}" | grep -E '(centos|red_hat|amazon|oracle|almalinux)')" = "" ]; then
         echoerror "${DISTRO_NAME} does not have testing packages support"
         exit 1
     fi
@@ -4845,6 +4846,69 @@ install_oracle_linux_check_services() {
 }
 #
 #   Ended Oracle Linux Install Functions
+#
+#######################################################################################################################
+
+#######################################################################################################################
+#
+#   AlmaLinux Install Functions
+#
+install_almalinux_stable_deps() {
+    install_centos_stable_deps || return 1
+    return 0
+}
+
+install_almalinux_git_deps() {
+    install_centos_git_deps || return 1
+    return 0
+}
+
+install_almalinux_testing_deps() {
+    install_centos_testing_deps || return 1
+    return 0
+}
+
+install_almalinux_stable() {
+    install_centos_stable || return 1
+    return 0
+}
+
+install_almalinux_git() {
+    install_centos_git || return 1
+    return 0
+}
+
+install_almalinux_testing() {
+    install_centos_testing || return 1
+    return 0
+}
+
+install_almalinux_stable_post() {
+    install_centos_stable_post || return 1
+    return 0
+}
+
+install_almalinux_git_post() {
+    install_centos_git_post || return 1
+    return 0
+}
+
+install_almalinux_testing_post() {
+    install_centos_testing_post || return 1
+    return 0
+}
+
+install_almalinux_restart_daemons() {
+    install_centos_restart_daemons || return 1
+    return 0
+}
+
+install_almalinux_check_services() {
+    install_centos_check_services || return 1
+    return 0
+}
+#
+#   Ended AlmaLinux Install Functions
 #
 #######################################################################################################################
 

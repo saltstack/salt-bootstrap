@@ -46,7 +46,6 @@ platforms:
   - name: centos-stream8
     driver:
       image: quay.io/centos/centos:stream8
-  - name: centos-8
   - name: centos-7
   - name: debian-9
     driver:
@@ -58,14 +57,11 @@ platforms:
     driver:
       image: debian:bullseye
       run_command: /lib/systemd/systemd
-  - name: fedora-33
-    driver:
-      provision_command: &fedora_provision_command
-        - dnf -y install procps-ng
-        - sed -i 's/^PubkeyAcceptedKeyTypes.*$/&,ssh-rsa/' /etc/crypto-policies/back-ends/opensshserver.config
   - name: fedora-34
     driver:
-      provision_command: *fedora_provision_command
+      provision_command: &fedora_provision_command
+        - dnf -y install procps-ng crypto-policies-scripts
+        - update-crypto-policies --set LEGACY
   - name: fedora-35
     driver:
       provision_command: *fedora_provision_command
@@ -101,8 +97,6 @@ platforms:
   - name: oraclelinux-8
   - name: oraclelinux-7
   - name: rockylinux-8
-    driver:
-      image: rockylinux/rockylinux
   - name: ubuntu-21.10
     driver:
       run_command: /lib/systemd/systemd
@@ -137,7 +131,6 @@ suites:
       - opensuse-15
       - opensuse-tumbleweed
       - debian-11
-      - fedora-33
       - arch
       - gentoo
       - gentoo-systemd
@@ -151,7 +144,6 @@ suites:
     excludes:
       - opensuse-15
       - opensuse-tumbleweed
-      - fedora-33
       - arch
       - gentoo
       - gentoo-systemd
@@ -187,7 +179,6 @@ suites:
     excludes:
       - opensuse-15
       - opensuse-tumbleweed
-      - fedora-33
       - arch
       - gentoo
       - gentoo-systemd

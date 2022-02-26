@@ -10,4 +10,3 @@
 kitchen.local.yml
 .kitchen/
 .bundle/
-Gemfile.lock

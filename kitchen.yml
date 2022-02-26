@@ -46,7 +46,6 @@ platforms:
   - name: centos-stream8
     driver:
       image: quay.io/centos/centos:stream8
-  - name: centos-8
   - name: centos-7
   - name: debian-9
     driver:

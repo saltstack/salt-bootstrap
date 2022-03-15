@@ -36,6 +36,61 @@ jobs:
       - name: 'ShellCheck'
         run: |
           shellcheck -s sh -f tty bootstrap-salt.sh
+  test-2022:
+    runs-on: 'windows-2022'
+    timeout-minutes: 20
+    needs: 'lint'
+    strategy:
+      fail-fast: false
+      matrix:
+        instance:
+          - py3-stable-3002-windows-2022
+          - py3-stable-3003-windows-2022
+          - py3-stable-3004-windows-2022
+          - latest-windows-2022
+    steps:
+      - name: 'Check out code'
+        uses: 'actions/checkout@v2'
+      - name: 'Install Chef'
+        uses: 'actionshub/chef-install@1.1.0'
+        with:
+          project: 'chef'
+          version: '16.10.8'
+      - name: 'Add Chef bindir to PATH'
+        uses: 'myci-actions/export-env-var-powershell@1'
+        with:
+          name: 'PATH'
+          value: "C:\\opscode\\chef\\bin;\
+                  C:\\opscode\\chef\\embedded\\bin;$env:PATH"
+      - name: 'Set up Bundler cache'
+        uses: 'actions/cache@v1'
+        with:
+          path: 'vendor/bundle'
+          key: "${{ runner.os }}-gems-${{ hashFiles('**/Gemfile.lock') }}"
+          restore-keys: "${{ runner.os }}-gems-"
+      - name: 'Set up test user'
+        run: |
+          $password = ConvertTo-SecureString $env:machine_pass -AsPlainText -Force
+          New-LocalUser $env:machine_user -Password $password
+          Add-LocalGroupMember -Group "Administrators" -Member $env:machine_user
+      - name: 'Set up WinRM'
+        run: |
+          Set-WSManQuickConfig -Force
+      - name: 'Run Bundler'
+        run: |
+          ruby --version
+          bundle config path vendor/bundle
+          bundle install --jobs 4 --retry 3
+      - name: 'Set up Python 3.7'
+        uses: 'actions/setup-python@v1'
+        with:
+          python-version: '3.7'
+      - name: 'Install Python Dependencies'
+        run: |
+          pip install -U pip
+          pip install -r tests/requirements.txt
+      - name: 'Run Test Kitchen'
+        run: 'bundle exec kitchen test ${{ matrix.instance }}'
   test-2019:
     runs-on: 'windows-2019'
     timeout-minutes: 20
@@ -44,9 +99,9 @@ jobs:
       fail-fast: false
       matrix:
         instance:
-          - py3-stable-3001-windows-2019
           - py3-stable-3002-windows-2019
           - py3-stable-3003-windows-2019
+          - py3-stable-3004-windows-2019
           - latest-windows-2019
     steps:
       - name: 'Check out code'
@@ -74,67 +129,8 @@ jobs:
           New-LocalUser $env:machine_user -Password $password
           Add-LocalGroupMember -Group "Administrators" -Member $env:machine_user
       - name: 'Set up WinRM'
-        run: >
-          Set-WSManQuickConfig -Force;
-          Set-WSManInstance -ResourceURI winrm/config/service
-          -ValueSet @{AllowUnencrypted="true"}
-      - name: 'Run Bundler'
         run: |
-          ruby --version
-          bundle config path vendor/bundle
-          bundle install --jobs 4 --retry 3
-      - name: 'Set up Python 3.7'
-        uses: 'actions/setup-python@v1'
-        with:
-          python-version: '3.7'
-      - name: 'Install Python Dependencies'
-        run: |
-          pip install -U pip
-          pip install -r tests/requirements.txt
-      - name: 'Run Test Kitchen'
-        run: 'bundle exec kitchen test ${{ matrix.instance }}'
-  test-2016:
-    runs-on: 'windows-2016'
-    timeout-minutes: 20
-    needs: 'lint'
-    strategy:
-      fail-fast: false
-      matrix:
-        instance:
-          - py3-stable-3001-windows-2016
-          - py3-stable-3002-windows-2016
-          - py3-stable-3003-windows-2016
-          - latest-windows-2016
-    steps:
-      - name: 'Check out code'
-        uses: 'actions/checkout@v2'
-      - name: 'Install Chef'
-        uses: 'actionshub/chef-install@1.1.0'
-        with:
-          project: 'chef'
-          version: '16.10.8'
-      - name: 'Add Chef bindir to PATH'
-        uses: 'myci-actions/export-env-var-powershell@1'
-        with:
-          name: 'PATH'
-          value: "C:\\opscode\\chef\\bin;\
-                  C:\\opscode\\chef\\embedded\\bin;$env:PATH"
-      - name: 'Set up Bundler cache'
-        uses: 'actions/cache@v1'
-        with:
-          path: 'vendor/bundle'
-          key: "${{ runner.os }}-gems-${{ hashFiles('**/Gemfile.lock') }}"
-          restore-keys: "${{ runner.os }}-gems-"
-      - name: 'Set up test user'
-        run: |
-          $password = ConvertTo-SecureString $env:machine_pass -AsPlainText -Force
-          New-LocalUser $env:machine_user -Password $password
-          Add-LocalGroupMember -Group "Administrators" -Member $env:machine_user
-      - name: 'Set up WinRM'
-        run: >
-          Set-WSManQuickConfig -Force;
-          Set-WSManInstance -ResourceURI winrm/config/service
-          -ValueSet @{AllowUnencrypted="true"}
+          Set-WSManQuickConfig -Force
       - name: 'Run Bundler'
         run: |
           ruby --version

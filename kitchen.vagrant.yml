@@ -7,9 +7,15 @@ driver:
   customize:
     usbxhci: 'off'
   gui: false
-  linked_clone: true
   ssh:
     shell: /bin/sh
+  <% unless ENV['CI'] %>
+  linked_clone: true
+  synced_folders:
+    - - '.kitchen/kitchen-vagrant/%{instance_name}/vagrant'
+      - '/vagrant'
+      - 'create: true, disabled: false'
+  <% end %>
 
 provisioner:
   init_environment: |
@@ -24,14 +30,15 @@ platforms:
   - name: freebsd-130
     driver:
       box: bento/freebsd-13.0
-  - name: freebsd-122
+  - name: freebsd-123
     driver:
-      box: bento/freebsd-12.2
+      box: bento/freebsd-12.3
   - name: openbsd-6
     driver:
       box: generic/openbsd6
       ssh:
         shell: /bin/ksh
+      synced_folders: []
     provisioner:
       init_environment: |
         echo 'auto_accept: true' > /tmp/auto-accept-keys.conf

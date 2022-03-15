@@ -10,11 +10,10 @@ LINUX_DISTROS = [
     "amazon-2",
     "arch",
     "centos-7",
-    "centos-8",
+    "centos-stream8",
     "debian-10",
     "debian-11",
     "debian-9",
-    "fedora-33",
     "fedora-34",
     "fedora-35",
     "gentoo",
@@ -24,9 +23,10 @@ LINUX_DISTROS = [
     "oraclelinux-7",
     "oraclelinux-8",
     "rockylinux-8",
+    "ubuntu-1604",
     "ubuntu-1804",
     "ubuntu-2004",
-    "ubuntu-2104",
+    "ubuntu-2110",
 ]
 OSX = WINDOWS = []
 
@@ -34,56 +34,45 @@ STABLE_DISTROS = [
     "almalinux-8",
     "amazon-2",
     "centos-7",
-    "centos-8",
+    "centos-stream8",
     "debian-10",
     "debian-11",
     "debian-9",
-    "fedora-33",
     "fedora-34",
     "fedora-35",
     "gentoo",
     "gentoo-systemd",
     "oraclelinux-7",
     "oraclelinux-8",
+    "rockylinux-8",
+    "ubuntu-1604",
     "ubuntu-1804",
     "ubuntu-2004",
-    "ubuntu-2104",
-]
-
-BLACKLIST_3001 = [
-    "almalinux-8",
-    "debian-11",
-    "rockylinux-8",
-    "ubuntu-2104",
-]
-
-BLACKLIST_3001_0 = [
-    "almalinux-8",
-    "amazon-2",
-    "debian-11",
-    "gentoo",
-    "gentoo-systemd",
-    "rockylinux-8",
-    "ubuntu-2104",
+    "ubuntu-2110",
 ]
 
 BLACKLIST_3002 = [
     "almalinux-8",
+    "centos-stream8",
     "rockylinux-8",
+    "debian-11",
 ]
 
 BLACKLIST_3002_0 = [
     "almalinux-8",
     "amazon-2",
+    "centos-stream8",
     "debian-11",
     "gentoo",
     "gentoo-systemd",
     "rockylinux-8",
-    "ubuntu-2104",
+    "ubuntu-2110",
 ]
 
 BLACKLIST_3003 = [
     "rockylinux-8",
+    "ubuntu-1604",
+    "debian-11",
 ]
 
 BLACKLIST_3003_0 = [
@@ -91,26 +80,41 @@ BLACKLIST_3003_0 = [
     "gentoo",
     "gentoo-systemd",
     "rockylinux-8",
+    "ubuntu-1604",
+    "debian-11"
+]
+
+BLACKLIST_3004 = [
+    "ubuntu-1604",
+    "arch",
+]
+
+BLACKLIST_3004_0 = [
+    "amazon-2",
+    "gentoo",
+    "gentoo-systemd",
+    "ubuntu-1604",
+    "arch",
 ]
 
 SALT_BRANCHES = [
-    "3001",
-    "3001-0",
     "3002",
     "3002-0",
     "3003",
     "3003-0",
+    "3004",
+    "3004-0",
     "master",
     "latest",
 ]
 
 BRANCH_DISPLAY_NAMES = {
-    "3001": "v3001",
-    "3001-0": "v3001.0",
     "3002": "v3002",
     "3002-0": "v3002.0",
     "3003": "v3003",
     "3003-0": "v3003.0",
+    "3004": "v3004",
+    "3004-0": "v3004.0",
     "master": "Master",
     "latest": "Latest",
 }
@@ -124,11 +128,10 @@ DISTRO_DISPLAY_NAMES = {
     "amazon-2": "Amazon 2",
     "arch": "Arch",
     "centos-7": "CentOS 7",
-    "centos-8": "CentOS 8",
+    "centos-stream8": "CentOS Stream 8",
     "debian-10": "Debian 10",
     "debian-11": "Debian 11",
     "debian-9": "Debian 9",
-    "fedora-33": "Fedora 33",
     "fedora-34": "Fedora 34",
     "fedora-35": "Fedora 35",
     "gentoo": "Gentoo",
@@ -138,9 +141,10 @@ DISTRO_DISPLAY_NAMES = {
     "oraclelinux-7": "Oracle Linux 7",
     "oraclelinux-8": "Oracle Linux 8",
     "rockylinux-8": "Rocky Linux 8",
+    "ubuntu-1604": "Ubuntu 16.04",
     "ubuntu-1804": "Ubuntu 18.04",
     "ubuntu-2004": "Ubuntu 20.04",
-    "ubuntu-2104": "Ubuntu 21.04",
+    "ubuntu-2110": "Ubuntu 21.10",
 }
 
 TIMEOUT_DEFAULT = 20
@@ -220,15 +224,9 @@ def generate_test_jobs():
                             continue
 
                     if bootstrap_type == "git":
-                        # .0 versions are a virtual version for pinning to the first point release of a major release, such as 3001, there is no git version.
+                        # .0 versions are a virtual version for pinning to the first point release of a major release, such as 3002, there is no git version.
                         if branch.endswith("-0"):
                             continue
-
-                    if branch == "3001" and distro in BLACKLIST_3001:
-                        continue
-
-                    if branch == "3001-0" and distro in BLACKLIST_3001_0:
-                        continue
 
                     if branch == "3002" and distro in BLACKLIST_3002:
                         continue
@@ -242,6 +240,11 @@ def generate_test_jobs():
                     if branch == "3003-0" and distro in BLACKLIST_3003_0:
                         continue
 
+                    if branch == "3004" and distro in BLACKLIST_3004:
+                        continue
+
+                    if branch == "3004-0" and distro in BLACKLIST_3004_0:
+                        continue
                     if distro in LINUX_DISTROS:
                         template = "linux.yml"
                     elif distro in OSX:

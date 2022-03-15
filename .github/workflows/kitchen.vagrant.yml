@@ -41,20 +41,20 @@ jobs:
       fail-fast: false
       matrix:
         instance:
-          - py3-git-3001-freebsd-130
-          - py3-git-3001-freebsd-122
-          # - py3-git-3001-openbsd-6
           - py3-git-3002-freebsd-130
-          - py3-git-3002-freebsd-122
+          - py3-git-3002-freebsd-123
           # - py3-git-3002-openbsd-6
           - py3-git-3003-freebsd-130
-          - py3-git-3003-freebsd-122
+          - py3-git-3003-freebsd-123
           # - py3-git-3003-openbsd-6
+          - py3-git-3004-freebsd-130
+          - py3-git-3004-freebsd-123
+          # - py3-git-3004-openbsd-6
           - py3-git-master-freebsd-130
-          - py3-git-master-freebsd-122
+          - py3-git-master-freebsd-123
           # - py3-git-master-openbsd-6
           - latest-freebsd-130
-          - latest-freebsd-122
+          - latest-freebsd-123
           - latest-openbsd-6
     steps:
       - name: 'Check out code'

@@ -33,6 +33,7 @@ OSX = WINDOWS = []
 STABLE_DISTROS = [
     "almalinux-8",
     "amazon-2",
+    "arch",
     "centos-7",
     "centos-stream8",
     "debian-10",
@@ -42,10 +43,11 @@ STABLE_DISTROS = [
     "fedora-35",
     "gentoo",
     "gentoo-systemd",
+    "opensuse-15",
+    "opensuse-tumbleweed",
     "oraclelinux-7",
     "oraclelinux-8",
     "rockylinux-8",
-    "ubuntu-1604",
     "ubuntu-1804",
     "ubuntu-2004",
     "ubuntu-2110",
@@ -53,75 +55,114 @@ STABLE_DISTROS = [
 
 BLACKLIST_3002 = [
     "almalinux-8",
-    "centos-stream8",
-    "rockylinux-8",
-    "debian-11",
-]
-
-BLACKLIST_3002_0 = [
-    "almalinux-8",
-    "amazon-2",
+    "arch",
     "centos-stream8",
     "debian-11",
+    "fedora-34",
+    "fedora-35",
     "gentoo",
     "gentoo-systemd",
+    "opensuse-15",
+    "opensuse-tumbleweed",
     "rockylinux-8",
+]
+
+BLACKLIST_GIT_3002 = [
+    "almalinux-8",
+    "amazon-2",
+    "arch",
+    "centos-stream8",
+    "debian-10",
+    "debian-11",
+    "fedora-34",
+    "fedora-35",
+    "gentoo",
+    "gentoo-systemd",
+    "opensuse-15",
+    "opensuse-tumbleweed",
+    "rockylinux-8",
+    "ubuntu-2004",
     "ubuntu-2110",
 ]
 
 BLACKLIST_3003 = [
-    "rockylinux-8",
-    "ubuntu-1604",
+    "arch",
     "debian-11",
-]
-
-BLACKLIST_3003_0 = [
-    "amazon-2",
+    "fedora-34",
+    "fedora-35",
     "gentoo",
     "gentoo-systemd",
+    "opensuse-15",
+    "opensuse-tumbleweed",
     "rockylinux-8",
     "ubuntu-1604",
-    "debian-11"
+]
+
+BLACKLIST_GIT_3003 = [
+    "amazon-2",
+    "arch",
+    "debian-10",
+    "debian-11",
+    "fedora-34",
+    "fedora-35",
+    "gentoo",
+    "gentoo-systemd",
+    "opensuse-15",
+    "opensuse-tumbleweed",
+    "rockylinux-8",
+    "ubuntu-1604",
+    "ubuntu-2004",
+    "ubuntu-2110",
 ]
 
 BLACKLIST_3004 = [
-    "ubuntu-1604",
     "arch",
-]
-
-BLACKLIST_3004_0 = [
-    "amazon-2",
+    "fedora-34",
+    "fedora-35",
     "gentoo",
     "gentoo-systemd",
+    "opensuse-15",
+    "opensuse-tumbleweed",
     "ubuntu-1604",
+]
+
+BLACKLIST_GIT_3004 = [
+    "amazon-2",
     "arch",
+    "debian-10",
+    "debian-11",
+    "fedora-34",
+    "fedora-35",
+    "gentoo",
+    "gentoo-systemd",
+    "opensuse-15",
+    "opensuse-tumbleweed",
+    "ubuntu-1604",
+    "ubuntu-2004",
+    "ubuntu-2110",
 ]
 
 SALT_BRANCHES = [
     "3002",
-    "3002-0",
     "3003",
-    "3003-0",
     "3004",
-    "3004-0",
     "master",
     "latest",
 ]
 
 BRANCH_DISPLAY_NAMES = {
     "3002": "v3002",
-    "3002-0": "v3002.0",
     "3003": "v3003",
-    "3003-0": "v3003.0",
     "3004": "v3004",
-    "3004-0": "v3004.0",
     "master": "Master",
     "latest": "Latest",
 }
 
 STABLE_BRANCH_BLACKLIST = []
 
-LATEST_PKG_BLACKLIST = []
+LATEST_PKG_BLACKLIST = [
+    "ubuntu-1604",
+]
 
 DISTRO_DISPLAY_NAMES = {
     "almalinux-8": "AlmaLinux 8",
@@ -223,28 +264,28 @@ def generate_test_jobs():
                             # Fedora does not keep old builds around
                             continue
 
+                    BLACKLIST = {
+                        "3002": BLACKLIST_3002,
+                        "3003": BLACKLIST_3003,
+                        "3004": BLACKLIST_3004,
+                    }
                     if bootstrap_type == "git":
+                        BLACKLIST = {
+                            "3002": BLACKLIST_GIT_3002,
+                            "3003": BLACKLIST_GIT_3003,
+                            "3004": BLACKLIST_GIT_3004,
+                        }
+
                         # .0 versions are a virtual version for pinning to the first point release of a major release, such as 3002, there is no git version.
                         if branch.endswith("-0"):
                             continue
 
-                    if branch == "3002" and distro in BLACKLIST_3002:
+                    if (
+                        branch in ("3002", "3003", "3004")
+                        and distro in BLACKLIST[branch]
+                    ):
                         continue
 
-                    if branch == "3002-0" and distro in BLACKLIST_3002_0:
-                        continue
-
-                    if branch == "3003" and distro in BLACKLIST_3003:
-                        continue
-
-                    if branch == "3003-0" and distro in BLACKLIST_3003_0:
-                        continue
-
-                    if branch == "3004" and distro in BLACKLIST_3004:
-                        continue
-
-                    if branch == "3004-0" and distro in BLACKLIST_3004_0:
-                        continue
                     if distro in LINUX_DISTROS:
                         template = "linux.yml"
                     elif distro in OSX:
@@ -289,7 +330,9 @@ def generate_test_jobs():
                     rfh.read()
                     .format(
                         jobs="{pre_commit}{lint}{test}".format(
-                            lint=lint_job, test=test_jobs, pre_commit=pre_commit_job,
+                            lint=lint_job,
+                            test=test_jobs,
+                            pre_commit=pre_commit_job,
                         ),
                         on="push, pull_request",
                         name="Testing",
@@ -304,7 +347,9 @@ def generate_test_jobs():
                 "{}\n".format(
                     rfh.read()
                     .format(
-                        jobs="{test}".format(test=branch_only_test_jobs,),
+                        jobs="{test}".format(
+                            test=branch_only_test_jobs,
+                        ),
                         on="push",
                         name="Branch Testing",
                     )

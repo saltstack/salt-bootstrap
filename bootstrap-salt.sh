@@ -3983,6 +3983,9 @@ install_fedora_git_deps() {
             done
     else
         __PACKAGES="python${PY_PKG_VER}-devel python${PY_PKG_VER}-pip python${PY_PKG_VER}-setuptools gcc"
+        if [ "${DISTRO_VERSION}" -ge 35 ]; then
+            __PACKAGES="${__PACKAGES} gcc-c++"
+        fi
         # shellcheck disable=SC2086
         __dnf_install_noinput ${__PACKAGES} || return 1
     fi

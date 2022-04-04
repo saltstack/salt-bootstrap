@@ -48,7 +48,6 @@ STABLE_DISTROS = [
     "oraclelinux-7",
     "oraclelinux-8",
     "rockylinux-8",
-    "ubuntu-1604",
     "ubuntu-1804",
     "ubuntu-2004",
     "ubuntu-2110",
@@ -68,6 +67,24 @@ BLACKLIST_3002 = [
     "rockylinux-8",
 ]
 
+BLACKLIST_GIT_3002 = [
+    "almalinux-8",
+    "amazon-2",
+    "arch",
+    "centos-stream8",
+    "debian-10",
+    "debian-11",
+    "fedora-34",
+    "fedora-35",
+    "gentoo",
+    "gentoo-systemd",
+    "opensuse-15",
+    "opensuse-tumbleweed",
+    "rockylinux-8",
+    "ubuntu-2004",
+    "ubuntu-2110",
+]
+
 BLACKLIST_3003 = [
     "arch",
     "debian-11",
@@ -81,6 +98,23 @@ BLACKLIST_3003 = [
     "ubuntu-1604",
 ]
 
+BLACKLIST_GIT_3003 = [
+    "amazon-2",
+    "arch",
+    "debian-10",
+    "debian-11",
+    "fedora-34",
+    "fedora-35",
+    "gentoo",
+    "gentoo-systemd",
+    "opensuse-15",
+    "opensuse-tumbleweed",
+    "rockylinux-8",
+    "ubuntu-1604",
+    "ubuntu-2004",
+    "ubuntu-2110",
+]
+
 BLACKLIST_3004 = [
     "arch",
     "fedora-34",
@@ -90,6 +124,22 @@ BLACKLIST_3004 = [
     "opensuse-15",
     "opensuse-tumbleweed",
     "ubuntu-1604",
+]
+
+BLACKLIST_GIT_3004 = [
+    "amazon-2",
+    "arch",
+    "debian-10",
+    "debian-11",
+    "fedora-34",
+    "fedora-35",
+    "gentoo",
+    "gentoo-systemd",
+    "opensuse-15",
+    "opensuse-tumbleweed",
+    "ubuntu-1604",
+    "ubuntu-2004",
+    "ubuntu-2110",
 ]
 
 SALT_BRANCHES = [
@@ -110,7 +160,9 @@ BRANCH_DISPLAY_NAMES = {
 
 STABLE_BRANCH_BLACKLIST = []
 
-LATEST_PKG_BLACKLIST = []
+LATEST_PKG_BLACKLIST = [
+    "ubuntu-1604",
+]
 
 DISTRO_DISPLAY_NAMES = {
     "almalinux-8": "AlmaLinux 8",
@@ -212,18 +264,26 @@ def generate_test_jobs():
                             # Fedora does not keep old builds around
                             continue
 
+                    BLACKLIST = {
+                        "3002": BLACKLIST_3002,
+                        "3003": BLACKLIST_3003,
+                        "3004": BLACKLIST_3004,
+                    }
                     if bootstrap_type == "git":
+                        BLACKLIST = {
+                            "3002": BLACKLIST_GIT_3002,
+                            "3003": BLACKLIST_GIT_3003,
+                            "3004": BLACKLIST_GIT_3004,
+                        }
+
                         # .0 versions are a virtual version for pinning to the first point release of a major release, such as 3002, there is no git version.
                         if branch.endswith("-0"):
                             continue
 
-                    if branch == "3002" and distro in BLACKLIST_3002:
-                        continue
-
-                    if branch == "3003" and distro in BLACKLIST_3003:
-                        continue
-
-                    if branch == "3004" and distro in BLACKLIST_3004:
+                    if (
+                        branch in ("3002", "3003", "3004")
+                        and distro in BLACKLIST[branch]
+                    ):
                         continue
 
                     if distro in LINUX_DISTROS:

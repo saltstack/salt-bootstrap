@@ -1,3 +1,4 @@
+# yamllint disable rule:line-length
 ---
 name: 'Kitchen (Windows)'
 'on': ['push', 'pull_request']

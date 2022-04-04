@@ -33,6 +33,7 @@ OSX = WINDOWS = []
 STABLE_DISTROS = [
     "almalinux-8",
     "amazon-2",
+    "arch",
     "centos-7",
     "centos-stream8",
     "debian-10",
@@ -42,6 +43,8 @@ STABLE_DISTROS = [
     "fedora-35",
     "gentoo",
     "gentoo-systemd",
+    "opensuse-15",
+    "opensuse-tumbleweed",
     "oraclelinux-7",
     "oraclelinux-8",
     "rockylinux-8",
@@ -53,48 +56,82 @@ STABLE_DISTROS = [
 
 BLACKLIST_3002 = [
     "almalinux-8",
+    "arch",
     "centos-stream8",
-    "rockylinux-8",
     "debian-11",
+    "fedora-34",
+    "fedora-35",
+    "gentoo",
+    "gentoo-systemd",
+    "opensuse-15",
+    "opensuse-tumbleweed",
+    "rockylinux-8",
 ]
 
 BLACKLIST_3002_0 = [
     "almalinux-8",
     "amazon-2",
+    "arch",
     "centos-stream8",
     "debian-11",
+    "fedora-34",
+    "fedora-35",
     "gentoo",
     "gentoo-systemd",
+    "opensuse-15",
+    "opensuse-tumbleweed",
     "rockylinux-8",
     "ubuntu-2110",
 ]
 
 BLACKLIST_3003 = [
+    "arch",
+    "debian-11",
+    "fedora-34",
+    "fedora-35",
+    "gentoo",
+    "gentoo-systemd",
+    "opensuse-15",
+    "opensuse-tumbleweed",
     "rockylinux-8",
     "ubuntu-1604",
-    "debian-11",
 ]
 
 BLACKLIST_3003_0 = [
     "amazon-2",
+    "arch",
+    "debian-11",
+    "fedora-34",
+    "fedora-35",
     "gentoo",
     "gentoo-systemd",
+    "opensuse-15",
+    "opensuse-tumbleweed",
     "rockylinux-8",
     "ubuntu-1604",
-    "debian-11"
 ]
 
 BLACKLIST_3004 = [
-    "ubuntu-1604",
     "arch",
+    "fedora-34",
+    "fedora-35",
+    "gentoo",
+    "gentoo-systemd",
+    "opensuse-15",
+    "opensuse-tumbleweed",
+    "ubuntu-1604",
 ]
 
 BLACKLIST_3004_0 = [
     "amazon-2",
+    "arch",
+    "fedora-34",
+    "fedora-35",
     "gentoo",
     "gentoo-systemd",
+    "opensuse-15",
+    "opensuse-tumbleweed",
     "ubuntu-1604",
-    "arch",
 ]
 
 SALT_BRANCHES = [

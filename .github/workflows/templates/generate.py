@@ -68,37 +68,7 @@ BLACKLIST_3002 = [
     "rockylinux-8",
 ]
 
-BLACKLIST_3002_0 = [
-    "almalinux-8",
-    "amazon-2",
-    "arch",
-    "centos-stream8",
-    "debian-11",
-    "fedora-34",
-    "fedora-35",
-    "gentoo",
-    "gentoo-systemd",
-    "opensuse-15",
-    "opensuse-tumbleweed",
-    "rockylinux-8",
-    "ubuntu-2110",
-]
-
 BLACKLIST_3003 = [
-    "arch",
-    "debian-11",
-    "fedora-34",
-    "fedora-35",
-    "gentoo",
-    "gentoo-systemd",
-    "opensuse-15",
-    "opensuse-tumbleweed",
-    "rockylinux-8",
-    "ubuntu-1604",
-]
-
-BLACKLIST_3003_0 = [
-    "amazon-2",
     "arch",
     "debian-11",
     "fedora-34",
@@ -122,36 +92,18 @@ BLACKLIST_3004 = [
     "ubuntu-1604",
 ]
 
-BLACKLIST_3004_0 = [
-    "amazon-2",
-    "arch",
-    "fedora-34",
-    "fedora-35",
-    "gentoo",
-    "gentoo-systemd",
-    "opensuse-15",
-    "opensuse-tumbleweed",
-    "ubuntu-1604",
-]
-
 SALT_BRANCHES = [
     "3002",
-    "3002-0",
     "3003",
-    "3003-0",
     "3004",
-    "3004-0",
     "master",
     "latest",
 ]
 
 BRANCH_DISPLAY_NAMES = {
     "3002": "v3002",
-    "3002-0": "v3002.0",
     "3003": "v3003",
-    "3003-0": "v3003.0",
     "3004": "v3004",
-    "3004-0": "v3004.0",
     "master": "Master",
     "latest": "Latest",
 }
@@ -268,20 +220,12 @@ def generate_test_jobs():
                     if branch == "3002" and distro in BLACKLIST_3002:
                         continue
 
-                    if branch == "3002-0" and distro in BLACKLIST_3002_0:
-                        continue
-
                     if branch == "3003" and distro in BLACKLIST_3003:
-                        continue
-
-                    if branch == "3003-0" and distro in BLACKLIST_3003_0:
                         continue
 
                     if branch == "3004" and distro in BLACKLIST_3004:
                         continue
 
-                    if branch == "3004-0" and distro in BLACKLIST_3004_0:
-                        continue
                     if distro in LINUX_DISTROS:
                         template = "linux.yml"
                     elif distro in OSX:

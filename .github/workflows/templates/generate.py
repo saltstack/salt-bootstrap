@@ -326,7 +326,9 @@ def generate_test_jobs():
                     rfh.read()
                     .format(
                         jobs="{pre_commit}{lint}{test}".format(
-                            lint=lint_job, test=test_jobs, pre_commit=pre_commit_job,
+                            lint=lint_job,
+                            test=test_jobs,
+                            pre_commit=pre_commit_job,
                         ),
                         on="push, pull_request",
                         name="Testing",
@@ -341,7 +343,9 @@ def generate_test_jobs():
                 "{}\n".format(
                     rfh.read()
                     .format(
-                        jobs="{test}".format(test=branch_only_test_jobs,),
+                        jobs="{test}".format(
+                            test=branch_only_test_jobs,
+                        ),
                         on="push",
                         name="Branch Testing",
                     )

@@ -4031,6 +4031,11 @@ install_fedora_git_post() {
 
         __copyfile "${_SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-${fname}.service" "/lib/systemd/system/salt-${fname}.service"
 
+        # Salt executables are located under `/usr/local/bin/` on Fedora 36+
+        if [ "${DISTRO_VERSION}" -ge 36 ]; then
+          sed -i -e 's:/usr/bin/:/usr/local/bin/:g' /lib/systemd/system/salt-*.service
+        fi
+
         # Skip salt-api since the service should be opt-in and not necessarily started on boot
         [ $fname = "api" ] && continue
 

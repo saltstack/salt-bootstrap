@@ -1,4 +1,4 @@
-#!/bin/sh -
+#!/bin/sh +x
 
 # WARNING: Changes to this file in the salt repo will be overwritten!
 # Please submit pull requests against the salt-bootstrap repo:
@@ -290,17 +290,20 @@ __usage() {
   Usage :  ${__ScriptName} [options] <install-type> [install-type-args]
 
   Installation types:
-    - stable              Install latest stable release. This is the default
-                          install type
-    - stable [branch]     Install latest version on a branch. Only supported
-                          for packages available at repo.saltproject.io
-    - stable [version]    Install a specific version. Only supported for
-                          packages available at repo.saltproject.io
-                          To pin a 3xxx minor version, specify it as 3xxx.0
-    - testing             RHEL-family specific: configure EPEL testing repo
-    - git                 Install from the head of the master branch
-    - git [ref]           Install from any git ref (such as a branch, tag, or
-                          commit)
+    - stable               Install latest stable release. This is the default
+                           install type
+    - stable [branch]      Install latest version on a branch. Only supported
+                           for packages available at repo.saltproject.io
+    - stable [version]     Install a specific version. Only supported for
+                           packages available at repo.saltproject.io
+                           To pin a 3xxx minor version, specify it as 3xxx.0
+    - testing              RHEL-family specific: configure EPEL testing repo
+    - git                  Install from the head of the master branch
+    - git [ref]            Install from any git ref (such as a branch, tag, or
+                           commit)
+    - tiamat               Install latest tiamat release.
+    - tiamat [version]     Install a specific version. Only supported for
+                           tiamat packages available at repo.saltproject.io
 
   Examples:
     - ${__ScriptName}
@@ -312,6 +315,8 @@ __usage() {
     - ${__ScriptName} git 2017.7
     - ${__ScriptName} git v2017.7.2
     - ${__ScriptName} git 06f249901a2e2f1ed310d58ea3921a129f214358
+    - ${__ScriptName} tiamat
+    - ${__ScriptName} tiamat 3005
 
   Options:
     -a  Pip install all Python pkg dependencies for Salt. Requires -V to install
@@ -582,7 +587,7 @@ if [ "$#" -gt 0 ];then
 fi
 
 # Check installation type
-if [ "$(echo "$ITYPE" | grep -E '(stable|testing|git)')" = "" ]; then
+if [ "$(echo "$ITYPE" | grep -E '(stable|testing|git|tiamat)')" = "" ]; then
     echoerror "Installation type \"$ITYPE\" is not known..."
     exit 1
 fi
@@ -619,6 +624,10 @@ elif [ "$ITYPE" = "stable" ]; then
             exit 1
         fi
     fi
+
+elif [ "$ITYPE" = "tiamat" ]; then
+  #TIAMET_REV="latest"
+  TIAMET_REV=""
 fi
 
 # Check for any unparsed arguments. Should be an error.
@@ -2964,6 +2973,48 @@ __install_saltstack_ubuntu_repository() {
     __wait_for_apt apt-get update || return 1
 }
 
+__install_saltstack_ubuntu_tiamat_repository() {
+    # Workaround for latest non-LTS Ubuntu
+    if { [ "$DISTRO_MAJOR_VERSION" -eq 20 ] && [ "$DISTRO_MINOR_VERSION" -eq 10 ]; } || \
+        [ "$DISTRO_MAJOR_VERSION" -eq 21 ]; then
+        echowarn "Non-LTS Ubuntu detected, but stable packages requested. Trying packages for previous LTS release. You may experience problems."
+        UBUNTU_VERSION=20.04
+        UBUNTU_CODENAME="focal"
+    else
+        UBUNTU_VERSION=${DISTRO_VERSION}
+        UBUNTU_CODENAME=${DISTRO_CODENAME}
+    fi
+
+    # Install downloader backend for GPG keys fetching
+    __PACKAGES='wget'
+
+    # Required as it is not installed by default on Ubuntu 18+
+    if [ "$DISTRO_MAJOR_VERSION" -ge 18 ]; then
+        __PACKAGES="${__PACKAGES} gnupg"
+    fi
+
+    # Make sure https transport is available
+    if [ "$HTTP_VAL" = "https" ] ; then
+        __PACKAGES="${__PACKAGES} apt-transport-https ca-certificates"
+    fi
+
+    # shellcheck disable=SC2086,SC2090
+    __apt_get_install_noinput ${__PACKAGES} || return 1
+
+    __PY_VERSION_REPO="apt"
+    if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 3 ]; then
+        __PY_VERSION_REPO="py3"
+    fi
+
+    # SaltStack's stable Ubuntu repository:
+    SALTSTACK_UBUNTU_URL="${HTTP_VAL}://${_REPO_URL}/salt-dev/${__PY_VERSION_REPO}/ubuntu/${UBUNTU_VERSION}/${__REPO_ARCH}/${TIAMAT_REV}"
+    echo "$__REPO_ARCH_DEB $SALTSTACK_UBUNTU_URL $UBUNTU_CODENAME main" > /etc/apt/sources.list.d/salt.list
+
+    __apt_key_fetch "$SALTSTACK_UBUNTU_URL/salt-archive-keyring.gpg" || return 1
+
+    __wait_for_apt apt-get update || return 1
+}
+
 install_ubuntu_deps() {
     if [ $_DISABLE_REPOS -eq $BS_FALSE ]; then
         # Install add-apt-repository
@@ -3133,6 +3184,44 @@ install_ubuntu_git_deps() {
     return 0
 }
 
+install_ubuntu_tiamat_deps() {
+    if [ "${_SLEEP}" -eq "${__DEFAULT_SLEEP}" ] && [ "$DISTRO_MAJOR_VERSION" -lt 16 ]; then
+        # The user did not pass a custom sleep value as an argument, let's increase the default value
+        echodebug "On Ubuntu systems we increase the default sleep value to 10."
+        echodebug "See https://github.com/saltstack/salt/issues/12248 for more info."
+        _SLEEP=10
+    fi
+
+    if [ $_START_DAEMONS -eq $BS_FALSE ]; then
+        echowarn "Not starting daemons on Debian based distributions is not working mostly because starting them is the default behaviour."
+    fi
+
+    # No user interaction, libc6 restart services for example
+    export DEBIAN_FRONTEND=noninteractive
+
+    __wait_for_apt apt-get update || return 1
+
+    if [ "${_UPGRADE_SYS}" -eq $BS_TRUE ]; then
+        if [ "${_INSECURE_DL}" -eq $BS_TRUE ]; then
+            if [ "$DISTRO_MAJOR_VERSION" -ge 20 ] || [ "$DISTRO_MAJOR_VERSION" -ge 21 ]; then
+                __apt_get_install_noinput --allow-unauthenticated debian-archive-keyring && apt-get update || return 1
+            else
+                __apt_get_install_noinput --allow-unauthenticated debian-archive-keyring &&
+                    apt-key update && apt-get update || return 1
+            fi
+        fi
+
+        __apt_get_upgrade_noinput || return 1
+    fi
+
+    if [ "$_DISABLE_REPOS" -eq "$BS_FALSE" ] || [ "$_CUSTOM_REPO_URL" != "null" ]; then
+        __check_dpkg_architecture || return 1
+        __install_saltstack_ubuntu_tiamat_repository || return 1
+    fi
+
+    install_ubuntu_deps || return 1
+}
+
 install_ubuntu_stable() {
     __PACKAGES=""
 
@@ -3188,6 +3277,28 @@ install_ubuntu_git() {
         # shellcheck disable=SC2086
         "${_PYEXE}" setup.py ${SETUP_PY_INSTALL_ARGS} install --install-layout=deb || return 1
     fi
+
+    return 0
+}
+
+install_ubuntu_tiamat() {
+    __PACKAGES=""
+
+    if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ];then
+        __PACKAGES="${__PACKAGES} salt-cloud"
+    fi
+    if [ "$_INSTALL_MASTER" -eq $BS_TRUE ]; then
+        __PACKAGES="${__PACKAGES} salt-master"
+    fi
+    if [ "$_INSTALL_MINION" -eq $BS_TRUE ]; then
+        __PACKAGES="${__PACKAGES} salt-minion"
+    fi
+    if [ "$_INSTALL_SYNDIC" -eq $BS_TRUE ]; then
+        __PACKAGES="${__PACKAGES} salt-syndic"
+    fi
+
+    # shellcheck disable=SC2086
+    __apt_get_install_noinput ${__PACKAGES} || return 1
 
     return 0
 }
@@ -3382,6 +3493,40 @@ __install_saltstack_debian_repository() {
 
     # amd64 is just a part of repository URI, 32-bit pkgs are hosted under the same location
     SALTSTACK_DEBIAN_URL="${HTTP_VAL}://${_REPO_URL}/${__PY_VERSION_REPO}/debian/${DEBIAN_RELEASE}/${__REPO_ARCH}/${STABLE_REV}"
+    echo "$__REPO_ARCH_DEB $SALTSTACK_DEBIAN_URL $DEBIAN_CODENAME main" > "/etc/apt/sources.list.d/salt.list"
+
+    __apt_key_fetch "$SALTSTACK_DEBIAN_URL/salt-archive-keyring.gpg" || return 1
+
+    __wait_for_apt apt-get update || return 1
+}
+
+__install_saltstack_debian_tiamat_repository() {
+    DEBIAN_RELEASE="$DISTRO_MAJOR_VERSION"
+    DEBIAN_CODENAME="$DISTRO_CODENAME"
+
+    __PY_VERSION_REPO="apt"
+    if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 3 ]; then
+        __PY_VERSION_REPO="py3"
+    fi
+
+    # Install downloader backend for GPG keys fetching
+    __PACKAGES='wget'
+
+    # Required as it is not installed by default on Debian 9+
+    if [ "$DISTRO_MAJOR_VERSION" -ge 9 ]; then
+        __PACKAGES="${__PACKAGES} gnupg2"
+    fi
+
+    # Make sure https transport is available
+    if [ "$HTTP_VAL" = "https" ] ; then
+        __PACKAGES="${__PACKAGES} apt-transport-https ca-certificates"
+    fi
+
+    # shellcheck disable=SC2086,SC2090
+    __apt_get_install_noinput ${__PACKAGES} || return 1
+
+    # amd64 is just a part of repository URI, 32-bit pkgs are hosted under the same location
+    SALTSTACK_DEBIAN_URL="${HTTP_VAL}://${_REPO_URL}/salt-dev/${__PY_VERSION_REPO}/debian/${DEBIAN_RELEASE}/${__REPO_ARCH}/${TIAMAT_REV}"
     echo "$__REPO_ARCH_DEB $SALTSTACK_DEBIAN_URL $DEBIAN_CODENAME main" > "/etc/apt/sources.list.d/salt.list"
 
     __apt_key_fetch "$SALTSTACK_DEBIAN_URL/salt-archive-keyring.gpg" || return 1
@@ -3715,6 +3860,28 @@ install_debian_8_git() {
 
 install_debian_9_git() {
     install_debian_git || return 1
+    return 0
+}
+
+install_debian_tiamat() {
+    __PACKAGES=""
+
+    if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ];then
+        __PACKAGES="${__PACKAGES} salt-cloud"
+    fi
+    if [ "$_INSTALL_MASTER" -eq $BS_TRUE ]; then
+        __PACKAGES="${__PACKAGES} salt-master"
+    fi
+    if [ "$_INSTALL_MINION" -eq $BS_TRUE ]; then
+        __PACKAGES="${__PACKAGES} salt-minion"
+    fi
+    if [ "$_INSTALL_SYNDIC" -eq $BS_TRUE ]; then
+        __PACKAGES="${__PACKAGES} salt-syndic"
+    fi
+
+    # shellcheck disable=SC2086
+    __apt_get_install_noinput ${__PACKAGES} || return 1
+
     return 0
 }
 
@@ -4160,6 +4327,60 @@ _eof
     return 0
 }
 
+__install_saltstack_tiamat_rhel_repository() {
+    if [ "$ITYPE" = "stable" ]; then
+        repo_rev="$TIAMAT_REV"
+    else
+        repo_rev="latest"
+    fi
+
+    __PY_VERSION_REPO="yum"
+    if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 3 ]; then
+        __PY_VERSION_REPO="py3"
+    fi
+
+    # Avoid using '$releasever' variable for yum.
+    # Instead, this should work correctly on all RHEL variants.
+    base_url="${HTTP_VAL}://${_REPO_URL}/salt-dev/${__PY_VERSION_REPO}/redhat/${DISTRO_MAJOR_VERSION}/\$basearch/"
+    if [ "${DISTRO_MAJOR_VERSION}" -eq 7 ]; then
+        gpg_key="SALTSTACK-GPG-KEY.pub base/RPM-GPG-KEY-CentOS-7"
+    else
+        gpg_key="SALTSTACK-GPG-KEY.pub"
+    fi
+
+    gpg_key_urls=""
+    for key in $gpg_key; do
+        gpg_key_urls=$(printf "${base_url}${key},%s" "$gpg_key_urls")
+    done
+
+    repo_file="/etc/yum.repos.d/salt.repo"
+
+    if [ ! -s "$repo_file" ] || [ "$_FORCE_OVERWRITE" -eq $BS_TRUE ]; then
+        cat <<_eof > "$repo_file"
+[saltstack]
+name=SaltStack ${repo_rev} Release Channel for RHEL/CentOS \$releasever
+baseurl=${base_url}
+skip_if_unavailable=True
+gpgcheck=1
+gpgkey=${gpg_key_urls}
+enabled=1
+enabled_metadata=1
+_eof
+
+        fetch_url="${HTTP_VAL}://${_REPO_URL}/salt-dev/${__PY_VERSION_REPO}/redhat/${DISTRO_MAJOR_VERSION}/${CPU_ARCH_L}/"
+        for key in $gpg_key; do
+            __rpm_import_gpg "${fetch_url}${key}" || return 1
+        done
+
+        yum clean metadata || return 1
+    elif [ "$repo_rev" != "latest" ]; then
+        echowarn "salt.repo already exists, ignoring salt version argument."
+        echowarn "Use -F (forced overwrite) to install $repo_rev."
+    fi
+
+    return 0
+}
+
 install_centos_stable_deps() {
     if [ "$_UPGRADE_SYS" -eq $BS_TRUE ]; then
         yum -y update || return 1
@@ -4464,6 +4685,101 @@ install_centos_git_post() {
     return 0
 }
 
+install_centos_tiamat_deps() {
+    if [ "$_UPGRADE_SYS" -eq $BS_TRUE ]; then
+        yum -y update || return 1
+    fi
+
+    if [ "$_DISABLE_REPOS" -eq "$BS_TRUE" ] && [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 3 ]; then
+        echowarn "Detected -r or -R option while installing Salt packages for Python 3."
+        echowarn "Python 3 packages for older Salt releases requires the EPEL repository to be installed."
+        echowarn "Installing the EPEL repository automatically is disabled when using the -r or -R options."
+    fi
+
+    if [ "$_DISABLE_REPOS" -eq "$BS_FALSE" ]; then
+        __install_epel_repository || return 1
+        __install_saltstack_tiamat_rhel_repository || return 1
+    fi
+
+    # If -R was passed, we need to configure custom repo url with rsync-ed packages
+    # Which is still handled in __install_saltstack_rhel_repository. This call has
+    # its own check in case -r was passed without -R.
+    if [ "$_CUSTOM_REPO_URL" != "null" ]; then
+        __install_saltstack_tiamat_rhel_repository || return 1
+    fi
+
+    if [ "$DISTRO_MAJOR_VERSION" -ge 8 ]; then
+        __PACKAGES="dnf-utils chkconfig"
+    else
+        __PACKAGES="yum-utils chkconfig"
+    fi
+
+    # shellcheck disable=SC2086
+    __yum_install_noinput ${__PACKAGES} || return 1
+
+    if [ "${_EXTRA_PACKAGES}" != "" ]; then
+        echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
+        # shellcheck disable=SC2086
+        __yum_install_noinput ${_EXTRA_PACKAGES} || return 1
+    fi
+
+
+    return 0
+}
+
+install_centos_tiamat() {
+    __PACKAGES=""
+
+    if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ];then
+        __PACKAGES="${__PACKAGES} salt-cloud"
+    fi
+    if [ "$_INSTALL_MASTER" -eq $BS_TRUE ];then
+        __PACKAGES="${__PACKAGES} salt-master"
+    fi
+    if [ "$_INSTALL_MINION" -eq $BS_TRUE ]; then
+        __PACKAGES="${__PACKAGES} salt-minion"
+    fi
+    if [ "$_INSTALL_SYNDIC" -eq $BS_TRUE ];then
+        __PACKAGES="${__PACKAGES} salt-syndic"
+    fi
+
+    # shellcheck disable=SC2086
+    __yum_install_noinput ${__PACKAGES} || return 1
+
+    return 0
+}
+
+install_centos_tiamat_post() {
+    SYSTEMD_RELOAD=$BS_FALSE
+
+    for fname in api master minion syndic; do
+        # Skip salt-api since the service should be opt-in and not necessarily started on boot
+        [ $fname = "api" ] && continue
+
+        # Skip if not meant to be installed
+        [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
+        [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
+        [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
+
+        if [ -f /bin/systemctl ]; then
+            /bin/systemctl is-enabled salt-${fname}.service > /dev/null 2>&1 || (
+                /bin/systemctl preset salt-${fname}.service > /dev/null 2>&1 &&
+                /bin/systemctl enable salt-${fname}.service > /dev/null 2>&1
+            )
+
+            SYSTEMD_RELOAD=$BS_TRUE
+        elif [ -f "/etc/init.d/salt-${fname}" ]; then
+            /sbin/chkconfig salt-${fname} on
+        fi
+    done
+
+    if [ "$SYSTEMD_RELOAD" -eq $BS_TRUE ]; then
+        /bin/systemctl daemon-reload
+    fi
+
+    return 0
+}
+
 install_centos_restart_daemons() {
     [ $_START_DAEMONS -eq $BS_FALSE ] && return
 
@@ -4563,6 +4879,11 @@ install_red_hat_linux_git_deps() {
     return 0
 }
 
+install_red_hat_linux_tiamat_deps() {
+    install_centos_tiamat_deps || return 1
+    return 0
+}
+
 install_red_hat_enterprise_stable_deps() {
     install_red_hat_linux_stable_deps || return 1
     return 0
@@ -4570,6 +4891,11 @@ install_red_hat_enterprise_stable_deps() {
 
 install_red_hat_enterprise_git_deps() {
     install_red_hat_linux_git_deps || return 1
+    return 0
+}
+
+install_red_hat_enterprise_tiamat_deps() {
+    install_red_hat_linux_tiamat_deps || return 1
     return 0
 }
 
@@ -4583,6 +4909,11 @@ install_red_hat_enterprise_linux_git_deps() {
     return 0
 }
 
+install_red_hat_enterprise_linux_tiamat_deps() {
+    install_red_hat_linux_tiamat_deps || return 1
+    return 0
+}
+
 install_red_hat_enterprise_server_stable_deps() {
     install_red_hat_linux_stable_deps || return 1
     return 0
@@ -4590,6 +4921,11 @@ install_red_hat_enterprise_server_stable_deps() {
 
 install_red_hat_enterprise_server_git_deps() {
     install_red_hat_linux_git_deps || return 1
+    return 0
+}
+
+install_red_hat_enterprise_server_tiamat_deps() {
+    install_red_hat_linux_tiamat_deps || return 1
     return 0
 }
 
@@ -4603,6 +4939,11 @@ install_red_hat_enterprise_workstation_git_deps() {
     return 0
 }
 
+install_red_hat_enterprise_workstation_tiamat_deps() {
+    install_red_hat_linux_timat_deps || return 1
+    return 0
+}
+
 install_red_hat_linux_stable() {
     install_centos_stable || return 1
     return 0
@@ -4610,6 +4951,11 @@ install_red_hat_linux_stable() {
 
 install_red_hat_linux_git() {
     install_centos_git || return 1
+    return 0
+}
+
+install_red_hat_linux_tiamat() {
+    install_centos_tiamat || return 1
     return 0
 }
 
@@ -4623,6 +4969,11 @@ install_red_hat_enterprise_git() {
     return 0
 }
 
+install_red_hat_enterprise_tiamat() {
+    install_red_hat_linux_tiamat || return 1
+    return 0
+}
+
 install_red_hat_enterprise_linux_stable() {
     install_red_hat_linux_stable || return 1
     return 0
@@ -4630,6 +4981,11 @@ install_red_hat_enterprise_linux_stable() {
 
 install_red_hat_enterprise_linux_git() {
     install_red_hat_linux_git || return 1
+    return 0
+}
+
+install_red_hat_enterprise_linux_tiamat() {
+    install_red_hat_linux_tiamat || return 1
     return 0
 }
 
@@ -4643,6 +4999,11 @@ install_red_hat_enterprise_server_git() {
     return 0
 }
 
+install_red_hat_enterprise_server_tiamat() {
+    install_red_hat_linux_tiamat || return 1
+    return 0
+}
+
 install_red_hat_enterprise_workstation_stable() {
     install_red_hat_linux_stable || return 1
     return 0
@@ -4650,6 +5011,11 @@ install_red_hat_enterprise_workstation_stable() {
 
 install_red_hat_enterprise_workstation_git() {
     install_red_hat_linux_git || return 1
+    return 0
+}
+
+install_red_hat_enterprise_workstation_tiamat() {
+    install_red_hat_linux_tiamat || return 1
     return 0
 }
 
@@ -4806,6 +5172,11 @@ install_oracle_linux_git_deps() {
     return 0
 }
 
+install_oracle_linux_tiamat_deps() {
+    install_centos_tiamat_deps || return 1
+    return 0
+}
+
 install_oracle_linux_testing_deps() {
     install_centos_testing_deps || return 1
     return 0
@@ -4818,6 +5189,11 @@ install_oracle_linux_stable() {
 
 install_oracle_linux_git() {
     install_centos_git || return 1
+    return 0
+}
+
+install_oracle_linux_tiamat() {
+    install_centos_tiamat || return 1
     return 0
 }
 
@@ -4869,6 +5245,11 @@ install_almalinux_git_deps() {
     return 0
 }
 
+install_almalinux_tiamat_deps() {
+    install_centos_tiamat_deps || return 1
+    return 0
+}
+
 install_almalinux_testing_deps() {
     install_centos_testing_deps || return 1
     return 0
@@ -4881,6 +5262,11 @@ install_almalinux_stable() {
 
 install_almalinux_git() {
     install_centos_git || return 1
+    return 0
+}
+
+install_almalinux_tiamat() {
+    install_centos_tiamat || return 1
     return 0
 }
 
@@ -4932,6 +5318,11 @@ install_rocky_linux_git_deps() {
     return 0
 }
 
+install_rocky_linux_tiamat_deps() {
+    install_centos_tiamat_deps || return 1
+    return 0
+}
+
 install_rocky_linux_testing_deps() {
     install_centos_testing_deps || return 1
     return 0
@@ -4939,6 +5330,11 @@ install_rocky_linux_testing_deps() {
 
 install_rocky_linux_stable() {
     install_centos_stable || return 1
+    return 0
+}
+
+install_rocky_linux_tiamat() {
+    install_centos_tiamat || return 1
     return 0
 }
 
@@ -4995,6 +5391,11 @@ install_scientific_linux_git_deps() {
     return 0
 }
 
+install_scientific_linux_tiamat_deps() {
+    install_centos_tiamat_deps || return 1
+    return 0
+}
+
 install_scientific_linux_testing_deps() {
     install_centos_testing_deps || return 1
     return 0
@@ -5007,6 +5408,11 @@ install_scientific_linux_stable() {
 
 install_scientific_linux_git() {
     install_centos_git || return 1
+    return 0
+}
+
+install_scientific_linux_tiamat() {
+    install_centos_tiamat || return 1
     return 0
 }
 
@@ -5055,6 +5461,11 @@ install_cloud_linux_stable_deps() {
 
 install_cloud_linux_git_deps() {
     install_centos_git_deps || return 1
+    return 0
+}
+
+install_cloud_linux_tiamat_deps() {
+    install_centos_tiamat_deps || return 1
     return 0
 }
 
@@ -7705,6 +8116,143 @@ install_macosx_restart_daemons() {
 
 #######################################################################################################################
 #
+#   Begin Tiamat Onedir Install Functions
+#
+
+ _parse_json_specd_ver() {
+    local file_name="$1"
+    local salt_url_version="$2"
+    local file_value=""
+    local blk_count=0
+    local specd_ver_blk_count=0
+    local specd_ver_flag=0
+    local found_specd_ver_linux=0
+
+    local var1=""
+    local var2=""
+    declare -A rdict
+
+    file_value=$(<"${file_name}")
+
+    # limit 80 cols
+    var1=$(echo "${file_value}" | sed 's/,/,\n/g' | sed 's/{/\n{\n/g')
+    var2=$(echo "${var1}" | sed 's/}/\n}\n/g' | sed 's/,//g' | sed 's/"//g')
+
+    while IFS= read -r line
+    do
+        echodebug "$0:${FUNCNAME[0]} parsing line '${line}'"
+        if [[ -z "${line}" ]]; then
+            continue
+        fi
+        if [[ "${line}" = "{" ]]; then
+            (( blk_count++ ))
+        elif [[ "${line}" = "}" ]]; then
+            # examine directory just read in
+            if [[  ${specd_ver_flag} -eq 1 ]]; then
+                if [[ "${rdict['os']}" = "linux" ]]; then
+                    # have linux values for specd_ver
+                    echodebug "$0:${FUNCNAME[0]} parsed following linux for"\
+                    "specified version '${salt_url_version}' from repo json"\
+                    "file '${file_name}', os ${rdict['os']}, version"\
+                    "${rdict['version']}, name ${rdict['name']}, SHA512"\
+                    "${rdict['SHA512']}"
+                    found_specd_ver_linux=1
+                    break
+                fi
+            fi
+
+            if [[ ${blk_count} -eq ${specd_ver_blk_count} ]]; then
+                specd_ver_flag=0
+                break
+            fi
+            (( blk_count-- ))
+        else
+            line_key=$(echo "${line}" | cut -d ':' -f 1 | xargs)
+            line_value=$(echo "${line}" | cut -d ':' -f 2 | xargs)
+            if [[ "${line_key}" = "${salt_url_version}" ]]; then
+                # note blk_count encountered 'specd_ver', closing brace check
+                specd_ver_flag=1
+                specd_ver_blk_count=${blk_count}
+                (( specd_ver_blk_count++ ))
+            else
+                rdict["${line_key}"]="${line_value}"
+                echodebug "$0:${FUNCNAME[0]} updated dictionary with"\
+                "line_key '${line_key}' and line_value '${line_value}'"
+            fi
+        fi
+    done <<< "${var2}"
+
+    if [[ ${found_specd_ver_linux} -eq 1 ]]; then
+        echo "${rdict['version']}:${rdict['name']}:${rdict['SHA512']}"
+    else
+        echoerr "$0:${FUNCNAME[0]} unable to parse version, name and "\
+        "SHA512 from repo json file '${file_name}'"
+        # echo ""
+    fi
+    return 0
+}
+
+
+install_tiamat() {
+    echoinfo "Fetching repo.json for Tiamat ${_TIAMAT_TYPE}"
+
+    base_url="https://repo.saltproject.io/salt-dev/"
+    tiamat_type_repo_json_url="${base_url}${_TIAMAT_TYPE}/repo.json"
+    repo_json_file="$(mktemp /tmp/base-json-XXXXXXXX 2>/dev/null)"
+    salt_url="https://repo.saltproject.io/salt-dev/${_TIAMAT_TYPE}"
+
+    if [ -z "$repo_json_file" ]; then
+        echoerror "Failed to create temporary file in /tmp"
+        return 1
+    fi
+
+    __fetch_url "$repo_json_file" "$tiamat_type_repo_json_url" || return 1
+
+    json_version_name_sha=$(_parse_json_specd_ver "${repo_json_file}" "${_TIAMAT_VERSION}")
+
+    echoinfo "json_version_name_sha ${json_version_name_sha}"
+
+    echoinfo "Installing Tiamat ${_TIAMAT_TYPE}"
+
+    rm -f "$repo_json_file"
+
+    salt_json_version=$(\
+        echo "${json_version_name_sha}" | awk -F":" '{print $1}')
+    salt_json_name=$(\
+        echo "${json_version_name_sha}" | awk -F":" '{print $2}')
+    salt_json_sha512=$(\
+        echo "${json_version_name_sha}" | awk -F":" '{print $3}')
+    echodebug "$0:${FUNCNAME[0]} using repo.json values version"\
+        "'${salt_json_version}', name '${salt_json_name}, sha512"\
+        "'${salt_json_sha512}'"
+
+    echoinfo "salt_json_name - ${salt_json_name}"
+    salt_pkg_name="${salt_json_name}"
+    salt_pkg_url="${salt_url}/${salt_json_version}/${salt_pkg_name}"
+
+    echoinfo "salt_pkg_name - ${salt_pkg_name}"
+    tempfile="$(mktemp /tmp/${salt_pkg_name}-XXXXXXXX.tar.gz 2>/dev/null)"
+
+    if [ -z "$tempfile" ]; then
+        echoerror "Failed to create temporary file in /tmp"
+        return 1
+    fi
+
+    __fetch_url "$tempfile" "$salt_pkg_url" || return 1
+
+    #rm -f "$tempfile"
+
+    return 0
+
+}
+
+#
+#   Ended Tiamt Onedir Install Functions
+#
+#######################################################################################################################
+
+#######################################################################################################################
+#
 #   Default minion configuration function. Matches ANY distribution as long as
 #   the -c options is passed.
 #
@@ -7900,6 +8448,36 @@ preseed_master() {
 #
 #   This function checks if all of the installed daemons are running or not.
 #
+daemons_running_tiamat() {
+    [ "$_START_DAEMONS" -eq $BS_FALSE ] && return 0
+
+    FAILED_DAEMONS=0
+    for fname in api master minion syndic; do
+        # Skip salt-api since the service should be opt-in and not necessarily started on boot
+        [ $fname = "api" ] && continue
+
+        # Skip if not meant to be installed
+        [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
+        [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
+        [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
+
+        if [ '$(ps wwwaux | grep -v grep | grep "/opt/saltstack/salt/run/run $fname")' = "" ]; then
+            echoerror "salt-$fname was not found running"
+            FAILED_DAEMONS=$((FAILED_DAEMONS + 1))
+        fi
+    done
+
+    return $FAILED_DAEMONS
+}
+#
+#  Ended daemons running check function
+#
+#######################################################################################################################
+
+#######################################################################################################################
+#
+#   This function checks if all of the installed daemons are running or not.
+#
 daemons_running() {
     [ "$_START_DAEMONS" -eq $BS_FALSE ] && return 0
 
@@ -7996,6 +8574,7 @@ echodebug "PRESEED_MASTER_FUNC=${PRESEED_MASTER_FUNC}"
 INSTALL_FUNC_NAMES="install_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}_${ITYPE}"
 INSTALL_FUNC_NAMES="$INSTALL_FUNC_NAMES install_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}${PREFIXED_DISTRO_MINOR_VERSION}_${ITYPE}"
 INSTALL_FUNC_NAMES="$INSTALL_FUNC_NAMES install_${DISTRO_NAME_L}_${ITYPE}"
+echodebug "INSTALL_FUNC_NAMES=${INSTALL_FUNC_NAMES}"
 
 INSTALL_FUNC="null"
 for FUNC_NAME in $(__strip_duplicates "$INSTALL_FUNC_NAMES"); do
@@ -8047,6 +8626,7 @@ DAEMONS_RUNNING_FUNC_NAMES="$DAEMONS_RUNNING_FUNC_NAMES daemons_running_${DISTRO
 DAEMONS_RUNNING_FUNC_NAMES="$DAEMONS_RUNNING_FUNC_NAMES daemons_running_${DISTRO_NAME_L}${PREFIXED_DISTRO_MAJOR_VERSION}${PREFIXED_DISTRO_MINOR_VERSION}"
 DAEMONS_RUNNING_FUNC_NAMES="$DAEMONS_RUNNING_FUNC_NAMES daemons_running_${DISTRO_NAME_L}_${ITYPE}"
 DAEMONS_RUNNING_FUNC_NAMES="$DAEMONS_RUNNING_FUNC_NAMES daemons_running_${DISTRO_NAME_L}"
+DAEMONS_RUNNING_FUNC_NAMES="$DAEMONS_RUNNING_FUNC_NAMES daemons_running_${ITYPE}"
 DAEMONS_RUNNING_FUNC_NAMES="$DAEMONS_RUNNING_FUNC_NAMES daemons_running"
 
 DAEMONS_RUNNING_FUNC="null"

@@ -1466,6 +1466,9 @@ __ubuntu_codename_translation() {
         "21")
             DISTRO_CODENAME="hirsute"
             ;;
+        "22")
+            DISTRO_CODENAME="jammy"
+            ;;
         *)
             DISTRO_CODENAME="trusty"
             ;;

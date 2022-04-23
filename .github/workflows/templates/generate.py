@@ -28,6 +28,7 @@ LINUX_DISTROS = [
     "ubuntu-1804",
     "ubuntu-2004",
     "ubuntu-2110",
+    "ubuntu-2204",
 ]
 OSX = WINDOWS = []
 
@@ -53,6 +54,7 @@ STABLE_DISTROS = [
     "ubuntu-1804",
     "ubuntu-2004",
     "ubuntu-2110",
+    "ubuntu-2204",
 ]
 
 BLACKLIST_3002 = [
@@ -68,6 +70,7 @@ BLACKLIST_3002 = [
     "opensuse-15",
     "opensuse-tumbleweed",
     "rockylinux-8",
+    "ubuntu-2204",
 ]
 
 BLACKLIST_GIT_3002 = [
@@ -87,6 +90,7 @@ BLACKLIST_GIT_3002 = [
     "rockylinux-8",
     "ubuntu-2004",
     "ubuntu-2110",
+    "ubuntu-2204",
 ]
 
 BLACKLIST_3003 = [
@@ -101,6 +105,7 @@ BLACKLIST_3003 = [
     "opensuse-tumbleweed",
     "rockylinux-8",
     "ubuntu-1604",
+    "ubuntu-2204",
 ]
 
 BLACKLIST_GIT_3003 = [
@@ -119,6 +124,7 @@ BLACKLIST_GIT_3003 = [
     "ubuntu-1604",
     "ubuntu-2004",
     "ubuntu-2110",
+    "ubuntu-2204",
 ]
 
 BLACKLIST_3004 = [
@@ -131,6 +137,7 @@ BLACKLIST_3004 = [
     "opensuse-15",
     "opensuse-tumbleweed",
     "ubuntu-1604",
+    "ubuntu-2204",
 ]
 
 BLACKLIST_GIT_3004 = [
@@ -148,6 +155,7 @@ BLACKLIST_GIT_3004 = [
     "ubuntu-1604",
     "ubuntu-2004",
     "ubuntu-2110",
+    "ubuntu-2204",
 ]
 
 SALT_BRANCHES = [
@@ -195,6 +203,7 @@ DISTRO_DISPLAY_NAMES = {
     "ubuntu-1804": "Ubuntu 18.04",
     "ubuntu-2004": "Ubuntu 20.04",
     "ubuntu-2110": "Ubuntu 21.10",
+    "ubuntu-2204": "Ubuntu 22.04",
 }
 
 TIMEOUT_DEFAULT = 20

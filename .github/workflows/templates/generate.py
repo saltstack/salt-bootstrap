@@ -70,7 +70,6 @@ BLACKLIST_3002 = [
     "opensuse-15",
     "opensuse-tumbleweed",
     "rockylinux-8",
-    "ubuntu-2204",
 ]
 
 BLACKLIST_GIT_3002 = [
@@ -105,7 +104,6 @@ BLACKLIST_3003 = [
     "opensuse-tumbleweed",
     "rockylinux-8",
     "ubuntu-1604",
-    "ubuntu-2204",
 ]
 
 BLACKLIST_GIT_3003 = [
@@ -137,7 +135,6 @@ BLACKLIST_3004 = [
     "opensuse-15",
     "opensuse-tumbleweed",
     "ubuntu-1604",
-    "ubuntu-2204",
 ]
 
 BLACKLIST_GIT_3004 = [

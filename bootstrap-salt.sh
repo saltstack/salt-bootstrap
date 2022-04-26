@@ -3124,6 +3124,9 @@ install_ubuntu_git_deps() {
         fi
     else
         __PACKAGES="python${PY_PKG_VER}-dev python${PY_PKG_VER}-pip python${PY_PKG_VER}-setuptools gcc"
+        if [ "$DISTRO_MAJOR_VERSION" -ge 22 ]; then
+            __PACKAGES="${__PACKAGES} g++"
+        fi
         # shellcheck disable=SC2086
         __apt_get_install_noinput ${__PACKAGES} || return 1
     fi

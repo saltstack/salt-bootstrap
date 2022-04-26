@@ -33,9 +33,11 @@ platforms:
   - name: freebsd-123
     driver:
       box: bento/freebsd-12.3
-  - name: openbsd-6
+  - name: openbsd-7
     driver:
-      box: generic/openbsd6
+      box: generic/openbsd7
+      provision_command:
+        - echo "PubkeyAcceptedAlgorithms +ssh-rsa" | tee -a /etc/ssh/sshd_config
       ssh:
         shell: /bin/ksh
       synced_folders: []

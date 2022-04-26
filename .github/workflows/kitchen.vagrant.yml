@@ -43,10 +43,10 @@ jobs:
         instance:
           - py3-git-master-freebsd-130
           - py3-git-master-freebsd-123
-          # - py3-git-master-openbsd-6
+          # - py3-git-master-openbsd-7
           - latest-freebsd-130
           - latest-freebsd-123
-          - latest-openbsd-6
+          - latest-openbsd-7
     steps:
       - name: 'Check out code'
         uses: 'actions/checkout@v2'

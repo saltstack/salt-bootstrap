@@ -114,9 +114,6 @@ platforms:
   - name: ubuntu-18.04
     driver:
       run_command: /lib/systemd/systemd
-  - name: ubuntu-16.04
-    driver_config:
-      run_command: /lib/systemd/systemd
 
 suites:
   - name: py3-git-3002

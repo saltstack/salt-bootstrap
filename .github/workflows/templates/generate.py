@@ -24,7 +24,6 @@ LINUX_DISTROS = [
     "oraclelinux-7",
     "oraclelinux-8",
     "rockylinux-8",
-    "ubuntu-1604",
     "ubuntu-1804",
     "ubuntu-2004",
     "ubuntu-2110",
@@ -104,7 +103,6 @@ BLACKLIST_3003 = [
     "opensuse-15",
     "opensuse-tumbleweed",
     "rockylinux-8",
-    "ubuntu-1604",
     "ubuntu-2204",
 ]
 
@@ -121,7 +119,6 @@ BLACKLIST_GIT_3003 = [
     "opensuse-15",
     "opensuse-tumbleweed",
     "rockylinux-8",
-    "ubuntu-1604",
     "ubuntu-2004",
     "ubuntu-2110",
     "ubuntu-2204",
@@ -136,7 +133,6 @@ BLACKLIST_3004 = [
     "gentoo-systemd",
     "opensuse-15",
     "opensuse-tumbleweed",
-    "ubuntu-1604",
 ]
 
 BLACKLIST_GIT_3004 = [
@@ -151,7 +147,6 @@ BLACKLIST_GIT_3004 = [
     "gentoo-systemd",
     "opensuse-15",
     "opensuse-tumbleweed",
-    "ubuntu-1604",
     "ubuntu-2004",
     "ubuntu-2110",
     "ubuntu-2204",
@@ -175,9 +170,7 @@ BRANCH_DISPLAY_NAMES = {
 
 STABLE_BRANCH_BLACKLIST = []
 
-LATEST_PKG_BLACKLIST = [
-    "ubuntu-1604",
-]
+LATEST_PKG_BLACKLIST = []
 
 DISTRO_DISPLAY_NAMES = {
     "almalinux-8": "AlmaLinux 8",
@@ -198,7 +191,6 @@ DISTRO_DISPLAY_NAMES = {
     "oraclelinux-7": "Oracle Linux 7",
     "oraclelinux-8": "Oracle Linux 8",
     "rockylinux-8": "Rocky Linux 8",
-    "ubuntu-1604": "Ubuntu 16.04",
     "ubuntu-1804": "Ubuntu 18.04",
     "ubuntu-2004": "Ubuntu 20.04",
     "ubuntu-2110": "Ubuntu 21.10",

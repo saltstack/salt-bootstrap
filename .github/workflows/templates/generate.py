@@ -16,6 +16,7 @@ LINUX_DISTROS = [
     "debian-9",
     "fedora-34",
     "fedora-35",
+    "fedora-36",
     "gentoo",
     "gentoo-systemd",
     "opensuse-15",
@@ -27,6 +28,7 @@ LINUX_DISTROS = [
     "ubuntu-1804",
     "ubuntu-2004",
     "ubuntu-2110",
+    "ubuntu-2204",
 ]
 OSX = WINDOWS = []
 
@@ -41,6 +43,7 @@ STABLE_DISTROS = [
     "debian-9",
     "fedora-34",
     "fedora-35",
+    "fedora-36",
     "gentoo",
     "gentoo-systemd",
     "opensuse-15",
@@ -51,6 +54,7 @@ STABLE_DISTROS = [
     "ubuntu-1804",
     "ubuntu-2004",
     "ubuntu-2110",
+    "ubuntu-2204",
 ]
 
 BLACKLIST_3002 = [
@@ -60,11 +64,13 @@ BLACKLIST_3002 = [
     "debian-11",
     "fedora-34",
     "fedora-35",
+    "fedora-36",
     "gentoo",
     "gentoo-systemd",
     "opensuse-15",
     "opensuse-tumbleweed",
     "rockylinux-8",
+    "ubuntu-2204",
 ]
 
 BLACKLIST_GIT_3002 = [
@@ -76,6 +82,7 @@ BLACKLIST_GIT_3002 = [
     "debian-11",
     "fedora-34",
     "fedora-35",
+    "fedora-36",
     "gentoo",
     "gentoo-systemd",
     "opensuse-15",
@@ -83,6 +90,7 @@ BLACKLIST_GIT_3002 = [
     "rockylinux-8",
     "ubuntu-2004",
     "ubuntu-2110",
+    "ubuntu-2204",
 ]
 
 BLACKLIST_3003 = [
@@ -90,12 +98,14 @@ BLACKLIST_3003 = [
     "debian-11",
     "fedora-34",
     "fedora-35",
+    "fedora-36",
     "gentoo",
     "gentoo-systemd",
     "opensuse-15",
     "opensuse-tumbleweed",
     "rockylinux-8",
     "ubuntu-1604",
+    "ubuntu-2204",
 ]
 
 BLACKLIST_GIT_3003 = [
@@ -105,6 +115,7 @@ BLACKLIST_GIT_3003 = [
     "debian-11",
     "fedora-34",
     "fedora-35",
+    "fedora-36",
     "gentoo",
     "gentoo-systemd",
     "opensuse-15",
@@ -113,12 +124,14 @@ BLACKLIST_GIT_3003 = [
     "ubuntu-1604",
     "ubuntu-2004",
     "ubuntu-2110",
+    "ubuntu-2204",
 ]
 
 BLACKLIST_3004 = [
     "arch",
     "fedora-34",
     "fedora-35",
+    "fedora-36",
     "gentoo",
     "gentoo-systemd",
     "opensuse-15",
@@ -133,6 +146,7 @@ BLACKLIST_GIT_3004 = [
     "debian-11",
     "fedora-34",
     "fedora-35",
+    "fedora-36",
     "gentoo",
     "gentoo-systemd",
     "opensuse-15",
@@ -140,6 +154,7 @@ BLACKLIST_GIT_3004 = [
     "ubuntu-1604",
     "ubuntu-2004",
     "ubuntu-2110",
+    "ubuntu-2204",
 ]
 
 SALT_BRANCHES = [
@@ -175,6 +190,7 @@ DISTRO_DISPLAY_NAMES = {
     "debian-9": "Debian 9",
     "fedora-34": "Fedora 34",
     "fedora-35": "Fedora 35",
+    "fedora-36": "Fedora 36",
     "gentoo": "Gentoo",
     "gentoo-systemd": "Gentoo (systemd)",
     "opensuse-15": "Opensuse 15",
@@ -186,6 +202,7 @@ DISTRO_DISPLAY_NAMES = {
     "ubuntu-1804": "Ubuntu 18.04",
     "ubuntu-2004": "Ubuntu 20.04",
     "ubuntu-2110": "Ubuntu 21.10",
+    "ubuntu-2204": "Ubuntu 22.04",
 }
 
 TIMEOUT_DEFAULT = 20

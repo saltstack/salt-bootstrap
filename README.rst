@@ -32,6 +32,10 @@ sum** of the downloaded ``bootstrap-salt.sh`` file.
 
 The SHA256 sum of the ``bootstrap-salt.sh`` file, per release, is:
 
+- 2022.03.15: ``8f65952c3435f441e7f793941d5162d3ec2033a9ef82722ff1da67a2ef860a2f``
+- 2021.09.17: ``090d652cd6290debce0e3a4eded65086a4272e69446e711eb26f87160593b6a2``
+- 2021.09.14: ``30fdcba972f449630b4f13492cb5525e69e08fa2cdb66a6dc78f1536ad279e52``
+- 2021.08.19: ``ee40a9d8d057cce88a288fc1cb94b1d31408a61d262db6f77b34ad63d66f0806``
 - 2021.06.23: ``35b397dd0a50f832af453c17f138fd29e3692e492d7f463c404a57e1fac10665``
 - 2021.03.02: ``91baa0073308f1be20c7be65238ef67e5733c75285314b302a5b2456e73a0758``
 - 2020.10.20: ``b47bfc8d63cccf22eb4cd94491d30cc1d571e184be25a5be7f775e7f2daaf6e2``
@@ -97,12 +101,12 @@ To view the latest options and descriptions for ``salt-bootstrap``, use ``-h`` a
   Examples:
     - bootstrap-salt.sh
     - bootstrap-salt.sh stable
-    - bootstrap-salt.sh stable 2017.7
-    - bootstrap-salt.sh stable 2017.7.2
+    - bootstrap-salt.sh stable 3003.3
+    - bootstrap-salt.sh stable v3002.7
     - bootstrap-salt.sh testing
     - bootstrap-salt.sh git
-    - bootstrap-salt.sh git 2017.7
-    - bootstrap-salt.sh git v2017.7.2
+    - bootstrap-salt.sh git 3003.3
+    - bootstrap-salt.sh git v3002.7
     - bootstrap-salt.sh git 06f249901a2e2f1ed310d58ea3921a129f214358
 
   Options:
@@ -213,14 +217,14 @@ If you want to install a package of a specific release version, from the SaltSta
 .. code:: console
 
   curl -o bootstrap-salt.sh -L https://bootstrap.saltproject.io
-  sudo sh bootstrap-salt.sh -P stable 3002.2
+  sudo sh bootstrap-salt.sh -P stable 3003.3
 
 If you want to install a specific release version, based on the Git tags:
 
 .. code:: console
 
   curl -o bootstrap-salt.sh -L https://bootstrap.saltproject.io
-  sudo sh bootstrap-salt.sh git v3002.2
+  sudo sh bootstrap-salt.sh git v3003.3
 
 Using ``curl`` to install latest development version from GitHub:
 
@@ -275,14 +279,14 @@ Installing a specific version from git using ``wget``:
 .. code:: console
 
   wget -O bootstrap-salt.sh https://bootstrap.saltproject.io
-  sudo sh bootstrap-salt.sh git v3002.2
+  sudo sh bootstrap-salt.sh git v3003.3
 
 Installing a specific version package from the SaltStack repo using ``wget``:
 
 .. code:: console
 
   wget -O bootstrap-salt.sh https://bootstrap.saltproject.io
-  sudo sh bootstrap-salt.sh -P stable 3002.2
+  sudo sh bootstrap-salt.sh -P stable 3003.3
 
 **NOTE**
 
@@ -298,7 +302,7 @@ If you already have Python installed, ``python 2.7``, then it's as easy as:
 .. code:: console
 
   python -m urllib "https://bootstrap.saltproject.io" > bootstrap-salt.sh
-  sudo sh bootstrap-salt.sh -P stable 3002.2
+  sudo sh bootstrap-salt.sh -P stable 3003.3
 
 With python version 2, the following in-line code should always work:
 
@@ -312,7 +316,7 @@ With python version 3:
 .. code:: console
 
   python3 -c 'import urllib.request; print(urllib.request.urlopen("https://bootstrap.saltproject.io").read().decode("ascii"))' > bootstrap-salt.sh
-  sudo sh bootstrap-salt.sh git v3002.2
+  sudo sh bootstrap-salt.sh git v3003.3
 
 Install using fetch
 ~~~~~~~~~~~~~~~~~~~
@@ -373,7 +377,7 @@ Installing a target version package of Salt from the SaltStack repo:
 
 .. code:: console
 
-  curl -L https://bootstrap.saltproject.io | sudo sh -s -- stable 3002.2
+  curl -L https://bootstrap.saltproject.io | sudo sh -s -- stable 3003.3
 
 Installing the latest master branch of Salt from git:
 
@@ -437,23 +441,11 @@ Debian and derivatives
 ~~~~~~~~~~~~~~~~~~~~~~
 
 - Cumulus Linux 2/3
-- Debian GNU/Linux 7/8/9/10
+- Debian GNU/Linux 9/10/11
 - Devuan GNU/Linux 1/2
 - Kali Linux 1.0 (based on Debian 7)
 - Linux Mint Debian Edition 1 (based on Debian 8)
 - Raspbian 8 (``armhf`` packages) and 9 (using ``git`` installation mode only)
-
-Debian Best Effort Support: Testing Release
-*******************************************
-
-This script provides best-effort support for the upcoming Debian testing release. Package
-repositories are not provided on `SaltStack's Debian repository`_ for Debian testing releases.
-However, the bootstrap script will attempt to install the packages for the current stable
-version of Debian.
-
-For example, when installing Salt on Debian 11 (Bullseye), the bootstrap script will setup the
-repository for Debian 10 (Buster) from `SaltStack's Debian repository`_ and install the
-Debian 10 packages.
 
 
 Red Hat family
@@ -501,7 +493,7 @@ repositories are not provided on `SaltStack's Ubuntu repository`_ for the non-LT
 bootstrap script will attempt to install the packages for the most closely related LTS Ubuntu
 release instead.
 
-For example, when installing Salt on Ubuntu 20.10, the bootstrap script will setup the repository
+For example, when installing Salt on Ubuntu 21.10, the bootstrap script will setup the repository
 for Ubuntu 20.04 from `SaltStack's Ubuntu repository`_ and install the 20.04 packages.
 
 Non-LTS Ubuntu releases are not supported once the release reaches End-of-Life as defined by
@@ -532,8 +524,8 @@ UNIX systems
 Using a custom salt bootstrap
 -----------------------------
 
-By default the ``salt-cloud -p`` provisioning command will use the latest release from this 
-repository to bootstrap new minions. If 
+By default the ``salt-cloud -p`` provisioning command will use the latest release from this
+repository to bootstrap new minions. If
 
 - your needs are not met by that script,
 - you want to lock salt bootstrap to a specific release, or
@@ -569,9 +561,11 @@ this offering, while limited, is as follows:
 - Centos 8
 - Debian 9
 - Debian 10
+- Debian 11
 - Fedora (only git installations)
 - Ubuntu 16.04
 - Ubuntu 18.04
+- Ubuntu 20.04
 
 On Fedora, PIP installation must be allowed (-P) due to incompatibility with the shipped Tornado
 library.

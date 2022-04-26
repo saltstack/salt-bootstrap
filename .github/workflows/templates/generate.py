@@ -10,13 +10,13 @@ LINUX_DISTROS = [
     "amazon-2",
     "arch",
     "centos-7",
-    "centos-8",
+    "centos-stream8",
     "debian-10",
     "debian-11",
     "debian-9",
-    "fedora-33",
     "fedora-34",
     "fedora-35",
+    "fedora-36",
     "gentoo",
     "gentoo-systemd",
     "opensuse-15",
@@ -26,123 +26,144 @@ LINUX_DISTROS = [
     "rockylinux-8",
     "ubuntu-1804",
     "ubuntu-2004",
-    "ubuntu-2104",
+    "ubuntu-2110",
+    "ubuntu-2204",
 ]
 OSX = WINDOWS = []
 
 STABLE_DISTROS = [
     "almalinux-8",
     "amazon-2",
+    "arch",
     "centos-7",
-    "centos-8",
+    "centos-stream8",
     "debian-10",
     "debian-11",
     "debian-9",
-    "fedora-33",
     "fedora-34",
     "fedora-35",
-    "gentoo",
-    "gentoo-systemd",
-    "oraclelinux-7",
-    "oraclelinux-8",
-    "ubuntu-1804",
-    "ubuntu-2004",
-    "ubuntu-2104",
-]
-
-PY2_BLACKLIST = [
-    "almalinux-8",
-    "centos-8",
-    "debian-10",
-    "debian-11",
-    "fedora-33",
-    "fedora-34",
-    "fedora-35",
+    "fedora-36",
     "gentoo",
     "gentoo-systemd",
     "opensuse-15",
     "opensuse-tumbleweed",
+    "oraclelinux-7",
     "oraclelinux-8",
     "rockylinux-8",
+    "ubuntu-1804",
     "ubuntu-2004",
-    "ubuntu-2104",
-]
-
-BLACKLIST_3000 = [
-    "almalinux-8",
-    "debian-11",
-    "fedora-33",
-    "fedora-34",
-    "fedora-35",
-    "opensuse-tumbleweed",
-    "rockylinux-8",
-    "ubuntu-2004",
-    "ubuntu-2104",
-]
-
-BLACKLIST_3001 = [
-    "almalinux-8",
-    "debian-11",
-    "rockylinux-8",
-    "ubuntu-2104",
-]
-
-BLACKLIST_3001_0 = [
-    "almalinux-8",
-    "amazon-2",
-    "debian-11",
-    "gentoo",
-    "gentoo-systemd",
-    "rockylinux-8",
-    "ubuntu-2104",
+    "ubuntu-2110",
+    "ubuntu-2204",
 ]
 
 BLACKLIST_3002 = [
     "almalinux-8",
-    "rockylinux-8",
-]
-
-BLACKLIST_3002_0 = [
-    "almalinux-8",
-    "amazon-2",
+    "arch",
+    "centos-stream8",
     "debian-11",
+    "fedora-34",
+    "fedora-35",
+    "fedora-36",
     "gentoo",
     "gentoo-systemd",
+    "opensuse-15",
+    "opensuse-tumbleweed",
     "rockylinux-8",
-    "ubuntu-2104",
+    "ubuntu-2204",
+]
+
+BLACKLIST_GIT_3002 = [
+    "almalinux-8",
+    "amazon-2",
+    "arch",
+    "centos-stream8",
+    "debian-10",
+    "debian-11",
+    "fedora-34",
+    "fedora-35",
+    "fedora-36",
+    "gentoo",
+    "gentoo-systemd",
+    "opensuse-15",
+    "opensuse-tumbleweed",
+    "rockylinux-8",
+    "ubuntu-2004",
+    "ubuntu-2110",
+    "ubuntu-2204",
 ]
 
 BLACKLIST_3003 = [
-    "rockylinux-8",
-]
-
-BLACKLIST_3003_0 = [
-    "amazon-2",
+    "arch",
+    "debian-11",
+    "fedora-34",
+    "fedora-35",
+    "fedora-36",
     "gentoo",
     "gentoo-systemd",
+    "opensuse-15",
+    "opensuse-tumbleweed",
     "rockylinux-8",
+    "ubuntu-2204",
+]
+
+BLACKLIST_GIT_3003 = [
+    "amazon-2",
+    "arch",
+    "debian-10",
+    "debian-11",
+    "fedora-34",
+    "fedora-35",
+    "fedora-36",
+    "gentoo",
+    "gentoo-systemd",
+    "opensuse-15",
+    "opensuse-tumbleweed",
+    "rockylinux-8",
+    "ubuntu-2004",
+    "ubuntu-2110",
+    "ubuntu-2204",
+]
+
+BLACKLIST_3004 = [
+    "arch",
+    "fedora-34",
+    "fedora-35",
+    "fedora-36",
+    "gentoo",
+    "gentoo-systemd",
+    "opensuse-15",
+    "opensuse-tumbleweed",
+]
+
+BLACKLIST_GIT_3004 = [
+    "amazon-2",
+    "arch",
+    "debian-10",
+    "debian-11",
+    "fedora-34",
+    "fedora-35",
+    "fedora-36",
+    "gentoo",
+    "gentoo-systemd",
+    "opensuse-15",
+    "opensuse-tumbleweed",
+    "ubuntu-2004",
+    "ubuntu-2110",
+    "ubuntu-2204",
 ]
 
 SALT_BRANCHES = [
-    "3000",
-    "3001",
-    "3001-0",
     "3002",
-    "3002-0",
     "3003",
-    "3003-0",
+    "3004",
     "master",
     "latest",
 ]
 
 BRANCH_DISPLAY_NAMES = {
-    "3000": "v3000",
-    "3001": "v3001",
-    "3001-0": "v3001.0",
     "3002": "v3002",
-    "3002-0": "v3002.0",
     "3003": "v3003",
-    "3003-0": "v3003.0",
+    "3004": "v3004",
     "master": "Master",
     "latest": "Latest",
 }
@@ -156,13 +177,13 @@ DISTRO_DISPLAY_NAMES = {
     "amazon-2": "Amazon 2",
     "arch": "Arch",
     "centos-7": "CentOS 7",
-    "centos-8": "CentOS 8",
+    "centos-stream8": "CentOS Stream 8",
     "debian-10": "Debian 10",
     "debian-11": "Debian 11",
     "debian-9": "Debian 9",
-    "fedora-33": "Fedora 33",
     "fedora-34": "Fedora 34",
     "fedora-35": "Fedora 35",
+    "fedora-36": "Fedora 36",
     "gentoo": "Gentoo",
     "gentoo-systemd": "Gentoo (systemd)",
     "opensuse-15": "Opensuse 15",
@@ -172,7 +193,8 @@ DISTRO_DISPLAY_NAMES = {
     "rockylinux-8": "Rocky Linux 8",
     "ubuntu-1804": "Ubuntu 18.04",
     "ubuntu-2004": "Ubuntu 20.04",
-    "ubuntu-2104": "Ubuntu 21.04",
+    "ubuntu-2110": "Ubuntu 21.10",
+    "ubuntu-2204": "Ubuntu 22.04",
 }
 
 TIMEOUT_DEFAULT = 20
@@ -234,18 +256,7 @@ def generate_test_jobs():
                     )
                 continue
 
-            for python_version in ("py2", "py3"):
-
-                if branch == "master" and python_version == "py2":
-                    # Salt's master branch no longer supports Python 2
-                    continue
-
-                try:
-                    if int(branch.split("-")[0]) >= 3000 and python_version == "py2":
-                        # Salt's 300X versions no longer supports Python 2
-                        continue
-                except ValueError:
-                    pass
+            for python_version in ("py3",):
 
                 for bootstrap_type in ("stable", "git"):
                     if bootstrap_type == "stable":
@@ -262,45 +273,26 @@ def generate_test_jobs():
                             # Fedora does not keep old builds around
                             continue
 
+                    BLACKLIST = {
+                        "3002": BLACKLIST_3002,
+                        "3003": BLACKLIST_3003,
+                        "3004": BLACKLIST_3004,
+                    }
                     if bootstrap_type == "git":
-                        # .0 versions are a virtual version for pinning to the first point release of a major release, such as 3001, there is no git version.
+                        BLACKLIST = {
+                            "3002": BLACKLIST_GIT_3002,
+                            "3003": BLACKLIST_GIT_3003,
+                            "3004": BLACKLIST_GIT_3004,
+                        }
+
+                        # .0 versions are a virtual version for pinning to the first point release of a major release, such as 3002, there is no git version.
                         if branch.endswith("-0"):
                             continue
 
-                        if python_version == "py3":
-                            if distro in ("arch"):
-                                allowed_branches = ["master"]
-                                try:
-                                    int_branch = int(branch)
-                                    if int_branch > 3000:
-                                        allowed_branches.append(branch)
-                                except ValueError:
-                                    pass
-                                if branch not in allowed_branches:
-                                    # Arch and Fedora default to py3.8
-                                    continue
-                    if branch == "3000" and distro in BLACKLIST_3000:
-                        continue
-
-                    if branch == "3001" and distro in BLACKLIST_3001:
-                        continue
-
-                    if branch == "3001-0" and distro in BLACKLIST_3001_0:
-                        continue
-
-                    if branch == "3002" and distro in BLACKLIST_3002:
-                        continue
-
-                    if branch == "3002-0" and distro in BLACKLIST_3002_0:
-                        continue
-
-                    if branch == "3003" and distro in BLACKLIST_3003:
-                        continue
-
-                    if branch == "3003-0" and distro in BLACKLIST_3003_0:
-                        continue
-
-                    if python_version == "py2" and distro in PY2_BLACKLIST:
+                    if (
+                        branch in ("3002", "3003", "3004")
+                        and distro in BLACKLIST[branch]
+                    ):
                         continue
 
                     if distro in LINUX_DISTROS:
@@ -347,7 +339,9 @@ def generate_test_jobs():
                     rfh.read()
                     .format(
                         jobs="{pre_commit}{lint}{test}".format(
-                            lint=lint_job, test=test_jobs, pre_commit=pre_commit_job,
+                            lint=lint_job,
+                            test=test_jobs,
+                            pre_commit=pre_commit_job,
                         ),
                         on="push, pull_request",
                         name="Testing",
@@ -362,7 +356,9 @@ def generate_test_jobs():
                 "{}\n".format(
                     rfh.read()
                     .format(
-                        jobs="{test}".format(test=branch_only_test_jobs,),
+                        jobs="{test}".format(
+                            test=branch_only_test_jobs,
+                        ),
                         on="push",
                         name="Branch Testing",
                     )

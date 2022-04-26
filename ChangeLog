@@ -1,5 +1,31 @@
 Version TBD (In Progress on the Develop Branch):
 
+Version 2022.03.15:
+	* Add detection and functions for AlmaLinux and Rocky Linux (myii) #1803
+	* Copy configs to correct config dirs (v3004+) (dafyddj) #1798
+	* Support Non-LTS Ubuntu 21.04 & 21.10 (blindpirate) #1793
+	* Use native repositories for Debian 11 (jpacura) #1615
+	* Keep all command-line parameters when UAC is enabled (Simon-TheUser) #1613
+	* Add support for Raspbian (Jille) #1612
+	* Add openrc to alpine:latest dependencies (krionbsd) #1609
+	* Add CentOS 7 base key (bryceml) #1608
+	* Fix git master install on alpine 3.12+ (Nascire) #1604
+	* Sort help alphabetically (krionbsd) #1601
+
+Version 2021.09.17:
+	* Re-add Ubuntu-16 support as it's still supported with 3001 and 3002 (krionbsd) #1594
+	* Add oncoming 3004 release (krionbsd) #1593
+
+Version 2021.09.14:
+	* Update latest Salt version in README (krionbsd) #1588
+	* Make Python 3 the default (bryceml) #1577
+	* Don't output info if using the default -x value (bryceml) #1587
+
+Version 2021.08.19:
+    * Update README with instructions to use salt-bootstrap custom version (ari) #1580
+    * Remove unsupported versions (bryceml) #1578
+    * Update FreeBSD default Python version to 3.8 (myii) #1574
+
 Version 2021.06.23:
 	* Use salt.list instead of saltstack.list (bryceml) #1563
 	* Use fetch_url function for curl (xeacott) #1562

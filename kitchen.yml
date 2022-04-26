@@ -46,7 +46,6 @@ platforms:
   - name: centos-stream8
     driver:
       image: quay.io/centos/centos:stream8
-  - name: centos-8
   - name: centos-7
   - name: debian-9
     driver:
@@ -58,15 +57,15 @@ platforms:
     driver:
       image: debian:bullseye
       run_command: /lib/systemd/systemd
-  - name: fedora-33
-    driver:
-      provision_command: &fedora_provision_command
-        - dnf -y install procps-ng
-        - sed -i 's/^PubkeyAcceptedKeyTypes.*$/&,ssh-rsa/' /etc/crypto-policies/back-ends/opensshserver.config
   - name: fedora-34
     driver:
-      provision_command: *fedora_provision_command
+      provision_command: &fedora_provision_command
+        - dnf -y install procps-ng crypto-policies-scripts
+        - update-crypto-policies --set LEGACY
   - name: fedora-35
+    driver:
+      provision_command: *fedora_provision_command
+  - name: fedora-36
     driver:
       provision_command: *fedora_provision_command
   - name: gentoo
@@ -101,8 +100,11 @@ platforms:
   - name: oraclelinux-8
   - name: oraclelinux-7
   - name: rockylinux-8
+  - name: ubuntu-22.04
     driver:
-      image: rockylinux/rockylinux
+      run_command: /lib/systemd/systemd
+      provision_command:
+        - echo "PubkeyAcceptedAlgorithms +ssh-rsa" | tee -a /etc/ssh/sshd_config
   - name: ubuntu-21.10
     driver:
       run_command: /lib/systemd/systemd
@@ -111,9 +113,6 @@ platforms:
       run_command: /lib/systemd/systemd
   - name: ubuntu-18.04
     driver:
-      run_command: /lib/systemd/systemd
-  - name: ubuntu-16.04
-    driver_config:
       run_command: /lib/systemd/systemd
 
 suites:
@@ -137,7 +136,6 @@ suites:
       - opensuse-15
       - opensuse-tumbleweed
       - debian-11
-      - fedora-33
       - arch
       - gentoo
       - gentoo-systemd
@@ -151,7 +149,6 @@ suites:
     excludes:
       - opensuse-15
       - opensuse-tumbleweed
-      - fedora-33
       - arch
       - gentoo
       - gentoo-systemd
@@ -187,7 +184,6 @@ suites:
     excludes:
       - opensuse-15
       - opensuse-tumbleweed
-      - fedora-33
       - arch
       - gentoo
       - gentoo-systemd

@@ -14,7 +14,7 @@
 #
 #          BUGS: https://github.com/saltstack/salt-bootstrap/issues
 #
-#     COPYRIGHT: (c) 2012-2021 by the SaltStack Team, see AUTHORS.rst for more
+#     COPYRIGHT: (c) 2012-2022 by the SaltStack Team, see AUTHORS.rst for more
 #                details.
 #
 #       LICENSE: Apache 2.0
@@ -23,7 +23,7 @@
 #======================================================================================================================
 set -o nounset                              # Treat unset variables as an error
 
-__ScriptVersion="2021.09.17"
+__ScriptVersion="2022.03.15"
 __ScriptName="bootstrap-salt.sh"
 
 __ScriptFullName="$0"
@@ -945,7 +945,7 @@ __strip_duplicates() {
 __sort_release_files() {
     KNOWN_RELEASE_FILES=$(echo "(arch|alpine|centos|debian|ubuntu|fedora|redhat|suse|\
         mandrake|mandriva|gentoo|slackware|turbolinux|unitedlinux|void|lsb|system|\
-        oracle|os)(-|_)(release|version)" | sed -E 's:[[:space:]]::g')
+        oracle|os|almalinux|rocky)(-|_)(release|version)" | sed -E 's:[[:space:]]::g')
     primary_release_files=""
     secondary_release_files=""
     # Sort know VS un-known files first
@@ -959,7 +959,7 @@ __sort_release_files() {
     done
 
     # Now let's sort by know files importance, max important goes last in the max_prio list
-    max_prio="redhat-release centos-release oracle-release fedora-release"
+    max_prio="redhat-release centos-release oracle-release fedora-release almalinux-release rocky-release"
     for entry in $max_prio; do
         if [ "$(echo "${primary_release_files}" | grep "$entry")" != "" ]; then
             primary_release_files=$(echo "${primary_release_files}" | sed -e "s:\\(.*\\)\\($entry\\)\\(.*\\):\\2 \\1 \\3:g")
@@ -1028,6 +1028,8 @@ __gather_linux_system_info() {
         elif [ "${DISTRO_NAME}" = "Arch" ]; then
             DISTRO_NAME="Arch Linux"
             return
+        elif [ "${DISTRO_NAME}" = "Rocky" ]; then
+            DISTRO_NAME="Rocky Linux"
         fi
         rv=$(lsb_release -sr)
         [ "${rv}" != "" ] && DISTRO_VERSION=$(__parse_version_string "$rv")
@@ -1086,6 +1088,8 @@ __gather_linux_system_info() {
             unitedlinux        ) n="UnitedLinux"    ;;
             void               ) n="VoidLinux"      ;;
             oracle             ) n="Oracle Linux"   ;;
+            almalinux          ) n="AlmaLinux"      ;;
+            rocky              ) n="Rocky Linux"    ;;
             system             )
                 while read -r line; do
                     [ "${n}x" != "systemx" ] && break
@@ -1462,6 +1466,9 @@ __ubuntu_codename_translation() {
         "21")
             DISTRO_CODENAME="hirsute"
             ;;
+        "22")
+            DISTRO_CODENAME="jammy"
+            ;;
         *)
             DISTRO_CODENAME="trusty"
             ;;
@@ -1488,6 +1495,7 @@ __debian_derivatives_translation() {
     devuan_1_debian_base="8.0"
     devuan_2_debian_base="9.0"
     kali_1_debian_base="7.0"
+    kali_2021_debian_base="10.0"
     linuxmint_1_debian_base="8.0"
     raspbian_8_debian_base="8.0"
     raspbian_9_debian_base="9.0"
@@ -1815,14 +1823,14 @@ elif [ "${DISTRO_NAME_L}" = "debian" ]; then
   __debian_codename_translation
 fi
 
-if [ "$(echo "${DISTRO_NAME_L}" | grep -E '(debian|ubuntu|centos|gentoo|red_hat|oracle|scientific|amazon|fedora|macosx)')" = "" ] && [ "$ITYPE" = "stable" ] && [ "$STABLE_REV" != "latest" ]; then
+if [ "$(echo "${DISTRO_NAME_L}" | grep -E '(debian|ubuntu|centos|gentoo|red_hat|oracle|scientific|amazon|fedora|macosx|almalinux|rocky)')" = "" ] && [ "$ITYPE" = "stable" ] && [ "$STABLE_REV" != "latest" ]; then
     echoerror "${DISTRO_NAME} does not have major version pegged packages support"
     exit 1
 fi
 
 # Only RedHat based distros have testing support
 if [ "${ITYPE}" = "testing" ]; then
-    if [ "$(echo "${DISTRO_NAME_L}" | grep -E '(centos|red_hat|amazon|oracle)')" = "" ]; then
+    if [ "$(echo "${DISTRO_NAME_L}" | grep -E '(centos|red_hat|amazon|oracle|almalinux|rocky)')" = "" ]; then
         echoerror "${DISTRO_NAME} does not have testing packages support"
         exit 1
     fi
@@ -2921,7 +2929,8 @@ __enable_universe_repository() {
 __install_saltstack_ubuntu_repository() {
     # Workaround for latest non-LTS Ubuntu
     if { [ "$DISTRO_MAJOR_VERSION" -eq 20 ] && [ "$DISTRO_MINOR_VERSION" -eq 10 ]; } || \
-        [ "$DISTRO_MAJOR_VERSION" -eq 21 ]; then
+        # remove 22 version when salt packages for 22.04 are available
+        [ "$DISTRO_MAJOR_VERSION" -eq 21 ] ||  [ "$DISTRO_MAJOR_VERSION" -eq 22 ]; then
         echowarn "Non-LTS Ubuntu detected, but stable packages requested. Trying packages for previous LTS release. You may experience problems."
         UBUNTU_VERSION=20.04
         UBUNTU_CODENAME="focal"
@@ -3035,7 +3044,7 @@ install_ubuntu_stable_deps() {
 
     if [ "${_UPGRADE_SYS}" -eq $BS_TRUE ]; then
         if [ "${_INSECURE_DL}" -eq $BS_TRUE ]; then
-            if [ "$DISTRO_MAJOR_VERSION" -ge 20 ] || [ "$DISTRO_MAJOR_VERSION" -ge 21 ]; then
+            if [ "$DISTRO_MAJOR_VERSION" -ge 20 ] || [ "$DISTRO_MAJOR_VERSION" -ge 21 ] || [ "$DISTRO_MAJOR_VERSION" -ge 22 ]; then
                 __apt_get_install_noinput --allow-unauthenticated debian-archive-keyring && apt-get update || return 1
             else
                 __apt_get_install_noinput --allow-unauthenticated debian-archive-keyring &&
@@ -3116,6 +3125,9 @@ install_ubuntu_git_deps() {
         fi
     else
         __PACKAGES="python${PY_PKG_VER}-dev python${PY_PKG_VER}-pip python${PY_PKG_VER}-setuptools gcc"
+        if [ "$DISTRO_MAJOR_VERSION" -ge 22 ]; then
+            __PACKAGES="${__PACKAGES} g++"
+        fi
         # shellcheck disable=SC2086
         __apt_get_install_noinput ${__PACKAGES} || return 1
     fi
@@ -3764,6 +3776,13 @@ install_debian_git_post() {
     done
 }
 
+install_debian_2021_post() {
+    # Kali 2021 (debian derivative) disables all network services by default
+    # Using archlinux post function to enable salt systemd services
+    install_arch_linux_post || return 1
+    return 0
+}
+
 install_debian_restart_daemons() {
     [ "$_START_DAEMONS" -eq $BS_FALSE ] && return 0
 
@@ -3979,6 +3998,9 @@ install_fedora_git_deps() {
             done
     else
         __PACKAGES="python${PY_PKG_VER}-devel python${PY_PKG_VER}-pip python${PY_PKG_VER}-setuptools gcc"
+        if [ "${DISTRO_VERSION}" -ge 35 ]; then
+            __PACKAGES="${__PACKAGES} gcc-c++"
+        fi
         # shellcheck disable=SC2086
         __dnf_install_noinput ${__PACKAGES} || return 1
     fi
@@ -4023,6 +4045,11 @@ install_fedora_git_post() {
         [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
 
         __copyfile "${_SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-${fname}.service" "/lib/systemd/system/salt-${fname}.service"
+
+        # Salt executables are located under `/usr/local/bin/` on Fedora 36+
+        if [ "${DISTRO_VERSION}" -ge 36 ]; then
+          sed -i -e 's:/usr/bin/:/usr/local/bin/:g' /lib/systemd/system/salt-*.service
+        fi
 
         # Skip salt-api since the service should be opt-in and not necessarily started on boot
         [ $fname = "api" ] && continue
@@ -4845,6 +4872,132 @@ install_oracle_linux_check_services() {
 }
 #
 #   Ended Oracle Linux Install Functions
+#
+#######################################################################################################################
+
+#######################################################################################################################
+#
+#   AlmaLinux Install Functions
+#
+install_almalinux_stable_deps() {
+    install_centos_stable_deps || return 1
+    return 0
+}
+
+install_almalinux_git_deps() {
+    install_centos_git_deps || return 1
+    return 0
+}
+
+install_almalinux_testing_deps() {
+    install_centos_testing_deps || return 1
+    return 0
+}
+
+install_almalinux_stable() {
+    install_centos_stable || return 1
+    return 0
+}
+
+install_almalinux_git() {
+    install_centos_git || return 1
+    return 0
+}
+
+install_almalinux_testing() {
+    install_centos_testing || return 1
+    return 0
+}
+
+install_almalinux_stable_post() {
+    install_centos_stable_post || return 1
+    return 0
+}
+
+install_almalinux_git_post() {
+    install_centos_git_post || return 1
+    return 0
+}
+
+install_almalinux_testing_post() {
+    install_centos_testing_post || return 1
+    return 0
+}
+
+install_almalinux_restart_daemons() {
+    install_centos_restart_daemons || return 1
+    return 0
+}
+
+install_almalinux_check_services() {
+    install_centos_check_services || return 1
+    return 0
+}
+#
+#   Ended AlmaLinux Install Functions
+#
+#######################################################################################################################
+
+#######################################################################################################################
+#
+#   Rocky Linux Install Functions
+#
+install_rocky_linux_stable_deps() {
+    install_centos_stable_deps || return 1
+    return 0
+}
+
+install_rocky_linux_git_deps() {
+    install_centos_git_deps || return 1
+    return 0
+}
+
+install_rocky_linux_testing_deps() {
+    install_centos_testing_deps || return 1
+    return 0
+}
+
+install_rocky_linux_stable() {
+    install_centos_stable || return 1
+    return 0
+}
+
+install_rocky_linux_git() {
+    install_centos_git || return 1
+    return 0
+}
+
+install_rocky_linux_testing() {
+    install_centos_testing || return 1
+    return 0
+}
+
+install_rocky_linux_stable_post() {
+    install_centos_stable_post || return 1
+    return 0
+}
+
+install_rocky_linux_git_post() {
+    install_centos_git_post || return 1
+    return 0
+}
+
+install_rocky_linux_testing_post() {
+    install_centos_testing_post || return 1
+    return 0
+}
+
+install_rocky_linux_restart_daemons() {
+    install_centos_restart_daemons || return 1
+    return 0
+}
+
+install_rocky_linux_check_services() {
+    install_centos_check_services || return 1
+    return 0
+}
+#
+#   Ended Rocky Linux Install Functions
 #
 #######################################################################################################################
 

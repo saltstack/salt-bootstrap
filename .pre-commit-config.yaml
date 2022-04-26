@@ -12,7 +12,7 @@ repos:
       - id: end-of-file-fixer     # Makes sure files end in a newline and only a newline.
 
   - repo: https://github.com/psf/black
-    rev: 19.10b0
+    rev: 22.3.0
     hooks:
       - id: black
 
@@ -27,6 +27,6 @@ repos:
 
       - id: shellcheck
         name: Run ShellCheck against bootstrap-salt.sh
-        entry: koalaman/shellcheck-alpine:v0.6.0 shellcheck -s sh -f tty
+        entry: koalaman/shellcheck-alpine:v0.7.0 shellcheck -s sh -f tty
         files: 'bootstrap-salt\.sh'
         language: docker_image

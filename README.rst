@@ -32,6 +32,7 @@ sum** of the downloaded ``bootstrap-salt.sh`` file.
 
 The SHA256 sum of the ``bootstrap-salt.sh`` file, per release, is:
 
+- 2022.03.15: ``8f65952c3435f441e7f793941d5162d3ec2033a9ef82722ff1da67a2ef860a2f``
 - 2021.09.17: ``090d652cd6290debce0e3a4eded65086a4272e69446e711eb26f87160593b6a2``
 - 2021.09.14: ``30fdcba972f449630b4f13492cb5525e69e08fa2cdb66a6dc78f1536ad279e52``
 - 2021.08.19: ``ee40a9d8d057cce88a288fc1cb94b1d31408a61d262db6f77b34ad63d66f0806``
@@ -440,23 +441,11 @@ Debian and derivatives
 ~~~~~~~~~~~~~~~~~~~~~~
 
 - Cumulus Linux 2/3
-- Debian GNU/Linux 7/8/9/10
+- Debian GNU/Linux 9/10/11
 - Devuan GNU/Linux 1/2
 - Kali Linux 1.0 (based on Debian 7)
 - Linux Mint Debian Edition 1 (based on Debian 8)
 - Raspbian 8 (``armhf`` packages) and 9 (using ``git`` installation mode only)
-
-Debian Best Effort Support: Testing Release
-*******************************************
-
-This script provides best-effort support for the upcoming Debian testing release. Package
-repositories are not provided on `SaltStack's Debian repository`_ for Debian testing releases.
-However, the bootstrap script will attempt to install the packages for the current stable
-version of Debian.
-
-For example, when installing Salt on Debian 11 (Bullseye), the bootstrap script will setup the
-repository for Debian 10 (Buster) from `SaltStack's Debian repository`_ and install the
-Debian 10 packages.
 
 
 Red Hat family
@@ -504,7 +493,7 @@ repositories are not provided on `SaltStack's Ubuntu repository`_ for the non-LT
 bootstrap script will attempt to install the packages for the most closely related LTS Ubuntu
 release instead.
 
-For example, when installing Salt on Ubuntu 20.10, the bootstrap script will setup the repository
+For example, when installing Salt on Ubuntu 21.10, the bootstrap script will setup the repository
 for Ubuntu 20.04 from `SaltStack's Ubuntu repository`_ and install the 20.04 packages.
 
 Non-LTS Ubuntu releases are not supported once the release reaches End-of-Life as defined by
@@ -572,9 +561,11 @@ this offering, while limited, is as follows:
 - Centos 8
 - Debian 9
 - Debian 10
+- Debian 11
 - Fedora (only git installations)
 - Ubuntu 16.04
 - Ubuntu 18.04
+- Ubuntu 20.04
 
 On Fedora, PIP installation must be allowed (-P) due to incompatibility with the shipped Tornado
 library.

@@ -9,8 +9,8 @@ driver:
   gui: false
   ssh:
     shell: /bin/sh
-  <% unless ENV['CI'] %>
   linked_clone: true
+  <% unless ENV['CI'] %>
   synced_folders:
     - - '.kitchen/kitchen-vagrant/%{instance_name}/vagrant'
       - '/vagrant'

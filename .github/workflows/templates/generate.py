@@ -16,6 +16,7 @@ LINUX_DISTROS = [
     "debian-9",
     "fedora-34",
     "fedora-35",
+    "fedora-36",
     "gentoo",
     "gentoo-systemd",
     "opensuse-15",
@@ -23,16 +24,17 @@ LINUX_DISTROS = [
     "oraclelinux-7",
     "oraclelinux-8",
     "rockylinux-8",
-    "ubuntu-1604",
     "ubuntu-1804",
     "ubuntu-2004",
     "ubuntu-2110",
+    "ubuntu-2204",
 ]
 OSX = WINDOWS = []
 
 STABLE_DISTROS = [
     "almalinux-8",
     "amazon-2",
+    "arch",
     "centos-7",
     "centos-stream8",
     "debian-10",
@@ -40,81 +42,128 @@ STABLE_DISTROS = [
     "debian-9",
     "fedora-34",
     "fedora-35",
+    "fedora-36",
     "gentoo",
     "gentoo-systemd",
+    "opensuse-15",
+    "opensuse-tumbleweed",
     "oraclelinux-7",
     "oraclelinux-8",
     "rockylinux-8",
-    "ubuntu-1604",
     "ubuntu-1804",
     "ubuntu-2004",
     "ubuntu-2110",
+    "ubuntu-2204",
 ]
 
 BLACKLIST_3002 = [
     "almalinux-8",
-    "centos-stream8",
-    "rockylinux-8",
-    "debian-11",
-]
-
-BLACKLIST_3002_0 = [
-    "almalinux-8",
-    "amazon-2",
+    "arch",
     "centos-stream8",
     "debian-11",
+    "fedora-34",
+    "fedora-35",
+    "fedora-36",
     "gentoo",
     "gentoo-systemd",
+    "opensuse-15",
+    "opensuse-tumbleweed",
     "rockylinux-8",
+    "ubuntu-2204",
+]
+
+BLACKLIST_GIT_3002 = [
+    "almalinux-8",
+    "amazon-2",
+    "arch",
+    "centos-stream8",
+    "debian-10",
+    "debian-11",
+    "fedora-34",
+    "fedora-35",
+    "fedora-36",
+    "gentoo",
+    "gentoo-systemd",
+    "opensuse-15",
+    "opensuse-tumbleweed",
+    "rockylinux-8",
+    "ubuntu-2004",
     "ubuntu-2110",
+    "ubuntu-2204",
 ]
 
 BLACKLIST_3003 = [
-    "rockylinux-8",
-    "ubuntu-1604",
+    "arch",
     "debian-11",
-]
-
-BLACKLIST_3003_0 = [
-    "amazon-2",
+    "fedora-34",
+    "fedora-35",
+    "fedora-36",
     "gentoo",
     "gentoo-systemd",
+    "opensuse-15",
+    "opensuse-tumbleweed",
     "rockylinux-8",
-    "ubuntu-1604",
-    "debian-11"
+    "ubuntu-2204",
+]
+
+BLACKLIST_GIT_3003 = [
+    "amazon-2",
+    "arch",
+    "debian-10",
+    "debian-11",
+    "fedora-34",
+    "fedora-35",
+    "fedora-36",
+    "gentoo",
+    "gentoo-systemd",
+    "opensuse-15",
+    "opensuse-tumbleweed",
+    "rockylinux-8",
+    "ubuntu-2004",
+    "ubuntu-2110",
+    "ubuntu-2204",
 ]
 
 BLACKLIST_3004 = [
-    "ubuntu-1604",
     "arch",
-]
-
-BLACKLIST_3004_0 = [
-    "amazon-2",
+    "fedora-34",
+    "fedora-35",
+    "fedora-36",
     "gentoo",
     "gentoo-systemd",
-    "ubuntu-1604",
+    "opensuse-15",
+    "opensuse-tumbleweed",
+]
+
+BLACKLIST_GIT_3004 = [
+    "amazon-2",
     "arch",
+    "debian-10",
+    "debian-11",
+    "fedora-34",
+    "fedora-35",
+    "fedora-36",
+    "gentoo",
+    "gentoo-systemd",
+    "opensuse-15",
+    "opensuse-tumbleweed",
+    "ubuntu-2004",
+    "ubuntu-2110",
+    "ubuntu-2204",
 ]
 
 SALT_BRANCHES = [
     "3002",
-    "3002-0",
     "3003",
-    "3003-0",
     "3004",
-    "3004-0",
     "master",
     "latest",
 ]
 
 BRANCH_DISPLAY_NAMES = {
     "3002": "v3002",
-    "3002-0": "v3002.0",
     "3003": "v3003",
-    "3003-0": "v3003.0",
     "3004": "v3004",
-    "3004-0": "v3004.0",
     "master": "Master",
     "latest": "Latest",
 }
@@ -134,6 +183,7 @@ DISTRO_DISPLAY_NAMES = {
     "debian-9": "Debian 9",
     "fedora-34": "Fedora 34",
     "fedora-35": "Fedora 35",
+    "fedora-36": "Fedora 36",
     "gentoo": "Gentoo",
     "gentoo-systemd": "Gentoo (systemd)",
     "opensuse-15": "Opensuse 15",
@@ -141,10 +191,10 @@ DISTRO_DISPLAY_NAMES = {
     "oraclelinux-7": "Oracle Linux 7",
     "oraclelinux-8": "Oracle Linux 8",
     "rockylinux-8": "Rocky Linux 8",
-    "ubuntu-1604": "Ubuntu 16.04",
     "ubuntu-1804": "Ubuntu 18.04",
     "ubuntu-2004": "Ubuntu 20.04",
     "ubuntu-2110": "Ubuntu 21.10",
+    "ubuntu-2204": "Ubuntu 22.04",
 }
 
 TIMEOUT_DEFAULT = 20
@@ -223,28 +273,28 @@ def generate_test_jobs():
                             # Fedora does not keep old builds around
                             continue
 
+                    BLACKLIST = {
+                        "3002": BLACKLIST_3002,
+                        "3003": BLACKLIST_3003,
+                        "3004": BLACKLIST_3004,
+                    }
                     if bootstrap_type == "git":
+                        BLACKLIST = {
+                            "3002": BLACKLIST_GIT_3002,
+                            "3003": BLACKLIST_GIT_3003,
+                            "3004": BLACKLIST_GIT_3004,
+                        }
+
                         # .0 versions are a virtual version for pinning to the first point release of a major release, such as 3002, there is no git version.
                         if branch.endswith("-0"):
                             continue
 
-                    if branch == "3002" and distro in BLACKLIST_3002:
+                    if (
+                        branch in ("3002", "3003", "3004")
+                        and distro in BLACKLIST[branch]
+                    ):
                         continue
 
-                    if branch == "3002-0" and distro in BLACKLIST_3002_0:
-                        continue
-
-                    if branch == "3003" and distro in BLACKLIST_3003:
-                        continue
-
-                    if branch == "3003-0" and distro in BLACKLIST_3003_0:
-                        continue
-
-                    if branch == "3004" and distro in BLACKLIST_3004:
-                        continue
-
-                    if branch == "3004-0" and distro in BLACKLIST_3004_0:
-                        continue
                     if distro in LINUX_DISTROS:
                         template = "linux.yml"
                     elif distro in OSX:
@@ -289,7 +339,9 @@ def generate_test_jobs():
                     rfh.read()
                     .format(
                         jobs="{pre_commit}{lint}{test}".format(
-                            lint=lint_job, test=test_jobs, pre_commit=pre_commit_job,
+                            lint=lint_job,
+                            test=test_jobs,
+                            pre_commit=pre_commit_job,
                         ),
                         on="push, pull_request",
                         name="Testing",
@@ -304,7 +356,9 @@ def generate_test_jobs():
                 "{}\n".format(
                     rfh.read()
                     .format(
-                        jobs="{test}".format(test=branch_only_test_jobs,),
+                        jobs="{test}".format(
+                            test=branch_only_test_jobs,
+                        ),
                         on="push",
                         name="Branch Testing",
                     )

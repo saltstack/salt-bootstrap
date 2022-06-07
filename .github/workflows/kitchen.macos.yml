@@ -1,6 +1,6 @@
 # yamllint disable rule:line-length
 ---
-name: 'Kitchen (MacOS)'
+name: 'Kitchen (macOS)'
 'on': ['push', 'pull_request']
 
 env:

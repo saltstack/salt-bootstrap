@@ -54,40 +54,6 @@ STABLE_DISTROS = [
     "ubuntu-2204",
 ]
 
-BLACKLIST_3002 = [
-    "almalinux-8",
-    "arch",
-    "centos-stream8",
-    "debian-11",
-    "fedora-35",
-    "fedora-36",
-    "gentoo",
-    "gentoo-systemd",
-    "opensuse-15",
-    "opensuse-tumbleweed",
-    "rockylinux-8",
-    "ubuntu-2204",
-]
-
-BLACKLIST_GIT_3002 = [
-    "almalinux-8",
-    "amazon-2",
-    "arch",
-    "centos-stream8",
-    "debian-10",
-    "debian-11",
-    "fedora-35",
-    "fedora-36",
-    "gentoo",
-    "gentoo-systemd",
-    "opensuse-15",
-    "opensuse-tumbleweed",
-    "rockylinux-8",
-    "ubuntu-2004",
-    "ubuntu-2110",
-    "ubuntu-2204",
-]
-
 BLACKLIST_3003 = [
     "arch",
     "debian-11",
@@ -145,7 +111,6 @@ BLACKLIST_GIT_3004 = [
 ]
 
 SALT_BRANCHES = [
-    "3002",
     "3003",
     "3004",
     "master",
@@ -153,7 +118,6 @@ SALT_BRANCHES = [
 ]
 
 BRANCH_DISPLAY_NAMES = {
-    "3002": "v3002",
     "3003": "v3003",
     "3004": "v3004",
     "master": "Master",
@@ -265,23 +229,21 @@ def generate_test_jobs():
                             continue
 
                     BLACKLIST = {
-                        "3002": BLACKLIST_3002,
                         "3003": BLACKLIST_3003,
                         "3004": BLACKLIST_3004,
                     }
                     if bootstrap_type == "git":
                         BLACKLIST = {
-                            "3002": BLACKLIST_GIT_3002,
                             "3003": BLACKLIST_GIT_3003,
                             "3004": BLACKLIST_GIT_3004,
                         }
 
-                        # .0 versions are a virtual version for pinning to the first point release of a major release, such as 3002, there is no git version.
+                        # .0 versions are a virtual version for pinning to the first point release of a major release, such as 3003, there is no git version.
                         if branch.endswith("-0"):
                             continue
 
                     if (
-                        branch in ("3002", "3003", "3004")
+                        branch in ("3003", "3004")
                         and distro in BLACKLIST[branch]
                     ):
                         continue

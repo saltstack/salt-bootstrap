@@ -57,14 +57,11 @@ platforms:
     driver:
       image: debian:bullseye
       run_command: /lib/systemd/systemd
-  - name: fedora-34
+  - name: fedora-35
     driver:
       provision_command: &fedora_provision_command
         - dnf -y install procps-ng crypto-policies-scripts
         - update-crypto-policies --set LEGACY
-  - name: fedora-35
-    driver:
-      provision_command: *fedora_provision_command
   - name: fedora-36
     driver:
       provision_command: *fedora_provision_command
@@ -116,10 +113,6 @@ platforms:
       run_command: /lib/systemd/systemd
 
 suites:
-  - name: py3-git-3002
-    provisioner:
-      salt_version: 3002
-      salt_bootstrap_options: -x python3 -MPfq git %s
   - name: py3-git-3003
     provisioner:
       salt_version: 3003
@@ -128,10 +121,6 @@ suites:
     provisioner:
       salt_version: 3004
       salt_bootstrap_options: -x python3 -MPfq git %s
-  - name: py3-stable-3002-0
-    provisioner:
-      salt_version: 3002
-      salt_bootstrap_options: -x python3 -MP stable 3002.0
     excludes:
       - opensuse-15
       - opensuse-tumbleweed
@@ -155,10 +144,6 @@ suites:
       - freebsd-130
       - freebsd-123
       - openbsd-6
-  - name: py3-stable-3002
-    provisioner:
-      salt_version: 3002
-      salt_bootstrap_options: -x python3 -MP stable %s
     excludes:
       - opensuse-15
       - opensuse-tumbleweed

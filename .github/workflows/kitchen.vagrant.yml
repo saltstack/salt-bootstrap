@@ -41,10 +41,10 @@ jobs:
       fail-fast: false
       matrix:
         instance:
-          - py3-git-master-freebsd-130
+          - py3-git-master-freebsd-131
           - py3-git-master-freebsd-123
           # - py3-git-master-openbsd-6
-          - latest-freebsd-130
+          - latest-freebsd-131
           - latest-freebsd-123
           - latest-openbsd-6
     steps:

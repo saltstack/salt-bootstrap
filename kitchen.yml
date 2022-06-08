@@ -128,7 +128,7 @@ suites:
       - arch
       - gentoo
       - gentoo-systemd
-      - freebsd-130
+      - freebsd-131
       - freebsd-123
       - openbsd-6
   - name: py3-stable-3003-0
@@ -141,14 +141,14 @@ suites:
       - arch
       - gentoo
       - gentoo-systemd
-      - freebsd-130
+      - freebsd-131
       - freebsd-123
       - openbsd-6
     excludes:
       - opensuse-15
       - opensuse-tumbleweed
       - arch
-      - freebsd-130
+      - freebsd-131
       - freebsd-123
       - openbsd-6
   - name: py3-stable-3003
@@ -159,7 +159,7 @@ suites:
       - opensuse-15
       - opensuse-tumbleweed
       - arch
-      - freebsd-130
+      - freebsd-131
       - freebsd-123
       - openbsd-6
   - name: py3-stable-3004-0
@@ -172,7 +172,7 @@ suites:
       - arch
       - gentoo
       - gentoo-systemd
-      - freebsd-130
+      - freebsd-131
       - freebsd-123
       - openbsd-6
   - name: py3-stable-3004
@@ -183,7 +183,7 @@ suites:
       - opensuse-15
       - opensuse-tumbleweed
       - arch
-      - freebsd-130
+      - freebsd-131
       - freebsd-123
       - openbsd-6
   - name: py3-git-master

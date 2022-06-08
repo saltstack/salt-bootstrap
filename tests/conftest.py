@@ -9,7 +9,7 @@ log = logging.getLogger(__name__)
 
 @pytest.fixture(scope="session")
 def host():
-    if os.environ.get("RUNNER_OS", "") == "macOS":
+    if os.environ.get("RUNNER_OS", "") == "macOS" and os.environ.get("KITCHEN_LOCAL_YAML", "") == "kitchen.macos.yml":
         # Adjust the `PATH` so that the `salt-call` executable can be found
         os.environ["PATH"] = "/opt/salt/bin{}{}".format(os.pathsep, os.environ["PATH"])
         return testinfra.get_host("local://", sudo=True)

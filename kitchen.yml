@@ -81,7 +81,7 @@ platforms:
         - echo "PubkeyAcceptedAlgorithms +ssh-rsa" | tee -a /etc/ssh/sshd_config
   - name: opensuse-15
     driver:
-      image: opensuse/leap:15.3
+      image: opensuse/leap:15.4
       provision_command:
         - &opensuse_provision_command_01 zypper --non-interactive install --auto-agree-with-licenses dbus-1
         - &opensuse_provision_command_02 zypper --non-interactive install --auto-agree-with-licenses sudo openssh which curl systemd

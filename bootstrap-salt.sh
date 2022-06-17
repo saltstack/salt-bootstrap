@@ -4817,6 +4817,15 @@ install_red_hat_enterprise_workstation_testing_post() {
 #   Oracle Linux Install Functions
 #
 install_oracle_linux_stable_deps() {
+    # Install Oracle's EPEL.
+    if [ ${_EPEL_REPOS_INSTALLED} -eq $BS_FALSE ]; then
+        _EPEL_REPO=oracle-epel-release-el${DISTRO_MAJOR_VERSION}
+        if ! rpm -q "${_EPEL_REPO}" > /dev/null; then
+            __yum_install_noinput "${_EPEL_REPO}"
+        fi
+        _EPEL_REPOS_INSTALLED=$BS_TRUE
+    fi
+
     install_centos_stable_deps || return 1
     return 0
 }

@@ -6614,7 +6614,7 @@ install_opensuse_git_deps() {
         fi
     # Check for Tumbleweed
     elif [ "${DISTRO_MAJOR_VERSION}" -ge 20210101 ]; then
-        __PACKAGES="python3-pip"
+        __PACKAGES="python3-pip gcc-c++ python310-pyzmq-devel"
     else
         __PACKAGES="python-pip python-setuptools gcc"
     fi

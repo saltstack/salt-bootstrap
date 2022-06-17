@@ -6463,6 +6463,8 @@ __set_suse_pkg_repo() {
     # Set distro repo variable
     if [ "${DISTRO_MAJOR_VERSION}" -gt 2015 ]; then
         DISTRO_REPO="openSUSE_Tumbleweed"
+    elif [ "${DISTRO_MAJOR_VERSION}" -eq 15 ] && [ "${DISTRO_MINOR_VERSION}" -ge 4 ]; then
+        DISTRO_REPO="${DISTRO_MAJOR_VERSION}.${DISTRO_MINOR_VERSION}"
     elif [ "${DISTRO_MAJOR_VERSION}" -ge 42 ] || [ "${DISTRO_MAJOR_VERSION}" -eq 15 ]; then
         DISTRO_REPO="openSUSE_Leap_${DISTRO_MAJOR_VERSION}.${DISTRO_MINOR_VERSION}"
     else
@@ -6612,7 +6614,7 @@ install_opensuse_git_deps() {
         fi
     # Check for Tumbleweed
     elif [ "${DISTRO_MAJOR_VERSION}" -ge 20210101 ]; then
-        __PACKAGES="python3-pip"
+        __PACKAGES="python3-pip gcc-c++ python310-pyzmq-devel"
     else
         __PACKAGES="python-pip python-setuptools gcc"
     fi

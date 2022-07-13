@@ -5983,15 +5983,15 @@ install_freebsd_git_deps() {
 
     if [ "${_POST_NEON_INSTALL}" -eq $BS_FALSE ]; then
 
-        SALT_DEPENDENCIES=$(/usr/local/sbin/pkg rquery %dn py38-salt)
+        SALT_DEPENDENCIES=$(/usr/local/sbin/pkg rquery %dn py39-salt)
         # shellcheck disable=SC2086
         /usr/local/sbin/pkg install -y ${SALT_DEPENDENCIES} python || return 1
 
-        /usr/local/sbin/pkg install -y py38-requests || return 1
-        /usr/local/sbin/pkg install -y py38-tornado4 || return 1
+        /usr/local/sbin/pkg install -y py39-requests || return 1
+        /usr/local/sbin/pkg install -y py39-tornado4 || return 1
 
     else
-        /usr/local/sbin/pkg install -y python py38-pip py38-setuptools libzmq4 libunwind || return 1
+        /usr/local/sbin/pkg install -y python py39-pip py39-setuptools libzmq4 libunwind || return 1
     fi
 
     echodebug "Adapting paths to FreeBSD"
@@ -6037,7 +6037,7 @@ install_freebsd_stable() {
 # installing latest version of salt from FreeBSD CURRENT ports repo
 #
     # shellcheck disable=SC2086
-    /usr/local/sbin/pkg install -y py38-salt || return 1
+    /usr/local/sbin/pkg install -y py39-salt || return 1
 
     return 0
 }

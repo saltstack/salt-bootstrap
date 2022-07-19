@@ -268,6 +268,7 @@ _CUSTOM_MASTER_CONFIG="null"
 _CUSTOM_MINION_CONFIG="null"
 _QUIET_GIT_INSTALLATION=$BS_FALSE
 _REPO_URL="repo.saltproject.io"
+_TIAMT_DIR="salt_rc"
 _PY_EXE="python3"
 _INSTALL_PY="$BS_FALSE"
 _TORNADO_MAX_PY3_VERSION="5.0"
@@ -3007,8 +3008,9 @@ __install_saltstack_ubuntu_tiamat_repository() {
     fi
 
     # SaltStack's stable Ubuntu repository:
-    SALTSTACK_UBUNTU_URL="${HTTP_VAL}://${_REPO_URL}/salt-dev/${__PY_VERSION_REPO}/ubuntu/${UBUNTU_VERSION}/${__REPO_ARCH}/${TIAMAT_REV}"
-    echo "$__REPO_ARCH_DEB $SALTSTACK_UBUNTU_URL $UBUNTU_CODENAME main" > /etc/apt/sources.list.d/salt.list
+    SALTSTACK_UBUNTU_URL="${HTTP_VAL}://${_REPO_URL}/${_TIAMAT_DIR}/${__PY_VERSION_REPO}/ubuntu/${UBUNTU_VERSION}/${__REPO_ARCH}"
+    #echo "$__REPO_ARCH_DEB $SALTSTACK_UBUNTU_URL $UBUNTU_CODENAME main" > /etc/apt/sources.list.d/salt.list
+    echo "$__REPO_ARCH_DEB $SALTSTACK_UBUNTU_URL stable main" > /etc/apt/sources.list.d/salt.list
 
     __apt_key_fetch "$SALTSTACK_UBUNTU_URL/salt-archive-keyring.gpg" || return 1
 
@@ -3526,7 +3528,7 @@ __install_saltstack_debian_tiamat_repository() {
     __apt_get_install_noinput ${__PACKAGES} || return 1
 
     # amd64 is just a part of repository URI, 32-bit pkgs are hosted under the same location
-    SALTSTACK_DEBIAN_URL="${HTTP_VAL}://${_REPO_URL}/salt-dev/${__PY_VERSION_REPO}/debian/${DEBIAN_RELEASE}/${__REPO_ARCH}/${TIAMAT_REV}"
+    SALTSTACK_DEBIAN_URL="${HTTP_VAL}://${_REPO_URL}/${_TIAMAT_DIR}/${__PY_VERSION_REPO}/debian/${DEBIAN_RELEASE}/${__REPO_ARCH}/${TIAMAT_REV}"
     echo "$__REPO_ARCH_DEB $SALTSTACK_DEBIAN_URL $DEBIAN_CODENAME main" > "/etc/apt/sources.list.d/salt.list"
 
     __apt_key_fetch "$SALTSTACK_DEBIAN_URL/salt-archive-keyring.gpg" || return 1
@@ -4264,9 +4266,13 @@ __install_epel_repository() {
         return 0
     fi
 
+    # Download latest 'epel-next-release' package for the distro version directly
+    epel_next_repo_url="${HTTP_VAL}://dl.fedoraproject.org/pub/epel/epel-next-release-latest-${DISTRO_MAJOR_VERSION}.noarch.rpm"
+
     # Download latest 'epel-release' package for the distro version directly
     epel_repo_url="${HTTP_VAL}://dl.fedoraproject.org/pub/epel/epel-release-latest-${DISTRO_MAJOR_VERSION}.noarch.rpm"
-    rpm -Uvh --force "$epel_repo_url" || return 1
+
+    yum -y install ${epel_next_repo_url} ${epel_repo_url}
 
     _EPEL_REPOS_INSTALLED=$BS_TRUE
 
@@ -4341,7 +4347,7 @@ __install_saltstack_tiamat_rhel_repository() {
 
     # Avoid using '$releasever' variable for yum.
     # Instead, this should work correctly on all RHEL variants.
-    base_url="${HTTP_VAL}://${_REPO_URL}/salt-dev/${__PY_VERSION_REPO}/redhat/${DISTRO_MAJOR_VERSION}/\$basearch/"
+    base_url="${HTTP_VAL}://${_REPO_URL}/${_TIAMAT_DIR}/${__PY_VERSION_REPO}/redhat/${DISTRO_MAJOR_VERSION}/\$basearch/"
     if [ "${DISTRO_MAJOR_VERSION}" -eq 7 ]; then
         gpg_key="SALTSTACK-GPG-KEY.pub base/RPM-GPG-KEY-CentOS-7"
     else
@@ -4367,7 +4373,7 @@ enabled=1
 enabled_metadata=1
 _eof
 
-        fetch_url="${HTTP_VAL}://${_REPO_URL}/salt-dev/${__PY_VERSION_REPO}/redhat/${DISTRO_MAJOR_VERSION}/${CPU_ARCH_L}/"
+        fetch_url="${HTTP_VAL}://${_REPO_URL}/salt_rc/${__PY_VERSION_REPO}/redhat/${DISTRO_MAJOR_VERSION}/${CPU_ARCH_L}/"
         for key in $gpg_key; do
             __rpm_import_gpg "${fetch_url}${key}" || return 1
         done
@@ -8196,10 +8202,10 @@ install_macosx_restart_daemons() {
 install_tiamat() {
     echoinfo "Fetching repo.json for Tiamat ${_TIAMAT_TYPE}"
 
-    base_url="https://repo.saltproject.io/salt-dev/"
+    base_url="https://repo.saltproject.io/salt_rc/"
     tiamat_type_repo_json_url="${base_url}${_TIAMAT_TYPE}/repo.json"
     repo_json_file="$(mktemp /tmp/base-json-XXXXXXXX 2>/dev/null)"
-    salt_url="https://repo.saltproject.io/salt-dev/${_TIAMAT_TYPE}"
+    salt_url="https://repo.saltproject.io/salt_rc/${_TIAMAT_TYPE}"
 
     if [ -z "$repo_json_file" ]; then
         echoerror "Failed to create temporary file in /tmp"

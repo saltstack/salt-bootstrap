@@ -4382,7 +4382,7 @@ enabled=1
 enabled_metadata=1
 _eof
 
-        fetch_url="${HTTP_VAL}://${_REPO_URL}/salt_rc/${__PY_VERSION_REPO}/redhat/${DISTRO_MAJOR_VERSION}/${CPU_ARCH_L}/"
+        fetch_url="${HTTP_VAL}://${_REPO_URL}/${_TIAMAT_DIR}/${__PY_VERSION_REPO}/redhat/${DISTRO_MAJOR_VERSION}/${CPU_ARCH_L}/"
         for key in $gpg_key; do
             __rpm_import_gpg "${fetch_url}${key}" || return 1
         done

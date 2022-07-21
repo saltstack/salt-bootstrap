@@ -627,8 +627,23 @@ elif [ "$ITYPE" = "stable" ]; then
     fi
 
 elif [ "$ITYPE" = "tiamat" ]; then
-  #TIAMET_REV="latest"
-  TIAMET_REV=""
+    if [ "$#" -eq 0 ];then
+        TIAMAT_REV="latest"
+    else
+        if [ "$(echo "$1" | grep -E '^(latest)$')" != "" ]; then
+            TIAMAT_REV="$1"
+            shift
+        elif [ "$(echo "$1" | grep -E '^([3-9][0-9]{3}(\.[0-9]*)?)$')" != "" ]; then
+            # Handle the 3xxx.0 version as 3xxx archive (pin to minor) and strip the fake ".0" suffix
+            TIAMAT_REV=$(echo "$1" | sed -E 's/^([3-9][0-9]{3})\.0$/\1/')
+            TIAMAT_REV="minor/$TIAMAT_REV"
+            shift
+        else
+            echo "Unknown stable version: $1 (valid: 3005, latest.)"
+            exit 1
+        fi
+    fi
+
 fi
 
 # Check for any unparsed arguments. Should be an error.
@@ -3012,7 +3027,7 @@ __install_saltstack_ubuntu_tiamat_repository() {
     fi
 
     # SaltStack's stable Ubuntu repository:
-    SALTSTACK_UBUNTU_URL="${HTTP_VAL}://${_REPO_URL}/${_TIAMAT_DIR}/${__PY_VERSION_REPO}/ubuntu/${UBUNTU_VERSION}/${__REPO_ARCH}"
+    SALTSTACK_UBUNTU_URL="${HTTP_VAL}://${_REPO_URL}/${_TIAMAT_DIR}/${__PY_VERSION_REPO}/ubuntu/${UBUNTU_VERSION}/${__REPO_ARCH}/${TIAMAT_REV}/"
     #echo "$__REPO_ARCH_DEB $SALTSTACK_UBUNTU_URL $UBUNTU_CODENAME main" > /etc/apt/sources.list.d/salt.list
     echo "$__REPO_ARCH_DEB $SALTSTACK_UBUNTU_URL stable main" > /etc/apt/sources.list.d/salt.list
 
@@ -4356,7 +4371,7 @@ __install_saltstack_tiamat_rhel_repository() {
 
     # Avoid using '$releasever' variable for yum.
     # Instead, this should work correctly on all RHEL variants.
-    base_url="${HTTP_VAL}://${_REPO_URL}/${_TIAMAT_DIR}/${__PY_VERSION_REPO}/redhat/${DISTRO_MAJOR_VERSION}/\$basearch/"
+    base_url="${HTTP_VAL}://${_REPO_URL}/${_TIAMAT_DIR}/${__PY_VERSION_REPO}/redhat/${DISTRO_MAJOR_VERSION}/\$basearch/${TIAMAT_REV}/"
     if [ "${DISTRO_MAJOR_VERSION}" -eq 7 ]; then
         gpg_key="SALTSTACK-GPG-KEY.pub base/RPM-GPG-KEY-CentOS-7"
     else

@@ -268,7 +268,7 @@ _CUSTOM_MASTER_CONFIG="null"
 _CUSTOM_MINION_CONFIG="null"
 _QUIET_GIT_INSTALLATION=$BS_FALSE
 _REPO_URL="repo.saltproject.io"
-_TIAMAT_DIR="salt_rc/salt"
+_TIAMAT_DIR="salt"
 _PY_EXE="python3"
 _INSTALL_PY="$BS_FALSE"
 _TORNADO_MAX_PY3_VERSION="5.0"
@@ -306,6 +306,10 @@ __usage() {
     - tiamat [version]     Install a specific version. Only supported for
                            tiamat packages available at repo.saltproject.io
 
+    - tiamat_rc            Install latest tiamat RC release.
+    - tiamat_rc [version]  Install a specific version. Only supported for
+                           tiamat RC packages available at repo.saltproject.io
+
   Examples:
     - ${__ScriptName}
     - ${__ScriptName} stable
@@ -318,6 +322,8 @@ __usage() {
     - ${__ScriptName} git 06f249901a2e2f1ed310d58ea3921a129f214358
     - ${__ScriptName} tiamat
     - ${__ScriptName} tiamat 3005
+    - ${__ScriptName} tiamat_rc
+    - ${__ScriptName} tiamat_rc 3005
 
   Options:
     -a  Pip install all Python pkg dependencies for Salt. Requires -V to install
@@ -588,7 +594,7 @@ if [ "$#" -gt 0 ];then
 fi
 
 # Check installation type
-if [ "$(echo "$ITYPE" | grep -E '(stable|testing|git|tiamat)')" = "" ]; then
+if [ "$(echo "$ITYPE" | grep -E '(stable|testing|git|tiamat|tiamat_rc)')" = "" ]; then
     echoerror "Installation type \"$ITYPE\" is not known..."
     exit 1
 fi
@@ -644,6 +650,29 @@ elif [ "$ITYPE" = "tiamat" ]; then
         fi
     fi
 
+elif [ "$ITYPE" = "tiamat_rc" ]; then
+    # Change the _TIAMAT_DIR to be the location for the RC packages
+    _TIAMAT_DIR="salt_rc/salt"
+
+    # Change ITYPE to tiamat so we use the regular Tiamat functions
+    ITYPE="tiamat"
+
+    if [ "$#" -eq 0 ];then
+        TIAMAT_REV="latest"
+    else
+        if [ "$(echo "$1" | grep -E '^(latest)$')" != "" ]; then
+            TIAMAT_REV="$1"
+            shift
+        elif [ "$(echo "$1" | grep -E '^([3-9][0-9]{3}?rc[0-9]-[0-9]$)')" != "" ]; then
+            # Handle the 3xxx.0 version as 3xxx archive (pin to minor) and strip the fake ".0" suffix
+            #TIAMAT_REV=$(echo "$1" | sed -E 's/^([3-9][0-9]{3})\.0$/\1/')
+            TIAMAT_REV="minor/$1"
+            shift
+        else
+            echo "Unknown stable version: $1 (valid: 3005, latest.)"
+            exit 1
+        fi
+    fi
 fi
 
 # Check for any unparsed arguments. Should be an error.
@@ -3028,10 +3057,9 @@ __install_saltstack_ubuntu_tiamat_repository() {
 
     # SaltStack's stable Ubuntu repository:
     SALTSTACK_UBUNTU_URL="${HTTP_VAL}://${_REPO_URL}/${_TIAMAT_DIR}/${__PY_VERSION_REPO}/ubuntu/${UBUNTU_VERSION}/${__REPO_ARCH}/${TIAMAT_REV}/"
-    #echo "$__REPO_ARCH_DEB $SALTSTACK_UBUNTU_URL $UBUNTU_CODENAME main" > /etc/apt/sources.list.d/salt.list
-    echo "$__REPO_ARCH_DEB $SALTSTACK_UBUNTU_URL stable main" > /etc/apt/sources.list.d/salt.list
+    echo "$__REPO_ARCH_DEB $SALTSTACK_UBUNTU_URL $UBUNTU_CODENAME main" > /etc/apt/sources.list.d/salt.list
 
-    __apt_key_fetch "$SALTSTACK_UBUNTU_URL/salt-archive-keyring.gpg" || return 1
+    __apt_key_fetch "${SALTSTACK_UBUNTU_URL}salt-archive-keyring.gpg" || return 1
 
     __wait_for_apt apt-get update || return 1
 }
@@ -3547,10 +3575,10 @@ __install_saltstack_debian_tiamat_repository() {
     __apt_get_install_noinput ${__PACKAGES} || return 1
 
     # amd64 is just a part of repository URI, 32-bit pkgs are hosted under the same location
-    SALTSTACK_DEBIAN_URL="${HTTP_VAL}://${_REPO_URL}/${_TIAMAT_DIR}/${__PY_VERSION_REPO}/debian/${DEBIAN_RELEASE}/${__REPO_ARCH}/${TIAMAT_REV}"
+    SALTSTACK_DEBIAN_URL="${HTTP_VAL}://${_REPO_URL}/${_TIAMAT_DIR}/${__PY_VERSION_REPO}/debian/${DEBIAN_RELEASE}/${__REPO_ARCH}/${TIAMAT_REV}/"
     echo "$__REPO_ARCH_DEB $SALTSTACK_DEBIAN_URL $DEBIAN_CODENAME main" > "/etc/apt/sources.list.d/salt.list"
 
-    __apt_key_fetch "$SALTSTACK_DEBIAN_URL/salt-archive-keyring.gpg" || return 1
+    __apt_key_fetch "${SALTSTACK_DEBIAN_URL}salt-archive-keyring.gpg" || return 1
 
     __wait_for_apt apt-get update || return 1
 }
@@ -8499,6 +8527,7 @@ daemons_running_tiamat() {
 
     return $FAILED_DAEMONS
 }
+
 #
 #  Ended daemons running check function
 #

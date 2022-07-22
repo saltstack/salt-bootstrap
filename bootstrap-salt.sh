@@ -3550,7 +3550,7 @@ __install_saltstack_debian_repository() {
 }
 
 __install_saltstack_debian_tiamat_repository() {
-    DEBIAN_RELEASE="$DISTRO_MAJORtiamat__VERSION"
+    DEBIAN_RELEASE="$DISTRO_MAJOR_VERSION"
     DEBIAN_CODENAME="$DISTRO_CODENAME"
 
     __PY_VERSION_REPO="apt"
@@ -4377,7 +4377,7 @@ __install_epel_repository() {
     # Download latest 'epel-release' package for the distro version directly
     epel_repo_url="${HTTP_VAL}://dl.fedoraproject.org/pub/epel/epel-release-latest-${DISTRO_MAJOR_VERSION}.noarch.rpm"
 
-    yum -y install ${epel_next_repo_url} ${epel_repo_url}
+    yum -y install "${epel_next_repo_url}" "${epel_repo_url}"
 
     _EPEL_REPOS_INSTALLED=$BS_TRUE
 
@@ -8572,8 +8572,9 @@ daemons_running_tiamat() {
         [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
         [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
 
-        if [ '$(ps wwwaux | grep -v grep | grep "/opt/saltstack/salt/run/run $fname")' = "" ]; then
-            echoerror "salt-$fname was not found running"
+        salt_path="/opt/saltstack/salt/run/run"
+        if [ "$(ps wwwaux | grep -v grep | grep $salt_path | grep $fname)" = "" ]; then
+            echoerror "$salt_process was not found running"
             FAILED_DAEMONS=$((FAILED_DAEMONS + 1))
         fi
     done

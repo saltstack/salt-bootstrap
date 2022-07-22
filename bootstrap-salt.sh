@@ -3550,7 +3550,7 @@ __install_saltstack_debian_repository() {
 }
 
 __install_saltstack_debian_tiamat_repository() {
-    DEBIAN_RELEASE="$DISTRO_MAJOR_VERSION"
+    DEBIAN_RELEASE="$DISTRO_MAJORtiamat__VERSION"
     DEBIAN_CODENAME="$DISTRO_CODENAME"
 
     __PY_VERSION_REPO="apt"
@@ -3625,6 +3625,59 @@ install_debian_deps() {
     if [ "$_DISABLE_REPOS" -eq "$BS_FALSE" ] || [ "$_CUSTOM_REPO_URL" != "null" ]; then
         __check_dpkg_architecture || return 1
         __install_saltstack_debian_repository || return 1
+    fi
+
+    if [ "${_EXTRA_PACKAGES}" != "" ]; then
+        echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
+        # shellcheck disable=SC2086
+        __apt_get_install_noinput ${_EXTRA_PACKAGES} || return 1
+    fi
+
+    return 0
+}
+
+install_debian_tiamat_deps() {
+    if [ $_START_DAEMONS -eq $BS_FALSE ]; then
+        echowarn "Not starting daemons on Debian based distributions is not working mostly because starting them is the default behaviour."
+    fi
+
+    # No user interaction, libc6 restart services for example
+    export DEBIAN_FRONTEND=noninteractive
+
+    __wait_for_apt apt-get update || return 1
+
+    if [ "${_UPGRADE_SYS}" -eq $BS_TRUE ]; then
+        # Try to update GPG keys first if allowed
+        if [ "${_INSECURE_DL}" -eq $BS_TRUE ]; then
+            if [ "$DISTRO_MAJOR_VERSION" -ge 10 ]; then
+                __apt_get_install_noinput --allow-unauthenticated debian-archive-keyring && apt-get update || return 1
+            else
+                __apt_get_install_noinput --allow-unauthenticated debian-archive-keyring &&
+                    apt-key update && apt-get update || return 1
+            fi
+        fi
+
+        __apt_get_upgrade_noinput || return 1
+    fi
+
+    if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 3 ]; then
+        PY_PKG_VER=3
+    else
+        PY_PKG_VER=""
+    fi
+
+    # Additionally install procps and pciutils which allows for Docker bootstraps. See 366#issuecomment-39666813
+    __PACKAGES='procps pciutils'
+
+    # YAML module is used for generating custom master/minion configs
+    __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-yaml"
+
+    # shellcheck disable=SC2086
+    __apt_get_install_noinput ${__PACKAGES} || return 1
+
+    if [ "$_DISABLE_REPOS" -eq "$BS_FALSE" ] || [ "$_CUSTOM_REPO_URL" != "null" ]; then
+        __check_dpkg_architecture || return 1
+        __install_saltstack_debian_tiamat_repository || return 1
     fi
 
     if [ "${_EXTRA_PACKAGES}" != "" ]; then
@@ -4385,7 +4438,7 @@ _eof
     return 0
 }
 
-__install_saltstack_tiamat_rhel_repository() {
+__install_saltstack_rhel_tiamat_repository() {
     if [ "$ITYPE" = "stable" ]; then
         repo_rev="$TIAMAT_REV"
     else
@@ -4756,14 +4809,14 @@ install_centos_tiamat_deps() {
 
     if [ "$_DISABLE_REPOS" -eq "$BS_FALSE" ]; then
         __install_epel_repository || return 1
-        __install_saltstack_tiamat_rhel_repository || return 1
+        __install_saltstack_rhel_tiamat_repository || return 1
     fi
 
     # If -R was passed, we need to configure custom repo url with rsync-ed packages
     # Which is still handled in __install_saltstack_rhel_repository. This call has
     # its own check in case -r was passed without -R.
     if [ "$_CUSTOM_REPO_URL" != "null" ]; then
-        __install_saltstack_tiamat_rhel_repository || return 1
+        __install_saltstack_rhel_tiamat_repository || return 1
     fi
 
     if [ "$DISTRO_MAJOR_VERSION" -ge 8 ]; then

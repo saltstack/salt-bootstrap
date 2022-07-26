@@ -1,11 +1,11 @@
 <#
 .SYNOPSIS
-    A simple Powershell script to download and install a salt minion on windows.
+    A simple Powershell script to download and install a Salt minion on Windows.
 
 .DESCRIPTION
-    The script will download the official salt package from saltstack. It will
+    The script will download the official Salt package from SaltProject. It will
     install a specific package version and accept parameters for the master and
-    minion ids. Finally, it can stop and set the windows service to "manual" for
+    minion ids. Finally, it can stop and set the Windows service to "manual" for
     local testing.
 
 .EXAMPLE
@@ -18,8 +18,9 @@
 
 .EXAMPLE
     ./bootstrap-salt.ps1 -pythonVersion 3
-    Specifies the Python version of the installer. Can be "2" or "3". Defaults to "2".
-    Python 3 installers are only available for Salt 2017.7.0 and newer.
+    Specifies the Python version of the installer. Can be "2" or "3". Defaults
+    to "2". Python 3 installers are only available for Salt 2017.7.0 and newer.
+    Starting with Python 3002 only Python 3 installers are available.
 
 .EXAMPLE
     ./bootstrap-salt.ps1 -runservice false
@@ -71,36 +72,36 @@
 #>
 
 #===============================================================================
-# Commandlet Binding
+# Bind Parameters
 #===============================================================================
 [CmdletBinding()]
-Param(
-    [Parameter(Mandatory=$false,ValueFromPipeline=$true)]
+param(
+    [Parameter(Mandatory=$false, ValueFromPipeline=$True)]
     # Doesn't support versions prior to "YYYY.M.R-B"
     # Supports new version and latest
     # Option 1 means case insensitive
     [ValidatePattern('^(\d{4}(\.\d{1,2}){0,2}(\-\d{1})?)|(latest)$', Options=1)]
-    [string]$version = '',
+    [string]$Version = '',
 
-    [Parameter(Mandatory=$false,ValueFromPipeline=$true)]
+    [Parameter(Mandatory=$false, ValueFromPipeline=$True)]
     # Doesn't support Python versions prior to "2017.7.0"
     [ValidateSet("2","3")]
-    [string]$pythonVersion = "3",
+    [string]$PythonVersion = "3",
 
-    [Parameter(Mandatory=$false,ValueFromPipeline=$true)]
+    [Parameter(Mandatory=$false, ValueFromPipeline=$True)]
     [ValidateSet("true","false")]
-    [string]$runservice = "true",
+    [string]$RunService = "true",
 
-    [Parameter(Mandatory=$false,ValueFromPipeline=$true)]
-    [string]$minion = "not-specified",
+    [Parameter(Mandatory=$false, ValueFromPipeline=$True)]
+    [string]$Minion = "not-specified",
 
-    [Parameter(Mandatory=$false,ValueFromPipeline=$true)]
-    [string]$master = "not-specified",
+    [Parameter(Mandatory=$false, ValueFromPipeline=$True)]
+    [string]$Master = "not-specified",
 
-    [Parameter(Mandatory=$false,ValueFromPipeline=$true)]
-    [string]$repourl= "https://repo.saltproject.io/windows",
+    [Parameter(Mandatory=$false, ValueFromPipeline=$True)]
+    [string]$RepoUrl= "https://repo.saltproject.io/windows",
 
-    [Parameter(Mandatory=$false,ValueFromPipeline=$true)]
+    [Parameter(Mandatory=$false, ValueFromPipeline=$True)]
     [switch]$ConfigureOnly
 )
 
@@ -125,8 +126,8 @@ function Get-IsUacEnabled
 #===============================================================================
 # Check for Elevated Privileges
 #===============================================================================
-If (!(Get-IsAdministrator)) {
-    If (Get-IsUacEnabled) {
+if (!(Get-IsAdministrator)) {
+    if (Get-IsUacEnabled) {
         # We are not running "as Administrator" - so relaunch as administrator
         # Create a new process object that starts PowerShell
         $newProcess = new-object System.Diagnostics.ProcessStartInfo "PowerShell";
@@ -149,10 +150,10 @@ If (!(Get-IsAdministrator)) {
         [System.Diagnostics.Process]::Start($newProcess);
 
         # Exit from the current, unelevated, process
-        Exit
+        exit
     }
-    Else {
-        Throw "You must be administrator to run this script"
+    else {
+        throw "You must be administrator to run this script"
     }
 }
 
@@ -166,15 +167,15 @@ Write-Verbose "master: $master"
 Write-Verbose "minion: $minion"
 Write-Verbose "repourl: $repourl"
 
-If ($runservice.ToLower() -eq "true") {
+if ($runservice.ToLower() -eq "true") {
     Write-Verbose "Windows service will be set to run"
     [bool]$runservice = $True
 }
-ElseIf ($runservice.ToLower() -eq "false") {
+elseif ($runservice.ToLower() -eq "false") {
     Write-Verbose "Windows service will be stopped and set to manual"
     [bool]$runservice = $False
 }
-Else {
+else {
     # Param passed in wasn't clear so defaulting to true.
     Write-Verbose "Windows service defaulting to run automatically"
     [bool]$runservice = $True
@@ -186,22 +187,28 @@ Else {
 
 $ConfiguredAnything = $False
 
+$RootDir = "C:\salt"
 $SaltRegKey = "HKLM:\SOFTWARE\Salt Project\Salt"
-$RootDir = If ((Get-ItemProperty $SaltRegKey).root_dir -ne $null) {
-    (Get-ItemProperty $SaltRegKey).root_dir
-} Else {
-    "C:\salt"
+if (Test-Path -Path $SaltRegKey) {
+    if ($null -ne (Get-ItemProperty $SaltRegKey).root_dir) {
+        $RootDir = (Get-ItemProperty $SaltRegKey).root_dir
+    }
 }
+
 $ConfDir = "$RootDir\conf"
 $PkiDir = "$ConfDir\pki\minion"
+Write-Verbose "ConfDir: $ConfDir"
 
 # Create C:\tmp\
 New-Item C:\tmp\ -ItemType directory -Force | Out-Null
 
-# Copy Vagrant Files to their proper location. Vagrant files will be placed
-# in C:\tmp
+#===============================================================================
+# Copy Vagrant Files to their proper location.
+#===============================================================================
+
+# Vagrant files will be placed in C:\tmp
 # Check if minion keys have been uploaded, copy to correct location
-If (Test-Path C:\tmp\minion.pem) {
+if (Test-Path C:\tmp\minion.pem) {
     New-Item $PkiDir -ItemType Directory -Force | Out-Null
     Copy-Item -Path C:\tmp\minion.pem -Destination $PkiDir -Force | Out-Null
     Copy-Item -Path C:\tmp\minion.pub -Destination $PkiDir -Force | Out-Null
@@ -211,20 +218,20 @@ If (Test-Path C:\tmp\minion.pem) {
 # Check if minion config has been uploaded
 # This should be done before the installer is run so that it can be updated with
 # id: and master: settings when the installer runs
-If (Test-Path C:\tmp\minion) {
+if (Test-Path C:\tmp\minion) {
     New-Item $ConfDir -ItemType Directory -Force | Out-Null
     Copy-Item -Path C:\tmp\minion -Destination $ConfDir -Force | Out-Null
     $ConfiguredAnything = $True
 }
 
 # Check if grains config has been uploaded
-If (Test-Path C:\tmp\grains) {
+if (Test-Path C:\tmp\grains) {
     New-Item $ConfDir -ItemType Directory -Force | Out-Null
     Copy-Item -Path C:\tmp\grains -Destination $ConfDir -Force | Out-Null
     $ConfiguredAnything = $True
 }
 
-If ($ConfigureOnly -and !$ConfiguredAnything) {
+if ($ConfigureOnly -and !$ConfiguredAnything) {
     Write-Output "No configuration or keys were copied over. No configuration was done!"
     exit 0
 }
@@ -232,31 +239,30 @@ If ($ConfigureOnly -and !$ConfiguredAnything) {
 #===============================================================================
 # Detect architecture
 #===============================================================================
-If ([IntPtr]::Size -eq 4) {
+if ([IntPtr]::Size -eq 4) {
     $arch = "x86"
-}
-Else {
+} else {
     $arch = "AMD64"
 }
 
 #===============================================================================
 # Use version "Latest" if no version is passed
 #===============================================================================
-If ((!$version) -or ($version.ToLower() -eq 'latest')){
-    $versionSection = "Latest-Py$pythonVersion"
+if ((!$version) -or ($version.ToLower() -eq 'latest')){
+    $versionSection = "Latest-Py$PythonVersion"
 } else {
     $versionSection = $version
     $year = $version.Substring(0, 4)
-    If ([int]$year -ge 2017) {
-        If ($pythonVersion -eq "3") {
+    if ([int]$year -ge 2017) {
+        if ($PythonVersion -eq "3") {
             $versionSection = "$version-Py3"
-        } Else {
+        } else {
             $versionSection = "$version-Py2"
         }
     }
 }
 
-If (!$ConfigureOnly) {
+if (!$ConfigureOnly) {
     #===============================================================================
     # Download minion setup file
     #===============================================================================
@@ -275,9 +281,9 @@ If (!$ConfigureOnly) {
     # - master: salt
     # - Start the service
     $parameters = ""
-    If($minion -ne "not-specified") {$parameters = "/minion-name=$minion"}
-    If($master -ne "not-specified") {$parameters = "$parameters /master=$master"}
-    If($runservice -eq $false) {$parameters = "$parameters /start-service=0"}
+    if($minion -ne "not-specified") {$parameters = "/minion-name=$minion"}
+    if($master -ne "not-specified") {$parameters = "$parameters /master=$master"}
+    if($runservice -eq $false) {$parameters = "$parameters /start-service=0"}
 
     #===============================================================================
     # Install minion silently
@@ -291,12 +297,12 @@ If (!$ConfigureOnly) {
     #===============================================================================
     # Wait for salt-minion service to be registered before trying to start it
     $service = Get-Service salt-minion -ErrorAction SilentlyContinue
-    While (!$service) {
+    while (!$service) {
       Start-Sleep -s 2
       $service = Get-Service salt-minion -ErrorAction SilentlyContinue
     }
 
-    If($runservice) {
+    if($runservice) {
         # Start service
         Write-Output "Starting the Salt minion service"
         Start-Service -Name "salt-minion" -ErrorAction SilentlyContinue
@@ -304,7 +310,7 @@ If (!$ConfigureOnly) {
         # Check if service is started, otherwise retry starting the
         # service 4 times.
         $try = 0
-        While (($service.Status -ne "Running") -and ($try -ne 4)) {
+        while (($service.Status -ne "Running") -and ($try -ne 4)) {
             Start-Service -Name "salt-minion" -ErrorAction SilentlyContinue
             $service = Get-Service salt-minion -ErrorAction SilentlyContinue
             Start-Sleep -s 2
@@ -313,12 +319,12 @@ If (!$ConfigureOnly) {
 
         # If the salt-minion service is still not running, something probably
         # went wrong and user intervention is required - report failure.
-        If ($service.Status -eq "Stopped") {
+        if ($service.Status -eq "Stopped") {
             Write-Output -NoNewline "Failed to start salt minion"
             exit 1
         }
     }
-    Else {
+    else {
         Write-Output -NoNewline "Stopping salt minion and setting it to 'Manual'"
         Set-Service "salt-minion" -StartupType "Manual"
         Stop-Service "salt-minion"
@@ -328,9 +334,9 @@ If (!$ConfigureOnly) {
 #===============================================================================
 # Script Complete
 #===============================================================================
-If ($ConfigureOnly) {
+if ($ConfigureOnly) {
     Write-Output "Salt minion successfully configured"
 }
-Else {
+else {
     Write-Output "Salt minion successfully installed"
 }

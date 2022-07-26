@@ -9,8 +9,8 @@ driver:
   gui: false
   ssh:
     shell: /bin/sh
-  <% unless ENV['CI'] %>
   linked_clone: true
+  <% unless ENV['CI'] %>
   synced_folders:
     - - '.kitchen/kitchen-vagrant/%{instance_name}/vagrant'
       - '/vagrant'
@@ -27,9 +27,9 @@ provisioner:
   sudo: true
 
 platforms:
-  - name: freebsd-130
+  - name: freebsd-131
     driver:
-      box: bento/freebsd-13.0
+      box: bento/freebsd-13.1
   - name: freebsd-123
     driver:
       box: bento/freebsd-12.3

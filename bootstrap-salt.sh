@@ -23,7 +23,7 @@
 #======================================================================================================================
 set -o nounset                              # Treat unset variables as an error
 
-__ScriptVersion="2022.03.15"
+__ScriptVersion="2022.05.19"
 __ScriptName="bootstrap-salt.sh"
 
 __ScriptFullName="$0"
@@ -1549,6 +1549,7 @@ __debian_derivatives_translation() {
     devuan_1_debian_base="8.0"
     devuan_2_debian_base="9.0"
     kali_1_debian_base="7.0"
+    kali_2021_debian_base="10.0"
     linuxmint_1_debian_base="8.0"
     raspbian_8_debian_base="8.0"
     raspbian_9_debian_base="9.0"
@@ -3220,6 +3221,9 @@ install_ubuntu_git_deps() {
         fi
     else
         __PACKAGES="python${PY_PKG_VER}-dev python${PY_PKG_VER}-pip python${PY_PKG_VER}-setuptools gcc"
+        if [ "$DISTRO_MAJOR_VERSION" -ge 22 ]; then
+            __PACKAGES="${__PACKAGES} g++"
+        fi
         # shellcheck disable=SC2086
         __apt_get_install_noinput ${__PACKAGES} || return 1
     fi
@@ -4035,6 +4039,13 @@ install_debian_git_post() {
             update-rc.d "salt-${fname}" defaults
         fi
     done
+}
+
+install_debian_2021_post() {
+    # Kali 2021 (debian derivative) disables all network services by default
+    # Using archlinux post function to enable salt systemd services
+    install_arch_linux_post || return 1
+    return 0
 }
 
 install_debian_restart_daemons() {
@@ -6485,15 +6496,15 @@ install_freebsd_git_deps() {
 
     if [ "${_POST_NEON_INSTALL}" -eq $BS_FALSE ]; then
 
-        SALT_DEPENDENCIES=$(/usr/local/sbin/pkg rquery %dn py38-salt)
+        SALT_DEPENDENCIES=$(/usr/local/sbin/pkg rquery %dn py39-salt)
         # shellcheck disable=SC2086
         /usr/local/sbin/pkg install -y ${SALT_DEPENDENCIES} python || return 1
 
-        /usr/local/sbin/pkg install -y py38-requests || return 1
-        /usr/local/sbin/pkg install -y py38-tornado4 || return 1
+        /usr/local/sbin/pkg install -y py39-requests || return 1
+        /usr/local/sbin/pkg install -y py39-tornado4 || return 1
 
     else
-        /usr/local/sbin/pkg install -y python py38-pip py38-setuptools libzmq4 libunwind || return 1
+        /usr/local/sbin/pkg install -y python py39-pip py39-setuptools libzmq4 libunwind || return 1
     fi
 
     echodebug "Adapting paths to FreeBSD"
@@ -6539,7 +6550,7 @@ install_freebsd_stable() {
 # installing latest version of salt from FreeBSD CURRENT ports repo
 #
     # shellcheck disable=SC2086
-    /usr/local/sbin/pkg install -y py38-salt || return 1
+    /usr/local/sbin/pkg install -y py39-salt || return 1
 
     return 0
 }
@@ -6665,7 +6676,7 @@ install_openbsd_git_deps() {
     __git_clone_and_checkout || return 1
 
     if [ "${_POST_NEON_INSTALL}" -eq $BS_TRUE ]; then
-        pkg_add -I -v py-pip py-setuptools
+        pkg_add -I -v py3-pip py3-setuptools
     fi
 
     #
@@ -6965,6 +6976,8 @@ __set_suse_pkg_repo() {
     # Set distro repo variable
     if [ "${DISTRO_MAJOR_VERSION}" -gt 2015 ]; then
         DISTRO_REPO="openSUSE_Tumbleweed"
+    elif [ "${DISTRO_MAJOR_VERSION}" -eq 15 ] && [ "${DISTRO_MINOR_VERSION}" -ge 4 ]; then
+        DISTRO_REPO="${DISTRO_MAJOR_VERSION}.${DISTRO_MINOR_VERSION}"
     elif [ "${DISTRO_MAJOR_VERSION}" -ge 42 ] || [ "${DISTRO_MAJOR_VERSION}" -eq 15 ]; then
         DISTRO_REPO="openSUSE_Leap_${DISTRO_MAJOR_VERSION}.${DISTRO_MINOR_VERSION}"
     else
@@ -7114,7 +7127,7 @@ install_opensuse_git_deps() {
         fi
     # Check for Tumbleweed
     elif [ "${DISTRO_MAJOR_VERSION}" -ge 20210101 ]; then
-        __PACKAGES="python3-pip"
+        __PACKAGES="python3-pip gcc-c++ python310-pyzmq-devel"
     else
         __PACKAGES="python-pip python-setuptools gcc"
     fi

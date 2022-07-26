@@ -1,4 +1,4 @@
-#!/bin/sh +x
+#!/bin/sh -
 
 # WARNING: Changes to this file in the salt repo will be overwritten!
 # Please submit pull requests against the salt-bootstrap repo:

@@ -1,5 +1,11 @@
 Version TBD (In Progress on the Develop Branch):
 
+Version 2022.05.19
+	* Fix situations where the registry key for root_dir does not exist
+	on Windows (twangboy) #1828
+	* Add Ubuntu 22 support (krionbsd) #1820
+	* Add Fedora 36 support (myii) #1818
+
 Version 2022.03.15:
 	* Add detection and functions for AlmaLinux and Rocky Linux (myii) #1803
 	* Copy configs to correct config dirs (v3004+) (dafyddj) #1798

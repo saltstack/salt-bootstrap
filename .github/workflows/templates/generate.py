@@ -14,7 +14,6 @@ LINUX_DISTROS = [
     "debian-10",
     "debian-11",
     "debian-9",
-    "fedora-34",
     "fedora-35",
     "fedora-36",
     "gentoo",
@@ -24,7 +23,6 @@ LINUX_DISTROS = [
     "oraclelinux-7",
     "oraclelinux-8",
     "rockylinux-8",
-    "ubuntu-1604",
     "ubuntu-1804",
     "ubuntu-2004",
     "ubuntu-2204",
@@ -40,7 +38,6 @@ STABLE_DISTROS = [
     "debian-10",
     "debian-11",
     "debian-9",
-    "fedora-34",
     "fedora-35",
     "fedora-36",
     "gentoo",
@@ -55,46 +52,9 @@ STABLE_DISTROS = [
     "ubuntu-2204",
 ]
 
-BLACKLIST_3002 = [
-    "almalinux-8",
-    "arch",
-    "centos-stream8",
-    "debian-11",
-    "fedora-34",
-    "fedora-35",
-    "fedora-36",
-    "gentoo",
-    "gentoo-systemd",
-    "opensuse-15",
-    "opensuse-tumbleweed",
-    "rockylinux-8",
-    "ubuntu-2204",
-]
-
-BLACKLIST_GIT_3002 = [
-    "almalinux-8",
-    "amazon-2",
-    "arch",
-    "centos-stream8",
-    "debian-10",
-    "debian-11",
-    "fedora-34",
-    "fedora-35",
-    "fedora-36",
-    "gentoo",
-    "gentoo-systemd",
-    "opensuse-15",
-    "opensuse-tumbleweed",
-    "rockylinux-8",
-    "ubuntu-2004",
-    "ubuntu-2110",
-    "ubuntu-2204",
-]
-
 BLACKLIST_3003 = [
     "arch",
     "debian-11",
-    "fedora-34",
     "fedora-35",
     "fedora-36",
     "gentoo",
@@ -102,7 +62,6 @@ BLACKLIST_3003 = [
     "opensuse-15",
     "opensuse-tumbleweed",
     "rockylinux-8",
-    "ubuntu-1604",
     "ubuntu-2204",
 ]
 
@@ -111,7 +70,6 @@ BLACKLIST_GIT_3003 = [
     "arch",
     "debian-10",
     "debian-11",
-    "fedora-34",
     "fedora-35",
     "fedora-36",
     "gentoo",
@@ -119,7 +77,6 @@ BLACKLIST_GIT_3003 = [
     "opensuse-15",
     "opensuse-tumbleweed",
     "rockylinux-8",
-    "ubuntu-1604",
     "ubuntu-2004",
     "ubuntu-2110",
     "ubuntu-2204",
@@ -127,14 +84,12 @@ BLACKLIST_GIT_3003 = [
 
 BLACKLIST_3004 = [
     "arch",
-    "fedora-34",
     "fedora-35",
     "fedora-36",
     "gentoo",
     "gentoo-systemd",
     "opensuse-15",
     "opensuse-tumbleweed",
-    "ubuntu-1604",
 ]
 
 BLACKLIST_GIT_3004 = [
@@ -142,21 +97,18 @@ BLACKLIST_GIT_3004 = [
     "arch",
     "debian-10",
     "debian-11",
-    "fedora-34",
     "fedora-35",
     "fedora-36",
     "gentoo",
     "gentoo-systemd",
     "opensuse-15",
     "opensuse-tumbleweed",
-    "ubuntu-1604",
     "ubuntu-2004",
     "ubuntu-2110",
     "ubuntu-2204",
 ]
 
 SALT_BRANCHES = [
-    "3002",
     "3003",
     "3004",
     "master",
@@ -164,7 +116,6 @@ SALT_BRANCHES = [
 ]
 
 BRANCH_DISPLAY_NAMES = {
-    "3002": "v3002",
     "3003": "v3003",
     "3004": "v3004",
     "master": "Master",
@@ -173,9 +124,7 @@ BRANCH_DISPLAY_NAMES = {
 
 STABLE_BRANCH_BLACKLIST = []
 
-LATEST_PKG_BLACKLIST = [
-    "ubuntu-1604",
-]
+LATEST_PKG_BLACKLIST = []
 
 DISTRO_DISPLAY_NAMES = {
     "almalinux-8": "AlmaLinux 8",
@@ -186,7 +135,6 @@ DISTRO_DISPLAY_NAMES = {
     "debian-10": "Debian 10",
     "debian-11": "Debian 11",
     "debian-9": "Debian 9",
-    "fedora-34": "Fedora 34",
     "fedora-35": "Fedora 35",
     "fedora-36": "Fedora 36",
     "gentoo": "Gentoo",
@@ -196,7 +144,6 @@ DISTRO_DISPLAY_NAMES = {
     "oraclelinux-7": "Oracle Linux 7",
     "oraclelinux-8": "Oracle Linux 8",
     "rockylinux-8": "Rocky Linux 8",
-    "ubuntu-1604": "Ubuntu 16.04",
     "ubuntu-1804": "Ubuntu 18.04",
     "ubuntu-2004": "Ubuntu 20.04",
     "ubuntu-2204": "Ubuntu 22.04",
@@ -279,23 +226,21 @@ def generate_test_jobs():
                             continue
 
                     BLACKLIST = {
-                        "3002": BLACKLIST_3002,
                         "3003": BLACKLIST_3003,
                         "3004": BLACKLIST_3004,
                     }
                     if bootstrap_type == "git":
                         BLACKLIST = {
-                            "3002": BLACKLIST_GIT_3002,
                             "3003": BLACKLIST_GIT_3003,
                             "3004": BLACKLIST_GIT_3004,
                         }
 
-                        # .0 versions are a virtual version for pinning to the first point release of a major release, such as 3002, there is no git version.
+                        # .0 versions are a virtual version for pinning to the first point release of a major release, such as 3003, there is no git version.
                         if branch.endswith("-0"):
                             continue
 
                     if (
-                        branch in ("3002", "3003", "3004")
+                        branch in ("3003", "3004")
                         and distro in BLACKLIST[branch]
                     ):
                         continue

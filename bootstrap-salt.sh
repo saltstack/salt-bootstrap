@@ -8435,9 +8435,10 @@ daemons_running_tiamat() {
         [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
         [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
 
-        salt_path="/opt/saltstack/salt/run/run"
-        if [ "$(ps wwwaux | grep -v grep | grep $salt_path | grep $fname)" = "" ]; then
-            echoerror "$salt_process was not found running"
+        salt_path="/opt/saltstack/salt/run/run ${fname}"
+        process_running=$(pgrep -f "${salt_path}")
+        if [ "${process_running}" = "" ]; then
+            echoerror "${salt_path} was not found running"
             FAILED_DAEMONS=$((FAILED_DAEMONS + 1))
         fi
     done

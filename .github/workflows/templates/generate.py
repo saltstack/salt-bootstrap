@@ -27,7 +27,6 @@ LINUX_DISTROS = [
     "ubuntu-1604",
     "ubuntu-1804",
     "ubuntu-2004",
-    "ubuntu-2110",
     "ubuntu-2204",
 ]
 OSX = WINDOWS = []
@@ -53,7 +52,6 @@ STABLE_DISTROS = [
     "rockylinux-8",
     "ubuntu-1804",
     "ubuntu-2004",
-    "ubuntu-2110",
     "ubuntu-2204",
 ]
 
@@ -201,7 +199,6 @@ DISTRO_DISPLAY_NAMES = {
     "ubuntu-1604": "Ubuntu 16.04",
     "ubuntu-1804": "Ubuntu 18.04",
     "ubuntu-2004": "Ubuntu 20.04",
-    "ubuntu-2110": "Ubuntu 21.10",
     "ubuntu-2204": "Ubuntu 22.04",
 }
 

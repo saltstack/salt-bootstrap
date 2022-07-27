@@ -268,7 +268,7 @@ _CUSTOM_MASTER_CONFIG="null"
 _CUSTOM_MINION_CONFIG="null"
 _QUIET_GIT_INSTALLATION=$BS_FALSE
 _REPO_URL="repo.saltproject.io"
-_TIAMAT_DIR="salt"
+_ONEDIR_DIR="salt"
 _PY_EXE="python3"
 _INSTALL_PY="$BS_FALSE"
 _TORNADO_MAX_PY3_VERSION="5.0"
@@ -302,13 +302,13 @@ __usage() {
     - git                  Install from the head of the master branch
     - git [ref]            Install from any git ref (such as a branch, tag, or
                            commit)
-    - tiamat               Install latest tiamat release.
-    - tiamat [version]     Install a specific version. Only supported for
-                           tiamat packages available at repo.saltproject.io
+    - onedir               Install latest onedir release.
+    - onedir [version]     Install a specific version. Only supported for
+                           onedir packages available at repo.saltproject.io
 
-    - tiamat_rc            Install latest tiamat RC release.
-    - tiamat_rc [version]  Install a specific version. Only supported for
-                           tiamat RC packages available at repo.saltproject.io
+    - onedir_rc            Install latest onedir RC release.
+    - onedir_rc [version]  Install a specific version. Only supported for
+                           onedir RC packages available at repo.saltproject.io
 
   Examples:
     - ${__ScriptName}
@@ -320,10 +320,10 @@ __usage() {
     - ${__ScriptName} git 2017.7
     - ${__ScriptName} git v2017.7.2
     - ${__ScriptName} git 06f249901a2e2f1ed310d58ea3921a129f214358
-    - ${__ScriptName} tiamat
-    - ${__ScriptName} tiamat 3005
-    - ${__ScriptName} tiamat_rc
-    - ${__ScriptName} tiamat_rc 3005
+    - ${__ScriptName} onedir
+    - ${__ScriptName} onedir 3005
+    - ${__ScriptName} onedir_rc
+    - ${__ScriptName} onedir_rc 3005
 
   Options:
     -a  Pip install all Python pkg dependencies for Salt. Requires -V to install
@@ -594,7 +594,7 @@ if [ "$#" -gt 0 ];then
 fi
 
 # Check installation type
-if [ "$(echo "$ITYPE" | grep -E '(stable|testing|git|tiamat|tiamat_rc)')" = "" ]; then
+if [ "$(echo "$ITYPE" | grep -E '(stable|testing|git|onedir|onedir_rc)')" = "" ]; then
     echoerror "Installation type \"$ITYPE\" is not known..."
     exit 1
 fi
@@ -632,17 +632,17 @@ elif [ "$ITYPE" = "stable" ]; then
         fi
     fi
 
-elif [ "$ITYPE" = "tiamat" ]; then
+elif [ "$ITYPE" = "onedir" ]; then
     if [ "$#" -eq 0 ];then
-        TIAMAT_REV="latest"
+        ONEDIR_REV="latest"
     else
         if [ "$(echo "$1" | grep -E '^(latest)$')" != "" ]; then
-            TIAMAT_REV="$1"
+            ONEDIR_REV="$1"
             shift
         elif [ "$(echo "$1" | grep -E '^([3-9][0-9]{3}(\.[0-9]*)?)$')" != "" ]; then
             # Handle the 3xxx.0 version as 3xxx archive (pin to minor) and strip the fake ".0" suffix
-            TIAMAT_REV=$(echo "$1" | sed -E 's/^([3-9][0-9]{3})\.0$/\1/')
-            TIAMAT_REV="minor/$TIAMAT_REV"
+            ONEDIR_REV=$(echo "$1" | sed -E 's/^([3-9][0-9]{3})\.0$/\1/')
+            ONEDIR_REV="minor/$ONEDIR_REV"
             shift
         else
             echo "Unknown stable version: $1 (valid: 3005, latest.)"
@@ -650,23 +650,23 @@ elif [ "$ITYPE" = "tiamat" ]; then
         fi
     fi
 
-elif [ "$ITYPE" = "tiamat_rc" ]; then
-    # Change the _TIAMAT_DIR to be the location for the RC packages
-    _TIAMAT_DIR="salt_rc/salt"
+elif [ "$ITYPE" = "onedir_rc" ]; then
+    # Change the _ONEDIR_DIR to be the location for the RC packages
+    _ONEDIR_DIR="salt_rc/salt"
 
-    # Change ITYPE to tiamat so we use the regular Tiamat functions
-    ITYPE="tiamat"
+    # Change ITYPE to onedir so we use the regular onedir functions
+    ITYPE="onedir"
 
     if [ "$#" -eq 0 ];then
-        TIAMAT_REV="latest"
+        ONEDIR_REV="latest"
     else
         if [ "$(echo "$1" | grep -E '^(latest)$')" != "" ]; then
-            TIAMAT_REV="$1"
+            ONEDIR_REV="$1"
             shift
         elif [ "$(echo "$1" | grep -E '^([3-9][0-9]{3}?rc[0-9]-[0-9]$)')" != "" ]; then
             # Handle the 3xxx.0 version as 3xxx archive (pin to minor) and strip the fake ".0" suffix
-            #TIAMAT_REV=$(echo "$1" | sed -E 's/^([3-9][0-9]{3})\.0$/\1/')
-            TIAMAT_REV="minor/$1"
+            #ONEDIR_REV=$(echo "$1" | sed -E 's/^([3-9][0-9]{3})\.0$/\1/')
+            ONEDIR_REV="minor/$1"
             shift
         else
             echo "Unknown stable version: $1 (valid: 3005, latest.)"
@@ -3023,7 +3023,7 @@ __install_saltstack_ubuntu_repository() {
     __wait_for_apt apt-get update || return 1
 }
 
-__install_saltstack_ubuntu_tiamat_repository() {
+__install_saltstack_ubuntu_onedir_repository() {
     # Workaround for latest non-LTS Ubuntu
     if { [ "$DISTRO_MAJOR_VERSION" -eq 20 ] && [ "$DISTRO_MINOR_VERSION" -eq 10 ]; } || \
         [ "$DISTRO_MAJOR_VERSION" -eq 21 ]; then
@@ -3057,7 +3057,7 @@ __install_saltstack_ubuntu_tiamat_repository() {
     fi
 
     # SaltStack's stable Ubuntu repository:
-    SALTSTACK_UBUNTU_URL="${HTTP_VAL}://${_REPO_URL}/${_TIAMAT_DIR}/${__PY_VERSION_REPO}/ubuntu/${UBUNTU_VERSION}/${__REPO_ARCH}/${TIAMAT_REV}/"
+    SALTSTACK_UBUNTU_URL="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_DIR}/${__PY_VERSION_REPO}/ubuntu/${UBUNTU_VERSION}/${__REPO_ARCH}/${ONEDIR_REV}/"
     echo "$__REPO_ARCH_DEB $SALTSTACK_UBUNTU_URL $UBUNTU_CODENAME main" > /etc/apt/sources.list.d/salt.list
 
     __apt_key_fetch "${SALTSTACK_UBUNTU_URL}salt-archive-keyring.gpg" || return 1
@@ -3237,7 +3237,7 @@ install_ubuntu_git_deps() {
     return 0
 }
 
-install_ubuntu_tiamat_deps() {
+install_ubuntu_onedir_deps() {
     if [ "${_SLEEP}" -eq "${__DEFAULT_SLEEP}" ] && [ "$DISTRO_MAJOR_VERSION" -lt 16 ]; then
         # The user did not pass a custom sleep value as an argument, let's increase the default value
         echodebug "On Ubuntu systems we increase the default sleep value to 10."
@@ -3269,7 +3269,7 @@ install_ubuntu_tiamat_deps() {
 
     if [ "$_DISABLE_REPOS" -eq "$BS_FALSE" ] || [ "$_CUSTOM_REPO_URL" != "null" ]; then
         __check_dpkg_architecture || return 1
-        __install_saltstack_ubuntu_tiamat_repository || return 1
+        __install_saltstack_ubuntu_onedir_repository || return 1
     fi
 
     install_ubuntu_deps || return 1
@@ -3334,7 +3334,7 @@ install_ubuntu_git() {
     return 0
 }
 
-install_ubuntu_tiamat() {
+install_ubuntu_onedir() {
     __PACKAGES=""
 
     if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ];then
@@ -3553,7 +3553,7 @@ __install_saltstack_debian_repository() {
     __wait_for_apt apt-get update || return 1
 }
 
-__install_saltstack_debian_tiamat_repository() {
+__install_saltstack_debian_onedir_repository() {
     DEBIAN_RELEASE="$DISTRO_MAJOR_VERSION"
     DEBIAN_CODENAME="$DISTRO_CODENAME"
 
@@ -3579,7 +3579,7 @@ __install_saltstack_debian_tiamat_repository() {
     __apt_get_install_noinput ${__PACKAGES} || return 1
 
     # amd64 is just a part of repository URI, 32-bit pkgs are hosted under the same location
-    SALTSTACK_DEBIAN_URL="${HTTP_VAL}://${_REPO_URL}/${_TIAMAT_DIR}/${__PY_VERSION_REPO}/debian/${DEBIAN_RELEASE}/${__REPO_ARCH}/${TIAMAT_REV}/"
+    SALTSTACK_DEBIAN_URL="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_DIR}/${__PY_VERSION_REPO}/debian/${DEBIAN_RELEASE}/${__REPO_ARCH}/${ONEDIR_REV}/"
     echo "$__REPO_ARCH_DEB $SALTSTACK_DEBIAN_URL $DEBIAN_CODENAME main" > "/etc/apt/sources.list.d/salt.list"
 
     __apt_key_fetch "${SALTSTACK_DEBIAN_URL}salt-archive-keyring.gpg" || return 1
@@ -3640,7 +3640,7 @@ install_debian_deps() {
     return 0
 }
 
-install_debian_tiamat_deps() {
+install_debian_onedir_deps() {
     if [ $_START_DAEMONS -eq $BS_FALSE ]; then
         echowarn "Not starting daemons on Debian based distributions is not working mostly because starting them is the default behaviour."
     fi
@@ -3681,7 +3681,7 @@ install_debian_tiamat_deps() {
 
     if [ "$_DISABLE_REPOS" -eq "$BS_FALSE" ] || [ "$_CUSTOM_REPO_URL" != "null" ]; then
         __check_dpkg_architecture || return 1
-        __install_saltstack_debian_tiamat_repository || return 1
+        __install_saltstack_debian_onedir_repository || return 1
     fi
 
     if [ "${_EXTRA_PACKAGES}" != "" ]; then
@@ -3969,7 +3969,7 @@ install_debian_9_git() {
     return 0
 }
 
-install_debian_tiamat() {
+install_debian_onedir() {
     __PACKAGES=""
 
     if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ];then
@@ -4449,9 +4449,9 @@ _eof
     return 0
 }
 
-__install_saltstack_rhel_tiamat_repository() {
+__install_saltstack_rhel_onedir_repository() {
     if [ "$ITYPE" = "stable" ]; then
-        repo_rev="$TIAMAT_REV"
+        repo_rev="$ONEDIR_REV"
     else
         repo_rev="latest"
     fi
@@ -4463,7 +4463,7 @@ __install_saltstack_rhel_tiamat_repository() {
 
     # Avoid using '$releasever' variable for yum.
     # Instead, this should work correctly on all RHEL variants.
-    base_url="${HTTP_VAL}://${_REPO_URL}/${_TIAMAT_DIR}/${__PY_VERSION_REPO}/redhat/${DISTRO_MAJOR_VERSION}/\$basearch/${TIAMAT_REV}/"
+    base_url="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_DIR}/${__PY_VERSION_REPO}/redhat/${DISTRO_MAJOR_VERSION}/\$basearch/${ONEDIR_REV}/"
     if [ "${DISTRO_MAJOR_VERSION}" -eq 7 ]; then
         gpg_key="SALTSTACK-GPG-KEY.pub base/RPM-GPG-KEY-CentOS-7"
     else
@@ -4489,7 +4489,7 @@ enabled=1
 enabled_metadata=1
 _eof
 
-        fetch_url="${HTTP_VAL}://${_REPO_URL}/${_TIAMAT_DIR}/${__PY_VERSION_REPO}/redhat/${DISTRO_MAJOR_VERSION}/${CPU_ARCH_L}/"
+        fetch_url="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_DIR}/${__PY_VERSION_REPO}/redhat/${DISTRO_MAJOR_VERSION}/${CPU_ARCH_L}/"
         for key in $gpg_key; do
             __rpm_import_gpg "${fetch_url}${key}" || return 1
         done
@@ -4807,7 +4807,7 @@ install_centos_git_post() {
     return 0
 }
 
-install_centos_tiamat_deps() {
+install_centos_onedir_deps() {
     if [ "$_UPGRADE_SYS" -eq $BS_TRUE ]; then
         yum -y update || return 1
     fi
@@ -4820,14 +4820,14 @@ install_centos_tiamat_deps() {
 
     if [ "$_DISABLE_REPOS" -eq "$BS_FALSE" ]; then
         __install_epel_repository || return 1
-        __install_saltstack_rhel_tiamat_repository || return 1
+        __install_saltstack_rhel_onedir_repository || return 1
     fi
 
     # If -R was passed, we need to configure custom repo url with rsync-ed packages
     # Which is still handled in __install_saltstack_rhel_repository. This call has
     # its own check in case -r was passed without -R.
     if [ "$_CUSTOM_REPO_URL" != "null" ]; then
-        __install_saltstack_rhel_tiamat_repository || return 1
+        __install_saltstack_rhel_onedir_repository || return 1
     fi
 
     if [ "$DISTRO_MAJOR_VERSION" -ge 8 ]; then
@@ -4849,7 +4849,7 @@ install_centos_tiamat_deps() {
     return 0
 }
 
-install_centos_tiamat() {
+install_centos_onedir() {
     __PACKAGES=""
 
     if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ];then
@@ -4871,7 +4871,7 @@ install_centos_tiamat() {
     return 0
 }
 
-install_centos_tiamat_post() {
+install_centos_onedir_post() {
     SYSTEMD_RELOAD=$BS_FALSE
 
     for fname in api master minion syndic; do
@@ -5001,8 +5001,8 @@ install_red_hat_linux_git_deps() {
     return 0
 }
 
-install_red_hat_linux_tiamat_deps() {
-    install_centos_tiamat_deps || return 1
+install_red_hat_linux_onedir_deps() {
+    install_centos_onedir_deps || return 1
     return 0
 }
 
@@ -5016,8 +5016,8 @@ install_red_hat_enterprise_git_deps() {
     return 0
 }
 
-install_red_hat_enterprise_tiamat_deps() {
-    install_red_hat_linux_tiamat_deps || return 1
+install_red_hat_enterprise_onedir_deps() {
+    install_red_hat_linux_onedir_deps || return 1
     return 0
 }
 
@@ -5031,8 +5031,8 @@ install_red_hat_enterprise_linux_git_deps() {
     return 0
 }
 
-install_red_hat_enterprise_linux_tiamat_deps() {
-    install_red_hat_linux_tiamat_deps || return 1
+install_red_hat_enterprise_linux_onedir_deps() {
+    install_red_hat_linux_onedir_deps || return 1
     return 0
 }
 
@@ -5046,8 +5046,8 @@ install_red_hat_enterprise_server_git_deps() {
     return 0
 }
 
-install_red_hat_enterprise_server_tiamat_deps() {
-    install_red_hat_linux_tiamat_deps || return 1
+install_red_hat_enterprise_server_onedir_deps() {
+    install_red_hat_linux_onedir_deps || return 1
     return 0
 }
 
@@ -5061,7 +5061,7 @@ install_red_hat_enterprise_workstation_git_deps() {
     return 0
 }
 
-install_red_hat_enterprise_workstation_tiamat_deps() {
+install_red_hat_enterprise_workstation_onedir_deps() {
     install_red_hat_linux_timat_deps || return 1
     return 0
 }
@@ -5076,8 +5076,8 @@ install_red_hat_linux_git() {
     return 0
 }
 
-install_red_hat_linux_tiamat() {
-    install_centos_tiamat || return 1
+install_red_hat_linux_onedir() {
+    install_centos_onedir || return 1
     return 0
 }
 
@@ -5091,8 +5091,8 @@ install_red_hat_enterprise_git() {
     return 0
 }
 
-install_red_hat_enterprise_tiamat() {
-    install_red_hat_linux_tiamat || return 1
+install_red_hat_enterprise_onedir() {
+    install_red_hat_linux_onedir || return 1
     return 0
 }
 
@@ -5106,8 +5106,8 @@ install_red_hat_enterprise_linux_git() {
     return 0
 }
 
-install_red_hat_enterprise_linux_tiamat() {
-    install_red_hat_linux_tiamat || return 1
+install_red_hat_enterprise_linux_onedir() {
+    install_red_hat_linux_onedir || return 1
     return 0
 }
 
@@ -5121,8 +5121,8 @@ install_red_hat_enterprise_server_git() {
     return 0
 }
 
-install_red_hat_enterprise_server_tiamat() {
-    install_red_hat_linux_tiamat || return 1
+install_red_hat_enterprise_server_onedir() {
+    install_red_hat_linux_onedir || return 1
     return 0
 }
 
@@ -5136,8 +5136,8 @@ install_red_hat_enterprise_workstation_git() {
     return 0
 }
 
-install_red_hat_enterprise_workstation_tiamat() {
-    install_red_hat_linux_tiamat || return 1
+install_red_hat_enterprise_workstation_onedir() {
+    install_red_hat_linux_onedir || return 1
     return 0
 }
 
@@ -5294,8 +5294,8 @@ install_oracle_linux_git_deps() {
     return 0
 }
 
-install_oracle_linux_tiamat_deps() {
-    install_centos_tiamat_deps || return 1
+install_oracle_linux_onedir_deps() {
+    install_centos_onedir_deps || return 1
     return 0
 }
 
@@ -5314,8 +5314,8 @@ install_oracle_linux_git() {
     return 0
 }
 
-install_oracle_linux_tiamat() {
-    install_centos_tiamat || return 1
+install_oracle_linux_onedir() {
+    install_centos_onedir || return 1
     return 0
 }
 
@@ -5367,8 +5367,8 @@ install_almalinux_git_deps() {
     return 0
 }
 
-install_almalinux_tiamat_deps() {
-    install_centos_tiamat_deps || return 1
+install_almalinux_onedir_deps() {
+    install_centos_onedir_deps || return 1
     return 0
 }
 
@@ -5387,8 +5387,8 @@ install_almalinux_git() {
     return 0
 }
 
-install_almalinux_tiamat() {
-    install_centos_tiamat || return 1
+install_almalinux_onedir() {
+    install_centos_onedir || return 1
     return 0
 }
 
@@ -5440,8 +5440,8 @@ install_rocky_linux_git_deps() {
     return 0
 }
 
-install_rocky_linux_tiamat_deps() {
-    install_centos_tiamat_deps || return 1
+install_rocky_linux_onedir_deps() {
+    install_centos_onedir_deps || return 1
     return 0
 }
 
@@ -5455,8 +5455,8 @@ install_rocky_linux_stable() {
     return 0
 }
 
-install_rocky_linux_tiamat() {
-    install_centos_tiamat || return 1
+install_rocky_linux_onedir() {
+    install_centos_onedir || return 1
     return 0
 }
 
@@ -5513,8 +5513,8 @@ install_scientific_linux_git_deps() {
     return 0
 }
 
-install_scientific_linux_tiamat_deps() {
-    install_centos_tiamat_deps || return 1
+install_scientific_linux_onedir_deps() {
+    install_centos_onedir_deps || return 1
     return 0
 }
 
@@ -5533,8 +5533,8 @@ install_scientific_linux_git() {
     return 0
 }
 
-install_scientific_linux_tiamat() {
-    install_centos_tiamat || return 1
+install_scientific_linux_onedir() {
+    install_centos_onedir || return 1
     return 0
 }
 
@@ -5586,8 +5586,8 @@ install_cloud_linux_git_deps() {
     return 0
 }
 
-install_cloud_linux_tiamat_deps() {
-    install_centos_tiamat_deps || return 1
+install_cloud_linux_onedir_deps() {
+    install_centos_onedir_deps || return 1
     return 0
 }
 
@@ -8435,7 +8435,7 @@ preseed_master() {
 #
 #   This function checks if all of the installed daemons are running or not.
 #
-daemons_running_tiamat() {
+daemons_running_onedir() {
     [ "$_START_DAEMONS" -eq $BS_FALSE ] && return 0
 
     FAILED_DAEMONS=0

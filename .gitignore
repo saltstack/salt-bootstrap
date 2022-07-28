@@ -1,6 +1,7 @@
 /.project
 *.sw?
 .vagrant
+.venv
 
 # Pycharm
 .idea

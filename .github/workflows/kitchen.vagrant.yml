@@ -4,6 +4,7 @@ name: 'Kitchen Vagrant (FreeBSD & OpenBSD)'
 
 env:
   KITCHEN_LOCAL_YAML: 'kitchen.vagrant.yml'
+  VAGRANT_HOME: '.vagrant.d'
 
 jobs:
   generate-actions-workflow:
@@ -50,12 +51,14 @@ jobs:
     steps:
       - name: 'Check out code'
         uses: 'actions/checkout@v2'
-      - name: 'Set up Bundler cache'
-        uses: 'actions/cache@v1'
+      - name: 'Set up Bundler and Vagrant cache'
+        uses: 'actions/cache@v3'
         with:
-          path: 'vendor/bundle'
-          key: "${{ runner.os }}-gems-${{ hashFiles('**/Gemfile.lock') }}"
-          restore-keys: "${{ runner.os }}-gems-"
+          path: |
+            vendor/bundle
+            .kitchen/kitchen-vagrant
+            .vagrant.d/
+          key: "${{ runner.os }}-gems-${{ hashFiles('**/Gemfile.lock','**/kitchen.vagrant.yml','**/.github/workflows/kitchen.vagrant.yml') }}"
       - name: 'Run Bundler'
         run: |
           ruby --version

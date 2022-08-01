@@ -6155,6 +6155,92 @@ _eof
     fi
 }
 
+install_amazon_linux_ami_2_onedir_deps() {
+    # Shim to figure out if we're using old (rhel) or new (aws) rpms.
+    _USEAWS=$BS_FALSE
+    pkg_append="python"
+
+    if [ "$ITYPE" = "onedir" ]; then
+        repo_rev="$ONEDIR_REV"
+    else
+        repo_rev="latest"
+    fi
+
+    if echo $repo_rev | grep -E -q '^archive'; then
+        year=$(echo "$repo_rev" | cut -d '/' -f 2 | cut -c1-4)
+    else
+        year=$(echo "$repo_rev" | cut -c1-4)
+    fi
+
+    # We need to install yum-utils before doing anything else when installing on
+    # Amazon Linux ECS-optimized images. See issue #974.
+    __yum_install_noinput yum-utils
+
+    # Do upgrade early
+    if [ "$_UPGRADE_SYS" -eq $BS_TRUE ]; then
+        yum -y update || return 1
+    fi
+
+    if [ $_DISABLE_REPOS -eq $BS_FALSE ] || [ "$_CUSTOM_REPO_URL" != "null" ]; then
+        __REPO_FILENAME="salt.repo"
+        __PY_VERSION_REPO="yum"
+        PY_PKG_VER=""
+        repo_label="saltstack-repo"
+        repo_name="SaltStack repo for Amazon Linux 2"
+        if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 3 ]; then
+            __REPO_FILENAME="salt.repo"
+            __PY_VERSION_REPO="py3"
+            PY_PKG_VER=3
+            repo_label="saltstack-py3-repo"
+            repo_name="SaltStack Python 3 repo for Amazon Linux 2"
+        fi
+
+        base_url="$HTTP_VAL://${_REPO_URL}/${_ONEDIR_DIR}/${__PY_VERSION_REPO}/amazon/2/\$basearch/$repo_rev/"
+        gpg_key="${base_url}SALTSTACK-GPG-KEY.pub,${base_url}base/RPM-GPG-KEY-CentOS-7"
+        if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 3 ]; then
+            gpg_key="${base_url}SALTSTACK-GPG-KEY.pub"
+        fi
+
+        # This should prob be refactored to use __install_saltstack_rhel_repository()
+        # With args passed in to do the right thing.  Reformatted to be more like the
+        # amazon linux yum file.
+        if [ ! -s "/etc/yum.repos.d/${__REPO_FILENAME}" ]; then
+          cat <<_eof > "/etc/yum.repos.d/${__REPO_FILENAME}"
+[$repo_label]
+name=$repo_name
+failovermethod=priority
+priority=10
+gpgcheck=1
+gpgkey=$gpg_key
+baseurl=$base_url
+_eof
+        fi
+
+    fi
+
+    if [ "${_POST_NEON_INSTALL}" -eq $BS_FALSE ]; then
+        # Package python-ordereddict-1.1-2.el6.noarch is obsoleted by python26-2.6.9-2.88.amzn1.x86_64
+        # which is already installed
+        if [ -n "${PY_PKG_VER}" ] && [ "${PY_PKG_VER}" -eq 3 ]; then
+            __PACKAGES="${pkg_append}${PY_PKG_VER}-m2crypto ${pkg_append}${PY_PKG_VER}-pyyaml"
+        else
+            __PACKAGES="m2crypto PyYAML ${pkg_append}-futures"
+        fi
+
+        __PACKAGES="${__PACKAGES} ${pkg_append}${PY_PKG_VER}-crypto ${pkg_append}${PY_PKG_VER}-jinja2 procps-ng"
+        __PACKAGES="${__PACKAGES} ${pkg_append}${PY_PKG_VER}-msgpack ${pkg_append}${PY_PKG_VER}-requests ${pkg_append}${PY_PKG_VER}-zmq"
+
+        # shellcheck disable=SC2086
+        __yum_install_noinput ${__PACKAGES} || return 1
+    fi
+
+    if [ "${_EXTRA_PACKAGES}" != "" ]; then
+        echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
+        # shellcheck disable=SC2086
+        __yum_install_noinput ${_EXTRA_PACKAGES} || return 1
+    fi
+}
+
 install_amazon_linux_ami_stable() {
     install_centos_stable || return 1
     return 0
@@ -6227,6 +6313,16 @@ install_amazon_linux_ami_2_testing_post() {
 
 install_amazon_linux_ami_2_check_services() {
     install_centos_check_services || return 1
+    return 0
+}
+
+install_amazon_linux_ami_2_onedir() {
+    install_centos_stable || return 1
+    return 0
+}
+
+install_amazon_linux_ami_2_onedir_post() {
+    install_centos_stable_post || return 1
     return 0
 }
 

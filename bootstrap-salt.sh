@@ -4412,6 +4412,8 @@ __install_saltstack_rhel_repository() {
     base_url="${HTTP_VAL}://${_REPO_URL}/${__PY_VERSION_REPO}/redhat/${DISTRO_MAJOR_VERSION}/\$basearch/${repo_rev}/"
     if [ "${DISTRO_MAJOR_VERSION}" -eq 7 ]; then
         gpg_key="SALTSTACK-GPG-KEY.pub base/RPM-GPG-KEY-CentOS-7"
+    elif [ "${DISTRO_MAJOR_VERSION}" -ge 9 ]; then
+        gpg_key="SALTSTACK-GPG-KEY2.pub"
     else
         gpg_key="SALTSTACK-GPG-KEY.pub"
     fi
@@ -4464,7 +4466,11 @@ __install_saltstack_rhel_onedir_repository() {
     # Avoid using '$releasever' variable for yum.
     # Instead, this should work correctly on all RHEL variants.
     base_url="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_DIR}/${__PY_VERSION_REPO}/redhat/${DISTRO_MAJOR_VERSION}/\$basearch/${ONEDIR_REV}/"
-    gpg_key="SALTSTACK-GPG-KEY.pub"
+    if [ "${DISTRO_MAJOR_VERSION}" -eq 9 ]; then
+        gpg_key="SALTSTACK-GPG-KEY2.pub"
+    else
+        gpg_key="SALTSTACK-GPG-KEY.pub"
+    fi
 
     gpg_key_urls=""
     for key in $gpg_key; do

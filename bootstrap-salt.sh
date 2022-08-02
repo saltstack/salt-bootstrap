@@ -616,7 +616,7 @@ elif [ "$ITYPE" = "stable" ]; then
     if [ "$#" -eq 0 ];then
         STABLE_REV="latest"
     else
-        if [ "$(echo "$1" | grep -E '^(latest|1\.6|1\.7|2014\.1|2014\.7|2015\.5|2015\.8|2016\.3|2016\.11|2017\.7|2018\.3|2019\.2|3000|3001|3002|3003|3004)$')" != "" ]; then
+        if [ "$(echo "$1" | grep -E '^(latest|1\.6|1\.7|2014\.1|2014\.7|2015\.5|2015\.8|2016\.3|2016\.11|2017\.7|2018\.3|2019\.2|3000|3001|3002|3003|3004|3005)$')" != "" ]; then
             STABLE_REV="$1"
             shift
         elif [ "$(echo "$1" | grep -E '^(2[0-9]*\.[0-9]*\.[0-9]*|[3-9][0-9]{3}(\.[0-9]*)?)$')" != "" ]; then
@@ -627,7 +627,7 @@ elif [ "$ITYPE" = "stable" ]; then
             fi
             shift
         else
-            echo "Unknown stable version: $1 (valid: 1.6, 1.7, 2014.1, 2014.7, 2015.5, 2015.8, 2016.3, 2016.11, 2017.7, 2018.3, 2019.2, 3000, 3001, 3002, 3003, 3004, latest, \$MAJOR.\$MINOR.\$PATCH until 2019.2, \$MAJOR or \$MAJOR.\$PATCH starting from 3000)"
+            echo "Unknown stable version: $1 (valid: 1.6, 1.7, 2014.1, 2014.7, 2015.5, 2015.8, 2016.3, 2016.11, 2017.7, 2018.3, 2019.2, 3000, 3001, 3002, 3003, 3004, 3005, latest, \$MAJOR.\$MINOR.\$PATCH until 2019.2, \$MAJOR or \$MAJOR.\$PATCH starting from 3000)"
             exit 1
         fi
     fi

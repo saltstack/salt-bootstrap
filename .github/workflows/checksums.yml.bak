@@ -9,22 +9,20 @@ jobs:
   checksums:
     name: Update Scripts Checksums
     runs-on: ubuntu-latest
+    if: github.repository == 'saltstack/salt-bootstrap'
 
     steps:
       - uses: actions/checkout@v2
-        if: github.repository == 'saltstack/salt-bootstrap'
         with:
           ref: stable
 
       - name: Get bootstrap-salt.sh sha256sum
-        if: github.repository == 'saltstack/salt-bootstrap'
         run: |
           echo "SH=$(sha256sum bootstrap-salt.sh | awk '{ print $1 }')" >> $GITHUB_ENV
           echo "PS1=$(sha256sum bootstrap-salt.ps1 | awk '{ print $1 }')" >> $GITHUB_ENV
           echo "BS_VERSION=$(sh bootstrap-salt.sh -v | awk '{ print $4 }')" >> $GITHUB_ENV
 
       - name: Update Checksums
-        if: github.repository == 'saltstack/salt-bootstrap'
         run: |
           echo ${{ env.SH }} > bootstrap-salt.sh.sha256
           echo ${{ env.PS1 }} > bootstrap-salt.ps1.sha256

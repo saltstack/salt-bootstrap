@@ -11,6 +11,11 @@ repos:
         args: [--fix=lf]
       - id: end-of-file-fixer     # Makes sure files end in a newline and only a newline.
 
+  - repo: https://github.com/executablebooks/mdformat
+    rev: 0.7.14
+    hooks:
+      - id: mdformat
+
   - repo: https://github.com/psf/black
     rev: 22.3.0
     hooks:

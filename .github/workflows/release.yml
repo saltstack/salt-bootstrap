@@ -43,9 +43,7 @@ jobs:
         run: |
           python3 .github/workflows/scripts/cut-release.py --repo ${{ github.repository }}
           export CUT_RELEASE_VERSION=$(cat .cut_release_version)
-          export CUT_RELEASE_CHANGES=$(cat .cut_release_changes)
           echo "CUT_RELEASE_VERSION=${CUT_RELEASE_VERSION}" >> $GITHUB_ENV
-          echo "CUT_RELEASE_CHANGES=${CUT_RELEASE_CHANGES}" >> $GITHUB_ENV
 
       - name: Show Changes
         run: |
@@ -98,9 +96,7 @@ jobs:
       - name: Update Environment
         run: |
           export CUT_RELEASE_VERSION=$(cat .cut_release_version)
-          export CUT_RELEASE_CHANGES=$(cat .cut_release_changes)
           echo "CUT_RELEASE_VERSION=${CUT_RELEASE_VERSION}" >> $GITHUB_ENV
-          echo "CUT_RELEASE_CHANGES=${CUT_RELEASE_CHANGES}" >> $GITHUB_ENV
 
       - name: Merge develop into stable
         run: |
@@ -151,9 +147,7 @@ jobs:
       - name: Update Environment
         run: |
           export CUT_RELEASE_VERSION=$(cat .cut_release_version)
-          export CUT_RELEASE_CHANGES=$(cat .cut_release_changes)
           echo "CUT_RELEASE_VERSION=${CUT_RELEASE_VERSION}" >> $GITHUB_ENV
-          echo "CUT_RELEASE_CHANGES=${CUT_RELEASE_CHANGES}" >> $GITHUB_ENV
 
       - name: Create Github Release
         uses: softprops/action-gh-release@v1

@@ -1,9 +1,6 @@
 # -*- coding: utf-8 -*-
-import json
 import os
-import pytest
 import logging
-import pprint
 from contextlib import nullcontext
 
 log = logging.getLogger(__name__)

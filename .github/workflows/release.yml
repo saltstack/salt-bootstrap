@@ -10,6 +10,12 @@ jobs:
     permissions:
       contents: write  # To be able to publish the release
     steps:
+      - name: Check For Admin Permission
+        uses: actions-cool/check-user-permission@v2
+        with:
+          require: admin
+          username: ${{ github.triggering_actor }}
+
       - name: Check Branch Triggering Release
         run: |
           if [ "${{ github.ref_name }}" != "develop" ]

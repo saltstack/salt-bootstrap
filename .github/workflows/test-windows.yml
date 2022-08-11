@@ -1,0 +1,113 @@
+name: Test Windows
+on:
+  workflow_call:
+    inputs:
+      distro-slug:
+        type: string
+        required: true
+        description: The Distribution Slug
+
+      display-name:
+        type: string
+        required: true
+        description: The Display Name For The Job
+
+      runs-on:
+        type: string
+        required: true
+        description: The GitHub Windows Worker To Run Workflow On
+
+      instances:
+        type: string
+        required: true
+        description: The Instances To Test
+
+      timeout:
+        type: number
+        required: false
+        default: 20
+        description: The timeout(in minutes) for the workflow
+
+env:
+  machine_user: kitchen
+  machine_pass: Password1
+  machine_port: 5985
+  KITCHEN_LOCAL_YAML: 'kitchen.windows.yml'
+
+jobs:
+  Test:
+    name: ${{ matrix.instance }}
+    runs-on: ${{ inputs.runs-on }}
+    timeout-minutes: ${{ inputs.timeout }}
+    strategy:
+      fail-fast: false
+      matrix:
+        instance: ${{ fromJSON(inputs.instances) }}
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 2.6.10
+          bundler-cache: true
+
+      - name: Install Chef
+        uses: actionshub/chef-install@1.1.0
+        with:
+          project: chef
+          version: 16.10.8
+
+      - name: Add Chef bindir to PATH
+        uses: myci-actions/export-env-var-powershell@1
+        with:
+          name: PATH
+          value: "C:\\opscode\\chef\\bin;C:\\opscode\\chef\\embedded\\bin;$env:PATH"
+
+      - name: Setup test user
+        run: |
+          $password = ConvertTo-SecureString $env:machine_pass -AsPlainText -Force
+          New-LocalUser $env:machine_user -Password $password
+          Add-LocalGroupMember -Group "Administrators" -Member $env:machine_user
+
+      - name: Set up WinRM
+        run: |
+          Set-WSManQuickConfig -Force
+
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.9
+
+      - name: Install Python Dependencies
+        run: |
+          pip install -U pip
+          pip install -r tests/requirements.txt
+
+      - name: Create Test Instance
+        run: |
+          bundle exec kitchen create ${{ matrix.instance }}-${{ inputs.distro-slug }} || \
+            (sleep 10 && bundle exec kitchen create ${{ matrix.instance }}-${{ inputs.distro-slug }})
+
+      - name: Test Bootstrap
+        run: |
+          bundle exec kitchen verify ${{ matrix.instance }}-${{ inputs.distro-slug }}
+
+      - name: Destroy Test Instance
+        if: always()
+        run: |
+          bundle exec kitchen destroy ${{ matrix.instance }}-${{ inputs.distro-slug }}
+
+      - name: Set Exit Status
+        if: always()
+        run: |
+          mkdir exitstatus
+          echo "${{ job.status }}" > exitstatus/${{ github.job }}-${{ matrix.instance }}-${{ inputs.distro-slug }}
+
+      - name: Upload Exit Status
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: exitstatus
+          path: exitstatus

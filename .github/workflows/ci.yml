@@ -1,0 +1,566 @@
+name: CI
+on:
+  - push
+  - pull_request
+
+concurrency:
+  # If changes are pushed to a PR, stop all running workflows before starting new ones
+  group: ${{ github.head_ref || (github.repository == 'saltstack/salt-bootstrap' && github.run_id || github.ref_name) }}
+  cancel-in-progress: true
+
+jobs:
+
+  collect-changed-files:
+    name: Collect changed files
+    runs-on: ubuntu-latest
+    outputs:
+      run-tests: ${{ steps.set-output.outputs.run-tests }}
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Get specific changed files
+        id: changed-files
+        uses: tj-actions/changed-files@v25
+        with:
+          separator: ","
+          files: |
+            bootstrap-salt.*
+            Gemfile
+            kitchen*.yml
+            tests/**
+            .github/workflows/**
+
+      - name: Set Job Output
+        id: set-output
+        run: |
+          echo "::set-output name=run-tests::${{ steps.changed-files.outputs.any_modified }}"
+
+  generate-actions-workflow:
+    name: Generate The Actions Workflow
+    runs-on: ubuntu-latest
+    needs: collect-changed-files
+
+    if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.9
+
+      - name: Install Pre-Commit
+        run: |
+          python3 -m pip install -U pip
+          python3 -m pip install pre-commit
+          pre-commit install --install-hooks
+
+      - name: Generate Workflow Actions
+        run: |
+          pre-commit run -av generate-actions-workflow
+
+      - name: Set Exit Status
+        if: always()
+        run: |
+          mkdir exitstatus
+          echo "${{ job.status }}" > exitstatus/${{ github.job }}
+
+      - name: Upload Exit Status
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: exitstatus
+          path: exitstatus
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    needs: collect-changed-files
+    container: koalaman/shellcheck-alpine:v0.6.0
+    if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
+    steps:
+      - uses: actions/checkout@v3
+      - name: ShellCheck
+        run: |
+          shellcheck -s sh -f tty bootstrap-salt.sh
+
+      - name: Set Exit Status
+        if: always()
+        run: |
+          mkdir exitstatus
+          echo "${{ job.status }}" > exitstatus/${{ github.job }}
+
+      - name: Upload Exit Status
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: exitstatus
+          path: exitstatus
+
+
+  almalinux-8:
+    name: AlmaLinux 8
+    if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
+    uses: ./.github/workflows/test-linux.yml
+    needs:
+      - lint
+      - generate-actions-workflow
+    with:
+      distro-slug: almalinux-8
+      display-name: AlmaLinux 8
+      timeout: 20
+      instances: '["stable-3003", "git-3003", "stable-3004", "git-3004", "git-master", "latest"]'
+
+
+  amazon-2:
+    name: Amazon 2
+    if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
+    uses: ./.github/workflows/test-linux.yml
+    needs:
+      - lint
+      - generate-actions-workflow
+    with:
+      distro-slug: amazon-2
+      display-name: Amazon 2
+      timeout: 20
+      instances: '["stable-3003", "stable-3004", "git-master", "latest"]'
+
+
+  arch:
+    name: Arch
+    if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
+    uses: ./.github/workflows/test-linux.yml
+    needs:
+      - lint
+      - generate-actions-workflow
+    with:
+      distro-slug: arch
+      display-name: Arch
+      timeout: 20
+      instances: '["git-master", "latest"]'
+
+
+  centos-7:
+    name: CentOS 7
+    if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
+    uses: ./.github/workflows/test-linux.yml
+    needs:
+      - lint
+      - generate-actions-workflow
+    with:
+      distro-slug: centos-7
+      display-name: CentOS 7
+      timeout: 20
+      instances: '["stable-3003", "git-3003", "stable-3004", "git-3004", "git-master", "latest"]'
+
+
+  centos-stream8:
+    name: CentOS Stream 8
+    if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
+    uses: ./.github/workflows/test-linux.yml
+    needs:
+      - lint
+      - generate-actions-workflow
+    with:
+      distro-slug: centos-stream8
+      display-name: CentOS Stream 8
+      timeout: 20
+      instances: '["stable-3003", "git-3003", "stable-3004", "git-3004", "git-master", "latest"]'
+
+
+  debian-10:
+    name: Debian 10
+    if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
+    uses: ./.github/workflows/test-linux.yml
+    needs:
+      - lint
+      - generate-actions-workflow
+    with:
+      distro-slug: debian-10
+      display-name: Debian 10
+      timeout: 20
+      instances: '["stable-3003", "stable-3004", "git-master", "latest"]'
+
+
+  debian-11:
+    name: Debian 11
+    if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
+    uses: ./.github/workflows/test-linux.yml
+    needs:
+      - lint
+      - generate-actions-workflow
+    with:
+      distro-slug: debian-11
+      display-name: Debian 11
+      timeout: 20
+      instances: '["stable-3004", "git-master", "latest"]'
+
+
+  debian-9:
+    name: Debian 9
+    if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
+    uses: ./.github/workflows/test-linux.yml
+    needs:
+      - lint
+      - generate-actions-workflow
+    with:
+      distro-slug: debian-9
+      display-name: Debian 9
+      timeout: 20
+      instances: '["stable-3003", "git-3003", "stable-3004", "git-3004", "git-master", "latest"]'
+
+
+  fedora-35:
+    name: Fedora 35
+    if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
+    uses: ./.github/workflows/test-linux.yml
+    needs:
+      - lint
+      - generate-actions-workflow
+    with:
+      distro-slug: fedora-35
+      display-name: Fedora 35
+      timeout: 20
+      instances: '["git-master", "latest"]'
+
+
+  fedora-36:
+    name: Fedora 36
+    if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
+    uses: ./.github/workflows/test-linux.yml
+    needs:
+      - lint
+      - generate-actions-workflow
+    with:
+      distro-slug: fedora-36
+      display-name: Fedora 36
+      timeout: 20
+      instances: '["git-master", "latest"]'
+
+
+  gentoo:
+    name: Gentoo
+    if: github.event_name == 'push'
+    uses: ./.github/workflows/test-linux.yml
+    needs:
+      - lint
+      - generate-actions-workflow
+    with:
+      distro-slug: gentoo
+      display-name: Gentoo
+      timeout: 90
+      instances: '["git-master", "latest"]'
+
+
+  gentoo-systemd:
+    name: Gentoo (systemd)
+    if: github.event_name == 'push'
+    uses: ./.github/workflows/test-linux.yml
+    needs:
+      - lint
+      - generate-actions-workflow
+    with:
+      distro-slug: gentoo-systemd
+      display-name: Gentoo (systemd)
+      timeout: 90
+      instances: '["git-master", "latest"]'
+
+
+  opensuse-15:
+    name: Opensuse 15
+    if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
+    uses: ./.github/workflows/test-linux.yml
+    needs:
+      - lint
+      - generate-actions-workflow
+    with:
+      distro-slug: opensuse-15
+      display-name: Opensuse 15
+      timeout: 20
+      instances: '["git-master", "latest"]'
+
+
+  opensuse-tumbleweed:
+    name: Opensuse Tumbleweed
+    if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
+    uses: ./.github/workflows/test-linux.yml
+    needs:
+      - lint
+      - generate-actions-workflow
+    with:
+      distro-slug: opensuse-tumbleweed
+      display-name: Opensuse Tumbleweed
+      timeout: 20
+      instances: '["git-master", "latest"]'
+
+
+  oraclelinux-7:
+    name: Oracle Linux 7
+    if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
+    uses: ./.github/workflows/test-linux.yml
+    needs:
+      - lint
+      - generate-actions-workflow
+    with:
+      distro-slug: oraclelinux-7
+      display-name: Oracle Linux 7
+      timeout: 20
+      instances: '["stable-3003", "git-3003", "stable-3004", "git-3004", "git-master", "latest"]'
+
+
+  oraclelinux-8:
+    name: Oracle Linux 8
+    if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
+    uses: ./.github/workflows/test-linux.yml
+    needs:
+      - lint
+      - generate-actions-workflow
+    with:
+      distro-slug: oraclelinux-8
+      display-name: Oracle Linux 8
+      timeout: 20
+      instances: '["stable-3003", "git-3003", "stable-3004", "git-3004", "git-master", "latest"]'
+
+
+  rockylinux-8:
+    name: Rocky Linux 8
+    if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
+    uses: ./.github/workflows/test-linux.yml
+    needs:
+      - lint
+      - generate-actions-workflow
+    with:
+      distro-slug: rockylinux-8
+      display-name: Rocky Linux 8
+      timeout: 20
+      instances: '["stable-3004", "git-3004", "git-master", "latest"]'
+
+
+  ubuntu-1804:
+    name: Ubuntu 18.04
+    if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
+    uses: ./.github/workflows/test-linux.yml
+    needs:
+      - lint
+      - generate-actions-workflow
+    with:
+      distro-slug: ubuntu-1804
+      display-name: Ubuntu 18.04
+      timeout: 20
+      instances: '["stable-3003", "git-3003", "stable-3004", "git-3004", "git-master", "latest"]'
+
+
+  ubuntu-2004:
+    name: Ubuntu 20.04
+    if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
+    uses: ./.github/workflows/test-linux.yml
+    needs:
+      - lint
+      - generate-actions-workflow
+    with:
+      distro-slug: ubuntu-2004
+      display-name: Ubuntu 20.04
+      timeout: 20
+      instances: '["stable-3003", "stable-3004", "git-master", "latest"]'
+
+
+  ubuntu-2204:
+    name: Ubuntu 22.04
+    if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
+    uses: ./.github/workflows/test-linux.yml
+    needs:
+      - lint
+      - generate-actions-workflow
+    with:
+      distro-slug: ubuntu-2204
+      display-name: Ubuntu 22.04
+      timeout: 20
+      instances: '["stable-3004", "git-master", "latest"]'
+
+
+
+  windows-2019:
+    name: Windows 2019
+    if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
+    uses: ./.github/workflows/test-windows.yml
+    needs:
+      - lint
+      - generate-actions-workflow
+    with:
+      distro-slug: windows-2019
+      display-name: Windows 2019
+      timeout: 20
+      runs-on: windows-2019
+      instances: '["stable-3003", "stable-3004", "latest"]'
+
+
+  windows-2022:
+    name: Windows 2022
+    if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
+    uses: ./.github/workflows/test-windows.yml
+    needs:
+      - lint
+      - generate-actions-workflow
+    with:
+      distro-slug: windows-2022
+      display-name: Windows 2022
+      timeout: 20
+      runs-on: windows-2022
+      instances: '["stable-3003", "stable-3004", "latest"]'
+
+
+
+  macos-1015:
+    name: macOS 10.15
+    if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
+    uses: ./.github/workflows/test-macos.yml
+    needs:
+      - lint
+      - generate-actions-workflow
+    with:
+      distro-slug: macos-1015
+      display-name: macOS 10.15
+      timeout: 20
+      runs-on: macos-10.15
+      instances: '["stable-3003", "stable-3004", "latest"]'
+
+
+  macos-11:
+    name: macOS 11
+    if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
+    uses: ./.github/workflows/test-macos.yml
+    needs:
+      - lint
+      - generate-actions-workflow
+    with:
+      distro-slug: macos-11
+      display-name: macOS 11
+      timeout: 20
+      runs-on: macos-11
+      instances: '["stable-3003", "stable-3004", "latest"]'
+
+
+  macos-12:
+    name: macOS 12
+    if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
+    uses: ./.github/workflows/test-macos.yml
+    needs:
+      - lint
+      - generate-actions-workflow
+    with:
+      distro-slug: macos-12
+      display-name: macOS 12
+      timeout: 20
+      runs-on: macos-12
+      instances: '["stable-3003", "stable-3004", "latest"]'
+
+
+
+  freebsd-131:
+    name: FreeBSD 13.1
+    if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
+    uses: ./.github/workflows/test-bsd.yml
+    needs:
+      - lint
+      - generate-actions-workflow
+    with:
+      distro-slug: freebsd-131
+      display-name: FreeBSD 13.1
+      timeout: 20
+      runs-on: macos-10.15
+      instances: '["git-master", "latest"]'
+
+
+  freebsd-123:
+    name: FreeBSD 12.3
+    if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
+    uses: ./.github/workflows/test-bsd.yml
+    needs:
+      - lint
+      - generate-actions-workflow
+    with:
+      distro-slug: freebsd-123
+      display-name: FreeBSD 12.3
+      timeout: 20
+      runs-on: macos-10.15
+      instances: '["git-master", "latest"]'
+
+
+  openbsd-6:
+    name: OpenBSD 6
+    if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
+    uses: ./.github/workflows/test-bsd.yml
+    needs:
+      - lint
+      - generate-actions-workflow
+    with:
+      distro-slug: openbsd-6
+      display-name: OpenBSD 6
+      timeout: 20
+      runs-on: macos-10.15
+      instances: '["latest"]'
+
+
+  set-pipeline-exit-status:
+    # This step is just so we can make github require this step, to pass checks
+    # on a pull request instead of requiring all
+    name: Set the ${{ github.workflow }} Pipeline Exit Status
+    runs-on: ubuntu-latest
+    needs:
+      - lint
+      - generate-actions-workflow
+      - almalinux-8
+      - amazon-2
+      - arch
+      - centos-7
+      - centos-stream8
+      - debian-10
+      - debian-11
+      - debian-9
+      - fedora-35
+      - fedora-36
+      - gentoo
+      - gentoo-systemd
+      - opensuse-15
+      - opensuse-tumbleweed
+      - oraclelinux-7
+      - oraclelinux-8
+      - rockylinux-8
+      - ubuntu-1804
+      - ubuntu-2004
+      - ubuntu-2204
+      - windows-2019
+      - windows-2022
+      - macos-1015
+      - macos-11
+      - macos-12
+      - freebsd-131
+      - freebsd-123
+      - openbsd-6
+    if: always()
+    steps:
+
+      - name: Download Exit Status Files
+        if: always()
+        uses: actions/download-artifact@v3
+        with:
+          name: exitstatus
+          path: exitstatus
+
+      - name: Delete Exit Status Artifacts
+        if: always()
+        uses: geekyeggo/delete-artifact@v1
+        with:
+          name: exitstatus
+          failOnError: false
+
+      - name: Set Pipeline Exit Status
+        run: |
+          grep -RE 'failure|cancelled' exitstatus/ && exit 1 || exit 0
+
+      - name: Done
+        if: always()
+        run:
+          echo "All worflows finished"

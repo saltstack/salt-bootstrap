@@ -1,5 +1,11 @@
+This authors list is kept for historical purposes
+=================================================
+
+Feel free to add yourself to this list, but for a full list of contributors,
+`check here <https://github.com/saltstack/salt-bootstrap/graphs/contributors>`_.
+
 Authors
-=======
+-------
 
 Here's a list of everyone who contributed to salt-bootstrap in alphabetical
 order.

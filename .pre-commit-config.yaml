@@ -27,7 +27,7 @@ repos:
         name: Generate Github Actions Workflow
         entry: .github/workflows/templates/generate.py
         pass_filenames: false
-        files: '.github/workflows/templates/.*'
+        files: '^.github/workflows/.*$'
         language: script
 
       - id: shellcheck

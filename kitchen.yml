@@ -113,11 +113,11 @@ platforms:
       run_command: /lib/systemd/systemd
 
 suites:
-  - name: py3-git-3003
+  - name: git-3003
     provisioner:
       salt_version: 3003
       salt_bootstrap_options: -x python3 -MPfq git %s
-  - name: py3-git-3004
+  - name: git-3004
     provisioner:
       salt_version: 3004
       salt_bootstrap_options: -x python3 -MPfq git %s
@@ -131,7 +131,7 @@ suites:
       - freebsd-131
       - freebsd-123
       - openbsd-6
-  - name: py3-stable-3003-0
+  - name: stable-3003-0
     provisioner:
       salt_version: 3003
       salt_bootstrap_options: -x python3 -MP stable 3003.0
@@ -151,7 +151,7 @@ suites:
       - freebsd-131
       - freebsd-123
       - openbsd-6
-  - name: py3-stable-3003
+  - name: stable-3003
     provisioner:
       salt_version: 3003
       salt_bootstrap_options: -x python3 -MP stable %s
@@ -162,7 +162,7 @@ suites:
       - freebsd-131
       - freebsd-123
       - openbsd-6
-  - name: py3-stable-3004-0
+  - name: stable-3004-0
     provisioner:
       salt_version: 3004
       salt_bootstrap_options: -x python3 -MP stable 3004.0
@@ -175,7 +175,7 @@ suites:
       - freebsd-131
       - freebsd-123
       - openbsd-6
-  - name: py3-stable-3004
+  - name: stable-3004
     provisioner:
       salt_version: 3004
       salt_bootstrap_options: -x python3 -MP stable %s
@@ -186,7 +186,7 @@ suites:
       - freebsd-131
       - freebsd-123
       - openbsd-6
-  - name: py3-git-master
+  - name: git-master
     provisioner:
       salt_version: master
       salt_bootstrap_options: -x python3 -MPfq -D git %s

@@ -87,8 +87,7 @@ jobs:
 
       - name: Create Test Instance
         run: |
-          bundle exec kitchen create ${{ matrix.instance }}-${{ inputs.distro-slug }} || \
-            (sleep 10 && bundle exec kitchen create ${{ matrix.instance }}-${{ inputs.distro-slug }})
+          bundle exec kitchen create ${{ matrix.instance }}-${{ inputs.distro-slug }}
 
       - name: Test Bootstrap
         run: |

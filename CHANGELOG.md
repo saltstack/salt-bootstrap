@@ -1,3 +1,24 @@
+# v2022.08.12
+
+## What's Changed
+
+- Update README.rst with 2022.05.19 release sha256sum by @github-actions in https://github.com/saltstack/salt-bootstrap/pull/1832
+- ci(eol): remove `fedora-34` and `3002` by @myii in https://github.com/saltstack/salt-bootstrap/pull/1835
+- ci(freebsd): replace `13.0` with newly released `13.1` box by @myii in https://github.com/saltstack/salt-bootstrap/pull/1836
+- feat: add support and update CI for openSUSE Leap 15.4 by @myii in https://github.com/saltstack/salt-bootstrap/pull/1837
+- Rename to py39-salt, Python 3.9 is default version on FreeBSD by @krionbsd in https://github.com/saltstack/salt-bootstrap/pull/1842
+- Adding bits to install Salt packages built using Tiamat. by @garethgreenaway in https://github.com/saltstack/salt-bootstrap/pull/1819
+- replace all references of tiamat to onedir by @garethgreenaway in https://github.com/saltstack/salt-bootstrap/pull/1845
+- use SHA-256 key for Red Hat / CentOS relesaes 9 and over. by @garethgreenaway in https://github.com/saltstack/salt-bootstrap/pull/1846
+- Add version for Salt version 3005. by @garethgreenaway in https://github.com/saltstack/salt-bootstrap/pull/1848
+- Automate the release process by @s0undt3ch in https://github.com/saltstack/salt-bootstrap/pull/1849
+- Tighten Release Workflow Permissions & Rework the CI Workflow by @s0undt3ch in https://github.com/saltstack/salt-bootstrap/pull/1850
+- Fix Release Workflow by @s0undt3ch in https://github.com/saltstack/salt-bootstrap/pull/1852
+- Fix parameter name for the changed files action by @s0undt3ch in https://github.com/saltstack/salt-bootstrap/pull/1853
+- Specify the repository by @s0undt3ch in https://github.com/saltstack/salt-bootstrap/pull/1854
+
+**Full Changelog**: https://github.com/saltstack/salt-bootstrap/compare/v2022.05.19...v2022.08.12
+
 # v2022.05.19:
 
 - Fix situations where the registry key for root_dir does not exist

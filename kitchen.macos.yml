@@ -19,6 +19,7 @@ platforms:
   - name: macos-1015
 
 suites:
+<<<<<<< HEAD
   - name: py3-stable-3002
     provisioner:
       salt_version: 3002.8
@@ -26,6 +27,12 @@ suites:
     provisioner:
       salt_version: 3003.4
   - name: py3-stable-3004
+=======
+  - name: stable-3003
+    provisioner:
+      salt_version: 3003.4
+  - name: stable-3004
+>>>>>>> origin/develop
     provisioner:
       salt_version: 3004.1
   - name: latest

@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import os
+import json
+import pathlib
 import datetime
 
 os.chdir(os.path.abspath(os.path.dirname(__file__)))
@@ -14,7 +16,6 @@ LINUX_DISTROS = [
     "debian-10",
     "debian-11",
     "debian-9",
-    "fedora-34",
     "fedora-35",
     "fedora-36",
     "gentoo",
@@ -26,10 +27,23 @@ LINUX_DISTROS = [
     "rockylinux-8",
     "ubuntu-1804",
     "ubuntu-2004",
-    "ubuntu-2110",
     "ubuntu-2204",
 ]
-OSX = WINDOWS = []
+WINDOWS = [
+    "windows-2019",
+    "windows-2022",
+]
+
+OSX = [
+    "macos-1015",
+    "macos-11",
+    "macos-12",
+]
+BSD = [
+    "freebsd-131",
+    "freebsd-123",
+    "openbsd-6",
+]
 
 STABLE_DISTROS = [
     "almalinux-8",
@@ -40,7 +54,6 @@ STABLE_DISTROS = [
     "debian-10",
     "debian-11",
     "debian-9",
-    "fedora-34",
     "fedora-35",
     "fedora-36",
     "gentoo",
@@ -52,50 +65,12 @@ STABLE_DISTROS = [
     "rockylinux-8",
     "ubuntu-1804",
     "ubuntu-2004",
-    "ubuntu-2110",
-    "ubuntu-2204",
-]
-
-BLACKLIST_3002 = [
-    "almalinux-8",
-    "arch",
-    "centos-stream8",
-    "debian-11",
-    "fedora-34",
-    "fedora-35",
-    "fedora-36",
-    "gentoo",
-    "gentoo-systemd",
-    "opensuse-15",
-    "opensuse-tumbleweed",
-    "rockylinux-8",
-    "ubuntu-2204",
-]
-
-BLACKLIST_GIT_3002 = [
-    "almalinux-8",
-    "amazon-2",
-    "arch",
-    "centos-stream8",
-    "debian-10",
-    "debian-11",
-    "fedora-34",
-    "fedora-35",
-    "fedora-36",
-    "gentoo",
-    "gentoo-systemd",
-    "opensuse-15",
-    "opensuse-tumbleweed",
-    "rockylinux-8",
-    "ubuntu-2004",
-    "ubuntu-2110",
     "ubuntu-2204",
 ]
 
 BLACKLIST_3003 = [
     "arch",
     "debian-11",
-    "fedora-34",
     "fedora-35",
     "fedora-36",
     "gentoo",
@@ -111,7 +86,6 @@ BLACKLIST_GIT_3003 = [
     "arch",
     "debian-10",
     "debian-11",
-    "fedora-34",
     "fedora-35",
     "fedora-36",
     "gentoo",
@@ -126,7 +100,6 @@ BLACKLIST_GIT_3003 = [
 
 BLACKLIST_3004 = [
     "arch",
-    "fedora-34",
     "fedora-35",
     "fedora-36",
     "gentoo",
@@ -140,7 +113,6 @@ BLACKLIST_GIT_3004 = [
     "arch",
     "debian-10",
     "debian-11",
-    "fedora-34",
     "fedora-35",
     "fedora-36",
     "gentoo",
@@ -152,23 +124,21 @@ BLACKLIST_GIT_3004 = [
     "ubuntu-2204",
 ]
 
-SALT_BRANCHES = [
-    "3002",
+SALT_VERSIONS = [
     "3003",
     "3004",
     "master",
     "latest",
 ]
 
-BRANCH_DISPLAY_NAMES = {
-    "3002": "v3002",
+VERSION_DISPLAY_NAMES = {
     "3003": "v3003",
     "3004": "v3004",
     "master": "Master",
     "latest": "Latest",
 }
 
-STABLE_BRANCH_BLACKLIST = []
+STABLE_VERSION_BLACKLIST = []
 
 LATEST_PKG_BLACKLIST = []
 
@@ -181,7 +151,6 @@ DISTRO_DISPLAY_NAMES = {
     "debian-10": "Debian 10",
     "debian-11": "Debian 11",
     "debian-9": "Debian 9",
-    "fedora-34": "Fedora 34",
     "fedora-35": "Fedora 35",
     "fedora-36": "Fedora 36",
     "gentoo": "Gentoo",
@@ -193,8 +162,15 @@ DISTRO_DISPLAY_NAMES = {
     "rockylinux-8": "Rocky Linux 8",
     "ubuntu-1804": "Ubuntu 18.04",
     "ubuntu-2004": "Ubuntu 20.04",
-    "ubuntu-2110": "Ubuntu 21.10",
     "ubuntu-2204": "Ubuntu 22.04",
+    "macos-1015": "macOS 10.15",
+    "macos-11": "macOS 11",
+    "macos-12": "macOS 12",
+    "freebsd-131": "FreeBSD 13.1",
+    "freebsd-123": "FreeBSD 12.3",
+    "openbsd-6": "OpenBSD 6",
+    "windows-2019": "Windows 2019",
+    "windows-2022": "Windows 2022",
 }
 
 TIMEOUT_DEFAULT = 20
@@ -202,169 +178,269 @@ TIMEOUT_OVERRIDES = {
     "gentoo": 90,
     "gentoo-systemd": 90,
 }
-BRANCH_ONLY_OVERRIDES = [
+VERSION_ONLY_OVERRIDES = [
     "gentoo",
     "gentoo-systemd",
 ]
 
+TEMPLATE = """
+  {distro}:
+    name: {display_name}{ifcheck}
+    uses: {uses}
+    needs:
+      - lint
+      - generate-actions-workflow
+    with:
+      distro-slug: {distro}
+      display-name: {display_name}
+      timeout: {timeout_minutes}{runs_on}
+      instances: '{instances}'
+"""
+
 
 def generate_test_jobs():
     test_jobs = ""
-    branch_only_test_jobs = ""
+    needs = ["lint", "generate-actions-workflow"]
 
-    for distro in LINUX_DISTROS + OSX + WINDOWS:
+    for distro in BSD:
+        test_jobs += "\n"
+        runs_on = "macos-10.15"
+        runs_on = f"\n      runs-on: {runs_on}"
+        ifcheck = "\n    if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'"
+        uses = "./.github/workflows/test-bsd.yml"
+        instances = []
         timeout_minutes = (
             TIMEOUT_OVERRIDES[distro]
             if distro in TIMEOUT_OVERRIDES
             else TIMEOUT_DEFAULT
         )
-        needs = "    needs: lint"
-        if distro in BRANCH_ONLY_OVERRIDES:
-            needs = ""
-        current_test_jobs = ""
+        for salt_version in SALT_VERSIONS:
 
-        for branch in SALT_BRANCHES:
-
-            if branch == "latest":
+            if salt_version == "latest":
                 if distro in LATEST_PKG_BLACKLIST:
                     continue
-                if distro in LINUX_DISTROS:
-                    template = "linux.yml"
-                elif distro in OSX:
-                    template = "osx.yml"
-                elif distro in WINDOWS:
-                    template = "windows.yml"
-                else:
-                    print("Don't know how to handle {}".format(distro))
 
-                with open(template) as rfh:
-                    current_test_jobs += "\n{}\n".format(
-                        rfh.read()
-                        .replace(
-                            "{python_version}-{bootstrap_type}-{branch}-{distro}",
-                            "{branch}-{distro}",
-                        )
-                        .format(
-                            distro=distro,
-                            branch=branch,
-                            display_name="{} Latest packaged release".format(
-                                DISTRO_DISPLAY_NAMES[distro],
-                            ),
-                            timeout_minutes=timeout_minutes,
-                            needs=needs,
-                        )
-                    )
+                instances.append(salt_version)
                 continue
 
-            for python_version in ("py3",):
+            if distro == "openbsd-6":
+                # Only test latest on OpenBSD 6
+                continue
 
-                for bootstrap_type in ("stable", "git"):
-                    if bootstrap_type == "stable":
-                        if branch == "master":
-                            # For the master branch there's no stable build
-                            continue
-                        if distro not in STABLE_DISTROS:
-                            continue
+            if salt_version != "master":
+                # Only test the master branch on BSD's
+                continue
 
-                        if branch in STABLE_BRANCH_BLACKLIST:
-                            continue
+            # BSD's don't have a stable release, only use git
+            for bootstrap_type in ("git",):
 
-                        if distro.startswith("fedora") and branch != "latest":
-                            # Fedora does not keep old builds around
-                            continue
-
+                BLACKLIST = {
+                    "3003": BLACKLIST_3003,
+                    "3004": BLACKLIST_3004,
+                }
+                if bootstrap_type == "git":
                     BLACKLIST = {
-                        "3002": BLACKLIST_3002,
-                        "3003": BLACKLIST_3003,
-                        "3004": BLACKLIST_3004,
+                        "3003": BLACKLIST_GIT_3003,
+                        "3004": BLACKLIST_GIT_3004,
                     }
-                    if bootstrap_type == "git":
-                        BLACKLIST = {
-                            "3002": BLACKLIST_GIT_3002,
-                            "3003": BLACKLIST_GIT_3003,
-                            "3004": BLACKLIST_GIT_3004,
-                        }
 
-                        # .0 versions are a virtual version for pinning to the first point release of a major release, such as 3002, there is no git version.
-                        if branch.endswith("-0"):
-                            continue
-
-                    if (
-                        branch in ("3002", "3003", "3004")
-                        and distro in BLACKLIST[branch]
-                    ):
+                    # .0 versions are a virtual version for pinning to the first
+                    # point release of a major release, such as 3003,
+                    # there is no git version.
+                    if salt_version.endswith("-0"):
                         continue
 
-                    if distro in LINUX_DISTROS:
-                        template = "linux.yml"
-                    elif distro in OSX:
-                        template = "osx.yml"
-                    elif distro in WINDOWS:
-                        template = "windows.yml"
-                    else:
-                        print("Don't know how to handle {}".format(distro))
+                if (
+                    salt_version in ("3003", "3004")
+                    and distro in BLACKLIST[salt_version]
+                ):
+                    continue
 
-                    with open(template) as rfh:
-                        current_test_jobs += "\n{}\n".format(
-                            rfh.read().format(
-                                distro=distro,
-                                branch=branch,
-                                python_version=python_version,
-                                bootstrap_type=bootstrap_type,
-                                display_name="{} {} {} {}".format(
-                                    DISTRO_DISPLAY_NAMES[distro],
-                                    BRANCH_DISPLAY_NAMES[branch],
-                                    python_version.capitalize(),
-                                    bootstrap_type.capitalize(),
-                                ),
-                                timeout_minutes=timeout_minutes,
-                                needs=needs,
-                            )
-                        )
-        if distro in BRANCH_ONLY_OVERRIDES:
-            branch_only_test_jobs += current_test_jobs
+                kitchen_target = f"{bootstrap_type}-{salt_version}"
+                instances.append(kitchen_target)
+
+        if instances:
+            needs.append(distro)
+            test_jobs += TEMPLATE.format(
+                distro=distro,
+                runs_on=runs_on,
+                uses=uses,
+                ifcheck=ifcheck,
+                instances=json.dumps(instances),
+                display_name=DISTRO_DISPLAY_NAMES[distro],
+                timeout_minutes=timeout_minutes,
+            )
+
+    test_jobs += "\n"
+    for distro in OSX:
+        test_jobs += "\n"
+        if distro == "macos-1015":
+            runs_on = "macos-10.15"
         else:
-            test_jobs += current_test_jobs
+            runs_on = distro
+        runs_on = f"\n      runs-on: {runs_on}"
+        ifcheck = "\n    if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'"
+        uses = "./.github/workflows/test-macos.yml"
+        instances = []
+        timeout_minutes = (
+            TIMEOUT_OVERRIDES[distro]
+            if distro in TIMEOUT_OVERRIDES
+            else TIMEOUT_DEFAULT
+        )
 
-    with open("lint.yml") as rfh:
-        lint_job = "\n{}\n".format(rfh.read())
+        for salt_version in SALT_VERSIONS:
 
-    with open("pre-commit.yml") as rfh:
-        pre_commit_job = "\n{}\n".format(rfh.read())
+            if salt_version == "latest":
 
-    with open("../main.yml", "w") as wfh:
-        with open("main.yml") as rfh:
-            wfh.write(
-                "{}\n".format(
-                    rfh.read()
-                    .format(
-                        jobs="{pre_commit}{lint}{test}".format(
-                            lint=lint_job,
-                            test=test_jobs,
-                            pre_commit=pre_commit_job,
-                        ),
-                        on="push, pull_request",
-                        name="Testing",
-                    )
-                    .strip()
-                )
+                instances.append(salt_version)
+                continue
+
+            for bootstrap_type in ("stable",):
+                if bootstrap_type == "stable":
+                    if salt_version == "master":
+                        # For the master branch there's no stable build
+                        continue
+
+                kitchen_target = f"{bootstrap_type}-{salt_version}"
+                instances.append(kitchen_target)
+
+        if instances:
+            needs.append(distro)
+            test_jobs += TEMPLATE.format(
+                distro=distro,
+                runs_on=runs_on,
+                uses=uses,
+                ifcheck=ifcheck,
+                instances=json.dumps(instances),
+                display_name=DISTRO_DISPLAY_NAMES[distro],
+                timeout_minutes=timeout_minutes,
             )
 
-    with open("../main-branch-only.yml", "w") as wfh:
-        with open("main.yml") as rfh:
-            wfh.write(
-                "{}\n".format(
-                    rfh.read()
-                    .format(
-                        jobs="{test}".format(
-                            test=branch_only_test_jobs,
-                        ),
-                        on="push",
-                        name="Branch Testing",
-                    )
-                    .strip()
-                )
+    test_jobs += "\n"
+    for distro in WINDOWS:
+        test_jobs += "\n"
+        runs_on = f"\n      runs-on: {distro}"
+        ifcheck = "\n    if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'"
+        uses = "./.github/workflows/test-windows.yml"
+        instances = []
+        timeout_minutes = (
+            TIMEOUT_OVERRIDES[distro]
+            if distro in TIMEOUT_OVERRIDES
+            else TIMEOUT_DEFAULT
+        )
+
+        for salt_version in SALT_VERSIONS:
+
+            if salt_version == "latest":
+
+                instances.append(salt_version)
+                continue
+
+            for bootstrap_type in ("stable",):
+                if bootstrap_type == "stable":
+                    if salt_version == "master":
+                        # For the master branch there's no stable build
+                        continue
+
+                kitchen_target = f"{bootstrap_type}-{salt_version}"
+                instances.append(kitchen_target)
+
+        if instances:
+            needs.append(distro)
+            test_jobs += TEMPLATE.format(
+                distro=distro,
+                runs_on=runs_on,
+                uses=uses,
+                ifcheck=ifcheck,
+                instances=json.dumps(instances),
+                display_name=DISTRO_DISPLAY_NAMES[distro],
+                timeout_minutes=timeout_minutes,
             )
+
+    test_jobs += "\n"
+    for distro in LINUX_DISTROS:
+        test_jobs += "\n"
+        runs_on = ""
+        ifcheck = "\n    if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'"
+        uses = "./.github/workflows/test-linux.yml"
+        instances = []
+        timeout_minutes = (
+            TIMEOUT_OVERRIDES[distro]
+            if distro in TIMEOUT_OVERRIDES
+            else TIMEOUT_DEFAULT
+        )
+        if distro in VERSION_ONLY_OVERRIDES:
+            ifcheck = "\n    if: github.event_name == 'push'"
+
+        for salt_version in SALT_VERSIONS:
+
+            if salt_version == "latest":
+                if distro in LATEST_PKG_BLACKLIST:
+                    continue
+
+                instances.append(salt_version)
+                continue
+
+            for bootstrap_type in ("stable", "git"):
+                if bootstrap_type == "stable":
+                    if salt_version == "master":
+                        # For the master branch there's no stable build
+                        continue
+                    if distro not in STABLE_DISTROS:
+                        continue
+
+                    if salt_version in STABLE_VERSION_BLACKLIST:
+                        continue
+
+                    if distro.startswith("fedora") and salt_version != "latest":
+                        # Fedora does not keep old builds around
+                        continue
+
+                BLACKLIST = {
+                    "3003": BLACKLIST_3003,
+                    "3004": BLACKLIST_3004,
+                }
+                if bootstrap_type == "git":
+                    BLACKLIST = {
+                        "3003": BLACKLIST_GIT_3003,
+                        "3004": BLACKLIST_GIT_3004,
+                    }
+
+                    # .0 versions are a virtual version for pinning to the first
+                    # point release of a major release, such as 3003,
+                    # there is no git version.
+                    if salt_version.endswith("-0"):
+                        continue
+
+                if (
+                    salt_version in ("3003", "3004")
+                    and distro in BLACKLIST[salt_version]
+                ):
+                    continue
+
+                kitchen_target = f"{bootstrap_type}-{salt_version}"
+                instances.append(kitchen_target)
+
+        if instances:
+            needs.append(distro)
+            test_jobs += TEMPLATE.format(
+                distro=distro,
+                runs_on=runs_on,
+                uses=uses,
+                ifcheck=ifcheck,
+                instances=json.dumps(instances),
+                display_name=DISTRO_DISPLAY_NAMES[distro],
+                timeout_minutes=timeout_minutes,
+            )
+
+    ci_src_workflow = pathlib.Path("ci.yml").resolve()
+    ci_tail_src_workflow = pathlib.Path("ci-tail.yml").resolve()
+    ci_dst_workflow = pathlib.Path("../ci.yml").resolve()
+    ci_workflow_contents = ci_src_workflow.read_text() + test_jobs + "\n"
+    ci_workflow_contents += ci_tail_src_workflow.read_text().format(
+        needs="\n".join([f"      - {need}" for need in needs]).lstrip()
+    )
+    ci_dst_workflow.write_text(ci_workflow_contents)
 
 
 if __name__ == "__main__":

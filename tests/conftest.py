@@ -9,7 +9,10 @@ log = logging.getLogger(__name__)
 
 @pytest.fixture(scope="session")
 def host():
-    if os.environ.get("RUNNER_OS", "") == "macOS":
+    if (
+        os.environ.get("RUNNER_OS", "") == "macOS"
+        and os.environ.get("KITCHEN_LOCAL_YAML", "") == "kitchen.macos.yml"
+    ):
         # Adjust the `PATH` so that the `salt-call` executable can be found
         os.environ["PATH"] = "/opt/salt/bin{}{}".format(os.pathsep, os.environ["PATH"])
         return testinfra.get_host("local://", sudo=True)
@@ -37,12 +40,7 @@ def host():
 
 @pytest.fixture(scope="session")
 def target_python_version():
-    target_python = os.environ["KITCHEN_SUITE"].split("-", 1)[0]
-    if target_python == "latest":
-        pytest.skip(
-            "Unable to get target python from {}".format(os.environ["KITCHEN_SUITE"])
-        )
-    return int(target_python.replace("py", ""))
+    return 3
 
 
 @pytest.fixture(scope="session")

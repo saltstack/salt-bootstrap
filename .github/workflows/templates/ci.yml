@@ -1,0 +1,102 @@
+name: CI
+on:
+  - push
+  - pull_request
+
+concurrency:
+  # If changes are pushed to a PR, stop all running workflows before starting new ones
+  group: ${{ github.head_ref || (github.repository == 'saltstack/salt-bootstrap' && github.run_id || github.ref_name) }}
+  cancel-in-progress: true
+
+jobs:
+
+  collect-changed-files:
+    name: Collect changed files
+    runs-on: ubuntu-latest
+    outputs:
+      run-tests: ${{ steps.set-output.outputs.run-tests }}
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Get specific changed files
+        id: changed-files
+        uses: tj-actions/changed-files@v25
+        with:
+          separator: ","
+          files: |
+            bootstrap-salt.*
+            Gemfile
+            kitchen*.yml
+            tests/**
+            .github/workflows/**
+          files_ignore: |
+            .github/workflows/release.yml
+
+      - name: Set Job Output
+        id: set-output
+        run: |
+          echo "::set-output name=run-tests::${{ steps.changed-files.outputs.any_modified }}"
+
+  generate-actions-workflow:
+    name: Generate The Actions Workflow
+    runs-on: ubuntu-latest
+    needs: collect-changed-files
+
+    if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.9
+
+      - name: Install Pre-Commit
+        run: |
+          python3 -m pip install -U pip
+          python3 -m pip install pre-commit
+          pre-commit install --install-hooks
+
+      - name: Generate Workflow Actions
+        run: |
+          pre-commit run -av generate-actions-workflow
+
+      - name: Set Exit Status
+        if: always()
+        run: |
+          mkdir exitstatus
+          echo "${{ job.status }}" > exitstatus/${{ github.job }}
+
+      - name: Upload Exit Status
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: exitstatus
+          path: exitstatus
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    needs: collect-changed-files
+    container: koalaman/shellcheck-alpine:v0.6.0
+    if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
+    steps:
+      - uses: actions/checkout@v3
+      - name: ShellCheck
+        run: |
+          shellcheck -s sh -f tty bootstrap-salt.sh
+
+      - name: Set Exit Status
+        if: always()
+        run: |
+          mkdir exitstatus
+          echo "${{ job.status }}" > exitstatus/${{ github.job }}
+
+      - name: Upload Exit Status
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: exitstatus
+          path: exitstatus

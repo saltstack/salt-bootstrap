@@ -31,6 +31,8 @@ jobs:
             kitchen*.yml
             tests/**
             .github/workflows/**
+          files-ignore: |
+            .github/workflows/release.yml
 
       - name: Set Job Output
         id: set-output

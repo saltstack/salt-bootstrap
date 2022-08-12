@@ -119,6 +119,7 @@ jobs:
             for f in $(git status | grep 'both modified' | awk '{ print $3 }')
             do
               git checkout --theirs $f
+              pre-commit run -av --files $f
               git add $f
             done
             git commit -a -m "Merge develop into stable(auto resolving conflicts to the develop version)"

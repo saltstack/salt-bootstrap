@@ -67,6 +67,7 @@ jobs:
       - name: Push Changes
         uses: ad-m/github-push-action@master
         with:
+          repository: ${{ github.repository }}
           branch: develop
           ssh: true
 
@@ -134,6 +135,7 @@ jobs:
       - name: Push Changes
         uses: ad-m/github-push-action@master
         with:
+          repository: ${{ github.repository }}
           branch: stable
           tags: true
           ssh: true
@@ -238,6 +240,7 @@ jobs:
       - name: Push Changes
         uses: ad-m/github-push-action@master
         with:
+          repository: ${{ github.repository }}
           branch: develop
           ssh: true
 

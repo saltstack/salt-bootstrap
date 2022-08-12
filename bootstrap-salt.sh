@@ -584,7 +584,6 @@ fi
 echoinfo "Running version: ${__ScriptVersion}"
 echoinfo "Executed by: ${CALLER}"
 echoinfo "Command line: '${__ScriptFullName} ${__ScriptArgs}'"
-echowarn "Running the unstable version of ${__ScriptName}"
 
 # Define installation type
 if [ "$#" -gt 0 ];then

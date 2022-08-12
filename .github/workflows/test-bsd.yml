@@ -57,7 +57,7 @@ jobs:
           path: |
             ${{ github.workspace }}/.kitchen
             ${{ github.workspace }}/.vagrant.d/
-          key: "${{ runner.os }}|vagrant|${{ inputs.distro-slug }}|${{ hashFiles('**/Gemfile', '**/ci.yml', '**/test-*.yml') }}"
+          key: "${{ runner.os }}|vagrant|${{ inputs.distro-slug }}|${{ hashFiles('Gemfile', '.github/workflows/test-bsd.yml', 'kitchen.bsd.yml') }}"
 
       - name: Set up Python 3.9
         uses: actions/setup-python@v4

@@ -29,6 +29,7 @@ on:
         description: The timeout(in minutes) for the workflow
 
 env:
+  VAGRANT_HOME: '${{ github.workspace }}/.vagrant.d'
   KITCHEN_LOCAL_YAML: 'kitchen.bsd.yml'
 
 jobs:
@@ -49,6 +50,14 @@ jobs:
         with:
           ruby-version: 2.6.10
           bundler-cache: true
+
+      - name: Setup Vagrant Cache
+        uses: actions/cache@v3
+        with:
+          path: |
+            ${{ github.workspace }}/.kitchen
+            ${{ github.workspace }}/.vagrant.d/
+          key: "${{ runner.os }}|vagrant|${{ inputs.distro-slug }}|${{ hashFiles('**/Gemfile', '**/ci.yml', '**/test-*.yml') }}"
 
       - name: Set up Python 3.9
         uses: actions/setup-python@v4

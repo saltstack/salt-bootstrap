@@ -100,6 +100,129 @@ jobs:
           path: exitstatus
 
 
+  freebsd-131:
+    name: FreeBSD 13.1
+    if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
+    uses: ./.github/workflows/test-bsd.yml
+    needs:
+      - lint
+      - generate-actions-workflow
+    with:
+      distro-slug: freebsd-131
+      display-name: FreeBSD 13.1
+      timeout: 20
+      runs-on: macos-10.15
+      instances: '["git-master", "latest"]'
+
+
+  freebsd-123:
+    name: FreeBSD 12.3
+    if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
+    uses: ./.github/workflows/test-bsd.yml
+    needs:
+      - lint
+      - generate-actions-workflow
+    with:
+      distro-slug: freebsd-123
+      display-name: FreeBSD 12.3
+      timeout: 20
+      runs-on: macos-10.15
+      instances: '["git-master", "latest"]'
+
+
+  openbsd-6:
+    name: OpenBSD 6
+    if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
+    uses: ./.github/workflows/test-bsd.yml
+    needs:
+      - lint
+      - generate-actions-workflow
+    with:
+      distro-slug: openbsd-6
+      display-name: OpenBSD 6
+      timeout: 20
+      runs-on: macos-10.15
+      instances: '["latest"]'
+
+
+
+  macos-1015:
+    name: macOS 10.15
+    if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
+    uses: ./.github/workflows/test-macos.yml
+    needs:
+      - lint
+      - generate-actions-workflow
+    with:
+      distro-slug: macos-1015
+      display-name: macOS 10.15
+      timeout: 20
+      runs-on: macos-10.15
+      instances: '["stable-3003", "stable-3004", "latest"]'
+
+
+  macos-11:
+    name: macOS 11
+    if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
+    uses: ./.github/workflows/test-macos.yml
+    needs:
+      - lint
+      - generate-actions-workflow
+    with:
+      distro-slug: macos-11
+      display-name: macOS 11
+      timeout: 20
+      runs-on: macos-11
+      instances: '["stable-3003", "stable-3004", "latest"]'
+
+
+  macos-12:
+    name: macOS 12
+    if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
+    uses: ./.github/workflows/test-macos.yml
+    needs:
+      - lint
+      - generate-actions-workflow
+    with:
+      distro-slug: macos-12
+      display-name: macOS 12
+      timeout: 20
+      runs-on: macos-12
+      instances: '["stable-3003", "stable-3004", "latest"]'
+
+
+
+  windows-2019:
+    name: Windows 2019
+    if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
+    uses: ./.github/workflows/test-windows.yml
+    needs:
+      - lint
+      - generate-actions-workflow
+    with:
+      distro-slug: windows-2019
+      display-name: Windows 2019
+      timeout: 20
+      runs-on: windows-2019
+      instances: '["stable-3003", "stable-3004", "latest"]'
+
+
+  windows-2022:
+    name: Windows 2022
+    if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
+    uses: ./.github/workflows/test-windows.yml
+    needs:
+      - lint
+      - generate-actions-workflow
+    with:
+      distro-slug: windows-2022
+      display-name: Windows 2022
+      timeout: 20
+      runs-on: windows-2022
+      instances: '["stable-3003", "stable-3004", "latest"]'
+
+
+
   almalinux-8:
     name: AlmaLinux 8
     if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
@@ -380,129 +503,6 @@ jobs:
       instances: '["stable-3004", "git-master", "latest"]'
 
 
-
-  windows-2019:
-    name: Windows 2019
-    if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
-    uses: ./.github/workflows/test-windows.yml
-    needs:
-      - lint
-      - generate-actions-workflow
-    with:
-      distro-slug: windows-2019
-      display-name: Windows 2019
-      timeout: 20
-      runs-on: windows-2019
-      instances: '["stable-3003", "stable-3004", "latest"]'
-
-
-  windows-2022:
-    name: Windows 2022
-    if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
-    uses: ./.github/workflows/test-windows.yml
-    needs:
-      - lint
-      - generate-actions-workflow
-    with:
-      distro-slug: windows-2022
-      display-name: Windows 2022
-      timeout: 20
-      runs-on: windows-2022
-      instances: '["stable-3003", "stable-3004", "latest"]'
-
-
-
-  macos-1015:
-    name: macOS 10.15
-    if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
-    uses: ./.github/workflows/test-macos.yml
-    needs:
-      - lint
-      - generate-actions-workflow
-    with:
-      distro-slug: macos-1015
-      display-name: macOS 10.15
-      timeout: 20
-      runs-on: macos-10.15
-      instances: '["stable-3003", "stable-3004", "latest"]'
-
-
-  macos-11:
-    name: macOS 11
-    if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
-    uses: ./.github/workflows/test-macos.yml
-    needs:
-      - lint
-      - generate-actions-workflow
-    with:
-      distro-slug: macos-11
-      display-name: macOS 11
-      timeout: 20
-      runs-on: macos-11
-      instances: '["stable-3003", "stable-3004", "latest"]'
-
-
-  macos-12:
-    name: macOS 12
-    if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
-    uses: ./.github/workflows/test-macos.yml
-    needs:
-      - lint
-      - generate-actions-workflow
-    with:
-      distro-slug: macos-12
-      display-name: macOS 12
-      timeout: 20
-      runs-on: macos-12
-      instances: '["stable-3003", "stable-3004", "latest"]'
-
-
-
-  freebsd-131:
-    name: FreeBSD 13.1
-    if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
-    uses: ./.github/workflows/test-bsd.yml
-    needs:
-      - lint
-      - generate-actions-workflow
-    with:
-      distro-slug: freebsd-131
-      display-name: FreeBSD 13.1
-      timeout: 20
-      runs-on: macos-10.15
-      instances: '["git-master", "latest"]'
-
-
-  freebsd-123:
-    name: FreeBSD 12.3
-    if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
-    uses: ./.github/workflows/test-bsd.yml
-    needs:
-      - lint
-      - generate-actions-workflow
-    with:
-      distro-slug: freebsd-123
-      display-name: FreeBSD 12.3
-      timeout: 20
-      runs-on: macos-10.15
-      instances: '["git-master", "latest"]'
-
-
-  openbsd-6:
-    name: OpenBSD 6
-    if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
-    uses: ./.github/workflows/test-bsd.yml
-    needs:
-      - lint
-      - generate-actions-workflow
-    with:
-      distro-slug: openbsd-6
-      display-name: OpenBSD 6
-      timeout: 20
-      runs-on: macos-10.15
-      instances: '["latest"]'
-
-
   set-pipeline-exit-status:
     # This step is just so we can make github require this step, to pass checks
     # on a pull request instead of requiring all
@@ -511,6 +511,14 @@ jobs:
     needs:
       - lint
       - generate-actions-workflow
+      - freebsd-131
+      - freebsd-123
+      - openbsd-6
+      - macos-1015
+      - macos-11
+      - macos-12
+      - windows-2019
+      - windows-2022
       - almalinux-8
       - amazon-2
       - arch
@@ -531,14 +539,6 @@ jobs:
       - ubuntu-1804
       - ubuntu-2004
       - ubuntu-2204
-      - windows-2019
-      - windows-2022
-      - macos-1015
-      - macos-11
-      - macos-12
-      - freebsd-131
-      - freebsd-123
-      - openbsd-6
     if: always()
     steps:
 

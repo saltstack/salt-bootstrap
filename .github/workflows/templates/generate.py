@@ -202,20 +202,18 @@ def generate_test_jobs():
     test_jobs = ""
     needs = ["lint", "generate-actions-workflow"]
 
-    for distro in LINUX_DISTROS:
+    for distro in BSD:
         test_jobs += "\n"
-        runs_on = ""
+        runs_on = "macos-10.15"
+        runs_on = f"\n      runs-on: {runs_on}"
         ifcheck = "\n    if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'"
-        uses = "./.github/workflows/test-linux.yml"
+        uses = "./.github/workflows/test-bsd.yml"
         instances = []
         timeout_minutes = (
             TIMEOUT_OVERRIDES[distro]
             if distro in TIMEOUT_OVERRIDES
             else TIMEOUT_DEFAULT
         )
-        if distro in VERSION_ONLY_OVERRIDES:
-            ifcheck = "\n    if: github.event_name == 'push'"
-
         for salt_version in SALT_VERSIONS:
 
             if salt_version == "latest":
@@ -225,20 +223,16 @@ def generate_test_jobs():
                 instances.append(salt_version)
                 continue
 
-            for bootstrap_type in ("stable", "git"):
-                if bootstrap_type == "stable":
-                    if salt_version == "master":
-                        # For the master branch there's no stable build
-                        continue
-                    if distro not in STABLE_DISTROS:
-                        continue
+            if distro == "openbsd-6":
+                # Only test latest on OpenBSD 6
+                continue
 
-                    if salt_version in STABLE_VERSION_BLACKLIST:
-                        continue
+            if salt_version != "master":
+                # Only test the master branch on BSD's
+                continue
 
-                    if distro.startswith("fedora") and salt_version != "latest":
-                        # Fedora does not keep old builds around
-                        continue
+            # BSD's don't have a stable release, only use git
+            for bootstrap_type in ("git",):
 
                 BLACKLIST = {
                     "3003": BLACKLIST_3003,
@@ -261,47 +255,6 @@ def generate_test_jobs():
                     and distro in BLACKLIST[salt_version]
                 ):
                     continue
-
-                kitchen_target = f"{bootstrap_type}-{salt_version}"
-                instances.append(kitchen_target)
-
-        if instances:
-            needs.append(distro)
-            test_jobs += TEMPLATE.format(
-                distro=distro,
-                runs_on=runs_on,
-                uses=uses,
-                ifcheck=ifcheck,
-                instances=json.dumps(instances),
-                display_name=DISTRO_DISPLAY_NAMES[distro],
-                timeout_minutes=timeout_minutes,
-            )
-
-    test_jobs += "\n"
-    for distro in WINDOWS:
-        test_jobs += "\n"
-        runs_on = f"\n      runs-on: {distro}"
-        ifcheck = "\n    if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'"
-        uses = "./.github/workflows/test-windows.yml"
-        instances = []
-        timeout_minutes = (
-            TIMEOUT_OVERRIDES[distro]
-            if distro in TIMEOUT_OVERRIDES
-            else TIMEOUT_DEFAULT
-        )
-
-        for salt_version in SALT_VERSIONS:
-
-            if salt_version == "latest":
-
-                instances.append(salt_version)
-                continue
-
-            for bootstrap_type in ("stable",):
-                if bootstrap_type == "stable":
-                    if salt_version == "master":
-                        # For the master branch there's no stable build
-                        continue
 
                 kitchen_target = f"{bootstrap_type}-{salt_version}"
                 instances.append(kitchen_target)
@@ -364,18 +317,61 @@ def generate_test_jobs():
             )
 
     test_jobs += "\n"
-    for distro in BSD:
+    for distro in WINDOWS:
         test_jobs += "\n"
-        runs_on = "macos-10.15"
-        runs_on = f"\n      runs-on: {runs_on}"
+        runs_on = f"\n      runs-on: {distro}"
         ifcheck = "\n    if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'"
-        uses = "./.github/workflows/test-bsd.yml"
+        uses = "./.github/workflows/test-windows.yml"
         instances = []
         timeout_minutes = (
             TIMEOUT_OVERRIDES[distro]
             if distro in TIMEOUT_OVERRIDES
             else TIMEOUT_DEFAULT
         )
+
+        for salt_version in SALT_VERSIONS:
+
+            if salt_version == "latest":
+
+                instances.append(salt_version)
+                continue
+
+            for bootstrap_type in ("stable",):
+                if bootstrap_type == "stable":
+                    if salt_version == "master":
+                        # For the master branch there's no stable build
+                        continue
+
+                kitchen_target = f"{bootstrap_type}-{salt_version}"
+                instances.append(kitchen_target)
+
+        if instances:
+            needs.append(distro)
+            test_jobs += TEMPLATE.format(
+                distro=distro,
+                runs_on=runs_on,
+                uses=uses,
+                ifcheck=ifcheck,
+                instances=json.dumps(instances),
+                display_name=DISTRO_DISPLAY_NAMES[distro],
+                timeout_minutes=timeout_minutes,
+            )
+
+    test_jobs += "\n"
+    for distro in LINUX_DISTROS:
+        test_jobs += "\n"
+        runs_on = ""
+        ifcheck = "\n    if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'"
+        uses = "./.github/workflows/test-linux.yml"
+        instances = []
+        timeout_minutes = (
+            TIMEOUT_OVERRIDES[distro]
+            if distro in TIMEOUT_OVERRIDES
+            else TIMEOUT_DEFAULT
+        )
+        if distro in VERSION_ONLY_OVERRIDES:
+            ifcheck = "\n    if: github.event_name == 'push'"
+
         for salt_version in SALT_VERSIONS:
 
             if salt_version == "latest":
@@ -385,16 +381,20 @@ def generate_test_jobs():
                 instances.append(salt_version)
                 continue
 
-            if distro == "openbsd-6":
-                # Only test latest on OpenBSD 6
-                continue
+            for bootstrap_type in ("stable", "git"):
+                if bootstrap_type == "stable":
+                    if salt_version == "master":
+                        # For the master branch there's no stable build
+                        continue
+                    if distro not in STABLE_DISTROS:
+                        continue
 
-            if salt_version != "master":
-                # Only test the master branch on BSD's
-                continue
+                    if salt_version in STABLE_VERSION_BLACKLIST:
+                        continue
 
-            # BSD's don't have a stable release, only use git
-            for bootstrap_type in ("git",):
+                    if distro.startswith("fedora") and salt_version != "latest":
+                        # Fedora does not keep old builds around
+                        continue
 
                 BLACKLIST = {
                     "3003": BLACKLIST_3003,

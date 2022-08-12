@@ -31,7 +31,7 @@ jobs:
             kitchen*.yml
             tests/**
             .github/workflows/**
-          files-ignore: |
+          files_ignore: |
             .github/workflows/release.yml
 
       - name: Set Job Output

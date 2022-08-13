@@ -112,7 +112,7 @@ jobs:
 
       - name: Merge develop into stable
         run: |
-          git merge --no-ff -m "Merge develop into stable" origin/develop || touch .git-conflicts
+          git merge --no-ff -m "Merge develop into stable for ${CUT_RELEASE_VERSION} release" origin/develop || touch .git-conflicts
           if [ -f .git-conflicts ]
           then
             git diff
@@ -122,7 +122,7 @@ jobs:
               pre-commit run -av --files $f
               git add $f
             done
-            git commit -a -m "Merge develop into stable(auto resolving conflicts to the develop version)"
+            git commit -a -m "Merge develop into stable for ${CUT_RELEASE_VERSION} release(auto resolving conflicts to the develop version)"
           fi
 
       - name: Tag Release
@@ -132,6 +132,12 @@ jobs:
           custom_tag: ${{ env.CUT_RELEASE_VERSION }}
           tag_prefix: ""
           create_annotated_tag: true
+
+      - name: Update bootstrap-salt.sh sha256sum's
+        run: |
+          echo "$(sha256sum bootstrap-salt.sh | awk '{ print $1 }')" > bootstrap-salt.sh.sha256
+          echo "$(sha256sum bootstrap-salt.ps1 | awk '{ print $1 }')" > bootstrap-salt.ps1.sha256
+          git commmit -a -m "Update sha256 checksums" || git commmit -a -m "Update sha256 checksums"
 
       - name: Push Changes
         uses: ad-m/github-push-action@master
@@ -177,7 +183,9 @@ jobs:
           generate_release_notes: false
           files: |
             bootstrap-salt.sh
+            bootstrap-salt.sh.sha256
             bootstrap-salt.ps1
+            bootstrap-salt.ps1.sha256
             LICENSE
 
       - name: Delete Release Details Artifact

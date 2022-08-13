@@ -1,3 +1,12 @@
+# v2022.08.13
+
+## What's Changed
+
+- Fix test-windows workflow powershell syntax & Run pre-commit when resolving conflicts on the release workflow by @s0undt3ch in https://github.com/saltstack/salt-bootstrap/pull/1857
+- Update `*.sha256` files when merging develop into stable by @s0undt3ch in https://github.com/saltstack/salt-bootstrap/pull/1859
+
+**Full Changelog**: https://github.com/saltstack/salt-bootstrap/compare/v2022.08.12...v2022.08.13
+
 # v2022.08.12
 
 ## What's Changed

@@ -39,6 +39,19 @@ jobs:
         run: |
           echo "::set-output name=run-tests::${{ steps.changed-files.outputs.any_modified }}"
 
+      - name: Set Exit Status
+        if: always()
+        run: |
+          mkdir exitstatus
+          echo "${{ job.status }}" > exitstatus/${{ github.job }}
+
+      - name: Upload Exit Status
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: exitstatus
+          path: exitstatus
+
   generate-actions-workflow:
     name: Generate The Actions Workflow
     runs-on: ubuntu-latest

@@ -137,7 +137,7 @@ jobs:
         run: |
           echo "$(sha256sum bootstrap-salt.sh | awk '{ print $1 }')" > bootstrap-salt.sh.sha256
           echo "$(sha256sum bootstrap-salt.ps1 | awk '{ print $1 }')" > bootstrap-salt.ps1.sha256
-          git commmit -a -m "Update sha256 checksums" || git commmit -a -m "Update sha256 checksums"
+          git commit -a -m "Update sha256 checksums" || git commit -a -m "Update sha256 checksums"
 
       - name: Push Changes
         uses: ad-m/github-push-action@master

@@ -395,7 +395,7 @@ Install on Windows
 Using ``PowerShell`` to install latest stable version:
 
 .. code:: console
-
+  New-Item -ItemType Directory -Force -Path C:\Temp
   Invoke-WebRequest -Uri https://winbootstrap.saltproject.io -OutFile C:\Temp\bootstrap-salt.ps1
   Set-ExecutionPolicy -ExecutionPolicy Unrestricted -Scope CurrentUser
   C:\Temp\bootstrap-salt.ps1

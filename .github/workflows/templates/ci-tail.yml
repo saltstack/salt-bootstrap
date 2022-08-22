@@ -1,0 +1,33 @@
+
+  set-pipeline-exit-status:
+    # This step is just so we can make github require this step, to pass checks
+    # on a pull request instead of requiring all
+    name: Set the ${{{{ github.workflow }}}} Pipeline Exit Status
+    runs-on: ubuntu-latest
+    needs:
+      {needs}
+    if: always()
+    steps:
+
+      - name: Download Exit Status Files
+        if: always()
+        uses: actions/download-artifact@v3
+        with:
+          name: exitstatus
+          path: exitstatus
+
+      - name: Delete Exit Status Artifacts
+        if: always()
+        uses: geekyeggo/delete-artifact@v1
+        with:
+          name: exitstatus
+          failOnError: false
+
+      - name: Set Pipeline Exit Status
+        run: |
+          grep -RE 'failure|cancelled' exitstatus/ && exit 1 || exit 0
+
+      - name: Done
+        if: always()
+        run:
+          echo "All worflows finished"

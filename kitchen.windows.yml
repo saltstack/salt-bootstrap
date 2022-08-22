@@ -17,10 +17,10 @@ platforms:
   - name: windows-2019
 
 suites:
-  - name: py3-stable-3003
+  - name: stable-3003
     provisioner:
       salt_version: 3003.4-1
-  - name: py3-stable-3004
+  - name: stable-3004
     provisioner:
       salt_version: 3004.1-1
   - name: latest

@@ -1,81 +1,301 @@
-name: Release
+name: Cut Release
 
-on:
-  push:
-    tags:
-      - '*'
+on: workflow_dispatch
 
 jobs:
-  bootstrap:
-    name: Update Release Checksums on Develop
+  update-develop:
+    name: Update CHANGELOG.md and bootstrap-salt.sh
     runs-on: ubuntu-latest
-
+    if: github.repository == 'saltstack/salt-bootstrap'
+    permissions:
+      contents: write  # To be able to publish the release
+    environment: Release
     steps:
-      - uses: actions/checkout@v2
-        if: github.repository == 'saltstack/salt-bootstrap'
+      - name: Check For Admin Permission
+        uses: actions-cool/check-user-permission@v2
+        with:
+          require: admin
+          username: ${{ github.triggering_actor }}
+
+      - name: Check Branch Triggering Release
+        run: |
+          if [ "${{ github.ref_name }}" != "develop" ]
+          then
+            echo "This workflow should only be triggered from the develop branch"
+            exit 1
+          fi
+
+      - uses: actions/checkout@v3
+        with:
+          ref: develop
+          repository: ${{ github.repository }}
+          ssh-key: ${{ secrets.SALT_BOOTSTRAP_RELEASE_KEY }}
+
+      - name: Update Git Settings
+        run: |
+          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot] on behalf of ${{ github.event.sender.login }}"
+
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.9
+
+      - name: Install Requirements
+        run: |
+          python3 -m pip install requests pre-commit
+          pre-commit install --install-hooks
+
+      - name: Update Repository
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python3 .github/workflows/scripts/cut-release.py --repo ${{ github.repository }}
+          export CUT_RELEASE_VERSION=$(cat .cut_release_version)
+          echo "CUT_RELEASE_VERSION=${CUT_RELEASE_VERSION}" >> $GITHUB_ENV
+
+      - name: Show Changes
+        run: |
+          git status
+          git diff
+
+      - name: Commit Changes
+        run: |
+          git commit -am "Update develop branch for the ${CUT_RELEASE_VERSION} release" || \
+            git commit -am "Update develop branch for the ${CUT_RELEASE_VERSION} release"
+
+      - name: Push Changes
+        uses: ad-m/github-push-action@master
+        with:
+          repository: ${{ github.repository }}
+          branch: develop
+          ssh: true
+
+      - name: Upload Release Details
+        uses: actions/upload-artifact@v3
+        with:
+          name: release-details
+          path: |
+            .cut_release_version
+            .cut_release_changes
+
+  merge-develop-into-stable:
+    name: Merge develop into stable
+    runs-on: ubuntu-latest
+    if: github.repository == 'saltstack/salt-bootstrap'
+    needs: update-develop
+    environment: Release
+    permissions:
+      contents: write  # To be able to publish the release
+    steps:
+      - uses: actions/checkout@v3
         with:
           ref: stable
+          repository: ${{ github.repository }}
+          ssh-key: ${{ secrets.SALT_BOOTSTRAP_RELEASE_KEY }}
+          fetch-depth: 0
 
-      - name: Get bootstrap-salt.sh sha256sum
-        if: github.repository == 'saltstack/salt-bootstrap'
+      - name: Update Git Settings
+        run: |
+          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot] on behalf of @${{ github.event.sender.login }}"
+
+      - name: Download Release Details
+        uses: actions/download-artifact@v3
+        with:
+          name: release-details
+
+      - name: Update Environment
+        run: |
+          export CUT_RELEASE_VERSION=$(cat .cut_release_version)
+          echo "CUT_RELEASE_VERSION=${CUT_RELEASE_VERSION}" >> $GITHUB_ENV
+
+      - name: Merge develop into stable
+        run: |
+          git merge --no-ff -m "Merge develop into stable for ${CUT_RELEASE_VERSION} release" origin/develop || touch .git-conflicts
+          if [ -f .git-conflicts ]
+          then
+            git diff
+            for f in $(git status | grep 'both modified' | awk '{ print $3 }')
+            do
+              git checkout --theirs $f
+              pre-commit run -av --files $f
+              git add $f
+            done
+            git commit -a -m "Merge develop into stable for ${CUT_RELEASE_VERSION} release(auto resolving conflicts to the develop version)"
+          fi
+
+      - name: Tag Release
+        uses: mathieudutour/github-tag-action@v6.0
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          custom_tag: ${{ env.CUT_RELEASE_VERSION }}
+          tag_prefix: ""
+          create_annotated_tag: true
+
+      - name: Update bootstrap-salt.sh sha256sum's
+        run: |
+          echo "$(sha256sum bootstrap-salt.sh | awk '{ print $1 }')" > bootstrap-salt.sh.sha256
+          echo "$(sha256sum bootstrap-salt.ps1 | awk '{ print $1 }')" > bootstrap-salt.ps1.sha256
+          git commit -a -m "Update sha256 checksums" || git commit -a -m "Update sha256 checksums"
+
+      - name: Push Changes
+        uses: ad-m/github-push-action@master
+        with:
+          repository: ${{ github.repository }}
+          branch: stable
+          tags: true
+          ssh: true
+
+  publish-release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+    if: github.repository == 'saltstack/salt-bootstrap'
+    needs: merge-develop-into-stable
+    environment: Release
+    permissions:
+      contents: write  # To be able to publish the release
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: stable
+          repository: ${{ github.repository }}
+          ssh-key: ${{ secrets.SALT_BOOTSTRAP_RELEASE_KEY }}
+      - name: Download Release Details
+        uses: actions/download-artifact@v3
+        with:
+          name: release-details
+
+      - name: Update Environment
+        run: |
+          export CUT_RELEASE_VERSION=$(cat .cut_release_version)
+          echo "CUT_RELEASE_VERSION=${CUT_RELEASE_VERSION}" >> $GITHUB_ENV
+
+      - name: Create Github Release
+        uses: softprops/action-gh-release@v1
+        with:
+          name: ${{ env.CUT_RELEASE_VERSION }}
+          tag_name: ${{ env.CUT_RELEASE_VERSION }}
+          body_path: .cut_release_changes
+          target_commitish: stable
+          draft: false
+          prerelease: false
+          generate_release_notes: false
+          files: |
+            bootstrap-salt.sh
+            bootstrap-salt.sh.sha256
+            bootstrap-salt.ps1
+            bootstrap-salt.ps1.sha256
+            LICENSE
+
+      - name: Delete Release Details Artifact
+        uses: geekyeggo/delete-artifact@v1
+        with:
+          name: release-details
+          failOnError: false
+
+  update-develop-checksums:
+    name: Update Release Checksums on Develop
+    runs-on: ubuntu-latest
+    if: github.repository == 'saltstack/salt-bootstrap'
+    needs: publish-release
+    environment: Release
+    permissions:
+      contents: write  # For action peter-evans/create-pull-request
+      pull-requests: write  # For action peter-evans/create-pull-request
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: stable
+          repository: ${{ github.repository }}
+          ssh-key: ${{ secrets.SALT_BOOTSTRAP_RELEASE_KEY }}
+
+      - name: Get bootstrap-salt.sh on stable branch sha256sum
         run: |
           echo "SH=$(sha256sum bootstrap-salt.sh | awk '{ print $1 }')" >> $GITHUB_ENV
           echo "BS_VERSION=$(sh bootstrap-salt.sh -v | awk '{ print $4 }')" >> $GITHUB_ENV
 
-      - uses: actions/checkout@v2
-        if: github.repository == 'saltstack/salt-bootstrap'
+      - uses: actions/checkout@v3
         with:
           ref: develop
+          repository: ${{ github.repository }}
+          ssh-key: ${{ secrets.SALT_BOOTSTRAP_RELEASE_KEY }}
+
+      - name: Update Git Settings
+        run: |
+          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot] on behalf of @${{ github.event.sender.login }}"
 
       - name: Set up Python 3.7
-        if: github.repository == 'saltstack/salt-bootstrap'
-        uses: actions/setup-python@v1
+        uses: actions/setup-python@v4
         with:
           python-version: 3.7
 
       - name: Update Latest Release on README
-        if: github.repository == 'saltstack/salt-bootstrap'
         run: |
           python3 .github/workflows/scripts/update-release-shasum.py ${{ env.BS_VERSION }} ${{ env.SH }}
 
-      - name: Create Pull Request Against Develop
-        uses: peter-evans/create-pull-request@v3
+      - name: Show Changes
+        run: |
+          git status
+          git diff
+
+      - name: Commit Changes
+        run: |
+          git commit -am "Update README.rst with ${{ env.BS_VERSION }} release sha256sum" || \
+            git commit -am "Update README.rst with ${{ env.BS_VERSION }} release sha256sum"
+
+      - name: Push Changes
+        uses: ad-m/github-push-action@master
         with:
-          title: Update README.rst with ${{ env.BS_VERSION }} release sha256sum
-          commit-message: Update README.rst with ${{ env.BS_VERSION }} release sha256sum
-          delete-branch: true
+          repository: ${{ github.repository }}
+          branch: develop
+          ssh: true
+
 
   salt:
     name: Update Release on Salt Repo
     runs-on: ubuntu-latest
+    if: github.repository == 'saltstack/salt-bootstrap'
+    needs: update-develop-checksums
+    environment: Open PR Against Salt
+    permissions:
+      contents: write  # For action peter-evans/create-pull-request
+      pull-requests: write  # For action peter-evans/create-pull-request
 
     steps:
-      - uses: actions/checkout@v2
-        if: github.repository == 'saltstack/salt-bootstrap'
+      - uses: actions/checkout@v3
         with:
           ref: stable
+          repository: ${{ github.repository }}
 
       - name: Get bootstrap version
-        if: github.repository == 'saltstack/salt-bootstrap'
         run: |
           echo "BS_VERSION=$(sh bootstrap-salt.sh -v | awk '{ print $4 }')" >> $GITHUB_ENV
 
-      - uses: actions/checkout@v2
-        if: github.repository == 'saltstack/salt-bootstrap'
+      - uses: actions/checkout@v3
         with:
           repository: saltstack/salt
           ref: master
           path: salt-checkout
+          token: ${{ secrets.SALT_REPO_WRITE_TOKEN }}
+
+      - name: Update Git Settings
+        run: |
+          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot] on behalf of @${{ github.event.sender.login }}"
 
       - name: Update bootstrap script on Salt
-        if: github.repository == 'saltstack/salt-bootstrap'
         run: |
           cp bootstrap-salt.sh salt-checkout/salt/cloud/deploy/bootstrap-salt.sh
 
       - name: Create Pull Request Against Develop
-        uses: peter-evans/create-pull-request@v3
+        uses: peter-evans/create-pull-request@v4
         with:
-          title: Update the bootstrap script to v${{ env.BS_VERSION }}
+          title: "Update the bootstrap script to v${{ env.BS_VERSION }}"
           path: salt-checkout
+          base: master
+          token: ${{ secrets.SALT_REPO_WRITE_TOKEN }}
           commit-message: Update the bootstrap script to v${{ env.BS_VERSION }}
           delete-branch: true

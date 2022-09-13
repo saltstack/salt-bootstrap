@@ -639,7 +639,7 @@ elif [ "$ITYPE" = "onedir" ]; then
         if [ "$(echo "$1" | grep -E '^(latest)$')" != "" ]; then
             ONEDIR_REV="$1"
             shift
-        elif [ "$(echo "$1" | grep -E '^([3-9][0-9]{3}(\.[0-9]*))')" != "" ]; then
+        elif [ "$(echo "$1" | grep -E '^([3-9][0-9]{3}(\.[0-9]*)?)')" != "" ]; then
             # Handle the 3xxx.0 version as 3xxx archive (pin to minor) and strip the fake ".0" suffix
             ONEDIR_REV=$(echo "$1" | sed -E 's/^([3-9][0-9]{3})\.0$/\1/')
             shift

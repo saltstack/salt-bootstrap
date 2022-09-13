@@ -1440,7 +1440,7 @@ __check_dpkg_architecture() {
             else
                 # Saltstack official repository does not yet have arm64 metadata,
                 # use amd64 repositories on arm64, since all pkgs are arch-independent
-                __REPO_ARCH="amd64"
+                __REPO_ARCH="arm64"
                 __REPO_ARCH_DEB="deb [signed-by=/usr/share/keyrings/salt-archive-keyring.gpg arch=$__REPO_ARCH]"
                 warn_msg="Support for arm64 packages is experimental and might rely on architecture-independent packages from the amd64 repository."
             fi

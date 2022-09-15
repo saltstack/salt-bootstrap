@@ -636,15 +636,13 @@ elif [ "$ITYPE" = "onedir" ]; then
     if [ "$#" -eq 0 ];then
         ONEDIR_REV="latest"
     else
-        if [ "$(echo "$1" | grep -E '^(latest)$')" != "" ]; then
+        if [ "$(echo "$1" | grep -E '^(latest|3005)$')" != "" ]; then
             ONEDIR_REV="$1"
-            shift
-	elif [ "$(echo "$1" | grep -E '^([3-9][0-9]{3}?-[0-9]$)')" != "" ]; then
-            ONEDIR_REV="minor/$1"
             shift
         elif [ "$(echo "$1" | grep -E '^([3-9][0-9]{3}(\.[0-9]*)?)')" != "" ]; then
             # Handle the 3xxx.0 version as 3xxx archive (pin to minor) and strip the fake ".0" suffix
             ONEDIR_REV=$(echo "$1" | sed -E 's/^([3-9][0-9]{3})\.0$/\1/')
+            ONEDIR_REV="minor/$ONEDIR_REV"
             shift
         else
             echo "Unknown stable version: $1 (valid: 3005, latest.)"

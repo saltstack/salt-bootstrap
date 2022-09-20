@@ -388,7 +388,7 @@ __usage() {
         points to a repository that mirrors Salt packages located at
         repo.saltproject.io. The option passed with -R replaces the
         "repo.saltproject.io". If -R is passed, -r is also set. Currently only
-        works on CentOS/RHEL and Debian based distributions.
+        works on CentOS/RHEL and Debian based distributions and macOS.
     -s  Sleep time used when waiting for daemons to start, restart and when
         checking for the services running. Default: ${__DEFAULT_SLEEP}
     -S  Also install salt-syndic
@@ -8230,7 +8230,7 @@ __macosx_get_packagesite() {
     fi
 
     PKG="salt-${STABLE_REV}-${__PY_VERSION_REPO}-${DARWIN_ARCH}.pkg"
-    SALTPKGCONFURL="https://repo.saltproject.io/osx/${PKG}"
+    SALTPKGCONFURL="https://${_REPO_URL}/osx/${PKG}"
 }
 
 # Using a separate conf step to head for idempotent install...

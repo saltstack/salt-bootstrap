@@ -1,3 +1,20 @@
+# v2022.10.04
+
+## What's Changed
+
+- Update README for Windows installation by @eozer in https://github.com/saltstack/salt-bootstrap/pull/1860
+- Update the bootstrap script to work with final onedir releases. by @garethgreenaway in https://github.com/saltstack/salt-bootstrap/pull/1863
+- Install Oracle's EPEL repo on Oracle Linux 7 and 8. by @pjcreath in https://github.com/saltstack/salt-bootstrap/pull/1839
+- onedir install - correct version regex by @jeff350 in https://github.com/saltstack/salt-bootstrap/pull/1868
+- Ensure the REPO_ARCH for Arm64 is correct. by @garethgreenaway in https://github.com/saltstack/salt-bootstrap/pull/1867
+
+## New Contributors
+
+- @eozer made their first contribution in https://github.com/saltstack/salt-bootstrap/pull/1860
+- @jeff350 made their first contribution in https://github.com/saltstack/salt-bootstrap/pull/1868
+
+**Full Changelog**: https://github.com/saltstack/salt-bootstrap/compare/v2022.08.13...v2022.10.04
+
 # v2022.08.13
 
 ## What's Changed

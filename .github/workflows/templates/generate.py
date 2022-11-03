@@ -158,6 +158,11 @@ SALT_VERSIONS = [
     "latest",
 ]
 
+ONEDIR_SALT_VERSIONS = [
+    "3005",
+    "latest",
+]
+
 VERSION_DISPLAY_NAMES = {
     "3003": "v3003",
     "3004": "v3004",
@@ -410,6 +415,10 @@ def generate_test_jobs():
                 continue
 
             for bootstrap_type in ("stable", "git", "onedir"):
+                if bootstrap_type == "onedir":
+                    if salt_version not in ONEDIR_SALT_VERSIONS:
+                        continue
+
                 if bootstrap_type == "stable":
                     if salt_version == "master":
                         # For the master branch there's no stable build

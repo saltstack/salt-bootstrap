@@ -336,20 +336,6 @@ jobs:
       instances: '["stable-3004", "stable-3005", "onedir-3005", "git-master", "latest"]'
 
 
-  debian-9:
-    name: Debian 9
-    if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
-    uses: ./.github/workflows/test-linux.yml
-    needs:
-      - lint
-      - generate-actions-workflow
-    with:
-      distro-slug: debian-9
-      display-name: Debian 9
-      timeout: 20
-      instances: '["stable-3003", "git-3003", "stable-3004", "git-3004", "stable-3005", "git-3005", "onedir-3005", "git-master", "latest"]'
-
-
   fedora-35:
     name: Fedora 35
     if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
@@ -541,7 +527,6 @@ jobs:
       - centos-stream8
       - debian-10
       - debian-11
-      - debian-9
       - fedora-35
       - fedora-36
       - gentoo

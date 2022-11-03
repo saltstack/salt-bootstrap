@@ -108,7 +108,33 @@ BLACKLIST_3004 = [
     "opensuse-tumbleweed",
 ]
 
+BLACKLIST_3005 = [
+    "arch",
+    "fedora-35",
+    "fedora-36",
+    "gentoo",
+    "gentoo-systemd",
+    "opensuse-15",
+    "opensuse-tumbleweed",
+]
+
 BLACKLIST_GIT_3004 = [
+    "amazon-2",
+    "arch",
+    "debian-10",
+    "debian-11",
+    "fedora-35",
+    "fedora-36",
+    "gentoo",
+    "gentoo-systemd",
+    "opensuse-15",
+    "opensuse-tumbleweed",
+    "ubuntu-2004",
+    "ubuntu-2110",
+    "ubuntu-2204",
+]
+
+BLACKLIST_GIT_3005 = [
     "amazon-2",
     "arch",
     "debian-10",
@@ -127,6 +153,7 @@ BLACKLIST_GIT_3004 = [
 SALT_VERSIONS = [
     "3003",
     "3004",
+    "3005",
     "master",
     "latest",
 ]
@@ -134,6 +161,7 @@ SALT_VERSIONS = [
 VERSION_DISPLAY_NAMES = {
     "3003": "v3003",
     "3004": "v3004",
+    "3005": "v3005",
     "master": "Master",
     "latest": "Latest",
 }
@@ -381,7 +409,7 @@ def generate_test_jobs():
                 instances.append(salt_version)
                 continue
 
-            for bootstrap_type in ("stable", "git"):
+            for bootstrap_type in ("stable", "git", "onedir"):
                 if bootstrap_type == "stable":
                     if salt_version == "master":
                         # For the master branch there's no stable build
@@ -399,11 +427,13 @@ def generate_test_jobs():
                 BLACKLIST = {
                     "3003": BLACKLIST_3003,
                     "3004": BLACKLIST_3004,
+                    "3005": BLACKLIST_3005,
                 }
                 if bootstrap_type == "git":
                     BLACKLIST = {
                         "3003": BLACKLIST_GIT_3003,
                         "3004": BLACKLIST_GIT_3004,
+                        "3005": BLACKLIST_GIT_3005,
                     }
 
                     # .0 versions are a virtual version for pinning to the first
@@ -413,7 +443,7 @@ def generate_test_jobs():
                         continue
 
                 if (
-                    salt_version in ("3003", "3004")
+                    salt_version in ("3003", "3004", "3005")
                     and distro in BLACKLIST[salt_version]
                 ):
                     continue

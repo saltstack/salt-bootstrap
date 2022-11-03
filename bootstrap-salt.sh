@@ -5345,6 +5345,11 @@ install_oracle_linux_git_post() {
     return 0
 }
 
+install_oracle_linux_onedir_post() {
+    install_centos_onedir_post || return 1
+    return 0
+}
+
 install_oracle_linux_testing_post() {
     install_centos_testing_post || return 1
     return 0
@@ -5415,6 +5420,11 @@ install_almalinux_stable_post() {
 
 install_almalinux_git_post() {
     install_centos_git_post || return 1
+    return 0
+}
+
+install_almalinux_onedir_post() {
+    install_centos_onedir_post || return 1
     return 0
 }
 
@@ -5491,6 +5501,11 @@ install_rocky_linux_git_post() {
     return 0
 }
 
+install_rocky_linux_onedir_post() {
+    install_centos_onedir_post || return 1
+    return 0
+}
+
 install_rocky_linux_testing_post() {
     install_centos_testing_post || return 1
     return 0
@@ -5561,6 +5576,11 @@ install_scientific_linux_stable_post() {
 
 install_scientific_linux_git_post() {
     install_centos_git_post || return 1
+    return 0
+}
+
+install_scientific_linux_onedir_post() {
+    install_centos_onedir_post || return 1
     return 0
 }
 

@@ -196,6 +196,22 @@ suites:
       salt_version: latest
       salt_bootstrap_options: -MP stable %s
 
+  - name: onedir latest
+    provisioner:
+      salt_version: latest
+      salt_bootstrap_options: -MP onedir %s
+
+  - name: onedir_3005
+    provisioner:
+      salt_version: 3005
+      salt_bootstrap_options: -MP onedir %s
+
+  - name: onedir_3005.1
+    provisioner:
+      salt_version: 3005.1
+      salt_bootstrap_options: -MP onedir %s
+
+
 verifier:
   name: shell
   remote_exec: false

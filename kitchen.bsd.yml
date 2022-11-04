@@ -33,9 +33,9 @@ platforms:
   - name: freebsd-123
     driver:
       box: bento/freebsd-12.3
-  - name: openbsd-6
+  - name: openbsd-7
     driver:
-      box: generic/openbsd6
+      box: generic/openbsd7
       ssh:
         shell: /bin/ksh
       synced_folders: []

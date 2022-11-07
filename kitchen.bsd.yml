@@ -39,6 +39,10 @@ platforms:
       ssh:
         shell: /bin/ksh
       synced_folders: []
+    transport:
+      name: ssh
+      username: vagrant
+      password: vagrant
     provisioner:
       init_environment: |
         echo 'auto_accept: true' > /tmp/auto-accept-keys.conf

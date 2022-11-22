@@ -41,7 +41,7 @@ OSX = [
 BSD = [
     "freebsd-131",
     "freebsd-123",
-    "openbsd-6",
+    "openbsd-7",
 ]
 
 STABLE_DISTROS = [
@@ -198,7 +198,7 @@ DISTRO_DISPLAY_NAMES = {
     "macos-12": "macOS 12",
     "freebsd-131": "FreeBSD 13.1",
     "freebsd-123": "FreeBSD 12.3",
-    "openbsd-6": "OpenBSD 6",
+    "openbsd-7": "OpenBSD 7",
     "windows-2019": "Windows 2019",
     "windows-2022": "Windows 2022",
 }
@@ -253,7 +253,7 @@ def generate_test_jobs():
                 instances.append(salt_version)
                 continue
 
-            if distro == "openbsd-6":
+            if distro == "openbsd-7":
                 # Only test latest on OpenBSD 6
                 continue
 

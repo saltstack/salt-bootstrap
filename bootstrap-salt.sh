@@ -639,10 +639,13 @@ elif [ "$ITYPE" = "onedir" ]; then
         if [ "$(echo "$1" | grep -E '^(latest|3005)$')" != "" ]; then
             ONEDIR_REV="$1"
             shift
-        elif [ "$(echo "$1" | grep -E '^([3-9][0-9]{3}(\.[0-9]*)?)')" != "" ]; then
-            # Handle the 3xxx.0 version as 3xxx archive (pin to minor) and strip the fake ".0" suffix
-            ONEDIR_REV=$(echo "$1" | sed -E 's/^([3-9][0-9]{3})\.0$/\1/')
+        elif [ "$(echo "$1" | grep -E '^(3005(\.[0-9]*)?)')" != "" ]; then
+            # Handle the 3005.0 version as 3005 archive (pin to minor) and strip the fake ".0" suffix
+            ONEDIR_REV=$(echo "$1" | sed -E 's/^(3005)\.0$/\1/')
             ONEDIR_REV="minor/$ONEDIR_REV"
+            shift
+        elif [ "$(echo "$1" | grep -E '^([3-9][0-9]{3}(\.[0-9]*)?)')" != "" ]; then
+            ONEDIR_REV="minor/$1"
             shift
         else
             echo "Unknown stable version: $1 (valid: 3005, latest.)"
@@ -5345,6 +5348,11 @@ install_oracle_linux_git_post() {
     return 0
 }
 
+install_oracle_linux_onedir_post() {
+    install_centos_onedir_post || return 1
+    return 0
+}
+
 install_oracle_linux_testing_post() {
     install_centos_testing_post || return 1
     return 0
@@ -5415,6 +5423,11 @@ install_almalinux_stable_post() {
 
 install_almalinux_git_post() {
     install_centos_git_post || return 1
+    return 0
+}
+
+install_almalinux_onedir_post() {
+    install_centos_onedir_post || return 1
     return 0
 }
 
@@ -5491,6 +5504,11 @@ install_rocky_linux_git_post() {
     return 0
 }
 
+install_rocky_linux_onedir_post() {
+    install_centos_onedir_post || return 1
+    return 0
+}
+
 install_rocky_linux_testing_post() {
     install_centos_testing_post || return 1
     return 0
@@ -5561,6 +5579,11 @@ install_scientific_linux_stable_post() {
 
 install_scientific_linux_git_post() {
     install_centos_git_post || return 1
+    return 0
+}
+
+install_scientific_linux_onedir_post() {
+    install_centos_onedir_post || return 1
     return 0
 }
 

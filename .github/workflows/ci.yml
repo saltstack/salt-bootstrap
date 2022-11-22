@@ -145,16 +145,16 @@ jobs:
       instances: '["git-master", "latest"]'
 
 
-  openbsd-6:
-    name: OpenBSD 6
+  openbsd-7:
+    name: OpenBSD 7
     if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
     uses: ./.github/workflows/test-bsd.yml
     needs:
       - lint
       - generate-actions-workflow
     with:
-      distro-slug: openbsd-6
-      display-name: OpenBSD 6
+      distro-slug: openbsd-7
+      display-name: OpenBSD 7
       timeout: 20
       runs-on: macos-10.15
       instances: '["latest"]'
@@ -514,7 +514,7 @@ jobs:
       - generate-actions-workflow
       - freebsd-131
       - freebsd-123
-      - openbsd-6
+      - openbsd-7
       - macos-1015
       - macos-11
       - macos-12

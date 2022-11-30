@@ -54,6 +54,7 @@ jobs:
           python3 -m pip install -r tests/requirements.txt
 
       - name: Setup tmate session
+        if: ${{ matrix.instance }}-${{ inputs.distro-slug }} == "onedir-3005-amazon-2"
         uses: mxschmitt/action-tmate@v3
         timeout-minutes: 15
 

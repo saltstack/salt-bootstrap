@@ -37,11 +37,9 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Setup upterm session
-        uses: lhotari/action-upterm@v1
-        with:
-          limit-access-to-actor: true
-          limit-access-to-users: garethgreenaway
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
+        timeout-minutes: 15
 
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1

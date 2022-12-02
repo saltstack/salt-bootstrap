@@ -53,11 +53,6 @@ jobs:
           python3 -m pip install -U pip
           python3 -m pip install -r tests/requirements.txt
 
-      - name: Setup tmate session
-        if: matrix.instance == 'onedir-3005'
-        uses: mxschmitt/action-tmate@v3
-        timeout-minutes: 15
-
       - name: Create Test Instance
         run: |
           bundle exec kitchen create ${{ matrix.instance }}-${{ inputs.distro-slug }} || \

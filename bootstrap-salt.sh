@@ -3055,6 +3055,9 @@ __install_saltstack_ubuntu_onedir_repository() {
 
     # SaltStack's stable Ubuntu repository:
     SALTSTACK_UBUNTU_URL="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_DIR}/${__PY_VERSION_REPO}/ubuntu/${UBUNTU_VERSION}/${__REPO_ARCH}/${ONEDIR_REV}/"
+    if [ "${ONEDIR_REV}" = "nightly" ] ; then
+        SALTSTACK_UBUNTU_URL="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_NIGHTLY_DIR}/${__PY_VERSION_REPO}/ubuntu/${UBUNTU_VERSION}/${__REPO_ARCH}/"
+    fi
     echo "$__REPO_ARCH_DEB $SALTSTACK_UBUNTU_URL $UBUNTU_CODENAME main" > /etc/apt/sources.list.d/salt.list
 
     __apt_key_fetch "${SALTSTACK_UBUNTU_URL}salt-archive-keyring.gpg" || return 1

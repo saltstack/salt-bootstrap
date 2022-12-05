@@ -4445,6 +4445,9 @@ __install_saltstack_rhel_onedir_repository() {
     # Avoid using '$releasever' variable for yum.
     # Instead, this should work correctly on all RHEL variants.
     base_url="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_DIR}/${__PY_VERSION_REPO}/redhat/${DISTRO_MAJOR_VERSION}/\$basearch/${ONEDIR_REV}/"
+    if [ "${ONEDIR_REV}" = "nightly" ] ; then
+        base_url="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_NIGHTLY_DIR}/${__PY_VERSION_REPO}/redhat/${DISTRO_MAJOR_VERSION}/\$basearch/"
+    fi
     if [ "${DISTRO_MAJOR_VERSION}" -eq 9 ]; then
         gpg_key="SALTSTACK-GPG-KEY2.pub"
     else
@@ -4471,6 +4474,9 @@ enabled_metadata=1
 _eof
 
         fetch_url="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_DIR}/${__PY_VERSION_REPO}/redhat/${DISTRO_MAJOR_VERSION}/${CPU_ARCH_L}/${ONEDIR_REV}/"
+        if [ "${ONEDIR_REV}" = "nightly" ] ; then
+            fetch_url="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_NIGHTLY_DIR}/${__PY_VERSION_REPO}/redhat/${DISTRO_MAJOR_VERSION}/${CPU_ARCH_L}/"
+        fi
         for key in $gpg_key; do
             __rpm_import_gpg "${fetch_url}${key}" || return 1
         done

@@ -269,6 +269,7 @@ _CUSTOM_MINION_CONFIG="null"
 _QUIET_GIT_INSTALLATION=$BS_FALSE
 _REPO_URL="repo.saltproject.io"
 _ONEDIR_DIR="salt"
+_ONEDIR_NIGHTLY_DIR="salt-dev/${_ONEDIR_DIR}"
 _PY_EXE="python3"
 _INSTALL_PY="$BS_FALSE"
 _TORNADO_MAX_PY3_VERSION="5.0"
@@ -636,7 +637,7 @@ elif [ "$ITYPE" = "onedir" ]; then
     if [ "$#" -eq 0 ];then
         ONEDIR_REV="latest"
     else
-        if [ "$(echo "$1" | grep -E '^(latest|3005)$')" != "" ]; then
+        if [ "$(echo "$1" | grep -E '^(nightly|latest|3005)$')" != "" ]; then
             ONEDIR_REV="$1"
             shift
         elif [ "$(echo "$1" | grep -E '^(3005(\.[0-9]*)?)')" != "" ]; then
@@ -648,7 +649,7 @@ elif [ "$ITYPE" = "onedir" ]; then
             ONEDIR_REV="minor/$1"
             shift
         else
-            echo "Unknown stable version: $1 (valid: 3005, latest.)"
+            echo "Unknown stable version: $1 (valid: 3005, latest, nightly.)"
             exit 1
         fi
     fi

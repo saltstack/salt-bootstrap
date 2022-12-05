@@ -72,6 +72,7 @@ platforms:
       provision_command:
         - rc-update add sshd default
         - echo "PubkeyAcceptedAlgorithms +ssh-rsa" | tee -a /etc/ssh/sshd_config
+        - touch /etc/sudoers.d/root
   - name: gentoo-systemd
     driver:
       image: gentoo/stage3:systemd
@@ -79,6 +80,7 @@ platforms:
       provision_command:
         - systemctl enable sshd.service
         - echo "PubkeyAcceptedAlgorithms +ssh-rsa" | tee -a /etc/ssh/sshd_config
+        - touch /etc/sudoers.d/root
   - name: opensuse-15
     driver:
       image: opensuse/leap:15.4

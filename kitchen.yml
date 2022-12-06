@@ -72,7 +72,7 @@ platforms:
       provision_command:
         - rc-update add sshd default
         - echo "PubkeyAcceptedAlgorithms +ssh-rsa" | tee -a /etc/ssh/sshd_config
-        - touch /etc/sudoers.d/root
+        - mkdir /etc/sudoers.d
   - name: gentoo-systemd
     driver:
       image: gentoo/stage3:systemd
@@ -80,7 +80,7 @@ platforms:
       provision_command:
         - systemctl enable sshd.service
         - echo "PubkeyAcceptedAlgorithms +ssh-rsa" | tee -a /etc/ssh/sshd_config
-        - touch /etc/sudoers.d/root
+        - mkdir /etc/sudoers.d
   - name: opensuse-15
     driver:
       image: opensuse/leap:15.4
@@ -217,11 +217,17 @@ suites:
     provisioner:
       salt_version: master
       salt_bootstrap_options: -x python3 -MPfq -D git %s
+    excludes:
+      - gentoo
+      - gentoo-systemd
 
   - name: latest
     provisioner:
       salt_version: latest
       salt_bootstrap_options: -MP stable %s
+    excludes:
+      - gentoo
+      - gentoo-systemd
 
   - name: onedir-latest
     provisioner:

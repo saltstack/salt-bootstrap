@@ -2099,20 +2099,13 @@ __rpm_import_gpg() {
 #----------------------------------------------------------------------------------------------------------------------
 __yum_install_noinput() {
 
-    ENABLE_EPEL_CMD=""
-    # Skip Amazon Linux for the first round, since EPEL is no longer required.
-    # See issue #724
-    if [ $_DISABLE_REPOS -eq $BS_FALSE ] && [ "$DISTRO_NAME_L" != "amazon_linux_ami" ]; then
-        ENABLE_EPEL_CMD="--enablerepo=${_EPEL_REPO}"
-    fi
-
     if [ "$DISTRO_NAME_L" = "oracle_linux" ]; then
         # We need to install one package at a time because --enablerepo=X disables ALL OTHER REPOS!!!!
         for package in "${@}"; do
-            yum -y install "${package}" || yum -y install "${package}" ${ENABLE_EPEL_CMD} || return $?
+            yum -y install "${package}" || yum -y install "${package}" || return $?
         done
     else
-        yum -y install "${@}" ${ENABLE_EPEL_CMD} || return $?
+        yum -y install "${@}" || return $?
     fi
 }   # ----------  end of function __yum_install_noinput  ----------
 
@@ -4536,6 +4529,8 @@ install_centos_stable_deps() {
             fi
         fi
     fi
+
+    __PACKAGES="${__PACKAGES} procps"
 
     # shellcheck disable=SC2086
     __yum_install_noinput ${__PACKAGES} || return 1

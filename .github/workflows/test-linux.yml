@@ -26,9 +26,10 @@ on:
 jobs:
   Test:
     name: ${{ matrix.instance }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     timeout-minutes: ${{ inputs.timeout }}
     strategy:
+      max-parallel: 2
       fail-fast: false
       matrix:
         instance: ${{ fromJSON(inputs.instances) }}

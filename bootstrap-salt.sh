@@ -23,7 +23,7 @@
 #======================================================================================================================
 set -o nounset                              # Treat unset variables as an error
 
-__ScriptVersion="2022.08.13"
+__ScriptVersion="2022.10.04"
 __ScriptName="bootstrap-salt.sh"
 
 __ScriptFullName="$0"
@@ -639,10 +639,13 @@ elif [ "$ITYPE" = "onedir" ]; then
         if [ "$(echo "$1" | grep -E '^(latest|3005)$')" != "" ]; then
             ONEDIR_REV="$1"
             shift
-        elif [ "$(echo "$1" | grep -E '^([3-9][0-9]{3}(\.[0-9]*)?)')" != "" ]; then
-            # Handle the 3xxx.0 version as 3xxx archive (pin to minor) and strip the fake ".0" suffix
-            ONEDIR_REV=$(echo "$1" | sed -E 's/^([3-9][0-9]{3})\.0$/\1/')
+        elif [ "$(echo "$1" | grep -E '^(3005(\.[0-9]*)?)')" != "" ]; then
+            # Handle the 3005.0 version as 3005 archive (pin to minor) and strip the fake ".0" suffix
+            ONEDIR_REV=$(echo "$1" | sed -E 's/^(3005)\.0$/\1/')
             ONEDIR_REV="minor/$ONEDIR_REV"
+            shift
+        elif [ "$(echo "$1" | grep -E '^([3-9][0-9]{3}(\.[0-9]*)?)')" != "" ]; then
+            ONEDIR_REV="minor/$1"
             shift
         else
             echo "Unknown stable version: $1 (valid: 3005, latest.)"
@@ -2096,20 +2099,13 @@ __rpm_import_gpg() {
 #----------------------------------------------------------------------------------------------------------------------
 __yum_install_noinput() {
 
-    ENABLE_EPEL_CMD=""
-    # Skip Amazon Linux for the first round, since EPEL is no longer required.
-    # See issue #724
-    if [ $_DISABLE_REPOS -eq $BS_FALSE ] && [ "$DISTRO_NAME_L" != "amazon_linux_ami" ]; then
-        ENABLE_EPEL_CMD="--enablerepo=${_EPEL_REPO}"
-    fi
-
     if [ "$DISTRO_NAME_L" = "oracle_linux" ]; then
         # We need to install one package at a time because --enablerepo=X disables ALL OTHER REPOS!!!!
         for package in "${@}"; do
-            yum -y install "${package}" || yum -y install "${package}" ${ENABLE_EPEL_CMD} || return $?
+            yum -y install "${package}" || yum -y install "${package}" || return $?
         done
     else
-        yum -y install "${@}" ${ENABLE_EPEL_CMD} || return $?
+        yum -y install "${@}" || return $?
     fi
 }   # ----------  end of function __yum_install_noinput  ----------
 
@@ -4312,9 +4308,9 @@ install_fedora_git_post() {
         __copyfile "${_SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-${fname}.service" "/lib/systemd/system/salt-${fname}.service"
 
         # Salt executables are located under `/usr/local/bin/` on Fedora 36+
-        if [ "${DISTRO_VERSION}" -ge 36 ]; then
-          sed -i -e 's:/usr/bin/:/usr/local/bin/:g' /lib/systemd/system/salt-*.service
-        fi
+        #if [ "${DISTRO_VERSION}" -ge 36 ]; then
+        #  sed -i -e 's:/usr/bin/:/usr/local/bin/:g' /lib/systemd/system/salt-*.service
+        #fi
 
         # Skip salt-api since the service should be opt-in and not necessarily started on boot
         [ $fname = "api" ] && continue
@@ -4371,30 +4367,6 @@ install_fedora_check_services() {
 #
 #   CentOS Install Functions
 #
-__install_epel_repository() {
-    if [ ${_EPEL_REPOS_INSTALLED} -eq $BS_TRUE ]; then
-        return 0
-    fi
-
-    # Check if epel repo is already enabled and flag it accordingly
-    if yum repolist | grep -q "^[!]\\?${_EPEL_REPO}/"; then
-        _EPEL_REPOS_INSTALLED=$BS_TRUE
-        return 0
-    fi
-
-    # Download latest 'epel-next-release' package for the distro version directly
-    epel_next_repo_url="${HTTP_VAL}://dl.fedoraproject.org/pub/epel/epel-next-release-latest-${DISTRO_MAJOR_VERSION}.noarch.rpm"
-
-    # Download latest 'epel-release' package for the distro version directly
-    epel_repo_url="${HTTP_VAL}://dl.fedoraproject.org/pub/epel/epel-release-latest-${DISTRO_MAJOR_VERSION}.noarch.rpm"
-
-    yum -y install "${epel_next_repo_url}" "${epel_repo_url}"
-
-    _EPEL_REPOS_INSTALLED=$BS_TRUE
-
-    return 0
-}
-
 __install_saltstack_rhel_repository() {
     if [ "$ITYPE" = "stable" ]; then
         repo_rev="$STABLE_REV"
@@ -4517,7 +4489,6 @@ install_centos_stable_deps() {
     fi
 
     if [ "$_DISABLE_REPOS" -eq "$BS_FALSE" ]; then
-        __install_epel_repository || return 1
         __install_saltstack_rhel_repository || return 1
     fi
 
@@ -4558,6 +4529,8 @@ install_centos_stable_deps() {
             fi
         fi
     fi
+
+    __PACKAGES="${__PACKAGES} procps"
 
     # shellcheck disable=SC2086
     __yum_install_noinput ${__PACKAGES} || return 1
@@ -4821,7 +4794,6 @@ install_centos_onedir_deps() {
     fi
 
     if [ "$_DISABLE_REPOS" -eq "$BS_FALSE" ]; then
-        __install_epel_repository || return 1
         __install_saltstack_rhel_onedir_repository || return 1
     fi
 
@@ -5345,6 +5317,11 @@ install_oracle_linux_git_post() {
     return 0
 }
 
+install_oracle_linux_onedir_post() {
+    install_centos_onedir_post || return 1
+    return 0
+}
+
 install_oracle_linux_testing_post() {
     install_centos_testing_post || return 1
     return 0
@@ -5415,6 +5392,11 @@ install_almalinux_stable_post() {
 
 install_almalinux_git_post() {
     install_centos_git_post || return 1
+    return 0
+}
+
+install_almalinux_onedir_post() {
+    install_centos_onedir_post || return 1
     return 0
 }
 
@@ -5491,6 +5473,11 @@ install_rocky_linux_git_post() {
     return 0
 }
 
+install_rocky_linux_onedir_post() {
+    install_centos_onedir_post || return 1
+    return 0
+}
+
 install_rocky_linux_testing_post() {
     install_centos_testing_post || return 1
     return 0
@@ -5561,6 +5548,11 @@ install_scientific_linux_stable_post() {
 
 install_scientific_linux_git_post() {
     install_centos_git_post || return 1
+    return 0
+}
+
+install_scientific_linux_onedir_post() {
+    install_centos_onedir_post || return 1
     return 0
 }
 

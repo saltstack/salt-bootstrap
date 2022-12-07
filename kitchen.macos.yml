@@ -25,6 +25,9 @@ suites:
   - name: stable-3004
     provisioner:
       salt_version: 3004.1
+  - name: stable-3005
+    provisioner:
+      salt_version: 3005.1
   - name: latest
     provisioner:
       salt_version: latest

@@ -169,7 +169,9 @@ VERSION_DISPLAY_NAMES = {
     "latest": "Latest",
 }
 
-STABLE_VERSION_BLACKLIST = []
+STABLE_VERSION_BLACKLIST = [
+    "master",
+]
 
 LATEST_PKG_BLACKLIST = []
 
@@ -327,8 +329,7 @@ def generate_test_jobs():
 
             for bootstrap_type in ("stable",):
                 if bootstrap_type == "stable":
-                    if salt_version == "master":
-                        # For the master branch there's no stable build
+                    if salt_version in STABLE_VERSION_BLACKLIST:
                         continue
 
                 kitchen_target = f"{bootstrap_type}-{salt_version}"
@@ -368,8 +369,7 @@ def generate_test_jobs():
 
             for bootstrap_type in ("stable",):
                 if bootstrap_type == "stable":
-                    if salt_version == "master":
-                        # For the master branch there's no stable build
+                    if salt_version in STABLE_VERSION_BLACKLIST:
                         continue
 
                 kitchen_target = f"{bootstrap_type}-{salt_version}"
@@ -417,13 +417,9 @@ def generate_test_jobs():
                         continue
 
                 if bootstrap_type == "stable":
-                    if salt_version == "master":
-                        # For the master branch there's no stable build
+                    if salt_version in STABLE_VERSION_BLACKLIST:
                         continue
                     if distro not in STABLE_DISTROS:
-                        continue
-
-                    if salt_version in STABLE_VERSION_BLACKLIST:
                         continue
 
                     if distro.startswith("fedora") and salt_version != "latest":

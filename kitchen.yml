@@ -221,6 +221,11 @@ suites:
       salt_version: latest
       salt_bootstrap_options: -MP stable %s
 
+  - name: onedir-nightly
+    provisioner:
+      salt_version: nightly
+      salt_bootstrap_options: -MP onedir %s
+
   - name: onedir-latest
     provisioner:
       salt_version: latest

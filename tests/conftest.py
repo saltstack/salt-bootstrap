@@ -46,6 +46,6 @@ def target_python_version():
 @pytest.fixture(scope="session")
 def target_salt_version():
     target_salt = os.environ["KITCHEN_SUITE"].split("-", 2)[-1].replace("-", ".")
-    if target_salt in ("latest", "master"):
+    if target_salt in ("latest", "master", "nightly"):
         pytest.skip("Don't have a specific salt version to test against")
     return target_salt

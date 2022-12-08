@@ -269,6 +269,7 @@ _CUSTOM_MINION_CONFIG="null"
 _QUIET_GIT_INSTALLATION=$BS_FALSE
 _REPO_URL="repo.saltproject.io"
 _ONEDIR_DIR="salt"
+_ONEDIR_NIGHTLY_DIR="salt-dev/${_ONEDIR_DIR}"
 _PY_EXE="python3"
 _INSTALL_PY="$BS_FALSE"
 _TORNADO_MAX_PY3_VERSION="5.0"
@@ -636,7 +637,7 @@ elif [ "$ITYPE" = "onedir" ]; then
     if [ "$#" -eq 0 ];then
         ONEDIR_REV="latest"
     else
-        if [ "$(echo "$1" | grep -E '^(latest|3005)$')" != "" ]; then
+        if [ "$(echo "$1" | grep -E '^(nightly|latest|3005)$')" != "" ]; then
             ONEDIR_REV="$1"
             shift
         elif [ "$(echo "$1" | grep -E '^(3005(\.[0-9]*)?)')" != "" ]; then
@@ -648,7 +649,7 @@ elif [ "$ITYPE" = "onedir" ]; then
             ONEDIR_REV="minor/$1"
             shift
         else
-            echo "Unknown stable version: $1 (valid: 3005, latest.)"
+            echo "Unknown stable version: $1 (valid: 3005, latest, nightly.)"
             exit 1
         fi
     fi
@@ -3054,6 +3055,9 @@ __install_saltstack_ubuntu_onedir_repository() {
 
     # SaltStack's stable Ubuntu repository:
     SALTSTACK_UBUNTU_URL="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_DIR}/${__PY_VERSION_REPO}/ubuntu/${UBUNTU_VERSION}/${__REPO_ARCH}/${ONEDIR_REV}/"
+    if [ "${ONEDIR_REV}" = "nightly" ] ; then
+        SALTSTACK_UBUNTU_URL="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_NIGHTLY_DIR}/${__PY_VERSION_REPO}/ubuntu/${UBUNTU_VERSION}/${__REPO_ARCH}/"
+    fi
     echo "$__REPO_ARCH_DEB $SALTSTACK_UBUNTU_URL $UBUNTU_CODENAME main" > /etc/apt/sources.list.d/salt.list
 
     __apt_key_fetch "${SALTSTACK_UBUNTU_URL}salt-archive-keyring.gpg" || return 1
@@ -3576,6 +3580,9 @@ __install_saltstack_debian_onedir_repository() {
 
     # amd64 is just a part of repository URI, 32-bit pkgs are hosted under the same location
     SALTSTACK_DEBIAN_URL="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_DIR}/${__PY_VERSION_REPO}/debian/${DEBIAN_RELEASE}/${__REPO_ARCH}/${ONEDIR_REV}/"
+    if [ "${ONEDIR_REV}" = "nightly" ] ; then
+        SALTSTACK_DEBIAN_URL="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_NIGHTLY_DIR}/${__PY_VERSION_REPO}/debian/${DEBIAN_RELEASE}/${__REPO_ARCH}/"
+    fi
     echo "$__REPO_ARCH_DEB $SALTSTACK_DEBIAN_URL $DEBIAN_CODENAME main" > "/etc/apt/sources.list.d/salt.list"
 
     __apt_key_fetch "${SALTSTACK_DEBIAN_URL}salt-archive-keyring.gpg" || return 1
@@ -4438,6 +4445,9 @@ __install_saltstack_rhel_onedir_repository() {
     # Avoid using '$releasever' variable for yum.
     # Instead, this should work correctly on all RHEL variants.
     base_url="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_DIR}/${__PY_VERSION_REPO}/redhat/${DISTRO_MAJOR_VERSION}/\$basearch/${ONEDIR_REV}/"
+    if [ "${ONEDIR_REV}" = "nightly" ] ; then
+        base_url="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_NIGHTLY_DIR}/${__PY_VERSION_REPO}/redhat/${DISTRO_MAJOR_VERSION}/\$basearch/"
+    fi
     if [ "${DISTRO_MAJOR_VERSION}" -eq 9 ]; then
         gpg_key="SALTSTACK-GPG-KEY2.pub"
     else
@@ -4464,6 +4474,9 @@ enabled_metadata=1
 _eof
 
         fetch_url="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_DIR}/${__PY_VERSION_REPO}/redhat/${DISTRO_MAJOR_VERSION}/${CPU_ARCH_L}/${ONEDIR_REV}/"
+        if [ "${ONEDIR_REV}" = "nightly" ] ; then
+            fetch_url="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_NIGHTLY_DIR}/${__PY_VERSION_REPO}/redhat/${DISTRO_MAJOR_VERSION}/${CPU_ARCH_L}/"
+        fi
         for key in $gpg_key; do
             __rpm_import_gpg "${fetch_url}${key}" || return 1
         done
@@ -6199,6 +6212,9 @@ install_amazon_linux_ami_2_onedir_deps() {
         fi
 
         base_url="$HTTP_VAL://${_REPO_URL}/${_ONEDIR_DIR}/${__PY_VERSION_REPO}/amazon/2/\$basearch/$repo_rev/"
+        if [ "${ONEDIR_REV}" = "nightly" ] ; then
+            base_url="$HTTP_VAL://${_REPO_URL}/${_ONEDIR_NIGHTLY_DIR}/${__PY_VERSION_REPO}/amazon/2/\$basearch/"
+        fi
         gpg_key="${base_url}SALTSTACK-GPG-KEY.pub,${base_url}base/RPM-GPG-KEY-CentOS-7"
         if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 3 ]; then
             gpg_key="${base_url}SALTSTACK-GPG-KEY.pub"

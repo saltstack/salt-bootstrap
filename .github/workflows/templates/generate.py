@@ -66,6 +66,21 @@ STABLE_DISTROS = [
     "ubuntu-2204",
 ]
 
+ONEDIR_DISTROS = [
+    "almalinux-8",
+    "amazon-2",
+    "centos-7",
+    "centos-stream8",
+    "debian-10",
+    "debian-11",
+    "oraclelinux-7",
+    "oraclelinux-8",
+    "rockylinux-8",
+    "ubuntu-1804",
+    "ubuntu-2004",
+    "ubuntu-2204",
+]
+
 BLACKLIST_3003 = [
     "arch",
     "debian-11",
@@ -154,11 +169,13 @@ SALT_VERSIONS = [
     "3005",
     "master",
     "latest",
+    "nightly",
 ]
 
 ONEDIR_SALT_VERSIONS = [
     "3005",
     "latest",
+    "nightly",
 ]
 
 VERSION_DISPLAY_NAMES = {
@@ -167,9 +184,17 @@ VERSION_DISPLAY_NAMES = {
     "3005": "v3005",
     "master": "Master",
     "latest": "Latest",
+    "nightly": "Nightly",
 }
 
-STABLE_VERSION_BLACKLIST = []
+STABLE_VERSION_BLACKLIST = [
+    "master",
+    "nightly",
+]
+
+GIT_VERSION_BLACKLIST = [
+    "nightly",
+]
 
 LATEST_PKG_BLACKLIST = []
 
@@ -327,8 +352,7 @@ def generate_test_jobs():
 
             for bootstrap_type in ("stable",):
                 if bootstrap_type == "stable":
-                    if salt_version == "master":
-                        # For the master branch there's no stable build
+                    if salt_version in STABLE_VERSION_BLACKLIST:
                         continue
 
                 kitchen_target = f"{bootstrap_type}-{salt_version}"
@@ -368,8 +392,7 @@ def generate_test_jobs():
 
             for bootstrap_type in ("stable",):
                 if bootstrap_type == "stable":
-                    if salt_version == "master":
-                        # For the master branch there's no stable build
+                    if salt_version in STABLE_VERSION_BLACKLIST:
                         continue
 
                 kitchen_target = f"{bootstrap_type}-{salt_version}"
@@ -415,19 +438,21 @@ def generate_test_jobs():
                 if bootstrap_type == "onedir":
                     if salt_version not in ONEDIR_SALT_VERSIONS:
                         continue
+                    if distro not in ONEDIR_DISTROS:
+                        continue
 
                 if bootstrap_type == "stable":
-                    if salt_version == "master":
-                        # For the master branch there's no stable build
+                    if salt_version in STABLE_VERSION_BLACKLIST:
                         continue
                     if distro not in STABLE_DISTROS:
                         continue
 
-                    if salt_version in STABLE_VERSION_BLACKLIST:
-                        continue
-
                     if distro.startswith("fedora") and salt_version != "latest":
                         # Fedora does not keep old builds around
+                        continue
+
+                if bootstrap_type == "git":
+                    if salt_version in GIT_VERSION_BLACKLIST:
                         continue
 
                 BLACKLIST = {

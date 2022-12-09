@@ -212,6 +212,19 @@ GIT_VERSION_BLACKLIST = [
     "nightly",
 ]
 
+# TODO: Revert the commit relating to this section, once the Git-based builds
+#       have been fixed for the distros listed below
+#
+#       Apparent failure is:
+#
+#           /usr/lib/python3.11/site-packages/setuptools/command/install.py:34:
+#           SetuptoolsDeprecationWarning: setup.py install is deprecated.
+#           Use build and pip and other standards-based tools.
+GIT_DISTRO_BLACKLIST = [
+    "fedora-37",
+    "fedora-38",
+]
+
 LATEST_PKG_BLACKLIST = []
 
 DISTRO_DISPLAY_NAMES = {
@@ -471,6 +484,8 @@ def generate_test_jobs():
 
                 if bootstrap_type == "git":
                     if salt_version in GIT_VERSION_BLACKLIST:
+                        continue
+                    if distro in GIT_DISTRO_BLACKLIST:
                         continue
 
                 BLACKLIST = {

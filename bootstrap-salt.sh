@@ -649,7 +649,7 @@ elif [ "$ITYPE" = "onedir" ]; then
             ONEDIR_REV="minor/$1"
             shift
         else
-            echo "Unknown stable version: $1 (valid: 3005, latest, nightly.)"
+            echo "Unknown onedir version: $1 (valid: 3005, latest, nightly.)"
             exit 1
         fi
     fi
@@ -673,7 +673,7 @@ elif [ "$ITYPE" = "onedir_rc" ]; then
             ONEDIR_REV="minor/$1"
             shift
         else
-            echo "Unknown stable version: $1 (valid: 3005-1, latest.)"
+            echo "Unknown onedir_rc version: $1 (valid: 3005-1, latest.)"
             exit 1
         fi
     fi

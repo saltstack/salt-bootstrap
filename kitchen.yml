@@ -68,6 +68,9 @@ platforms:
   - name: fedora-37
     driver:
       provision_command: *fedora_provision_command
+  - name: fedora-38
+    driver:
+      provision_command: *fedora_provision_command
   - name: gentoo
     driver:
       image: gentoo/stage3:latest

@@ -378,6 +378,20 @@ jobs:
       instances: '["git-master", "latest"]'
 
 
+  fedora-38:
+    name: Fedora 38
+    if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
+    uses: ./.github/workflows/test-linux.yml
+    needs:
+      - lint
+      - generate-actions-workflow
+    with:
+      distro-slug: fedora-38
+      display-name: Fedora 38
+      timeout: 20
+      instances: '["git-master", "latest"]'
+
+
   gentoo:
     name: Gentoo
     if: github.event_name == 'push'
@@ -544,6 +558,7 @@ jobs:
       - fedora-35
       - fedora-36
       - fedora-37
+      - fedora-38
       - gentoo
       - gentoo-systemd
       - opensuse-15

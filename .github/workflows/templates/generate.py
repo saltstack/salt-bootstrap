@@ -17,6 +17,8 @@ LINUX_DISTROS = [
     "debian-11",
     "fedora-35",
     "fedora-36",
+    "fedora-37",
+    "fedora-38",
     "gentoo",
     "gentoo-systemd",
     "opensuse-15",
@@ -54,6 +56,8 @@ STABLE_DISTROS = [
     "debian-11",
     "fedora-35",
     "fedora-36",
+    "fedora-37",
+    "fedora-38",
     "gentoo",
     "gentoo-systemd",
     "opensuse-15",
@@ -86,6 +90,8 @@ BLACKLIST_3003 = [
     "debian-11",
     "fedora-35",
     "fedora-36",
+    "fedora-37",
+    "fedora-38",
     "gentoo",
     "gentoo-systemd",
     "opensuse-15",
@@ -101,6 +107,8 @@ BLACKLIST_GIT_3003 = [
     "debian-11",
     "fedora-35",
     "fedora-36",
+    "fedora-37",
+    "fedora-38",
     "gentoo",
     "gentoo-systemd",
     "opensuse-15",
@@ -115,6 +123,8 @@ BLACKLIST_3004 = [
     "arch",
     "fedora-35",
     "fedora-36",
+    "fedora-37",
+    "fedora-38",
     "gentoo",
     "gentoo-systemd",
     "opensuse-15",
@@ -125,6 +135,8 @@ BLACKLIST_3005 = [
     "arch",
     "fedora-35",
     "fedora-36",
+    "fedora-37",
+    "fedora-38",
     "gentoo",
     "gentoo-systemd",
     "opensuse-15",
@@ -138,6 +150,8 @@ BLACKLIST_GIT_3004 = [
     "debian-11",
     "fedora-35",
     "fedora-36",
+    "fedora-37",
+    "fedora-38",
     "gentoo",
     "gentoo-systemd",
     "opensuse-15",
@@ -154,6 +168,8 @@ BLACKLIST_GIT_3005 = [
     "debian-11",
     "fedora-35",
     "fedora-36",
+    "fedora-37",
+    "fedora-38",
     "gentoo",
     "gentoo-systemd",
     "opensuse-15",
@@ -196,6 +212,19 @@ GIT_VERSION_BLACKLIST = [
     "nightly",
 ]
 
+# TODO: Revert the commit relating to this section, once the Git-based builds
+#       have been fixed for the distros listed below
+#
+#       Apparent failure is:
+#
+#           /usr/lib/python3.11/site-packages/setuptools/command/install.py:34:
+#           SetuptoolsDeprecationWarning: setup.py install is deprecated.
+#           Use build and pip and other standards-based tools.
+GIT_DISTRO_BLACKLIST = [
+    "fedora-37",
+    "fedora-38",
+]
+
 LATEST_PKG_BLACKLIST = []
 
 DISTRO_DISPLAY_NAMES = {
@@ -208,6 +237,8 @@ DISTRO_DISPLAY_NAMES = {
     "debian-11": "Debian 11",
     "fedora-35": "Fedora 35",
     "fedora-36": "Fedora 36",
+    "fedora-37": "Fedora 37",
+    "fedora-38": "Fedora 38",
     "gentoo": "Gentoo",
     "gentoo-systemd": "Gentoo (systemd)",
     "opensuse-15": "Opensuse 15",
@@ -453,6 +484,8 @@ def generate_test_jobs():
 
                 if bootstrap_type == "git":
                     if salt_version in GIT_VERSION_BLACKLIST:
+                        continue
+                    if distro in GIT_DISTRO_BLACKLIST:
                         continue
 
                 BLACKLIST = {

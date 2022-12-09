@@ -649,7 +649,7 @@ elif [ "$ITYPE" = "onedir" ]; then
             ONEDIR_REV="minor/$1"
             shift
         else
-            echo "Unknown stable version: $1 (valid: 3005, latest, nightly.)"
+            echo "Unknown onedir version: $1 (valid: 3005, latest, nightly.)"
             exit 1
         fi
     fi
@@ -673,7 +673,7 @@ elif [ "$ITYPE" = "onedir_rc" ]; then
             ONEDIR_REV="minor/$1"
             shift
         else
-            echo "Unknown stable version: $1 (valid: 3005-1, latest.)"
+            echo "Unknown onedir_rc version: $1 (valid: 3005-1, latest.)"
             exit 1
         fi
     fi
@@ -7242,7 +7242,7 @@ install_opensuse_git_deps() {
         fi
     # Check for Tumbleweed
     elif [ "${DISTRO_MAJOR_VERSION}" -ge 20210101 ]; then
-        __PACKAGES="python3-pip gcc-c++ python310-pyzmq-devel"
+        __PACKAGES="python3-pip gcc-c++ python3-pyzmq-devel"
     else
         __PACKAGES="python-pip python-setuptools gcc"
     fi

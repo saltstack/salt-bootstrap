@@ -1442,9 +1442,13 @@ __check_dpkg_architecture() {
             if [ "$_CUSTOM_REPO_URL" != "null" ]; then
                 warn_msg="Support for arm64 is experimental, make sure the custom repository used has the expected structure and contents."
             else
-                # Saltstack official repository does not yet have arm64 metadata,
-                # use arm64 repositories on arm64, since all pkgs are arch-independent
-                __REPO_ARCH="arm64"
+                # Saltstack official repository has arm64 metadata beginning with Debian 11,
+                # use amd64 repositories on arm64 for anything older, since all pkgs are arch-independent
+                if [ "$DISTRO_NAME_L" = "debian" ] || [ "$DISTRO_MAJOR_VERSION" -lt 11 ]; then
+                  __REPO_ARCH="amd64"
+                else
+                  __REPO_ARCH="arm64"
+                fi
                 __REPO_ARCH_DEB="deb [signed-by=/usr/share/keyrings/salt-archive-keyring.gpg arch=$__REPO_ARCH]"
                 warn_msg="Support for arm64 packages is experimental and might rely on architecture-independent packages from the amd64 repository."
             fi

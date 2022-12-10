@@ -1370,7 +1370,7 @@ __gather_system_info() {
 #----------------------------------------------------------------------------------------------------------------------
 # shellcheck disable=SC2034
 __ubuntu_derivatives_translation() {
-    UBUNTU_DERIVATIVES="(trisquel|linuxmint|linaro|elementary_os|neon)"
+    UBUNTU_DERIVATIVES="(trisquel|linuxmint|linaro|elementary_os|neon|pop)"
     # Mappings
     trisquel_6_ubuntu_base="12.04"
     linuxmint_13_ubuntu_base="12.04"
@@ -1383,6 +1383,7 @@ __ubuntu_derivatives_translation() {
     neon_16_ubuntu_base="16.04"
     neon_18_ubuntu_base="18.04"
     neon_20_ubuntu_base="20.04"
+    pop_22_ubuntu_base="22.04"
 
     # Translate Ubuntu derivatives to their base Ubuntu version
     match=$(echo "$DISTRO_NAME_L" | grep -E ${UBUNTU_DERIVATIVES})

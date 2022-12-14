@@ -1829,14 +1829,8 @@ else
     fi
 fi
 
-i# Red Hat variants after 9.x not supported by stable type
+# Red Hat variants after 9.x not supported by stable type
 if [ "$(echo "${DISTRO_NAME_L}" | grep -E '(centos|red_hat|scientific|almalinux|rocky)')" != "" ] && [ "$ITYPE" = "stable" ] && [ "$DISTRO_MAJOR_VERSION" -ge 9 ]; then
-    echoerror "${DISTRO_NAME} ${DISTRO_VERSION} not supported by stable type, use type onedir."
-    exit 1
-fi
-
-# Debian after 11.x not supported by stable type
-if [ "$(echo "${DISTRO_NAME_L}" | grep -E '(debian)')" != "" ] && [ "$ITYPE" = "stable" ] && [ "$DISTRO_MAJOR_VERSION" -ge 11 ]; then
     echoerror "${DISTRO_NAME} ${DISTRO_VERSION} not supported by stable type, use type onedir."
     exit 1
 fi

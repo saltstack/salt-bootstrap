@@ -1835,12 +1835,6 @@ if [ "$(echo "${DISTRO_NAME_L}" | grep -E '(centos|red_hat|scientific|almalinux|
     exit 1
 fi
 
-# Ubuntu after 22.x not supported by stable type
-if [ "$(echo "${DISTRO_NAME_L}" | grep -E '(ubuntu)')" != "" ] && [ "$ITYPE" = "stable" ] && [ "$DISTRO_MAJOR_VERSION" -ge 22 ]; then
-    echoerror "${DISTRO_NAME} ${DISTRO_VERSION} not supported by stable type, use type onedir."
-    exit 1
-fi
-
 # For Ubuntu derivatives, pretend to be their Ubuntu base version
 __ubuntu_derivatives_translation
 

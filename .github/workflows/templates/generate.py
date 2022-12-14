@@ -9,10 +9,12 @@ os.chdir(os.path.abspath(os.path.dirname(__file__)))
 
 LINUX_DISTROS = [
     "almalinux-8",
+    "almalinux-9",
     "amazon-2",
     "arch",
     "centos-7",
     "centos-stream8",
+    "centos-stream9",
     "debian-10",
     "debian-11",
     "fedora-35",
@@ -26,6 +28,7 @@ LINUX_DISTROS = [
     "oraclelinux-7",
     "oraclelinux-8",
     "rockylinux-8",
+    "rockylinux-9",
     "ubuntu-1804",
     "ubuntu-2004",
     "ubuntu-2204",
@@ -72,21 +75,26 @@ STABLE_DISTROS = [
 
 ONEDIR_DISTROS = [
     "almalinux-8",
+    "almalinux-9",
     "amazon-2",
     "centos-7",
     "centos-stream8",
+    "centos-stream9",
     "debian-10",
     "debian-11",
     "oraclelinux-7",
     "oraclelinux-8",
     "rockylinux-8",
+    "rockylinux-9",
     "ubuntu-1804",
     "ubuntu-2004",
     "ubuntu-2204",
 ]
 
 BLACKLIST_3003 = [
+    "almalinux-9",
     "arch",
+    "centos-stream9",
     "debian-11",
     "fedora-35",
     "fedora-36",
@@ -97,12 +105,15 @@ BLACKLIST_3003 = [
     "opensuse-15",
     "opensuse-tumbleweed",
     "rockylinux-8",
+    "rockylinux-9",
     "ubuntu-2204",
 ]
 
 BLACKLIST_GIT_3003 = [
+    "almalinux-9",
     "amazon-2",
     "arch",
+    "centos-stream9",
     "debian-10",
     "debian-11",
     "fedora-35",
@@ -114,13 +125,16 @@ BLACKLIST_GIT_3003 = [
     "opensuse-15",
     "opensuse-tumbleweed",
     "rockylinux-8",
+    "rockylinux-9",
     "ubuntu-2004",
     "ubuntu-2110",
     "ubuntu-2204",
 ]
 
 BLACKLIST_3004 = [
+    "almalinux-9",
     "arch",
+    "centos-stream9",
     "fedora-35",
     "fedora-36",
     "fedora-37",
@@ -129,6 +143,7 @@ BLACKLIST_3004 = [
     "gentoo-systemd",
     "opensuse-15",
     "opensuse-tumbleweed",
+    "rockylinux-9",
 ]
 
 BLACKLIST_3005 = [
@@ -144,8 +159,10 @@ BLACKLIST_3005 = [
 ]
 
 BLACKLIST_GIT_3004 = [
+    "almalinux-9",
     "amazon-2",
     "arch",
+    "centos-stream9",
     "debian-10",
     "debian-11",
     "fedora-35",
@@ -159,6 +176,7 @@ BLACKLIST_GIT_3004 = [
     "ubuntu-2004",
     "ubuntu-2110",
     "ubuntu-2204",
+    "rockylinux-9",
 ]
 
 BLACKLIST_GIT_3005 = [
@@ -229,10 +247,12 @@ LATEST_PKG_BLACKLIST = []
 
 DISTRO_DISPLAY_NAMES = {
     "almalinux-8": "AlmaLinux 8",
+    "almalinux-9": "AlmaLinux 9",
     "amazon-2": "Amazon 2",
     "arch": "Arch",
     "centos-7": "CentOS 7",
     "centos-stream8": "CentOS Stream 8",
+    "centos-stream9": "CentOS Stream 9",
     "debian-10": "Debian 10",
     "debian-11": "Debian 11",
     "fedora-35": "Fedora 35",
@@ -246,6 +266,7 @@ DISTRO_DISPLAY_NAMES = {
     "oraclelinux-7": "Oracle Linux 7",
     "oraclelinux-8": "Oracle Linux 8",
     "rockylinux-8": "Rocky Linux 8",
+    "rockylinux-9": "Rocky Linux 9",
     "ubuntu-1804": "Ubuntu 18.04",
     "ubuntu-2004": "Ubuntu 20.04",
     "ubuntu-2204": "Ubuntu 22.04",

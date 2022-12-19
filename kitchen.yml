@@ -29,6 +29,7 @@ provisioner:
     sh -c 't=$(shuf -i 1-15 -n 1); echo Sleeping $t seconds; sleep $t'
 
 platforms:
+  - name: almalinux-9
   - name: almalinux-8
   - name: amazon-2
     driver:
@@ -43,6 +44,9 @@ platforms:
         - pacman -Syu --noconfirm --needed systemd grep awk procps which
         - systemctl enable sshd
         - echo "PubkeyAcceptedAlgorithms +ssh-rsa" | tee -a /etc/ssh/sshd_config
+  - name: centos-stream9
+    driver:
+      image: quay.io/centos/centos:stream8
   - name: centos-stream8
     driver:
       image: quay.io/centos/centos:stream8
@@ -103,6 +107,7 @@ platforms:
   - name: oraclelinux-8
   - name: oraclelinux-7
   - name: rockylinux-8
+  - name: rockylinux-9
   - name: ubuntu-22.04
     driver:
       run_command: /lib/systemd/systemd

@@ -1830,8 +1830,11 @@ else
 fi
 
 # Red Hat variants after 9.x not supported by stable type
-if [ "$(echo "${DISTRO_NAME_L}" | grep -E '(centos|red_hat|scientific|almalinux|rocky)')" != "" ] && [ "$ITYPE" = "stable" ] && [ "$DISTRO_MAJOR_VERSION" -ge 9 ]; then
-    echoerror "${DISTRO_NAME} ${DISTRO_VERSION} not supported by stable type, use type onedir."
+if [ "$(echo "${DISTRO_NAME_L}" | grep -E '(centos|red_hat|scientific|almalinux|rocky)')" != "" ] && \
+   [ "$ITYPE" = "stable" ] && \
+   [ "$DISTRO_MAJOR_VERSION" -ge 9 ] && \
+   [ "$(echo "$STABLE_REV" | grep -E '^(3003|3004|3005)$')" != "" ]; then
+    echoerror "${DISTRO_NAME} ${DISTRO_VERSION} not supported by stable type and ${STABLE_REV}, use type onedir and a release 3005 or greater."
     exit 1
 fi
 

@@ -30,6 +30,10 @@ provisioner:
 
 platforms:
   - name: almalinux-9
+      provision_command:
+        - dnf -y install crypto-policies-scripts
+        - update-crypto-policies --set DEFAULT:SHA1
+        - echo "PubkeyAcceptedAlgorithms +ssh-rsa" | tee -a /etc/ssh/sshd_config
   - name: almalinux-8
   - name: amazon-2
     driver:
@@ -111,6 +115,8 @@ platforms:
     driver:
       run_command: /usr/lib/systemd/systemd
       provision_command:
+        - dnf -y install crypto-policies-scripts
+        - update-crypto-policies --set DEFAULT:SHA1
         - echo "PubkeyAcceptedAlgorithms +ssh-rsa" | tee -a /etc/ssh/sshd_config
   - name: ubuntu-22.04
     driver:

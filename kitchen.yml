@@ -32,7 +32,7 @@ platforms:
   - name: almalinux-9
     driver:
       provision_command:
-        - dnf -y install crypto-policies-scripts procps-nf
+        - dnf -y install crypto-policies-scripts procps-ng
         - update-crypto-policies --set DEFAULT:SHA1
         - echo "PubkeyAcceptedAlgorithms +ssh-rsa" | tee -a /etc/ssh/sshd_config
   - name: almalinux-8

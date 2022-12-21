@@ -243,7 +243,11 @@ GIT_DISTRO_BLACKLIST = [
     "fedora-38",
 ]
 
-LATEST_PKG_BLACKLIST = []
+LATEST_PKG_BLACKLIST = [
+    "almalinux-9",
+    "centos-stream9",
+    "rockylinux-9",
+]
 
 DISTRO_DISPLAY_NAMES = {
     "almalinux-8": "AlmaLinux 8",

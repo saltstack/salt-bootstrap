@@ -4617,7 +4617,12 @@ install_centos_stable_post() {
 }
 
 install_centos_git_deps() {
-    install_centos_stable_deps || return 1
+    # First try stable deps then fall back to onedir deps if that one fails
+    # if we're installing on a Red Hat based host that doesn't have the classic
+    # package repos available.
+    install_centos_stable_deps || \
+    install_centos_onedir_deps || \
+    return 1
 
     if [ "$_INSECURE_DL" -eq $BS_FALSE ] && [ "${_SALT_REPO_URL%%://*}" = "https" ]; then
         __yum_install_noinput ca-certificates || return 1

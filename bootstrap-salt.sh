@@ -4620,6 +4620,9 @@ install_centos_git_deps() {
     # First try stable deps then fall back to onedir deps if that one fails
     # if we're installing on a Red Hat based host that doesn't have the classic
     # package repos available.
+    # Set ONEDIR_REV to STABLE_REV in case we
+    # end up calling install_centos_onedir_deps
+    ONEDIR_REV=${STABLE_REV}
     install_centos_stable_deps || \
     install_centos_onedir_deps || \
     return 1

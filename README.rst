@@ -486,7 +486,7 @@ in combination with the ``git`` installation method.
 Ubuntu and derivatives
 ~~~~~~~~~~~~~~~~~~~~~~
 
-- KDE neon (based on Ubuntu 18.04)
+- KDE neon (based on Ubuntu 18.04/20.04/22.04)
 - Linux Mint 17/18
 - Ubuntu 14.04/16.04/18.04 and subsequent non-LTS releases (see below)
 

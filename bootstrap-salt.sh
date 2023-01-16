@@ -1383,6 +1383,7 @@ __ubuntu_derivatives_translation() {
     neon_16_ubuntu_base="16.04"
     neon_18_ubuntu_base="18.04"
     neon_20_ubuntu_base="20.04"
+    neon_22_ubuntu_base="22.04"
     pop_22_ubuntu_base="22.04"
 
     # Translate Ubuntu derivatives to their base Ubuntu version

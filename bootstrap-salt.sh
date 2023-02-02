@@ -3330,7 +3330,15 @@ install_ubuntu_git() {
         _POST_NEON_PIP_INSTALL_ARGS=""
         __install_salt_from_repo_post_neon "${_PY_EXE}" || return 1
         cd "${_SALT_GIT_CHECKOUT_DIR}" || return 1
-        sed -i 's:/usr/bin:/usr/local/bin:g' pkg/*.service
+
+        # Account for new path for services files in later releases
+        if [ -d "pkg/common" ]; then
+          _SERVICE_DIR="pkg/common"
+        else
+          _SERVICE_DIR="pkg"
+        fi
+
+        sed -i 's:/usr/bin:/usr/local/bin:g' ${_SERVICE_DIR}/*.service
         return 0
     fi
 
@@ -3962,7 +3970,15 @@ install_debian_git() {
         _POST_NEON_PIP_INSTALL_ARGS=""
         __install_salt_from_repo_post_neon "${_PY_EXE}" || return 1
         cd "${_SALT_GIT_CHECKOUT_DIR}" || return 1
-        sed -i 's:/usr/bin:/usr/local/bin:g' pkg/*.service
+
+        # Account for new path for services files in later releases
+        if [ -d "pkg/common" ]; then
+          _SERVICE_DIR="pkg/common"
+        else
+          _SERVICE_DIR="pkg"
+        fi
+
+        sed -i 's:/usr/bin:/usr/local/bin:g' ${_SERVICE_DIR}/*.service
         return 0
     fi
 

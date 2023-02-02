@@ -3402,8 +3402,15 @@ install_ubuntu_git_post() {
         [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
         [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
 
+        # Account for new path for services files in later releases
+        if [ -f "${_SALT_GIT_CHECKOUT_DIR}/pkg/common/salt-${fname}.service" ]; then
+          _SERVICE_DIR="${_SALT_GIT_CHECKOUT_DIR}/pkg/common"
+        else
+          _SERVICE_DIR="${_SALT_GIT_CHECKOUT_DIR}/pkg"
+        fi
+
         if [ -f /bin/systemctl ] && [ "$DISTRO_MAJOR_VERSION" -ge 16 ]; then
-            __copyfile "${_SALT_GIT_CHECKOUT_DIR}/pkg/salt-${fname}.service" "/lib/systemd/system/salt-${fname}.service"
+            __copyfile "${_SERVICE_DIR}/salt-${fname}.service" "/lib/systemd/system/salt-${fname}.service"
 
             # Skip salt-api since the service should be opt-in and not necessarily started on boot
             [ $fname = "api" ] && continue
@@ -3418,8 +3425,8 @@ install_ubuntu_git_post() {
             if [ ! -f $_upstart_conf ]; then
                 # upstart does not know about our service, let's copy the proper file
                 echowarn "Upstart does not appear to know about salt-$fname"
-                echodebug "Copying ${_SALT_GIT_CHECKOUT_DIR}/pkg/salt-$fname.upstart to $_upstart_conf"
-                __copyfile "${_SALT_GIT_CHECKOUT_DIR}/pkg/salt-${fname}.upstart" "$_upstart_conf"
+                echodebug "Copying ${_SERVICE_DIR}/salt-$fname.upstart to $_upstart_conf"
+                __copyfile "${_SERVICE_DIR}/salt-${fname}.upstart" "$_upstart_conf"
                 # Set service to know about virtualenv
                 if [ "${_VIRTUALENV_DIR}" != "null" ]; then
                     echo "SALT_USE_VIRTUALENV=${_VIRTUALENV_DIR}" > /etc/default/salt-${fname}
@@ -4014,16 +4021,23 @@ install_debian_git_post() {
         [ "$fname" = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
         [ "$fname" = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
 
+        # Account for new path for services files in later releases
+        if [ -f "${_SALT_GIT_CHECKOUT_DIR}/pkg/common/salt-${fname}.service" ]; then
+          _SERVICE_DIR="${_SALT_GIT_CHECKOUT_DIR}/pkg/common"
+        else
+          _SERVICE_DIR="${_SALT_GIT_CHECKOUT_DIR}/pkg"
+        fi
+
         # Configure SystemD for Debian 8 "Jessie" and later
         if [ -f /bin/systemctl ]; then
             if [ ! -f /lib/systemd/system/salt-${fname}.service ] || \
                 { [ -f /lib/systemd/system/salt-${fname}.service ] && [ $_FORCE_OVERWRITE -eq $BS_TRUE ]; }; then
-                if [ -f "${_SALT_GIT_CHECKOUT_DIR}/pkg/salt-${fname}.service" ]; then
-                    __copyfile "${_SALT_GIT_CHECKOUT_DIR}/pkg/salt-${fname}.service" /lib/systemd/system
-                    __copyfile "${_SALT_GIT_CHECKOUT_DIR}/pkg/salt-${fname}.environment" "/etc/default/salt-${fname}"
+                if [ -f "${_SERVICE_DIR}/salt-${fname}.service" ]; then
+                    __copyfile "${_SERVICE_DIR}/salt-${fname}.service" /lib/systemd/system
+                    __copyfile "${_SERVICE_DIR}/salt-${fname}.environment" "/etc/default/salt-${fname}"
                 else
                     # workaround before adding Debian-specific unit files to the Salt main repo
-                    __copyfile "${_SALT_GIT_CHECKOUT_DIR}/pkg/salt-${fname}.service" /lib/systemd/system
+                    __copyfile "${_SERVICE_DIR}/salt-${fname}.service" /lib/systemd/system
                     sed -i -e '/^Type/ s/notify/simple/' /lib/systemd/system/salt-${fname}.service
                 fi
             fi

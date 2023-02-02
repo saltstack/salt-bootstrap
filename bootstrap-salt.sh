@@ -7380,10 +7380,17 @@ install_opensuse_git_post() {
                 use_usr_lib=$BS_TRUE
             fi
 
-            if [ "${use_usr_lib}" -eq $BS_TRUE ]; then
-                __copyfile "${_SALT_GIT_CHECKOUT_DIR}/pkg/salt-${fname}.service" "/usr/lib/systemd/system/salt-${fname}.service"
+            # Account for new path for services files in later releases
+            if [ -f "${_SALT_GIT_CHECKOUT_DIR}/pkg/common/salt-${fname}.service" ]; then
+              _SERVICE_DIR="${_SALT_GIT_CHECKOUT_DIR}/pkg/common"
             else
-                __copyfile "${_SALT_GIT_CHECKOUT_DIR}/pkg/salt-${fname}.service" "/lib/systemd/system/salt-${fname}.service"
+              _SERVICE_DIR="${_SALT_GIT_CHECKOUT_DIR}/pkg/"
+            fi
+
+            if [ "${use_usr_lib}" -eq $BS_TRUE ]; then
+                __copyfile "${_SERVICE_DIR}/salt-${fname}.service" "/usr/lib/systemd/system/salt-${fname}.service"
+            else
+                __copyfile "${_SERVICE_DIR}/salt-${fname}.service" "/lib/systemd/system/salt-${fname}.service"
             fi
 
             continue

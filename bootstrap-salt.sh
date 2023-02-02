@@ -4337,7 +4337,13 @@ install_fedora_git_post() {
         [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
         [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
 
-        __copyfile "${_SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-${fname}.service" "/lib/systemd/system/salt-${fname}.service"
+        # Account for new path for services files in later releases
+        if [ -f "${_SALT_GIT_CHECKOUT_DIR}/pkg/common/salt-${fname}.service" ]; then
+          _SERVICE_DIR="${_SALT_GIT_CHECKOUT_DIR}/pkg/common"
+        else
+          _SERVICE_DIR="${_SALT_GIT_CHECKOUT_DIR}/pkg/rpm"
+        fi
+        __copyfile "${_SERVICE_DIR}/salt-${fname}.service" "/lib/systemd/system/salt-${fname}.service"
 
         # Salt executables are located under `/usr/local/bin/` on Fedora 36+
         #if [ "${DISTRO_VERSION}" -ge 36 ]; then

@@ -2832,11 +2832,11 @@ EOM
     mkdir /tmp/git/deps
     echoinfo "Downloading Salt Dependencies from PyPi"
     echodebug "Running '${_pip_cmd} download -d /tmp/git/deps .'"
-    ${_pip_cmd} download -d /tmp/git/deps . || (echo "Failed to download salt dependencies" && return 1)
+    ${_pip_cmd} download --use-517 -d /tmp/git/deps . || (echo "Failed to download salt dependencies" && return 1)
 
     echoinfo "Installing Downloaded Salt Dependencies"
     echodebug "Running '${_pip_cmd} install --ignore-installed ${_POST_NEON_PIP_INSTALL_ARGS} /tmp/git/deps/*'"
-    ${_pip_cmd} install --ignore-installed ${_POST_NEON_PIP_INSTALL_ARGS} /tmp/git/deps/* || return 1
+    ${_pip_cmd} install --use-517 --ignore-installed ${_POST_NEON_PIP_INSTALL_ARGS} /tmp/git/deps/* || return 1
     rm -f /tmp/git/deps/*
 
     echoinfo "Building Salt Python Wheel"

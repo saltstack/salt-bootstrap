@@ -277,6 +277,7 @@ _POST_NEON_INSTALL=$BS_FALSE
 _MINIMUM_PIP_VERSION="9.0.1"
 _MINIMUM_SETUPTOOLS_VERSION="9.1"
 _POST_NEON_PIP_INSTALL_ARGS="--prefix=/usr"
+_PIP_DOWNLOAD_ARGS=""
 
 # Defaults for install arguments
 ITYPE="stable"
@@ -2831,8 +2832,8 @@ EOM
 
     mkdir /tmp/git/deps
     echoinfo "Downloading Salt Dependencies from PyPi"
-    echodebug "Running '${_pip_cmd} download -d /tmp/git/deps .'"
-    ${_pip_cmd} download -d /tmp/git/deps ${_POST_NEON_PIP_INSTALL_ARGS} . || (echo "Failed to download salt dependencies" && return 1)
+    echodebug "Running '${_pip_cmd} download -d /tmp/git/deps ${_PIP_DOWNLOAD_ARGS} .'"
+    ${_pip_cmd} download -d /tmp/git/deps ${_PIP_DOWNLOAD_ARGS} . || (echo "Failed to download salt dependencies" && return 1)
 
     echoinfo "Installing Downloaded Salt Dependencies"
     echodebug "Running '${_pip_cmd} install --ignore-installed ${_POST_NEON_PIP_INSTALL_ARGS} /tmp/git/deps/*'"
@@ -6516,6 +6517,7 @@ install_arch_linux_stable() {
 install_arch_linux_git() {
 
     _POST_NEON_PIP_INSTALL_ARGS="${_POST_NEON_PIP_INSTALL_ARGS} --use-pep517"
+    _PIP_DOWNLOAD_ARGS="${_PIP_DOWNLOAD_ARGS} --use-pep517"
     if [ "${_POST_NEON_INSTALL}" -eq $BS_TRUE ]; then
          __install_salt_from_repo_post_neon "${_PY_EXE}" || return 1
         return 0

@@ -8036,6 +8036,8 @@ install_gentoo_git_deps() {
         __emerge ${GENTOO_GIT_PACKAGES} || return 1
     fi
 
+    __emerge -v1 setuptools || return 1
+
     __git_clone_and_checkout || return 1
     __gentoo_post_dep || return 1
 }

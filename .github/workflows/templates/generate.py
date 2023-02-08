@@ -28,7 +28,6 @@ LINUX_DISTROS = [
     "oraclelinux-7",
     "oraclelinux-8",
     "rockylinux-8",
-    "rockylinux-9",
     "ubuntu-1804",
     "ubuntu-2004",
     "ubuntu-2204",
@@ -85,7 +84,6 @@ ONEDIR_DISTROS = [
     "oraclelinux-7",
     "oraclelinux-8",
     "rockylinux-8",
-    "rockylinux-9",
     "ubuntu-1804",
     "ubuntu-2004",
     "ubuntu-2204",
@@ -105,7 +103,6 @@ BLACKLIST_3003 = [
     "opensuse-15",
     "opensuse-tumbleweed",
     "rockylinux-8",
-    "rockylinux-9",
     "ubuntu-2204",
 ]
 
@@ -125,7 +122,6 @@ BLACKLIST_GIT_3003 = [
     "opensuse-15",
     "opensuse-tumbleweed",
     "rockylinux-8",
-    "rockylinux-9",
     "ubuntu-2004",
     "ubuntu-2110",
     "ubuntu-2204",
@@ -143,7 +139,6 @@ BLACKLIST_3004 = [
     "gentoo-systemd",
     "opensuse-15",
     "opensuse-tumbleweed",
-    "rockylinux-9",
 ]
 
 BLACKLIST_3005 = [
@@ -176,7 +171,6 @@ BLACKLIST_GIT_3004 = [
     "ubuntu-2004",
     "ubuntu-2110",
     "ubuntu-2204",
-    "rockylinux-9",
 ]
 
 BLACKLIST_GIT_3005 = [
@@ -246,7 +240,6 @@ GIT_DISTRO_BLACKLIST = [
 LATEST_PKG_BLACKLIST = [
     "almalinux-9",
     "centos-stream9",
-    "rockylinux-9",
 ]
 
 DISTRO_DISPLAY_NAMES = {
@@ -270,7 +263,6 @@ DISTRO_DISPLAY_NAMES = {
     "oraclelinux-7": "Oracle Linux 7",
     "oraclelinux-8": "Oracle Linux 8",
     "rockylinux-8": "Rocky Linux 8",
-    "rockylinux-9": "Rocky Linux 9",
     "ubuntu-1804": "Ubuntu 18.04",
     "ubuntu-2004": "Ubuntu 20.04",
     "ubuntu-2204": "Ubuntu 22.04",

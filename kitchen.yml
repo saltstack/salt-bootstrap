@@ -112,7 +112,6 @@ platforms:
   - name: oraclelinux-8
   - name: oraclelinux-7
   - name: rockylinux-8
-  - name: rockylinux-9
     driver:
       run_command: /usr/lib/systemd/systemd
       provision_command:

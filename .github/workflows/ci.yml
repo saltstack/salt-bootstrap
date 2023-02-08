@@ -518,20 +518,6 @@ jobs:
       instances: '["stable-3004", "git-3004", "stable-3005", "git-3005", "onedir-3005", "git-master", "latest", "onedir-nightly"]'
 
 
-  rockylinux-9:
-    name: Rocky Linux 9
-    if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
-    uses: ./.github/workflows/test-linux.yml
-    needs:
-      - lint
-      - generate-actions-workflow
-    with:
-      distro-slug: rockylinux-9
-      display-name: Rocky Linux 9
-      timeout: 20
-      instances: '["git-3005", "onedir-3005", "git-master", "onedir-nightly"]'
-
-
   ubuntu-1804:
     name: Ubuntu 18.04
     if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
@@ -610,7 +596,6 @@ jobs:
       - oraclelinux-7
       - oraclelinux-8
       - rockylinux-8
-      - rockylinux-9
       - ubuntu-1804
       - ubuntu-2004
       - ubuntu-2204

@@ -29,6 +29,12 @@ provisioner:
     sh -c 't=$(shuf -i 1-15 -n 1); echo Sleeping $t seconds; sleep $t'
 
 platforms:
+  - name: almalinux-9
+    driver:
+      provision_command:
+        - dnf -y install crypto-policies-scripts procps-ng
+        - update-crypto-policies --set DEFAULT:SHA1
+        - echo "PubkeyAcceptedAlgorithms +ssh-rsa" | tee -a /etc/ssh/sshd_config
   - name: almalinux-8
   - name: amazon-2
     driver:
@@ -42,6 +48,14 @@ platforms:
       provision_command:
         - pacman -Syu --noconfirm --needed systemd grep awk procps which
         - systemctl enable sshd
+        - echo "PubkeyAcceptedAlgorithms +ssh-rsa" | tee -a /etc/ssh/sshd_config
+  - name: centos-stream9
+    driver:
+      platform: centosstream
+      image: quay.io/centos/centos:stream9
+      provision_command:
+        - dnf -y install crypto-policies-scripts procps-ng
+        - update-crypto-policies --set DEFAULT:SHA1
         - echo "PubkeyAcceptedAlgorithms +ssh-rsa" | tee -a /etc/ssh/sshd_config
   - name: centos-stream8
     driver:

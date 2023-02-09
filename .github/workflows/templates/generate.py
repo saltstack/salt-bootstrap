@@ -9,10 +9,12 @@ os.chdir(os.path.abspath(os.path.dirname(__file__)))
 
 LINUX_DISTROS = [
     "almalinux-8",
+    "almalinux-9",
     "amazon-2",
     "arch",
     "centos-7",
     "centos-stream8",
+    "centos-stream9",
     "debian-10",
     "debian-11",
     "fedora-35",
@@ -72,9 +74,11 @@ STABLE_DISTROS = [
 
 ONEDIR_DISTROS = [
     "almalinux-8",
+    "almalinux-9",
     "amazon-2",
     "centos-7",
     "centos-stream8",
+    "centos-stream9",
     "debian-10",
     "debian-11",
     "oraclelinux-7",
@@ -86,7 +90,9 @@ ONEDIR_DISTROS = [
 ]
 
 BLACKLIST_3003 = [
+    "almalinux-9",
     "arch",
+    "centos-stream9",
     "debian-11",
     "fedora-35",
     "fedora-36",
@@ -101,8 +107,10 @@ BLACKLIST_3003 = [
 ]
 
 BLACKLIST_GIT_3003 = [
+    "almalinux-9",
     "amazon-2",
     "arch",
+    "centos-stream9",
     "debian-10",
     "debian-11",
     "fedora-35",
@@ -120,7 +128,9 @@ BLACKLIST_GIT_3003 = [
 ]
 
 BLACKLIST_3004 = [
+    "almalinux-9",
     "arch",
+    "centos-stream9",
     "fedora-35",
     "fedora-36",
     "fedora-37",
@@ -144,8 +154,10 @@ BLACKLIST_3005 = [
 ]
 
 BLACKLIST_GIT_3004 = [
+    "almalinux-9",
     "amazon-2",
     "arch",
+    "centos-stream9",
     "debian-10",
     "debian-11",
     "fedora-35",
@@ -225,14 +237,19 @@ GIT_DISTRO_BLACKLIST = [
     "fedora-38",
 ]
 
-LATEST_PKG_BLACKLIST = []
+LATEST_PKG_BLACKLIST = [
+    "almalinux-9",
+    "centos-stream9",
+]
 
 DISTRO_DISPLAY_NAMES = {
     "almalinux-8": "AlmaLinux 8",
+    "almalinux-9": "AlmaLinux 9",
     "amazon-2": "Amazon 2",
     "arch": "Arch",
     "centos-7": "CentOS 7",
     "centos-stream8": "CentOS Stream 8",
+    "centos-stream9": "CentOS Stream 9",
     "debian-10": "Debian 10",
     "debian-11": "Debian 11",
     "fedora-35": "Fedora 35",

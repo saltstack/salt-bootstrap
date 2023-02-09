@@ -277,6 +277,7 @@ _POST_NEON_INSTALL=$BS_FALSE
 _MINIMUM_PIP_VERSION="9.0.1"
 _MINIMUM_SETUPTOOLS_VERSION="9.1"
 _POST_NEON_PIP_INSTALL_ARGS="--prefix=/usr"
+_PIP_DOWNLOAD_ARGS=""
 
 # Defaults for install arguments
 ITYPE="stable"
@@ -2831,8 +2832,8 @@ EOM
 
     mkdir /tmp/git/deps
     echoinfo "Downloading Salt Dependencies from PyPi"
-    echodebug "Running '${_pip_cmd} download -d /tmp/git/deps .'"
-    ${_pip_cmd} download -d /tmp/git/deps . || (echo "Failed to download salt dependencies" && return 1)
+    echodebug "Running '${_pip_cmd} download -d /tmp/git/deps ${_PIP_DOWNLOAD_ARGS} .'"
+    ${_pip_cmd} download -d /tmp/git/deps ${_PIP_DOWNLOAD_ARGS} . || (echo "Failed to download salt dependencies" && return 1)
 
     echoinfo "Installing Downloaded Salt Dependencies"
     echodebug "Running '${_pip_cmd} install --ignore-installed ${_POST_NEON_PIP_INSTALL_ARGS} /tmp/git/deps/*'"
@@ -3330,7 +3331,15 @@ install_ubuntu_git() {
         _POST_NEON_PIP_INSTALL_ARGS=""
         __install_salt_from_repo_post_neon "${_PY_EXE}" || return 1
         cd "${_SALT_GIT_CHECKOUT_DIR}" || return 1
-        sed -i 's:/usr/bin:/usr/local/bin:g' pkg/*.service
+
+        # Account for new path for services files in later releases
+        if [ -d "pkg/common" ]; then
+          _SERVICE_DIR="pkg/common"
+        else
+          _SERVICE_DIR="pkg"
+        fi
+
+        sed -i 's:/usr/bin:/usr/local/bin:g' ${_SERVICE_DIR}/*.service
         return 0
     fi
 
@@ -3402,8 +3411,15 @@ install_ubuntu_git_post() {
         [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
         [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
 
+        # Account for new path for services files in later releases
+        if [ -f "${_SALT_GIT_CHECKOUT_DIR}/pkg/common/salt-${fname}.service" ]; then
+          _SERVICE_DIR="${_SALT_GIT_CHECKOUT_DIR}/pkg/common"
+        else
+          _SERVICE_DIR="${_SALT_GIT_CHECKOUT_DIR}/pkg"
+        fi
+
         if [ -f /bin/systemctl ] && [ "$DISTRO_MAJOR_VERSION" -ge 16 ]; then
-            __copyfile "${_SALT_GIT_CHECKOUT_DIR}/pkg/salt-${fname}.service" "/lib/systemd/system/salt-${fname}.service"
+            __copyfile "${_SERVICE_DIR}/salt-${fname}.service" "/lib/systemd/system/salt-${fname}.service"
 
             # Skip salt-api since the service should be opt-in and not necessarily started on boot
             [ $fname = "api" ] && continue
@@ -3418,8 +3434,8 @@ install_ubuntu_git_post() {
             if [ ! -f $_upstart_conf ]; then
                 # upstart does not know about our service, let's copy the proper file
                 echowarn "Upstart does not appear to know about salt-$fname"
-                echodebug "Copying ${_SALT_GIT_CHECKOUT_DIR}/pkg/salt-$fname.upstart to $_upstart_conf"
-                __copyfile "${_SALT_GIT_CHECKOUT_DIR}/pkg/salt-${fname}.upstart" "$_upstart_conf"
+                echodebug "Copying ${_SERVICE_DIR}/salt-$fname.upstart to $_upstart_conf"
+                __copyfile "${_SERVICE_DIR}/salt-${fname}.upstart" "$_upstart_conf"
                 # Set service to know about virtualenv
                 if [ "${_VIRTUALENV_DIR}" != "null" ]; then
                     echo "SALT_USE_VIRTUALENV=${_VIRTUALENV_DIR}" > /etc/default/salt-${fname}
@@ -3955,7 +3971,15 @@ install_debian_git() {
         _POST_NEON_PIP_INSTALL_ARGS=""
         __install_salt_from_repo_post_neon "${_PY_EXE}" || return 1
         cd "${_SALT_GIT_CHECKOUT_DIR}" || return 1
-        sed -i 's:/usr/bin:/usr/local/bin:g' pkg/*.service
+
+        # Account for new path for services files in later releases
+        if [ -d "pkg/common" ]; then
+          _SERVICE_DIR="pkg/common"
+        else
+          _SERVICE_DIR="pkg"
+        fi
+
+        sed -i 's:/usr/bin:/usr/local/bin:g' ${_SERVICE_DIR}/*.service
         return 0
     fi
 
@@ -4014,16 +4038,23 @@ install_debian_git_post() {
         [ "$fname" = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
         [ "$fname" = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
 
+        # Account for new path for services files in later releases
+        if [ -f "${_SALT_GIT_CHECKOUT_DIR}/pkg/common/salt-${fname}.service" ]; then
+          _SERVICE_DIR="${_SALT_GIT_CHECKOUT_DIR}/pkg/common"
+        else
+          _SERVICE_DIR="${_SALT_GIT_CHECKOUT_DIR}/pkg"
+        fi
+
         # Configure SystemD for Debian 8 "Jessie" and later
         if [ -f /bin/systemctl ]; then
             if [ ! -f /lib/systemd/system/salt-${fname}.service ] || \
                 { [ -f /lib/systemd/system/salt-${fname}.service ] && [ $_FORCE_OVERWRITE -eq $BS_TRUE ]; }; then
-                if [ -f "${_SALT_GIT_CHECKOUT_DIR}/pkg/salt-${fname}.service" ]; then
-                    __copyfile "${_SALT_GIT_CHECKOUT_DIR}/pkg/salt-${fname}.service" /lib/systemd/system
-                    __copyfile "${_SALT_GIT_CHECKOUT_DIR}/pkg/salt-${fname}.environment" "/etc/default/salt-${fname}"
+                if [ -f "${_SERVICE_DIR}/salt-${fname}.service" ]; then
+                    __copyfile "${_SERVICE_DIR}/salt-${fname}.service" /lib/systemd/system
+                    __copyfile "${_SERVICE_DIR}/salt-${fname}.environment" "/etc/default/salt-${fname}"
                 else
                     # workaround before adding Debian-specific unit files to the Salt main repo
-                    __copyfile "${_SALT_GIT_CHECKOUT_DIR}/pkg/salt-${fname}.service" /lib/systemd/system
+                    __copyfile "${_SERVICE_DIR}/salt-${fname}.service" /lib/systemd/system
                     sed -i -e '/^Type/ s/notify/simple/' /lib/systemd/system/salt-${fname}.service
                 fi
             fi
@@ -4323,7 +4354,13 @@ install_fedora_git_post() {
         [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
         [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
 
-        __copyfile "${_SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-${fname}.service" "/lib/systemd/system/salt-${fname}.service"
+        # Account for new path for services files in later releases
+        if [ -f "${_SALT_GIT_CHECKOUT_DIR}/pkg/common/salt-${fname}.service" ]; then
+          _SERVICE_DIR="${_SALT_GIT_CHECKOUT_DIR}/pkg/common"
+        else
+          _SERVICE_DIR="${_SALT_GIT_CHECKOUT_DIR}/pkg/rpm"
+        fi
+        __copyfile "${_SERVICE_DIR}/salt-${fname}.service" "/lib/systemd/system/salt-${fname}.service"
 
         # Salt executables are located under `/usr/local/bin/` on Fedora 36+
         #if [ "${DISTRO_VERSION}" -ge 36 ]; then
@@ -4623,7 +4660,15 @@ install_centos_stable_post() {
 }
 
 install_centos_git_deps() {
-    install_centos_stable_deps || return 1
+    # First try stable deps then fall back to onedir deps if that one fails
+    # if we're installing on a Red Hat based host that doesn't have the classic
+    # package repos available.
+    # Set ONEDIR_REV to STABLE_REV in case we
+    # end up calling install_centos_onedir_deps
+    ONEDIR_REV=${STABLE_REV}
+    install_centos_stable_deps || \
+    install_centos_onedir_deps || \
+    return 1
 
     if [ "$_INSECURE_DL" -eq $BS_FALSE ] && [ "${_SALT_REPO_URL%%://*}" = "https" ]; then
         __yum_install_noinput ca-certificates || return 1
@@ -4783,10 +4828,16 @@ install_centos_git_post() {
         [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
         [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
 
+        # Account for new path for services files in later releases
+        if [ -f "${_SALT_GIT_CHECKOUT_DIR}/pkg/common/salt-${fname}.service" ]; then
+          _SERVICE_FILE="${_SALT_GIT_CHECKOUT_DIR}/pkg/common/salt-${fname}.service"
+        else
+          _SERVICE_FILE="${_SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-${fname}.service"
+        fi
         if [ -f /bin/systemctl ]; then
             if [ ! -f "/usr/lib/systemd/system/salt-${fname}.service" ] || \
                 { [ -f "/usr/lib/systemd/system/salt-${fname}.service" ] && [ "$_FORCE_OVERWRITE" -eq $BS_TRUE ]; }; then
-                __copyfile "${_SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-${fname}.service" /usr/lib/systemd/system
+                __copyfile "${_SERVICE_FILE}" /usr/lib/systemd/system
             fi
 
             SYSTEMD_RELOAD=$BS_TRUE
@@ -6465,6 +6516,8 @@ install_arch_linux_stable() {
 
 install_arch_linux_git() {
 
+    _POST_NEON_PIP_INSTALL_ARGS="${_POST_NEON_PIP_INSTALL_ARGS} --use-pep517"
+    _PIP_DOWNLOAD_ARGS="${_PIP_DOWNLOAD_ARGS} --use-pep517"
     if [ "${_POST_NEON_INSTALL}" -eq $BS_TRUE ]; then
          __install_salt_from_repo_post_neon "${_PY_EXE}" || return 1
         return 0
@@ -6522,8 +6575,15 @@ install_arch_linux_git_post() {
         [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
         [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
 
+        # Account for new path for services files in later releases
+        if [ -f "${_SALT_GIT_CHECKOUT_DIR}/pkg/common/salt-${fname}.service" ]; then
+          _SERVICE_DIR="${_SALT_GIT_CHECKOUT_DIR}/pkg/common"
+        else
+          _SERVICE_DIR="${_SALT_GIT_CHECKOUT_DIR}/pkg/rpm"
+        fi
+
         if [ -f /usr/bin/systemctl ]; then
-            __copyfile "${_SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-${fname}.service" "/lib/systemd/system/salt-${fname}.service"
+            __copyfile "${_SERVICE_DIR}/salt-${fname}.service" "/lib/systemd/system/salt-${fname}.service"
 
             # Skip salt-api since the service should be opt-in and not necessarily started on boot
             [ $fname = "api" ] && continue
@@ -7346,10 +7406,17 @@ install_opensuse_git_post() {
                 use_usr_lib=$BS_TRUE
             fi
 
-            if [ "${use_usr_lib}" -eq $BS_TRUE ]; then
-                __copyfile "${_SALT_GIT_CHECKOUT_DIR}/pkg/salt-${fname}.service" "/usr/lib/systemd/system/salt-${fname}.service"
+            # Account for new path for services files in later releases
+            if [ -f "${_SALT_GIT_CHECKOUT_DIR}/pkg/common/salt-${fname}.service" ]; then
+              _SERVICE_DIR="${_SALT_GIT_CHECKOUT_DIR}/pkg/common"
             else
-                __copyfile "${_SALT_GIT_CHECKOUT_DIR}/pkg/salt-${fname}.service" "/lib/systemd/system/salt-${fname}.service"
+              _SERVICE_DIR="${_SALT_GIT_CHECKOUT_DIR}/pkg/"
+            fi
+
+            if [ "${use_usr_lib}" -eq $BS_TRUE ]; then
+                __copyfile "${_SERVICE_DIR}/salt-${fname}.service" "/usr/lib/systemd/system/salt-${fname}.service"
+            else
+                __copyfile "${_SERVICE_DIR}/salt-${fname}.service" "/lib/systemd/system/salt-${fname}.service"
             fi
 
             continue
@@ -7969,6 +8036,9 @@ install_gentoo_git_deps() {
         __emerge ${GENTOO_GIT_PACKAGES} || return 1
     fi
 
+    echoinfo "Running emerge -v1 setuptools"
+    __emerge -v1 setuptools || return 1
+
     __git_clone_and_checkout || return 1
     __gentoo_post_dep || return 1
 }
@@ -8051,8 +8121,15 @@ install_gentoo_git_post() {
         [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
         [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
 
+        # Account for new path for services files in later releases
+        if [ -f "${_SALT_GIT_CHECKOUT_DIR}/pkg/common/salt-${fname}.service" ]; then
+          _SERVICE_DIR="${_SALT_GIT_CHECKOUT_DIR}/pkg/common"
+        else
+          _SERVICE_DIR="${_SALT_GIT_CHECKOUT_DIR}/pkg"
+        fi
+
         if __check_command_exists systemctl ; then
-            __copyfile "${_SALT_GIT_CHECKOUT_DIR}/pkg/salt-${fname}.service" "/lib/systemd/system/salt-${fname}.service"
+            __copyfile "${_SERVICE_DIR}/salt-${fname}.service" "/lib/systemd/system/salt-${fname}.service"
 
             # Skip salt-api since the service should be opt-in and not necessarily started on boot
             [ $fname = "api" ] && continue

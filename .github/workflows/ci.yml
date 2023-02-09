@@ -93,7 +93,7 @@ jobs:
     name: Lint
     runs-on: ubuntu-latest
     needs: collect-changed-files
-    container: koalaman/shellcheck-alpine:v0.6.0
+    container: koalaman/shellcheck-alpine:v0.7.0
     if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
     steps:
       - uses: actions/checkout@v3
@@ -252,6 +252,20 @@ jobs:
       instances: '["stable-3003", "git-3003", "stable-3004", "git-3004", "stable-3005", "git-3005", "onedir-3005", "git-master", "latest", "onedir-nightly"]'
 
 
+  almalinux-9:
+    name: AlmaLinux 9
+    if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
+    uses: ./.github/workflows/test-linux.yml
+    needs:
+      - lint
+      - generate-actions-workflow
+    with:
+      distro-slug: almalinux-9
+      display-name: AlmaLinux 9
+      timeout: 20
+      instances: '["git-3005", "onedir-3005", "git-master", "onedir-nightly"]'
+
+
   amazon-2:
     name: Amazon 2
     if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
@@ -306,6 +320,20 @@ jobs:
       display-name: CentOS Stream 8
       timeout: 20
       instances: '["stable-3003", "git-3003", "stable-3004", "git-3004", "stable-3005", "git-3005", "onedir-3005", "git-master", "latest", "onedir-nightly"]'
+
+
+  centos-stream9:
+    name: CentOS Stream 9
+    if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
+    uses: ./.github/workflows/test-linux.yml
+    needs:
+      - lint
+      - generate-actions-workflow
+    with:
+      distro-slug: centos-stream9
+      display-name: CentOS Stream 9
+      timeout: 20
+      instances: '["git-3005", "onedir-3005", "git-master", "onedir-nightly"]'
 
 
   debian-10:
@@ -549,10 +577,12 @@ jobs:
       - windows-2019
       - windows-2022
       - almalinux-8
+      - almalinux-9
       - amazon-2
       - arch
       - centos-7
       - centos-stream8
+      - centos-stream9
       - debian-10
       - debian-11
       - fedora-35

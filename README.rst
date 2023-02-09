@@ -397,12 +397,16 @@ Using ``PowerShell`` to install latest stable version:
 
 .. code:: console
 
-  New-Item -ItemType Directory -Force -Path C:\Temp
-  Invoke-WebRequest -Uri https://winbootstrap.saltproject.io -OutFile C:\Temp\bootstrap-salt.ps1
+  Invoke-WebRequest -Uri https://winbootstrap.saltproject.io -OutFile $env:TEMP\bootstrap-salt.ps1
   Set-ExecutionPolicy -ExecutionPolicy Unrestricted -Scope CurrentUser
-  C:\Temp\bootstrap-salt.ps1
+  & $env:TEMP\bootstrap-salt.ps1
   Set-ExecutionPolicy -ExecutionPolicy Undefined -Scope CurrentUser
 
+Display information about the install script parameters:
+
+.. code:: console
+
+  help $env:TEMP\bootstrap-salt.ps1 -Detailed
 
 Using ``cygwin`` to install latest stable version:
 

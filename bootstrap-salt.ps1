@@ -65,10 +65,10 @@
     version. The architecture is dynamically determined by the script.
 
 .LINK
-    Bootstrap GitHub Project (script home) - https://github.com/saltstack/salt-windows-bootstrap
-    Original Vagrant Provisioner Project -https://github.com/saltstack/salty-vagrant
+    Salt Bootstrap GitHub Project (script home) - https://github.com/saltstack/salt-bootstrap
+    Original Vagrant Provisioner Project - https://github.com/saltstack/salty-vagrant
     Vagrant Project (utilizes this script) - https://github.com/mitchellh/vagrant
-    SaltStack Download Location - https://repo.saltproject.io/windows/
+    Salt Download Location - https://repo.saltproject.io/windows/
 #>
 
 #===============================================================================

@@ -193,7 +193,7 @@ To view the latest options and descriptions for ``salt-bootstrap``, use ``-h`` a
     -q  Quiet salt installation from git (setup.py install -q)
     -x  Changes the Python version used to install Salt.
         For CentOS 6 git installations python2.7 is supported.
-        Fedora git installation, CentOS 7, Debian 9, Ubuntu 16.04 and 18.04 support python3.
+        Fedora git installation, CentOS 7, Ubuntu 18.04 support python3.
     -y  Installs a different python version on host. Currently this has only been
         tested with CentOS 6 and is considered experimental. This will install the
         ius repo on the box if disable repo is false. This must be used in conjunction
@@ -492,7 +492,6 @@ Ubuntu and derivatives
 
 - KDE neon (based on Ubuntu 18.04/20.04/22.04)
 - Linux Mint 17/18
-- Ubuntu 14.04/16.04/18.04 and subsequent non-LTS releases (see below)
 
 Ubuntu Best Effort Support: Non-LTS Releases
 ********************************************
@@ -567,12 +566,9 @@ Some distributions support installing Salt to use Python 3 instead of Python 2. 
 this offering, while limited, is as follows:
 
 - CentOS 7
-- Centos 8
-- Debian 9
 - Debian 10
 - Debian 11
 - Fedora (only git installations)
-- Ubuntu 16.04
 - Ubuntu 18.04
 - Ubuntu 20.04
 

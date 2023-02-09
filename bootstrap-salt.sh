@@ -406,7 +406,7 @@ __usage() {
         implemented for SUSE.
     -x  Changes the Python version used to install Salt.
         For CentOS 6 git installations python2.7 is supported.
-        Fedora git installation, CentOS 7, Debian 9, Ubuntu 16.04 and 18.04 support python3.
+        Fedora git installation, CentOS 7, Ubuntu 18.04 support python3.
     -X  Do not start daemons after installation
     -y  Installs a different python version on host. Currently this has only been
         tested with CentOS 6 and is considered experimental. This will install the

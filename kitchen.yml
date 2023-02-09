@@ -51,7 +51,11 @@ platforms:
         - echo "PubkeyAcceptedAlgorithms +ssh-rsa" | tee -a /etc/ssh/sshd_config
   - name: centos-stream9
     driver:
-      image: quay.io/centos/centos:stream8
+      image: quay.io/centos/centos:stream9
+      provision_command:
+        - dnf -y install crypto-policies-scripts procps-ng
+        - update-crypto-policies --set DEFAULT:SHA1
+        - echo "PubkeyAcceptedAlgorithms +ssh-rsa" | tee -a /etc/ssh/sshd_config
   - name: centos-stream8
     driver:
       image: quay.io/centos/centos:stream8

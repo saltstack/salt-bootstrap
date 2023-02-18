@@ -29,7 +29,6 @@ LINUX_DISTROS = [
     "oraclelinux-8",
     "rockylinux-8",
     "rockylinux-9",
-    "ubuntu-1804",
     "ubuntu-2004",
     "ubuntu-2204",
 ]
@@ -68,7 +67,6 @@ STABLE_DISTROS = [
     "oraclelinux-7",
     "oraclelinux-8",
     "rockylinux-8",
-    "ubuntu-1804",
     "ubuntu-2004",
     "ubuntu-2204",
 ]
@@ -86,7 +84,6 @@ ONEDIR_DISTROS = [
     "oraclelinux-8",
     "rockylinux-8",
     "rockylinux-9",
-    "ubuntu-1804",
     "ubuntu-2004",
     "ubuntu-2204",
 ]
@@ -238,14 +235,22 @@ GIT_VERSION_BLACKLIST = [
 #           /usr/lib/python3.11/site-packages/setuptools/command/install.py:34:
 #           SetuptoolsDeprecationWarning: setup.py install is deprecated.
 #           Use build and pip and other standards-based tools.
+#
 GIT_DISTRO_BLACKLIST = [
+    "almalinux-8",
+    "centos-7",
+    "centos-stream8",
     "fedora-37",
     "fedora-38",
+    "opensuse-15",
+    "oraclelinux-7",
+    "oraclelinux-8",
+    "rockylinux-8",
 ]
 
 LATEST_PKG_BLACKLIST = [
     "almalinux-9",
-    "centos-stream-9",
+    "centos-stream9",
     "rockylinux-9",
 ]
 
@@ -271,7 +276,6 @@ DISTRO_DISPLAY_NAMES = {
     "oraclelinux-8": "Oracle Linux 8",
     "rockylinux-8": "Rocky Linux 8",
     "rockylinux-9": "Rocky Linux 9",
-    "ubuntu-1804": "Ubuntu 18.04",
     "ubuntu-2004": "Ubuntu 20.04",
     "ubuntu-2204": "Ubuntu 22.04",
     "macos-1015": "macOS 10.15",

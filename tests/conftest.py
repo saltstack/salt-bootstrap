@@ -21,10 +21,12 @@ def host():
         "KITCHEN_INSTANCE"
     ):
         if "windows" in os.environ.get("KITCHEN_INSTANCE"):
+            _url = "winrm://{KITCHEN_USERNAME}:{KITCHEN_PASSWORD}@{KITCHEN_HOSTNAME}:{KITCHEN_PORT}".format(
+                **os.environ
+            )
+            log.debug("=== %s ====", _url)
             return testinfra.get_host(
-                "winrm://{KITCHEN_USERNAME}:{KITCHEN_PASSWORD}@{KITCHEN_HOSTNAME}:{KITCHEN_PORT}".format(
-                    **os.environ
-                ),
+                _url,
                 no_ssl=True,
             )
         return testinfra.get_host(

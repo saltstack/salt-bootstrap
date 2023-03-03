@@ -3078,7 +3078,11 @@ __install_saltstack_ubuntu_onedir_repository() {
     fi
     echo "$__REPO_ARCH_DEB $SALTSTACK_UBUNTU_URL $UBUNTU_CODENAME main" > /etc/apt/sources.list.d/salt.list
 
-    __apt_key_fetch "${SALTSTACK_UBUNTU_URL}salt-archive-keyring.gpg" || return 1
+    if [ "$(echo "${ONEDIR_REV}" | grep -E '^(3004|3005)')" != "" ]; then
+      __apt_key_fetch "${SALTSTACK_UBUNTU_URL}salt-archive-keyring.gpg" || return 1
+    else
+      __apt_key_fetch "${SALTSTACK_UBUNTU_URL}SALT-PROJECT-GPG-PUBKEY-2023.gpg" || return 1
+    fi
 
     __wait_for_apt apt-get update || return 1
 }
@@ -3618,7 +3622,11 @@ __install_saltstack_debian_onedir_repository() {
     fi
     echo "$__REPO_ARCH_DEB $SALTSTACK_DEBIAN_URL $DEBIAN_CODENAME main" > "/etc/apt/sources.list.d/salt.list"
 
-    __apt_key_fetch "${SALTSTACK_DEBIAN_URL}salt-archive-keyring.gpg" || return 1
+    if [ "$(echo "${ONEDIR_REV}" | grep -E '^(3004|3005)')" != "" ]; then
+      __apt_key_fetch "${SALTSTACK_DEBIAN_URL}salt-archive-keyring.gpg" || return 1
+    else
+      __apt_key_fetch "${SALTSTACK_DEBIAN_URL}SALT-PROJECT-GPG-PUBKEY-2023.gpg" || return 1
+    fi
 
     __wait_for_apt apt-get update || return 1
 }

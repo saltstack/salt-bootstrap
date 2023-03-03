@@ -673,6 +673,11 @@ elif [ "$ITYPE" = "onedir_rc" ]; then
             #ONEDIR_REV=$(echo "$1" | sed -E 's/^([3-9][0-9]{3})\.0$/\1/')
             ONEDIR_REV="minor/$1"
             shift
+        elif [ "$(echo "$1" | grep -E '^([3-9][0-9]{3}\.[0-9]?rc[0-9]$)')" != "" ]; then
+            # Handle the 3xxx.0 version as 3xxx archive (pin to minor) and strip the fake ".0" suffix
+            #ONEDIR_REV=$(echo "$1" | sed -E 's/^([3-9][0-9]{3})\.0$/\1/')
+            ONEDIR_REV="minor/$1"
+            shift
         else
             echo "Unknown onedir_rc version: $1 (valid: 3005-1, latest.)"
             exit 1
@@ -4497,10 +4502,14 @@ __install_saltstack_rhel_onedir_repository() {
     if [ "${ONEDIR_REV}" = "nightly" ] ; then
         base_url="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_NIGHTLY_DIR}/${__PY_VERSION_REPO}/redhat/${DISTRO_MAJOR_VERSION}/\$basearch/"
     fi
-    if [ "${DISTRO_MAJOR_VERSION}" -eq 9 ]; then
-        gpg_key="SALTSTACK-GPG-KEY2.pub"
+    if [ "$(echo "${repo_rev}" | grep -E '^(3004|3005)')" != "" ]; then
+      if [ "${DISTRO_MAJOR_VERSION}" -eq 9 ]; then
+          gpg_key="SALTSTACK-GPG-KEY2.pub"
+      else
+          gpg_key="SALTSTACK-GPG-KEY.pub"
+      fi
     else
-        gpg_key="SALTSTACK-GPG-KEY.pub"
+        gpg_key="SALT-PROJECT-GPG-PUBKEY-2023.pub"
     fi
 
     gpg_key_urls=""
@@ -6278,9 +6287,14 @@ install_amazon_linux_ami_2_onedir_deps() {
         if [ "${ONEDIR_REV}" = "nightly" ] ; then
             base_url="$HTTP_VAL://${_REPO_URL}/${_ONEDIR_NIGHTLY_DIR}/${__PY_VERSION_REPO}/amazon/2/\$basearch/"
         fi
-        gpg_key="${base_url}SALTSTACK-GPG-KEY.pub,${base_url}base/RPM-GPG-KEY-CentOS-7"
-        if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 3 ]; then
-            gpg_key="${base_url}SALTSTACK-GPG-KEY.pub"
+
+        if [ "$(echo "${repo_rev}" | grep -E '^(3004|3005)')" != "" ]; then
+          gpg_key="${base_url}SALTSTACK-GPG-KEY.pub,${base_url}base/RPM-GPG-KEY-CentOS-7"
+          if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 3 ]; then
+              gpg_key="${base_url}SALTSTACK-GPG-KEY.pub"
+          fi
+        else
+            gpg_key="${base_url}SALTSTACK-GPG-PUBKEY-2023.pub"
         fi
 
         # This should prob be refactored to use __install_saltstack_rhel_repository()
@@ -8652,7 +8666,11 @@ daemons_running_onedir() {
         [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
         [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
 
-        salt_path="/opt/saltstack/salt/run/run ${fname}"
+        if [ -f "/opt/saltstack/salt/run/run" ]; then
+            salt_path="/opt/saltstack/salt/run/run ${fname}"
+        else
+            salt_path="salt-${fname}"
+        fi
         process_running=$(pgrep -f "${salt_path}")
         if [ "${process_running}" = "" ]; then
             echoerror "${salt_path} was not found running"

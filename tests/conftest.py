@@ -24,7 +24,6 @@ def host():
             _url = "winrm://{KITCHEN_USERNAME}:{KITCHEN_PASSWORD}@{KITCHEN_HOSTNAME}:{KITCHEN_PORT}".format(
                 **os.environ
             )
-            log.debug("=== %s ====", _url)
             return testinfra.get_host(
                 _url,
                 no_ssl=True,

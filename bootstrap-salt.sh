@@ -3078,7 +3078,7 @@ __install_saltstack_ubuntu_onedir_repository() {
     fi
     echo "$__REPO_ARCH_DEB $SALTSTACK_UBUNTU_URL $UBUNTU_CODENAME main" > /etc/apt/sources.list.d/salt.list
 
-    if [ "$(echo "${ONEDIR_REV}" | grep -E '^(3004|3005)')" != "" ]; then
+    if [ "$(echo "${ONEDIR_REV}" | grep -E '(3004|3005)')" != "" ]; then
       __apt_key_fetch "${SALTSTACK_UBUNTU_URL}salt-archive-keyring.gpg" || return 1
     else
       __apt_key_fetch "${SALTSTACK_UBUNTU_URL}SALT-PROJECT-GPG-PUBKEY-2023.gpg" || return 1
@@ -3622,7 +3622,7 @@ __install_saltstack_debian_onedir_repository() {
     fi
     echo "$__REPO_ARCH_DEB $SALTSTACK_DEBIAN_URL $DEBIAN_CODENAME main" > "/etc/apt/sources.list.d/salt.list"
 
-    if [ "$(echo "${ONEDIR_REV}" | grep -E '^(3004|3005)')" != "" ]; then
+    if [ "$(echo "${ONEDIR_REV}" | grep -E '(3004|3005)')" != "" ]; then
       __apt_key_fetch "${SALTSTACK_DEBIAN_URL}salt-archive-keyring.gpg" || return 1
     else
       __apt_key_fetch "${SALTSTACK_DEBIAN_URL}SALT-PROJECT-GPG-PUBKEY-2023.gpg" || return 1
@@ -4510,7 +4510,7 @@ __install_saltstack_rhel_onedir_repository() {
     if [ "${ONEDIR_REV}" = "nightly" ] ; then
         base_url="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_NIGHTLY_DIR}/${__PY_VERSION_REPO}/redhat/${DISTRO_MAJOR_VERSION}/\$basearch/"
     fi
-    if [ "$(echo "${repo_rev}" | grep -E '^(3004|3005)')" != "" ]; then
+    if [ "$(echo "${repo_rev}" | grep -E '(3004|3005)')" != "" ]; then
       if [ "${DISTRO_MAJOR_VERSION}" -eq 9 ]; then
           gpg_key="SALTSTACK-GPG-KEY2.pub"
       else

@@ -70,10 +70,14 @@ jobs:
           $password = ConvertTo-SecureString $env:machine_pass -AsPlainText -Force
           New-LocalUser $env:machine_user -Password $password
           Add-LocalGroupMember -Group "Administrators" -Member $env:machine_user
+          Get-LocalUser
+          Get-LocalGroupMember -Group "Administrators"
 
       - name: Set up WinRM
         run: |
           Set-WSManQuickConfig -Force
+          winrm set winrm/config/service '@{AllowUnencrypted="True"}'
+          env
 
       - name: Set up Python 3.9
         uses: actions/setup-python@v4
@@ -91,6 +95,7 @@ jobs:
 
       - name: Test Bootstrap
         run: |
+          env
           bundle exec kitchen verify ${{ matrix.instance }}-${{ inputs.distro-slug }}
 
       - name: Destroy Test Instance

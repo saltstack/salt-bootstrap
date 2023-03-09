@@ -1,4 +1,5 @@
 pytest-testinfra
 paramiko
+requests-ntlm==1.1.0; sys.platform == 'win32'
 pywinrm; sys.platform == 'win32'
 six>=1.10.0

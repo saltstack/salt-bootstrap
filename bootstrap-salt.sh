@@ -6296,7 +6296,7 @@ install_amazon_linux_ami_2_onedir_deps() {
             base_url="$HTTP_VAL://${_REPO_URL}/${_ONEDIR_NIGHTLY_DIR}/${__PY_VERSION_REPO}/amazon/2/\$basearch/"
         fi
 
-        if [ "$(echo "${repo_rev}" | grep -E '^(3004|3005)')" != "" ]; then
+        if [ "$(echo "${ONEDIR_REV}" | grep -E '(3004|3005)')" != "" ]; then
           gpg_key="${base_url}SALTSTACK-GPG-KEY.pub,${base_url}base/RPM-GPG-KEY-CentOS-7"
           if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 3 ]; then
               gpg_key="${base_url}SALTSTACK-GPG-KEY.pub"

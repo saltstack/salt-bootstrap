@@ -88,6 +88,23 @@ ONEDIR_DISTROS = [
     "ubuntu-2204",
 ]
 
+ONEDIR_RC_DISTROS = [
+    "almalinux-8",
+    "almalinux-9",
+    "amazon-2",
+    "centos-7",
+    "centos-stream8",
+    "centos-stream9",
+    "debian-10",
+    "debian-11",
+    "oraclelinux-7",
+    "oraclelinux-8",
+    "rockylinux-8",
+    "rockylinux-9",
+    "ubuntu-2004",
+    "ubuntu-2204",
+]
+
 BLACKLIST_3003 = [
     "almalinux-9",
     "arch",
@@ -201,12 +218,17 @@ SALT_VERSIONS = [
     "master",
     "latest",
     "nightly",
+    "3006.0rc1",
 ]
 
 ONEDIR_SALT_VERSIONS = [
     "3005",
     "latest",
     "nightly",
+]
+
+ONEDIR_RC_SALT_VERSIONS = [
+    "3006.0rc1",
 ]
 
 VERSION_DISPLAY_NAMES = {
@@ -221,10 +243,12 @@ VERSION_DISPLAY_NAMES = {
 STABLE_VERSION_BLACKLIST = [
     "master",
     "nightly",
+    "3006.0rc1",
 ]
 
 GIT_VERSION_BLACKLIST = [
     "nightly",
+    "3006.0rc1",
 ]
 
 # TODO: Revert the commit relating to this section, once the Git-based builds
@@ -494,11 +518,17 @@ def generate_test_jobs():
                 instances.append(salt_version)
                 continue
 
-            for bootstrap_type in ("stable", "git", "onedir"):
+            for bootstrap_type in ("stable", "git", "onedir", "onedir_rc"):
                 if bootstrap_type == "onedir":
                     if salt_version not in ONEDIR_SALT_VERSIONS:
                         continue
                     if distro not in ONEDIR_DISTROS:
+                        continue
+
+                if bootstrap_type == "onedir_rc":
+                    if salt_version not in ONEDIR_RC_SALT_VERSIONS:
+                        continue
+                    if distro not in ONEDIR_RC_DISTROS:
                         continue
 
                 if bootstrap_type == "stable":

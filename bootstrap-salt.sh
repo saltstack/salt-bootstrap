@@ -6302,7 +6302,7 @@ install_amazon_linux_ami_2_onedir_deps() {
               gpg_key="${base_url}SALTSTACK-GPG-KEY.pub"
           fi
         else
-            gpg_key="${base_url}SALTSTACK-GPG-PUBKEY-2023.pub"
+            gpg_key="${base_url}SALT-PROJECT-GPG-PUBKEY-2023.pub"
         fi
 
         # This should prob be refactored to use __install_saltstack_rhel_repository()

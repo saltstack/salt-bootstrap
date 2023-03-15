@@ -518,14 +518,14 @@ def generate_test_jobs():
                 instances.append(salt_version)
                 continue
 
-            for bootstrap_type in ("stable", "git", "onedir", "onedir_rc"):
+            for bootstrap_type in ("stable", "git", "onedir", "onedir-rc"):
                 if bootstrap_type == "onedir":
                     if salt_version not in ONEDIR_SALT_VERSIONS:
                         continue
                     if distro not in ONEDIR_DISTROS:
                         continue
 
-                if bootstrap_type == "onedir_rc":
+                if bootstrap_type == "onedir-rc":
                     if salt_version not in ONEDIR_RC_SALT_VERSIONS:
                         continue
                     if distro not in ONEDIR_RC_DISTROS:

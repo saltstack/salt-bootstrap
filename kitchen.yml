@@ -265,7 +265,7 @@ suites:
       salt_version: 3005
       salt_bootstrap_options: -MP onedir %s
 
-  - name: onedir-rc-3006-0rc1
+  - name: onedir_rc-3006-0rc1
     provisioner:
       salt_version: 3006.0rc1
       salt_bootstrap_options: -R staging.repo.saltproject.io -MP onedir_rc %s

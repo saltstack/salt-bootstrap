@@ -4643,6 +4643,13 @@ install_centos_stable() {
     # shellcheck disable=SC2086
     __yum_install_noinput ${__PACKAGES} || return 1
 
+    # Workaround for 3.11 broken on CentOS Stream 8.x
+    # Re-install Python 3.6
+    _py_version=$(${_PY_EXE} -c "import sys; print('{0}.{1}'.format(*sys.version_info))")
+    if [ "$DISTRO_MAJOR_VERSION" -eq 8 ] && [ "${_py_version}" = "3.11" ]; then
+      __yum_install_noinput python3
+    fi
+
     return 0
 }
 

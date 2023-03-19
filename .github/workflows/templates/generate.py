@@ -219,6 +219,7 @@ SALT_VERSIONS = [
     "latest",
     "nightly",
     "3006-0rc1",
+    "3006-0rc2",
 ]
 
 ONEDIR_SALT_VERSIONS = [
@@ -229,6 +230,7 @@ ONEDIR_SALT_VERSIONS = [
 
 ONEDIR_RC_SALT_VERSIONS = [
     "3006-0rc1",
+    "3006-0rc2",
 ]
 
 VERSION_DISPLAY_NAMES = {
@@ -244,11 +246,13 @@ STABLE_VERSION_BLACKLIST = [
     "master",
     "nightly",
     "3006-0rc1",
+    "3006-0rc2",
 ]
 
 GIT_VERSION_BLACKLIST = [
     "nightly",
     "3006-0rc1",
+    "3006-0rc2",
 ]
 
 # TODO: Revert the commit relating to this section, once the Git-based builds

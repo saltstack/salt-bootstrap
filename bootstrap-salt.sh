@@ -617,11 +617,20 @@ if [ "$ITYPE" = "git" ]; then
 elif [ "$ITYPE" = "stable" ]; then
     if [ "$#" -eq 0 ];then
         STABLE_REV="latest"
+        ITYPE="onedir"
     else
-        if [ "$(echo "$1" | grep -E '^(latest|1\.6|1\.7|2014\.1|2014\.7|2015\.5|2015\.8|2016\.3|2016\.11|2017\.7|2018\.3|2019\.2|3000|3001|3002|3003|3004|3005)$')" != "" ]; then
+        if [ "$(echo "$1" | grep -E '^(nightly|latest|3006)$')" != "" ]; then
+            ONEDIR_REV="$1"
+            ITYPE="onedir"
+            shift
+        elif [ "$(echo "$1" | grep -E '^(3003|3004|3005)$')" != "" ]; then
             STABLE_REV="$1"
             shift
-        elif [ "$(echo "$1" | grep -E '^(2[0-9]*\.[0-9]*\.[0-9]*|[3-9][0-9]{3}(\.[0-9]*)?)$')" != "" ]; then
+        elif [ "$(echo "$1" | grep -E '^([3-9][6-9]{3}(\.[0-9]*)?)')" != "" ]; then
+            ONEDIR_REV="minor/$1"
+            ITYPE="onedir"
+            shift
+        elif [ "$(echo "$1" | grep -E '^([3-9][0-5]{3}(\.[0-9]*)?)$')" != "" ]; then
             # Handle the 3xxx.0 version as 3xxx archive (pin to minor) and strip the fake ".0" suffix
             STABLE_REV=$(echo "$1" | sed -E 's/^([3-9][0-9]{3})\.0$/\1/')
             if [ "$(uname)" != "Darwin" ]; then
@@ -629,7 +638,7 @@ elif [ "$ITYPE" = "stable" ]; then
             fi
             shift
         else
-            echo "Unknown stable version: $1 (valid: 1.6, 1.7, 2014.1, 2014.7, 2015.5, 2015.8, 2016.3, 2016.11, 2017.7, 2018.3, 2019.2, 3000, 3001, 3002, 3003, 3004, 3005, latest, \$MAJOR.\$MINOR.\$PATCH until 2019.2, \$MAJOR or \$MAJOR.\$PATCH starting from 3000)"
+            echo "Unknown stable version: $1 (valid: 3003, 3004, 3005, 3006, latest)"
             exit 1
         fi
     fi
@@ -638,7 +647,7 @@ elif [ "$ITYPE" = "onedir" ]; then
     if [ "$#" -eq 0 ];then
         ONEDIR_REV="latest"
     else
-        if [ "$(echo "$1" | grep -E '^(nightly|latest|3005)$')" != "" ]; then
+        if [ "$(echo "$1" | grep -E '^(nightly|latest|3005|3006)$')" != "" ]; then
             ONEDIR_REV="$1"
             shift
         elif [ "$(echo "$1" | grep -E '^(3005(\.[0-9]*)?)')" != "" ]; then
@@ -650,7 +659,7 @@ elif [ "$ITYPE" = "onedir" ]; then
             ONEDIR_REV="minor/$1"
             shift
         else
-            echo "Unknown onedir version: $1 (valid: 3005, latest, nightly.)"
+            echo "Unknown onedir version: $1 (valid: 3005, 3006, latest, nightly.)"
             exit 1
         fi
     fi

@@ -898,6 +898,18 @@ __fetch_verify() {
 }
 
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#         NAME:  __check_url_exists
+#  DESCRIPTION:  Checks if a URL exists
+#----------------------------------------------------------------------------------------------------------------------
+__check_url_exists() {
+  _URL="$1"
+  if curl --output /dev/null --silent --fail "${_URL}"; then
+    return 0
+  else
+    return 1
+  fi
+}
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #          NAME:  __gather_hardware_info
 #   DESCRIPTION:  Discover hardware information
 #----------------------------------------------------------------------------------------------------------------------
@@ -3637,8 +3649,8 @@ __install_saltstack_debian_onedir_repository() {
     if [ "$(echo "${ONEDIR_REV}" | grep -E '(3004|3005)')" != "" ]; then
       __apt_key_fetch "${SALTSTACK_DEBIAN_URL}salt-archive-keyring.gpg" || return 1
     elif [ "$(echo "${ONEDIR_REV}" | grep -E '(latest|nightly)')" != "" ]; then
-      __apt_key_fetch "${SALTSTACK_UBUNTU_URL}salt-archive-keyring.gpg" || \
-      __apt_key_fetch "${SALTSTACK_UBUNTU_URL}SALT-PROJECT-GPG-PUBKEY-2023.gpg" || return 1
+      __apt_key_fetch "${SALTSTACK_DEBIAN_URL}salt-archive-keyring.gpg" || \
+      __apt_key_fetch "${SALTSTACK_DEBIAN_URL}SALT-PROJECT-GPG-PUBKEY-2023.gpg" || return 1
     else
       __apt_key_fetch "${SALTSTACK_DEBIAN_URL}SALT-PROJECT-GPG-PUBKEY-2023.gpg" || return 1
     fi
@@ -4537,10 +4549,14 @@ __install_saltstack_rhel_onedir_repository() {
           gpg_key="SALTSTACK-GPG-KEY.pub"
       fi
     elif [ "$(echo "${ONEDIR_REV}" | grep -E '(latest|nightly)')" != "" ]; then
-      if [ "${DISTRO_MAJOR_VERSION}" -eq 9 ]; then
-        gpg_key="SALTSTACK-GPG-KEY2.pub SALT-PROJECT-GPG-PUBKEY-2023.pub"
+      if __check_url_exists "${base_url}SALT-PROJECT-GPG-PUBKEY-2023.pub"; then
+        gpg_key="SALT-PROJECT-GPG-PUBKEY-2023.pub"
       else
-        gpg_key="SALTSTACK-GPG-KEY.pub SALT-PROJECT-GPG-PUBKEY-2023.pub"
+        if [ "${DISTRO_MAJOR_VERSION}" -eq 9 ]; then
+          gpg_key="SALTSTACK-GPG-KEY2.pub"
+        else
+          gpg_key="SALTSTACK-GPG-KEY.pub SALT-PROJECT-GPG-PUBKEY-2023.pub"
+        fi
       fi
     else
         gpg_key="SALT-PROJECT-GPG-PUBKEY-2023.pub"
@@ -6335,7 +6351,11 @@ install_amazon_linux_ami_2_onedir_deps() {
               gpg_key="${base_url}SALTSTACK-GPG-KEY.pub"
           fi
         elif [ "$(echo "${ONEDIR_REV}" | grep -E '(latest|nightly)')" != "" ]; then
-          gpg_key="SALTSTACK-GPG-KEY.pub SALT-PROJECT-GPG-PUBKEY-2023.pub"
+          if __check_url_exists "${base_url}SALT-PROJECT-GPG-PUBKEY-2023.pub"; then
+            gpg_key="${base_url}SALT-PROJECT-GPG-PUBKEY-2023.pub"
+          else
+            gpg_key="${base_url}SALTSTACK-GPG-KEY.pub"
+          fi
         else
             gpg_key="${base_url}SALT-PROJECT-GPG-PUBKEY-2023.pub"
         fi

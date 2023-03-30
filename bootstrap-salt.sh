@@ -3087,8 +3087,11 @@ __install_saltstack_ubuntu_onedir_repository() {
     fi
     echo "$__REPO_ARCH_DEB $SALTSTACK_UBUNTU_URL $UBUNTU_CODENAME main" > /etc/apt/sources.list.d/salt.list
 
-    if [ "$(echo "${ONEDIR_REV}" | grep -E '(3004|3005|nightly)')" != "" ]; then
+    if [ "$(echo "${ONEDIR_REV}" | grep -E '(3004|3005)')" != "" ]; then
       __apt_key_fetch "${SALTSTACK_UBUNTU_URL}salt-archive-keyring.gpg" || return 1
+    elif [ "$(echo "${ONEDIR_REV}" | grep -E '(latest|nightly)')" != "" ]; then
+      __apt_key_fetch "${SALTSTACK_UBUNTU_URL}salt-archive-keyring.gpg" || \
+      __apt_key_fetch "${SALTSTACK_UBUNTU_URL}SALT-PROJECT-GPG-PUBKEY-2023.gpg" || return 1
     else
       __apt_key_fetch "${SALTSTACK_UBUNTU_URL}SALT-PROJECT-GPG-PUBKEY-2023.gpg" || return 1
     fi
@@ -3631,8 +3634,11 @@ __install_saltstack_debian_onedir_repository() {
     fi
     echo "$__REPO_ARCH_DEB $SALTSTACK_DEBIAN_URL $DEBIAN_CODENAME main" > "/etc/apt/sources.list.d/salt.list"
 
-    if [ "$(echo "${ONEDIR_REV}" | grep -E '(3004|3005|nightly)')" != "" ]; then
+    if [ "$(echo "${ONEDIR_REV}" | grep -E '(3004|3005)')" != "" ]; then
       __apt_key_fetch "${SALTSTACK_DEBIAN_URL}salt-archive-keyring.gpg" || return 1
+    elif [ "$(echo "${ONEDIR_REV}" | grep -E '(latest|nightly)')" != "" ]; then
+      __apt_key_fetch "${SALTSTACK_UBUNTU_URL}salt-archive-keyring.gpg" || \
+      __apt_key_fetch "${SALTSTACK_UBUNTU_URL}SALT-PROJECT-GPG-PUBKEY-2023.gpg" || return 1
     else
       __apt_key_fetch "${SALTSTACK_DEBIAN_URL}SALT-PROJECT-GPG-PUBKEY-2023.gpg" || return 1
     fi
@@ -4519,11 +4525,17 @@ __install_saltstack_rhel_onedir_repository() {
     if [ "${ONEDIR_REV}" = "nightly" ] ; then
         base_url="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_NIGHTLY_DIR}/${__PY_VERSION_REPO}/redhat/${DISTRO_MAJOR_VERSION}/\$basearch/"
     fi
-    if [ "$(echo "${ONEDIR_REV}" | grep -E '(3004|3005|nightly)')" != "" ]; then
+    if [ "$(echo "${ONEDIR_REV}" | grep -E '(3004|3005)')" != "" ]; then
       if [ "${DISTRO_MAJOR_VERSION}" -eq 9 ]; then
           gpg_key="SALTSTACK-GPG-KEY2.pub"
       else
           gpg_key="SALTSTACK-GPG-KEY.pub"
+      fi
+    elif [ "$(echo "${ONEDIR_REV}" | grep -E '(latest|nightly)')" != "" ]; then
+      if [ "${DISTRO_MAJOR_VERSION}" -eq 9 ]; then
+        gpg_key="SALTSTACK-GPG-KEY2.pub SALT-PROJECT-GPG-PUBKEY-2023.pub"
+      else
+        gpg_key="SALTSTACK-GPG-KEY.pub SALT-PROJECT-GPG-PUBKEY-2023.pub"
       fi
     else
         gpg_key="SALT-PROJECT-GPG-PUBKEY-2023.pub"
@@ -6312,11 +6324,13 @@ install_amazon_linux_ami_2_onedir_deps() {
             base_url="$HTTP_VAL://${_REPO_URL}/${_ONEDIR_NIGHTLY_DIR}/${__PY_VERSION_REPO}/amazon/2/\$basearch/"
         fi
 
-        if [ "$(echo "${ONEDIR_REV}" | grep -E '(3004|3005|nightly)')" != "" ]; then
+        if [ "$(echo "${ONEDIR_REV}" | grep -E '(3004|3005)')" != "" ]; then
           gpg_key="${base_url}SALTSTACK-GPG-KEY.pub,${base_url}base/RPM-GPG-KEY-CentOS-7"
           if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 3 ]; then
               gpg_key="${base_url}SALTSTACK-GPG-KEY.pub"
           fi
+        elif [ "$(echo "${ONEDIR_REV}" | grep -E '(latest|nightly)')" != "" ]; then
+          gpg_key="SALTSTACK-GPG-KEY.pub SALT-PROJECT-GPG-PUBKEY-2023.pub"
         else
             gpg_key="${base_url}SALT-PROJECT-GPG-PUBKEY-2023.pub"
         fi

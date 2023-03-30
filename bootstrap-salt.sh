@@ -4442,6 +4442,11 @@ install_fedora_check_services() {
 
     return 0
 }
+install_fedora_onedir() {
+    install_fedora_stable || return 1
+
+    return 0
+}
 #
 #   Ended Fedora Install Functions
 #
@@ -6881,6 +6886,15 @@ install_freebsd_restart_daemons() {
         service salt_$fname start
     done
 }
+
+install_freebsd_onedir() {
+#
+# call install_freebsd_stable
+#
+    install_freebsd_stable || return 1
+
+    return 0
+}
 #
 #   Ended FreeBSD Install Functions
 #
@@ -6999,6 +7013,14 @@ install_openbsd_restart_daemons() {
     return 0
 }
 
+install_openbsd_onedir() {
+#
+# Call install_openbsd_stable
+#
+    install_openbsd_stable || return 1
+
+    return 0
+}
 #
 #   Ended OpenBSD Install Functions
 #
@@ -7196,6 +7218,14 @@ install_smartos_restart_daemons() {
         svcadm disable salt-$fname > /dev/null 2>&1
         svcadm enable salt-$fname
     done
+
+    return 0
+}
+install_smartos_onedir() {
+#
+# call install_smartos_stable
+#
+    install_smartos_stable || return 1
 
     return 0
 }

@@ -4461,6 +4461,13 @@ install_fedora_onedir() {
 
     return 0
 }
+
+install_fedora_onedir_post() {
+    STABLE_REV=$ONEDIR_REV
+    install_fedora_stable_post || return 1
+
+    return 0
+}
 #
 #   Ended Fedora Install Functions
 #

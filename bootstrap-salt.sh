@@ -6743,6 +6743,12 @@ install_arch_linux_onedir() {
 
   return 0
 }
+
+install_arch_linux_onedir_post() {
+  install_arch_linux_stable_post || return 1
+
+  return 0
+}
 #
 #   Ended Arch Install Functions
 #

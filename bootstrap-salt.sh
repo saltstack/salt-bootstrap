@@ -617,7 +617,6 @@ if [ "$ITYPE" = "git" ]; then
 elif [ "$ITYPE" = "stable" ]; then
     if [ "$#" -eq 0 ];then
         ONEDIR_REV="latest"
-        STABLE_REV="latest"
         ITYPE="onedir"
     else
         if [ "$(echo "$1" | grep -E '^(nightly|latest|3006)$')" != "" ]; then
@@ -629,6 +628,7 @@ elif [ "$ITYPE" = "stable" ]; then
             shift
         elif [ "$(echo "$1" | grep -E '^([3-9][6-9]{3}(\.[0-9]*)?)')" != "" ]; then
             ONEDIR_REV="minor/$1"
+            _ONEDIR_REV="$1"
             ITYPE="onedir"
             shift
         elif [ "$(echo "$1" | grep -E '^([3-9][0-5]{3}(\.[0-9]*)?)$')" != "" ]; then
@@ -4456,6 +4456,7 @@ install_fedora_check_services() {
     return 0
 }
 install_fedora_onedir() {
+    STABLE_REV=$ONEDIR_REV
     install_fedora_stable || return 1
 
     return 0
@@ -8439,14 +8440,46 @@ __macosx_get_packagesite() {
     SALTPKGCONFURL="https://${_REPO_URL}/osx/${PKG}"
 }
 
+__macosx_get_packagesite_onedir() {
+    DARWIN_ARCH="x86_64"
+
+    __PY_VERSION_REPO="py2"
+    if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 3 ]; then
+        __PY_VERSION_REPO="py3"
+    fi
+
+    if [ "$(echo "$_ONEDIR_REV" | grep -E '^(3005)$')" != "" ]; then
+      PKG="salt-${_ONEDIR_REV}-macos-${DARWIN_ARCH}.pkg"
+      SALTPKGCONFURL="https://${_REPO_URL}/${_ONEDIR_DIR}/${__PY_VERSION_REPO}/macos/${_ONEDIR_REV}/${PKG}"
+    else
+      if [ "$(echo "$_ONEDIR_REV" | grep -E '(salt_rc)$')" != "" ]; then
+        UNSIGNED="-unsigned"
+      else
+        UNSIGNED=""
+      fi
+      PKG="salt-${_ONEDIR_REV}-${__PY_VERSION_REPO}-${DARWIN_ARCH}${UNSIGNED}.pkg"
+      SALTPKGCONFURL="https://${_REPO_URL}/${ONEDIR_REV}/${PKG}"
+    fi
+}
+
 # Using a separate conf step to head for idempotent install...
 __configure_macosx_pkg_details() {
     __macosx_get_packagesite || return 1
     return 0
 }
 
+__configure_macosx_pkg_details_onedir() {
+    __macosx_get_packagesite_onedir || return 1
+    return 0
+}
+
 install_macosx_stable_deps() {
     __configure_macosx_pkg_details || return 1
+    return 0
+}
+
+install_macosx_onedir_deps() {
+    __configure_macosx_pkg_details_onedir || return 1
     return 0
 }
 
@@ -8496,6 +8529,16 @@ install_macosx_stable() {
     return 0
 }
 
+install_macosx_onedir() {
+    install_macosx_onedir_deps || return 1
+
+    __fetch_url "/tmp/${PKG}" "${SALTPKGCONFURL}" || return 1
+
+    /usr/sbin/installer -pkg "/tmp/${PKG}" -target / || return 1
+
+    return 0
+}
+
 install_macosx_git() {
 
     if [ -n "$_PY_EXE" ]; then
@@ -8530,6 +8573,11 @@ install_macosx_stable_post() {
     # Revert nounset to it's previous state
     set -o nounset
 
+    return 0
+}
+
+install_macosx_onedir_post() {
+    install_macosx_stable_post || return 1
     return 0
 }
 

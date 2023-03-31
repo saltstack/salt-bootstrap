@@ -4556,7 +4556,7 @@ __install_saltstack_rhel_onedir_repository() {
         if [ "${DISTRO_MAJOR_VERSION}" -eq 9 ]; then
           gpg_key="SALTSTACK-GPG-KEY2.pub"
         else
-          gpg_key="SALTSTACK-GPG-KEY.pub SALT-PROJECT-GPG-PUBKEY-2023.pub"
+          gpg_key="SALTSTACK-GPG-KEY.pub"
         fi
       fi
     else
@@ -6728,6 +6728,12 @@ install_arch_check_services() {
     done
 
     return 0
+}
+
+install_arch_linux_onedir() {
+  install_arch_linux_stable || return 1
+
+  return 0
 }
 #
 #   Ended Arch Install Functions

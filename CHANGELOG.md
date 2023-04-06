@@ -1,3 +1,36 @@
+# v2023.04.06
+
+## What's Changed
+
+- Fix missing functions for post-installation on EL clones by @ggiesen in https://github.com/saltstack/salt-bootstrap/pull/1877
+- Support for dotZero in version beginning in 3006 by @garethgreenaway in https://github.com/saltstack/salt-bootstrap/pull/1879
+- Update gemfile by @garethgreenaway in https://github.com/saltstack/salt-bootstrap/pull/1882
+- update openbsd to 7, seems like 6 (6.9) is no longer available. by @garethgreenaway in https://github.com/saltstack/salt-bootstrap/pull/1881
+- Adding tests for installing onedir packages by @garethgreenaway in https://github.com/saltstack/salt-bootstrap/pull/1880
+- Removing EPEL, which is no longer needed. by @garethgreenaway in https://github.com/saltstack/salt-bootstrap/pull/1884
+- Add support for the -R flag on macOS. by @pjcreath in https://github.com/saltstack/salt-bootstrap/pull/1871
+- feat: add `onedir nightly` support by @myii in https://github.com/saltstack/salt-bootstrap/pull/1885
+- ci: add `fedora-37` & `fedora-38` by @myii in https://github.com/saltstack/salt-bootstrap/pull/1840
+- Debian ARM Fix by @garethgreenaway in https://github.com/saltstack/salt-bootstrap/pull/1887
+- Added Pop!\_OS as a Ubuntu derivative by @shombando in https://github.com/saltstack/salt-bootstrap/pull/1888
+- Don't attempt to stable install on Red Hat onedir only systems by @garethgreenaway in https://github.com/saltstack/salt-bootstrap/pull/1889
+- \[docs\] Improve Windows readme instructions and links in script by @dafyddj in https://github.com/saltstack/salt-bootstrap/pull/1897
+- Adding newer versions of CentOS Stream and AlmaLinux by @garethgreenaway in https://github.com/saltstack/salt-bootstrap/pull/1890
+- Add support for KDE neon based on Ubuntu 22.04 by @digitalkram in https://github.com/saltstack/salt-bootstrap/pull/1894
+- Removing Ubuntu 16.04 by @garethgreenaway in https://github.com/saltstack/salt-bootstrap/pull/1886
+- Adding rockylinux 9 by @garethgreenaway in https://github.com/saltstack/salt-bootstrap/pull/1899
+- Bootstrap fixes for 3006 by @garethgreenaway in https://github.com/saltstack/salt-bootstrap/pull/1900
+- Adding 3006.0rc1 to Github actions. by @garethgreenaway in https://github.com/saltstack/salt-bootstrap/pull/1901
+- Adding 3006.0rc2 to bootstrap tests. by @garethgreenaway in https://github.com/saltstack/salt-bootstrap/pull/1902
+
+## New Contributors
+
+- @ggiesen made their first contribution in https://github.com/saltstack/salt-bootstrap/pull/1877
+- @shombando made their first contribution in https://github.com/saltstack/salt-bootstrap/pull/1888
+- @digitalkram made their first contribution in https://github.com/saltstack/salt-bootstrap/pull/1894
+
+**Full Changelog**: https://github.com/saltstack/salt-bootstrap/compare/v2022.10.04...v2023.04.06
+
 # v2022.10.04
 
 ## What's Changed

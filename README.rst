@@ -32,6 +32,7 @@ sum** of the downloaded ``bootstrap-salt.sh`` file.
 
 The SHA256 sum of the ``bootstrap-salt.sh`` file, per release, is:
 
+- 2022.10.04: ``d0686c2daeed18bb726e58eef75a69afe9ee56a1a23b2c32cd4e87d6005638e2``
 - 2022.08.13: ``af922699c1a2bb3b89b6dac04397389999df1b3416b8d0b5c93766412f14c95c``
 - 2022.08.12: ``b46f018bbf02f45c6096ab96e9261a9adb3a78ff65092c3976f32ffde909afcb``
 - 2022.05.19: ``e92e1df6930285cf23eda188bee3cfa3dd6c577b4fb7aa91b29213ad820199b1``
@@ -192,7 +193,7 @@ To view the latest options and descriptions for ``salt-bootstrap``, use ``-h`` a
     -q  Quiet salt installation from git (setup.py install -q)
     -x  Changes the Python version used to install Salt.
         For CentOS 6 git installations python2.7 is supported.
-        Fedora git installation, CentOS 7, Debian 9, Ubuntu 16.04 and 18.04 support python3.
+        Fedora git installation, CentOS 7, Ubuntu 18.04 support python3.
     -y  Installs a different python version on host. Currently this has only been
         tested with CentOS 6 and is considered experimental. This will install the
         ius repo on the box if disable repo is false. This must be used in conjunction
@@ -396,12 +397,16 @@ Using ``PowerShell`` to install latest stable version:
 
 .. code:: console
 
-  New-Item -ItemType Directory -Force -Path C:\Temp
-  Invoke-WebRequest -Uri https://winbootstrap.saltproject.io -OutFile C:\Temp\bootstrap-salt.ps1
+  Invoke-WebRequest -Uri https://winbootstrap.saltproject.io -OutFile $env:TEMP\bootstrap-salt.ps1
   Set-ExecutionPolicy -ExecutionPolicy Unrestricted -Scope CurrentUser
-  C:\Temp\bootstrap-salt.ps1
+  & $env:TEMP\bootstrap-salt.ps1
   Set-ExecutionPolicy -ExecutionPolicy Undefined -Scope CurrentUser
 
+Display information about the install script parameters:
+
+.. code:: console
+
+  help $env:TEMP\bootstrap-salt.ps1 -Detailed
 
 Using ``cygwin`` to install latest stable version:
 
@@ -485,9 +490,8 @@ in combination with the ``git`` installation method.
 Ubuntu and derivatives
 ~~~~~~~~~~~~~~~~~~~~~~
 
-- KDE neon (based on Ubuntu 18.04)
+- KDE neon (based on Ubuntu 18.04/20.04/22.04)
 - Linux Mint 17/18
-- Ubuntu 14.04/16.04/18.04 and subsequent non-LTS releases (see below)
 
 Ubuntu Best Effort Support: Non-LTS Releases
 ********************************************
@@ -562,12 +566,9 @@ Some distributions support installing Salt to use Python 3 instead of Python 2. 
 this offering, while limited, is as follows:
 
 - CentOS 7
-- Centos 8
-- Debian 9
 - Debian 10
 - Debian 11
 - Fedora (only git installations)
-- Ubuntu 16.04
 - Ubuntu 18.04
 - Ubuntu 20.04
 

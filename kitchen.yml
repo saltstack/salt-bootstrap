@@ -29,11 +29,23 @@ provisioner:
     sh -c 't=$(shuf -i 1-15 -n 1); echo Sleeping $t seconds; sleep $t'
 
 platforms:
+  - name: almalinux-9
+    driver:
+      provision_command:
+        - dnf -y install crypto-policies-scripts procps-ng
+        - update-crypto-policies --set DEFAULT:SHA1
+        - echo "PubkeyAcceptedAlgorithms +ssh-rsa" | tee -a /etc/ssh/sshd_config
   - name: almalinux-8
   - name: amazon-2
     driver:
       image: amazonlinux:2
       platform: rhel
+      provision_command:
+        - yum -y install procps-ng
+  - name: amazon-2023
+    driver:
+      image: amazonlinux:2023
+      platform: fedora
       provision_command:
         - yum -y install procps-ng
   - name: arch
@@ -42,6 +54,14 @@ platforms:
       provision_command:
         - pacman -Syu --noconfirm --needed systemd grep awk procps which
         - systemctl enable sshd
+        - echo "PubkeyAcceptedAlgorithms +ssh-rsa" | tee -a /etc/ssh/sshd_config
+  - name: centos-stream9
+    driver:
+      platform: centosstream
+      image: quay.io/centos/centos:stream9
+      provision_command:
+        - dnf -y install crypto-policies-scripts procps-ng
+        - update-crypto-policies --set DEFAULT:SHA1
         - echo "PubkeyAcceptedAlgorithms +ssh-rsa" | tee -a /etc/ssh/sshd_config
   - name: centos-stream8
     driver:
@@ -63,6 +83,12 @@ platforms:
         - dnf -y install procps-ng crypto-policies-scripts
         - update-crypto-policies --set LEGACY
   - name: fedora-36
+    driver:
+      provision_command: *fedora_provision_command
+  - name: fedora-37
+    driver:
+      provision_command: *fedora_provision_command
+  - name: fedora-38
     driver:
       provision_command: *fedora_provision_command
   - name: gentoo
@@ -94,6 +120,15 @@ platforms:
         - *opensuse_provision_command_02
         - *opensuse_provision_command_03
         - echo "PubkeyAcceptedAlgorithms +ssh-rsa" | tee -a /etc/ssh/sshd_config
+  - name: rockylinux-9
+    driver:
+      platform: centosstream
+      run_command: /usr/lib/systemd/systemd
+      provision_command:
+        - dnf -y install crypto-policies-scripts procps-ng
+        - update-crypto-policies --set DEFAULT:SHA1
+        - echo "PubkeyAcceptedAlgorithms +ssh-rsa" | tee -a /etc/ssh/sshd_config
+  - name: rockylinux-8
   - name: oraclelinux-8
   - name: oraclelinux-7
   - name: rockylinux-8
@@ -120,6 +155,20 @@ suites:
   - name: git-3004
     provisioner:
       salt_version: 3004
+      salt_bootstrap_options: -x python3 -MPfq git %s
+    excludes:
+      - opensuse-15
+      - opensuse-tumbleweed
+      - debian-11
+      - arch
+      - gentoo
+      - gentoo-systemd
+      - freebsd-131
+      - freebsd-123
+      - openbsd-6
+  - name: git-3005
+    provisioner:
+      salt_version: 3005
       salt_bootstrap_options: -x python3 -MPfq git %s
     excludes:
       - opensuse-15
@@ -186,6 +235,17 @@ suites:
       - freebsd-131
       - freebsd-123
       - openbsd-6
+  - name: stable-3005
+    provisioner:
+      salt_version: 3005
+      salt_bootstrap_options: -x python3 -MP stable %s
+    excludes:
+      - opensuse-15
+      - opensuse-tumbleweed
+      - arch
+      - freebsd-131
+      - freebsd-123
+      - openbsd-6
   - name: git-master
     provisioner:
       salt_version: master
@@ -195,6 +255,49 @@ suites:
     provisioner:
       salt_version: latest
       salt_bootstrap_options: -MP stable %s
+
+  - name: onedir-nightly
+    provisioner:
+      salt_version: nightly
+      salt_bootstrap_options: -MP onedir %s
+
+  - name: onedir-latest
+    provisioner:
+      salt_version: latest
+      salt_bootstrap_options: -MP onedir %s
+
+  - name: onedir-3005
+    provisioner:
+      salt_version: 3005
+      salt_bootstrap_options: -MP onedir %s
+
+  - name: onedir-rc-3006-0rc2
+    provisioner:
+      salt_version: 3006.0rc2
+      salt_bootstrap_options: -R staging.repo.saltproject.io -MP onedir_rc %s
+    excludes:
+      - arch
+      - freebsd-131
+      - freebsd-123
+      - gentoo
+      - openbsd-6
+      - opensuse-15
+      - opensuse-tumbleweed
+      - ubuntu-1804
+
+  - name: onedir-rc-3006-0rc1
+    provisioner:
+      salt_version: 3006.0rc1
+      salt_bootstrap_options: -R staging.repo.saltproject.io -MP onedir_rc %s
+    excludes:
+      - arch
+      - freebsd-131
+      - freebsd-123
+      - gentoo
+      - openbsd-6
+      - opensuse-15
+      - opensuse-tumbleweed
+      - ubuntu-1804
 
 verifier:
   name: shell

@@ -9,15 +9,18 @@ os.chdir(os.path.abspath(os.path.dirname(__file__)))
 
 LINUX_DISTROS = [
     "almalinux-8",
+    "almalinux-9",
     "amazon-2",
     "arch",
     "centos-7",
     "centos-stream8",
+    "centos-stream9",
     "debian-10",
     "debian-11",
-    "debian-9",
     "fedora-35",
     "fedora-36",
+    "fedora-37",
+    "fedora-38",
     "gentoo",
     "gentoo-systemd",
     "opensuse-15",
@@ -25,7 +28,7 @@ LINUX_DISTROS = [
     "oraclelinux-7",
     "oraclelinux-8",
     "rockylinux-8",
-    "ubuntu-1804",
+    "rockylinux-9",
     "ubuntu-2004",
     "ubuntu-2204",
 ]
@@ -42,7 +45,7 @@ OSX = [
 BSD = [
     "freebsd-131",
     "freebsd-123",
-    "openbsd-6",
+    "openbsd-7",
 ]
 
 STABLE_DISTROS = [
@@ -53,9 +56,10 @@ STABLE_DISTROS = [
     "centos-stream8",
     "debian-10",
     "debian-11",
-    "debian-9",
     "fedora-35",
     "fedora-36",
+    "fedora-37",
+    "fedora-38",
     "gentoo",
     "gentoo-systemd",
     "opensuse-15",
@@ -63,45 +67,105 @@ STABLE_DISTROS = [
     "oraclelinux-7",
     "oraclelinux-8",
     "rockylinux-8",
-    "ubuntu-1804",
+    "ubuntu-2004",
+    "ubuntu-2204",
+]
+
+ONEDIR_DISTROS = [
+    "almalinux-8",
+    "almalinux-9",
+    "amazon-2",
+    "centos-7",
+    "centos-stream8",
+    "centos-stream9",
+    "debian-10",
+    "debian-11",
+    "oraclelinux-7",
+    "oraclelinux-8",
+    "rockylinux-8",
+    "rockylinux-9",
+    "ubuntu-2004",
+    "ubuntu-2204",
+]
+
+ONEDIR_RC_DISTROS = [
+    "almalinux-8",
+    "almalinux-9",
+    "amazon-2",
+    "centos-7",
+    "centos-stream8",
+    "centos-stream9",
+    "debian-10",
+    "debian-11",
+    "oraclelinux-7",
+    "oraclelinux-8",
+    "rockylinux-8",
+    "rockylinux-9",
     "ubuntu-2004",
     "ubuntu-2204",
 ]
 
 BLACKLIST_3003 = [
+    "almalinux-9",
     "arch",
+    "centos-stream9",
     "debian-11",
     "fedora-35",
     "fedora-36",
+    "fedora-37",
+    "fedora-38",
     "gentoo",
     "gentoo-systemd",
     "opensuse-15",
     "opensuse-tumbleweed",
     "rockylinux-8",
+    "rockylinux-9",
     "ubuntu-2204",
 ]
 
 BLACKLIST_GIT_3003 = [
+    "almalinux-9",
     "amazon-2",
     "arch",
+    "centos-stream9",
     "debian-10",
     "debian-11",
     "fedora-35",
     "fedora-36",
+    "fedora-37",
+    "fedora-38",
     "gentoo",
     "gentoo-systemd",
     "opensuse-15",
     "opensuse-tumbleweed",
     "rockylinux-8",
+    "rockylinux-9",
     "ubuntu-2004",
     "ubuntu-2110",
     "ubuntu-2204",
 ]
 
 BLACKLIST_3004 = [
+    "almalinux-9",
+    "arch",
+    "centos-stream9",
+    "fedora-35",
+    "fedora-36",
+    "fedora-37",
+    "fedora-38",
+    "gentoo",
+    "gentoo-systemd",
+    "opensuse-15",
+    "opensuse-tumbleweed",
+    "rockylinux-9",
+]
+
+BLACKLIST_3005 = [
     "arch",
     "fedora-35",
     "fedora-36",
+    "fedora-37",
+    "fedora-38",
     "gentoo",
     "gentoo-systemd",
     "opensuse-15",
@@ -109,12 +173,35 @@ BLACKLIST_3004 = [
 ]
 
 BLACKLIST_GIT_3004 = [
+    "almalinux-9",
+    "amazon-2",
+    "arch",
+    "centos-stream9",
+    "debian-10",
+    "debian-11",
+    "fedora-35",
+    "fedora-36",
+    "fedora-37",
+    "fedora-38",
+    "gentoo",
+    "gentoo-systemd",
+    "opensuse-15",
+    "opensuse-tumbleweed",
+    "ubuntu-2004",
+    "ubuntu-2110",
+    "ubuntu-2204",
+    "rockylinux-9",
+]
+
+BLACKLIST_GIT_3005 = [
     "amazon-2",
     "arch",
     "debian-10",
     "debian-11",
     "fedora-35",
     "fedora-36",
+    "fedora-37",
+    "fedora-38",
     "gentoo",
     "gentoo-systemd",
     "opensuse-15",
@@ -127,32 +214,88 @@ BLACKLIST_GIT_3004 = [
 SALT_VERSIONS = [
     "3003",
     "3004",
+    "3005",
     "master",
     "latest",
+    "nightly",
+    "3006-0rc1",
+    "3006-0rc2",
+]
+
+ONEDIR_SALT_VERSIONS = [
+    "3005",
+    "latest",
+    "nightly",
+]
+
+ONEDIR_RC_SALT_VERSIONS = [
+    "3006-0rc1",
+    "3006-0rc2",
 ]
 
 VERSION_DISPLAY_NAMES = {
     "3003": "v3003",
     "3004": "v3004",
+    "3005": "v3005",
     "master": "Master",
     "latest": "Latest",
+    "nightly": "Nightly",
 }
 
-STABLE_VERSION_BLACKLIST = []
+STABLE_VERSION_BLACKLIST = [
+    "master",
+    "nightly",
+    "3006-0rc1",
+    "3006-0rc2",
+]
 
-LATEST_PKG_BLACKLIST = []
+GIT_VERSION_BLACKLIST = [
+    "nightly",
+    "3006-0rc1",
+    "3006-0rc2",
+]
+
+# TODO: Revert the commit relating to this section, once the Git-based builds
+#       have been fixed for the distros listed below
+#
+#       Apparent failure is:
+#
+#           /usr/lib/python3.11/site-packages/setuptools/command/install.py:34:
+#           SetuptoolsDeprecationWarning: setup.py install is deprecated.
+#           Use build and pip and other standards-based tools.
+#
+GIT_DISTRO_BLACKLIST = [
+    "almalinux-8",
+    "centos-7",
+    "centos-stream8",
+    "fedora-37",
+    "fedora-38",
+    "opensuse-15",
+    "oraclelinux-7",
+    "oraclelinux-8",
+    "rockylinux-8",
+]
+
+LATEST_PKG_BLACKLIST = [
+    "almalinux-9",
+    "centos-stream9",
+    "rockylinux-9",
+]
 
 DISTRO_DISPLAY_NAMES = {
     "almalinux-8": "AlmaLinux 8",
+    "almalinux-9": "AlmaLinux 9",
     "amazon-2": "Amazon 2",
     "arch": "Arch",
     "centos-7": "CentOS 7",
     "centos-stream8": "CentOS Stream 8",
+    "centos-stream9": "CentOS Stream 9",
     "debian-10": "Debian 10",
     "debian-11": "Debian 11",
-    "debian-9": "Debian 9",
     "fedora-35": "Fedora 35",
     "fedora-36": "Fedora 36",
+    "fedora-37": "Fedora 37",
+    "fedora-38": "Fedora 38",
     "gentoo": "Gentoo",
     "gentoo-systemd": "Gentoo (systemd)",
     "opensuse-15": "Opensuse 15",
@@ -160,7 +303,7 @@ DISTRO_DISPLAY_NAMES = {
     "oraclelinux-7": "Oracle Linux 7",
     "oraclelinux-8": "Oracle Linux 8",
     "rockylinux-8": "Rocky Linux 8",
-    "ubuntu-1804": "Ubuntu 18.04",
+    "rockylinux-9": "Rocky Linux 9",
     "ubuntu-2004": "Ubuntu 20.04",
     "ubuntu-2204": "Ubuntu 22.04",
     "macos-1015": "macOS 10.15",
@@ -168,7 +311,7 @@ DISTRO_DISPLAY_NAMES = {
     "macos-12": "macOS 12",
     "freebsd-131": "FreeBSD 13.1",
     "freebsd-123": "FreeBSD 12.3",
-    "openbsd-6": "OpenBSD 6",
+    "openbsd-7": "OpenBSD 7",
     "windows-2019": "Windows 2019",
     "windows-2022": "Windows 2022",
 }
@@ -223,7 +366,7 @@ def generate_test_jobs():
                 instances.append(salt_version)
                 continue
 
-            if distro == "openbsd-6":
+            if distro == "openbsd-7":
                 # Only test latest on OpenBSD 6
                 continue
 
@@ -297,8 +440,7 @@ def generate_test_jobs():
 
             for bootstrap_type in ("stable",):
                 if bootstrap_type == "stable":
-                    if salt_version == "master":
-                        # For the master branch there's no stable build
+                    if salt_version in STABLE_VERSION_BLACKLIST:
                         continue
 
                 kitchen_target = f"{bootstrap_type}-{salt_version}"
@@ -338,8 +480,7 @@ def generate_test_jobs():
 
             for bootstrap_type in ("stable",):
                 if bootstrap_type == "stable":
-                    if salt_version == "master":
-                        # For the master branch there's no stable build
+                    if salt_version in STABLE_VERSION_BLACKLIST:
                         continue
 
                 kitchen_target = f"{bootstrap_type}-{salt_version}"
@@ -381,29 +522,45 @@ def generate_test_jobs():
                 instances.append(salt_version)
                 continue
 
-            for bootstrap_type in ("stable", "git"):
-                if bootstrap_type == "stable":
-                    if salt_version == "master":
-                        # For the master branch there's no stable build
+            for bootstrap_type in ("stable", "git", "onedir", "onedir-rc"):
+                if bootstrap_type == "onedir":
+                    if salt_version not in ONEDIR_SALT_VERSIONS:
                         continue
-                    if distro not in STABLE_DISTROS:
+                    if distro not in ONEDIR_DISTROS:
                         continue
 
+                if bootstrap_type == "onedir-rc":
+                    if salt_version not in ONEDIR_RC_SALT_VERSIONS:
+                        continue
+                    if distro not in ONEDIR_RC_DISTROS:
+                        continue
+
+                if bootstrap_type == "stable":
                     if salt_version in STABLE_VERSION_BLACKLIST:
+                        continue
+                    if distro not in STABLE_DISTROS:
                         continue
 
                     if distro.startswith("fedora") and salt_version != "latest":
                         # Fedora does not keep old builds around
                         continue
 
+                if bootstrap_type == "git":
+                    if salt_version in GIT_VERSION_BLACKLIST:
+                        continue
+                    if distro in GIT_DISTRO_BLACKLIST:
+                        continue
+
                 BLACKLIST = {
                     "3003": BLACKLIST_3003,
                     "3004": BLACKLIST_3004,
+                    "3005": BLACKLIST_3005,
                 }
                 if bootstrap_type == "git":
                     BLACKLIST = {
                         "3003": BLACKLIST_GIT_3003,
                         "3004": BLACKLIST_GIT_3004,
+                        "3005": BLACKLIST_GIT_3005,
                     }
 
                     # .0 versions are a virtual version for pinning to the first
@@ -413,7 +570,7 @@ def generate_test_jobs():
                         continue
 
                 if (
-                    salt_version in ("3003", "3004")
+                    salt_version in ("3003", "3004", "3005")
                     and distro in BLACKLIST[salt_version]
                 ):
                     continue

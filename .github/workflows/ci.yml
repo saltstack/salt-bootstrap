@@ -93,7 +93,7 @@ jobs:
     name: Lint
     runs-on: ubuntu-latest
     needs: collect-changed-files
-    container: koalaman/shellcheck-alpine:v0.6.0
+    container: koalaman/shellcheck-alpine:v0.7.0
     if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
     steps:
       - uses: actions/checkout@v3
@@ -145,16 +145,16 @@ jobs:
       instances: '["git-master", "latest"]'
 
 
-  openbsd-6:
-    name: OpenBSD 6
+  openbsd-7:
+    name: OpenBSD 7
     if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
     uses: ./.github/workflows/test-bsd.yml
     needs:
       - lint
       - generate-actions-workflow
     with:
-      distro-slug: openbsd-6
-      display-name: OpenBSD 6
+      distro-slug: openbsd-7
+      display-name: OpenBSD 7
       timeout: 20
       runs-on: macos-10.15
       instances: '["latest"]'
@@ -173,7 +173,7 @@ jobs:
       display-name: macOS 10.15
       timeout: 20
       runs-on: macos-10.15
-      instances: '["stable-3003", "stable-3004", "latest"]'
+      instances: '["stable-3003", "stable-3004", "stable-3005", "latest"]'
 
 
   macos-11:
@@ -188,7 +188,7 @@ jobs:
       display-name: macOS 11
       timeout: 20
       runs-on: macos-11
-      instances: '["stable-3003", "stable-3004", "latest"]'
+      instances: '["stable-3003", "stable-3004", "stable-3005", "latest"]'
 
 
   macos-12:
@@ -203,7 +203,7 @@ jobs:
       display-name: macOS 12
       timeout: 20
       runs-on: macos-12
-      instances: '["stable-3003", "stable-3004", "latest"]'
+      instances: '["stable-3003", "stable-3004", "stable-3005", "latest"]'
 
 
 
@@ -219,7 +219,7 @@ jobs:
       display-name: Windows 2019
       timeout: 20
       runs-on: windows-2019
-      instances: '["stable-3003", "stable-3004", "latest"]'
+      instances: '["stable-3003", "stable-3004", "stable-3005", "latest"]'
 
 
   windows-2022:
@@ -234,7 +234,7 @@ jobs:
       display-name: Windows 2022
       timeout: 20
       runs-on: windows-2022
-      instances: '["stable-3003", "stable-3004", "latest"]'
+      instances: '["stable-3003", "stable-3004", "stable-3005", "latest"]'
 
 
 
@@ -249,7 +249,21 @@ jobs:
       distro-slug: almalinux-8
       display-name: AlmaLinux 8
       timeout: 20
-      instances: '["stable-3003", "git-3003", "stable-3004", "git-3004", "git-master", "latest"]'
+      instances: '["stable-3003", "stable-3004", "stable-3005", "onedir-3005", "latest", "onedir-nightly", "onedir-rc-3006-0rc1", "onedir-rc-3006-0rc2"]'
+
+
+  almalinux-9:
+    name: AlmaLinux 9
+    if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
+    uses: ./.github/workflows/test-linux.yml
+    needs:
+      - lint
+      - generate-actions-workflow
+    with:
+      distro-slug: almalinux-9
+      display-name: AlmaLinux 9
+      timeout: 20
+      instances: '["git-3005", "onedir-3005", "git-master", "onedir-nightly", "onedir-rc-3006-0rc1", "onedir-rc-3006-0rc2"]'
 
 
   amazon-2:
@@ -263,7 +277,7 @@ jobs:
       distro-slug: amazon-2
       display-name: Amazon 2
       timeout: 20
-      instances: '["stable-3003", "stable-3004", "git-master", "latest"]'
+      instances: '["stable-3003", "stable-3004", "stable-3005", "onedir-3005", "git-master", "latest", "onedir-nightly", "onedir-rc-3006-0rc1", "onedir-rc-3006-0rc2"]'
 
 
   arch:
@@ -291,7 +305,7 @@ jobs:
       distro-slug: centos-7
       display-name: CentOS 7
       timeout: 20
-      instances: '["stable-3003", "git-3003", "stable-3004", "git-3004", "git-master", "latest"]'
+      instances: '["stable-3003", "stable-3004", "stable-3005", "onedir-3005", "latest", "onedir-nightly", "onedir-rc-3006-0rc1", "onedir-rc-3006-0rc2"]'
 
 
   centos-stream8:
@@ -305,7 +319,21 @@ jobs:
       distro-slug: centos-stream8
       display-name: CentOS Stream 8
       timeout: 20
-      instances: '["stable-3003", "git-3003", "stable-3004", "git-3004", "git-master", "latest"]'
+      instances: '["stable-3003", "stable-3004", "stable-3005", "onedir-3005", "latest", "onedir-nightly", "onedir-rc-3006-0rc1", "onedir-rc-3006-0rc2"]'
+
+
+  centos-stream9:
+    name: CentOS Stream 9
+    if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
+    uses: ./.github/workflows/test-linux.yml
+    needs:
+      - lint
+      - generate-actions-workflow
+    with:
+      distro-slug: centos-stream9
+      display-name: CentOS Stream 9
+      timeout: 20
+      instances: '["git-3005", "onedir-3005", "git-master", "onedir-nightly", "onedir-rc-3006-0rc1", "onedir-rc-3006-0rc2"]'
 
 
   debian-10:
@@ -319,7 +347,7 @@ jobs:
       distro-slug: debian-10
       display-name: Debian 10
       timeout: 20
-      instances: '["stable-3003", "stable-3004", "git-master", "latest"]'
+      instances: '["stable-3003", "stable-3004", "stable-3005", "onedir-3005", "git-master", "latest", "onedir-nightly", "onedir-rc-3006-0rc1", "onedir-rc-3006-0rc2"]'
 
 
   debian-11:
@@ -333,21 +361,7 @@ jobs:
       distro-slug: debian-11
       display-name: Debian 11
       timeout: 20
-      instances: '["stable-3004", "git-master", "latest"]'
-
-
-  debian-9:
-    name: Debian 9
-    if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
-    uses: ./.github/workflows/test-linux.yml
-    needs:
-      - lint
-      - generate-actions-workflow
-    with:
-      distro-slug: debian-9
-      display-name: Debian 9
-      timeout: 20
-      instances: '["stable-3003", "git-3003", "stable-3004", "git-3004", "git-master", "latest"]'
+      instances: '["stable-3004", "stable-3005", "onedir-3005", "git-master", "latest", "onedir-nightly", "onedir-rc-3006-0rc1", "onedir-rc-3006-0rc2"]'
 
 
   fedora-35:
@@ -376,6 +390,34 @@ jobs:
       display-name: Fedora 36
       timeout: 20
       instances: '["git-master", "latest"]'
+
+
+  fedora-37:
+    name: Fedora 37
+    if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
+    uses: ./.github/workflows/test-linux.yml
+    needs:
+      - lint
+      - generate-actions-workflow
+    with:
+      distro-slug: fedora-37
+      display-name: Fedora 37
+      timeout: 20
+      instances: '["latest"]'
+
+
+  fedora-38:
+    name: Fedora 38
+    if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
+    uses: ./.github/workflows/test-linux.yml
+    needs:
+      - lint
+      - generate-actions-workflow
+    with:
+      distro-slug: fedora-38
+      display-name: Fedora 38
+      timeout: 20
+      instances: '["latest"]'
 
 
   gentoo:
@@ -417,7 +459,7 @@ jobs:
       distro-slug: opensuse-15
       display-name: Opensuse 15
       timeout: 20
-      instances: '["git-master", "latest"]'
+      instances: '["latest"]'
 
 
   opensuse-tumbleweed:
@@ -445,7 +487,7 @@ jobs:
       distro-slug: oraclelinux-7
       display-name: Oracle Linux 7
       timeout: 20
-      instances: '["stable-3003", "git-3003", "stable-3004", "git-3004", "git-master", "latest"]'
+      instances: '["stable-3003", "stable-3004", "stable-3005", "onedir-3005", "latest", "onedir-nightly", "onedir-rc-3006-0rc1", "onedir-rc-3006-0rc2"]'
 
 
   oraclelinux-8:
@@ -459,7 +501,7 @@ jobs:
       distro-slug: oraclelinux-8
       display-name: Oracle Linux 8
       timeout: 20
-      instances: '["stable-3003", "git-3003", "stable-3004", "git-3004", "git-master", "latest"]'
+      instances: '["stable-3003", "stable-3004", "stable-3005", "onedir-3005", "latest", "onedir-nightly", "onedir-rc-3006-0rc1", "onedir-rc-3006-0rc2"]'
 
 
   rockylinux-8:
@@ -473,21 +515,21 @@ jobs:
       distro-slug: rockylinux-8
       display-name: Rocky Linux 8
       timeout: 20
-      instances: '["stable-3004", "git-3004", "git-master", "latest"]'
+      instances: '["stable-3004", "stable-3005", "onedir-3005", "latest", "onedir-nightly", "onedir-rc-3006-0rc1", "onedir-rc-3006-0rc2"]'
 
 
-  ubuntu-1804:
-    name: Ubuntu 18.04
+  rockylinux-9:
+    name: Rocky Linux 9
     if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
     uses: ./.github/workflows/test-linux.yml
     needs:
       - lint
       - generate-actions-workflow
     with:
-      distro-slug: ubuntu-1804
-      display-name: Ubuntu 18.04
+      distro-slug: rockylinux-9
+      display-name: Rocky Linux 9
       timeout: 20
-      instances: '["stable-3003", "git-3003", "stable-3004", "git-3004", "git-master", "latest"]'
+      instances: '["git-3005", "onedir-3005", "git-master", "onedir-nightly", "onedir-rc-3006-0rc1", "onedir-rc-3006-0rc2"]'
 
 
   ubuntu-2004:
@@ -501,7 +543,7 @@ jobs:
       distro-slug: ubuntu-2004
       display-name: Ubuntu 20.04
       timeout: 20
-      instances: '["stable-3003", "stable-3004", "git-master", "latest"]'
+      instances: '["stable-3003", "stable-3004", "stable-3005", "onedir-3005", "git-master", "latest", "onedir-nightly", "onedir-rc-3006-0rc1", "onedir-rc-3006-0rc2"]'
 
 
   ubuntu-2204:
@@ -515,7 +557,7 @@ jobs:
       distro-slug: ubuntu-2204
       display-name: Ubuntu 22.04
       timeout: 20
-      instances: '["stable-3004", "git-master", "latest"]'
+      instances: '["stable-3004", "stable-3005", "onedir-3005", "git-master", "latest", "onedir-nightly", "onedir-rc-3006-0rc1", "onedir-rc-3006-0rc2"]'
 
 
   set-pipeline-exit-status:
@@ -528,22 +570,25 @@ jobs:
       - generate-actions-workflow
       - freebsd-131
       - freebsd-123
-      - openbsd-6
+      - openbsd-7
       - macos-1015
       - macos-11
       - macos-12
       - windows-2019
       - windows-2022
       - almalinux-8
+      - almalinux-9
       - amazon-2
       - arch
       - centos-7
       - centos-stream8
+      - centos-stream9
       - debian-10
       - debian-11
-      - debian-9
       - fedora-35
       - fedora-36
+      - fedora-37
+      - fedora-38
       - gentoo
       - gentoo-systemd
       - opensuse-15
@@ -551,7 +596,7 @@ jobs:
       - oraclelinux-7
       - oraclelinux-8
       - rockylinux-8
-      - ubuntu-1804
+      - rockylinux-9
       - ubuntu-2004
       - ubuntu-2204
     if: always()

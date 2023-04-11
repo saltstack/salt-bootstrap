@@ -155,6 +155,8 @@ def main():
             message=f"Unable to generate changelog. HTTP Response:\n{changelog}",
         )
 
+    github_output = os.environ.get("GITHUB_OUTPUT")
+
     cut_release_version = REPO_ROOT / ".cut_release_version"
     print(
         f"* Writing {cut_release_version.relative_to(REPO_ROOT)} ...",
@@ -162,6 +164,9 @@ def main():
         flush=True,
     )
     cut_release_version.write_text(options.release_tag)
+    if github_output is not None:
+        with open(github_output, "a", encoding="utf-8") as wfh:
+            wfh.write(f"release-version={options.release_tag}\n")
 
     cut_release_changes = REPO_ROOT / ".cut_release_changes"
     print(
@@ -170,6 +175,9 @@ def main():
         flush=True,
     )
     cut_release_changes.write_text(changelog["body"])
+    if github_output is not None:
+        with open(github_output, "a", encoding="utf-8") as wfh:
+            wfh.write(f"release-changes={changelog['body']}\n")
 
     print(
         f"* Updating {changelog_file.relative_to(REPO_ROOT)} ...",

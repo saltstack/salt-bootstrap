@@ -3,13 +3,11 @@ name: Cut Release
 on: workflow_dispatch
 
 jobs:
-  update-develop:
-    name: Update CHANGELOG.md and bootstrap-salt.sh
+
+  check-requirements:
+    name: Check Requirements
     runs-on: ubuntu-latest
-    if: github.repository == 'saltstack/salt-bootstrap'
-    permissions:
-      contents: write  # To be able to publish the release
-    environment: Release
+    environment: release-check
     steps:
       - name: Check For Admin Permission
         uses: actions-cool/check-user-permission@v2
@@ -17,42 +15,104 @@ jobs:
           require: admin
           username: ${{ github.triggering_actor }}
 
-      - name: Check Branch Triggering Release
+      - name: Check Repository
         run: |
-          if [ "${{ github.ref_name }}" != "develop" ]
-          then
-            echo "This workflow should only be triggered from the develop branch"
-            exit 1
+          echo "Trying to run the release workflow from repository ${{ github.repository }}"
+          if [ "${{ github.repository }}" != "saltstack/salt-bootstrap" ]; then
+              echo "Running the release workflow from the ${{ github.repository }} repository is not allowed"
+              echo "Allowed repository: saltstack/salt-bootstrap"
+              exit 1
+          else
+              echo "Allowed to release from repository ${{ github.repository }}"
           fi
 
+      - name: Check Branch
+        run: |
+          echo "Trying to run the release workflow from branch ${{ github.ref_name }}"
+          if [ "${{ github.ref_name }}" != "develop" ]; then
+              echo "Running the release workflow from the ${{ github.ref_name }} branch is not allowed"
+              echo "Allowed branches: develop"
+              exit 1
+          else
+              echo "Allowed to release from branch ${{ github.ref_name }}"
+          fi
+
+  update-develop:
+    name: Update CHANGELOG.md and bootstrap-salt.sh
+    runs-on:
+      - self-hosted
+      - linux
+      - repo-release
+    permissions:
+      contents: write  # To be able to publish the release
+    environment: release
+    needs:
+      - check-requirements
+    outputs:
+      release-changes: ${{ steps.update-repo.outputs.release-changes }}
+      release-version: ${{ steps.update-repo.outputs.release-version }}
+    steps:
       - uses: actions/checkout@v3
         with:
           ref: develop
           repository: ${{ github.repository }}
           ssh-key: ${{ secrets.SALT_BOOTSTRAP_RELEASE_KEY }}
 
-      - name: Update Git Settings
-        run: |
-          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git config --local user.name "github-actions[bot] on behalf of ${{ github.event.sender.login }}"
-
-      - name: Set up Python 3.7
+      - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: 3.9
+          python-version: "3.10"
 
       - name: Install Requirements
         run: |
           python3 -m pip install requests pre-commit
           pre-commit install --install-hooks
 
+      - name: Setup GnuPG
+        run: |
+          sudo install -d -m 0700 -o "$(id -u)" -g "$(id -g)" /run/gpg
+          GNUPGHOME="$(mktemp -d -p /run/gpg)"
+          echo "GNUPGHOME=${GNUPGHOME}" >> "$GITHUB_ENV"
+          cat <<EOF > "${GNUPGHOME}/gpg.conf"
+          batch
+          no-tty
+          pinentry-mode loopback
+          EOF
+
+      - name: Get Secrets
+        id: get-secrets
+        env:
+          SECRETS_KEY: ${{ secrets.SECRETS_KEY }}
+        run: |
+          SECRETS_KEY_FILE=$(mktemp /tmp/output.XXXXXXXXXX)
+          echo "$SECRETS_KEY" > "$SECRETS_KEY_FILE"
+          aws --region us-west-2 secretsmanager get-secret-value --secret-id /cmbu-saltstack/signing/repo-signing-keys-sha256-2023 \
+            --query SecretString --output text | jq .default_key -r | base64 -d \
+            | gpg --passphrase-file "${SECRETS_KEY_FILE}" -d - \
+            | gpg --import -
+          sync
+          aws --region us-west-2 secretsmanager get-secret-value --secret-id /cmbu-saltstack/signing/repo-signing-keys-sha256-2023 \
+            --query SecretString --output text| jq .default_passphrase -r | base64 -d \
+            | gpg --passphrase-file "${SECRETS_KEY_FILE}" -o "${GNUPGHOME}/passphrase" -d -
+          sync
+          rm "$SECRETS_KEY_FILE"
+          echo "passphrase-file ${GNUPGHOME}/passphrase" >> "${GNUPGHOME}/gpg.conf"
+
+      - name: Configure Git
+        shell: bash
+        run: |
+          git config --global --add safe.directory "$(pwd)"
+          git config --global user.name "Salt Project Packaging"
+          git config --global user.email saltproject-packaging@vmware.com
+          git config --global user.signingkey 64CBBC8173D76B3F
+          git config --global commit.gpgsign true
+
       - name: Update Repository
+        id: update-repo
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           python3 .github/workflows/scripts/cut-release.py --repo ${{ github.repository }}
-          export CUT_RELEASE_VERSION=$(cat .cut_release_version)
-          echo "CUT_RELEASE_VERSION=${CUT_RELEASE_VERSION}" >> $GITHUB_ENV
 
       - name: Show Changes
         run: |
@@ -61,15 +121,16 @@ jobs:
 
       - name: Commit Changes
         run: |
-          git commit -am "Update develop branch for the ${CUT_RELEASE_VERSION} release" || \
-            git commit -am "Update develop branch for the ${CUT_RELEASE_VERSION} release"
+          git commit -am "Update develop branch for the ${{ steps.update-repo.outputs.release-version }} release" || \
+            git commit -am "Update develop branch for the ${{ steps.update-repo.outputs.release-version }} release"
 
       - name: Push Changes
-        uses: ad-m/github-push-action@master
+        uses: ad-m/github-push-action@b87afee92c6e70ea888be6203a3e9426fda49839
         with:
-          repository: ${{ github.repository }}
-          branch: develop
           ssh: true
+          atomic: true
+          branch: develop
+          repository: ${{ github.repository }}
 
       - name: Upload Release Details
         uses: actions/upload-artifact@v3
@@ -81,10 +142,13 @@ jobs:
 
   merge-develop-into-stable:
     name: Merge develop into stable
-    runs-on: ubuntu-latest
-    if: github.repository == 'saltstack/salt-bootstrap'
-    needs: update-develop
-    environment: Release
+    runs-on:
+      - self-hosted
+      - linux
+      - repo-release
+    needs:
+      - update-develop
+    environment: release
     permissions:
       contents: write  # To be able to publish the release
     steps:
@@ -95,64 +159,90 @@ jobs:
           ssh-key: ${{ secrets.SALT_BOOTSTRAP_RELEASE_KEY }}
           fetch-depth: 0
 
-      - name: Update Git Settings
+      - name: Setup GnuPG
         run: |
-          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git config --local user.name "github-actions[bot] on behalf of @${{ github.event.sender.login }}"
+          sudo install -d -m 0700 -o "$(id -u)" -g "$(id -g)" /run/gpg
+          GNUPGHOME="$(mktemp -d -p /run/gpg)"
+          echo "GNUPGHOME=${GNUPGHOME}" >> "$GITHUB_ENV"
+          cat <<EOF > "${GNUPGHOME}/gpg.conf"
+          batch
+          no-tty
+          pinentry-mode loopback
+          EOF
+
+      - name: Get Secrets
+        id: get-secrets
+        env:
+          SECRETS_KEY: ${{ secrets.SECRETS_KEY }}
+        run: |
+          SECRETS_KEY_FILE=$(mktemp /tmp/output.XXXXXXXXXX)
+          echo "$SECRETS_KEY" > "$SECRETS_KEY_FILE"
+          aws --region us-west-2 secretsmanager get-secret-value --secret-id /cmbu-saltstack/signing/repo-signing-keys-sha256-2023 \
+            --query SecretString --output text | jq .default_key -r | base64 -d \
+            | gpg --passphrase-file "${SECRETS_KEY_FILE}" -d - \
+            | gpg --import -
+          sync
+          aws --region us-west-2 secretsmanager get-secret-value --secret-id /cmbu-saltstack/signing/repo-signing-keys-sha256-2023 \
+            --query SecretString --output text| jq .default_passphrase -r | base64 -d \
+            | gpg --passphrase-file "${SECRETS_KEY_FILE}" -o "${GNUPGHOME}/passphrase" -d -
+          sync
+          rm "$SECRETS_KEY_FILE"
+          echo "passphrase-file ${GNUPGHOME}/passphrase" >> "${GNUPGHOME}/gpg.conf"
+
+      - name: Configure Git
+        shell: bash
+        run: |
+          git config --global --add safe.directory "$(pwd)"
+          git config --global user.name "Salt Project Packaging"
+          git config --global user.email saltproject-packaging@vmware.com
+          git config --global user.signingkey 64CBBC8173D76B3F
+          git config --global commit.gpgsign true
 
       - name: Download Release Details
         uses: actions/download-artifact@v3
         with:
           name: release-details
 
-      - name: Update Environment
-        run: |
-          export CUT_RELEASE_VERSION=$(cat .cut_release_version)
-          echo "CUT_RELEASE_VERSION=${CUT_RELEASE_VERSION}" >> $GITHUB_ENV
-
       - name: Merge develop into stable
         run: |
-          git merge --no-ff -m "Merge develop into stable for ${CUT_RELEASE_VERSION} release" origin/develop || touch .git-conflicts
+          git merge --no-ff -m "Merge develop into stable for ${{ needs.update-develop.outputs.release-version }} release" origin/develop || touch .git-conflicts
           if [ -f .git-conflicts ]
           then
             git diff
             for f in $(git status | grep 'both modified' | awk '{ print $3 }')
             do
-              git checkout --theirs $f
-              pre-commit run -av --files $f
-              git add $f
+              git checkout --theirs "$f"
+              pre-commit run -av --files "$f"
+              git add "$f"
             done
-            git commit -a -m "Merge develop into stable for ${CUT_RELEASE_VERSION} release(auto resolving conflicts to the develop version)"
+            git commit -a -m "Merge develop into stable for ${{ needs.update-develop.outputs.release-version }} release(auto resolving conflicts to the develop version)"
           fi
 
-      - name: Tag Release
-        uses: mathieudutour/github-tag-action@v6.0
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          custom_tag: ${{ env.CUT_RELEASE_VERSION }}
-          tag_prefix: ""
-          create_annotated_tag: true
+      - name: Tag The ${{ needs.update-develop.outputs.release-version }} Release
+        run: |
+          git tag -m "Release ${{ needs.update-develop.outputs.release-version }}" -as ${{ needs.update-develop.outputs.release-version }}
 
       - name: Update bootstrap-salt.sh sha256sum's
         run: |
-          echo "$(sha256sum bootstrap-salt.sh | awk '{ print $1 }')" > bootstrap-salt.sh.sha256
-          echo "$(sha256sum bootstrap-salt.ps1 | awk '{ print $1 }')" > bootstrap-salt.ps1.sha256
+          sha256sum bootstrap-salt.sh | awk '{ print $1 }' > bootstrap-salt.sh.sha256
+          sha256sum bootstrap-salt.ps1 | awk '{ print $1 }' > bootstrap-salt.ps1.sha256
           git commit -a -m "Update sha256 checksums" || git commit -a -m "Update sha256 checksums"
 
       - name: Push Changes
-        uses: ad-m/github-push-action@master
+        uses: ad-m/github-push-action@b87afee92c6e70ea888be6203a3e9426fda49839
         with:
-          repository: ${{ github.repository }}
-          branch: stable
-          tags: true
           ssh: true
+          tags: true
+          atomic: true
+          branch: stable
+          repository: ${{ github.repository }}
 
   publish-release:
     name: Create GitHub Release
     runs-on: ubuntu-latest
-    if: github.repository == 'saltstack/salt-bootstrap'
-    needs: merge-develop-into-stable
-    environment: Release
+    needs:
+      - merge-develop-into-stable
+    environment: release
     permissions:
       contents: write  # To be able to publish the release
     steps:
@@ -168,8 +258,8 @@ jobs:
 
       - name: Update Environment
         run: |
-          export CUT_RELEASE_VERSION=$(cat .cut_release_version)
-          echo "CUT_RELEASE_VERSION=${CUT_RELEASE_VERSION}" >> $GITHUB_ENV
+          CUT_RELEASE_VERSION=$(cat .cut_release_version)
+          echo "CUT_RELEASE_VERSION=${CUT_RELEASE_VERSION}" >> "$GITHUB_ENV"
 
       - name: Create Github Release
         uses: softprops/action-gh-release@v1
@@ -194,12 +284,38 @@ jobs:
           name: release-details
           failOnError: false
 
+  update-s3-bucket:
+    name: Update S3 Bucket
+    runs-on:
+      - self-hosted
+      - linux
+      - repo-release
+    needs:
+      - publish-release
+    environment: release
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: stable
+          repository: ${{ github.repository }}
+
+      - name: Upload Stable Release to S3
+        run: |
+          files="bootstrap-salt.sh bootstrap-salt.sh.sha256 bootstrap-salt.ps1 bootstrap-salt.ps1.sha256"
+          for fname in $files; do
+            aws s3 cp "${fname}" "s3://${{ vars.S3_BUCKET || 'salt-project-prod-salt-artifacts-release' }}/bootstrap/stable/${fname}"
+          done
+
   update-develop-checksums:
     name: Update Release Checksums on Develop
-    runs-on: ubuntu-latest
-    if: github.repository == 'saltstack/salt-bootstrap'
-    needs: publish-release
-    environment: Release
+    runs-on:
+      - self-hosted
+      - linux
+      - repo-release
+    needs:
+      - publish-release
+    environment: release
     permissions:
       contents: write  # For action peter-evans/create-pull-request
       pull-requests: write  # For action peter-evans/create-pull-request
@@ -213,8 +329,8 @@ jobs:
 
       - name: Get bootstrap-salt.sh on stable branch sha256sum
         run: |
-          echo "SH=$(sha256sum bootstrap-salt.sh | awk '{ print $1 }')" >> $GITHUB_ENV
-          echo "BS_VERSION=$(sh bootstrap-salt.sh -v | awk '{ print $4 }')" >> $GITHUB_ENV
+          echo "SH=$(sha256sum bootstrap-salt.sh | awk '{ print $1 }')" >> "$GITHUB_ENV"
+          echo "BS_VERSION=$(sh bootstrap-salt.sh -v | awk '{ print $4 }')" >> "$GITHUB_ENV"
 
       - uses: actions/checkout@v3
         with:
@@ -222,15 +338,49 @@ jobs:
           repository: ${{ github.repository }}
           ssh-key: ${{ secrets.SALT_BOOTSTRAP_RELEASE_KEY }}
 
-      - name: Update Git Settings
+      - name: Setup GnuPG
         run: |
-          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git config --local user.name "github-actions[bot] on behalf of @${{ github.event.sender.login }}"
+          sudo install -d -m 0700 -o "$(id -u)" -g "$(id -g)" /run/gpg
+          GNUPGHOME="$(mktemp -d -p /run/gpg)"
+          echo "GNUPGHOME=${GNUPGHOME}" >> "$GITHUB_ENV"
+          cat <<EOF > "${GNUPGHOME}/gpg.conf"
+          batch
+          no-tty
+          pinentry-mode loopback
+          EOF
 
-      - name: Set up Python 3.7
+      - name: Get Secrets
+        id: get-secrets
+        env:
+          SECRETS_KEY: ${{ secrets.SECRETS_KEY }}
+        run: |
+          SECRETS_KEY_FILE=$(mktemp /tmp/output.XXXXXXXXXX)
+          echo "$SECRETS_KEY" > "$SECRETS_KEY_FILE"
+          aws --region us-west-2 secretsmanager get-secret-value --secret-id /cmbu-saltstack/signing/repo-signing-keys-sha256-2023 \
+            --query SecretString --output text | jq .default_key -r | base64 -d \
+            | gpg --passphrase-file "${SECRETS_KEY_FILE}" -d - \
+            | gpg --import -
+          sync
+          aws --region us-west-2 secretsmanager get-secret-value --secret-id /cmbu-saltstack/signing/repo-signing-keys-sha256-2023 \
+            --query SecretString --output text| jq .default_passphrase -r | base64 -d \
+            | gpg --passphrase-file "${SECRETS_KEY_FILE}" -o "${GNUPGHOME}/passphrase" -d -
+          sync
+          rm "$SECRETS_KEY_FILE"
+          echo "passphrase-file ${GNUPGHOME}/passphrase" >> "${GNUPGHOME}/gpg.conf"
+
+      - name: Configure Git
+        shell: bash
+        run: |
+          git config --global --add safe.directory "$(pwd)"
+          git config --global user.name "Salt Project Packaging"
+          git config --global user.email saltproject-packaging@vmware.com
+          git config --global user.signingkey 64CBBC8173D76B3F
+          git config --global commit.gpgsign true
+
+      - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: 3.7
+          python-version: "3.10"
 
       - name: Update Latest Release on README
         run: |
@@ -247,19 +397,23 @@ jobs:
             git commit -am "Update README.rst with ${{ env.BS_VERSION }} release sha256sum"
 
       - name: Push Changes
-        uses: ad-m/github-push-action@master
+        uses: ad-m/github-push-action@b87afee92c6e70ea888be6203a3e9426fda49839
         with:
-          repository: ${{ github.repository }}
-          branch: develop
           ssh: true
+          atomic: true
+          branch: develop
+          repository: ${{ github.repository }}
 
 
   salt:
     name: Update Release on Salt Repo
-    runs-on: ubuntu-latest
-    if: github.repository == 'saltstack/salt-bootstrap'
-    needs: update-develop-checksums
-    environment: Open PR Against Salt
+    runs-on:
+      - self-hosted
+      - linux
+      - repo-release
+    needs:
+      - update-develop-checksums
+    environment: release
     permissions:
       contents: write  # For action peter-evans/create-pull-request
       pull-requests: write  # For action peter-evans/create-pull-request
@@ -272,7 +426,7 @@ jobs:
 
       - name: Get bootstrap version
         run: |
-          echo "BS_VERSION=$(sh bootstrap-salt.sh -v | awk '{ print $4 }')" >> $GITHUB_ENV
+          echo "BS_VERSION=$(sh bootstrap-salt.sh -v | awk '{ print $4 }')" >> "$GITHUB_ENV"
 
       - uses: actions/checkout@v3
         with:
@@ -281,17 +435,51 @@ jobs:
           path: salt-checkout
           token: ${{ secrets.SALT_REPO_WRITE_TOKEN }}
 
-      - name: Update Git Settings
+      - name: Setup GnuPG
         run: |
-          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git config --local user.name "github-actions[bot] on behalf of @${{ github.event.sender.login }}"
+          sudo install -d -m 0700 -o "$(id -u)" -g "$(id -g)" /run/gpg
+          GNUPGHOME="$(mktemp -d -p /run/gpg)"
+          echo "GNUPGHOME=${GNUPGHOME}" >> "$GITHUB_ENV"
+          cat <<EOF > "${GNUPGHOME}/gpg.conf"
+          batch
+          no-tty
+          pinentry-mode loopback
+          EOF
+
+      - name: Get Secrets
+        id: get-secrets
+        env:
+          SECRETS_KEY: ${{ secrets.SECRETS_KEY }}
+        run: |
+          SECRETS_KEY_FILE=$(mktemp /tmp/output.XXXXXXXXXX)
+          echo "$SECRETS_KEY" > "$SECRETS_KEY_FILE"
+          aws --region us-west-2 secretsmanager get-secret-value --secret-id /cmbu-saltstack/signing/repo-signing-keys-sha256-2023 \
+            --query SecretString --output text | jq .default_key -r | base64 -d \
+            | gpg --passphrase-file "${SECRETS_KEY_FILE}" -d - \
+            | gpg --import -
+          sync
+          aws --region us-west-2 secretsmanager get-secret-value --secret-id /cmbu-saltstack/signing/repo-signing-keys-sha256-2023 \
+            --query SecretString --output text| jq .default_passphrase -r | base64 -d \
+            | gpg --passphrase-file "${SECRETS_KEY_FILE}" -o "${GNUPGHOME}/passphrase" -d -
+          sync
+          rm "$SECRETS_KEY_FILE"
+          echo "passphrase-file ${GNUPGHOME}/passphrase" >> "${GNUPGHOME}/gpg.conf"
+
+      - name: Configure Git
+        shell: bash
+        run: |
+          git config --global --add safe.directory "$(pwd)"
+          git config --global user.name "Salt Project Packaging"
+          git config --global user.email saltproject-packaging@vmware.com
+          git config --global user.signingkey 64CBBC8173D76B3F
+          git config --global commit.gpgsign true
 
       - name: Update bootstrap script on Salt
         run: |
           cp bootstrap-salt.sh salt-checkout/salt/cloud/deploy/bootstrap-salt.sh
 
       - name: Create Pull Request Against Develop
-        uses: peter-evans/create-pull-request@v4
+        uses: peter-evans/create-pull-request@v5
         with:
           title: "Update the bootstrap script to v${{ env.BS_VERSION }}"
           path: salt-checkout
@@ -299,3 +487,5 @@ jobs:
           token: ${{ secrets.SALT_REPO_WRITE_TOKEN }}
           commit-message: Update the bootstrap script to v${{ env.BS_VERSION }}
           delete-branch: true
+          add-paths: |
+            salt-checkout/salt/cloud/deploy/bootstrap-salt.sh

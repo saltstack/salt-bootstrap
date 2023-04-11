@@ -1,0 +1,98 @@
+name: Nightly S3 Update
+run-name: "Nightly S3 (branch: ${{ github.ref_name }})"
+
+on:
+  workflow_dispatch: {}
+  schedule:
+    # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#onschedule
+    - cron: '0 1 * * *'  # Every day at 1AM
+
+jobs:
+
+  workflow-requirements:
+    name: Check Workflow Requirements
+    runs-on: ubuntu-latest
+    outputs:
+      requirements-met: ${{ steps.check-requirements.outputs.requirements-met }}
+    steps:
+      - name: Check For Admin Permission
+        if: ${{ github.event_name != 'schedule' }}
+        uses: actions-cool/check-user-permission@v2
+        with:
+          require: admin
+          username: ${{ github.triggering_actor }}
+
+      - name: Check Requirements
+        id: check-requirements
+        run: |
+          if [ "${{ vars.RUN_SCHEDULED_BUILDS }}" = "1" ]; then
+            MSG="Running workflow because RUN_SCHEDULED_BUILDS=1"
+            echo "${MSG}"
+            echo "${MSG}" >> "${GITHUB_STEP_SUMMARY}"
+            echo "requirements-met=true" >> "${GITHUB_OUTPUT}"
+          elif [ "${{ github.event.repository.fork }}" = "true" ]; then
+            MSG="Not running workflow because ${{ github.repository }} is a fork"
+            echo "${MSG}"
+            echo "${MSG}" >> "${GITHUB_STEP_SUMMARY}"
+            echo "requirements-met=false" >> "${GITHUB_OUTPUT}"
+          else
+            MSG="Running workflow because ${{ github.repository }} is not a fork"
+            echo "${MSG}"
+            echo "${MSG}" >> "${GITHUB_STEP_SUMMARY}"
+            echo "requirements-met=true" >> "${GITHUB_OUTPUT}"
+          fi
+
+  update-s3-bucket:
+    name: Update S3 Bucket
+    if: ${{ fromJSON(needs.workflow-requirements.outputs.requirements-met) }}
+    runs-on:
+      - self-hosted
+      - linux
+      - repo-release
+    needs:
+      - workflow-requirements
+    environment: release
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup GnuPG
+        run: |
+          sudo install -d -m 0700 -o "$(id -u)" -g "$(id -g)" /run/gpg
+          GNUPGHOME="$(mktemp -d -p /run/gpg)"
+          echo "GNUPGHOME=${GNUPGHOME}" >> "$GITHUB_ENV"
+          cat <<EOF > "${GNUPGHOME}/gpg.conf"
+          batch
+          no-tty
+          pinentry-mode loopback
+          EOF
+
+      - name: Get Secrets
+        id: get-secrets
+        env:
+          SECRETS_KEY: ${{ secrets.SECRETS_KEY }}
+        run: |
+          SECRETS_KEY_FILE=$(mktemp /tmp/output.XXXXXXXXXX)
+          echo "$SECRETS_KEY" > "$SECRETS_KEY_FILE"
+          aws --region us-west-2 secretsmanager get-secret-value --secret-id /cmbu-saltstack/signing/repo-signing-keys-sha256-2023 \
+            --query SecretString --output text | jq .default_key -r | base64 -d \
+            | gpg --passphrase-file "${SECRETS_KEY_FILE}" -d - \
+            | gpg --import -
+          sync
+          aws --region us-west-2 secretsmanager get-secret-value --secret-id /cmbu-saltstack/signing/repo-signing-keys-sha256-2023 \
+            --query SecretString --output text| jq .default_passphrase -r | base64 -d \
+            | gpg --passphrase-file "${SECRETS_KEY_FILE}" -o "${GNUPGHOME}/passphrase" -d -
+          sync
+          rm "$SECRETS_KEY_FILE"
+          echo "passphrase-file ${GNUPGHOME}/passphrase" >> "${GNUPGHOME}/gpg.conf"
+
+      - name: Upload Develop to S3
+        run: |
+          gpg --output SALT-PROJECT-GPG-PUBKEY-2023.gpg --export 64CBBC8173D76B3F
+          gpg --armor --output SALT-PROJECT-GPG-PUBKEY-2023.pub --export 64CBBC8173D76B3F
+          files="bootstrap-salt.sh bootstrap-salt.sh.sha256 bootstrap-salt.ps1 bootstrap-salt.ps1.sha256 SALT-PROJECT-GPG-PUBKEY-2023.gpg SALT-PROJECT-GPG-PUBKEY-2023.pub"
+          for fname in $files; do
+            gpg --local-user 64CBBC8173D76B3F --output "${fname}.asc" --armor --detach-sign --sign "${fpath}"
+            aws s3 cp "${fname}" "s3://${{ vars.S3_BUCKET || 'salt-project-prod-salt-artifacts-release' }}/bootstrap/${{ github.ref_name }}/${fname}"
+            aws s3 cp "${fname}.asc" "s3://${{ vars.S3_BUCKET || 'salt-project-prod-salt-artifacts-release' }}/bootstrap/${{ github.ref_name }}/${fname}.asc"
+          done

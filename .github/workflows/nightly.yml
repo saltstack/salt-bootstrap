@@ -88,11 +88,16 @@ jobs:
 
       - name: Upload Develop to S3
         run: |
+          echo "Exporting GPG Key"
           gpg --output SALT-PROJECT-GPG-PUBKEY-2023.gpg --export 64CBBC8173D76B3F
+          echo "Exporting Armored GPG Key"
           gpg --armor --output SALT-PROJECT-GPG-PUBKEY-2023.pub --export 64CBBC8173D76B3F
-          files="bootstrap-salt.sh bootstrap-salt.sh.sha256 bootstrap-salt.ps1 bootstrap-salt.ps1.sha256 SALT-PROJECT-GPG-PUBKEY-2023.gpg SALT-PROJECT-GPG-PUBKEY-2023.pub"
-          for fname in $files; do
+          declare -a files=("bootstrap-salt.sh bootstrap-salt.sh.sha256 bootstrap-salt.ps1 bootstrap-salt.ps1.sha256 SALT-PROJECT-GPG-PUBKEY-2023.gpg SALT-PROJECT-GPG-PUBKEY-2023.pub")
+          for fname in "${files[@]}"
+          do
+            echo "GPG Signing ${fpath} ..."
             gpg --local-user 64CBBC8173D76B3F --output "${fname}.asc" --armor --detach-sign --sign "${fpath}"
+            echo "Uploading ${fpath} and ${fpath}.asc to S3"
             aws s3 cp "${fname}" "s3://${{ vars.S3_BUCKET || 'salt-project-prod-salt-artifacts-release' }}/bootstrap/${{ github.ref_name }}/${fname}"
             aws s3 cp "${fname}.asc" "s3://${{ vars.S3_BUCKET || 'salt-project-prod-salt-artifacts-release' }}/bootstrap/${{ github.ref_name }}/${fname}.asc"
           done

@@ -56,6 +56,12 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: Get Salt Project GitHub Actions Bot Environment
+        run: |
+          TOKEN=$(curl -sS -f -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 30")
+          SPB_ENVIRONMENT=$(curl -sS -f -H "X-aws-ec2-metadata-token: $TOKEN" http://169.254.169.254/latest/meta-data/tags/instance/spb:environment)
+          echo "SPB_ENVIRONMENT=$SPB_ENVIRONMENT" >> "$GITHUB_ENV"
+
       - name: Setup GnuPG
         run: |
           sudo install -d -m 0700 -o "$(id -u)" -g "$(id -g)" /run/gpg
@@ -86,18 +92,15 @@ jobs:
           rm "$SECRETS_KEY_FILE"
           echo "passphrase-file ${GNUPGHOME}/passphrase" >> "${GNUPGHOME}/gpg.conf"
 
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+
+      - name: Install Requirements
+        run: |
+          python3 -m pip install -r requirements/release.txt
+
       - name: Upload Develop to S3
         run: |
-          echo "Exporting GPG Key"
-          gpg --output SALT-PROJECT-GPG-PUBKEY-2023.gpg --export 64CBBC8173D76B3F
-          echo "Exporting Armored GPG Key"
-          gpg --armor --output SALT-PROJECT-GPG-PUBKEY-2023.pub --export 64CBBC8173D76B3F
-          declare -a files=("bootstrap-salt.sh bootstrap-salt.sh.sha256 bootstrap-salt.ps1 bootstrap-salt.ps1.sha256 SALT-PROJECT-GPG-PUBKEY-2023.gpg SALT-PROJECT-GPG-PUBKEY-2023.pub")
-          for fname in "${files[@]}"
-          do
-            echo "GPG Signing ${fpath} ..."
-            gpg --local-user 64CBBC8173D76B3F --output "${fname}.asc" --armor --detach-sign --sign "${fpath}"
-            echo "Uploading ${fpath} and ${fpath}.asc to S3"
-            aws s3 cp "${fname}" "s3://${{ vars.S3_BUCKET || 'salt-project-prod-salt-artifacts-release' }}/bootstrap/${{ github.ref_name }}/${fname}"
-            aws s3 cp "${fname}.asc" "s3://${{ vars.S3_BUCKET || 'salt-project-prod-salt-artifacts-release' }}/bootstrap/${{ github.ref_name }}/${fname}.asc"
-          done
+          tools release s3-publish --key-id 64CBBC8173D76B3F develop

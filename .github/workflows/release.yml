@@ -65,7 +65,7 @@ jobs:
 
       - name: Install Requirements
         run: |
-          python3 -m pip install requests pre-commit
+          python3 -m pip install -r requirements/release.txt
           pre-commit install --install-hooks
 
       - name: Setup GnuPG
@@ -296,9 +296,12 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-        with:
-          ref: stable
-          repository: ${{ github.repository }}
+
+      - name: Get Salt Project GitHub Actions Bot Environment
+        run: |
+          TOKEN=$(curl -sS -f -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 30")
+          SPB_ENVIRONMENT=$(curl -sS -f -H "X-aws-ec2-metadata-token: $TOKEN" http://169.254.169.254/latest/meta-data/tags/instance/spb:environment)
+          echo "SPB_ENVIRONMENT=$SPB_ENVIRONMENT" >> "$GITHUB_ENV"
 
       - name: Setup GnuPG
         run: |
@@ -330,16 +333,18 @@ jobs:
           rm "$SECRETS_KEY_FILE"
           echo "passphrase-file ${GNUPGHOME}/passphrase" >> "${GNUPGHOME}/gpg.conf"
 
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+
+      - name: Install Requirements
+        run: |
+          python3 -m pip install -r requirements/release.txt
+
       - name: Upload Stable Release to S3
         run: |
-          gpg --output SALT-PROJECT-GPG-PUBKEY-2023.gpg --export 64CBBC8173D76B3F
-          gpg --armor --output SALT-PROJECT-GPG-PUBKEY-2023.pub --export 64CBBC8173D76B3F
-          files="bootstrap-salt.sh bootstrap-salt.sh.sha256 bootstrap-salt.ps1 bootstrap-salt.ps1.sha256 SALT-PROJECT-GPG-PUBKEY-2023.gpg SALT-PROJECT-GPG-PUBKEY-2023.pub"
-          for fname in $files; do
-            gpg --local-user 64CBBC8173D76B3F --output "${fname}.asc" --armor --detach-sign --sign "${fpath}"
-            aws s3 cp "${fname}" "s3://${{ vars.S3_BUCKET || 'salt-project-prod-salt-artifacts-release' }}/bootstrap/stable/${fname}"
-            aws s3 cp "${fname}.asc" "s3://${{ vars.S3_BUCKET || 'salt-project-prod-salt-artifacts-release' }}/bootstrap/stable/${fname}.asc"
-          done
+          tools release s3-publish --key-id 64CBBC8173D76B3F stable
 
   update-develop-checksums:
     name: Update Release Checksums on Develop

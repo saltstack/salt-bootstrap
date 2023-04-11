@@ -21,6 +21,19 @@ repos:
     hooks:
       - id: black
 
+  - repo: https://github.com/s0undt3ch/python-tools-scripts
+    rev: "0.12.0"
+    hooks:
+      - id: tools
+        alias: actionlint
+        name: Lint GitHub Actions Workflows
+        files: "^.github/workflows/"
+        types:
+          - yaml
+        args:
+          - pre-commit
+          - actionlint
+
   - repo: local
     hooks:
       - id: generate-actions-workflow

@@ -514,6 +514,11 @@ jobs:
         run: |
           cp bootstrap-salt.sh salt-checkout/salt/cloud/deploy/bootstrap-salt.sh
 
+      - name: Commit Changes
+        working-directory: salt-checkout/
+        run: |
+          git commit -am "Update the bootstrap script to v${{ env.BS_VERSION }}"
+
       - name: Create Pull Request Against Develop
         uses: peter-evans/create-pull-request@v5
         with:
@@ -521,7 +526,8 @@ jobs:
           path: salt-checkout
           base: master
           token: ${{ secrets.SALT_REPO_WRITE_TOKEN }}
+          author: "Salt Project Packaging <saltproject-packaging@vmware.com>"
+          committer: "Salt Project Packaging <saltproject-packaging@vmware.com>"
           commit-message: Update the bootstrap script to v${{ env.BS_VERSION }}
+          signoff: true
           delete-branch: true
-          add-paths: |
-            salt-checkout/salt/cloud/deploy/bootstrap-salt.sh

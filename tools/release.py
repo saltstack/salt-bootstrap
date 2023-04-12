@@ -5,6 +5,8 @@ These commands are used to release Salt Bootstrap.
 from __future__ import annotations
 
 import logging
+import os
+import pathlib
 import sys
 from typing import TYPE_CHECKING
 
@@ -59,54 +61,86 @@ def s3_publish(ctx: Context, branch: str, key_id: str = None):
     ctx.info(
         f"Uploading release artifacts to {tools.utils.RELEASE_BUCKET_NAME!r} bucket ..."
     )
-    paths_to_upload = [
-        f"{tools.utils.GPG_KEY_FILENAME}.gpg",
-        f"{tools.utils.GPG_KEY_FILENAME}.pub",
-    ]
-    copy_exclusions = [
-        ".asc",
-        ".gpg",
-        ".pub",
-        ".sha256",
-    ]
+    upload_files = {
+        "stable": {
+            f"{tools.utils.GPG_KEY_FILENAME}.gpg": [
+                f"bootstrap/stable/{tools.utils.GPG_KEY_FILENAME}.gpg",
+            ],
+            f"{tools.utils.GPG_KEY_FILENAME}.pub": [
+                f"bootstrap/stable/{tools.utils.GPG_KEY_FILENAME}.pub",
+            ],
+            "bootstrap-salt.sh": [
+                "bootstrap/stable/bootstrap-salt.sh",
+            ],
+            "bootstrap-salt.sh.sha256": [
+                "bootstrap/stable/bootstrap-salt.sh.sha256",
+                "bootstrap/stable/bootstrap/sha256",
+            ],
+            "bootstrap-salt.ps1": [
+                "bootstrap/stable/bootstrap-salt.ps1",
+            ],
+            "bootstrap-salt.ps1.sha256": [
+                "bootstrap/stable/bootstrap-salt.ps1.sha256",
+                "bootstrap/stable/winbootstrap/sha256",
+            ],
+        },
+        "develop": {
+            f"{tools.utils.GPG_KEY_FILENAME}.gpg": [
+                f"bootstrap/develop/{tools.utils.GPG_KEY_FILENAME}.gpg",
+            ],
+            f"{tools.utils.GPG_KEY_FILENAME}.pub": [
+                f"bootstrap/develop/{tools.utils.GPG_KEY_FILENAME}.pub",
+            ],
+            "bootstrap-salt.sh": [
+                "bootstrap/develop/bootstrap-salt.sh",
+                "bootstrap/develop/bootstrap/develop",
+            ],
+            "bootstrap-salt.sh.sha256": [
+                "bootstrap/develop/bootstrap-salt.sh.sha256",
+            ],
+            "bootstrap-salt.ps1": [
+                "bootstrap/develop/bootstrap-salt.ps1",
+                "bootstrap/develop/winbootstrap/develop",
+            ],
+            "bootstrap-salt.ps1.sha256": [
+                "bootstrap/develop/bootstrap-salt.ps1.sha256",
+            ],
+        },
+    }
+
+    files_to_upload: list[tuple[str, str]] = []
 
     try:
         # Export the GPG key in use
         tools.utils.export_gpg_key(ctx, key_id, tools.utils.REPO_ROOT)
-
-        for fpath in tools.utils.REPO_ROOT.glob("bootstrap-salt.*"):
-            if fpath.suffix in copy_exclusions:
-                continue
-            paths_to_upload.append(fpath.name)
-            ret = ctx.run(
-                "sha256sum",
-                fpath.relative_to(tools.utils.REPO_ROOT),
-                capture=True,
-                check=False,
-            )
-            if ret.returncode:
-                ctx.error(
-                    f"Failed to get the sha256sum of {fpath.relative_to(tools.utils.REPO_ROOT)}"
+        for lpath, rpaths in upload_files[branch].items():
+            ctx.info(f"Processing {lpath} ...")
+            if lpath.endswith(".sha256") and not os.path.exists(lpath):
+                ret = ctx.run(
+                    "sha256sum",
+                    lpath.replace(".sha256", ""),
+                    capture=True,
+                    check=False,
                 )
-                ctx.exit(1)
-            shasum_file = fpath.parent / f"{fpath.name}.sha256"
-            shasum_file.write_bytes(ret.stdout)
-            paths_to_upload.append(shasum_file.name)
-            tools.utils.gpg_sign(ctx, key_id, shasum_file)
-            paths_to_upload.append(f"{shasum_file.name}.asc")
-            tools.utils.gpg_sign(ctx, key_id, fpath)
-            paths_to_upload.append(f"{fpath.name}.asc")
+                if ret.returncode:
+                    ctx.error(f"Failed to get the sha256sum of {lpath}")
+                    ctx.exit(1)
+                pathlib.Path(lpath).write_bytes(ret.stdout)
+            for rpath in rpaths:
+                files_to_upload.append((lpath, rpath))
+            if not lpath.endswith((".gpg", ".pub")):
+                tools.utils.gpg_sign(ctx, key_id, pathlib.Path(lpath))
+                files_to_upload.append((f"{lpath}.asc", f"{rpaths[0]}.asc"))
 
-        for path in paths_to_upload:
-            upload_path = f"bootstrap/{branch}/{path}"
-            size = fpath.stat().st_size
-            ctx.info(f"  {upload_path}")
+        for lpath, rpath in sorted(files_to_upload):
+            size = pathlib.Path(lpath).stat().st_size
+            ctx.info(f" Uploading {lpath} -> {rpath}")
             with tools.utils.create_progress_bar(file_progress=True) as progress:
                 task = progress.add_task(description="Uploading...", total=size)
                 s3.upload_file(
-                    fpath,
+                    lpath,
                     tools.utils.RELEASE_BUCKET_NAME,
-                    upload_path,
+                    rpath,
                     Callback=tools.utils.UpdateProgress(progress, task),
                 )
     except KeyboardInterrupt:

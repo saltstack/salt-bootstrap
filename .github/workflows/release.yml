@@ -246,7 +246,9 @@ jobs:
 
   publish-release:
     name: Create GitHub Release
-    runs-on: ubuntu-latest
+    runs-on:
+      - self-hosted
+      - linux
     needs:
       - merge-develop-into-stable
     environment: release

@@ -288,7 +288,7 @@ jobs:
             LICENSE
 
       - name: Delete Release Details Artifact
-        uses: geekyeggo/delete-artifact@v1
+        uses: geekyeggo/delete-artifact@v2
         with:
           name: release-details
           failOnError: false

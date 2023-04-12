@@ -17,13 +17,25 @@ jobs:
 
       - name: Check Repository
         run: |
+          if [ "${{ vars.RUN_RELEASE_BUILDS }}" = "1" ]; then
+            MSG="Running workflow because RUN_RELEASE_BUILDS=1"
+            echo "${MSG}"
+            echo "${MSG}" >> "${GITHUB_STEP_SUMMARY}"
+            exit 0
+          fi
           echo "Trying to run the release workflow from repository ${{ github.repository }}"
           if [ "${{ github.repository }}" != "saltstack/salt-bootstrap" ]; then
-              echo "Running the release workflow from the ${{ github.repository }} repository is not allowed"
-              echo "Allowed repository: saltstack/salt-bootstrap"
+              MSG="Running the release workflow from the ${{ github.repository }} repository is not allowed"
+              echo "${MSG}"
+              echo "${MSG}" >> "${GITHUB_STEP_SUMMARY}"
+              MSG="Allowed repository: saltstack/salt-bootstrap"
+              echo "${MSG}"
+              echo "${MSG}" >> "${GITHUB_STEP_SUMMARY}"
               exit 1
           else
-              echo "Allowed to release from repository ${{ github.repository }}"
+              MSG="Allowed to release from repository ${{ github.repository }}"
+              echo "${MSG}"
+              echo "${MSG}" >> "${GITHUB_STEP_SUMMARY}"
           fi
 
       - name: Check Branch

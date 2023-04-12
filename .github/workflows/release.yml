@@ -58,11 +58,6 @@ jobs:
           repository: ${{ github.repository }}
           ssh-key: ${{ secrets.SALT_BOOTSTRAP_RELEASE_KEY }}
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: "3.10"
-
       - name: Install Requirements
         run: |
           python3 -m pip install -r requirements/release.txt
@@ -333,11 +328,6 @@ jobs:
           rm "$SECRETS_KEY_FILE"
           echo "passphrase-file ${GNUPGHOME}/passphrase" >> "${GNUPGHOME}/gpg.conf"
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: "3.10"
-
       - name: Install Requirements
         run: |
           python3 -m pip install -r requirements/release.txt
@@ -415,11 +405,6 @@ jobs:
           git config --global user.email saltproject-packaging@vmware.com
           git config --global user.signingkey 64CBBC8173D76B3F
           git config --global commit.gpgsign true
-
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: "3.10"
 
       - name: Update Latest Release on README
         run: |

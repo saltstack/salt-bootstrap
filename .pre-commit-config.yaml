@@ -16,10 +16,70 @@ repos:
     hooks:
       - id: mdformat
 
+  - repo: https://github.com/s0undt3ch/python-tools-scripts
+    rev: "0.12.0"
+    hooks:
+      - id: tools
+        alias: actionlint
+        name: Lint GitHub Actions Workflows
+        files: "^.github/workflows/"
+        types:
+          - yaml
+        args:
+          - pre-commit
+          - actionlint
+
+  - repo: https://github.com/jazzband/pip-tools
+    rev: 6.13.0
+    hooks:
+      - id: pip-compile
+        files: ^requirements/release\.(in|txt)$
+        args:
+          - requirements/release.in
+
+  - repo: https://github.com/asottile/pyupgrade
+    rev: v2.37.3
+    hooks:
+      - id: pyupgrade
+        name: Rewrite Code to be Py3.9+
+        args: [--py39-plus]
+
+  - repo: https://github.com/asottile/reorder_python_imports
+    rev: v3.8.2
+    hooks:
+      - id: reorder-python-imports
+        args: [--py39-plus]
+
   - repo: https://github.com/psf/black
     rev: 22.6.0
     hooks:
       - id: black
+        args: []
+
+#  - repo: https://github.com/PyCQA/flake8
+#    rev: 3.9.2
+#    hooks:
+#      - id: flake8
+#        language_version: python3
+#        additional_dependencies:
+#          - flake8-mypy-fork
+#          - flake8-docstrings
+#          - flake8-typing-imports
+#
+#  - repo: https://github.com/pre-commit/mirrors-mypy
+#    rev: v1.0.0
+#    hooks:
+#      - id: mypy
+#        alias: mypy-tools
+#        name: Run mypy against tools
+#        files: ^tools/.*\.py$
+#        #args: [--strict]
+#        additional_dependencies:
+#          - attrs
+#          - rich
+#          - types-attrs
+#          - types-pyyaml
+#          - types-requests
 
   - repo: local
     hooks:

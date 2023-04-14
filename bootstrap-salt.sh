@@ -6587,6 +6587,10 @@ install_arch_linux_git_deps() {
     return 0
 }
 
+install_arch_linux_onedir_deps() {
+    install_arch_linux_stable_deps || return 1
+}
+
 install_arch_linux_stable() {
     # Pacman does not resolve dependencies on outdated versions
     # They always need to be updated
@@ -6747,7 +6751,7 @@ install_arch_linux_onedir() {
 }
 
 install_arch_linux_onedir_post() {
-  install_arch_linux_stable_post || return 1
+  install_arch_linux_post || return 1
 
   return 0
 }

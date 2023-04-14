@@ -8457,7 +8457,7 @@ __parse_repo_json_python() {
 
   # Using latest, grab the right
   # version from the repo.json
-  _ONEDIR_REV=$(python - <<-EOF
+  _JSON_LATEST_VERSION=$(python - <<-EOF
 import json, urllib.request
 url = "https://repo.saltproject.io/salt/py3/macos/repo.json"
 response = urllib.request.urlopen(url)
@@ -8466,7 +8466,7 @@ version = data['latest'][list(data['latest'].keys())[0]]['version']
 print(version)
 EOF
 )
-
+echo "${_JSON_LATEST_VERSION}"
 }
 
 __macosx_get_packagesite_onedir() {
@@ -8487,7 +8487,7 @@ __macosx_get_packagesite_onedir() {
         UNSIGNED=""
       fi
       if [ "$(echo "$_ONEDIR_REV" | grep -E '^(latest)$')" != "" ]; then
-        __parse_repo_json_python || return 1
+        _ONEDIR_REV=$(__parse_repo_json_python)
       fi
       PKG="salt-${_ONEDIR_REV}-${__PY_VERSION_REPO}-${DARWIN_ARCH}${UNSIGNED}.pkg"
       SALTPKGCONFURL="https://${_REPO_URL}/${ONEDIR_REV}/${PKG}"

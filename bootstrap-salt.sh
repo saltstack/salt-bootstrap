@@ -8505,12 +8505,7 @@ __macosx_get_packagesite_onedir() {
     if [ "$(echo "$_ONEDIR_REV" | grep -E '^(3005)')" != "" ]; then
       PKG="salt-${_ONEDIR_REV}-macos-${DARWIN_ARCH}.pkg"
     else
-      if [ "$(echo "$_ONEDIR_REV" | grep -E '(salt_rc)')" != "" ]; then
-        UNSIGNED="-unsigned"
-      else
-        UNSIGNED=""
-      fi
-      PKG="salt-${_ONEDIR_REV}-${__PY_VERSION_REPO}-${DARWIN_ARCH}${UNSIGNED}.pkg"
+      PKG="salt-${_ONEDIR_REV}-${__PY_VERSION_REPO}-${DARWIN_ARCH}.pkg"
     fi
     SALTPKGCONFURL="https://${_REPO_URL}/${_ONEDIR_DIR}/${__PY_VERSION_REPO}/macos/${_ONEDIR_REV}/${PKG}"
 }

@@ -8481,7 +8481,6 @@ __macosx_get_packagesite_onedir() {
 
     if [ "$(echo "$_ONEDIR_REV" | grep -E '^(3005)$')" != "" ]; then
       PKG="salt-${_ONEDIR_REV}-macos-${DARWIN_ARCH}.pkg"
-      SALTPKGCONFURL="https://${_REPO_URL}/${_ONEDIR_DIR}/${__PY_VERSION_REPO}/macos/${_ONEDIR_REV}/${PKG}"
     else
       if [ "$(echo "$_ONEDIR_REV" | grep -E '(salt_rc)$')" != "" ]; then
         UNSIGNED="-unsigned"
@@ -8492,8 +8491,8 @@ __macosx_get_packagesite_onedir() {
         _ONEDIR_REV=$(__parse_repo_json_python)
       fi
       PKG="salt-${_ONEDIR_REV}-${__PY_VERSION_REPO}-${DARWIN_ARCH}${UNSIGNED}.pkg"
-      SALTPKGCONFURL="https://${_REPO_URL}/${ONEDIR_REV}/${PKG}"
     fi
+    SALTPKGCONFURL="https://${_REPO_URL}/${_ONEDIR_DIR}/${__PY_VERSION_REPO}/macos/${_ONEDIR_REV}/${PKG}"
 }
 
 # Using a separate conf step to head for idempotent install...

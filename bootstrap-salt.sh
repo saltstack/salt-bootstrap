@@ -8484,7 +8484,7 @@ import json, urllib.request
 url = "https://repo.saltproject.io/salt/py3/macos/repo.json"
 response = urllib.request.urlopen(url)
 data = json.loads(response.read())
-version = data['latest'][list(data['latest'].keys())[0]]['version']
+version = data['latest'][list(data['latest'])[0]]['version']
 print(version)
 EOF
 )

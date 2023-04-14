@@ -8479,6 +8479,9 @@ __macosx_get_packagesite_onedir() {
         __PY_VERSION_REPO="py3"
     fi
 
+    if [ "$(echo "$_ONEDIR_REV" | grep -E '^(latest)$')" != "" ]; then
+      _ONEDIR_REV=$(__parse_repo_json_python)
+    fi
     if [ "$(echo "$_ONEDIR_REV" | grep -E '^(3005)$')" != "" ]; then
       PKG="salt-${_ONEDIR_REV}-macos-${DARWIN_ARCH}.pkg"
     else
@@ -8486,9 +8489,6 @@ __macosx_get_packagesite_onedir() {
         UNSIGNED="-unsigned"
       else
         UNSIGNED=""
-      fi
-      if [ "$(echo "$_ONEDIR_REV" | grep -E '^(latest)$')" != "" ]; then
-        _ONEDIR_REV=$(__parse_repo_json_python)
       fi
       PKG="salt-${_ONEDIR_REV}-${__PY_VERSION_REPO}-${DARWIN_ARCH}${UNSIGNED}.pkg"
     fi

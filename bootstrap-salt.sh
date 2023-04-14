@@ -8486,10 +8486,10 @@ __macosx_get_packagesite_onedir() {
     if [ "$(echo "$_ONEDIR_REV" | grep -E '^(latest)$')" != "" ]; then
       _ONEDIR_REV=$(__parse_repo_json_python)
     fi
-    if [ "$(echo "$_ONEDIR_REV" | grep -E '^(3005)$')" != "" ]; then
+    if [ "$(echo "$_ONEDIR_REV" | grep -E '^(3005)')" != "" ]; then
       PKG="salt-${_ONEDIR_REV}-macos-${DARWIN_ARCH}.pkg"
     else
-      if [ "$(echo "$_ONEDIR_REV" | grep -E '(salt_rc)$')" != "" ]; then
+      if [ "$(echo "$_ONEDIR_REV" | grep -E '(salt_rc)')" != "" ]; then
         UNSIGNED="-unsigned"
       else
         UNSIGNED=""

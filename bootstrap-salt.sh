@@ -7460,6 +7460,10 @@ install_opensuse_git_deps() {
     return 0
 }
 
+install_opensuse_onedir_deps() {
+    install_opensuse_stable_deps || return 1
+}
+
 install_opensuse_stable() {
     __PACKAGES=""
 
@@ -7490,6 +7494,10 @@ install_opensuse_git() {
 
     python setup.py ${SETUP_PY_INSTALL_ARGS} install --prefix=/usr || return 1
     return 0
+}
+
+install_opensuse_onedir() {
+  install_opensuse_stable || return 1
 }
 
 install_opensuse_stable_post() {
@@ -7559,6 +7567,10 @@ install_opensuse_git_post() {
     install_opensuse_stable_post || return 1
 
     return 0
+}
+
+install_opensuse_onedir_post() {
+  install_opensuse_stable_post || return 1
 }
 
 install_opensuse_restart_daemons() {
@@ -8066,11 +8078,6 @@ __gentoo_pre_dep() {
         mkdir /etc/portage
     fi
 
-    # Enable Python 3.6 target for pre Neon Salt release
-    if echo "${STABLE_REV}" | grep -q "2019" || [ "${ITYPE}" = "git" ] && [ "${_POST_NEON_INSTALL}" -eq $BS_FALSE ]; then
-        EXTRA_PYTHON_TARGET=python3_6
-    fi
-
     # Enable Python 3.7 target for Salt Neon using GIT
     if [ "${ITYPE}" = "git" ] && [ "${GIT_REV}" = "v3000" ]; then
         EXTRA_PYTHON_TARGET=python3_7
@@ -8216,6 +8223,12 @@ install_gentoo_git() {
     return 0
 }
 
+install_gentoo_onedir() {
+
+  install_gentoo_stable || return 1
+
+}
+
 install_gentoo_post() {
     for fname in api master minion syndic; do
         # Skip salt-api since the service should be opt-in and not necessarily started on boot
@@ -8303,6 +8316,12 @@ _eof
     done
 
     return 0
+}
+
+install_gentoo_onedir_post() {
+
+  install_gentoo_post || return 1
+
 }
 
 install_gentoo_restart_daemons() {

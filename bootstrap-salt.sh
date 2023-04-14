@@ -8224,9 +8224,8 @@ install_gentoo_git() {
 }
 
 install_gentoo_onedir() {
-
+  STABLE_REV=${ONEDIR_REV}
   install_gentoo_stable || return 1
-
 }
 
 install_gentoo_post() {
@@ -8319,9 +8318,7 @@ _eof
 }
 
 install_gentoo_onedir_post() {
-
   install_gentoo_post || return 1
-
 }
 
 install_gentoo_restart_daemons() {

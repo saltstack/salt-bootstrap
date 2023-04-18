@@ -1,9 +1,8 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
-import os
-import json
-import pathlib
 import datetime
+import json
+import os
+import pathlib
 
 os.chdir(os.path.abspath(os.path.dirname(__file__)))
 
@@ -215,28 +214,26 @@ SALT_VERSIONS = [
     "3003",
     "3004",
     "3005",
+    "3006",
     "master",
     "latest",
     "nightly",
-    "3006-0rc1",
-    "3006-0rc2",
 ]
 
 ONEDIR_SALT_VERSIONS = [
     "3005",
+    "3006",
     "latest",
     "nightly",
 ]
 
-ONEDIR_RC_SALT_VERSIONS = [
-    "3006-0rc1",
-    "3006-0rc2",
-]
+ONEDIR_RC_SALT_VERSIONS = []
 
 VERSION_DISPLAY_NAMES = {
     "3003": "v3003",
     "3004": "v3004",
     "3005": "v3005",
+    "3006": "v3006",
     "master": "Master",
     "latest": "Latest",
     "nightly": "Nightly",
@@ -245,14 +242,10 @@ VERSION_DISPLAY_NAMES = {
 STABLE_VERSION_BLACKLIST = [
     "master",
     "nightly",
-    "3006-0rc1",
-    "3006-0rc2",
 ]
 
 GIT_VERSION_BLACKLIST = [
     "nightly",
-    "3006-0rc1",
-    "3006-0rc2",
 ]
 
 # TODO: Revert the commit relating to this section, once the Git-based builds

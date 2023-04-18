@@ -61,7 +61,6 @@ jobs:
     needs:
       - check-requirements
     outputs:
-      release-changes: ${{ steps.update-repo.outputs.release-changes }}
       release-version: ${{ steps.update-repo.outputs.release-version }}
     steps:
       - uses: actions/checkout@v3

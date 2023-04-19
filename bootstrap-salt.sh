@@ -8627,8 +8627,15 @@ install_macosx_git_post() {
 install_macosx_restart_daemons() {
     [ $_START_DAEMONS -eq $BS_FALSE ] && return
 
-    /bin/launchctl unload -w /Library/LaunchDaemons/com.saltstack.salt.minion.plist || return 1
-    /bin/launchctl load -w /Library/LaunchDaemons/com.saltstack.salt.minion.plist || return 1
+    if [ "$_INSTALL_MINION" -eq $BS_TRUE ]; then
+      /bin/launchctl unload -w /Library/LaunchDaemons/com.saltstack.salt.minion.plist || return 1
+      /bin/launchctl load -w /Library/LaunchDaemons/com.saltstack.salt.minion.plist || return 1
+    fi
+
+    if [ "$_INSTALL_MASTER" -eq $BS_TRUE ]; then
+      /bin/launchctl unload -w /Library/LaunchDaemons/com.saltstack.salt.master.plist || return 1
+      /bin/launchctl load -w /Library/LaunchDaemons/com.saltstack.salt.master.plist || return 1
+    fi
 
    return 0
 }

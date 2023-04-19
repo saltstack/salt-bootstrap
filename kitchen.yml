@@ -182,7 +182,7 @@ suites:
       - openbsd-6
   - name: git-3006
     provisioner:
-      salt_version: 3006
+      salt_version: 3006.0
       salt_bootstrap_options: -x python3 -MPfq git %s
     excludes:
       - opensuse-15

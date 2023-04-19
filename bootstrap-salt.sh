@@ -4559,16 +4559,6 @@ __install_saltstack_rhel_onedir_repository() {
       else
           gpg_key="SALTSTACK-GPG-KEY.pub"
       fi
-    elif [ "$(echo "${ONEDIR_REV}" | grep -E '(latest|nightly)')" != "" ]; then
-      if __check_url_exists "${base_url}SALT-PROJECT-GPG-PUBKEY-2023.pub"; then
-        gpg_key="SALT-PROJECT-GPG-PUBKEY-2023.pub"
-      else
-        if [ "${DISTRO_MAJOR_VERSION}" -eq 9 ]; then
-          gpg_key="SALTSTACK-GPG-KEY2.pub"
-        else
-          gpg_key="SALTSTACK-GPG-KEY.pub"
-        fi
-      fi
     else
         gpg_key="SALT-PROJECT-GPG-PUBKEY-2023.pub"
     fi

@@ -6351,16 +6351,10 @@ install_amazon_linux_ami_2_onedir_deps() {
         if [ "$(echo "${ONEDIR_REV}" | grep -E '(3004|3005)')" != "" ]; then
           gpg_key="${base_url}SALTSTACK-GPG-KEY.pub,${base_url}base/RPM-GPG-KEY-CentOS-7"
           if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 3 ]; then
-              gpg_key="${base_url}SALTSTACK-GPG-KEY.pub"
-          fi
-        elif [ "$(echo "${ONEDIR_REV}" | grep -E '(latest|nightly)')" != "" ]; then
-          if __check_url_exists "${base_url}SALT-PROJECT-GPG-PUBKEY-2023.pub"; then
-            gpg_key="${base_url}SALT-PROJECT-GPG-PUBKEY-2023.pub"
-          else
             gpg_key="${base_url}SALTSTACK-GPG-KEY.pub"
           fi
         else
-            gpg_key="${base_url}SALT-PROJECT-GPG-PUBKEY-2023.pub"
+          gpg_key="${base_url}SALT-PROJECT-GPG-PUBKEY-2023.pub"
         fi
 
         # This should prob be refactored to use __install_saltstack_rhel_repository()

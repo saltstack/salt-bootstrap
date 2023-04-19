@@ -3022,11 +3022,16 @@ __enable_universe_repository() {
 __install_saltstack_ubuntu_repository() {
     # Workaround for latest non-LTS Ubuntu
     if { [ "$DISTRO_MAJOR_VERSION" -eq 20 ] && [ "$DISTRO_MINOR_VERSION" -eq 10 ]; } || \
-        # remove 22 version when salt packages for 22.04 are available
-        [ "$DISTRO_MAJOR_VERSION" -eq 21 ] ||  [ "$DISTRO_MAJOR_VERSION" -eq 22 ]; then
-        echowarn "Non-LTS Ubuntu detected, but stable packages requested. Trying packages for previous LTS release. You may experience problems."
+        [ "$DISTRO_MAJOR_VERSION" -eq 21 ] ; then
+        echowarn "Non-LTS Ubuntu detected (prior to 22.04 LTS), but stable packages requested. Trying packages for previous LTS release. You may experience problems."
         UBUNTU_VERSION=20.04
         UBUNTU_CODENAME="focal"
+    elif { [ "$DISTRO_MAJOR_VERSION" -eq 22 ] && [ "$DISTRO_MINOR_VERSION" -eq 10 ]; } || \
+        # remove 24 version when salt packages for 24.04 are available
+        [ "$DISTRO_MAJOR_VERSION" -eq 23 ] ||  [ "$DISTRO_MAJOR_VERSION" -eq 24 ]; then
+        echowarn "Non-LTS Ubuntu detected, but stable packages requested. Trying packages for previous LTS release. You may experience problems."
+        UBUNTU_VERSION=22.04
+        UBUNTU_CODENAME="jammy"
     else
         UBUNTU_VERSION=${DISTRO_VERSION}
         UBUNTU_CODENAME=${DISTRO_CODENAME}

@@ -628,7 +628,7 @@ elif [ "$ITYPE" = "stable" ]; then
         elif [ "$(echo "$1" | grep -E '^(3003|3004|3005)$')" != "" ]; then
             STABLE_REV="$1"
             shift
-        elif [ "$(echo "$1" | grep -E '^([3-9][6-9]{3}(\.[0-9]*)?)')" != "" ]; then
+        elif [ "$(echo "$1" | grep -E '^([3-9][0-5]{2}[6-9](\.[0-9]*)?)')" != "" ]; then
             ONEDIR_REV="minor/$1"
             _ONEDIR_REV="$1"
             ITYPE="onedir"
@@ -8465,16 +8465,16 @@ __parse_repo_json_python() {
 
   # Using latest, grab the right
   # version from the repo.json
-  _JSON_LATEST_VERSION=$(python - <<-EOF
+  _JSON_VERSION=$(python - <<-EOF
 import json, urllib.request
 url = "https://repo.saltproject.io/salt/py3/macos/repo.json"
 response = urllib.request.urlopen(url)
 data = json.loads(response.read())
-version = data['latest'][list(data['latest'])[0]]['version']
+version = data["${_ONEDIR_REV}"][list(data["${_ONEDIR_REV}"])[0]]['version']
 print(version)
 EOF
 )
-echo "${_JSON_LATEST_VERSION}"
+echo "${_JSON_VERSION}"
 }
 
 __macosx_get_packagesite_onedir() {
@@ -8486,14 +8486,18 @@ __macosx_get_packagesite_onedir() {
     fi
 
     if [ "$(echo "$_ONEDIR_REV" | grep -E '^(latest)$')" != "" ]; then
-      _ONEDIR_REV=$(__parse_repo_json_python)
+      _PKG_VERSION=$(__parse_repo_json_python)
+    elif [ "$(echo "$_ONEDIR_REV" | grep -E '^([3-9][0-9]{3}(\.[0-9]*))')" != "" ]; then
+      _PKG_VERSION=$_ONEDIR_REV
+    else
+      _PKG_VERSION=$(__parse_repo_json_python)
     fi
     if [ "$(echo "$_ONEDIR_REV" | grep -E '^(3005)')" != "" ]; then
-      PKG="salt-${_ONEDIR_REV}-macos-${DARWIN_ARCH}.pkg"
+      PKG="salt-${_PKG_VERSION}-macos-${DARWIN_ARCH}.pkg"
     else
-      PKG="salt-${_ONEDIR_REV}-${__PY_VERSION_REPO}-${DARWIN_ARCH}.pkg"
+      PKG="salt-${_PKG_VERSION}-${__PY_VERSION_REPO}-${DARWIN_ARCH}.pkg"
     fi
-    SALTPKGCONFURL="https://${_REPO_URL}/${_ONEDIR_DIR}/${__PY_VERSION_REPO}/macos/minor/${_ONEDIR_REV}/${PKG}"
+    SALTPKGCONFURL="https://${_REPO_URL}/${_ONEDIR_DIR}/${__PY_VERSION_REPO}/macos/${ONEDIR_REV}/${PKG}"
 }
 
 # Using a separate conf step to head for idempotent install...

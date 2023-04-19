@@ -30,7 +30,7 @@ suites:
       salt_version: 3005.1
   - name: stable-3006
     provisioner:
-      salt_version: 3006.0
+      salt_version: 3006
   - name: latest
     provisioner:
       salt_version: latest

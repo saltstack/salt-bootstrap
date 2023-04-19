@@ -263,7 +263,7 @@ VERSION_DISPLAY_NAMES = {
     "3003": "v3003",
     "3004": "v3004",
     "3005": "v3005",
-    "3006": "v3006",
+    "3006": "v3006.0",
     "master": "Master",
     "latest": "Latest",
     "nightly": "Nightly",

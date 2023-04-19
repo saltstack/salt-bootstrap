@@ -4963,6 +4963,8 @@ install_centos_onedir_deps() {
         __PACKAGES="yum-utils chkconfig"
     fi
 
+    __PACKAGES="${__PACKAGES} procps"
+
     # shellcheck disable=SC2086
     __yum_install_noinput ${__PACKAGES} || return 1
 
@@ -8507,7 +8509,7 @@ __macosx_get_packagesite_onedir() {
     else
       PKG="salt-${_ONEDIR_REV}-${__PY_VERSION_REPO}-${DARWIN_ARCH}.pkg"
     fi
-    SALTPKGCONFURL="https://${_REPO_URL}/${_ONEDIR_DIR}/${__PY_VERSION_REPO}/macos/${_ONEDIR_REV}/${PKG}"
+    SALTPKGCONFURL="https://${_REPO_URL}/${_ONEDIR_DIR}/${__PY_VERSION_REPO}/macos/minor/${_ONEDIR_REV}/${PKG}"
 }
 
 # Using a separate conf step to head for idempotent install...

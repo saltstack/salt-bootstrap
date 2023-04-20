@@ -219,7 +219,7 @@ jobs:
       display-name: Windows 2019
       timeout: 20
       runs-on: windows-2019
-      instances: '["stable-3003", "stable-3004", "stable-3005", "latest"]'
+      instances: '["stable-3003", "stable-3004", "stable-3005", "stable-3006", "latest"]'
 
 
   windows-2022:
@@ -234,7 +234,7 @@ jobs:
       display-name: Windows 2022
       timeout: 20
       runs-on: windows-2022
-      instances: '["stable-3003", "stable-3004", "stable-3005", "latest"]'
+      instances: '["stable-3003", "stable-3004", "stable-3005", "stable-3006", "latest"]'
 
 
 

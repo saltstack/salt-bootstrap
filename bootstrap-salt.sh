@@ -1961,10 +1961,6 @@ if [ "$ITYPE" = "git" ]; then
                 if [ "$__NEW_VS_TAG_REGEX_MATCH" = "MATCH" ]; then
                     _POST_NEON_INSTALL=$BS_TRUE
                     __TAG_REGEX_MATCH="${__NEW_VS_TAG_REGEX_MATCH}"
-                    if [ "$(echo "${GIT_REV}" | cut -c -1)" != "v" ]; then
-                        # We do this to properly clone tags
-                        GIT_REV="v${GIT_REV}"
-                    fi
                     echodebug "Post Neon Tag Regex Match On: ${GIT_REV}"
                 else
                     __TAG_REGEX_MATCH=$(echo "${GIT_REV}" | sed -E 's/^(v?[0-9]{1,4}\.[0-9]{1,2})(\.[0-9]{1,2})?.*$/MATCH/')
@@ -1976,10 +1972,6 @@ if [ "$ITYPE" = "git" ]; then
                 if [ "$__NEW_VS_TAG_REGEX_MATCH" = "MATCH" ]; then
                     _POST_NEON_INSTALL=$BS_TRUE
                     __TAG_REGEX_MATCH="${__NEW_VS_TAG_REGEX_MATCH}"
-                    if [ "$(echo "${GIT_REV}" | cut -c -1)" != "v" ]; then
-                        # We do this to properly clone tags
-                        GIT_REV="v${GIT_REV}"
-                    fi
                     echodebug "Post Neon Tag Regex Match On: ${GIT_REV}"
                 else
                     __TAG_REGEX_MATCH=$(echo "${GIT_REV}" | sed 's/^.*\(v\?[[:digit:]]\{1,4\}\.[[:digit:]]\{1,2\}\)\(\.[[:digit:]]\{1,2\}\)\?.*$/MATCH/')

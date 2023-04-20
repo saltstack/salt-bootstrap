@@ -150,11 +150,11 @@ platforms:
 suites:
   - name: git-3003
     provisioner:
-      salt_version: 3003
+      salt_version: v3003
       salt_bootstrap_options: -x python3 -MPfq git %s
   - name: git-3004
     provisioner:
-      salt_version: 3004
+      salt_version: v3004
       salt_bootstrap_options: -x python3 -MPfq git %s
     excludes:
       - opensuse-15
@@ -168,7 +168,7 @@ suites:
       - openbsd-6
   - name: git-3005
     provisioner:
-      salt_version: 3005
+      salt_version: v3005
       salt_bootstrap_options: -x python3 -MPfq git %s
     excludes:
       - opensuse-15
@@ -182,7 +182,7 @@ suites:
       - openbsd-6
   - name: git-3006
     provisioner:
-      salt_version: 3006.0
+      salt_version: 3006.x
       salt_bootstrap_options: -x python3 -MPfq git %s
     excludes:
       - opensuse-15

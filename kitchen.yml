@@ -180,7 +180,7 @@ suites:
       - freebsd-131
       - freebsd-123
       - openbsd-6
-  - name: git-3006.x
+  - name: git-3006
     provisioner:
       salt_version: 3006.x
       salt_bootstrap_options: -x python3 -MPfq git %s

@@ -269,14 +269,6 @@ VERSION_DISPLAY_NAMES = {
     "nightly": "Nightly",
 }
 
-GIT_VERSIONS = {
-    "3003": "v3003",
-    "3004": "v3004",
-    "3005": "v3005",
-    "3006": "3006.x",
-    "master": "master",
-}
-
 STABLE_VERSION_BLACKLIST = [
     "master",
     "nightly",
@@ -408,7 +400,6 @@ def generate_test_jobs():
             # BSD's don't have a stable release, only use git
             for bootstrap_type in ("git",):
 
-                _salt_version = salt_version
                 BLACKLIST = {
                     "3003": BLACKLIST_3003,
                     "3004": BLACKLIST_3004,
@@ -424,7 +415,6 @@ def generate_test_jobs():
                     # there is no git version.
                     if salt_version.endswith("-0"):
                         continue
-                    _salt_version = GIT_VERSIONS[salt_version]
 
                 if (
                     salt_version in ("3003", "3004")
@@ -432,7 +422,7 @@ def generate_test_jobs():
                 ):
                     continue
 
-                kitchen_target = f"{bootstrap_type}-{_salt_version}"
+                kitchen_target = f"{bootstrap_type}-{salt_version}"
                 instances.append(kitchen_target)
 
         if instances:
@@ -556,7 +546,6 @@ def generate_test_jobs():
                 continue
 
             for bootstrap_type in ("stable", "git", "onedir", "onedir-rc"):
-                _salt_version = salt_version
                 if bootstrap_type == "onedir":
                     if salt_version not in ONEDIR_SALT_VERSIONS:
                         continue
@@ -604,7 +593,6 @@ def generate_test_jobs():
                     # there is no git version.
                     if salt_version.endswith("-0"):
                         continue
-                    _salt_version = GIT_VERSIONS[salt_version]
 
                 if (
                     salt_version in ("3003", "3004", "3005", "3006")
@@ -612,7 +600,7 @@ def generate_test_jobs():
                 ):
                     continue
 
-                kitchen_target = f"{bootstrap_type}-{_salt_version}"
+                kitchen_target = f"{bootstrap_type}-{salt_version}"
                 instances.append(kitchen_target)
 
         if instances:

@@ -148,11 +148,11 @@ platforms:
       run_command: /lib/systemd/systemd
 
 suites:
-  - name: git-3003
+  - name: git-v3003
     provisioner:
       salt_version: v3003
       salt_bootstrap_options: -x python3 -MPfq git %s
-  - name: git-3004
+  - name: git-v3004
     provisioner:
       salt_version: v3004
       salt_bootstrap_options: -x python3 -MPfq git %s
@@ -166,7 +166,7 @@ suites:
       - freebsd-131
       - freebsd-123
       - openbsd-6
-  - name: git-3005
+  - name: git-v3005
     provisioner:
       salt_version: v3005
       salt_bootstrap_options: -x python3 -MPfq git %s
@@ -180,7 +180,7 @@ suites:
       - freebsd-131
       - freebsd-123
       - openbsd-6
-  - name: git-3006
+  - name: git-3006.x
     provisioner:
       salt_version: 3006.x
       salt_bootstrap_options: -x python3 -MPfq git %s

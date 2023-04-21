@@ -65,6 +65,8 @@ STABLE_DISTROS = [
     "opensuse-tumbleweed",
     "oraclelinux-7",
     "oraclelinux-8",
+    "photon-3",
+    "photon-4",
     "rockylinux-8",
     "ubuntu-2004",
     "ubuntu-2204",
@@ -81,6 +83,8 @@ ONEDIR_DISTROS = [
     "debian-11",
     "oraclelinux-7",
     "oraclelinux-8",
+    "photon-3",
+    "photon-4",
     "rockylinux-8",
     "rockylinux-9",
     "ubuntu-2004",
@@ -98,6 +102,8 @@ ONEDIR_RC_DISTROS = [
     "debian-11",
     "oraclelinux-7",
     "oraclelinux-8",
+    "photon-3",
+    "photon-4",
     "rockylinux-8",
     "rockylinux-9",
     "ubuntu-2004",
@@ -117,6 +123,8 @@ BLACKLIST_3003 = [
     "gentoo-systemd",
     "opensuse-15",
     "opensuse-tumbleweed",
+    "photon-3",
+    "photon-4",
     "rockylinux-8",
     "rockylinux-9",
     "ubuntu-2204",
@@ -137,6 +145,8 @@ BLACKLIST_GIT_3003 = [
     "gentoo-systemd",
     "opensuse-15",
     "opensuse-tumbleweed",
+    "photon-3",
+    "photon-4",
     "rockylinux-8",
     "rockylinux-9",
     "ubuntu-2004",
@@ -156,6 +166,8 @@ BLACKLIST_3004 = [
     "gentoo-systemd",
     "opensuse-15",
     "opensuse-tumbleweed",
+    "photon-3",
+    "photon-4",
     "rockylinux-9",
 ]
 
@@ -169,6 +181,8 @@ BLACKLIST_3005 = [
     "gentoo-systemd",
     "opensuse-15",
     "opensuse-tumbleweed",
+    "photon-3",
+    "photon-4",
 ]
 
 BLACKLIST_GIT_3004 = [
@@ -190,6 +204,8 @@ BLACKLIST_GIT_3004 = [
     "ubuntu-2110",
     "ubuntu-2204",
     "rockylinux-9",
+    "photon-3",
+    "photon-4",
 ]
 
 BLACKLIST_GIT_3005 = [
@@ -205,6 +221,8 @@ BLACKLIST_GIT_3005 = [
     "gentoo-systemd",
     "opensuse-15",
     "opensuse-tumbleweed",
+    "photon-3",
+    "photon-4",
     "ubuntu-2004",
     "ubuntu-2110",
     "ubuntu-2204",
@@ -327,6 +345,8 @@ DISTRO_DISPLAY_NAMES = {
     "opensuse-tumbleweed": "Opensuse Tumbleweed",
     "oraclelinux-7": "Oracle Linux 7",
     "oraclelinux-8": "Oracle Linux 8",
+    "photon-3": "Photon OS 3",
+    "photon-4": "Photon OS 4",
     "rockylinux-8": "Rocky Linux 8",
     "rockylinux-9": "Rocky Linux 9",
     "ubuntu-2004": "Ubuntu 20.04",

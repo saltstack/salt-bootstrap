@@ -2154,6 +2154,15 @@ __dnf_install_noinput() {
 }   # ----------  end of function __dnf_install_noinput  ----------
 
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  __tdnf_install_noinput
+#   DESCRIPTION:  (DRY) dnf install with noinput options
+#----------------------------------------------------------------------------------------------------------------------
+__tdnf_install_noinput() {
+
+    tdnf -y install "${@}" || return $?
+}   # ----------  end of function __tdnf_install_noinput  ----------
+
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #          NAME:  __git_clone_and_checkout
 #   DESCRIPTION:  (DRY) Helper function to clone and checkout salt to a
 #                 specific revision.
@@ -4185,6 +4194,62 @@ install_debian_check_services() {
 #   Fedora Install Functions
 #
 
+__install_saltstack_fedora_onedir_repository() {
+    if [ "$ITYPE" = "stable" ]; then
+        repo_rev="$ONEDIR_REV"
+    else
+        repo_rev="latest"
+    fi
+
+    __PY_VERSION_REPO="yum"
+    if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 3 ]; then
+        __PY_VERSION_REPO="py3"
+    fi
+
+    # Avoid using '$releasever' variable for yum.
+    # Instead, this should work correctly on all RHEL variants.
+    base_url="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_DIR}/${__PY_VERSION_REPO}/fedora/${DISTRO_MAJOR_VERSION}/\$basearch/${ONEDIR_REV}/"
+    if [ "${ONEDIR_REV}" = "nightly" ] ; then
+        base_url="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_NIGHTLY_DIR}/${__PY_VERSION_REPO}/fedora/${DISTRO_MAJOR_VERSION}/\$basearch/"
+    fi
+    gpg_key="SALT-PROJECT-GPG-PUBKEY-2023.pub"
+
+    gpg_key_urls=""
+    for key in $gpg_key; do
+        gpg_key_urls=$(printf "${base_url}${key},%s" "$gpg_key_urls")
+    done
+
+    repo_file="/etc/yum.repos.d/salt.repo"
+
+    if [ ! -s "$repo_file" ] || [ "$_FORCE_OVERWRITE" -eq $BS_TRUE ]; then
+        cat <<_eof > "$repo_file"
+[saltstack]
+name=SaltStack ${repo_rev} Release Channel for Fedora \$releasever
+baseurl=${base_url}
+skip_if_unavailable=True
+gpgcheck=1
+gpgkey=${gpg_key_urls}
+enabled=1
+enabled_metadata=1
+_eof
+
+        fetch_url="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_DIR}/${__PY_VERSION_REPO}/fedora/${DISTRO_MAJOR_VERSION}/${CPU_ARCH_L}/${ONEDIR_REV}/"
+        if [ "${ONEDIR_REV}" = "nightly" ] ; then
+            fetch_url="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_NIGHTLY_DIR}/${__PY_VERSION_REPO}/fedora/${DISTRO_MAJOR_VERSION}/${CPU_ARCH_L}/"
+        fi
+        for key in $gpg_key; do
+            __rpm_import_gpg "${fetch_url}${key}" || return 1
+        done
+
+        yum clean metadata || return 1
+    elif [ "$repo_rev" != "latest" ]; then
+        echowarn "salt.repo already exists, ignoring salt version argument."
+        echowarn "Use -F (forced overwrite) to install $repo_rev."
+    fi
+
+    return 0
+}
+
 install_fedora_deps() {
     if [ "$_UPGRADE_SYS" -eq $BS_TRUE ]; then
         dnf -y update || return 1
@@ -4449,9 +4514,73 @@ install_fedora_check_services() {
 
     return 0
 }
+
+install_fedora_onedir_deps() {
+
+    if [ "$_UPGRADE_SYS" -eq $BS_TRUE ]; then
+        yum -y update || return 1
+    fi
+
+    if [ "$_DISABLE_REPOS" -eq "$BS_TRUE" ] && [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 3 ]; then
+        echowarn "Detected -r or -R option while installing Salt packages for Python 3."
+        echowarn "Python 3 packages for older Salt releases requires the EPEL repository to be installed."
+        echowarn "Installing the EPEL repository automatically is disabled when using the -r or -R options."
+    fi
+
+    if [ "$_DISABLE_REPOS" -eq "$BS_FALSE" ]; then
+        __install_saltstack_fedora_onedir_repository || return 1
+    fi
+
+    # If -R was passed, we need to configure custom repo url with rsync-ed packages
+    # Which is still handled in __install_saltstack_rhel_repository. This call has
+    # its own check in case -r was passed without -R.
+    if [ "$_CUSTOM_REPO_URL" != "null" ]; then
+        __install_saltstack_fedora_onedir_repository || return 1
+    fi
+
+    if [ "$DISTRO_MAJOR_VERSION" -ge 8 ]; then
+        __PACKAGES="dnf-utils chkconfig"
+    else
+        __PACKAGES="yum-utils chkconfig"
+    fi
+
+    __PACKAGES="${__PACKAGES} procps"
+
+    # shellcheck disable=SC2086
+    __yum_install_noinput ${__PACKAGES} || return 1
+
+    if [ "${_EXTRA_PACKAGES}" != "" ]; then
+        echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
+        # shellcheck disable=SC2086
+        __yum_install_noinput ${_EXTRA_PACKAGES} || return 1
+    fi
+
+    return 0
+
+}
+
+
 install_fedora_onedir() {
     STABLE_REV=$ONEDIR_REV
-    install_fedora_stable || return 1
+    #install_fedora_stable || return 1
+
+    __PACKAGES=""
+
+    if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ];then
+        __PACKAGES="${__PACKAGES} salt-cloud"
+    fi
+    if [ "$_INSTALL_MASTER" -eq $BS_TRUE ];then
+        __PACKAGES="${__PACKAGES} salt-master"
+    fi
+    if [ "$_INSTALL_MINION" -eq $BS_TRUE ]; then
+        __PACKAGES="${__PACKAGES} salt-minion"
+    fi
+    if [ "$_INSTALL_SYNDIC" -eq $BS_TRUE ];then
+        __PACKAGES="${__PACKAGES} salt-syndic"
+    fi
+
+    # shellcheck disable=SC2086
+    __yum_install_noinput ${__PACKAGES} || return 1
 
     return 0
 }
@@ -6735,6 +6864,344 @@ install_arch_linux_onedir_post() {
 }
 #
 #   Ended Arch Install Functions
+#
+#######################################################################################################################
+
+#######################################################################################################################
+#
+#   Photon OS Install Functions
+#
+
+__install_saltstack_photon_onedir_repository() {
+    if [ "$ITYPE" = "stable" ]; then
+        repo_rev="$ONEDIR_REV"
+    else
+        repo_rev="latest"
+    fi
+
+    __PY_VERSION_REPO="yum"
+    if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 3 ]; then
+        __PY_VERSION_REPO="py3"
+    fi
+
+    # Avoid using '$releasever' variable for yum.
+    # Instead, this should work correctly on all RHEL variants.
+    base_url="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_DIR}/${__PY_VERSION_REPO}/photon/${DISTRO_MAJOR_VERSION}/\$basearch/${ONEDIR_REV}"
+    if [ "${ONEDIR_REV}" = "nightly" ] ; then
+        base_url="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_NIGHTLY_DIR}/${__PY_VERSION_REPO}/photon/${DISTRO_MAJOR_VERSION}/\$basearch/"
+    fi
+    gpg_key="SALT-PROJECT-GPG-PUBKEY-2023.pub"
+
+    gpg_key_urls=""
+    for key in $gpg_key; do
+        gpg_key_urls=$(printf "${base_url}${key},%s" "$gpg_key_urls")
+    done
+
+    repo_file="/etc/yum.repos.d/salt.repo"
+
+    if [ ! -s "$repo_file" ] || [ "$_FORCE_OVERWRITE" -eq $BS_TRUE ]; then
+        cat <<_eof > "$repo_file"
+[saltstack]
+name=SaltStack ${repo_rev} Release Channel for Photon \$releasever
+baseurl=${base_url}
+skip_if_unavailable=True
+gpgcheck=1
+gpgkey=${gpg_key_urls}
+enabled=1
+enabled_metadata=1
+_eof
+
+        fetch_url="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_DIR}/${__PY_VERSION_REPO}/photon/${DISTRO_MAJOR_VERSION}/${CPU_ARCH_L}/${ONEDIR_REV}/"
+        if [ "${ONEDIR_REV}" = "nightly" ] ; then
+            fetch_url="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_NIGHTLY_DIR}/${__PY_VERSION_REPO}/photon/${DISTRO_MAJOR_VERSION}/${CPU_ARCH_L}/"
+        fi
+        for key in $gpg_key; do
+            __rpm_import_gpg "${fetch_url}${key}" || return 1
+        done
+
+        #tdnf clean metadata || return 1
+    elif [ "$repo_rev" != "latest" ]; then
+        echowarn "salt.repo already exists, ignoring salt version argument."
+        echowarn "Use -F (forced overwrite) to install $repo_rev."
+    fi
+
+    return 0
+}
+
+install_photon_deps() {
+    if [ "$_UPGRADE_SYS" -eq $BS_TRUE ]; then
+        tdnf -y update || return 1
+    fi
+
+    __PACKAGES="${__PACKAGES:=}"
+    if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -lt 3 ]; then
+        echoerror "There are no Python 2 stable packages for Fedora, only Py3 packages"
+        return 1
+    fi
+
+    PY_PKG_VER=3
+
+    __PACKAGES="${__PACKAGES} libyaml procps-ng python${PY_PKG_VER}-crypto python${PY_PKG_VER}-jinja2"
+    __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-msgpack python${PY_PKG_VER}-requests python${PY_PKG_VER}-zmq"
+    __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-pip python${PY_PKG_VER}-m2crypto python${PY_PKG_VER}-pyyaml"
+    __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-systemd"
+    if [ "${_EXTRA_PACKAGES}" != "" ]; then
+        echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
+    fi
+
+    # shellcheck disable=SC2086
+    __tdnf_install_noinput ${__PACKAGES} ${_EXTRA_PACKAGES} || return 1
+
+    return 0
+}
+
+install_photon_stable_post() {
+    for fname in api master minion syndic; do
+        # Skip salt-api since the service should be opt-in and not necessarily started on boot
+        [ $fname = "api" ] && continue
+
+        # Skip if not meant to be installed
+        [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
+        [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
+        [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
+
+        systemctl is-enabled salt-$fname.service || (systemctl preset salt-$fname.service && systemctl enable salt-$fname.service)
+        sleep 1
+        systemctl daemon-reload
+    done
+}
+
+install_photon_git_deps() {
+    if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 3 ]; then
+        # Packages are named python3-<whatever>
+        PY_PKG_VER=3
+    else
+        PY_PKG_VER=2
+    fi
+
+    __PACKAGES=""
+    if ! __check_command_exists ps; then
+        __PACKAGES="${__PACKAGES} procps-ng"
+    fi
+    if ! __check_command_exists git; then
+        __PACKAGES="${__PACKAGES} git"
+    fi
+
+    if [ -n "${__PACKAGES}" ]; then
+        # shellcheck disable=SC2086
+        __dnf_install_noinput ${__PACKAGES} || return 1
+        __PACKAGES=""
+    fi
+
+    __git_clone_and_checkout || return 1
+
+    if [ "${_POST_NEON_INSTALL}" -eq $BS_FALSE ]; then
+
+        if [ "$_INSECURE_DL" -eq $BS_FALSE ] && [ "${_SALT_REPO_URL%%://*}" = "https" ]; then
+            __PACKAGES="${__PACKAGES} ca-certificates"
+        fi
+        if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
+            __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-libcloud python${PY_PKG_VER}-netaddr"
+        fi
+
+        install_photon_deps || return 1
+
+        if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 3 ]; then
+            if __check_command_exists python3; then
+                __python="python3"
+            fi
+        elif [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 2 ]; then
+            if __check_command_exists python2; then
+                __python="python2"
+            fi
+        else
+            if ! __check_command_exists python; then
+                echoerror "Unable to find a python binary?!"
+                return 1
+            fi
+            # Let's hope it's the right one
+            __python="python"
+        fi
+
+        grep tornado "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" | while IFS='
+    '         read -r dep; do
+                echodebug "Running '${__python}' -m pip install '${dep}'"
+                "${__python}" -m pip install "${dep}" || return 1
+            done
+    else
+        __PACKAGES="python${PY_PKG_VER}-devel python${PY_PKG_VER}-pip python${PY_PKG_VER}-setuptools gcc"
+        if [ "${DISTRO_VERSION}" -ge 35 ]; then
+            __PACKAGES="${__PACKAGES} gcc-c++"
+        fi
+        # shellcheck disable=SC2086
+        __tdnf_install_noinput ${__PACKAGES} || return 1
+    fi
+
+    # Let's trigger config_salt()
+    if [ "$_TEMP_CONFIG_DIR" = "null" ]; then
+        _TEMP_CONFIG_DIR="${_SALT_GIT_CHECKOUT_DIR}/conf/"
+        CONFIG_SALT_FUNC="config_salt"
+    fi
+
+    return 0
+}
+
+install_photon_git() {
+    if [ "${_PY_EXE}" != "" ]; then
+        _PYEXE=${_PY_EXE}
+        echoinfo "Using the following python version: ${_PY_EXE} to install salt"
+    else
+        _PYEXE='python2'
+    fi
+
+    if [ -f "${_SALT_GIT_CHECKOUT_DIR}/salt/syspaths.py" ]; then
+        ${_PYEXE} setup.py --salt-config-dir="$_SALT_ETC_DIR" --salt-cache-dir="${_SALT_CACHE_DIR}" ${SETUP_PY_INSTALL_ARGS} install --prefix=/usr || return 1
+    else
+        ${_PYEXE} setup.py ${SETUP_PY_INSTALL_ARGS} install --prefix=/usr || return 1
+    fi
+    return 0
+}
+
+install_photon_git_post() {
+    for fname in api master minion syndic; do
+        # Skip if not meant to be installed
+        [ $fname = "api" ] && \
+            ([ "$_INSTALL_MASTER" -eq $BS_FALSE ] || ! __check_command_exists "salt-${fname}") && continue
+        [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
+        [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
+        [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
+
+        # Account for new path for services files in later releases
+        if [ -f "${_SALT_GIT_CHECKOUT_DIR}/pkg/common/salt-${fname}.service" ]; then
+          _SERVICE_DIR="${_SALT_GIT_CHECKOUT_DIR}/pkg/common"
+        else
+          _SERVICE_DIR="${_SALT_GIT_CHECKOUT_DIR}/pkg/rpm"
+        fi
+        __copyfile "${_SERVICE_DIR}/salt-${fname}.service" "/lib/systemd/system/salt-${fname}.service"
+
+        # Salt executables are located under `/usr/local/bin/` on Fedora 36+
+        #if [ "${DISTRO_VERSION}" -ge 36 ]; then
+        #  sed -i -e 's:/usr/bin/:/usr/local/bin/:g' /lib/systemd/system/salt-*.service
+        #fi
+
+        # Skip salt-api since the service should be opt-in and not necessarily started on boot
+        [ $fname = "api" ] && continue
+
+        systemctl is-enabled salt-$fname.service || (systemctl preset salt-$fname.service && systemctl enable salt-$fname.service)
+        sleep 1
+        systemctl daemon-reload
+    done
+}
+
+install_photon_restart_daemons() {
+    [ $_START_DAEMONS -eq $BS_FALSE ] && return
+
+    for fname in api master minion syndic; do
+        # Skip salt-api since the service should be opt-in and not necessarily started on boot
+        [ $fname = "api" ] && continue
+
+        # Skip if not meant to be installed
+        [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
+        [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
+        [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
+
+        systemctl stop salt-$fname > /dev/null 2>&1
+        systemctl start salt-$fname.service && continue
+        echodebug "Failed to start salt-$fname using systemd"
+        if [ "$_ECHO_DEBUG" -eq $BS_TRUE ]; then
+            systemctl status salt-$fname.service
+            journalctl -xe
+        fi
+    done
+}
+
+install_photon_check_services() {
+    for fname in api master minion syndic; do
+        # Skip salt-api since the service should be opt-in and not necessarily started on boot
+        [ $fname = "api" ] && continue
+
+        # Skip if not meant to be installed
+        [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
+        [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
+        [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
+
+        __check_services_systemd salt-$fname || return 1
+    done
+
+    return 0
+}
+
+install_photon_onedir_deps() {
+
+    if [ "$_UPGRADE_SYS" -eq $BS_TRUE ]; then
+        tdnf -y update || return 1
+    fi
+
+    if [ "$_DISABLE_REPOS" -eq "$BS_TRUE" ] && [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 3 ]; then
+        echowarn "Detected -r or -R option while installing Salt packages for Python 3."
+        echowarn "Python 3 packages for older Salt releases requires the EPEL repository to be installed."
+        echowarn "Installing the EPEL repository automatically is disabled when using the -r or -R options."
+    fi
+
+    if [ "$_DISABLE_REPOS" -eq "$BS_FALSE" ]; then
+        __install_saltstack_photon_onedir_repository || return 1
+    fi
+
+    # If -R was passed, we need to configure custom repo url with rsync-ed packages
+    # Which is still handled in __install_saltstack_rhel_repository. This call has
+    # its own check in case -r was passed without -R.
+    if [ "$_CUSTOM_REPO_URL" != "null" ]; then
+        __install_saltstack_photon_onedir_repository || return 1
+    fi
+
+    __PACKAGES="procps-ng"
+
+    # shellcheck disable=SC2086
+    __tdnf_install_noinput ${__PACKAGES} || return 1
+
+    if [ "${_EXTRA_PACKAGES}" != "" ]; then
+        echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
+        # shellcheck disable=SC2086
+        __tdnf_install_noinput ${_EXTRA_PACKAGES} || return 1
+    fi
+
+    return 0
+
+}
+
+
+install_photon_onedir() {
+    STABLE_REV=$ONEDIR_REV
+
+    __PACKAGES=""
+
+    if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ];then
+        __PACKAGES="${__PACKAGES} salt-cloud"
+    fi
+    if [ "$_INSTALL_MASTER" -eq $BS_TRUE ];then
+        __PACKAGES="${__PACKAGES} salt-master"
+    fi
+    if [ "$_INSTALL_MINION" -eq $BS_TRUE ]; then
+        __PACKAGES="${__PACKAGES} salt-minion"
+    fi
+    if [ "$_INSTALL_SYNDIC" -eq $BS_TRUE ];then
+        __PACKAGES="${__PACKAGES} salt-syndic"
+    fi
+
+    # shellcheck disable=SC2086
+    __tdnf_install_noinput ${__PACKAGES} || return 1
+
+    return 0
+}
+
+install_photon_onedir_post() {
+    STABLE_REV=$ONEDIR_REV
+    install_photon_stable_post || return 1
+
+    return 0
+}
+#
+#   Ended Fedora Install Functions
 #
 #######################################################################################################################
 

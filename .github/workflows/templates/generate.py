@@ -321,11 +321,7 @@ GIT_DISTRO_BLACKLIST = [
     "rockylinux-8",
 ]
 
-LATEST_PKG_BLACKLIST = [
-    "almalinux-9",
-    "centos-stream9",
-    "rockylinux-9",
-]
+LATEST_PKG_BLACKLIST = []
 
 DISTRO_DISPLAY_NAMES = {
     "almalinux-8": "AlmaLinux 8",

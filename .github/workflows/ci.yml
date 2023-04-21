@@ -263,7 +263,7 @@ jobs:
       distro-slug: almalinux-9
       display-name: AlmaLinux 9
       timeout: 20
-      instances: '["git-3005", "onedir-3005", "onedir-3006", "git-master"]'
+      instances: '["git-3005", "onedir-3005", "onedir-3006", "git-master", "latest"]'
 
 
   amazon-2:
@@ -333,7 +333,7 @@ jobs:
       distro-slug: centos-stream9
       display-name: CentOS Stream 9
       timeout: 20
-      instances: '["git-3005", "onedir-3005", "onedir-3006", "git-master"]'
+      instances: '["git-3005", "onedir-3005", "onedir-3006", "git-master", "latest"]'
 
 
   debian-10:
@@ -557,7 +557,7 @@ jobs:
       distro-slug: rockylinux-9
       display-name: Rocky Linux 9
       timeout: 20
-      instances: '["git-3005", "onedir-3005", "onedir-3006", "git-master"]'
+      instances: '["git-3005", "onedir-3005", "onedir-3006", "git-master", "latest"]'
 
 
   ubuntu-2004:

@@ -37,13 +37,13 @@
     Specifies all the optional parameters in no particular order.
 
 .PARAMETER version
-    Default version defined in this script.
+    The version of the Salt minion to install. Default is "latest" which will
+    install the latest version of Salt minion available.
 
 .PARAMETER pythonVersion
     The version of Python the installer should use. Specify either "2" or "3".
     Beginning with Salt 2017.7.0, Salt will run on either Python 2 or Python 3.
     The default is Python 2 if not specified. This parameter only works for Salt
-    versions >= 2017.7.0.
 
 .PARAMETER runservice
     Boolean flag to start or stop the minion service. True will start the minion
@@ -81,32 +81,47 @@ param(
     # Supports new version and latest
     # Option 1 means case insensitive
     [ValidatePattern('^(\d{4}(\.\d{1,2}){0,2}(\-\d{1})?)|(latest)$', Options=1)]
-    [string]$Version = '',
+    [Alias("v")]
+    [String]$Version = "latest",
 
     [Parameter(Mandatory=$false, ValueFromPipeline=$True)]
-    # Doesn't support Python versions prior to "2017.7.0"
+    # Python 3 support was added in 2017. Python 2 support was dropped in
+    # version 3001. This parameter is ignored for all versions before 2017 and
+    # after 3000.
     [ValidateSet("2","3")]
-    [string]$PythonVersion = "3",
+    [Alias("p")]
+    [String]$PythonVersion = "3",
 
     [Parameter(Mandatory=$false, ValueFromPipeline=$True)]
     [ValidateSet("true","false")]
-    [string]$RunService = "true",
+    [Alias("s")]
+    [String]$RunService = "true",
 
     [Parameter(Mandatory=$false, ValueFromPipeline=$True)]
-    [string]$Minion = "not-specified",
+    [Alias("m")]
+    [String]$Minion = "not-specified",
 
     [Parameter(Mandatory=$false, ValueFromPipeline=$True)]
-    [string]$Master = "not-specified",
+    [Alias("a")]
+    [String]$Master = "not-specified",
 
     [Parameter(Mandatory=$false, ValueFromPipeline=$True)]
-    [string]$RepoUrl= "https://repo.saltproject.io/windows",
+    [Alias("r")]
+    [String]$RepoUrl = "https://repo.saltproject.io/salt/py3/windows",
 
     [Parameter(Mandatory=$false, ValueFromPipeline=$True)]
-    [switch]$ConfigureOnly
+    [Alias("c")]
+    [Switch]$ConfigureOnly
 )
 
+
+#===============================================================================
+# Script Preferences
+#===============================================================================
 # Powershell supports only TLS 1.0 by default. Add support for TLS 1.2
 [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]'Tls12'
+$ErrorActionPreference = "Stop"
+$ProgressPreference = "SilentlyContinue"
 
 #===============================================================================
 # Script Functions
@@ -121,6 +136,129 @@ function Get-IsAdministrator
 function Get-IsUacEnabled
 {
     (Get-ItemProperty HKLM:\Software\Microsoft\Windows\CurrentVersion\Policies\System).EnableLua -ne 0
+}
+
+function Get-MajorVersion {
+    # Parses a version string and returns the major version
+    #
+    # Args:
+    #     Version (string): The Version to parse
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory=$true, Position=0)]
+        [String] $Version
+    )
+    return ( $Version -split "\." )[0]
+}
+
+function Convert-PSObjectToHashtable {
+    param (
+        [Parameter(ValueFromPipeline)]
+        $InputObject
+    )
+    if ($null -eq $InputObject) { return $null }
+
+    $is_enum = $InputObject -is [System.Collections.IEnumerable]
+    $not_string = $InputObject -isnot [string]
+    if ($is_enum -and $not_string) {
+        $collection = @(
+            foreach ($object in $InputObject) {
+                Convert-PSObjectToHashtable $object
+            }
+        )
+
+        Write-Host -NoEnumerate $collection
+    } elseif ($InputObject -is [PSObject]) {
+        $hash = @{}
+
+        foreach ($property in $InputObject.PSObject.Properties) {
+            $hash[$property.Name] = Convert-PSObjectToHashtable $property.Value
+        }
+
+        $hash
+    } else {
+        $InputObject
+    }
+}
+
+function Get-FileHash {
+    # Get-FileHash is a built-in cmdlet in powershell 5+ but we need to support
+    # powershell 3. This will overwrite the powershell 5 commandlet only for
+    # this script. But it will provide the missing cmdlet for powershell 3
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory=$true)]
+        [String] $Path,
+
+        [Parameter(Mandatory=$false)]
+        [ValidateSet(
+                "SHA1",
+                "SHA256",
+                "SHA384",
+                "SHA512",
+                # https://serverfault.com/questions/820300/
+                # why-isnt-mactripledes-algorithm-output-in-powershell-stable
+                "MACTripleDES", # don't use
+                "MD5",
+                "RIPEMD160",
+                IgnoreCase=$true)]
+        [String] $Algorithm = "SHA256"
+    )
+
+    if ( !(Test-Path $Path) ) {
+        Write-Verbose "Invalid path for hashing: $Path"
+        return @{}
+    }
+
+    if ( (Get-Item -Path $Path) -isnot [System.IO.FileInfo]) {
+        Write-Verbose "Not a file for hashing: $Path"
+        return @{}
+    }
+
+    $Path = Resolve-Path -Path $Path
+
+    Switch ($Algorithm) {
+        SHA1 {
+            $hasher = [System.Security.Cryptography.SHA1CryptoServiceProvider]::Create()
+        }
+        SHA256 {
+            $hasher = [System.Security.Cryptography.SHA256]::Create()
+        }
+        SHA384 {
+            $hasher = [System.Security.Cryptography.SHA384]::Create()
+        }
+        SHA512 {
+            $hasher = [System.Security.Cryptography.SHA512]::Create()
+        }
+        MACTripleDES {
+            $hasher = [System.Security.Cryptography.MACTripleDES]::Create()
+        }
+        MD5 {
+            $hasher = [System.Security.Cryptography.MD5]::Create()
+        }
+        RIPEMD160 {
+            $hasher = [System.Security.Cryptography.RIPEMD160]::Create()
+        }
+    }
+
+    Write-Verbose "Hashing using $Algorithm algorithm"
+    try {
+        $data = [System.IO.File]::OpenRead($Path)
+        $hash = $hasher.ComputeHash($data)
+        $hash = [System.BitConverter]::ToString($hash) -replace "-",""
+        return @{
+            Path = $Path;
+            Algorithm = $Algorithm.ToUpper();
+            Hash = $hash
+        }
+    } catch {
+        Write-Verbose "Error hashing: $Path"
+        return @{}
+    } finally {
+        if ($null -ne $data) {
+            $data.Close()
+        }
+    }
 }
 
 #===============================================================================
@@ -158,27 +296,55 @@ if (!(Get-IsAdministrator)) {
 }
 
 #===============================================================================
+# Change RepoUrl for older versions
+#===============================================================================
+$defaultUrl = "https://repo.saltproject.io/salt/py3/windows"
+$oldRepoUrl = "https://repo.saltproject.io/windows"
+$majorVersion = Get-MajorVersion -Version $Version
+$customUrl = $true
+if ( $Version.ToLower() -ne "latest" ) {
+    # A specific version has been passed
+    # We only want to modify the URL if a custom URL was not passed
+    $uri = [Uri]($RepoUrl)
+    if ( $uri.AbsoluteUri -eq $defaultUrl ) {
+        # No customURL passed, let's check for a pre 3006 version
+        $customUrl = $false
+        if ( $majorVersion -lt "3006" ) {
+            # This is an older version, use the old URL
+            $RepoUrl = $oldRepoUrl
+        } else {
+            # This is a new URL, and a version was passed, let's look in minor
+            if ( $Version.ToLower() -ne $majorVersion.ToLower() ) {
+                $RepoUrl = "$RepoUrl/minor"
+            }
+        }
+    }
+} else {
+    if ( $RepoUrl -eq $defaultUrl ) {
+        $customUrl = $false
+    }
+}
+
+#===============================================================================
 # Verify Parameters
 #===============================================================================
 Write-Verbose "Parameters passed in:"
-Write-Verbose "version: $version"
-Write-Verbose "runservice: $runservice"
-Write-Verbose "master: $master"
-Write-Verbose "minion: $minion"
-Write-Verbose "repourl: $repourl"
+Write-Verbose "version: $Version"
+Write-Verbose "runservice: $RunService"
+Write-Verbose "master: $Master"
+Write-Verbose "minion: $Minion"
+Write-Verbose "repourl: $RepoUrl"
 
-if ($runservice.ToLower() -eq "true") {
+if ($RunService.ToLower() -eq "true") {
     Write-Verbose "Windows service will be set to run"
-    [bool]$runservice = $True
-}
-elseif ($runservice.ToLower() -eq "false") {
+    [bool]$RunService = $True
+} elseif ($RunService.ToLower() -eq "false") {
     Write-Verbose "Windows service will be stopped and set to manual"
-    [bool]$runservice = $False
-}
-else {
+    [bool]$RunService = $False
+} else {
     # Param passed in wasn't clear so defaulting to true.
     Write-Verbose "Windows service defaulting to run automatically"
-    [bool]$runservice = $True
+    [bool]$RunService = $True
 }
 
 #===============================================================================
@@ -231,8 +397,14 @@ if (Test-Path C:\tmp\grains) {
     $ConfiguredAnything = $True
 }
 
-if ($ConfigureOnly -and !$ConfiguredAnything) {
-    Write-Output "No configuration or keys were copied over. No configuration was done!"
+if ( $ConfigureOnly ) {
+    if ( !$ConfiguredAnything ) {
+        Write-Host "No configuration or keys were copied over." -ForegroundColor yes
+        Write-Host "No configuration was done!" -ForegroundColor Yellow
+    } else {
+        Write-Host "Salt minion successfully configured" -ForegroundColor Green
+    }
+    # If we're only configuring, we want to end here
     exit 0
 }
 
@@ -246,97 +418,168 @@ if ([IntPtr]::Size -eq 4) {
 }
 
 #===============================================================================
-# Use version "Latest" if no version is passed
+# Get file name to download
 #===============================================================================
-if ((!$version) -or ($version.ToLower() -eq 'latest')){
-    $versionSection = "Latest-Py$PythonVersion"
+$saltFileName = ""
+$saltVersion = ""
+$saltSha512= ""
+$saltFileUrl = ""
+if ( ($customUrl) -or ($majorVersion -lt 3006) ) {
+    $saltFileName = "Salt-Minion-$Version-Py3-$arch-Setup.exe"
+    $saltVersion = $Version
+    $saltFileUrl = "$RepoUrl/$saltFileName"
 } else {
-    $versionSection = $version
-    $year = $version.Substring(0, 4)
-    if ([int]$year -ge 2017) {
-        if ($PythonVersion -eq "3") {
-            $versionSection = "$version-Py3"
-        } else {
-            $versionSection = "$version-Py2"
+    if ( $majorVersion -ge 3006 ) {
+        $enc = [System.Text.Encoding]::UTF8
+        try {
+            $response = Invoke-WebRequest -Uri "$RepoUrl/repo.json" -UseBasicParsing
+            if ($response.Content.GetType().Name -eq "Byte[]") {
+                $psobj = $enc.GetString($response.Content) | ConvertFrom-Json
+            } else {
+                $psobj = $response.Content | ConvertFrom-Json
+            }
+            $hash = Convert-PSObjectToHashtable $psobj
+        } catch {
+            Write-Verbose "repo.json not found at: $RepoUrl"
+            $hash = @{}
+        }
+
+        $searchVersion = $Version.ToLower()
+        if ( $hash.Contains($searchVersion)) {
+            foreach ($item in $hash.($searchVersion).Keys) {
+                if ( $item.EndsWith(".exe") ) {
+                    if ( $item.Contains($arch) ) {
+                        $saltFileName = $hash.($searchVersion).($item).name
+                        $saltVersion = $hash.($searchVersion).($item).version
+                        $saltSha512 = $hash.($searchVersion).($item).SHA512
+                    }
+                }
+            }
+        }
+        if ( $saltFileName -and $saltVersion -and $saltSha512 ) {
+            if ( $RepoUrl.Contains("minor") ) {
+                $saltFileUrl = @($RepoUrl, $saltVersion, $saltFileName) -join "/"
+            } else {
+                $saltFileUrl = @($RepoUrl, "minor", $saltVersion, $saltFileName) -join "/"
+            }
         }
     }
 }
 
-if (!$ConfigureOnly) {
-    #===============================================================================
-    # Download minion setup file
-    #===============================================================================
-    $saltExe = "Salt-Minion-$versionSection-$arch-Setup.exe"
-    Write-Output "Downloading Salt minion installer $saltExe"
-    $webclient = New-Object System.Net.WebClient
-    $url = "$repourl/$saltExe"
-    $file = "C:\Windows\Temp\$saltExe"
-    $webclient.DownloadFile($url, $file)
+#===============================================================================
+# Download minion setup file
+#===============================================================================
+Write-Host "===============================================================================" -ForegroundColor Yellow
+Write-Host " Bootstrapping Salt Minion" -ForegroundColor Green
+Write-Host " - version: $Version"
+Write-Host " - file name: $saltFileName"
+Write-Host " - file url: $saltFileUrl"
+Write-Host "-------------------------------------------------------------------------------" -ForegroundColor Yellow
+Write-Host "Downloading Installer: " -NoNewline
+$webclient = New-Object System.Net.WebClient
+$localFile = "C:\Windows\Temp\$saltFileName"
+$webclient.DownloadFile($saltFileUrl, $localFile)
 
-    #===============================================================================
-    # Set the parameters for the installer
-    #===============================================================================
-    # Unless specified, use the installer defaults
-    # - id: <hostname>
-    # - master: salt
-    # - Start the service
-    $parameters = ""
-    if($minion -ne "not-specified") {$parameters = "/minion-name=$minion"}
-    if($master -ne "not-specified") {$parameters = "$parameters /master=$master"}
-    if($runservice -eq $false) {$parameters = "$parameters /start-service=0"}
+if ( Test-Path -Path $localFile ) {
+    Write-Host "Success" -ForegroundColor Green
+} else {
+    Write-Host "Failed" -ForegroundColor Red
+}
 
-    #===============================================================================
-    # Install minion silently
-    #===============================================================================
-    #Wait for process to exit before continuing.
-    Write-Output "Installing Salt minion"
-    Start-Process C:\Windows\Temp\$saltExe -ArgumentList "/S $parameters" -Wait -NoNewWindow -PassThru | Out-Null
-
-    #===============================================================================
-    # Configure the minion service
-    #===============================================================================
-    # Wait for salt-minion service to be registered before trying to start it
-    $service = Get-Service salt-minion -ErrorAction SilentlyContinue
-    while (!$service) {
-      Start-Sleep -s 2
-      $service = Get-Service salt-minion -ErrorAction SilentlyContinue
+if ( $saltSha512 ) {
+    $localSha512 = (Get-FileHash -Path $localFile -Algorithm SHA512).Hash
+    Write-Host "Comparing Hash: " -NoNewline
+    if ( $localSha512 -eq $saltSha512 ) {
+        Write-Host "Success" -ForegroundColor Green
+    } else {
+        Write-Host "Failed" -ForegroundColor Red
+        exit 1
     }
+}
 
-    if($runservice) {
-        # Start service
-        Write-Output "Starting the Salt minion service"
+#===============================================================================
+# Set the parameters for the installer
+#===============================================================================
+# Unless specified, use the installer defaults
+# - id: <hostname>
+# - master: salt
+# - Start the service
+$parameters = ""
+if($Minion -ne "not-specified") {$parameters = "/minion-name=$Minion"}
+if($Master -ne "not-specified") {$parameters = "$parameters /master=$Master"}
+if($RunService -eq $false) {$parameters = "$parameters /start-service=0"}
+
+#===============================================================================
+# Install minion silently
+#===============================================================================
+#Wait for process to exit before continuing.
+Write-Host "Installing Salt Minion: " -NoNewline
+Start-Process $localFile -ArgumentList "/S $parameters" -Wait -NoNewWindow -PassThru | Out-Null
+
+#===============================================================================
+# Configure the minion service
+#===============================================================================
+# Wait for salt-minion service to be registered before trying to start it
+$service = Get-Service salt-minion -ErrorAction SilentlyContinue
+while (!$service) {
+  Start-Sleep -s 2
+  $service = Get-Service salt-minion -ErrorAction SilentlyContinue
+}
+if ( $service ) {
+    Write-Host "Success" -ForegroundColor Green
+} else {
+    Write-Host "Failed" -ForegroundColor Red
+    exit 1
+}
+
+if($RunService) {
+    # Start service
+    Write-Host "Starting Service: " -NoNewline
+    Start-Service -Name "salt-minion" -ErrorAction SilentlyContinue
+
+    # Check if service is started, otherwise retry starting the
+    # service 4 times.
+    $try = 0
+    while (($service.Status -ne "Running") -and ($try -ne 4)) {
         Start-Service -Name "salt-minion" -ErrorAction SilentlyContinue
-
-        # Check if service is started, otherwise retry starting the
-        # service 4 times.
-        $try = 0
-        while (($service.Status -ne "Running") -and ($try -ne 4)) {
-            Start-Service -Name "salt-minion" -ErrorAction SilentlyContinue
-            $service = Get-Service salt-minion -ErrorAction SilentlyContinue
-            Start-Sleep -s 2
-            $try += 1
-        }
-
-        # If the salt-minion service is still not running, something probably
-        # went wrong and user intervention is required - report failure.
-        if ($service.Status -eq "Stopped") {
-            Write-Output -NoNewline "Failed to start salt minion"
-            exit 1
-        }
+        $service = Get-Service salt-minion -ErrorAction SilentlyContinue
+        Start-Sleep -s 2
+        $try += 1
     }
-    else {
-        Write-Output -NoNewline "Stopping salt minion and setting it to 'Manual'"
-        Set-Service "salt-minion" -StartupType "Manual"
-        Stop-Service "salt-minion"
+
+    # If the salt-minion service is still not running, something probably
+    # went wrong and user intervention is required - report failure.
+    if ($service.Status -eq "Running") {
+        Write-Host "Success" -ForegroundColor Green
+    } else {
+        Write-Host "Failed" -ForegroundColor Red
+        exit 1
+    }
+
+} else {
+    Write-Host "Setting Service to 'Manual': " -NoNewline
+    Set-Service "salt-minion" -StartupType "Manual"
+    if ( (Get-Service "salt-minion").StartType -eq "Manual" ) {
+        Write-Host "Success" -ForegroundColor Green
+    } else {
+        Write-Host "Failed" -ForegroundColor Red
+        exit 1
+    }
+
+    Write-Host "Stopping Service: " -NoNewline
+    Stop-Service "salt-minion"
+    if ( (Get-Service "salt-minion").Status -eq "Stopped" ) {
+        Write-Host "Success" -ForegroundColor Green
+    } else {
+        Write-Host "Failed" -ForegroundColor Red
+        exit 1
     }
 }
 
 #===============================================================================
 # Script Complete
 #===============================================================================
-if ($ConfigureOnly) {
-    Write-Output "Salt minion successfully configured"
-}
-else {
-    Write-Output "Salt minion successfully installed"
-}
+Write-Host "-------------------------------------------------------------------------------" -ForegroundColor Yellow
+Write-Host "Salt Minion Installed Successfully" -ForegroundColor Green
+Write-Host "===============================================================================" -ForegroundColor Yellow
+exit 0

@@ -1,9 +1,8 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
-import os
-import json
-import pathlib
 import datetime
+import json
+import os
+import pathlib
 
 os.chdir(os.path.abspath(os.path.dirname(__file__)))
 
@@ -211,32 +210,62 @@ BLACKLIST_GIT_3005 = [
     "ubuntu-2204",
 ]
 
+BLACKLIST_3006 = [
+    "arch",
+    "fedora-35",
+    "fedora-36",
+    "fedora-37",
+    "fedora-38",
+    "gentoo",
+    "gentoo-systemd",
+    "opensuse-15",
+    "opensuse-tumbleweed",
+]
+
+BLACKLIST_GIT_3006 = [
+    "almalinux-9",
+    "amazon-2",
+    "arch",
+    "centos-stream9",
+    "debian-10",
+    "debian-11",
+    "fedora-35",
+    "fedora-36",
+    "fedora-37",
+    "fedora-38",
+    "gentoo",
+    "gentoo-systemd",
+    "opensuse-15",
+    "opensuse-tumbleweed",
+    "rockylinux-9",
+    "ubuntu-2004",
+    "ubuntu-2110",
+    "ubuntu-2204",
+]
+
 SALT_VERSIONS = [
     "3003",
     "3004",
     "3005",
+    "3006",
     "master",
     "latest",
     "nightly",
-    "3006-0rc1",
-    "3006-0rc2",
 ]
 
 ONEDIR_SALT_VERSIONS = [
     "3005",
+    "3006",
     "latest",
-    "nightly",
 ]
 
-ONEDIR_RC_SALT_VERSIONS = [
-    "3006-0rc1",
-    "3006-0rc2",
-]
+ONEDIR_RC_SALT_VERSIONS = []
 
 VERSION_DISPLAY_NAMES = {
     "3003": "v3003",
     "3004": "v3004",
     "3005": "v3005",
+    "3006": "v3006",
     "master": "Master",
     "latest": "Latest",
     "nightly": "Nightly",
@@ -245,14 +274,10 @@ VERSION_DISPLAY_NAMES = {
 STABLE_VERSION_BLACKLIST = [
     "master",
     "nightly",
-    "3006-0rc1",
-    "3006-0rc2",
 ]
 
 GIT_VERSION_BLACKLIST = [
     "nightly",
-    "3006-0rc1",
-    "3006-0rc2",
 ]
 
 # TODO: Revert the commit relating to this section, once the Git-based builds
@@ -555,12 +580,14 @@ def generate_test_jobs():
                     "3003": BLACKLIST_3003,
                     "3004": BLACKLIST_3004,
                     "3005": BLACKLIST_3005,
+                    "3006": BLACKLIST_3006,
                 }
                 if bootstrap_type == "git":
                     BLACKLIST = {
                         "3003": BLACKLIST_GIT_3003,
                         "3004": BLACKLIST_GIT_3004,
                         "3005": BLACKLIST_GIT_3005,
+                        "3006": BLACKLIST_GIT_3006,
                     }
 
                     # .0 versions are a virtual version for pinning to the first
@@ -570,7 +597,7 @@ def generate_test_jobs():
                         continue
 
                 if (
-                    salt_version in ("3003", "3004", "3005")
+                    salt_version in ("3003", "3004", "3005", "3006")
                     and distro in BLACKLIST[salt_version]
                 ):
                     continue

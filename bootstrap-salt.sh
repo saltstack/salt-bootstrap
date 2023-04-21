@@ -23,7 +23,7 @@
 #======================================================================================================================
 set -o nounset                              # Treat unset variables as an error
 
-__ScriptVersion="2023.04.06"
+__ScriptVersion="2023.04.21"
 __ScriptName="bootstrap-salt.sh"
 
 __ScriptFullName="$0"
@@ -615,12 +615,24 @@ if [ "$ITYPE" = "git" ]; then
 # If doing stable install, check if version specified
 elif [ "$ITYPE" = "stable" ]; then
     if [ "$#" -eq 0 ];then
-        STABLE_REV="latest"
+        ONEDIR_REV="latest"
+        _ONEDIR_REV="$1"
+        ITYPE="onedir"
     else
-        if [ "$(echo "$1" | grep -E '^(latest|1\.6|1\.7|2014\.1|2014\.7|2015\.5|2015\.8|2016\.3|2016\.11|2017\.7|2018\.3|2019\.2|3000|3001|3002|3003|3004|3005)$')" != "" ]; then
+        if [ "$(echo "$1" | grep -E '^(nightly|latest|3006)$')" != "" ]; then
+            ONEDIR_REV="$1"
+            _ONEDIR_REV="$1"
+            ITYPE="onedir"
+            shift
+        elif [ "$(echo "$1" | grep -E '^(3003|3004|3005)$')" != "" ]; then
             STABLE_REV="$1"
             shift
-        elif [ "$(echo "$1" | grep -E '^(2[0-9]*\.[0-9]*\.[0-9]*|[3-9][0-9]{3}(\.[0-9]*)?)$')" != "" ]; then
+        elif [ "$(echo "$1" | grep -E '^([3-9][0-5]{2}[6-9](\.[0-9]*)?)')" != "" ]; then
+            ONEDIR_REV="minor/$1"
+            _ONEDIR_REV="$1"
+            ITYPE="onedir"
+            shift
+        elif [ "$(echo "$1" | grep -E '^([3-9][0-5]{3}(\.[0-9]*)?)$')" != "" ]; then
             # Handle the 3xxx.0 version as 3xxx archive (pin to minor) and strip the fake ".0" suffix
             STABLE_REV=$(echo "$1" | sed -E 's/^([3-9][0-9]{3})\.0$/\1/')
             if [ "$(uname)" != "Darwin" ]; then
@@ -628,7 +640,7 @@ elif [ "$ITYPE" = "stable" ]; then
             fi
             shift
         else
-            echo "Unknown stable version: $1 (valid: 1.6, 1.7, 2014.1, 2014.7, 2015.5, 2015.8, 2016.3, 2016.11, 2017.7, 2018.3, 2019.2, 3000, 3001, 3002, 3003, 3004, 3005, latest, \$MAJOR.\$MINOR.\$PATCH until 2019.2, \$MAJOR or \$MAJOR.\$PATCH starting from 3000)"
+            echo "Unknown stable version: $1 (valid: 3003, 3004, 3005, 3006, latest)"
             exit 1
         fi
     fi
@@ -637,7 +649,7 @@ elif [ "$ITYPE" = "onedir" ]; then
     if [ "$#" -eq 0 ];then
         ONEDIR_REV="latest"
     else
-        if [ "$(echo "$1" | grep -E '^(nightly|latest|3005)$')" != "" ]; then
+        if [ "$(echo "$1" | grep -E '^(nightly|latest|3005|3006)$')" != "" ]; then
             ONEDIR_REV="$1"
             shift
         elif [ "$(echo "$1" | grep -E '^(3005(\.[0-9]*)?)')" != "" ]; then
@@ -649,7 +661,7 @@ elif [ "$ITYPE" = "onedir" ]; then
             ONEDIR_REV="minor/$1"
             shift
         else
-            echo "Unknown onedir version: $1 (valid: 3005, latest, nightly.)"
+            echo "Unknown onedir version: $1 (valid: 3005, 3006, latest, nightly.)"
             exit 1
         fi
     fi
@@ -887,6 +899,18 @@ __fetch_verify() {
     return 1
 }
 
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#         NAME:  __check_url_exists
+#  DESCRIPTION:  Checks if a URL exists
+#----------------------------------------------------------------------------------------------------------------------
+__check_url_exists() {
+  _URL="$1"
+  if curl --output /dev/null --silent --fail "${_URL}"; then
+    return 0
+  else
+    return 1
+  fi
+}
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #          NAME:  __gather_hardware_info
 #   DESCRIPTION:  Discover hardware information
@@ -1936,10 +1960,6 @@ if [ "$ITYPE" = "git" ]; then
                 if [ "$__NEW_VS_TAG_REGEX_MATCH" = "MATCH" ]; then
                     _POST_NEON_INSTALL=$BS_TRUE
                     __TAG_REGEX_MATCH="${__NEW_VS_TAG_REGEX_MATCH}"
-                    if [ "$(echo "${GIT_REV}" | cut -c -1)" != "v" ]; then
-                        # We do this to properly clone tags
-                        GIT_REV="v${GIT_REV}"
-                    fi
                     echodebug "Post Neon Tag Regex Match On: ${GIT_REV}"
                 else
                     __TAG_REGEX_MATCH=$(echo "${GIT_REV}" | sed -E 's/^(v?[0-9]{1,4}\.[0-9]{1,2})(\.[0-9]{1,2})?.*$/MATCH/')
@@ -1951,10 +1971,6 @@ if [ "$ITYPE" = "git" ]; then
                 if [ "$__NEW_VS_TAG_REGEX_MATCH" = "MATCH" ]; then
                     _POST_NEON_INSTALL=$BS_TRUE
                     __TAG_REGEX_MATCH="${__NEW_VS_TAG_REGEX_MATCH}"
-                    if [ "$(echo "${GIT_REV}" | cut -c -1)" != "v" ]; then
-                        # We do this to properly clone tags
-                        GIT_REV="v${GIT_REV}"
-                    fi
                     echodebug "Post Neon Tag Regex Match On: ${GIT_REV}"
                 else
                     __TAG_REGEX_MATCH=$(echo "${GIT_REV}" | sed 's/^.*\(v\?[[:digit:]]\{1,4\}\.[[:digit:]]\{1,2\}\)\(\.[[:digit:]]\{1,2\}\)\?.*$/MATCH/')
@@ -3077,8 +3093,11 @@ __install_saltstack_ubuntu_onedir_repository() {
     fi
     echo "$__REPO_ARCH_DEB $SALTSTACK_UBUNTU_URL $UBUNTU_CODENAME main" > /etc/apt/sources.list.d/salt.list
 
-    if [ "$(echo "${ONEDIR_REV}" | grep -E '(3004|3005|nightly)')" != "" ]; then
+    if [ "$(echo "${ONEDIR_REV}" | grep -E '(3004|3005)')" != "" ]; then
       __apt_key_fetch "${SALTSTACK_UBUNTU_URL}salt-archive-keyring.gpg" || return 1
+    elif [ "$(echo "${ONEDIR_REV}" | grep -E '(latest|nightly)')" != "" ]; then
+      __apt_key_fetch "${SALTSTACK_UBUNTU_URL}salt-archive-keyring.gpg" || \
+      __apt_key_fetch "${SALTSTACK_UBUNTU_URL}SALT-PROJECT-GPG-PUBKEY-2023.gpg" || return 1
     else
       __apt_key_fetch "${SALTSTACK_UBUNTU_URL}SALT-PROJECT-GPG-PUBKEY-2023.gpg" || return 1
     fi
@@ -3621,8 +3640,11 @@ __install_saltstack_debian_onedir_repository() {
     fi
     echo "$__REPO_ARCH_DEB $SALTSTACK_DEBIAN_URL $DEBIAN_CODENAME main" > "/etc/apt/sources.list.d/salt.list"
 
-    if [ "$(echo "${ONEDIR_REV}" | grep -E '(3004|3005|nightly)')" != "" ]; then
+    if [ "$(echo "${ONEDIR_REV}" | grep -E '(3004|3005)')" != "" ]; then
       __apt_key_fetch "${SALTSTACK_DEBIAN_URL}salt-archive-keyring.gpg" || return 1
+    elif [ "$(echo "${ONEDIR_REV}" | grep -E '(latest|nightly)')" != "" ]; then
+      __apt_key_fetch "${SALTSTACK_DEBIAN_URL}salt-archive-keyring.gpg" || \
+      __apt_key_fetch "${SALTSTACK_DEBIAN_URL}SALT-PROJECT-GPG-PUBKEY-2023.gpg" || return 1
     else
       __apt_key_fetch "${SALTSTACK_DEBIAN_URL}SALT-PROJECT-GPG-PUBKEY-2023.gpg" || return 1
     fi
@@ -4426,6 +4448,19 @@ install_fedora_check_services() {
 
     return 0
 }
+install_fedora_onedir() {
+    STABLE_REV=$ONEDIR_REV
+    install_fedora_stable || return 1
+
+    return 0
+}
+
+install_fedora_onedir_post() {
+    STABLE_REV=$ONEDIR_REV
+    install_fedora_stable_post || return 1
+
+    return 0
+}
 #
 #   Ended Fedora Install Functions
 #
@@ -4509,7 +4544,7 @@ __install_saltstack_rhel_onedir_repository() {
     if [ "${ONEDIR_REV}" = "nightly" ] ; then
         base_url="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_NIGHTLY_DIR}/${__PY_VERSION_REPO}/redhat/${DISTRO_MAJOR_VERSION}/\$basearch/"
     fi
-    if [ "$(echo "${ONEDIR_REV}" | grep -E '(3004|3005|nightly)')" != "" ]; then
+    if [ "$(echo "${ONEDIR_REV}" | grep -E '(3004|3005)')" != "" ]; then
       if [ "${DISTRO_MAJOR_VERSION}" -eq 9 ]; then
           gpg_key="SALTSTACK-GPG-KEY2.pub"
       else
@@ -4908,6 +4943,8 @@ install_centos_onedir_deps() {
     else
         __PACKAGES="yum-utils chkconfig"
     fi
+
+    __PACKAGES="${__PACKAGES} procps"
 
     # shellcheck disable=SC2086
     __yum_install_noinput ${__PACKAGES} || return 1
@@ -6302,13 +6339,13 @@ install_amazon_linux_ami_2_onedir_deps() {
             base_url="$HTTP_VAL://${_REPO_URL}/${_ONEDIR_NIGHTLY_DIR}/${__PY_VERSION_REPO}/amazon/2/\$basearch/"
         fi
 
-        if [ "$(echo "${ONEDIR_REV}" | grep -E '(3004|3005|nightly)')" != "" ]; then
+        if [ "$(echo "${ONEDIR_REV}" | grep -E '(3004|3005)')" != "" ]; then
           gpg_key="${base_url}SALTSTACK-GPG-KEY.pub,${base_url}base/RPM-GPG-KEY-CentOS-7"
           if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 3 ]; then
-              gpg_key="${base_url}SALTSTACK-GPG-KEY.pub"
+            gpg_key="${base_url}SALTSTACK-GPG-KEY.pub"
           fi
         else
-            gpg_key="${base_url}SALT-PROJECT-GPG-PUBKEY-2023.pub"
+          gpg_key="${base_url}SALT-PROJECT-GPG-PUBKEY-2023.pub"
         fi
 
         # This should prob be refactored to use __install_saltstack_rhel_repository()
@@ -6527,6 +6564,10 @@ install_arch_linux_git_deps() {
     return 0
 }
 
+install_arch_linux_onedir_deps() {
+    install_arch_linux_stable_deps || return 1
+}
+
 install_arch_linux_stable() {
     # Pacman does not resolve dependencies on outdated versions
     # They always need to be updated
@@ -6678,6 +6719,18 @@ install_arch_check_services() {
     done
 
     return 0
+}
+
+install_arch_linux_onedir() {
+  install_arch_linux_stable || return 1
+
+  return 0
+}
+
+install_arch_linux_onedir_post() {
+  install_arch_linux_post || return 1
+
+  return 0
 }
 #
 #   Ended Arch Install Functions
@@ -6857,6 +6910,15 @@ install_freebsd_restart_daemons() {
         service salt_$fname start
     done
 }
+
+install_freebsd_onedir() {
+#
+# call install_freebsd_stable
+#
+    install_freebsd_stable || return 1
+
+    return 0
+}
 #
 #   Ended FreeBSD Install Functions
 #
@@ -6975,6 +7037,14 @@ install_openbsd_restart_daemons() {
     return 0
 }
 
+install_openbsd_onedir() {
+#
+# Call install_openbsd_stable
+#
+    install_openbsd_stable || return 1
+
+    return 0
+}
 #
 #   Ended OpenBSD Install Functions
 #
@@ -7175,6 +7245,14 @@ install_smartos_restart_daemons() {
 
     return 0
 }
+install_smartos_onedir() {
+#
+# call install_smartos_stable
+#
+    install_smartos_stable || return 1
+
+    return 0
+}
 #
 #   Ended SmartOS Install Functions
 #
@@ -7359,6 +7437,10 @@ install_opensuse_git_deps() {
     return 0
 }
 
+install_opensuse_onedir_deps() {
+    install_opensuse_stable_deps || return 1
+}
+
 install_opensuse_stable() {
     __PACKAGES=""
 
@@ -7389,6 +7471,10 @@ install_opensuse_git() {
 
     python setup.py ${SETUP_PY_INSTALL_ARGS} install --prefix=/usr || return 1
     return 0
+}
+
+install_opensuse_onedir() {
+  install_opensuse_stable || return 1
 }
 
 install_opensuse_stable_post() {
@@ -7458,6 +7544,10 @@ install_opensuse_git_post() {
     install_opensuse_stable_post || return 1
 
     return 0
+}
+
+install_opensuse_onedir_post() {
+  install_opensuse_stable_post || return 1
 }
 
 install_opensuse_restart_daemons() {
@@ -7965,11 +8055,6 @@ __gentoo_pre_dep() {
         mkdir /etc/portage
     fi
 
-    # Enable Python 3.6 target for pre Neon Salt release
-    if echo "${STABLE_REV}" | grep -q "2019" || [ "${ITYPE}" = "git" ] && [ "${_POST_NEON_INSTALL}" -eq $BS_FALSE ]; then
-        EXTRA_PYTHON_TARGET=python3_6
-    fi
-
     # Enable Python 3.7 target for Salt Neon using GIT
     if [ "${ITYPE}" = "git" ] && [ "${GIT_REV}" = "v3000" ]; then
         EXTRA_PYTHON_TARGET=python3_7
@@ -8115,6 +8200,11 @@ install_gentoo_git() {
     return 0
 }
 
+install_gentoo_onedir() {
+  STABLE_REV=${ONEDIR_REV}
+  install_gentoo_stable || return 1
+}
+
 install_gentoo_post() {
     for fname in api master minion syndic; do
         # Skip salt-api since the service should be opt-in and not necessarily started on boot
@@ -8202,6 +8292,10 @@ _eof
     done
 
     return 0
+}
+
+install_gentoo_onedir_post() {
+  install_gentoo_post || return 1
 }
 
 install_gentoo_restart_daemons() {
@@ -8358,14 +8452,63 @@ __macosx_get_packagesite() {
     SALTPKGCONFURL="https://${_REPO_URL}/osx/${PKG}"
 }
 
+__parse_repo_json_python() {
+
+  # Using latest, grab the right
+  # version from the repo.json
+  _JSON_VERSION=$(python - <<-EOF
+import json, urllib.request
+url = "https://repo.saltproject.io/salt/py3/macos/repo.json"
+response = urllib.request.urlopen(url)
+data = json.loads(response.read())
+version = data["${_ONEDIR_REV}"][list(data["${_ONEDIR_REV}"])[0]]['version']
+print(version)
+EOF
+)
+echo "${_JSON_VERSION}"
+}
+
+__macosx_get_packagesite_onedir() {
+    DARWIN_ARCH="x86_64"
+
+    __PY_VERSION_REPO="py2"
+    if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 3 ]; then
+        __PY_VERSION_REPO="py3"
+    fi
+
+    if [ "$(echo "$_ONEDIR_REV" | grep -E '^(latest)$')" != "" ]; then
+      _PKG_VERSION=$(__parse_repo_json_python)
+    elif [ "$(echo "$_ONEDIR_REV" | grep -E '^([3-9][0-9]{3}(\.[0-9]*))')" != "" ]; then
+      _PKG_VERSION=$_ONEDIR_REV
+    else
+      _PKG_VERSION=$(__parse_repo_json_python)
+    fi
+    if [ "$(echo "$_ONEDIR_REV" | grep -E '^(3005)')" != "" ]; then
+      PKG="salt-${_PKG_VERSION}-macos-${DARWIN_ARCH}.pkg"
+    else
+      PKG="salt-${_PKG_VERSION}-${__PY_VERSION_REPO}-${DARWIN_ARCH}.pkg"
+    fi
+    SALTPKGCONFURL="https://${_REPO_URL}/${_ONEDIR_DIR}/${__PY_VERSION_REPO}/macos/${ONEDIR_REV}/${PKG}"
+}
+
 # Using a separate conf step to head for idempotent install...
 __configure_macosx_pkg_details() {
     __macosx_get_packagesite || return 1
     return 0
 }
 
+__configure_macosx_pkg_details_onedir() {
+    __macosx_get_packagesite_onedir || return 1
+    return 0
+}
+
 install_macosx_stable_deps() {
     __configure_macosx_pkg_details || return 1
+    return 0
+}
+
+install_macosx_onedir_deps() {
+    __configure_macosx_pkg_details_onedir || return 1
     return 0
 }
 
@@ -8415,6 +8558,16 @@ install_macosx_stable() {
     return 0
 }
 
+install_macosx_onedir() {
+    install_macosx_onedir_deps || return 1
+
+    __fetch_url "/tmp/${PKG}" "${SALTPKGCONFURL}" || return 1
+
+    /usr/sbin/installer -pkg "/tmp/${PKG}" -target / || return 1
+
+    return 0
+}
+
 install_macosx_git() {
 
     if [ -n "$_PY_EXE" ]; then
@@ -8452,6 +8605,11 @@ install_macosx_stable_post() {
     return 0
 }
 
+install_macosx_onedir_post() {
+    install_macosx_stable_post || return 1
+    return 0
+}
+
 install_macosx_git_post() {
     install_macosx_stable_post || return 1
     return 0
@@ -8460,8 +8618,15 @@ install_macosx_git_post() {
 install_macosx_restart_daemons() {
     [ $_START_DAEMONS -eq $BS_FALSE ] && return
 
-    /bin/launchctl unload -w /Library/LaunchDaemons/com.saltstack.salt.minion.plist || return 1
-    /bin/launchctl load -w /Library/LaunchDaemons/com.saltstack.salt.minion.plist || return 1
+    if [ "$_INSTALL_MINION" -eq $BS_TRUE ]; then
+      /bin/launchctl unload -w /Library/LaunchDaemons/com.saltstack.salt.minion.plist || return 1
+      /bin/launchctl load -w /Library/LaunchDaemons/com.saltstack.salt.minion.plist || return 1
+    fi
+
+    if [ "$_INSTALL_MASTER" -eq $BS_TRUE ]; then
+      /bin/launchctl unload -w /Library/LaunchDaemons/com.saltstack.salt.master.plist || return 1
+      /bin/launchctl load -w /Library/LaunchDaemons/com.saltstack.salt.master.plist || return 1
+    fi
 
    return 0
 }

@@ -364,20 +364,6 @@ jobs:
       instances: '["stable-3004", "stable-3005", "onedir-3005", "stable-3006", "onedir-3006", "git-master", "latest"]'
 
 
-  fedora-35:
-    name: Fedora 35
-    if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
-    uses: ./.github/workflows/test-linux.yml
-    needs:
-      - lint
-      - generate-actions-workflow
-    with:
-      distro-slug: fedora-35
-      display-name: Fedora 35
-      timeout: 20
-      instances: '["git-master"]'
-
-
   fedora-36:
     name: Fedora 36
     if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
@@ -613,7 +599,6 @@ jobs:
       - centos-stream9
       - debian-10
       - debian-11
-      - fedora-35
       - fedora-36
       - fedora-37
       - fedora-38

@@ -16,7 +16,6 @@ LINUX_DISTROS = [
     "centos-stream9",
     "debian-10",
     "debian-11",
-    "fedora-35",
     "fedora-36",
     "fedora-37",
     "fedora-38",
@@ -57,7 +56,6 @@ STABLE_DISTROS = [
     "centos-stream8",
     "debian-10",
     "debian-11",
-    "fedora-35",
     "fedora-36",
     "fedora-37",
     "fedora-38",
@@ -117,7 +115,6 @@ BLACKLIST_3003 = [
     "arch",
     "centos-stream9",
     "debian-11",
-    "fedora-35",
     "fedora-36",
     "fedora-37",
     "fedora-38",
@@ -139,7 +136,6 @@ BLACKLIST_GIT_3003 = [
     "centos-stream9",
     "debian-10",
     "debian-11",
-    "fedora-35",
     "fedora-36",
     "fedora-37",
     "fedora-38",
@@ -160,7 +156,6 @@ BLACKLIST_3004 = [
     "almalinux-9",
     "arch",
     "centos-stream9",
-    "fedora-35",
     "fedora-36",
     "fedora-37",
     "fedora-38",
@@ -175,7 +170,6 @@ BLACKLIST_3004 = [
 
 BLACKLIST_3005 = [
     "arch",
-    "fedora-35",
     "fedora-36",
     "fedora-37",
     "fedora-38",
@@ -194,7 +188,6 @@ BLACKLIST_GIT_3004 = [
     "centos-stream9",
     "debian-10",
     "debian-11",
-    "fedora-35",
     "fedora-36",
     "fedora-37",
     "fedora-38",
@@ -215,7 +208,6 @@ BLACKLIST_GIT_3005 = [
     "arch",
     "debian-10",
     "debian-11",
-    "fedora-35",
     "fedora-36",
     "fedora-37",
     "fedora-38",
@@ -232,7 +224,6 @@ BLACKLIST_GIT_3005 = [
 
 BLACKLIST_3006 = [
     "arch",
-    "fedora-35",
     "fedora-36",
     "fedora-37",
     "fedora-38",
@@ -249,7 +240,6 @@ BLACKLIST_GIT_3006 = [
     "centos-stream9",
     "debian-10",
     "debian-11",
-    "fedora-35",
     "fedora-36",
     "fedora-37",
     "fedora-38",
@@ -323,7 +313,7 @@ GIT_DISTRO_BLACKLIST = [
     "rockylinux-8",
 ]
 
-LATEST_PKG_BLACKLIST = ["fedora-35"]
+LATEST_PKG_BLACKLIST = []
 
 DISTRO_DISPLAY_NAMES = {
     "almalinux-8": "AlmaLinux 8",
@@ -335,7 +325,6 @@ DISTRO_DISPLAY_NAMES = {
     "centos-stream9": "CentOS Stream 9",
     "debian-10": "Debian 10",
     "debian-11": "Debian 11",
-    "fedora-35": "Fedora 35",
     "fedora-36": "Fedora 36",
     "fedora-37": "Fedora 37",
     "fedora-38": "Fedora 38",

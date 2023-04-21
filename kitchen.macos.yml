@@ -5,7 +5,6 @@ driver:
 provisioner:
   sudo: true
   salt_bootstrap_options: -MP stable %s
-  salt_call_command: /opt/salt/bin/salt-call
   init_environment: |
     echo 'auto_accept: true' > /tmp/auto-accept-keys.conf
     sudo mkdir -p /etc/salt/master.d
@@ -22,15 +21,23 @@ suites:
   - name: stable-3003
     provisioner:
       salt_version: 3003.4
+      salt_call_command: /opt/salt/bin/salt-call
   - name: stable-3004
     provisioner:
       salt_version: 3004.1
+      salt_call_command: /opt/salt/bin/salt-call
   - name: stable-3005
     provisioner:
       salt_version: 3005.1
+      salt_call_command: /opt/salt/bin/salt-call
+  - name: stable-3006
+    provisioner:
+      salt_version: 3006
+      salt_call_command: /opt/salt/salt-call
   - name: latest
     provisioner:
       salt_version: latest
+      salt_call_command: /opt/salt/salt-call
 
 verifier:
   command: pytest --cache-clear -v -s -ra --log-cli-level=debug -k "not test_ping" tests/integration/

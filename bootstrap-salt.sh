@@ -4206,39 +4206,20 @@ __install_saltstack_fedora_onedir_repository() {
         __PY_VERSION_REPO="py3"
     fi
 
-    # Avoid using '$releasever' variable for yum.
-    # Instead, this should work correctly on all RHEL variants.
-    base_url="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_DIR}/${__PY_VERSION_REPO}/fedora/${DISTRO_MAJOR_VERSION}/\$basearch/${ONEDIR_REV}/"
-    if [ "${ONEDIR_REV}" = "nightly" ] ; then
-        base_url="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_NIGHTLY_DIR}/${__PY_VERSION_REPO}/fedora/${DISTRO_MAJOR_VERSION}/\$basearch/"
-    fi
     gpg_key="SALT-PROJECT-GPG-PUBKEY-2023.pub"
-
-    gpg_key_urls=""
-    for key in $gpg_key; do
-        gpg_key_urls=$(printf "${base_url}${key},%s" "$gpg_key_urls")
-    done
 
     repo_file="/etc/yum.repos.d/salt.repo"
 
     if [ ! -s "$repo_file" ] || [ "$_FORCE_OVERWRITE" -eq $BS_TRUE ]; then
-        cat <<_eof > "$repo_file"
-[saltstack]
-name=SaltStack ${repo_rev} Release Channel for Fedora \$releasever
-baseurl=${base_url}
-skip_if_unavailable=True
-gpgcheck=1
-gpgkey=${gpg_key_urls}
-enabled=1
-enabled_metadata=1
-_eof
-
-        fetch_url="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_DIR}/${__PY_VERSION_REPO}/fedora/${DISTRO_MAJOR_VERSION}/${CPU_ARCH_L}/${ONEDIR_REV}/"
+        fetch_url="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_DIR}/${__PY_VERSION_REPO}/fedora/${DISTRO_MAJOR_VERSION}/${CPU_ARCH_L}/${ONEDIR_REV}"
         if [ "${ONEDIR_REV}" = "nightly" ] ; then
             fetch_url="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_NIGHTLY_DIR}/${__PY_VERSION_REPO}/fedora/${DISTRO_MAJOR_VERSION}/${CPU_ARCH_L}/"
         fi
+
+        __fetch_url "${repo_file}" "${fetch_url}.repo"
+
         for key in $gpg_key; do
-            __rpm_import_gpg "${fetch_url}${key}" || return 1
+            __rpm_import_gpg "${fetch_url}/${key}" || return 1
         done
 
         yum clean metadata || return 1
@@ -6884,42 +6865,23 @@ __install_saltstack_photon_onedir_repository() {
         __PY_VERSION_REPO="py3"
     fi
 
-    # Avoid using '$releasever' variable for yum.
-    # Instead, this should work correctly on all RHEL variants.
-    base_url="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_DIR}/${__PY_VERSION_REPO}/photon/${DISTRO_MAJOR_VERSION}/\$basearch/${ONEDIR_REV}"
-    if [ "${ONEDIR_REV}" = "nightly" ] ; then
-        base_url="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_NIGHTLY_DIR}/${__PY_VERSION_REPO}/photon/${DISTRO_MAJOR_VERSION}/\$basearch/"
-    fi
-    gpg_key="SALT-PROJECT-GPG-PUBKEY-2023.pub"
-
-    gpg_key_urls=""
-    for key in $gpg_key; do
-        gpg_key_urls=$(printf "${base_url}${key},%s" "$gpg_key_urls")
-    done
-
     repo_file="/etc/yum.repos.d/salt.repo"
 
     if [ ! -s "$repo_file" ] || [ "$_FORCE_OVERWRITE" -eq $BS_TRUE ]; then
-        cat <<_eof > "$repo_file"
-[saltstack]
-name=SaltStack ${repo_rev} Release Channel for Photon \$releasever
-baseurl=${base_url}
-skip_if_unavailable=True
-gpgcheck=1
-gpgkey=${gpg_key_urls}
-enabled=1
-enabled_metadata=1
-_eof
-
-        fetch_url="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_DIR}/${__PY_VERSION_REPO}/photon/${DISTRO_MAJOR_VERSION}/${CPU_ARCH_L}/${ONEDIR_REV}/"
+        fetch_url="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_DIR}/${__PY_VERSION_REPO}/photon/${DISTRO_MAJOR_VERSION}/${CPU_ARCH_L}/${ONEDIR_REV}"
         if [ "${ONEDIR_REV}" = "nightly" ] ; then
             fetch_url="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_NIGHTLY_DIR}/${__PY_VERSION_REPO}/photon/${DISTRO_MAJOR_VERSION}/${CPU_ARCH_L}/"
         fi
+
+        __fetch_url "${repo_file}" "${fetch_url}.repo"
+
+        gpg_key="SALT-PROJECT-GPG-PUBKEY-2023.pub"
+
         for key in $gpg_key; do
-            __rpm_import_gpg "${fetch_url}${key}" || return 1
+            __rpm_import_gpg "${fetch_url}/${key}" || return 1
         done
 
-        #tdnf clean metadata || return 1
+        tdnf makecache || return 1
     elif [ "$repo_rev" != "latest" ]; then
         echowarn "salt.repo already exists, ignoring salt version argument."
         echowarn "Use -F (forced overwrite) to install $repo_rev."
@@ -6989,7 +6951,7 @@ install_photon_git_deps() {
 
     if [ -n "${__PACKAGES}" ]; then
         # shellcheck disable=SC2086
-        __dnf_install_noinput ${__PACKAGES} || return 1
+        __tdnf_install_noinput ${__PACKAGES} || return 1
         __PACKAGES=""
     fi
 

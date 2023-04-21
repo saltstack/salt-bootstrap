@@ -257,7 +257,6 @@ ONEDIR_SALT_VERSIONS = [
     "3005",
     "3006",
     "latest",
-    "nightly",
 ]
 
 ONEDIR_RC_SALT_VERSIONS = []

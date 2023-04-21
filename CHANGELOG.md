@@ -1,3 +1,15 @@
+# v2023.04.21
+
+## What's Changed
+
+- Update release process by @s0undt3ch in https://github.com/saltstack/salt-bootstrap/pull/1908
+- Update with 3006 stable installs by @garethgreenaway in https://github.com/saltstack/salt-bootstrap/pull/1906
+- Add support for 3006 on windows bootstrap script by @twangboy in https://github.com/saltstack/salt-bootstrap/pull/1918
+- Fixes for 3006 by @garethgreenaway in https://github.com/saltstack/salt-bootstrap/pull/1912
+- Don't use GITHUB_OUTPUT by @s0undt3ch in https://github.com/saltstack/salt-bootstrap/pull/1911
+
+**Full Changelog**: https://github.com/saltstack/salt-bootstrap/compare/v2023.04.06...v2023.04.21
+
 # v2023.04.06
 
 ## What's Changed

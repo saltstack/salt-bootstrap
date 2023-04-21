@@ -26,6 +26,8 @@ LINUX_DISTROS = [
     "opensuse-tumbleweed",
     "oraclelinux-7",
     "oraclelinux-8",
+    "photon-3",
+    "photon-4",
     "rockylinux-8",
     "rockylinux-9",
     "ubuntu-2004",

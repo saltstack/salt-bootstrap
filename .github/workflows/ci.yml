@@ -504,6 +504,34 @@ jobs:
       instances: '["stable-3003", "stable-3004", "stable-3005", "onedir-3005", "stable-3006", "onedir-3006", "latest"]'
 
 
+  photon-3:
+    name: Photon OS 3
+    if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
+    uses: ./.github/workflows/test-linux.yml
+    needs:
+      - lint
+      - generate-actions-workflow
+    with:
+      distro-slug: photon-3
+      display-name: Photon OS 3
+      timeout: 20
+      instances: '["stable-3006", "git-3006", "onedir-3006", "git-master", "latest"]'
+
+
+  photon-4:
+    name: Photon OS 4
+    if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
+    uses: ./.github/workflows/test-linux.yml
+    needs:
+      - lint
+      - generate-actions-workflow
+    with:
+      distro-slug: photon-4
+      display-name: Photon OS 4
+      timeout: 20
+      instances: '["stable-3006", "git-3006", "onedir-3006", "git-master", "latest"]'
+
+
   rockylinux-8:
     name: Rocky Linux 8
     if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
@@ -595,6 +623,8 @@ jobs:
       - opensuse-tumbleweed
       - oraclelinux-7
       - oraclelinux-8
+      - photon-3
+      - photon-4
       - rockylinux-8
       - rockylinux-9
       - ubuntu-2004

@@ -20,19 +20,22 @@ suites:
   - name: stable-3003
     provisioner:
       salt_version: 3003.4-1
+      salt_call_command: c:\salt\salt-call.bat
   - name: stable-3004
     provisioner:
       salt_version: 3004.1-1
+      salt_call_command: c:\Program Files\Salt Project\Salt\salt-call.bat
   - name: stable-3005
     provisioner:
       salt_version: 3005.1-1
   - name: stable-3006
     provisioner:
       salt_version: 3006.0
+      salt_call_command: c:\Program Files\Salt Project\Salt\salt-call.exe
   - name: latest
     provisioner:
       salt_version: latest
-      salt_call_command: c:\Program Files\Salt Project\Salt\salt-call.bat
+      salt_call_command: c:\Program Files\Salt Project\Salt\salt-call.exe
 
 verifier:
   command: pytest --cache-clear -v -s -ra --log-cli-level=debug -k "not test_ping" tests/integration/

@@ -265,10 +265,6 @@ BLACKLIST_GIT_3006 = [
     "ubuntu-2204",
 ]
 
-BLACKLIST_GIT_3006 = [
-    "photon-4",
-]
-
 SALT_VERSIONS = [
     "3003",
     "3004",

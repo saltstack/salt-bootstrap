@@ -1,6 +1,5 @@
-# -*- coding: utf-8 -*-
-import os
 import logging
+import os
 from contextlib import nullcontext
 
 log = logging.getLogger(__name__)
@@ -26,7 +25,7 @@ def test_target_python_version(host, target_python_version):
 def test_target_salt_version(host, target_salt_version):
     with selected_context_manager(host):
         ret = host.salt("grains.item", "saltversion", "--timeout=120")
-        if target_salt_version.endswith(".0"):
+        if target_salt_version.endswith(".0") or target_salt_version.endswith(".x"):
             assert ret["saltversion"] == ".".join(target_salt_version.split(".")[:-1])
         else:
             assert ret["saltversion"].startswith(target_salt_version)

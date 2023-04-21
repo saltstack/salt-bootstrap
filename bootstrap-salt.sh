@@ -628,7 +628,7 @@ elif [ "$ITYPE" = "stable" ]; then
         elif [ "$(echo "$1" | grep -E '^(3003|3004|3005)$')" != "" ]; then
             STABLE_REV="$1"
             shift
-        elif [ "$(echo "$1" | grep -E '^([3-9][6-9]{3}(\.[0-9]*)?)')" != "" ]; then
+        elif [ "$(echo "$1" | grep -E '^([3-9][0-5]{2}[6-9](\.[0-9]*)?)')" != "" ]; then
             ONEDIR_REV="minor/$1"
             _ONEDIR_REV="$1"
             ITYPE="onedir"
@@ -1961,10 +1961,6 @@ if [ "$ITYPE" = "git" ]; then
                 if [ "$__NEW_VS_TAG_REGEX_MATCH" = "MATCH" ]; then
                     _POST_NEON_INSTALL=$BS_TRUE
                     __TAG_REGEX_MATCH="${__NEW_VS_TAG_REGEX_MATCH}"
-                    if [ "$(echo "${GIT_REV}" | cut -c -1)" != "v" ]; then
-                        # We do this to properly clone tags
-                        GIT_REV="v${GIT_REV}"
-                    fi
                     echodebug "Post Neon Tag Regex Match On: ${GIT_REV}"
                 else
                     __TAG_REGEX_MATCH=$(echo "${GIT_REV}" | sed -E 's/^(v?[0-9]{1,4}\.[0-9]{1,2})(\.[0-9]{1,2})?.*$/MATCH/')
@@ -1976,10 +1972,6 @@ if [ "$ITYPE" = "git" ]; then
                 if [ "$__NEW_VS_TAG_REGEX_MATCH" = "MATCH" ]; then
                     _POST_NEON_INSTALL=$BS_TRUE
                     __TAG_REGEX_MATCH="${__NEW_VS_TAG_REGEX_MATCH}"
-                    if [ "$(echo "${GIT_REV}" | cut -c -1)" != "v" ]; then
-                        # We do this to properly clone tags
-                        GIT_REV="v${GIT_REV}"
-                    fi
                     echodebug "Post Neon Tag Regex Match On: ${GIT_REV}"
                 else
                     __TAG_REGEX_MATCH=$(echo "${GIT_REV}" | sed 's/^.*\(v\?[[:digit:]]\{1,4\}\.[[:digit:]]\{1,2\}\)\(\.[[:digit:]]\{1,2\}\)\?.*$/MATCH/')
@@ -4559,16 +4551,6 @@ __install_saltstack_rhel_onedir_repository() {
       else
           gpg_key="SALTSTACK-GPG-KEY.pub"
       fi
-    elif [ "$(echo "${ONEDIR_REV}" | grep -E '(latest|nightly)')" != "" ]; then
-      if __check_url_exists "${base_url}SALT-PROJECT-GPG-PUBKEY-2023.pub"; then
-        gpg_key="SALT-PROJECT-GPG-PUBKEY-2023.pub"
-      else
-        if [ "${DISTRO_MAJOR_VERSION}" -eq 9 ]; then
-          gpg_key="SALTSTACK-GPG-KEY2.pub"
-        else
-          gpg_key="SALTSTACK-GPG-KEY.pub"
-        fi
-      fi
     else
         gpg_key="SALT-PROJECT-GPG-PUBKEY-2023.pub"
     fi
@@ -4962,6 +4944,8 @@ install_centos_onedir_deps() {
     else
         __PACKAGES="yum-utils chkconfig"
     fi
+
+    __PACKAGES="${__PACKAGES} procps"
 
     # shellcheck disable=SC2086
     __yum_install_noinput ${__PACKAGES} || return 1
@@ -6359,16 +6343,10 @@ install_amazon_linux_ami_2_onedir_deps() {
         if [ "$(echo "${ONEDIR_REV}" | grep -E '(3004|3005)')" != "" ]; then
           gpg_key="${base_url}SALTSTACK-GPG-KEY.pub,${base_url}base/RPM-GPG-KEY-CentOS-7"
           if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 3 ]; then
-              gpg_key="${base_url}SALTSTACK-GPG-KEY.pub"
-          fi
-        elif [ "$(echo "${ONEDIR_REV}" | grep -E '(latest|nightly)')" != "" ]; then
-          if __check_url_exists "${base_url}SALT-PROJECT-GPG-PUBKEY-2023.pub"; then
-            gpg_key="${base_url}SALT-PROJECT-GPG-PUBKEY-2023.pub"
-          else
             gpg_key="${base_url}SALTSTACK-GPG-KEY.pub"
           fi
         else
-            gpg_key="${base_url}SALT-PROJECT-GPG-PUBKEY-2023.pub"
+          gpg_key="${base_url}SALT-PROJECT-GPG-PUBKEY-2023.pub"
         fi
 
         # This should prob be refactored to use __install_saltstack_rhel_repository()
@@ -8479,16 +8457,16 @@ __parse_repo_json_python() {
 
   # Using latest, grab the right
   # version from the repo.json
-  _JSON_LATEST_VERSION=$(python - <<-EOF
+  _JSON_VERSION=$(python - <<-EOF
 import json, urllib.request
 url = "https://repo.saltproject.io/salt/py3/macos/repo.json"
 response = urllib.request.urlopen(url)
 data = json.loads(response.read())
-version = data['latest'][list(data['latest'])[0]]['version']
+version = data["${_ONEDIR_REV}"][list(data["${_ONEDIR_REV}"])[0]]['version']
 print(version)
 EOF
 )
-echo "${_JSON_LATEST_VERSION}"
+echo "${_JSON_VERSION}"
 }
 
 __macosx_get_packagesite_onedir() {
@@ -8500,14 +8478,18 @@ __macosx_get_packagesite_onedir() {
     fi
 
     if [ "$(echo "$_ONEDIR_REV" | grep -E '^(latest)$')" != "" ]; then
-      _ONEDIR_REV=$(__parse_repo_json_python)
+      _PKG_VERSION=$(__parse_repo_json_python)
+    elif [ "$(echo "$_ONEDIR_REV" | grep -E '^([3-9][0-9]{3}(\.[0-9]*))')" != "" ]; then
+      _PKG_VERSION=$_ONEDIR_REV
+    else
+      _PKG_VERSION=$(__parse_repo_json_python)
     fi
     if [ "$(echo "$_ONEDIR_REV" | grep -E '^(3005)')" != "" ]; then
-      PKG="salt-${_ONEDIR_REV}-macos-${DARWIN_ARCH}.pkg"
+      PKG="salt-${_PKG_VERSION}-macos-${DARWIN_ARCH}.pkg"
     else
-      PKG="salt-${_ONEDIR_REV}-${__PY_VERSION_REPO}-${DARWIN_ARCH}.pkg"
+      PKG="salt-${_PKG_VERSION}-${__PY_VERSION_REPO}-${DARWIN_ARCH}.pkg"
     fi
-    SALTPKGCONFURL="https://${_REPO_URL}/${_ONEDIR_DIR}/${__PY_VERSION_REPO}/macos/${_ONEDIR_REV}/${PKG}"
+    SALTPKGCONFURL="https://${_REPO_URL}/${_ONEDIR_DIR}/${__PY_VERSION_REPO}/macos/${ONEDIR_REV}/${PKG}"
 }
 
 # Using a separate conf step to head for idempotent install...
@@ -8637,8 +8619,15 @@ install_macosx_git_post() {
 install_macosx_restart_daemons() {
     [ $_START_DAEMONS -eq $BS_FALSE ] && return
 
-    /bin/launchctl unload -w /Library/LaunchDaemons/com.saltstack.salt.minion.plist || return 1
-    /bin/launchctl load -w /Library/LaunchDaemons/com.saltstack.salt.minion.plist || return 1
+    if [ "$_INSTALL_MINION" -eq $BS_TRUE ]; then
+      /bin/launchctl unload -w /Library/LaunchDaemons/com.saltstack.salt.minion.plist || return 1
+      /bin/launchctl load -w /Library/LaunchDaemons/com.saltstack.salt.minion.plist || return 1
+    fi
+
+    if [ "$_INSTALL_MASTER" -eq $BS_TRUE ]; then
+      /bin/launchctl unload -w /Library/LaunchDaemons/com.saltstack.salt.master.plist || return 1
+      /bin/launchctl load -w /Library/LaunchDaemons/com.saltstack.salt.master.plist || return 1
+    fi
 
    return 0
 }

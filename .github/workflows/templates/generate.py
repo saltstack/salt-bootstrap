@@ -257,10 +257,16 @@ BLACKLIST_GIT_3006 = [
     "gentoo-systemd",
     "opensuse-15",
     "opensuse-tumbleweed",
+    "photon-3",
+    "photon-4",
     "rockylinux-9",
     "ubuntu-2004",
     "ubuntu-2110",
     "ubuntu-2204",
+]
+
+BLACKLIST_GIT_3006 = [
+    "photon-4",
 ]
 
 SALT_VERSIONS = [

@@ -263,7 +263,7 @@ jobs:
       distro-slug: almalinux-9
       display-name: AlmaLinux 9
       timeout: 20
-      instances: '["git-3005", "onedir-3005", "onedir-3006", "git-master", "latest"]'
+      instances: '["git-3005", "onedir-3005", "git-3006", "onedir-3006", "git-master", "latest"]'
 
 
   amazon-2:
@@ -277,7 +277,7 @@ jobs:
       distro-slug: amazon-2
       display-name: Amazon 2
       timeout: 20
-      instances: '["stable-3003", "stable-3004", "stable-3005", "onedir-3005", "stable-3006", "onedir-3006", "git-master", "latest"]'
+      instances: '["stable-3003", "stable-3004", "stable-3005", "onedir-3005", "stable-3006", "git-3006", "onedir-3006", "git-master", "latest"]'
 
 
   arch:
@@ -291,7 +291,7 @@ jobs:
       distro-slug: arch
       display-name: Arch
       timeout: 20
-      instances: '["git-master", "latest"]'
+      instances: '["git-3006", "git-master", "latest"]'
 
 
   centos-7:
@@ -333,7 +333,7 @@ jobs:
       distro-slug: centos-stream9
       display-name: CentOS Stream 9
       timeout: 20
-      instances: '["git-3005", "onedir-3005", "onedir-3006", "git-master", "latest"]'
+      instances: '["git-3005", "onedir-3005", "git-3006", "onedir-3006", "git-master", "latest"]'
 
 
   debian-10:
@@ -347,7 +347,7 @@ jobs:
       distro-slug: debian-10
       display-name: Debian 10
       timeout: 20
-      instances: '["stable-3003", "stable-3004", "stable-3005", "onedir-3005", "stable-3006", "onedir-3006", "git-master", "latest"]'
+      instances: '["stable-3003", "stable-3004", "stable-3005", "onedir-3005", "stable-3006", "git-3006", "onedir-3006", "git-master", "latest"]'
 
 
   debian-11:
@@ -361,7 +361,7 @@ jobs:
       distro-slug: debian-11
       display-name: Debian 11
       timeout: 20
-      instances: '["stable-3004", "stable-3005", "onedir-3005", "stable-3006", "onedir-3006", "git-master", "latest"]'
+      instances: '["stable-3004", "stable-3005", "onedir-3005", "stable-3006", "git-3006", "onedir-3006", "git-master", "latest"]'
 
 
   fedora-35:
@@ -375,7 +375,7 @@ jobs:
       distro-slug: fedora-35
       display-name: Fedora 35
       timeout: 20
-      instances: '["git-master", "latest"]'
+      instances: '["git-3006", "git-master", "latest"]'
 
 
   fedora-36:
@@ -389,7 +389,7 @@ jobs:
       distro-slug: fedora-36
       display-name: Fedora 36
       timeout: 20
-      instances: '["git-master", "latest"]'
+      instances: '["git-3006", "git-master", "latest"]'
 
 
   fedora-37:
@@ -431,7 +431,7 @@ jobs:
       distro-slug: gentoo
       display-name: Gentoo
       timeout: 90
-      instances: '["git-master", "latest"]'
+      instances: '["git-3006", "git-master", "latest"]'
 
 
   gentoo-systemd:
@@ -445,7 +445,7 @@ jobs:
       distro-slug: gentoo-systemd
       display-name: Gentoo (systemd)
       timeout: 90
-      instances: '["git-master", "latest"]'
+      instances: '["git-3006", "git-master", "latest"]'
 
 
   opensuse-15:
@@ -473,7 +473,7 @@ jobs:
       distro-slug: opensuse-tumbleweed
       display-name: Opensuse Tumbleweed
       timeout: 20
-      instances: '["git-master", "latest"]'
+      instances: '["git-3006", "git-master", "latest"]'
 
 
   oraclelinux-7:
@@ -529,7 +529,7 @@ jobs:
       distro-slug: photon-4
       display-name: Photon OS 4
       timeout: 20
-      instances: '["stable-3006", "git-3006", "onedir-3006", "git-master", "latest"]'
+      instances: '["stable-3006", "onedir-3006", "git-master", "latest"]'
 
 
   rockylinux-8:
@@ -557,7 +557,7 @@ jobs:
       distro-slug: rockylinux-9
       display-name: Rocky Linux 9
       timeout: 20
-      instances: '["git-3005", "onedir-3005", "onedir-3006", "git-master", "latest"]'
+      instances: '["git-3005", "onedir-3005", "git-3006", "onedir-3006", "git-master", "latest"]'
 
 
   ubuntu-2004:
@@ -571,7 +571,7 @@ jobs:
       distro-slug: ubuntu-2004
       display-name: Ubuntu 20.04
       timeout: 20
-      instances: '["stable-3003", "stable-3004", "stable-3005", "onedir-3005", "stable-3006", "onedir-3006", "git-master", "latest"]'
+      instances: '["stable-3003", "stable-3004", "stable-3005", "onedir-3005", "stable-3006", "git-3006", "onedir-3006", "git-master", "latest"]'
 
 
   ubuntu-2204:
@@ -585,7 +585,7 @@ jobs:
       distro-slug: ubuntu-2204
       display-name: Ubuntu 22.04
       timeout: 20
-      instances: '["stable-3004", "stable-3005", "onedir-3005", "stable-3006", "onedir-3006", "git-master", "latest"]'
+      instances: '["stable-3004", "stable-3005", "onedir-3005", "stable-3006", "git-3006", "onedir-3006", "git-master", "latest"]'
 
 
   set-pipeline-exit-status:

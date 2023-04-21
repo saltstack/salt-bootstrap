@@ -375,7 +375,7 @@ jobs:
       distro-slug: fedora-35
       display-name: Fedora 35
       timeout: 20
-      instances: '["git-master", "latest"]'
+      instances: '["git-master"]'
 
 
   fedora-36:

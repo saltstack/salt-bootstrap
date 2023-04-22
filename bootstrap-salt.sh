@@ -4210,7 +4210,7 @@ __install_saltstack_fedora_onedir_repository() {
 
     REPO_FILE="/etc/yum.repos.d/salt.repo"
 
-    if [ ! -s "$repo_file" ] || [ "$_FORCE_OVERWRITE" -eq $BS_TRUE ]; then
+    if [ ! -s "$REPO_FILE" ] || [ "$_FORCE_OVERWRITE" -eq $BS_TRUE ]; then
         fetch_url="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_DIR}/${__PY_VERSION_REPO}/fedora/${DISTRO_MAJOR_VERSION}/${CPU_ARCH_L}/${ONEDIR_REV}"
         if [ "${ONEDIR_REV}" = "nightly" ] ; then
             fetch_url="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_NIGHTLY_DIR}/${__PY_VERSION_REPO}/fedora/${DISTRO_MAJOR_VERSION}/${CPU_ARCH_L}/"
@@ -6867,7 +6867,7 @@ __install_saltstack_photon_onedir_repository() {
 
     REPO_FILE="/etc/yum.repos.d/salt.repo"
 
-    if [ ! -s "$repo_file" ] || [ "$_FORCE_OVERWRITE" -eq $BS_TRUE ]; then
+    if [ ! -s "$REPO_FILE" ] || [ "$_FORCE_OVERWRITE" -eq $BS_TRUE ]; then
         fetch_url="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_DIR}/${__PY_VERSION_REPO}/photon/${DISTRO_MAJOR_VERSION}/${CPU_ARCH_L}/${ONEDIR_REV}"
         if [ "${ONEDIR_REV}" = "nightly" ] ; then
             fetch_url="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_NIGHTLY_DIR}/${__PY_VERSION_REPO}/photon/${DISTRO_MAJOR_VERSION}/${CPU_ARCH_L}/"

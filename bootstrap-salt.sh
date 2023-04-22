@@ -4206,9 +4206,9 @@ __install_saltstack_fedora_onedir_repository() {
         __PY_VERSION_REPO="py3"
     fi
 
-    gpg_key="SALT-PROJECT-GPG-PUBKEY-2023.pub"
+    GPG_KEY="SALT-PROJECT-GPG-PUBKEY-2023.pub"
 
-    repo_file="/etc/yum.repos.d/salt.repo"
+    REPO_FILE="/etc/yum.repos.d/salt.repo"
 
     if [ ! -s "$repo_file" ] || [ "$_FORCE_OVERWRITE" -eq $BS_TRUE ]; then
         fetch_url="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_DIR}/${__PY_VERSION_REPO}/fedora/${DISTRO_MAJOR_VERSION}/${CPU_ARCH_L}/${ONEDIR_REV}"
@@ -4216,9 +4216,9 @@ __install_saltstack_fedora_onedir_repository() {
             fetch_url="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_NIGHTLY_DIR}/${__PY_VERSION_REPO}/fedora/${DISTRO_MAJOR_VERSION}/${CPU_ARCH_L}/"
         fi
 
-        __fetch_url "${repo_file}" "${fetch_url}.repo"
+        __fetch_url "${REPO_FILE}" "${fetch_url}.repo"
 
-        for key in $gpg_key; do
+        for key in $GPG_KEY; do
             __rpm_import_gpg "${fetch_url}/${key}" || return 1
         done
 
@@ -6865,7 +6865,7 @@ __install_saltstack_photon_onedir_repository() {
         __PY_VERSION_REPO="py3"
     fi
 
-    repo_file="/etc/yum.repos.d/salt.repo"
+    REPO_FILE="/etc/yum.repos.d/salt.repo"
 
     if [ ! -s "$repo_file" ] || [ "$_FORCE_OVERWRITE" -eq $BS_TRUE ]; then
         fetch_url="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_DIR}/${__PY_VERSION_REPO}/photon/${DISTRO_MAJOR_VERSION}/${CPU_ARCH_L}/${ONEDIR_REV}"
@@ -6873,11 +6873,11 @@ __install_saltstack_photon_onedir_repository() {
             fetch_url="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_NIGHTLY_DIR}/${__PY_VERSION_REPO}/photon/${DISTRO_MAJOR_VERSION}/${CPU_ARCH_L}/"
         fi
 
-        __fetch_url "${repo_file}" "${fetch_url}.repo"
+        __fetch_url "${REPO_FILE}" "${fetch_url}.repo"
 
-        gpg_key="SALT-PROJECT-GPG-PUBKEY-2023.pub"
+        GPG_KEY="SALT-PROJECT-GPG-PUBKEY-2023.pub"
 
-        for key in $gpg_key; do
+        for key in $GPG_KEY; do
             __rpm_import_gpg "${fetch_url}/${key}" || return 1
         done
 

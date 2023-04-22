@@ -375,7 +375,7 @@ jobs:
       distro-slug: fedora-36
       display-name: Fedora 36
       timeout: 20
-      instances: '["git-master", "latest"]'
+      instances: '["stable-3006", "onedir-3006", "git-master", "latest"]'
 
 
   fedora-37:
@@ -389,7 +389,7 @@ jobs:
       distro-slug: fedora-37
       display-name: Fedora 37
       timeout: 20
-      instances: '["latest"]'
+      instances: '["stable-3006", "onedir-3006", "latest"]'
 
 
   fedora-38:
@@ -403,7 +403,7 @@ jobs:
       distro-slug: fedora-38
       display-name: Fedora 38
       timeout: 20
-      instances: '["latest"]'
+      instances: '["stable-3006", "onedir-3006", "latest"]'
 
 
   gentoo:

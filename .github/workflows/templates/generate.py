@@ -255,6 +255,10 @@ BLACKLIST_GIT_3006 = [
     "ubuntu-2204",
 ]
 
+BLACKLIST_GIT_MASTER = [
+    "photon-4",
+]
+
 SALT_VERSIONS = [
     "3003",
     "3004",
@@ -597,6 +601,7 @@ def generate_test_jobs():
                         "3004": BLACKLIST_GIT_3004,
                         "3005": BLACKLIST_GIT_3005,
                         "3006": BLACKLIST_GIT_3006,
+                        "master": BLACKLIST_GIT_MASTER,
                     }
 
                     # .0 versions are a virtual version for pinning to the first
@@ -606,7 +611,7 @@ def generate_test_jobs():
                         continue
 
                 if (
-                    salt_version in ("3003", "3004", "3005", "3006")
+                    salt_version in ("3003", "3004", "3005", "3006", "master")
                     and distro in BLACKLIST[salt_version]
                 ):
                     continue

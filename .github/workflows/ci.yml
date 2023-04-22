@@ -515,7 +515,7 @@ jobs:
       distro-slug: photon-4
       display-name: Photon OS 4
       timeout: 20
-      instances: '["stable-3006", "onedir-3006", "latest"]'
+      instances: '["stable-3006", "onedir-3006", "git-master", "latest"]'
 
 
   rockylinux-8:

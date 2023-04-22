@@ -2687,7 +2687,7 @@ __activate_virtualenv() {
 #          NAME:  __install_pip_pkgs
 #   DESCRIPTION:  Return 0 or 1 if successfully able to install pip packages. Can provide a different python version to
 #                 install pip packages with. If $py_ver is not specified it will use the default python version.
-#    PARAMETERS:  pkgs, py_ver
+#    PARAMETERS:  pkgs, py_ver, upgrade
 #----------------------------------------------------------------------------------------------------------------------
 
 __install_pip_pkgs() {
@@ -6992,12 +6992,14 @@ install_photon_git_deps() {
             done
     else
         __PACKAGES="python${PY_PKG_VER}-devel python${PY_PKG_VER}-pip python${PY_PKG_VER}-setuptools gcc"
-        if [ "${DISTRO_VERSION}" -ge 35 ]; then
-            __PACKAGES="${__PACKAGES} gcc-c++"
-        fi
         # shellcheck disable=SC2086
         __tdnf_install_noinput ${__PACKAGES} || return 1
     fi
+
+    # Need newer version of setuptools on Photon
+    _setuptools_dep="setuptools>=${_MINIMUM_SETUPTOOLS_VERSION}"
+    echodebug "Running '${_PY_EXE} -m pip --upgrade install ${_setuptools_dep}'"
+    ${_PY_EXE} -m pip install --upgrade "${_setuptools_dep}"
 
     # Let's trigger config_salt()
     if [ "$_TEMP_CONFIG_DIR" = "null" ]; then

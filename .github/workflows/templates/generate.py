@@ -224,9 +224,6 @@ BLACKLIST_GIT_3005 = [
 
 BLACKLIST_3006 = [
     "arch",
-    "fedora-36",
-    "fedora-37",
-    "fedora-38",
     "gentoo",
     "gentoo-systemd",
     "opensuse-15",

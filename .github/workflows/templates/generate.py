@@ -81,6 +81,9 @@ ONEDIR_DISTROS = [
     "centos-stream9",
     "debian-10",
     "debian-11",
+    "fedora-36",
+    "fedora-37",
+    "fedora-38",
     "oraclelinux-7",
     "oraclelinux-8",
     "photon-3",
@@ -574,10 +577,6 @@ def generate_test_jobs():
                     if salt_version in STABLE_VERSION_BLACKLIST:
                         continue
                     if distro not in STABLE_DISTROS:
-                        continue
-
-                    if distro.startswith("fedora") and salt_version != "latest":
-                        # Fedora does not keep old builds around
                         continue
 
                 if bootstrap_type == "git":

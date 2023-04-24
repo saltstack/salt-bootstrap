@@ -146,6 +146,22 @@ platforms:
   - name: ubuntu-18.04
     driver:
       run_command: /lib/systemd/systemd
+  - name: photon-3
+    driver:
+      image: photon:3.0
+      provision_command:
+        - tdnf -y install rpm procps-ng coreutils gawk
+        - echo "PubkeyAcceptedKeyTypes +ssh-rsa" | tee -a /etc/ssh/sshd_config
+        - sed -ie 's/PermitRootLogin no/PermitRootLogin yes/' /etc/ssh/sshd_config
+        - systemctl enable sshd.service
+  - name: photon-4
+    driver:
+      image: photon:4.0
+      provision_command:
+        - tdnf -y install rpm procps-ng coreutils gawk
+        - echo "PubkeyAcceptedKeyTypes +ssh-rsa" | tee -a /etc/ssh/sshd_config
+        - sed -ie 's/PermitRootLogin no/PermitRootLogin yes/' /etc/ssh/sshd_config
+        - systemctl enable sshd.service
 
 suites:
   - name: git-3003
@@ -183,6 +199,20 @@ suites:
   - name: git-3006
     provisioner:
       salt_version: v3006
+      salt_bootstrap_options: -x python3 -MPfq git %s
+    excludes:
+      - opensuse-15
+      - opensuse-tumbleweed
+      - debian-11
+      - arch
+      - gentoo
+      - gentoo-systemd
+      - freebsd-131
+      - freebsd-123
+      - openbsd-6
+  - name: git-3006x
+    provisioner:
+      salt_version: 3006.x
       salt_bootstrap_options: -x python3 -MPfq git %s
     excludes:
       - opensuse-15

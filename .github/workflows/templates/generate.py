@@ -50,6 +50,7 @@ BSD = [
 
 STABLE_DISTROS = [
     "almalinux-8",
+    "almalinux-9",
     "amazon-2",
     "arch",
     "centos-7",
@@ -174,7 +175,9 @@ BLACKLIST_3004 = [
 ]
 
 BLACKLIST_3005 = [
+    "almalinux-9",
     "arch",
+    "centos-stream9",
     "fedora-36",
     "fedora-37",
     "fedora-38",
@@ -184,6 +187,7 @@ BLACKLIST_3005 = [
     "opensuse-tumbleweed",
     "photon-3",
     "photon-4",
+    "rockylinux-9",
 ]
 
 BLACKLIST_GIT_3004 = [

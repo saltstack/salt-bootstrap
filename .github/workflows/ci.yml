@@ -333,7 +333,7 @@ jobs:
       distro-slug: centos-stream9
       display-name: CentOS Stream 9
       timeout: 20
-      instances: '["git-3005", "onedir-3005", "onedir-3006", "git-master", "latest"]'
+      instances: '["stable-3005", "git-3005", "onedir-3005", "stable-3006", "onedir-3006", "git-master", "latest", "default"]'
 
 
   debian-10:
@@ -543,7 +543,7 @@ jobs:
       distro-slug: rockylinux-9
       display-name: Rocky Linux 9
       timeout: 20
-      instances: '["git-3005", "onedir-3005", "onedir-3006", "git-master", "latest"]'
+      instances: '["stable-3005", "git-3005", "onedir-3005", "stable-3006", "onedir-3006", "git-master", "latest", "default"]'
 
 
   ubuntu-2004:

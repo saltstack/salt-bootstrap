@@ -54,6 +54,7 @@ STABLE_DISTROS = [
     "arch",
     "centos-7",
     "centos-stream8",
+    "centos-stream9",
     "debian-10",
     "debian-11",
     "fedora-36",
@@ -68,6 +69,7 @@ STABLE_DISTROS = [
     "photon-3",
     "photon-4",
     "rockylinux-8",
+    "rockylinux-9",
     "ubuntu-2004",
     "ubuntu-2204",
 ]

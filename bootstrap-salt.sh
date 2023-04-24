@@ -4196,9 +4196,9 @@ install_debian_check_services() {
 
 __install_saltstack_fedora_onedir_repository() {
     if [ "$ITYPE" = "stable" ]; then
-        repo_rev="$ONEDIR_REV"
+        REPO_REV="$ONEDIR_REV"
     else
-        repo_rev="latest"
+        REPO_REV="latest"
     fi
 
     __PY_VERSION_REPO="yum"
@@ -4211,21 +4211,19 @@ __install_saltstack_fedora_onedir_repository() {
     REPO_FILE="/etc/yum.repos.d/salt.repo"
 
     if [ ! -s "$REPO_FILE" ] || [ "$_FORCE_OVERWRITE" -eq $BS_TRUE ]; then
-        fetch_url="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_DIR}/${__PY_VERSION_REPO}/fedora/${DISTRO_MAJOR_VERSION}/${CPU_ARCH_L}/${ONEDIR_REV}"
+        FETCH_URL="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_DIR}/${__PY_VERSION_REPO}/fedora/${DISTRO_MAJOR_VERSION}/${CPU_ARCH_L}/${ONEDIR_REV}"
         if [ "${ONEDIR_REV}" = "nightly" ] ; then
-            fetch_url="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_NIGHTLY_DIR}/${__PY_VERSION_REPO}/fedora/${DISTRO_MAJOR_VERSION}/${CPU_ARCH_L}/"
+            FETCH_URL="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_NIGHTLY_DIR}/${__PY_VERSION_REPO}/fedora/${DISTRO_MAJOR_VERSION}/${CPU_ARCH_L}/"
         fi
 
-        __fetch_url "${REPO_FILE}" "${fetch_url}.repo"
+        __fetch_url "${REPO_FILE}" "${FETCH_URL}.repo"
 
-        for key in $GPG_KEY; do
-            __rpm_import_gpg "${fetch_url}/${key}" || return 1
-        done
+        __rpm_import_gpg "${FETCH_URL}/${GPG_KEY}" || return 1
 
         yum clean metadata || return 1
-    elif [ "$repo_rev" != "latest" ]; then
+    elif [ "$REPO_REV" != "latest" ]; then
         echowarn "salt.repo already exists, ignoring salt version argument."
-        echowarn "Use -F (forced overwrite) to install $repo_rev."
+        echowarn "Use -F (forced overwrite) to install $REPO_REV."
     fi
 
     return 0
@@ -6855,9 +6853,9 @@ install_arch_linux_onedir_post() {
 
 __install_saltstack_photon_onedir_repository() {
     if [ "$ITYPE" = "stable" ]; then
-        repo_rev="$ONEDIR_REV"
+        REPO_REV="$ONEDIR_REV"
     else
-        repo_rev="latest"
+        REPO_REV="latest"
     fi
 
     __PY_VERSION_REPO="yum"
@@ -6868,23 +6866,21 @@ __install_saltstack_photon_onedir_repository() {
     REPO_FILE="/etc/yum.repos.d/salt.repo"
 
     if [ ! -s "$REPO_FILE" ] || [ "$_FORCE_OVERWRITE" -eq $BS_TRUE ]; then
-        fetch_url="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_DIR}/${__PY_VERSION_REPO}/photon/${DISTRO_MAJOR_VERSION}/${CPU_ARCH_L}/${ONEDIR_REV}"
+        FETCH_URL="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_DIR}/${__PY_VERSION_REPO}/photon/${DISTRO_MAJOR_VERSION}/${CPU_ARCH_L}/${ONEDIR_REV}"
         if [ "${ONEDIR_REV}" = "nightly" ] ; then
-            fetch_url="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_NIGHTLY_DIR}/${__PY_VERSION_REPO}/photon/${DISTRO_MAJOR_VERSION}/${CPU_ARCH_L}/"
+            FETCH_URL="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_NIGHTLY_DIR}/${__PY_VERSION_REPO}/photon/${DISTRO_MAJOR_VERSION}/${CPU_ARCH_L}/"
         fi
 
-        __fetch_url "${REPO_FILE}" "${fetch_url}.repo"
+        __fetch_url "${REPO_FILE}" "${FETCH_URL}.repo"
 
         GPG_KEY="SALT-PROJECT-GPG-PUBKEY-2023.pub"
 
-        for key in $GPG_KEY; do
-            __rpm_import_gpg "${fetch_url}/${key}" || return 1
-        done
+        __rpm_import_gpg "${FETCH_URL}/${GPG_KEY}" || return 1
 
         tdnf makecache || return 1
-    elif [ "$repo_rev" != "latest" ]; then
+    elif [ "$REPO_REV" != "latest" ]; then
         echowarn "salt.repo already exists, ignoring salt version argument."
-        echowarn "Use -F (forced overwrite) to install $repo_rev."
+        echowarn "Use -F (forced overwrite) to install $REPO_REV."
     fi
 
     return 0

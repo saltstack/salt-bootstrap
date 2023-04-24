@@ -471,6 +471,12 @@ def generate_test_jobs():
                 kitchen_target = f"{bootstrap_type}-{salt_version}"
                 instances.append(kitchen_target)
 
+        for bootstrap_type in ("default",):
+            if distro not in STABLE_DISTROS:
+                continue
+            kitchen_target = f"{bootstrap_type}"
+            instances.append(kitchen_target)
+
         if instances:
             needs.append(distro)
             test_jobs += TEMPLATE.format(
@@ -510,6 +516,12 @@ def generate_test_jobs():
 
                 kitchen_target = f"{bootstrap_type}-{salt_version}"
                 instances.append(kitchen_target)
+
+        for bootstrap_type in ("default",):
+            if distro not in STABLE_DISTROS:
+                continue
+            kitchen_target = f"{bootstrap_type}"
+            instances.append(kitchen_target)
 
         if instances:
             needs.append(distro)
@@ -604,6 +616,12 @@ def generate_test_jobs():
 
                 kitchen_target = f"{bootstrap_type}-{salt_version}"
                 instances.append(kitchen_target)
+
+        for bootstrap_type in ("default",):
+            if distro not in STABLE_DISTROS:
+                continue
+            kitchen_target = f"{bootstrap_type}"
+            instances.append(kitchen_target)
 
         if instances:
             needs.append(distro)

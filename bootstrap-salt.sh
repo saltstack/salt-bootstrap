@@ -617,7 +617,7 @@ if [ "$ITYPE" = "git" ]; then
 elif [ "$ITYPE" = "stable" ]; then
     if [ "$#" -eq 0 ];then
         ONEDIR_REV="latest"
-        _ONEDIR_REV="$1"
+        _ONEDIR_REV="latest"
         ITYPE="onedir"
     else
         if [ "$(echo "$1" | grep -E '^(nightly|latest|3006)$')" != "" ]; then

@@ -51,8 +51,10 @@ jobs:
           ruby-version: 2.6.10
           bundler-cache: true
 
-      - name: Setup upterm session
-        uses: lhotari/action-upterm@v1
+      - name: Update Vagrant
+        run: |
+          brew update
+          brew install vagrant
 
       - name: Setup Vagrant Cache
         uses: actions/cache@v3

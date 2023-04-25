@@ -3063,7 +3063,7 @@ __install_saltstack_ubuntu_repository() {
     SALTSTACK_UBUNTU_URL="${HTTP_VAL}://${_REPO_URL}/salt/${__PY_VERSION_REPO}/ubuntu/${UBUNTU_VERSION}/${__REPO_ARCH}/${STABLE_REV}"
     echo "$__REPO_ARCH_DEB $SALTSTACK_UBUNTU_URL $UBUNTU_CODENAME main" > /etc/apt/sources.list.d/salt.list
 
-    __apt_key_fetch "$SALTSTACK_UBUNTU_URL/SALT-PROJECT-GPG-PUBKEY-2023.gpg" || return 1
+    __apt_key_fetch "$SALTSTACK_UBUNTU_URL/salt-archive-keyring.gpg" || return 1
 
     __wait_for_apt apt-get update || return 1
 }

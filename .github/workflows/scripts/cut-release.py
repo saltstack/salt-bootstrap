@@ -1,11 +1,12 @@
 #!/usr/bin/env python
+import argparse
 import os
+import pathlib
 import re
 import sys
-import pathlib
-import argparse
-import requests
 from datetime import datetime
+
+import requests
 
 REPO_ROOT = pathlib.Path(__file__).resolve().parent.parent.parent.parent
 
@@ -175,10 +176,6 @@ def main():
         flush=True,
     )
     cut_release_changes.write_text(changelog["body"])
-    if github_output is not None:
-        with open(github_output, "a", encoding="utf-8") as wfh:
-            wfh.write(f"release-changes={changelog['body']}\n")
-
     print(
         f"* Updating {changelog_file.relative_to(REPO_ROOT)} ...",
         file=sys.stderr,

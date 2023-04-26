@@ -488,11 +488,9 @@ def generate_test_jobs():
                 kitchen_target = f"{bootstrap_type}-{salt_version}"
                 instances.append(kitchen_target)
 
-        for bootstrap_type in ("default",):
-            if distro not in STABLE_DISTROS:
-                continue
-            kitchen_target = f"{bootstrap_type}"
-            instances.append(kitchen_target)
+        if distro not in STABLE_DISTROS:
+            continue
+        instances.append(bootstrap_type)
 
         if instances:
             needs.append(distro)

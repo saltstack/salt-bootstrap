@@ -1,3 +1,12 @@
+# v2023.04.26
+
+## What's Changed
+
+- Updates for Fedora and Photon by @garethgreenaway in https://github.com/saltstack/salt-bootstrap/pull/1920
+- Fixing defaults by @garethgreenaway in https://github.com/saltstack/salt-bootstrap/pull/1921
+
+**Full Changelog**: https://github.com/saltstack/salt-bootstrap/compare/v2023.04.21...v2023.04.26
+
 # v2023.04.21
 
 ## What's Changed

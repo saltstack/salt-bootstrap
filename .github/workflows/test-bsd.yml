@@ -51,6 +51,11 @@ jobs:
           ruby-version: 2.6.10
           bundler-cache: true
 
+      - name: Update Vagrant
+        run: |
+          brew update
+          brew upgrade vagrant
+
       - name: Setup Vagrant Cache
         uses: actions/cache@v3
         with:

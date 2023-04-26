@@ -16,7 +16,6 @@ LINUX_DISTROS = [
     "centos-stream9",
     "debian-10",
     "debian-11",
-    "fedora-35",
     "fedora-36",
     "fedora-37",
     "fedora-38",
@@ -26,6 +25,8 @@ LINUX_DISTROS = [
     "opensuse-tumbleweed",
     "oraclelinux-7",
     "oraclelinux-8",
+    "photon-3",
+    "photon-4",
     "rockylinux-8",
     "rockylinux-9",
     "ubuntu-2004",
@@ -49,13 +50,14 @@ BSD = [
 
 STABLE_DISTROS = [
     "almalinux-8",
+    "almalinux-9",
     "amazon-2",
     "arch",
     "centos-7",
     "centos-stream8",
+    "centos-stream9",
     "debian-10",
     "debian-11",
-    "fedora-35",
     "fedora-36",
     "fedora-37",
     "fedora-38",
@@ -65,7 +67,10 @@ STABLE_DISTROS = [
     "opensuse-tumbleweed",
     "oraclelinux-7",
     "oraclelinux-8",
+    "photon-3",
+    "photon-4",
     "rockylinux-8",
+    "rockylinux-9",
     "ubuntu-2004",
     "ubuntu-2204",
 ]
@@ -79,8 +84,13 @@ ONEDIR_DISTROS = [
     "centos-stream9",
     "debian-10",
     "debian-11",
+    "fedora-36",
+    "fedora-37",
+    "fedora-38",
     "oraclelinux-7",
     "oraclelinux-8",
+    "photon-3",
+    "photon-4",
     "rockylinux-8",
     "rockylinux-9",
     "ubuntu-2004",
@@ -98,6 +108,8 @@ ONEDIR_RC_DISTROS = [
     "debian-11",
     "oraclelinux-7",
     "oraclelinux-8",
+    "photon-3",
+    "photon-4",
     "rockylinux-8",
     "rockylinux-9",
     "ubuntu-2004",
@@ -109,7 +121,6 @@ BLACKLIST_3003 = [
     "arch",
     "centos-stream9",
     "debian-11",
-    "fedora-35",
     "fedora-36",
     "fedora-37",
     "fedora-38",
@@ -117,6 +128,8 @@ BLACKLIST_3003 = [
     "gentoo-systemd",
     "opensuse-15",
     "opensuse-tumbleweed",
+    "photon-3",
+    "photon-4",
     "rockylinux-8",
     "rockylinux-9",
     "ubuntu-2204",
@@ -129,7 +142,6 @@ BLACKLIST_GIT_3003 = [
     "centos-stream9",
     "debian-10",
     "debian-11",
-    "fedora-35",
     "fedora-36",
     "fedora-37",
     "fedora-38",
@@ -137,6 +149,8 @@ BLACKLIST_GIT_3003 = [
     "gentoo-systemd",
     "opensuse-15",
     "opensuse-tumbleweed",
+    "photon-3",
+    "photon-4",
     "rockylinux-8",
     "rockylinux-9",
     "ubuntu-2004",
@@ -148,7 +162,6 @@ BLACKLIST_3004 = [
     "almalinux-9",
     "arch",
     "centos-stream9",
-    "fedora-35",
     "fedora-36",
     "fedora-37",
     "fedora-38",
@@ -156,12 +169,15 @@ BLACKLIST_3004 = [
     "gentoo-systemd",
     "opensuse-15",
     "opensuse-tumbleweed",
+    "photon-3",
+    "photon-4",
     "rockylinux-9",
 ]
 
 BLACKLIST_3005 = [
+    "almalinux-9",
     "arch",
-    "fedora-35",
+    "centos-stream9",
     "fedora-36",
     "fedora-37",
     "fedora-38",
@@ -169,6 +185,9 @@ BLACKLIST_3005 = [
     "gentoo-systemd",
     "opensuse-15",
     "opensuse-tumbleweed",
+    "photon-3",
+    "photon-4",
+    "rockylinux-9",
 ]
 
 BLACKLIST_GIT_3004 = [
@@ -178,7 +197,6 @@ BLACKLIST_GIT_3004 = [
     "centos-stream9",
     "debian-10",
     "debian-11",
-    "fedora-35",
     "fedora-36",
     "fedora-37",
     "fedora-38",
@@ -190,6 +208,8 @@ BLACKLIST_GIT_3004 = [
     "ubuntu-2110",
     "ubuntu-2204",
     "rockylinux-9",
+    "photon-3",
+    "photon-4",
 ]
 
 BLACKLIST_GIT_3005 = [
@@ -197,7 +217,6 @@ BLACKLIST_GIT_3005 = [
     "arch",
     "debian-10",
     "debian-11",
-    "fedora-35",
     "fedora-36",
     "fedora-37",
     "fedora-38",
@@ -205,6 +224,8 @@ BLACKLIST_GIT_3005 = [
     "gentoo-systemd",
     "opensuse-15",
     "opensuse-tumbleweed",
+    "photon-3",
+    "photon-4",
     "ubuntu-2004",
     "ubuntu-2110",
     "ubuntu-2204",
@@ -212,10 +233,6 @@ BLACKLIST_GIT_3005 = [
 
 BLACKLIST_3006 = [
     "arch",
-    "fedora-35",
-    "fedora-36",
-    "fedora-37",
-    "fedora-38",
     "gentoo",
     "gentoo-systemd",
     "opensuse-15",
@@ -229,7 +246,6 @@ BLACKLIST_GIT_3006 = [
     "centos-stream9",
     "debian-10",
     "debian-11",
-    "fedora-35",
     "fedora-36",
     "fedora-37",
     "fedora-38",
@@ -237,11 +253,15 @@ BLACKLIST_GIT_3006 = [
     "gentoo-systemd",
     "opensuse-15",
     "opensuse-tumbleweed",
+    "photon-3",
+    "photon-4",
     "rockylinux-9",
     "ubuntu-2004",
     "ubuntu-2110",
     "ubuntu-2204",
 ]
+
+BLACKLIST_GIT_MASTER = []
 
 SALT_VERSIONS = [
     "3003",
@@ -301,11 +321,7 @@ GIT_DISTRO_BLACKLIST = [
     "rockylinux-8",
 ]
 
-LATEST_PKG_BLACKLIST = [
-    "almalinux-9",
-    "centos-stream9",
-    "rockylinux-9",
-]
+LATEST_PKG_BLACKLIST = []
 
 DISTRO_DISPLAY_NAMES = {
     "almalinux-8": "AlmaLinux 8",
@@ -317,7 +333,6 @@ DISTRO_DISPLAY_NAMES = {
     "centos-stream9": "CentOS Stream 9",
     "debian-10": "Debian 10",
     "debian-11": "Debian 11",
-    "fedora-35": "Fedora 35",
     "fedora-36": "Fedora 36",
     "fedora-37": "Fedora 37",
     "fedora-38": "Fedora 38",
@@ -327,6 +342,8 @@ DISTRO_DISPLAY_NAMES = {
     "opensuse-tumbleweed": "Opensuse Tumbleweed",
     "oraclelinux-7": "Oracle Linux 7",
     "oraclelinux-8": "Oracle Linux 8",
+    "photon-3": "Photon OS 3",
+    "photon-4": "Photon OS 4",
     "rockylinux-8": "Rocky Linux 8",
     "rockylinux-9": "Rocky Linux 9",
     "ubuntu-2004": "Ubuntu 20.04",
@@ -471,6 +488,11 @@ def generate_test_jobs():
                 kitchen_target = f"{bootstrap_type}-{salt_version}"
                 instances.append(kitchen_target)
 
+        for bootstrap_type in ("default",):
+            if distro not in STABLE_DISTROS:
+                continue
+            instances.append(bootstrap_type)
+
         if instances:
             needs.append(distro)
             test_jobs += TEMPLATE.format(
@@ -510,6 +532,11 @@ def generate_test_jobs():
 
                 kitchen_target = f"{bootstrap_type}-{salt_version}"
                 instances.append(kitchen_target)
+
+        for bootstrap_type in ("default",):
+            if distro not in STABLE_DISTROS:
+                continue
+            instances.append(bootstrap_type)
 
         if instances:
             needs.append(distro)
@@ -566,10 +593,6 @@ def generate_test_jobs():
                     if distro not in STABLE_DISTROS:
                         continue
 
-                    if distro.startswith("fedora") and salt_version != "latest":
-                        # Fedora does not keep old builds around
-                        continue
-
                 if bootstrap_type == "git":
                     if salt_version in GIT_VERSION_BLACKLIST:
                         continue
@@ -588,6 +611,7 @@ def generate_test_jobs():
                         "3004": BLACKLIST_GIT_3004,
                         "3005": BLACKLIST_GIT_3005,
                         "3006": BLACKLIST_GIT_3006,
+                        "master": BLACKLIST_GIT_MASTER,
                     }
 
                     # .0 versions are a virtual version for pinning to the first
@@ -597,13 +621,18 @@ def generate_test_jobs():
                         continue
 
                 if (
-                    salt_version in ("3003", "3004", "3005", "3006")
+                    salt_version in ("3003", "3004", "3005", "3006", "master")
                     and distro in BLACKLIST[salt_version]
                 ):
                     continue
 
                 kitchen_target = f"{bootstrap_type}-{salt_version}"
                 instances.append(kitchen_target)
+
+        for bootstrap_type in ("default",):
+            if distro not in STABLE_DISTROS:
+                continue
+            instances.append(bootstrap_type)
 
         if instances:
             needs.append(distro)

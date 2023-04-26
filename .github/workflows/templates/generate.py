@@ -50,10 +50,12 @@ BSD = [
 
 STABLE_DISTROS = [
     "almalinux-8",
+    "almalinux-9",
     "amazon-2",
     "arch",
     "centos-7",
     "centos-stream8",
+    "centos-stream9",
     "debian-10",
     "debian-11",
     "fedora-36",
@@ -68,6 +70,7 @@ STABLE_DISTROS = [
     "photon-3",
     "photon-4",
     "rockylinux-8",
+    "rockylinux-9",
     "ubuntu-2004",
     "ubuntu-2204",
 ]
@@ -172,7 +175,9 @@ BLACKLIST_3004 = [
 ]
 
 BLACKLIST_3005 = [
+    "almalinux-9",
     "arch",
+    "centos-stream9",
     "fedora-36",
     "fedora-37",
     "fedora-38",
@@ -182,6 +187,7 @@ BLACKLIST_3005 = [
     "opensuse-tumbleweed",
     "photon-3",
     "photon-4",
+    "rockylinux-9",
 ]
 
 BLACKLIST_GIT_3004 = [
@@ -482,6 +488,11 @@ def generate_test_jobs():
                 kitchen_target = f"{bootstrap_type}-{salt_version}"
                 instances.append(kitchen_target)
 
+        for bootstrap_type in ("default",):
+            if distro not in STABLE_DISTROS:
+                continue
+            instances.append(bootstrap_type)
+
         if instances:
             needs.append(distro)
             test_jobs += TEMPLATE.format(
@@ -521,6 +532,11 @@ def generate_test_jobs():
 
                 kitchen_target = f"{bootstrap_type}-{salt_version}"
                 instances.append(kitchen_target)
+
+        for bootstrap_type in ("default",):
+            if distro not in STABLE_DISTROS:
+                continue
+            instances.append(bootstrap_type)
 
         if instances:
             needs.append(distro)
@@ -612,6 +628,11 @@ def generate_test_jobs():
 
                 kitchen_target = f"{bootstrap_type}-{salt_version}"
                 instances.append(kitchen_target)
+
+        for bootstrap_type in ("default",):
+            if distro not in STABLE_DISTROS:
+                continue
+            instances.append(bootstrap_type)
 
         if instances:
             needs.append(distro)

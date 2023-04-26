@@ -617,7 +617,7 @@ if [ "$ITYPE" = "git" ]; then
 elif [ "$ITYPE" = "stable" ]; then
     if [ "$#" -eq 0 ];then
         ONEDIR_REV="latest"
-        _ONEDIR_REV="$1"
+        _ONEDIR_REV="latest"
         ITYPE="onedir"
     else
         if [ "$(echo "$1" | grep -E '^(nightly|latest|3006)$')" != "" ]; then
@@ -1858,12 +1858,6 @@ else
     if [ "${PREFIXED_DISTRO_MINOR_VERSION}" = "_" ]; then
         PREFIXED_DISTRO_MINOR_VERSION=""
     fi
-fi
-
-# Red Hat variants after 9.x not supported by stable type
-if [ "$(echo "${DISTRO_NAME_L}" | grep -E '(centos|red_hat|scientific|almalinux|rocky)')" != "" ] && [ "$ITYPE" = "stable" ] && [ "$DISTRO_MAJOR_VERSION" -ge 9 ]; then
-    echoerror "${DISTRO_NAME} ${DISTRO_VERSION} not supported by stable type, use type onedir."
-    exit 1
 fi
 
 # For Ubuntu derivatives, pretend to be their Ubuntu base version

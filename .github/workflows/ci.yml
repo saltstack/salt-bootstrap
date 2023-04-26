@@ -161,7 +161,49 @@ jobs:
 
 
 
+  macos-1015:
+    name: macOS 10.15
+    if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
+    uses: ./.github/workflows/test-macos.yml
+    needs:
+      - lint
+      - generate-actions-workflow
+    with:
+      distro-slug: macos-1015
+      display-name: macOS 10.15
+      timeout: 20
+      runs-on: macos-10.15
+      instances: '["stable-3003", "stable-3004", "stable-3005", "stable-3006", "latest"]'
 
+
+  macos-11:
+    name: macOS 11
+    if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
+    uses: ./.github/workflows/test-macos.yml
+    needs:
+      - lint
+      - generate-actions-workflow
+    with:
+      distro-slug: macos-11
+      display-name: macOS 11
+      timeout: 20
+      runs-on: macos-11
+      instances: '["stable-3003", "stable-3004", "stable-3005", "stable-3006", "latest"]'
+
+
+  macos-12:
+    name: macOS 12
+    if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
+    uses: ./.github/workflows/test-macos.yml
+    needs:
+      - lint
+      - generate-actions-workflow
+    with:
+      distro-slug: macos-12
+      display-name: macOS 12
+      timeout: 20
+      runs-on: macos-12
+      instances: '["stable-3003", "stable-3004", "stable-3005", "stable-3006", "latest"]'
 
 
 
@@ -543,6 +585,9 @@ jobs:
       - freebsd-131
       - freebsd-123
       - openbsd-7
+      - macos-1015
+      - macos-11
+      - macos-12
       - windows-2019
       - windows-2022
       - almalinux-8

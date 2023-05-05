@@ -224,7 +224,6 @@ _KEEP_TEMP_FILES=${BS_KEEP_TEMP_FILES:-$BS_FALSE}
 _TEMP_CONFIG_DIR="null"
 _SALTSTACK_REPO_URL="https://github.com/saltstack/salt.git"
 _SALT_REPO_URL=${_SALTSTACK_REPO_URL}
-_DOWNSTREAM_PKG_REPO=$BS_FALSE
 _TEMP_KEYS_DIR="null"
 _SLEEP="${__DEFAULT_SLEEP}"
 _INSTALL_MASTER=$BS_FALSE
@@ -401,9 +400,6 @@ __usage() {
     -v  Display script version
     -V  Install Salt into virtualenv
         (only available for Ubuntu based distributions)
-    -w  Install packages from downstream package repository rather than
-        upstream, saltstack package repository. This is currently only
-        implemented for SUSE.
     -x  Changes the Python version used to install Salt.
         For CentOS 6 git installations python2.7 is supported.
         Fedora git installation, CentOS 7, Ubuntu 18.04 support python3.
@@ -420,7 +416,7 @@ EOT
 }   # ----------  end of function __usage  ----------
 
 
-while getopts ':hvnDc:g:Gyx:wk:s:MSNXCPFUKIA:i:Lp:dH:bflV:J:j:rR:aq' opt
+while getopts ':hvnDc:g:Gyx:k:s:MSNXCPFUKIA:i:Lp:dH:bflV:J:j:rR:aq' opt
 do
   case "${opt}" in
 
@@ -436,7 +432,6 @@ do
          echowarn "No need to provide this option anymore, now it is a default behavior."
          ;;
 
-    w )  _DOWNSTREAM_PKG_REPO=$BS_TRUE                  ;;
     k )  _TEMP_KEYS_DIR="$OPTARG"                       ;;
     s )  _SLEEP=$OPTARG                                 ;;
     M )  _INSTALL_MASTER=$BS_TRUE                       ;;
@@ -7699,13 +7694,8 @@ __set_suse_pkg_repo() {
         DISTRO_REPO="SLE_${DISTRO_MAJOR_VERSION}_SP${SUSE_PATCHLEVEL}"
     fi
 
-    if [ "$_DOWNSTREAM_PKG_REPO" -eq $BS_TRUE ]; then
-        suse_pkg_url_base="https://download.opensuse.org/repositories/systemsmanagement:/saltstack"
-        suse_pkg_url_path="${DISTRO_REPO}/systemsmanagement:saltstack.repo"
-    else
-        suse_pkg_url_base="${HTTP_VAL}://repo.saltproject.io/opensuse"
-        suse_pkg_url_path="${DISTRO_REPO}/systemsmanagement:saltstack:products.repo"
-    fi
+    suse_pkg_url_base="https://download.opensuse.org/repositories/systemsmanagement:/saltstack"
+    suse_pkg_url_path="${DISTRO_REPO}/systemsmanagement:saltstack.repo"
     SUSE_PKG_URL="$suse_pkg_url_base/$suse_pkg_url_path"
 }
 
@@ -7725,7 +7715,7 @@ __version_lte() {
              zypper --non-interactive install --auto-agree-with-licenses python || return 1
     fi
 
-    if [ "$(python -c 'import sys; V1=tuple([int(i) for i in sys.argv[1].split(".")]); V2=tuple([int(i) for i in sys.argv[2].split(".")]); print V1<=V2' "$1" "$2")" = "True" ]; then
+    if [ "$(${_PY_EXE} -c 'import sys; V1=tuple([int(i) for i in sys.argv[1].split(".")]); V2=tuple([int(i) for i in sys.argv[2].split(".")]); print(V1<=V2)' "$1" "$2")" = "True" ]; then
         __ZYPPER_REQUIRES_REPLACE_FILES=${BS_TRUE}
     else
         __ZYPPER_REQUIRES_REPLACE_FILES=${BS_FALSE}
@@ -8131,6 +8121,11 @@ install_opensuse_15_git() {
     return 0
 }
 
+install_opensuse_15_onedir_deps() {
+    __opensuse_prep_install || return 1
+    return 0
+}
+
 #
 #   End of openSUSE Leap 15
 #
@@ -8160,6 +8155,13 @@ install_suse_15_git_deps() {
     return 0
 }
 
+install_suse_15_onedir_deps() {
+    __opensuse_prep_install || return 1
+    install_opensuse_15_onedir_deps || return 1
+
+    return 0
+}
+
 install_suse_15_stable() {
     install_opensuse_stable || return 1
     return 0
@@ -8170,6 +8172,11 @@ install_suse_15_git() {
     return 0
 }
 
+install_suse_15_onedir() {
+    install_opensuse_stable || return 1
+    return 0
+}
+
 install_suse_15_stable_post() {
     install_opensuse_stable_post || return 1
     return 0
@@ -8177,6 +8184,11 @@ install_suse_15_stable_post() {
 
 install_suse_15_git_post() {
     install_opensuse_git_post || return 1
+    return 0
+}
+
+install_suse_15_onedir_post() {
+    install_opensuse_stable_post || return 1
     return 0
 }
 
@@ -8262,6 +8274,11 @@ install_suse_12_git_deps() {
     return 0
 }
 
+install_suse_12_onedir_deps() {
+    install_suse_12_stable_deps || return 1
+    return 0
+}
+
 install_suse_12_stable() {
     install_opensuse_stable || return 1
     return 0
@@ -8272,6 +8289,11 @@ install_suse_12_git() {
     return 0
 }
 
+install_suse_12_onedir() {
+    install_opensuse_stable || return 1
+    return 0
+}
+
 install_suse_12_stable_post() {
     install_opensuse_stable_post || return 1
     return 0
@@ -8279,6 +8301,11 @@ install_suse_12_stable_post() {
 
 install_suse_12_git_post() {
     install_opensuse_git_post || return 1
+    return 0
+}
+
+install_suse_12_onedir_post() {
+    install_opensuse_stable_post || return 1
     return 0
 }
 
@@ -8358,6 +8385,11 @@ install_suse_11_git_deps() {
     return 0
 }
 
+install_suse_11_onedir_deps() {
+    install_suse_11_stable_deps || return 1
+    return 0
+}
+
 install_suse_11_stable() {
     install_opensuse_stable || return 1
     return 0
@@ -8368,6 +8400,11 @@ install_suse_11_git() {
     return 0
 }
 
+install_suse_11_onedir() {
+    install_opensuse_stable || return 1
+    return 0
+}
+
 install_suse_11_stable_post() {
     install_opensuse_stable_post || return 1
     return 0
@@ -8375,6 +8412,11 @@ install_suse_11_stable_post() {
 
 install_suse_11_git_post() {
     install_opensuse_git_post || return 1
+    return 0
+}
+
+install_suse_11_onedir_post() {
+    install_opensuse_stable_post || return 1
     return 0
 }
 

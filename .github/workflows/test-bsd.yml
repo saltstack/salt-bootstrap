@@ -55,7 +55,7 @@ jobs:
         run: |
           brew update
           brew upgrade vagrant || brew install vagrant
-          brew install -cask virtualbox
+          brew install virtualbox
 
       - name: Setup Vagrant Cache
         uses: actions/cache@v3

@@ -126,7 +126,7 @@ jobs:
       distro-slug: freebsd-131
       display-name: FreeBSD 13.1
       timeout: 20
-      runs-on: macos-10.15
+      runs-on: macos-11
       instances: '["git-master", "latest"]'
 
 
@@ -141,7 +141,7 @@ jobs:
       distro-slug: freebsd-123
       display-name: FreeBSD 12.3
       timeout: 20
-      runs-on: macos-10.15
+      runs-on: macos-11
       instances: '["git-master", "latest"]'
 
 
@@ -156,24 +156,9 @@ jobs:
       distro-slug: openbsd-7
       display-name: OpenBSD 7
       timeout: 20
-      runs-on: macos-10.15
+      runs-on: macos-11
       instances: '["latest"]'
 
-
-
-  macos-1015:
-    name: macOS 10.15
-    if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
-    uses: ./.github/workflows/test-macos.yml
-    needs:
-      - lint
-      - generate-actions-workflow
-    with:
-      distro-slug: macos-1015
-      display-name: macOS 10.15
-      timeout: 20
-      runs-on: macos-10.15
-      instances: '["stable-3003", "stable-3004", "stable-3005", "stable-3006", "latest"]'
 
 
   macos-11:
@@ -417,7 +402,7 @@ jobs:
       distro-slug: gentoo
       display-name: Gentoo
       timeout: 90
-      instances: '["git-master", "latest", "default"]'
+      instances: '["git-master", "latest"]'
 
 
   gentoo-systemd:
@@ -431,7 +416,7 @@ jobs:
       distro-slug: gentoo-systemd
       display-name: Gentoo (systemd)
       timeout: 90
-      instances: '["git-master", "latest", "default"]'
+      instances: '["git-master", "latest"]'
 
 
   opensuse-15:
@@ -585,7 +570,6 @@ jobs:
       - freebsd-131
       - freebsd-123
       - openbsd-7
-      - macos-1015
       - macos-11
       - macos-12
       - windows-2019

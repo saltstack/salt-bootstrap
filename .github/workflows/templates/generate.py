@@ -318,7 +318,10 @@ GIT_DISTRO_BLACKLIST = [
     "rockylinux-8",
 ]
 
-LATEST_PKG_BLACKLIST = []
+LATEST_PKG_BLACKLIST = [
+    "gentoo",
+    "gentoo-systemd",
+]
 
 DISTRO_DISPLAY_NAMES = {
     "almalinux-8": "AlmaLinux 8",

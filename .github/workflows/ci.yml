@@ -402,7 +402,7 @@ jobs:
       distro-slug: gentoo
       display-name: Gentoo
       timeout: 90
-      instances: '["git-master", "latest"]'
+      instances: '["git-master"]'
 
 
   gentoo-systemd:
@@ -416,7 +416,7 @@ jobs:
       distro-slug: gentoo-systemd
       display-name: Gentoo (systemd)
       timeout: 90
-      instances: '["git-master", "latest"]'
+      instances: '["git-master"]'
 
 
   opensuse-15:

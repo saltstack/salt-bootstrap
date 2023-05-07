@@ -389,7 +389,7 @@ def generate_test_jobs():
 
     for distro in BSD:
         test_jobs += "\n"
-        runs_on = "macos-11"
+        runs_on = "macos-12"
         runs_on = f"\n      runs-on: {runs_on}"
         ifcheck = "\n    if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'"
         uses = "./.github/workflows/test-bsd.yml"

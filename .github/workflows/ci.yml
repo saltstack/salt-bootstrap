@@ -126,7 +126,7 @@ jobs:
       distro-slug: freebsd-131
       display-name: FreeBSD 13.1
       timeout: 20
-      runs-on: macos-11
+      runs-on: macos-12
       instances: '["git-master", "latest"]'
 
 
@@ -141,7 +141,7 @@ jobs:
       distro-slug: freebsd-123
       display-name: FreeBSD 12.3
       timeout: 20
-      runs-on: macos-11
+      runs-on: macos-12
       instances: '["git-master", "latest"]'
 
 
@@ -156,7 +156,7 @@ jobs:
       distro-slug: openbsd-7
       display-name: OpenBSD 7
       timeout: 20
-      runs-on: macos-11
+      runs-on: macos-12
       instances: '["latest"]'
 
 

@@ -9310,7 +9310,7 @@ daemons_running() {
                 echoerror "salt-$fname was not found running"
                 FAILED_DAEMONS=$((FAILED_DAEMONS + 1))
             fi
-        elif [ "$(ps wwwaux | grep -v grep | grep salt-$fname)" = "" ]; then
+        elif [ "$(ps wwwaux | grep -v grep | egrep "salt/run/run $fname|salt-$fname")" = "" ]; then
             echoerror "salt-$fname was not found running"
             FAILED_DAEMONS=$((FAILED_DAEMONS + 1))
         fi

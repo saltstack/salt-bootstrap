@@ -311,8 +311,7 @@ __usage() {
     - onedir_rc            Install latest onedir RC release.
     - onedir_rc [version]  Install a specific version. Only supported for
                            onedir RC packages available at repo.saltproject.io
-    - old_stable           Install latest old_stable release. This is the default
-                           install type
+    - old_stable           Install latest old_stable release.
     - old_stable [branch]  Install latest version on a branch. Only supported
                            for packages available at repo.saltproject.io
     - old_stable [version] Install a specific version. Only supported for

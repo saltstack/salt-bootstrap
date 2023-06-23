@@ -224,10 +224,10 @@ suites:
       - freebsd-131
       - freebsd-123
       - openbsd-6
-  - name: stable-3003-0
+  - name: old-stable-3003-0
     provisioner:
       salt_version: 3003
-      salt_bootstrap_options: -x python3 -MP stable 3003.0
+      salt_bootstrap_options: -x python3 -MP old_stable 3003.0
     excludes:
       - opensuse-15
       - opensuse-tumbleweed
@@ -244,10 +244,10 @@ suites:
       - freebsd-131
       - freebsd-123
       - openbsd-6
-  - name: stable-3003
+  - name: old-stable-3003
     provisioner:
       salt_version: 3003
-      salt_bootstrap_options: -x python3 -MP stable %s
+      salt_bootstrap_options: -x python3 -MP old-stable %s
     excludes:
       - opensuse-15
       - opensuse-tumbleweed
@@ -255,10 +255,10 @@ suites:
       - freebsd-131
       - freebsd-123
       - openbsd-6
-  - name: stable-3004-0
+  - name: old-stable-3004-0
     provisioner:
       salt_version: 3004
-      salt_bootstrap_options: -x python3 -MP stable 3004.0
+      salt_bootstrap_options: -x python3 -MP old-stable 3004.0
     excludes:
       - opensuse-15
       - opensuse-tumbleweed
@@ -268,10 +268,21 @@ suites:
       - freebsd-131
       - freebsd-123
       - openbsd-6
-  - name: stable-3004
+  - name: old-stable-3004
     provisioner:
       salt_version: 3004
-      salt_bootstrap_options: -x python3 -MP stable %s
+      salt_bootstrap_options: -x python3 -MP old-stable %s
+    excludes:
+      - opensuse-15
+      - opensuse-tumbleweed
+      - arch
+      - freebsd-131
+      - freebsd-123
+      - openbsd-6
+  - name: old-stable-3005
+    provisioner:
+      salt_version: 3005
+      salt_bootstrap_options: -x python3 -MP old-stable %s
     excludes:
       - opensuse-15
       - opensuse-tumbleweed

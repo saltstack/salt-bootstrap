@@ -606,7 +606,7 @@ if [ "$#" -gt 0 ];then
 fi
 
 # Check installation type
-if [ "$(echo "$ITYPE" | grep -E '(stable|testing|git|onedir|onedir_rc)')" = "" ]; then
+if [ "$(echo "$ITYPE" | grep -E '(stable|testing|git|onedir|onedir_rc|old_stable)')" = "" ]; then
     echoerror "Installation type \"$ITYPE\" is not known..."
     exit 1
 fi
@@ -663,7 +663,7 @@ elif [ "$ITYPE" = "old_stable" ]; then
             fi
             shift
         else
-            echo "Unknown stable version: $1 (valid: 3003, 3004, 3005)"
+            echo "Unknown old_stable version: $1 (valid: 3003, 3004, 3005)"
             exit 1
         fi
     fi

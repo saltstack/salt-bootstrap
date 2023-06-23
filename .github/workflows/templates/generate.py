@@ -316,6 +316,8 @@ OLD_STABLE_VERSION_BLACKLIST = [
 ]
 
 STABLE_VERSION_BLACKLIST = [
+    "3003",
+    "3004",
     "master",
     "nightly",
 ]

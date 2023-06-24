@@ -38,7 +38,6 @@ WINDOWS = [
 ]
 
 OSX = [
-    "macos-1015",
     "macos-11",
     "macos-12",
 ]
@@ -61,8 +60,6 @@ STABLE_DISTROS = [
     "fedora-36",
     "fedora-37",
     "fedora-38",
-    "gentoo",
-    "gentoo-systemd",
     "opensuse-15",
     "opensuse-tumbleweed",
     "oraclelinux-7",
@@ -321,7 +318,10 @@ GIT_DISTRO_BLACKLIST = [
     "rockylinux-8",
 ]
 
-LATEST_PKG_BLACKLIST = []
+LATEST_PKG_BLACKLIST = [
+    "gentoo",
+    "gentoo-systemd",
+]
 
 DISTRO_DISPLAY_NAMES = {
     "almalinux-8": "AlmaLinux 8",
@@ -389,7 +389,7 @@ def generate_test_jobs():
 
     for distro in BSD:
         test_jobs += "\n"
-        runs_on = "macos-10.15"
+        runs_on = "macos-12"
         runs_on = f"\n      runs-on: {runs_on}"
         ifcheck = "\n    if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'"
         uses = "./.github/workflows/test-bsd.yml"

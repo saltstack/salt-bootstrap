@@ -54,7 +54,7 @@ jobs:
       - name: Update Vagrant
         run: |
           brew update
-          brew upgrade vagrant
+          brew upgrade vagrant || brew install vagrant
 
       - name: Setup Vagrant Cache
         uses: actions/cache@v3

@@ -601,7 +601,7 @@ def generate_test_jobs():
                 continue
 
             for bootstrap_type in (
-                "old_stable",
+                "old-stable",
                 "stable",
                 "git",
                 "onedir",
@@ -619,7 +619,7 @@ def generate_test_jobs():
                     if distro not in ONEDIR_RC_DISTROS:
                         continue
 
-                if bootstrap_type == "old_stable":
+                if bootstrap_type == "old-stable":
                     if salt_version in OLD_STABLE_VERSION_BLACKLIST:
                         continue
                     if distro not in OLD_STABLE_DISTROS:

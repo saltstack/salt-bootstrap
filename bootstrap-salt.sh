@@ -311,10 +311,10 @@ __usage() {
     - onedir_rc            Install latest onedir RC release.
     - onedir_rc [version]  Install a specific version. Only supported for
                            onedir RC packages available at repo.saltproject.io
-    - old_stable           Install latest old_stable release.
-    - old_stable [branch]  Install latest version on a branch. Only supported
+    - old-stable           Install latest old stable release.
+    - old-stable [branch]  Install latest version on a branch. Only supported
                            for packages available at repo.saltproject.io
-    - old_stable [version] Install a specific version. Only supported for
+    - old-stable [version] Install a specific version. Only supported for
                            packages available at repo.saltproject.io
                            To pin a 3xxx minor version, specify it as 3xxx.0
 
@@ -332,9 +332,9 @@ __usage() {
     - ${__ScriptName} onedir 3006
     - ${__ScriptName} onedir_rc
     - ${__ScriptName} onedir_rc 3006
-    - ${__ScriptName} old_stable
-    - ${__ScriptName} old_stable 3005
-    - ${__ScriptName} old_stable 3005.1
+    - ${__ScriptName} old-stable
+    - ${__ScriptName} old-stable 3005
+    - ${__ScriptName} old-stable 3005.1
 
 
   Options:
@@ -606,7 +606,7 @@ if [ "$#" -gt 0 ];then
 fi
 
 # Check installation type
-if [ "$(echo "$ITYPE" | grep -E '(stable|testing|git|onedir|onedir_rc|old_stable)')" = "" ]; then
+if [ "$(echo "$ITYPE" | grep -E '(stable|testing|git|onedir|onedir_rc|old-stable)')" = "" ]; then
     echoerror "Installation type \"$ITYPE\" is not known..."
     exit 1
 fi
@@ -646,8 +646,8 @@ elif [ "$ITYPE" = "stable" ]; then
         fi
     fi
 
-# If doing old_stable install, check if version specified
-elif [ "$ITYPE" = "old_stable" ]; then
+# If doing old-stable install, check if version specified
+elif [ "$ITYPE" = "old-stable" ]; then
     if [ "$#" -eq 0 ];then
         ITYPE="stable"
     else
@@ -663,7 +663,7 @@ elif [ "$ITYPE" = "old_stable" ]; then
             fi
             shift
         else
-            echo "Unknown old_stable version: $1 (valid: 3003, 3004, 3005)"
+            echo "Unknown old stable version: $1 (valid: 3003, 3004, 3005)"
             exit 1
         fi
     fi

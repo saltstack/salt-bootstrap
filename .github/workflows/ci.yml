@@ -127,7 +127,7 @@ jobs:
       display-name: FreeBSD 13.1
       timeout: 20
       runs-on: macos-12
-      instances: '["git-master", "latest"]'
+      instances: '["latest"]'
 
 
   freebsd-123:
@@ -142,7 +142,7 @@ jobs:
       display-name: FreeBSD 12.3
       timeout: 20
       runs-on: macos-12
-      instances: '["git-master", "latest"]'
+      instances: '["latest"]'
 
 
   openbsd-7:

@@ -630,7 +630,7 @@ elif [ "$ITYPE" = "stable" ]; then
         _ONEDIR_REV="latest"
         ITYPE="onedir"
     else
-        if [ "$(echo "$1" | grep -E '^(nightly|latest|3006)$')" != "" ]; then
+        if [ "$(echo "$1" | grep -E '^(nightly|latest|3005|3006)$')" != "" ]; then
             ONEDIR_REV="$1"
             _ONEDIR_REV="$1"
             ITYPE="onedir"

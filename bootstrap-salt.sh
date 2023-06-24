@@ -652,6 +652,7 @@ elif [ "$ITYPE" = "old-stable" ]; then
             shift
         elif [ "$(echo "$1" | grep -E '^([3-9][0-5]{3}(\.[0-9]*)?)$')" != "" ]; then
             # Handle the 3xxx.0 version as 3xxx archive (pin to minor) and strip the fake ".0" suffix
+            ITYPE="stable"
             STABLE_REV=$(echo "$1" | sed -E 's/^([3-9][0-9]{3})\.0$/\1/')
             if [ "$(uname)" != "Darwin" ]; then
                 STABLE_REV="archive/$STABLE_REV"

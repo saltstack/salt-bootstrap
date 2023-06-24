@@ -4856,7 +4856,6 @@ install_centos_git_deps() {
     # Set ONEDIR_REV to STABLE_REV in case we
     # end up calling install_centos_onedir_deps
     ONEDIR_REV=${STABLE_REV}
-    install_centos_stable_deps || \
     install_centos_onedir_deps || \
     return 1
 

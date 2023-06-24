@@ -277,7 +277,7 @@ jobs:
       distro-slug: amazon-2
       display-name: Amazon 2
       timeout: 20
-      instances: '["old-stable-3003", "old-stable-3004", "old-stable-3005", "stable-3005", "onedir-3005", "stable-3006", "onedir-3006", "git-master", "latest", "default"]'
+      instances: '["old-stable-3003", "old-stable-3004", "old-stable-3005", "stable-3005", "onedir-3005", "stable-3006", "onedir-3006", "latest", "default"]'
 
 
   arch:
@@ -347,7 +347,7 @@ jobs:
       distro-slug: debian-10
       display-name: Debian 10
       timeout: 20
-      instances: '["old-stable-3003", "old-stable-3004", "old-stable-3005", "stable-3005", "onedir-3005", "stable-3006", "onedir-3006", "git-master", "latest", "default"]'
+      instances: '["old-stable-3003", "old-stable-3004", "old-stable-3005", "stable-3005", "onedir-3005", "stable-3006", "onedir-3006", "latest", "default"]'
 
 
   debian-11:

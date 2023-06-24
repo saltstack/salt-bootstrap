@@ -279,7 +279,7 @@ BLACKLIST_GIT_3006 = [
     "ubuntu-2204",
 ]
 
-BLACKLIST_GIT_MASTER = []
+BLACKLIST_GIT_MASTER = ["amazon-2", "debian-10"]
 
 SALT_VERSIONS = [
     "3003",

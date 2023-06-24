@@ -173,7 +173,7 @@ jobs:
       display-name: macOS 11
       timeout: 20
       runs-on: macos-11
-      instances: '["stable-3005", "stable-3006", "latest"]'
+      instances: '["old-stable-3003", "old-stable-3004", "old-stable-3005", "stable-3006", "latest"]'
 
 
   macos-12:
@@ -188,7 +188,7 @@ jobs:
       display-name: macOS 12
       timeout: 20
       runs-on: macos-12
-      instances: '["stable-3005", "stable-3006", "latest"]'
+      instances: '["old-stable-3003", "old-stable-3004", "old-stable-3005", "stable-3006", "latest"]'
 
 
 

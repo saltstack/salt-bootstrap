@@ -319,6 +319,20 @@ STABLE_VERSION_BLACKLIST = [
     "nightly",
 ]
 
+MAC_OLD_STABLE_VERSION_BLACKLIST = [
+    "3006",
+    "master",
+    "nightly",
+]
+
+MAC_STABLE_VERSION_BLACKLIST = [
+    "3003",
+    "3004",
+    "3005",
+    "master",
+    "nightly",
+]
+
 GIT_VERSION_BLACKLIST = [
     "nightly",
 ]
@@ -506,9 +520,13 @@ def generate_test_jobs():
                 instances.append(salt_version)
                 continue
 
-            for bootstrap_type in ("stable",):
+            for bootstrap_type in ("stable", "old-stable"):
                 if bootstrap_type == "stable":
-                    if salt_version in STABLE_VERSION_BLACKLIST:
+                    if salt_version in MAC_STABLE_VERSION_BLACKLIST:
+                        continue
+
+                if bootstrap_type == "old-stable":
+                    if salt_version in MAC_OLD_STABLE_VERSION_BLACKLIST:
                         continue
 
                 kitchen_target = f"{bootstrap_type}-{salt_version}"

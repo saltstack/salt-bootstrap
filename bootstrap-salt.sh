@@ -310,21 +310,31 @@ __usage() {
     - onedir_rc            Install latest onedir RC release.
     - onedir_rc [version]  Install a specific version. Only supported for
                            onedir RC packages available at repo.saltproject.io
+    - old-stable           Install latest old stable release.
+    - old-stable [branch]  Install latest version on a branch. Only supported
+                           for packages available at repo.saltproject.io
+    - old-stable [version] Install a specific version. Only supported for
+                           packages available at repo.saltproject.io
+                           To pin a 3xxx minor version, specify it as 3xxx.0
 
   Examples:
     - ${__ScriptName}
     - ${__ScriptName} stable
-    - ${__ScriptName} stable 2017.7
-    - ${__ScriptName} stable 2017.7.2
+    - ${__ScriptName} stable 3006
+    - ${__ScriptName} stable 3006.1
     - ${__ScriptName} testing
     - ${__ScriptName} git
     - ${__ScriptName} git 2017.7
     - ${__ScriptName} git v2017.7.2
     - ${__ScriptName} git 06f249901a2e2f1ed310d58ea3921a129f214358
     - ${__ScriptName} onedir
-    - ${__ScriptName} onedir 3005
+    - ${__ScriptName} onedir 3006
     - ${__ScriptName} onedir_rc
-    - ${__ScriptName} onedir_rc 3005
+    - ${__ScriptName} onedir_rc 3006
+    - ${__ScriptName} old-stable
+    - ${__ScriptName} old-stable 3005
+    - ${__ScriptName} old-stable 3005.1
+
 
   Options:
     -a  Pip install all Python pkg dependencies for Salt. Requires -V to install
@@ -591,7 +601,7 @@ if [ "$#" -gt 0 ];then
 fi
 
 # Check installation type
-if [ "$(echo "$ITYPE" | grep -E '(stable|testing|git|onedir|onedir_rc)')" = "" ]; then
+if [ "$(echo "$ITYPE" | grep -E '(stable|testing|git|onedir|onedir_rc|old-stable)')" = "" ]; then
     echoerror "Installation type \"$ITYPE\" is not known..."
     exit 1
 fi
@@ -615,28 +625,41 @@ elif [ "$ITYPE" = "stable" ]; then
         _ONEDIR_REV="latest"
         ITYPE="onedir"
     else
-        if [ "$(echo "$1" | grep -E '^(nightly|latest|3006)$')" != "" ]; then
+        if [ "$(echo "$1" | grep -E '^(nightly|latest|3005|3006)$')" != "" ]; then
             ONEDIR_REV="$1"
             _ONEDIR_REV="$1"
             ITYPE="onedir"
             shift
-        elif [ "$(echo "$1" | grep -E '^(3003|3004|3005)$')" != "" ]; then
-            STABLE_REV="$1"
-            shift
-        elif [ "$(echo "$1" | grep -E '^([3-9][0-5]{2}[6-9](\.[0-9]*)?)')" != "" ]; then
+        elif [ "$(echo "$1" | grep -E '^([3-9][0-5]{2}[5-9](\.[0-9]*)?)')" != "" ]; then
             ONEDIR_REV="minor/$1"
             _ONEDIR_REV="$1"
             ITYPE="onedir"
             shift
+        else
+            echo "Unknown stable version: $1 (valid: 3005, 3006, latest)"
+            exit 1
+        fi
+    fi
+
+# If doing old-stable install, check if version specified
+elif [ "$ITYPE" = "old-stable" ]; then
+    if [ "$#" -eq 0 ];then
+        ITYPE="stable"
+    else
+        if [ "$(echo "$1" | grep -E '^(3003|3004|3005)$')" != "" ]; then
+            STABLE_REV="$1"
+            ITYPE="stable"
+            shift
         elif [ "$(echo "$1" | grep -E '^([3-9][0-5]{3}(\.[0-9]*)?)$')" != "" ]; then
             # Handle the 3xxx.0 version as 3xxx archive (pin to minor) and strip the fake ".0" suffix
+            ITYPE="stable"
             STABLE_REV=$(echo "$1" | sed -E 's/^([3-9][0-9]{3})\.0$/\1/')
             if [ "$(uname)" != "Darwin" ]; then
                 STABLE_REV="archive/$STABLE_REV"
             fi
             shift
         else
-            echo "Unknown stable version: $1 (valid: 3003, 3004, 3005, 3006, latest)"
+            echo "Unknown old stable version: $1 (valid: 3003, 3004, 3005)"
             exit 1
         fi
     fi
@@ -4569,6 +4592,12 @@ install_fedora_onedir_post() {
 #   CentOS Install Functions
 #
 __install_saltstack_rhel_repository() {
+  if [ "${DISTRO_MAJOR_VERSION}" -ge 9 ]; then
+    echoerror "Old stable repository unavailable on RH variants greater than or equal to 9"
+    echoerror "Use the stable install type."
+    exit 1
+  fi
+
     if [ "$ITYPE" = "stable" ]; then
         repo_rev="$STABLE_REV"
     else
@@ -4823,7 +4852,6 @@ install_centos_git_deps() {
     # Set ONEDIR_REV to STABLE_REV in case we
     # end up calling install_centos_onedir_deps
     ONEDIR_REV=${STABLE_REV}
-    install_centos_stable_deps || \
     install_centos_onedir_deps || \
     return 1
 

@@ -47,6 +47,24 @@ BSD = [
     "openbsd-7",
 ]
 
+OLD_STABLE_DISTROS = [
+    "almalinux-8",
+    "amazon-2",
+    "arch",
+    "centos-7",
+    "centos-stream8",
+    "debian-10",
+    "debian-11",
+    "gentoo",
+    "gentoo-systemd",
+    "opensuse-15",
+    "opensuse-tumbleweed",
+    "oraclelinux-7",
+    "oraclelinux-8",
+    "rockylinux-8",
+    "ubuntu-2004",
+]
+
 STABLE_DISTROS = [
     "almalinux-8",
     "almalinux-9",
@@ -258,7 +276,7 @@ BLACKLIST_GIT_3006 = [
     "ubuntu-2204",
 ]
 
-BLACKLIST_GIT_MASTER = []
+BLACKLIST_GIT_MASTER = ["amazon-2", "debian-10", "freebsd-131", "freebsd-123"]
 
 SALT_VERSIONS = [
     "3003",
@@ -288,7 +306,29 @@ VERSION_DISPLAY_NAMES = {
     "nightly": "Nightly",
 }
 
+OLD_STABLE_VERSION_BLACKLIST = [
+    "3006",
+    "master",
+    "nightly",
+]
+
 STABLE_VERSION_BLACKLIST = [
+    "3003",
+    "3004",
+    "master",
+    "nightly",
+]
+
+MAC_OLD_STABLE_VERSION_BLACKLIST = [
+    "3006",
+    "master",
+    "nightly",
+]
+
+MAC_STABLE_VERSION_BLACKLIST = [
+    "3003",
+    "3004",
+    "3005",
     "master",
     "nightly",
 ]
@@ -427,6 +467,7 @@ def generate_test_jobs():
                     BLACKLIST = {
                         "3003": BLACKLIST_GIT_3003,
                         "3004": BLACKLIST_GIT_3004,
+                        "master": BLACKLIST_GIT_MASTER,
                     }
 
                     # .0 versions are a virtual version for pinning to the first
@@ -436,7 +477,7 @@ def generate_test_jobs():
                         continue
 
                 if (
-                    salt_version in ("3003", "3004")
+                    salt_version in ("3003", "3004", "master")
                     and distro in BLACKLIST[salt_version]
                 ):
                     continue
@@ -480,9 +521,13 @@ def generate_test_jobs():
                 instances.append(salt_version)
                 continue
 
-            for bootstrap_type in ("stable",):
+            for bootstrap_type in ("stable", "old-stable"):
                 if bootstrap_type == "stable":
-                    if salt_version in STABLE_VERSION_BLACKLIST:
+                    if salt_version in MAC_STABLE_VERSION_BLACKLIST:
+                        continue
+
+                if bootstrap_type == "old-stable":
+                    if salt_version in MAC_OLD_STABLE_VERSION_BLACKLIST:
                         continue
 
                 kitchen_target = f"{bootstrap_type}-{salt_version}"
@@ -574,7 +619,13 @@ def generate_test_jobs():
                 instances.append(salt_version)
                 continue
 
-            for bootstrap_type in ("stable", "git", "onedir", "onedir-rc"):
+            for bootstrap_type in (
+                "old-stable",
+                "stable",
+                "git",
+                "onedir",
+                "onedir-rc",
+            ):
                 if bootstrap_type == "onedir":
                     if salt_version not in ONEDIR_SALT_VERSIONS:
                         continue
@@ -585,6 +636,12 @@ def generate_test_jobs():
                     if salt_version not in ONEDIR_RC_SALT_VERSIONS:
                         continue
                     if distro not in ONEDIR_RC_DISTROS:
+                        continue
+
+                if bootstrap_type == "old-stable":
+                    if salt_version in OLD_STABLE_VERSION_BLACKLIST:
+                        continue
+                    if distro not in OLD_STABLE_DISTROS:
                         continue
 
                 if bootstrap_type == "stable":

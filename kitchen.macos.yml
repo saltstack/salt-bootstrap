@@ -18,16 +18,19 @@ platforms:
   - name: macos-1015
 
 suites:
-  - name: stable-3003
+  - name: old-stable-3003
     provisioner:
+      salt_bootstrap_options: -MP old-stable %s
       salt_version: 3003.4
       salt_call_command: /opt/salt/bin/salt-call
-  - name: stable-3004
+  - name: old-stable-3004
     provisioner:
+      salt_bootstrap_options: -MP old-stable %s
       salt_version: 3004.1
       salt_call_command: /opt/salt/bin/salt-call
-  - name: stable-3005
+  - name: old-stable-3005
     provisioner:
+      salt_bootstrap_options: -MP old-stable %s
       salt_version: 3005.1
       salt_call_command: /opt/salt/bin/salt-call
   - name: stable-3006

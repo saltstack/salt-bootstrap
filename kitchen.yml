@@ -301,9 +301,31 @@ suites:
       - freebsd-131
       - freebsd-123
       - openbsd-6
+  - name: stable-3005-1
+    provisioner:
+      salt_version: 3005.1
+      salt_bootstrap_options: -x python3 -MP stable %s
+    excludes:
+      - opensuse-15
+      - opensuse-tumbleweed
+      - arch
+      - freebsd-131
+      - freebsd-123
+      - openbsd-6
   - name: stable-3006
     provisioner:
       salt_version: 3006
+      salt_bootstrap_options: -x python3 -MP stable %s
+    excludes:
+      - opensuse-15
+      - opensuse-tumbleweed
+      - arch
+      - freebsd-131
+      - freebsd-123
+      - openbsd-6
+  - name: stable-3006-1
+    provisioner:
+      salt_version: 3006.1
       salt_bootstrap_options: -x python3 -MP stable %s
     excludes:
       - opensuse-15

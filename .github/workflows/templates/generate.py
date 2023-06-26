@@ -282,7 +282,9 @@ SALT_VERSIONS = [
     "3003",
     "3004",
     "3005",
+    "3005-1",
     "3006",
+    "3006-1",
     "master",
     "latest",
     "nightly",
@@ -300,14 +302,18 @@ VERSION_DISPLAY_NAMES = {
     "3003": "v3003",
     "3004": "v3004",
     "3005": "v3005",
+    "3005-1": "v3005.1",
     "3006": "v3006",
+    "3006-1": "v3006.1",
     "master": "Master",
     "latest": "Latest",
     "nightly": "Nightly",
 }
 
 OLD_STABLE_VERSION_BLACKLIST = [
+    "3005-1",
     "3006",
+    "3006-1",
     "master",
     "nightly",
 ]
@@ -320,7 +326,9 @@ STABLE_VERSION_BLACKLIST = [
 ]
 
 MAC_OLD_STABLE_VERSION_BLACKLIST = [
+    "3005-1",
     "3006",
+    "3006-1",
     "master",
     "nightly",
 ]
@@ -329,11 +337,14 @@ MAC_STABLE_VERSION_BLACKLIST = [
     "3003",
     "3004",
     "3005",
+    "3005-1",
     "master",
     "nightly",
 ]
 
 GIT_VERSION_BLACKLIST = [
+    "3005-1",
+    "3006-1",
     "nightly",
 ]
 
@@ -660,7 +671,9 @@ def generate_test_jobs():
                     "3003": BLACKLIST_3003,
                     "3004": BLACKLIST_3004,
                     "3005": BLACKLIST_3005,
+                    "3005-1": BLACKLIST_3005,
                     "3006": BLACKLIST_3006,
+                    "3006-1": BLACKLIST_3006,
                 }
                 if bootstrap_type == "git":
                     BLACKLIST = {
@@ -678,7 +691,8 @@ def generate_test_jobs():
                         continue
 
                 if (
-                    salt_version in ("3003", "3004", "3005", "3006", "master")
+                    salt_version
+                    in ("3003", "3004", "3005", "3005-1", "3006", "3006-1", "master")
                     and distro in BLACKLIST[salt_version]
                 ):
                     continue

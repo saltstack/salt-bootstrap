@@ -670,7 +670,9 @@ def generate_test_jobs():
                     "3003": BLACKLIST_3003,
                     "3004": BLACKLIST_3004,
                     "3005": BLACKLIST_3005,
+                    "3005-1": BLACKLIST_3005,
                     "3006": BLACKLIST_3006,
+                    "3006-1": BLACKLIST_3006,
                 }
                 if bootstrap_type == "git":
                     BLACKLIST = {
@@ -688,7 +690,8 @@ def generate_test_jobs():
                         continue
 
                 if (
-                    salt_version in ("3003", "3004", "3005", "3006", "master")
+                    salt_version
+                    in ("3003", "3004", "3005", "3005-1", "3006", "3006-1", "master")
                     and distro in BLACKLIST[salt_version]
                 ):
                     continue

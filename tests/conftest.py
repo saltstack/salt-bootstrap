@@ -47,7 +47,7 @@ def target_python_version():
 
 @pytest.fixture(scope="session")
 def target_salt_version():
-    target_salt = os.environ["KITCHEN_SUITE"].split("-", 2)[-1].replace("-", ".")
+    target_salt = os.environ["KITCHEN_SUITE"].split("-", 1)[-1].replace("-", ".")
     if target_salt.startswith("v"):
         target_salt = target_salt[1:]
     if target_salt in ("default", "latest", "master", "nightly"):

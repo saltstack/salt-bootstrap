@@ -342,6 +342,8 @@ MAC_STABLE_VERSION_BLACKLIST = [
 ]
 
 GIT_VERSION_BLACKLIST = [
+    "3005-1",
+    "3006-1",
     "nightly",
 ]
 

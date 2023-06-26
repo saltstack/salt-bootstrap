@@ -337,6 +337,7 @@ MAC_STABLE_VERSION_BLACKLIST = [
     "3003",
     "3004",
     "3005",
+    "3005-1",
     "master",
     "nightly",
 ]

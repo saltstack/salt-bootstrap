@@ -37,6 +37,10 @@ suites:
     provisioner:
       salt_version: 3006
       salt_call_command: /opt/salt/salt-call
+  - name: stable-3006-1
+    provisioner:
+      salt_version: 3006.1
+      salt_call_command: /opt/salt/salt-call
   - name: latest
     provisioner:
       salt_version: latest

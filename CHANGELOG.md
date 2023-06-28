@@ -1,3 +1,13 @@
+# v2023.06.28
+
+## What's Changed
+
+- SUSE Fixes by @garethgreenaway in https://github.com/saltstack/salt-bootstrap/pull/1925
+- Add old_stable type by @garethgreenaway in https://github.com/saltstack/salt-bootstrap/pull/1934
+- Test out the minor versions by @garethgreenaway in https://github.com/saltstack/salt-bootstrap/pull/1936
+
+**Full Changelog**: https://github.com/saltstack/salt-bootstrap/compare/v2023.04.26...v2023.06.28
+
 # v2023.04.26
 
 ## What's Changed

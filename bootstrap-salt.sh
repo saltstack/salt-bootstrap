@@ -603,21 +603,6 @@ if [ "$#" -gt 0 ];then
     shift
 fi
 
-# Doing a quick start, so install master
-# set master address to 127.0.0.1
-if [ "$_QUICK_START" -eq "$BS_TRUE" ]; then
-  # make sure we're installing the master
-  _INSTALL_MASTER=$BS_TRUE
-  # override incase install minion
-  # is set to false
-  _INSTALL_MINION=$BS_TRUE
-  # Set master address to loopback IP
-  _SALT_MASTER_ADDRESS="127.0.0.1"
-  # Auto accept the minion key
-  # when the install is done.
-  _AUTO_ACCEPT_MINION_KEYS=$BS_TRUE
-fi
-
 # Check installation type
 if [ "$(echo "$ITYPE" | grep -E '(stable|testing|git|onedir|onedir_rc|old-stable)')" = "" ]; then
     echoerror "Installation type \"$ITYPE\" is not known..."
@@ -731,6 +716,31 @@ elif [ "$ITYPE" = "onedir_rc" ]; then
             exit 1
         fi
     fi
+fi
+
+# Doing a quick start, so install master
+# set master address to 127.0.0.1
+if [ "$_QUICK_START" -eq "$BS_TRUE" ]; then
+  # make install type is stable
+  ITYPE="stable"
+
+  # make sure the revision is latest
+  STABLE_REV="latest"
+  ONEDIR_REV="latest"
+
+  # make sure we're installing the master
+  _INSTALL_MASTER=$BS_TRUE
+
+  # override incase install minion
+  # is set to false
+  _INSTALL_MINION=$BS_TRUE
+
+  # Set master address to loopback IP
+  _SALT_MASTER_ADDRESS="127.0.0.1"
+
+  # Auto accept the minion key
+  # when the install is done.
+  _AUTO_ACCEPT_MINION_KEYS=$BS_TRUE
 fi
 
 # Check for any unparsed arguments. Should be an error.

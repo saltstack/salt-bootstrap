@@ -395,6 +395,8 @@ __usage() {
         resort method. NOTE: This only works for functions which actually
         implement pip based installations.
     -q  Quiet salt installation from git (setup.py install -q)
+    -Q  Quickstart, install the Salt master and the Salt minion.
+        And automatically accept the minion key.
     -R  Specify a custom repository URL. Assumes the custom repository URL
         points to a repository that mirrors Salt packages located at
         repo.saltproject.io. The option passed with -R replaces the
@@ -426,7 +428,7 @@ EOT
 }   # ----------  end of function __usage  ----------
 
 
-while getopts ':hvnDc:g:Gyx:k:s:MSNXCPFUKIA:i:Lp:dH:bflV:J:j:rR:aq' opt
+while getopts ':hvnDc:g:Gyx:k:s:MSNXCPFUKIA:i:Lp:dH:bflV:J:j:rR:aqQ' opt
 do
   case "${opt}" in
 
@@ -470,6 +472,7 @@ do
     J )  _CUSTOM_MASTER_CONFIG=$OPTARG                  ;;
     j )  _CUSTOM_MINION_CONFIG=$OPTARG                  ;;
     q )  _QUIET_GIT_INSTALLATION=$BS_TRUE               ;;
+    Q )  _QUICK_START=$BS_TRUE                          ;;
     x )  _PY_EXE="$OPTARG"                              ;;
     y )  _INSTALL_PY="$BS_TRUE"                         ;;
 
@@ -598,6 +601,21 @@ if [ "$#" -gt 0 ];then
     __check_unparsed_options "$*"
     ITYPE=$1
     shift
+fi
+
+# Doing a quick start, so install master
+# set master address to 127.0.0.1
+if [ "$_QUICK_START" -eq "$BS_TRUE" ]; then
+  # make sure we're installing the master
+  _INSTALL_MASTER=$BS_TRUE
+  # override incase install minion
+  # is set to false
+  _INSTALL_MINION=$BS_TRUE
+  # Set master address to loopback IP
+  _SALT_MASTER_ADDRESS="127.0.0.1"
+  # Auto accept the minion key
+  # when the install is done.
+  _AUTO_ACCEPT_MINION_KEYS=$BS_TRUE
 fi
 
 # Check installation type
@@ -9699,11 +9717,23 @@ if [ "$DAEMONS_RUNNING_FUNC" != "null" ] && [ ${_START_DAEMONS} -eq $BS_TRUE ]; 
     fi
 fi
 
+if [ "$_AUTO_ACCEPT_MINION_KEYS" -eq "$BS_TRUE" ]; then
+  echoinfo "Accepting the Salt Minion Keys"
+  salt-key -yA
+fi
+
 # Done!
 if [ "$_CONFIG_ONLY" -eq $BS_FALSE ]; then
     echoinfo "Salt installed!"
 else
     echoinfo "Salt configured!"
+fi
+
+if [ "$_QUICK_START" -eq "$BS_TRUE" ]; then
+  echoinfo "Congratulations!"
+  echoinfo "A couple of commands to try:"
+  echoinfo "  salt \* test.ping"
+  echoinfo "  salt \* test.version"
 fi
 
 exit 0

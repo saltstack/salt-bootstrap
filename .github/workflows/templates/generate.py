@@ -701,7 +701,7 @@ def generate_test_jobs():
                 instances.append(kitchen_target)
         
         for bootstrap_type in ("onedir-nightly",):
-            if distro not in STABLE_DISTROS:
+            if distro not in ONEDIR_DISTROS:
                 continue
             instances.append(bootstrap_type)
 

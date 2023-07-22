@@ -276,7 +276,7 @@ jobs:
       distro-slug: arch
       display-name: Arch
       timeout: 20
-      instances: '["git-master", "latest", "onedir-nightly", "default"]'
+      instances: '["git-master", "latest", "default"]'
 
 
   centos-7:
@@ -430,7 +430,7 @@ jobs:
       distro-slug: opensuse-15
       display-name: Opensuse 15
       timeout: 20
-      instances: '["latest", "onedir-nightly", "default"]'
+      instances: '["latest", "default"]'
 
 
   opensuse-tumbleweed:
@@ -444,7 +444,7 @@ jobs:
       distro-slug: opensuse-tumbleweed
       display-name: Opensuse Tumbleweed
       timeout: 20
-      instances: '["git-master", "latest", "onedir-nightly", "default"]'
+      instances: '["git-master", "latest", "default"]'
 
 
   oraclelinux-7:

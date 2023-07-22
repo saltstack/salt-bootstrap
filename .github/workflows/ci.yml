@@ -602,7 +602,8 @@ jobs:
       - fedora-38
       - gentoo
       - gentoo-systemd
-      - opensuse-15
+      - opensuse-15-4
+      - opensuse-15-5
       - opensuse-tumbleweed
       - oraclelinux-7
       - oraclelinux-8

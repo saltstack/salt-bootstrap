@@ -3153,7 +3153,7 @@ __install_saltstack_ubuntu_onedir_repository() {
     SALTSTACK_UBUNTU_URL="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_DIR}/${__PY_VERSION_REPO}/ubuntu/${UBUNTU_VERSION}/${__REPO_ARCH}/${ONEDIR_REV}/"
     if [ "${ONEDIR_REV}" = "nightly" ] ; then
         BASE_UBUNTU_URL="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_NIGHTLY_DIR}/${__PY_VERSION_REPO}/ubuntu/${UBUNTU_VERSION}/${__REPO_ARCH}/minor"
-        NIGHTLY_VERSION_PATH="$(__get_minor_subpath $BASE_UBUNTU_URL)"
+        NIGHTLY_VERSION_PATH="$(__get_minor_subpath "$BASE_UBUNTU_URL")"
         SALTSTACK_UBUNTU_URL="${BASE_UBUNTU_URL}/${NIGHTLY_VERSION_PATH}"
     fi
     echo "$__REPO_ARCH_DEB $SALTSTACK_UBUNTU_URL $UBUNTU_CODENAME main" > /etc/apt/sources.list.d/salt.list
@@ -3703,7 +3703,7 @@ __install_saltstack_debian_onedir_repository() {
     GPG_SALTSTACK_DEBIAN_URL=$SALTSTACK_DEBIAN_URL
     if [ "${ONEDIR_REV}" = "nightly" ] ; then
         BASE_DEBIAN_URL="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_NIGHTLY_DIR}/${__PY_VERSION_REPO}/debian/${DEBIAN_RELEASE}/${__REPO_ARCH}/minor"
-        NIGHTLY_VERSION_PATH="$(__get_minor_subpath $BASE_DEBIAN_URL)"
+        NIGHTLY_VERSION_PATH="$(__get_minor_subpath "$BASE_DEBIAN_URL")"
         SALTSTACK_DEBIAN_URL="${BASE_DEBIAN_URL}/${NIGHTLY_VERSION_PATH}"
         GPG_SALTSTACK_DEBIAN_URL="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_NIGHTLY_DIR}/${__PY_VERSION_REPO}/debian/${DEBIAN_RELEASE}/${__REPO_ARCH}/"
     fi

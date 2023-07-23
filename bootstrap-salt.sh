@@ -4254,13 +4254,15 @@ __install_saltstack_fedora_onedir_repository() {
 
     if [ ! -s "$REPO_FILE" ] || [ "$_FORCE_OVERWRITE" -eq $BS_TRUE ]; then
         FETCH_URL="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_DIR}/${__PY_VERSION_REPO}/fedora/${DISTRO_MAJOR_VERSION}/${CPU_ARCH_L}/${ONEDIR_REV}"
+        GPG_FETCH_URL=$FETCH_URL
         if [ "${ONEDIR_REV}" = "nightly" ] ; then
-            FETCH_URL="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_NIGHTLY_DIR}/${__PY_VERSION_REPO}/fedora/${DISTRO_MAJOR_VERSION}/${CPU_ARCH_L}/"
+            FETCH_URL="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_NIGHTLY_DIR}/${__PY_VERSION_REPO}/fedora/${DISTRO_MAJOR_VERSION}/${CPU_ARCH_L}/minor/nightly"
+            GPG_FETCH_URL="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_DIR}/${__PY_VERSION_REPO}/fedora/${DISTRO_MAJOR_VERSION}/${CPU_ARCH_L}/${ONEDIR_REV}"
         fi
 
         __fetch_url "${REPO_FILE}" "${FETCH_URL}.repo"
 
-        __rpm_import_gpg "${FETCH_URL}/${GPG_KEY}" || return 1
+        __rpm_import_gpg "${GPG_FETCH_URL}/${GPG_KEY}" || return 1
 
         yum clean metadata || return 1
     elif [ "$REPO_REV" != "latest" ]; then
@@ -4698,8 +4700,10 @@ __install_saltstack_rhel_onedir_repository() {
     # Avoid using '$releasever' variable for yum.
     # Instead, this should work correctly on all RHEL variants.
     base_url="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_DIR}/${__PY_VERSION_REPO}/redhat/${DISTRO_MAJOR_VERSION}/\$basearch/${ONEDIR_REV}/"
+    GPG_FETCH_URL=$base_url
     if [ "${ONEDIR_REV}" = "nightly" ] ; then
-        base_url="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_NIGHTLY_DIR}/${__PY_VERSION_REPO}/redhat/${DISTRO_MAJOR_VERSION}/\$basearch/"
+        base_url="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_NIGHTLY_DIR}/${__PY_VERSION_REPO}/redhat/${DISTRO_MAJOR_VERSION}/\$basearch/${ONEDIR_REV}/minor/nightly"
+        GPG_FETCH_URL="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_NIGHTLY_DIR}/${__PY_VERSION_REPO}/redhat/${DISTRO_MAJOR_VERSION}/\$basearch/${ONEDIR_REV}/"
     fi
     if [ "$(echo "${ONEDIR_REV}" | grep -E '(3004|3005)')" != "" ]; then
       if [ "${DISTRO_MAJOR_VERSION}" -eq 9 ]; then
@@ -4713,7 +4717,7 @@ __install_saltstack_rhel_onedir_repository() {
 
     gpg_key_urls=""
     for key in $gpg_key; do
-        gpg_key_urls=$(printf "${base_url}${key},%s" "$gpg_key_urls")
+        gpg_key_urls=$(printf "${GPG_FETCH_URL}${key},%s" "$gpg_key_urls")
     done
 
     repo_file="/etc/yum.repos.d/salt.repo"
@@ -4731,11 +4735,13 @@ enabled_metadata=1
 _eof
 
         fetch_url="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_DIR}/${__PY_VERSION_REPO}/redhat/${DISTRO_MAJOR_VERSION}/${CPU_ARCH_L}/${ONEDIR_REV}/"
+        GPG_FETCH_URL=$FETCH_URL
         if [ "${ONEDIR_REV}" = "nightly" ] ; then
-            fetch_url="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_NIGHTLY_DIR}/${__PY_VERSION_REPO}/redhat/${DISTRO_MAJOR_VERSION}/${CPU_ARCH_L}/"
+            fetch_url="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_NIGHTLY_DIR}/${__PY_VERSION_REPO}/redhat/${DISTRO_MAJOR_VERSION}/${CPU_ARCH_L}/minor/nightly"
+            GPG_FETCH_URL="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_NIGHTLY_DIR}/${__PY_VERSION_REPO}/redhat/${DISTRO_MAJOR_VERSION}/${CPU_ARCH_L}/"
         fi
         for key in $gpg_key; do
-            __rpm_import_gpg "${fetch_url}${key}" || return 1
+            __rpm_import_gpg "${GPG_FETCH_URL}${key}" || return 1
         done
 
         yum clean metadata || return 1
@@ -6914,15 +6920,17 @@ __install_saltstack_photon_onedir_repository() {
 
     if [ ! -s "$REPO_FILE" ] || [ "$_FORCE_OVERWRITE" -eq $BS_TRUE ]; then
         FETCH_URL="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_DIR}/${__PY_VERSION_REPO}/photon/${DISTRO_MAJOR_VERSION}/${CPU_ARCH_L}/${ONEDIR_REV}"
+        GPG_FETCH_URL=$FETCH_URL
         if [ "${ONEDIR_REV}" = "nightly" ] ; then
-            FETCH_URL="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_NIGHTLY_DIR}/${__PY_VERSION_REPO}/photon/${DISTRO_MAJOR_VERSION}/${CPU_ARCH_L}/"
+            FETCH_URL="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_NIGHTLY_DIR}/${__PY_VERSION_REPO}/photon/${DISTRO_MAJOR_VERSION}/${CPU_ARCH_L}/minor/nightly"
+            GPG_FETCH_URL="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_NIGHTLY_DIR}/${__PY_VERSION_REPO}/photon/${DISTRO_MAJOR_VERSION}/${CPU_ARCH_L}"
         fi
 
         __fetch_url "${REPO_FILE}" "${FETCH_URL}.repo"
 
         GPG_KEY="SALT-PROJECT-GPG-PUBKEY-2023.pub"
 
-        __rpm_import_gpg "${FETCH_URL}/${GPG_KEY}" || return 1
+        __rpm_import_gpg "${GPG_FETCH_URL}/${GPG_KEY}" || return 1
 
         tdnf makecache || return 1
     elif [ "$REPO_REV" != "latest" ]; then

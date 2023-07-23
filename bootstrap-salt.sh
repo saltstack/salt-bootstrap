@@ -4272,7 +4272,7 @@ __install_saltstack_fedora_onedir_repository() {
         GPG_FETCH_URL=$FETCH_URL
         if [ "${ONEDIR_REV}" = "nightly" ] ; then
             FETCH_URL="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_NIGHTLY_DIR}/${__PY_VERSION_REPO}/fedora/${DISTRO_MAJOR_VERSION}/${CPU_ARCH_L}/minor/nightly"
-            GPG_FETCH_URL="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_DIR}/${__PY_VERSION_REPO}/fedora/${DISTRO_MAJOR_VERSION}/${CPU_ARCH_L}/${ONEDIR_REV}"
+            GPG_FETCH_URL="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_NIGHTLY_DIR}/${__PY_VERSION_REPO}/fedora/${DISTRO_MAJOR_VERSION}/${CPU_ARCH_L}"
         fi
 
         __fetch_url "${REPO_FILE}" "${FETCH_URL}.repo"
@@ -4717,8 +4717,8 @@ __install_saltstack_rhel_onedir_repository() {
     base_url="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_DIR}/${__PY_VERSION_REPO}/redhat/${DISTRO_MAJOR_VERSION}/\$basearch/${ONEDIR_REV}/"
     GPG_FETCH_URL=$base_url
     if [ "${ONEDIR_REV}" = "nightly" ] ; then
-        base_url="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_NIGHTLY_DIR}/${__PY_VERSION_REPO}/redhat/${DISTRO_MAJOR_VERSION}/\$basearch/${ONEDIR_REV}/minor/nightly"
-        GPG_FETCH_URL="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_NIGHTLY_DIR}/${__PY_VERSION_REPO}/redhat/${DISTRO_MAJOR_VERSION}/\$basearch/${ONEDIR_REV}/"
+        base_url="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_NIGHTLY_DIR}/${__PY_VERSION_REPO}/redhat/${DISTRO_MAJOR_VERSION}/\$basearch/minor/nightly"
+        GPG_FETCH_URL="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_NIGHTLY_DIR}/${__PY_VERSION_REPO}/redhat/${DISTRO_MAJOR_VERSION}/\$basearch/"
     fi
     if [ "$(echo "${ONEDIR_REV}" | grep -E '(3004|3005)')" != "" ]; then
       if [ "${DISTRO_MAJOR_VERSION}" -eq 9 ]; then

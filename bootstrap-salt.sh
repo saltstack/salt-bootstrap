@@ -967,7 +967,7 @@ __check_url_exists() {
 #----------------------------------------------------------------------------------------------------------------------
 __get_minor_subpath() {
   _URL="$1"
-  retval=$(curl -s $1 | grep 'href' | grep -v '\.\.' | xargs | sed -e 's/<[^>]*>//g' | tail -1)
+  retval=$(curl -s "$1" | grep 'href' | grep -v '\.\.' | xargs | sed -e 's/<[^>]*>//g' | tail -1)
   echo "$retval"
 }
 

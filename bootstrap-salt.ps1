@@ -353,7 +353,14 @@ if ($RunService.ToLower() -eq "true") {
 
 $ConfiguredAnything = $False
 
-$RootDir = "C:\salt"
+# Detect older version of Salt to determing default RootDir
+if ($majorVersion -lt 3004) {
+    $RootDir = "$env:SystemDrive`:\salt"
+} else {
+    $RootDir = "$env:ProgramData\Salt Project\Salt"
+}
+
+# Check for existing installation where RootDir is stored in the registry
 $SaltRegKey = "HKLM:\SOFTWARE\Salt Project\Salt"
 if (Test-Path -Path $SaltRegKey) {
     if ($null -ne (Get-ItemProperty $SaltRegKey).root_dir) {

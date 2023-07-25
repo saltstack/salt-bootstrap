@@ -32,6 +32,7 @@ sum** of the downloaded ``bootstrap-salt.sh`` file.
 
 The SHA256 sum of the ``bootstrap-salt.sh`` file, per release, is:
 
+- 2023.06.28: ``f45f5da8abee27ef385131f5cfa9382d3a15863d0a05688a0404d2f057b27776``
 - 2023.04.26: ``516fa9cc2e258cb8484ff360b9674b46918f657985c21ca9301e42a3dd263d60``
 - 2023.04.21: ``e364428aa7a25f8e2c5e18e36e222351724c6cf35a1d57158f3357cde1e0a0f0``
 - 2023.04.06: ``994bf7e8bd92fe6d70d291c7562aff299f5651046b4e76dfa506cee0d9bb0843``

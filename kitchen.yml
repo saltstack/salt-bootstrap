@@ -397,6 +397,10 @@ suites:
       - opensuse-tumbleweed
       - ubuntu-1804
 
+  - name: quickstart
+    provisioner:
+      salt_bootstrap_options: -Q
+
 verifier:
   name: shell
   remote_exec: false

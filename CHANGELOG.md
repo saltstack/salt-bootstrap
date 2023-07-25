@@ -1,3 +1,17 @@
+# v2023.07.25
+
+## What's Changed
+
+- fix gpg pub key name for nightly rhel_onedir_repository by @ITJamie in https://github.com/saltstack/salt-bootstrap/pull/1943
+- Adding quickstart option by @garethgreenaway in https://github.com/saltstack/salt-bootstrap/pull/1945
+- fix install_amazon_linux_ami_2_onedir nightly gpg key path by @ITJamie in https://github.com/saltstack/salt-bootstrap/pull/1949
+
+## New Contributors
+
+- @ITJamie made their first contribution in https://github.com/saltstack/salt-bootstrap/pull/1943
+
+**Full Changelog**: https://github.com/saltstack/salt-bootstrap/compare/v2023.06.28...v2023.07.25
+
 # v2023.06.28
 
 ## What's Changed

@@ -23,7 +23,7 @@
 #======================================================================================================================
 set -o nounset                              # Treat unset variables as an error
 
-__ScriptVersion="2023.06.28"
+__ScriptVersion="2023.07.25"
 __ScriptName="bootstrap-salt.sh"
 
 __ScriptFullName="$0"

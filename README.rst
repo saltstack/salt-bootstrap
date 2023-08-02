@@ -400,18 +400,18 @@ Install on Windows
 
 Using ``PowerShell`` to install latest stable version:
 
-.. code:: console
+.. code:: powershell
 
-  Invoke-WebRequest -Uri https://winbootstrap.saltproject.io -OutFile $env:TEMP\bootstrap-salt.ps1
-  Set-ExecutionPolicy -ExecutionPolicy Unrestricted -Scope CurrentUser
-  & $env:TEMP\bootstrap-salt.ps1
-  Set-ExecutionPolicy -ExecutionPolicy Undefined -Scope CurrentUser
+  [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]'Tls12'
+  Invoke-WebRequest -Uri https://winbootstrap.saltproject.io -OutFile "$env:TEMP\bootstrap-salt.ps1"
+  Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+  & "$env:TEMP\bootstrap-salt.ps1"
 
 Display information about the install script parameters:
 
-.. code:: console
+.. code:: powershell
 
-  help $env:TEMP\bootstrap-salt.ps1 -Detailed
+  Get-Help $env:TEMP\bootstrap-salt.ps1 -Detailed
 
 Using ``cygwin`` to install latest stable version:
 

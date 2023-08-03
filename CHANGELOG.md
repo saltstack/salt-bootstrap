@@ -1,3 +1,13 @@
+# v2023.08.03
+
+## What's Changed
+
+- Set RootDir depending on Salt Version by @twangboy in https://github.com/saltstack/salt-bootstrap/pull/1952
+- Bump to `certifi==2023.07.22` due to https://github.com/advisories/GHSA-xqr8-7jwr-rhp7 by @s0undt3ch in https://github.com/saltstack/salt-bootstrap/pull/1954
+- Update windows commands to support TLS1.2 by @twangboy in https://github.com/saltstack/salt-bootstrap/pull/1956
+
+**Full Changelog**: https://github.com/saltstack/salt-bootstrap/compare/v2023.07.25...v2023.08.03
+
 # v2023.07.25
 
 ## What's Changed

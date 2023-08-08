@@ -268,7 +268,7 @@ _CUSTOM_MINION_CONFIG="null"
 _QUIET_GIT_INSTALLATION=$BS_FALSE
 _REPO_URL="repo.saltproject.io"
 _ONEDIR_DIR="salt"
-_ONEDIR_NIGHTLY_DIR="salt-dev/${_ONEDIR_DIR}"
+_ONEDIR_NIGHTLY_DIR="salt-dev/master/latest/${_ONEDIR_DIR}"
 _PY_EXE="python3"
 _INSTALL_PY="$BS_FALSE"
 _TORNADO_MAX_PY3_VERSION="5.0"
@@ -960,6 +960,17 @@ __check_url_exists() {
     return 1
   fi
 }
+
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#         NAME:  __get_minor_subpath
+#  DESCRIPTION:  return name of repo subdir
+#----------------------------------------------------------------------------------------------------------------------
+__get_minor_subpath() {
+  URL="$1"
+  RESP="$(curl -L "$URL" | grep 'href' | grep -v '\.\.' | xargs | sed -e 's/<[^>]*>//g' | tail -1)"
+  echo "$RESP"
+}
+
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #          NAME:  __gather_hardware_info
 #   DESCRIPTION:  Discover hardware information
@@ -3141,13 +3152,15 @@ __install_saltstack_ubuntu_onedir_repository() {
     # SaltStack's stable Ubuntu repository:
     SALTSTACK_UBUNTU_URL="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_DIR}/${__PY_VERSION_REPO}/ubuntu/${UBUNTU_VERSION}/${__REPO_ARCH}/${ONEDIR_REV}/"
     if [ "${ONEDIR_REV}" = "nightly" ] ; then
-        SALTSTACK_UBUNTU_URL="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_NIGHTLY_DIR}/${__PY_VERSION_REPO}/ubuntu/${UBUNTU_VERSION}/${__REPO_ARCH}/"
+        BASE_UBUNTU_URL="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_NIGHTLY_DIR}/${__PY_VERSION_REPO}/ubuntu/${UBUNTU_VERSION}/${__REPO_ARCH}/minor"
+        NIGHTLY_VERSION_PATH="$(__get_minor_subpath "$BASE_UBUNTU_URL")"
+        SALTSTACK_UBUNTU_URL="${BASE_UBUNTU_URL}/${NIGHTLY_VERSION_PATH}"
     fi
     echo "$__REPO_ARCH_DEB $SALTSTACK_UBUNTU_URL $UBUNTU_CODENAME main" > /etc/apt/sources.list.d/salt.list
 
     if [ "$(echo "${ONEDIR_REV}" | grep -E '(3004|3005)')" != "" ]; then
       __apt_key_fetch "${SALTSTACK_UBUNTU_URL}salt-archive-keyring.gpg" || return 1
-    elif [ "$(echo "${ONEDIR_REV}" | grep -E '(latest|nightly)')" != "" ]; then
+    elif [ "$(echo "${ONEDIR_REV}" | grep -E '(latest)')" != "" ]; then
       __apt_key_fetch "${SALTSTACK_UBUNTU_URL}salt-archive-keyring.gpg" || \
       __apt_key_fetch "${SALTSTACK_UBUNTU_URL}SALT-PROJECT-GPG-PUBKEY-2023.gpg" || return 1
     else
@@ -3687,18 +3700,22 @@ __install_saltstack_debian_onedir_repository() {
 
     # amd64 is just a part of repository URI, 32-bit pkgs are hosted under the same location
     SALTSTACK_DEBIAN_URL="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_DIR}/${__PY_VERSION_REPO}/debian/${DEBIAN_RELEASE}/${__REPO_ARCH}/${ONEDIR_REV}/"
+    GPG_SALTSTACK_DEBIAN_URL=$SALTSTACK_DEBIAN_URL
     if [ "${ONEDIR_REV}" = "nightly" ] ; then
-        SALTSTACK_DEBIAN_URL="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_NIGHTLY_DIR}/${__PY_VERSION_REPO}/debian/${DEBIAN_RELEASE}/${__REPO_ARCH}/"
+        BASE_DEBIAN_URL="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_NIGHTLY_DIR}/${__PY_VERSION_REPO}/debian/${DEBIAN_RELEASE}/${__REPO_ARCH}/minor"
+        NIGHTLY_VERSION_PATH="$(__get_minor_subpath "$BASE_DEBIAN_URL")"
+        SALTSTACK_DEBIAN_URL="${BASE_DEBIAN_URL}/${NIGHTLY_VERSION_PATH}"
+        GPG_SALTSTACK_DEBIAN_URL="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_NIGHTLY_DIR}/${__PY_VERSION_REPO}/debian/${DEBIAN_RELEASE}/${__REPO_ARCH}/"
     fi
     echo "$__REPO_ARCH_DEB $SALTSTACK_DEBIAN_URL $DEBIAN_CODENAME main" > "/etc/apt/sources.list.d/salt.list"
 
     if [ "$(echo "${ONEDIR_REV}" | grep -E '(3004|3005)')" != "" ]; then
-      __apt_key_fetch "${SALTSTACK_DEBIAN_URL}salt-archive-keyring.gpg" || return 1
-    elif [ "$(echo "${ONEDIR_REV}" | grep -E '(latest|nightly)')" != "" ]; then
-      __apt_key_fetch "${SALTSTACK_DEBIAN_URL}salt-archive-keyring.gpg" || \
-      __apt_key_fetch "${SALTSTACK_DEBIAN_URL}SALT-PROJECT-GPG-PUBKEY-2023.gpg" || return 1
+      __apt_key_fetch "${GPG_SALTSTACK_DEBIAN_URL}salt-archive-keyring.gpg" || return 1
+    elif [ "$(echo "${ONEDIR_REV}" | grep -E '(latest)')" != "" ]; then
+      __apt_key_fetch "${GPG_SALTSTACK_DEBIAN_URL}salt-archive-keyring.gpg" || \
+      __apt_key_fetch "${GPG_SALTSTACK_DEBIAN_URL}SALT-PROJECT-GPG-PUBKEY-2023.gpg" || return 1
     else
-      __apt_key_fetch "${SALTSTACK_DEBIAN_URL}SALT-PROJECT-GPG-PUBKEY-2023.gpg" || return 1
+      __apt_key_fetch "${GPG_SALTSTACK_DEBIAN_URL}SALT-PROJECT-GPG-PUBKEY-2023.gpg" || return 1
     fi
 
     __wait_for_apt apt-get update || return 1
@@ -4254,13 +4271,15 @@ __install_saltstack_fedora_onedir_repository() {
 
     if [ ! -s "$REPO_FILE" ] || [ "$_FORCE_OVERWRITE" -eq $BS_TRUE ]; then
         FETCH_URL="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_DIR}/${__PY_VERSION_REPO}/fedora/${DISTRO_MAJOR_VERSION}/${CPU_ARCH_L}/${ONEDIR_REV}"
+        GPG_FETCH_URL=$FETCH_URL
         if [ "${ONEDIR_REV}" = "nightly" ] ; then
-            FETCH_URL="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_NIGHTLY_DIR}/${__PY_VERSION_REPO}/fedora/${DISTRO_MAJOR_VERSION}/${CPU_ARCH_L}/"
+            FETCH_URL="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_NIGHTLY_DIR}/${__PY_VERSION_REPO}/fedora/${DISTRO_MAJOR_VERSION}/${CPU_ARCH_L}/minor/latest"
+            GPG_FETCH_URL="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_NIGHTLY_DIR}/${__PY_VERSION_REPO}/fedora/${DISTRO_MAJOR_VERSION}/${CPU_ARCH_L}"
         fi
 
         __fetch_url "${REPO_FILE}" "${FETCH_URL}.repo"
 
-        __rpm_import_gpg "${FETCH_URL}/${GPG_KEY}" || return 1
+        __rpm_import_gpg "${GPG_FETCH_URL}/${GPG_KEY}" || return 1
 
         yum clean metadata || return 1
     elif [ "$REPO_REV" != "latest" ]; then
@@ -4698,10 +4717,12 @@ __install_saltstack_rhel_onedir_repository() {
     # Avoid using '$releasever' variable for yum.
     # Instead, this should work correctly on all RHEL variants.
     base_url="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_DIR}/${__PY_VERSION_REPO}/redhat/${DISTRO_MAJOR_VERSION}/\$basearch/${ONEDIR_REV}/"
+    GPG_FETCH_URL=$base_url
     if [ "${ONEDIR_REV}" = "nightly" ] ; then
-        base_url="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_NIGHTLY_DIR}/${__PY_VERSION_REPO}/redhat/${DISTRO_MAJOR_VERSION}/\$basearch/"
+        base_url="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_NIGHTLY_DIR}/${__PY_VERSION_REPO}/redhat/${DISTRO_MAJOR_VERSION}/\$basearch/minor/latest"
+        GPG_FETCH_URL="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_NIGHTLY_DIR}/${__PY_VERSION_REPO}/redhat/${DISTRO_MAJOR_VERSION}/\$basearch/"
     fi
-    if [ "$(echo "${ONEDIR_REV}" | grep -E '(3004|3005)')" != "" ] || [ "${ONEDIR_REV}" = "nightly" ]; then
+    if [ "$(echo "${ONEDIR_REV}" | grep -E '(3004|3005)')" != "" ]; then
       if [ "${DISTRO_MAJOR_VERSION}" -eq 9 ]; then
           gpg_key="SALTSTACK-GPG-KEY2.pub"
       else
@@ -4713,7 +4734,7 @@ __install_saltstack_rhel_onedir_repository() {
 
     gpg_key_urls=""
     for key in $gpg_key; do
-        gpg_key_urls=$(printf "${base_url}${key},%s" "$gpg_key_urls")
+        gpg_key_urls=$(printf "${GPG_FETCH_URL}${key},%s" "$gpg_key_urls")
     done
 
     repo_file="/etc/yum.repos.d/salt.repo"
@@ -4731,11 +4752,13 @@ enabled_metadata=1
 _eof
 
         fetch_url="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_DIR}/${__PY_VERSION_REPO}/redhat/${DISTRO_MAJOR_VERSION}/${CPU_ARCH_L}/${ONEDIR_REV}/"
+        GPG_FETCH_URL=$fetch_url
         if [ "${ONEDIR_REV}" = "nightly" ] ; then
-            fetch_url="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_NIGHTLY_DIR}/${__PY_VERSION_REPO}/redhat/${DISTRO_MAJOR_VERSION}/${CPU_ARCH_L}/"
+            fetch_url="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_NIGHTLY_DIR}/${__PY_VERSION_REPO}/redhat/${DISTRO_MAJOR_VERSION}/${CPU_ARCH_L}/minor/latest"
+            GPG_FETCH_URL="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_NIGHTLY_DIR}/${__PY_VERSION_REPO}/redhat/${DISTRO_MAJOR_VERSION}/${CPU_ARCH_L}/"
         fi
         for key in $gpg_key; do
-            __rpm_import_gpg "${fetch_url}${key}" || return 1
+            __rpm_import_gpg "${GPG_FETCH_URL}${key}" || return 1
         done
 
         yum clean metadata || return 1
@@ -6495,7 +6518,7 @@ install_amazon_linux_ami_2_onedir_deps() {
             base_url="$HTTP_VAL://${_REPO_URL}/${_ONEDIR_NIGHTLY_DIR}/${__PY_VERSION_REPO}/amazon/2/\$basearch/"
         fi
 
-        if [ "$(echo "${ONEDIR_REV}" | grep -E '(3004|3005)')" != "" ] || [ "${ONEDIR_REV}" = "nightly" ]; then
+        if [ "$(echo "${ONEDIR_REV}" | grep -E '(3004|3005)')" != "" ]; then
           gpg_key="${base_url}SALTSTACK-GPG-KEY.pub,${base_url}base/RPM-GPG-KEY-CentOS-7"
           if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 3 ]; then
             gpg_key="${base_url}SALTSTACK-GPG-KEY.pub"
@@ -6914,15 +6937,17 @@ __install_saltstack_photon_onedir_repository() {
 
     if [ ! -s "$REPO_FILE" ] || [ "$_FORCE_OVERWRITE" -eq $BS_TRUE ]; then
         FETCH_URL="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_DIR}/${__PY_VERSION_REPO}/photon/${DISTRO_MAJOR_VERSION}/${CPU_ARCH_L}/${ONEDIR_REV}"
+        GPG_FETCH_URL=$FETCH_URL
         if [ "${ONEDIR_REV}" = "nightly" ] ; then
-            FETCH_URL="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_NIGHTLY_DIR}/${__PY_VERSION_REPO}/photon/${DISTRO_MAJOR_VERSION}/${CPU_ARCH_L}/"
+            FETCH_URL="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_NIGHTLY_DIR}/${__PY_VERSION_REPO}/photon/${DISTRO_MAJOR_VERSION}/${CPU_ARCH_L}/minor/latest"
+            GPG_FETCH_URL="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_NIGHTLY_DIR}/${__PY_VERSION_REPO}/photon/${DISTRO_MAJOR_VERSION}/${CPU_ARCH_L}"
         fi
 
         __fetch_url "${REPO_FILE}" "${FETCH_URL}.repo"
 
         GPG_KEY="SALT-PROJECT-GPG-PUBKEY-2023.pub"
 
-        __rpm_import_gpg "${FETCH_URL}/${GPG_KEY}" || return 1
+        __rpm_import_gpg "${GPG_FETCH_URL}/${GPG_KEY}" || return 1
 
         tdnf makecache || return 1
     elif [ "$REPO_REV" != "latest" ]; then

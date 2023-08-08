@@ -188,13 +188,13 @@ is not needed when running these commands as the ``root`` user.
 
 The examples below show how to bootstrap Salt directly from GitHub or another Git repository.
 Run the script without any parameters to get latest stable Salt packages for your system from
-the `SaltProject's corporate repository`_. See first example in the `Install using wget`_ section.
+the `Salt Project's repository`_. See first example in the `Install using wget`_ section.
 
 
 Install using curl
 ~~~~~~~~~~~~~~~~~~
 
-If you want to install a package of a specific release version, from the SaltProject repo:
+If you want to install a package of a specific release version, from the Salt Project repo:
 
 .. code:: console
 
@@ -229,7 +229,7 @@ If all you want is to install a ``salt-master`` using latest Git:
   curl -o bootstrap-salt.sh -L https://bootstrap.saltproject.io
   sudo sh bootstrap-salt.sh -M -N git master
 
-If your host has Internet access only via HTTP proxy, from the SaltProject repo:
+If your host has Internet access only via HTTP proxy, from the Salt Project repo:
 
 .. code:: console
 
@@ -263,7 +263,7 @@ Installing a specific version from git using ``wget``:
   wget -O bootstrap-salt.sh https://bootstrap.saltproject.io
   sudo sh bootstrap-salt.sh git v3004.1
 
-Installing a specific version package from the SaltProject repo using ``wget``:
+Installing a specific version package from the Salt Project repo using ``wget``:
 
 .. code:: console
 
@@ -355,7 +355,7 @@ Using ``wget`` to install your distribution's stable packages:
 
   wget -O - https://bootstrap.saltproject.io | sudo sh
 
-Installing a target version package of Salt from the SaltProject repo:
+Installing a target version package of Salt from the Salt Project repo:
 
 .. code:: console
 
@@ -403,8 +403,8 @@ listed below should reflect this document but may become out of date. If an oper
 listed below, but is not listed on the official supported operating systems document, the level of
 support is "best-effort".
 
-Since Salt is written in Python, the packages available from the `SaltProject's corporate
-repository`_ are CPU architecture independent and could be installed on any hardware supported by Linux kernel.
+Since Salt is written in Python, the packages available from the `Salt Project's repository`_ are
+CPU architecture independent and could be installed on any hardware supported by Linux kernel.
 However, the Salt Project does package Salt's binary dependencies only for ``x86_64`` (``amd64``)
 and ``AArch32`` (``armhf``). The latter is available only for Debian/Raspbian 8 platforms.
 
@@ -475,12 +475,12 @@ Ubuntu Best Effort Support: Non-LTS Releases
 ********************************************
 
 This script provides best-effort support for current, non-LTS Ubuntu releases. If package
-repositories are not provided on the `SaltProject's Ubuntu repository`_ for the non-LTS release,
+repositories are not provided on the `Salt Project's Ubuntu repository`_ for the non-LTS release,
 the bootstrap script will attempt to install the packages for the most closely related LTS Ubuntu
 release instead.
 
 For example, when installing Salt on Ubuntu 21.10, the bootstrap script will setup the repository
-for Ubuntu 20.04 from the `SaltProject's Ubuntu repository`_ and install the 20.04 packages.
+for Ubuntu 20.04 from the `Salt Project's Ubuntu repository`_ and install the 20.04 packages.
 
 Non-LTS Ubuntu releases are not supported once the release reaches End-of-Life as defined by
 `Ubuntu's release schedule`_.

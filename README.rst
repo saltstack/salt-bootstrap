@@ -406,7 +406,7 @@ support is "best-effort".
 Since Salt is written in Python, the packages available from the `Salt Project's repository`_ are
 CPU architecture independent and could be installed on any hardware supported by Linux kernel.
 However, the Salt Project does package Salt's binary dependencies only for ``x86_64`` (``amd64``)
-and ``AArch32`` (``armhf``). The latter is available only for Debian/Raspbian 8 platforms.
+and ``AArch64`` (``arm64``).
 
 It is recommended to use ``git`` bootstrap mode as described above to install Salt on other
 architectures, such as ``x86`` (``i386``), ``AArch64`` (``arm64``) or ``ARM EABI`` (``armel``).

@@ -276,7 +276,13 @@ BLACKLIST_GIT_3006 = [
     "ubuntu-2204",
 ]
 
-BLACKLIST_GIT_MASTER = ["amazon-2", "debian-10", "freebsd-131", "freebsd-123"]
+BLACKLIST_GIT_MASTER = [
+    "amazon-2",
+    "debian-10",
+    "freebsd-131",
+    "freebsd-123",
+    "photon-3",
+]
 
 SALT_VERSIONS = [
     "3003",

@@ -7034,15 +7034,17 @@ install_photon_git_deps() {
                 "${__python}" -m pip install "${dep}" || return 1
             done
     else
-        __PACKAGES="python${PY_PKG_VER}-devel python${PY_PKG_VER}-pip python${PY_PKG_VER}-setuptools gcc"
+        __PACKAGES="python${PY_PKG_VER}-devel python${PY_PKG_VER}-pip python${PY_PKG_VER}-setuptools gcc glibc-devel linux-devel.x86_64"
         # shellcheck disable=SC2086
         __tdnf_install_noinput ${__PACKAGES} || return 1
     fi
 
-    # Need newer version of setuptools on Photon
-    _setuptools_dep="setuptools>=${_MINIMUM_SETUPTOOLS_VERSION}"
-    echodebug "Running '${_PY_EXE} -m pip --upgrade install ${_setuptools_dep}'"
-    ${_PY_EXE} -m pip install --upgrade "${_setuptools_dep}"
+    if [ "${DISTRO_MAJOR_VERSION}" -gt 3 ]; then
+      # Need newer version of setuptools on Photon
+      _setuptools_dep="setuptools>=${_MINIMUM_SETUPTOOLS_VERSION}"
+      echodebug "Running '${_PY_EXE} -m pip --upgrade install ${_setuptools_dep}'"
+      ${_PY_EXE} -m pip install --upgrade "${_setuptools_dep}"
+    fi
 
     # Let's trigger config_salt()
     if [ "$_TEMP_CONFIG_DIR" = "null" ]; then

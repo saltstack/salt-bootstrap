@@ -7048,7 +7048,7 @@ install_photon_git_deps() {
         # shellcheck disable=SC2086
         __tdnf_install_noinput ${__PACKAGES} || return 1
 
-        __PACKAGES="linux-devel"
+        __PACKAGES="linux-devel.x86_64"
         # shellcheck disable=SC2086
         __tdnf_upgrade_noinput ${__PACKAGES} || return 1
     fi

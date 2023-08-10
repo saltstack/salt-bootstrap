@@ -2204,16 +2204,6 @@ __tdnf_install_noinput() {
     tdnf -y install "${@}" || return $?
 }   # ----------  end of function __tdnf_install_noinput  ----------
 
-#
-#---  FUNCTION  -------------------------------------------------------------------------------------------------------
-#          NAME:  __tdnf_upgrade_noinput
-#   DESCRIPTION:  (DRY) tdnf upgrade with noinput options
-#----------------------------------------------------------------------------------------------------------------------
-__tdnf_upgrade_noinput() {
-
-    tdnf -y upgrade "${@}" || return $?
-}   # ----------  end of function __tdnf_upgrade_noinput  ----------
-
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #          NAME:  __git_clone_and_checkout
 #   DESCRIPTION:  (DRY) Helper function to clone and checkout salt to a
@@ -7044,13 +7034,9 @@ install_photon_git_deps() {
                 "${__python}" -m pip install "${dep}" || return 1
             done
     else
-        __PACKAGES="python${PY_PKG_VER}-devel python${PY_PKG_VER}-pip python${PY_PKG_VER}-setuptools gcc glibc-devel"
+        __PACKAGES="python${PY_PKG_VER}-devel python${PY_PKG_VER}-pip python${PY_PKG_VER}-setuptools gcc glibc-devel linux-devel.x86_64"
         # shellcheck disable=SC2086
         __tdnf_install_noinput ${__PACKAGES} || return 1
-
-        __PACKAGES="linux-devel.x86_64"
-        # shellcheck disable=SC2086
-        __tdnf_upgrade_noinput ${__PACKAGES} || return 1
     fi
 
     if [ "${DISTRO_MAJOR_VERSION}" -gt 3 ]; then

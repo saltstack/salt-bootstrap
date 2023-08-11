@@ -32,6 +32,7 @@ sum** of the downloaded ``bootstrap-salt.sh`` file.
 
 The SHA256 sum of the ``bootstrap-salt.sh`` file, per release, is:
 
+- 2023.08.03: ``963e559bdb85adecfbbec2c3b81190392bc59b24992e4491e919cd748eeafcb8``
 - 2023.07.25: ``eaaaadaed40fe2e791d59a9e48f24449428a35ca61782d9139f1272c05524323``
 - 2023.06.28: ``f45f5da8abee27ef385131f5cfa9382d3a15863d0a05688a0404d2f057b27776``
 - 2023.04.26: ``516fa9cc2e258cb8484ff360b9674b46918f657985c21ca9301e42a3dd263d60``
@@ -373,18 +374,18 @@ Install on Windows
 
 Using ``PowerShell`` to install latest stable version:
 
-.. code:: console
+.. code:: powershell
 
-  Invoke-WebRequest -Uri https://winbootstrap.saltproject.io -OutFile $env:TEMP\bootstrap-salt.ps1
-  Set-ExecutionPolicy -ExecutionPolicy Unrestricted -Scope CurrentUser
-  & $env:TEMP\bootstrap-salt.ps1
-  Set-ExecutionPolicy -ExecutionPolicy Undefined -Scope CurrentUser
+  [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]'Tls12'
+  Invoke-WebRequest -Uri https://winbootstrap.saltproject.io -OutFile "$env:TEMP\bootstrap-salt.ps1"
+  Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+  & "$env:TEMP\bootstrap-salt.ps1"
 
 Display information about the install script parameters:
 
-.. code:: console
+.. code:: powershell
 
-  help $env:TEMP\bootstrap-salt.ps1 -Detailed
+  Get-Help $env:TEMP\bootstrap-salt.ps1 -Detailed
 
 Using ``cygwin`` to install latest stable version:
 

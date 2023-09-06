@@ -7847,7 +7847,7 @@ install_opensuse_stable_deps() {
     # YAML module is used for generating custom master/minion configs
     # requests is still used by many salt modules
     # Salt needs python-zypp installed in order to use the zypper module
-    __PACKAGES="python-PyYAML python-requests python-zypp"
+    __PACKAGES="python-PyYAML python-requests python-zypp gawk"
 
     # shellcheck disable=SC2086
     __zypper_install ${__PACKAGES} || return 1

@@ -1524,7 +1524,7 @@ __check_dpkg_architecture() {
             else
                 # Saltstack official repository has arm64 metadata beginning with Debian 11,
                 # use amd64 repositories on arm64 for anything older, since all pkgs are arch-independent
-                if [ "$DISTRO_NAME_L" = "debian" ] || [ "$DISTRO_MAJOR_VERSION" -lt 11 ]; then
+                if [ "$DISTRO_NAME_L" = "debian" ] && [ "$DISTRO_MAJOR_VERSION" -lt 11 ]; then
                   __REPO_ARCH="amd64"
                 else
                   __REPO_ARCH="arm64"

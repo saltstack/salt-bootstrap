@@ -1710,6 +1710,9 @@ __debian_codename_translation() {
         "11")
             DISTRO_CODENAME="bullseye"
             ;;
+        "12")
+            DISTRO_CODENAME="bookworm"
+            ;;
         *)
             DISTRO_CODENAME="stretch"
             ;;

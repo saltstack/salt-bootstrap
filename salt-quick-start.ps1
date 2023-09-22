@@ -84,7 +84,7 @@ function Expand-ZipFile {
 
 [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]'Tls12'
 
-$global:$ProgressPreference = 'SilentlyContinue'
+$global:ProgressPreference = 'SilentlyContinue'
 
 $RepoUrl = "https://repo.saltproject.io/salt/py3/onedir"
 

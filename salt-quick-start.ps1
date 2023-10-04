@@ -50,23 +50,23 @@ function Expand-ZipFile {
     )
 
     if (!(Test-Path -Path $Destination)) {
-        Write-Host "Creating missing directory: $Destination"
+        Write-Debug "Creating missing directory: $Destination"
         New-Item -ItemType directory -Path $Destination
     }
-    Write-Host "Unzipping '$ZipFile' to '$Destination'"
+    Write-Debug "Unzipping '$ZipFile' to '$Destination'"
     if ($PSVersionTable.PSVersion.Major -ge 5) {
         # PowerShell 5 introduced Expand-Archive
-        Write-Host "Using Expand-Archive to unzip"
+        Write-Debug "Using Expand-Archive to unzip"
         try{
             Expand-Archive -Path $ZipFile -DestinationPath $Destination -Force
         } catch {
-            Write-Host "Failed to unzip $ZipFile : $_"
+            Write-Debug "Failed to unzip $ZipFile : $_"
             exit 1
         }
     } else {
         # This method will work with older versions of powershell, but it is
         # slow
-        Write-Host "Using Shell.Application to unzip"
+        Write-Debug "Using Shell.Application to unzip"
         $objShell = New-Object -Com Shell.Application
         $objZip = $objShell.NameSpace($ZipFile)
         try{
@@ -74,11 +74,11 @@ function Expand-ZipFile {
                 $objShell.Namespace($Destination).CopyHere($item, 0x14)
             }
         } catch {
-            Write-Host "Failed to unzip $ZipFile : $_"
+            Write-Debug "Failed to unzip $ZipFile : $_"
             exit 1
         }
     }
-    Write-Host "Finished unzipping '$ZipFile' to '$Destination'"
+    Write-Debug "Finished unzipping '$ZipFile' to '$Destination'"
 }
 
 
@@ -127,10 +127,10 @@ if ( $saltFileName -and $saltVersion -and $saltSha512 ) {
     }
 }
 
-Write-Host "Download Salt"
+Write-Host "INFO: Downloading Salt"
 Invoke-WebRequest -Uri $saltFileUrl -OutFile .\salt.zip
 
-Write-Host "Extracting Salt"
+Write-Host "INFO: Extracting Salt"
 Expand-ZipFile -ZipFile .\salt.zip -Destination .
 
 $PATH = $(Get-Location).Path
@@ -151,7 +151,12 @@ New-Item -Path "$PATH\salt\conf" -Type Directory -Force | Out-Null
 New-Item -Path "$PATH\salt\var\cache\salt" -Type Directory -Force | Out-Null
 New-Item -Path "$PATH\salt\srv\salt" -Type Directory -Force | Out-Null
 
-Write-Host "Adding $PATH\salt to PATH"
-$env:Path = "$PATH\salt;" + $env:Path
+Write-Host "INFO: Adding Salt to current path"
+Write-Host "INFO:   $PATH\salt"
+$env:Path = "$PATH\salt;$env:PATH"
 
+Write-Host "INFO: Setting the SALT_SALTFILE environment variable"
+Write-Host "INFO:   $PATH\salt\Saltfile"
 $env:SALT_SALTFILE="$PATH\salt\Saltfile"
+
+Write-Host "INFO: Create Salt states in $PATH\salt\srv\salt"

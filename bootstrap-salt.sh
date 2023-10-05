@@ -2521,7 +2521,7 @@ __overwriteconfig() {
     fi
 
     # Convert json string to a yaml string and write it to config file. Output is dumped into tempfile.
-    "$good_python" -c "import json; import yaml; jsn=json.loads('$json'); yml=yaml.safe_dump(jsn, line_break='\\n', default_flow_style=False); config_file=open('$target', 'w'); config_file.write(yml); config_file.close();" 2>$tempfile
+    "$good_python" -c "import json; import yaml; jsn=json.loads('$json'); yml=yaml.safe_dump(jsn, line_break='\\n', default_flow_style=False, sort_keys=False); config_file=open('$target', 'w'); config_file.write(yml); config_file.close();" 2>$tempfile
 
     # No python errors output to the tempfile
     if [ ! -s "$tempfile" ]; then

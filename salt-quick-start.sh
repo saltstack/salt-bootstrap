@@ -183,7 +183,7 @@ EOT
 cat <<EOT >${_PATH}/Saltfile
 salt-call:
   local: True
-  config_dir: ${_PATH}
+  config_dir: ${_PATH}/etc/salt
   log_file: ${_PATH}/var/log/salt/minion
   cachedir: ${_PATH}/var/cache/salt
   file_root: ${_PATH}/srv/salt

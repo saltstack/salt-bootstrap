@@ -1,3 +1,19 @@
+# v2023.11.07
+
+## What's Changed
+
+- cleanup old information in the README.rst file by @garethgreenaway in https://github.com/saltstack/salt-bootstrap/pull/1955
+- Moving quick start scripts to bootstrap repo. by @garethgreenaway in https://github.com/saltstack/salt-bootstrap/pull/1960
+- Suppress progress bar by @twangboy in https://github.com/saltstack/salt-bootstrap/pull/1964
+- Fix global variable by @twangboy in https://github.com/saltstack/salt-bootstrap/pull/1965
+- Debian 12 arm64 by @joelpmichael in https://github.com/saltstack/salt-bootstrap/pull/1962
+- Mirror Linux output, display root_dir by @twangboy in https://github.com/saltstack/salt-bootstrap/pull/1967
+- Add asterisks to the output by @twangboy in https://github.com/saltstack/salt-bootstrap/pull/1968
+- Fixes to salt-quick-start.sh by @garethgreenaway in https://github.com/saltstack/salt-bootstrap/pull/1973
+- Update requirements by @twangboy in https://github.com/saltstack/salt-bootstrap/pull/1974
+
+**Full Changelog**: https://github.com/saltstack/salt-bootstrap/compare/v2023.08.03...v2023.11.07
+
 # v2023.08.03
 
 ## What's Changed

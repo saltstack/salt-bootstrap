@@ -486,7 +486,7 @@ jobs:
       distro-slug: photon-3
       display-name: Photon OS 3
       timeout: 20
-      instances: '["stable-3006", "onedir-3006", "stable-3006-1", "git-master", "latest", "default"]'
+      instances: '["stable-3006", "onedir-3006", "stable-3006-1", "latest", "default"]'
 
 
   photon-4:

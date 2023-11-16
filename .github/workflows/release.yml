@@ -304,6 +304,10 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+        with:
+          ref: stable
+          repository: ${{ github.repository }}
+          ssh-key: ${{ secrets.SALT_BOOTSTRAP_RELEASE_KEY }}
 
       - name: Get Salt Project GitHub Actions Bot Environment
         run: |

@@ -1,3 +1,11 @@
+# v2023.11.16
+
+## What's Changed
+
+- checking out stable branch on update-s3-bucket job by @felippeb in https://github.com/saltstack/salt-bootstrap/pull/1977
+
+**Full Changelog**: https://github.com/saltstack/salt-bootstrap/compare/v2023.11.07...v2023.11.16
+
 # v2023.11.07
 
 ## What's Changed

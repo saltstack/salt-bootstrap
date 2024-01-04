@@ -1,3 +1,11 @@
+# v2024.01.04
+
+## What's Changed
+
+- Add arm support for Debian 10 by @twangboy in https://github.com/saltstack/salt-bootstrap/pull/1981
+
+**Full Changelog**: https://github.com/saltstack/salt-bootstrap/compare/v2023.11.16...v2024.01.04
+
 # v2023.11.16
 
 ## What's Changed

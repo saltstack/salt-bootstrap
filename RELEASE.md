@@ -3,13 +3,10 @@
 - See if there are any PRs worth squeezing into release.
 - Go through the changes since last release, add them to changelog.
 - Add any new authors to the AUTHORS file.
-- If there's a new Salt release(major), update the script to add support for it.
+- If there's a new Salt release (major), update the script to add support for it.
 - Bump version for release.
 - Open PR against develop with these changes.
-- Once the above PR is merged, open a PR against stable with the changes from develop.
-- Once the above PR is merged, wait until an automatic PR is opened against stable which updates the checksums.
-- Once the above PR is merged, tag the release `v{version-here}` and push the tag.
-- Wait until an automatic PR is opened against the develop branch updating the checksums in `README.rst`. Merge it.
-- Check that an automated PR was opened against the salt repo updating the bootstrap script, located in `salt/cloud/deploy/bootstrap-salt.sh`
-
+- Once the above PR is merged, go to [Cut Release](https://github.com/saltstack/salt-bootstrap/actions/workflows/release.yml) and `Run workflow` against `develop` branch
+- Open a new PR against the branch of the oldest supported version of [the salt repo](https://github.com/saltstack/salt) (ex. `3006.x`), and replace `salt/cloud/deploy/bootstrap-salt.sh` with the latest `bootstrap-salt.sh` file
+- When that PR is merged into [the salt repo](https://github.com/saltstack/salt), merge-forwards into the latest branches and `master` will ensure that the latest bootstrap script is available
 - Victory!

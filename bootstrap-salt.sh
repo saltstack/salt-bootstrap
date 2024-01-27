@@ -4649,7 +4649,7 @@ __install_saltstack_rhel_repository() {
 
     # Avoid using '$releasever' variable for yum.
     # Instead, this should work correctly on all RHEL variants.
-    base_url="${HTTP_VAL}://${_REPO_URL}/${__PY_VERSION_REPO}/redhat/${DISTRO_MAJOR_VERSION}/\$basearch/${repo_rev}/"
+    base_url="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_DIR$}/${__PY_VERSION_REPO}/redhat/${DISTRO_MAJOR_VERSION}/\$basearch/${repo_rev}/"
     if [ "${DISTRO_MAJOR_VERSION}" -eq 7 ]; then
         gpg_key="SALTSTACK-GPG-KEY.pub base/RPM-GPG-KEY-CentOS-7"
     elif [ "${DISTRO_MAJOR_VERSION}" -ge 9 ]; then
@@ -4677,7 +4677,7 @@ enabled=1
 enabled_metadata=1
 _eof
 
-        fetch_url="${HTTP_VAL}://${_REPO_URL}/${__PY_VERSION_REPO}/redhat/${DISTRO_MAJOR_VERSION}/${CPU_ARCH_L}/${repo_rev}/"
+        fetch_url="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_DIR$}/{__PY_VERSION_REPO}/redhat/${DISTRO_MAJOR_VERSION}/${CPU_ARCH_L}/${repo_rev}/"
         for key in $gpg_key; do
             __rpm_import_gpg "${fetch_url}${key}" || return 1
         done
@@ -9420,7 +9420,7 @@ daemons_running() {
                 echoerror "salt-$fname was not found running"
                 FAILED_DAEMONS=$((FAILED_DAEMONS + 1))
             fi
-        elif [ "$(ps wwwaux | grep -v grep | grep salt-$fname)" = "" ]; then
+        elif [ "$(ps wwwaux | grep -v grep | egrep "salt/run/run $fname|salt-$fname")" = "" ]; then
             echoerror "salt-$fname was not found running"
             FAILED_DAEMONS=$((FAILED_DAEMONS + 1))
         fi

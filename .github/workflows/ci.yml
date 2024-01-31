@@ -419,16 +419,30 @@ jobs:
       instances: '["git-master"]'
 
 
-  opensuse-15:
-    name: Opensuse 15
+  opensuse-15-4:
+    name: Opensuse 15.4
     if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
     uses: ./.github/workflows/test-linux.yml
     needs:
       - lint
       - generate-actions-workflow
     with:
-      distro-slug: opensuse-15
-      display-name: Opensuse 15
+      distro-slug: opensuse-15-4
+      display-name: Opensuse 15.4
+      timeout: 20
+      instances: '["latest", "default"]'
+
+
+  opensuse-15-5:
+    name: Opensuse 15.5
+    if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
+    uses: ./.github/workflows/test-linux.yml
+    needs:
+      - lint
+      - generate-actions-workflow
+    with:
+      distro-slug: opensuse-15-5
+      display-name: Opensuse 15.5
       timeout: 20
       instances: '["latest", "default"]'
 
@@ -588,7 +602,8 @@ jobs:
       - fedora-38
       - gentoo
       - gentoo-systemd
-      - opensuse-15
+      - opensuse-15-4
+      - opensuse-15-5
       - opensuse-tumbleweed
       - oraclelinux-7
       - oraclelinux-8

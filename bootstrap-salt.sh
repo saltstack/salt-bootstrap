@@ -417,7 +417,7 @@ __usage() {
         (only available for Ubuntu based distributions)
     -x  Changes the Python version used to install Salt.
         Python 2.7 is no longer supported.
-        Fedora git installation, CentOS 7, Ubuntu 1820.04 support python3.
+        Fedora git installation, CentOS 7, Ubuntu 20.04 support python3.
     -X  Do not start daemons after installation
     -y  Installs a different python version on host. Currently this has only been
         tested with CentOS 7 and is considered experimental. This will install the
@@ -6157,37 +6157,37 @@ daemons_running_alpine_linux() {
 ## DGM     # Shim to figure out if we're using old (rhel) or new (aws) rpms.
 ## DGM     _USEAWS="$BS_FALSE"
 ## DGM     pkg_append="python"
-## DGM 
+## DGM
 ## DGM     if [ "$ITYPE" = "stable" ]; then
 ## DGM         repo_rev="$STABLE_REV"
 ## DGM     else
 ## DGM         repo_rev="latest"
 ## DGM     fi
-## DGM 
+## DGM
 ## DGM     if echo "$repo_rev" | grep -E -q '^archive'; then
 ## DGM         year=$(echo "$repo_rev" | cut -d '/' -f 2 | cut -c1-4)
 ## DGM     else
 ## DGM         year=$(echo "$repo_rev" | cut -c1-4)
 ## DGM     fi
-## DGM 
+## DGM
 ## DGM     if echo "$repo_rev" | grep -E -q '^(latest|2016\.11)$' || \
 ## DGM             [ "$year" -gt 2016 ]; then
 ## DGM        _USEAWS="$BS_TRUE"
 ## DGM        pkg_append="python27"
 ## DGM     fi
-## DGM 
+## DGM
 ## DGM     # We need to install yum-utils before doing anything else when installing on
 ## DGM     # Amazon Linux ECS-optimized images. See issue #974.
 ## DGM     __yum_install_noinput yum-utils
-## DGM 
+## DGM
 ## DGM     # Do upgrade early
 ## DGM     if [ "$_UPGRADE_SYS" -eq "$BS_TRUE" ]; then
 ## DGM         yum -y update || return 1
 ## DGM     fi
-## DGM 
+## DGM
 ## DGM     if [ "$_DISABLE_REPOS" -eq "$BS_FALSE" ] || [ "$_CUSTOM_REPO_URL" != "null" ]; then
 ## DGM         __REPO_FILENAME="salt.repo"
-## DGM 
+## DGM
 ## DGM         # Set a few vars to make life easier.
 ## DGM         if [ "$_USEAWS" -eq "$BS_TRUE" ]; then
 ## DGM            base_url="$HTTP_VAL://${_REPO_URL}/yum/amazon/latest/\$basearch/$repo_rev/"
@@ -6198,7 +6198,7 @@ daemons_running_alpine_linux() {
 ## DGM            gpg_key="${base_url}SALTSTACK-GPG-KEY.pub"
 ## DGM            repo_name="SaltStack repo for RHEL/CentOS 6"
 ## DGM         fi
-## DGM 
+## DGM
 ## DGM         # This should prob be refactored to use __install_saltstack_rhel_repository()
 ## DGM         # With args passed in to do the right thing.  Reformatted to be more like the
 ## DGM         # amazon linux yum file.
@@ -6213,9 +6213,9 @@ daemons_running_alpine_linux() {
 ## DGM baseurl=$base_url
 ## DGM _eof
 ## DGM         fi
-## DGM 
+## DGM
 ## DGM     fi
-## DGM 
+## DGM
 ## DGM     if [ "${_POST_NEON_INSTALL}" -eq "$BS_FALSE" ]; then
 ## DGM         # Package python-ordereddict-1.1-2.el6.noarch is obsoleted by python26-2.6.9-2.88.amzn1.x86_64
 ## DGM         # which is already installed
@@ -6225,19 +6225,19 @@ daemons_running_alpine_linux() {
 ## DGM         # shellcheck disable=SC2086
 ## DGM         __yum_install_noinput "${__PACKAGES}" || return 1
 ## DGM     fi
-## DGM 
+## DGM
 ## DGM     if [ "${_EXTRA_PACKAGES}" != "" ]; then
 ## DGM         echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
 ## DGM         # shellcheck disable=SC2086
 ## DGM         __yum_install_noinput "${_EXTRA_PACKAGES}" || return 1
 ## DGM     fi
 ## DGM }
-## DGM 
+## DGM
 ## DGM install_amazon_linux_ami_git_deps() {
 ## DGM     if [ "$_INSECURE_DL" -eq "$BS_FALSE" ] && [ "${_SALT_REPO_URL%%://*}" = "https" ]; then
 ## DGM         yum -y install ca-certificates || return 1
 ## DGM     fi
-## DGM 
+## DGM
 ## DGM     PIP_EXE='pip'
 ## DGM     if __check_command_exists python2.7; then
 ## DGM         if ! __check_command_exists pip2.7; then
@@ -6249,25 +6249,25 @@ daemons_running_alpine_linux() {
 ## DGM         PIP_EXE='/usr/local/bin/pip2.7'
 ## DGM         _PY_EXE='python2.7'
 ## DGM     fi
-## DGM 
+## DGM
 ## DGM     install_amazon_linux_ami_deps || return 1
-## DGM 
+## DGM
 ## DGM     if ! __check_command_exists git; then
 ## DGM         __yum_install_noinput git || return 1
 ## DGM     fi
-## DGM 
+## DGM
 ## DGM     __git_clone_and_checkout || return 1
-## DGM 
+## DGM
 ## DGM     if [ "${_POST_NEON_INSTALL}" -eq "$BS_FALSE" ]; then
 ## DGM         __PACKAGES=""
 ## DGM         __PIP_PACKAGES=""
-## DGM 
+## DGM
 ## DGM         if [ "$_INSTALL_CLOUD" -eq "$BS_TRUE" ]; then
 ## DGM             __check_pip_allowed "You need to allow pip based installations (-P) in order to install apache-libcloud"
 ## DGM             __PACKAGES="${__PACKAGES} python27-pip"
 ## DGM             __PIP_PACKAGES="${__PIP_PACKAGES} apache-libcloud>=$_LIBCLOUD_MIN_VERSION"
 ## DGM         fi
-## DGM 
+## DGM
 ## DGM         if [ -f "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" ]; then
 ## DGM             # We're on the master branch, install whichever tornado is on the requirements file
 ## DGM             __REQUIRED_TORNADO="$(grep tornado "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt")"
@@ -6275,12 +6275,12 @@ daemons_running_alpine_linux() {
 ## DGM                 __PACKAGES="${__PACKAGES} ${pkg_append}-tornado"
 ## DGM             fi
 ## DGM         fi
-## DGM 
+## DGM
 ## DGM         if [ "${__PACKAGES}" != "" ]; then
 ## DGM             # shellcheck disable=SC2086
 ## DGM             __yum_install_noinput "${__PACKAGES}" || return 1
 ## DGM         fi
-## DGM 
+## DGM
 ## DGM         if [ "${__PIP_PACKAGES}" != "" ]; then
 ## DGM             # shellcheck disable=SC2086
 ## DGM             ${PIP_EXE} install "${__PIP_PACKAGES}" || return 1
@@ -6290,46 +6290,46 @@ daemons_running_alpine_linux() {
 ## DGM             # shellcheck disable=SC2086
 ## DGM         __yum_install_noinput "${__PACKAGES}" || return 1
 ## DGM     fi
-## DGM 
+## DGM
 ## DGM     # Let's trigger config_salt()
 ## DGM     if [ "$_TEMP_CONFIG_DIR" = "null" ]; then
 ## DGM         _TEMP_CONFIG_DIR="${_SALT_GIT_CHECKOUT_DIR}/conf/"
 ## DGM         CONFIG_SALT_FUNC="config_salt"
 ## DGM     fi
-## DGM 
+## DGM
 ## DGM     return 0
 ## DGM }
-## DGM 
+## DGM
 ## DGM install_amazon_linux_ami_stable() {
 ## DGM     install_centos_stable || return 1
 ## DGM     return 0
 ## DGM }
-## DGM 
+## DGM
 ## DGM install_amazon_linux_ami_stable_post() {
 ## DGM     install_centos_stable_post || return 1
 ## DGM     return 0
 ## DGM }
-## DGM 
+## DGM
 ## DGM install_amazon_linux_ami_restart_daemons() {
 ## DGM     install_centos_restart_daemons || return 1
 ## DGM     return 0
 ## DGM }
-## DGM 
+## DGM
 ## DGM install_amazon_linux_ami_git() {
 ## DGM     install_centos_git || return 1
 ## DGM     return 0
 ## DGM }
-## DGM 
+## DGM
 ## DGM install_amazon_linux_ami_git_post() {
 ## DGM     install_centos_git_post || return 1
 ## DGM     return 0
 ## DGM }
-## DGM 
+## DGM
 ## DGM install_amazon_linux_ami_testing() {
 ## DGM     install_centos_testing || return 1
 ## DGM     return 0
 ## DGM }
-## DGM 
+## DGM
 ## DGM install_amazon_linux_ami_testing_post() {
 ## DGM     install_centos_testing_post || return 1
 ## DGM     return 0
@@ -6437,10 +6437,10 @@ install_amazon_linux_ami_2_git_deps() {
 
 install_amazon_linux_ami_2_deps() {
     # Shim to figure out if we're using old (rhel) or new (aws) rpms.
-    _USEAWS="$BS_FALSE"
+    ## DGM _USEAWS="$BS_FALSE"
 
     ## TBD DGM check what how pkg_append is used
-    pkg_append="python"
+    ## DGM pkg_append="python"
 
     if [ "$ITYPE" = "stable" ]; then
         repo_rev="$STABLE_REV"
@@ -6448,17 +6448,17 @@ install_amazon_linux_ami_2_deps() {
         repo_rev="latest"
     fi
 
-    if echo "$repo_rev" | grep -E -q '^archive'; then
-        year=$(echo "$repo_rev" | cut -d '/' -f 2 | cut -c1-4)
-    else
-        year=$(echo "$repo_rev" | cut -c1-4)
-    fi
-
-    if echo "$repo_rev" | grep -E -q '^(latest|2016\.11)$' || \
-            [ "$year" -gt 2016 ]; then
-       _USEAWS="$BS_TRUE"
-       pkg_append="python"
-    fi
+    ## DGM if echo "$repo_rev" | grep -E -q '^archive'; then
+    ## DGM     year=$(echo "$repo_rev" | cut -d '/' -f 2 | cut -c1-4)
+    ## DGM else
+    ## DGM     year=$(echo "$repo_rev" | cut -c1-4)
+    ## DGM fi
+    ## DGM
+    ## DGM if echo "$repo_rev" | grep -E -q '^(latest|2016\.11)$' || \
+    ## DGM         [ "$year" -gt 2016 ]; then
+    ## DGM    _USEAWS="$BS_TRUE"
+    ## DGM    pkg_append="python"
+    ## DGM fi
 
     # We need to install yum-utils before doing anything else when installing on
     # Amazon Linux ECS-optimized images. See issue #974.
@@ -6536,7 +6536,7 @@ _eof
 
 install_amazon_linux_ami_2_onedir_deps() {
     # Shim to figure out if we're using old (rhel) or new (aws) rpms.
-    _USEAWS="$BS_FALSE"
+    ## DGM _USEAWS="$BS_FALSE"
     ## TBD DGM check what how pkg_append is used
     pkg_append="python"
 
@@ -6544,12 +6544,6 @@ install_amazon_linux_ami_2_onedir_deps() {
         repo_rev="$ONEDIR_REV"
     else
         repo_rev="latest"
-    fi
-
-    if echo "$repo_rev" | grep -E -q '^archive'; then
-        year=$(echo "$repo_rev" | cut -d '/' -f 2 | cut -c1-4)
-    else
-        year=$(echo "$repo_rev" | cut -c1-4)
     fi
 
     # We need to install yum-utils before doing anything else when installing on
@@ -6720,7 +6714,7 @@ install_amazon_linux_ami_2023_git_deps() {
 
 install_amazon_linux_ami_2023_onedir_deps() {
     # Shim to figure out if we're using old (rhel) or new (aws) rpms.
-    _USEAWS="$BS_FALSE"
+    ## DGM _USEAWS="$BS_FALSE"
     ## TBD DGM check what how pkg_append is used
     pkg_append="python"
 
@@ -6728,12 +6722,6 @@ install_amazon_linux_ami_2023_onedir_deps() {
         repo_rev="$ONEDIR_REV"
     else
         repo_rev="latest"
-    fi
-
-    if echo "$repo_rev" | grep -E -q '^archive'; then
-        year=$(echo "$repo_rev" | cut -d '/' -f 2 | cut -c1-4)
-    else
-        year=$(echo "$repo_rev" | cut -c1-4)
     fi
 
     # We need to install yum-utils before doing anything else when installing on

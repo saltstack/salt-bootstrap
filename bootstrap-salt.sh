@@ -1456,17 +1456,24 @@ __gather_system_info() {
 __ubuntu_derivatives_translation() {
     UBUNTU_DERIVATIVES="(trisquel|linuxmint|linaro|elementary_os|neon|pop)"
     # Mappings
-    trisquel_6_ubuntu_base="12.04"
-    linuxmint_13_ubuntu_base="12.04"
-    linuxmint_17_ubuntu_base="14.04"
-    linuxmint_18_ubuntu_base="16.04"
-    linuxmint_19_ubuntu_base="18.04"
+    ## DGM trisquel_6_ubuntu_base="12.04"
+    ## DGM linuxmint_13_ubuntu_base="12.04"
+    ## DGM linuxmint_17_ubuntu_base="14.04"
+    ## DGM linuxmint_18_ubuntu_base="16.04"
+    ## DGM linuxmint_19_ubuntu_base="18.04"
     linuxmint_20_ubuntu_base="20.04"
+<<<<<<< HEAD
     linuxmint_21_ubuntu_base="22.04"
     linaro_12_ubuntu_base="12.04"
     elementary_os_02_ubuntu_base="12.04"
     neon_16_ubuntu_base="16.04"
     neon_18_ubuntu_base="18.04"
+=======
+    ## DGM linaro_12_ubuntu_base="12.04"
+    ## DGM elementary_os_02_ubuntu_base="12.04"
+    ## DGM neon_16_ubuntu_base="16.04"
+    ## DGM neon_18_ubuntu_base="18.04"
+>>>>>>> ddbec60 (Update minimum versions and correct Redat 7 base key)
     neon_20_ubuntu_base="20.04"
     neon_22_ubuntu_base="22.04"
     pop_22_ubuntu_base="22.04"
@@ -1740,7 +1747,8 @@ __check_end_of_life_versions() {
     case "${DISTRO_NAME_L}" in
         debian)
             # Debian versions below 9 are not supported
-            if [ "$DISTRO_MAJOR_VERSION" -lt 9 ]; then
+            ## DGM if [ "$DISTRO_MAJOR_VERSION" -lt 9 ]; then
+            if [ "$DISTRO_MAJOR_VERSION" -lt 10 ]; then
                 echoerror "End of life distributions are not supported."
                 echoerror "Please consider upgrading to the next stable. See:"
                 echoerror "    https://wiki.debian.org/DebianReleases"
@@ -1757,12 +1765,24 @@ __check_end_of_life_versions() {
             #  = 18.10
             #  = 19.04, 19.10
             #  = 20.10
-            if [ "$DISTRO_MAJOR_VERSION" -lt 16 ] || \
-                [ "$DISTRO_MAJOR_VERSION" -eq 17 ] || \
-                [ "$DISTRO_MAJOR_VERSION" -eq 19 ] || \
-                { [ "$DISTRO_MAJOR_VERSION" -eq 16 ] && [ "$DISTRO_MINOR_VERSION" -eq 10 ]; } || \
-                { [ "$DISTRO_MAJOR_VERSION" -eq 18 ] && [ "$DISTRO_MINOR_VERSION" -eq 10 ]; } || \
-                { [ "$DISTRO_MAJOR_VERSION" -eq 20 ] && [ "$DISTRO_MINOR_VERSION" -eq 10 ]; }; then
+            ## if [ "$DISTRO_MAJOR_VERSION" -lt 16 ] || \
+            ##     [ "$DISTRO_MAJOR_VERSION" -eq 17 ] || \
+            ##     [ "$DISTRO_MAJOR_VERSION" -eq 19 ] || \
+            ##     { [ "$DISTRO_MAJOR_VERSION" -eq 16 ] && [ "$DISTRO_MINOR_VERSION" -eq 10 ]; } || \
+            ##     { [ "$DISTRO_MAJOR_VERSION" -eq 18 ] && [ "$DISTRO_MINOR_VERSION" -eq 10 ]; } || \
+            ##     { [ "$DISTRO_MAJOR_VERSION" -eq 20 ] && [ "$DISTRO_MINOR_VERSION" -eq 10 ]; }; then
+            ##     echoerror "End of life distributions are not supported."
+            ##     echoerror "Please consider upgrading to the next stable. See:"
+            ##     echoerror "    https://wiki.ubuntu.com/Releases"
+            ##     exit 1
+            ## fi
+            if [ "$DISTRO_MAJOR_VERSION" -lt 20 ] || \
+                { [ "$DISTRO_MAJOR_VERSION" -eq 20 ] && [ "$DISTRO_MINOR_VERSION" -eq 10 ]; } || \
+                { [ "$DISTRO_MAJOR_VERSION" -eq 21 ] && [ "$DISTRO_MINOR_VERSION" -eq 04 ]; } || \
+                { [ "$DISTRO_MAJOR_VERSION" -eq 21 ] && [ "$DISTRO_MINOR_VERSION" -eq 10 ]; } || \
+                { [ "$DISTRO_MAJOR_VERSION" -eq 22 ] && [ "$DISTRO_MINOR_VERSION" -eq 10 ]; } || \
+                { [ "$DISTRO_MAJOR_VERSION" -eq 23 ] && [ "$DISTRO_MINOR_VERSION" -eq 04 ]; } || \
+                { [ "$DISTRO_MAJOR_VERSION" -eq 23 ] && [ "$DISTRO_MINOR_VERSION" -eq 10 ]; }; then
                 echoerror "End of life distributions are not supported."
                 echoerror "Please consider upgrading to the next stable. See:"
                 echoerror "    https://wiki.ubuntu.com/Releases"
@@ -1807,7 +1827,8 @@ __check_end_of_life_versions() {
 
         fedora)
             # Fedora lower than 33 are no longer supported
-            if [ "$DISTRO_MAJOR_VERSION" -lt 33 ]; then
+            ##  DGM if [ "$DISTRO_MAJOR_VERSION" -lt 33 ]; then
+            if [ "$DISTRO_MAJOR_VERSION" -lt 37 ]; then
                 echoerror "End of life distributions are not supported."
                 echoerror "Please consider upgrading to the next stable. See:"
                 echoerror "    https://fedoraproject.org/wiki/Releases"
@@ -4638,7 +4659,7 @@ __install_saltstack_rhel_repository() {
     # Instead, this should work correctly on all RHEL variants.
     base_url="${HTTP_VAL}://${_REPO_URL}/${__PY_VERSION_REPO}/redhat/${DISTRO_MAJOR_VERSION}/\$basearch/${repo_rev}/"
     if [ "${DISTRO_MAJOR_VERSION}" -eq 7 ]; then
-        gpg_key="SALTSTACK-GPG-KEY.pub base/RPM-GPG-KEY-CentOS-7"
+        gpg_key="SALTSTACK-GPG-KEY.pub base/RPM-GPG-KEY-CentOS-7.key"
     elif [ "${DISTRO_MAJOR_VERSION}" -ge 9 ]; then
         gpg_key="SALTSTACK-GPG-KEY2.pub"
     else
@@ -6487,7 +6508,7 @@ install_amazon_linux_ami_2_deps() {
         fi
 
         base_url="$HTTP_VAL://${_REPO_URL}/${__PY_VERSION_REPO}/amazon/2/\$basearch/$repo_rev/"
-        gpg_key="${base_url}SALTSTACK-GPG-KEY.pub,${base_url}base/RPM-GPG-KEY-CentOS-7"
+        gpg_key="${base_url}SALTSTACK-GPG-KEY.pub,${base_url}base/RPM-GPG-KEY-CentOS-7.key"
         if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 3 ]; then
             gpg_key="${base_url}SALTSTACK-GPG-KEY.pub"
         fi
@@ -6575,7 +6596,7 @@ install_amazon_linux_ami_2_onedir_deps() {
         fi
 
         if [ "$(echo "${ONEDIR_REV}" | grep -E '(3004|3005)')" != "" ] || [ "${ONEDIR_REV}" = "nightly" ]; then
-          gpg_key="${base_url}SALTSTACK-GPG-KEY.pub,${base_url}base/RPM-GPG-KEY-CentOS-7"
+          gpg_key="${base_url}SALTSTACK-GPG-KEY.pub,${base_url}base/RPM-GPG-KEY-CentOS-7.key"
           if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 3 ]; then
             gpg_key="${base_url}SALTSTACK-GPG-KEY.pub"
           fi

@@ -265,6 +265,20 @@ jobs:
       instances: '["old-stable-3003", "old-stable-3004", "old-stable-3005", "stable-3005", "onedir-3005", "stable-3005-1", "stable-3006", "onedir-3006", "stable-3006-1", "latest", "default"]'
 
 
+  amazon-2023:
+    name: Amazon 2023
+    if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
+    uses: ./.github/workflows/test-linux.yml
+    needs:
+      - lint
+      - generate-actions-workflow
+    with:
+      distro-slug: amazon-2023
+      display-name: Amazon 2023
+      timeout: 20
+      instances: '["stable-3005", "onedir-3005", "stable-3005-1", "stable-3006", "git-3006", "onedir-3006", "stable-3006-1", "git-master", "latest", "default"]'
+
+
   arch:
     name: Arch
     if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
@@ -349,16 +363,16 @@ jobs:
       instances: '["old-stable-3004", "old-stable-3005", "stable-3005", "onedir-3005", "stable-3005-1", "stable-3006", "onedir-3006", "stable-3006-1", "git-master", "latest", "default"]'
 
 
-  fedora-36:
-    name: Fedora 36
+  debian-12:
+    name: Debian 12
     if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
     uses: ./.github/workflows/test-linux.yml
     needs:
       - lint
       - generate-actions-workflow
     with:
-      distro-slug: fedora-36
-      display-name: Fedora 36
+      distro-slug: debian-12
+      display-name: Debian 12
       timeout: 20
       instances: '["stable-3006", "onedir-3006", "stable-3006-1", "git-master", "latest", "default"]'
 
@@ -387,6 +401,20 @@ jobs:
     with:
       distro-slug: fedora-38
       display-name: Fedora 38
+      timeout: 20
+      instances: '["stable-3006", "onedir-3006", "stable-3006-1", "latest", "default"]'
+
+
+  fedora-39:
+    name: Fedora 39
+    if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
+    uses: ./.github/workflows/test-linux.yml
+    needs:
+      - lint
+      - generate-actions-workflow
+    with:
+      distro-slug: fedora-39
+      display-name: Fedora 39
       timeout: 20
       instances: '["stable-3006", "onedir-3006", "stable-3006-1", "latest", "default"]'
 
@@ -577,15 +605,17 @@ jobs:
       - almalinux-8
       - almalinux-9
       - amazon-2
+      - amazon-2023
       - arch
       - centos-7
       - centos-stream8
       - centos-stream9
       - debian-10
       - debian-11
-      - fedora-36
+      - debian-12
       - fedora-37
       - fedora-38
+      - fedora-39
       - gentoo
       - gentoo-systemd
       - opensuse-15

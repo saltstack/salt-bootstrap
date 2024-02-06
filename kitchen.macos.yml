@@ -31,7 +31,7 @@ suites:
   - name: old-stable-3005
     provisioner:
       salt_bootstrap_options: -MP old-stable %s
-      salt_version: 3005.1
+      salt_version: 3005.5
       salt_call_command: /opt/salt/bin/salt-call
   - name: stable-3006
     provisioner:

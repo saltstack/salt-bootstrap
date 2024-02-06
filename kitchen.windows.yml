@@ -27,10 +27,10 @@ suites:
       salt_call_command: c:\Program Files\Salt Project\Salt\salt-call.bat
   - name: stable-3005
     provisioner:
-      salt_version: 3005.1-1
+      salt_version: 3005.5-1
   - name: stable-3005-1
     provisioner:
-      salt_version: 3005.1-1
+      salt_version: 3005.5-1
   - name: stable-3006
     provisioner:
       salt_version: 3006.0

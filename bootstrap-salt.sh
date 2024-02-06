@@ -335,7 +335,7 @@ __usage() {
     - ${__ScriptName} onedir_rc 3006
     - ${__ScriptName} old-stable
     - ${__ScriptName} old-stable 3005
-    - ${__ScriptName} old-stable 3005.1
+    - ${__ScriptName} old-stable 3005.5
 
 
   Options:

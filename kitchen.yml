@@ -311,7 +311,7 @@ suites:
       - openbsd-6
   - name: stable-3005-1
     provisioner:
-      salt_version: 3005.1
+      salt_version: 3005.5
       salt_bootstrap_options: -x python3 -MP stable %s
     excludes:
       - opensuse-15

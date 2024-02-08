@@ -82,7 +82,9 @@ platforms:
       run_command: /lib/systemd/systemd
   - name: fedora-38
     driver:
-      provision_command: *fedora_provision_command
+      provision_command: &fedora_provision_command
+        - dnf -y install procps-ng crypto-policies-scripts
+        - update-crypto-policies --set LEGACY
   - name: fedora-39
     driver:
       provision_command: *fedora_provision_command

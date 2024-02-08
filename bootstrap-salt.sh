@@ -3054,7 +3054,7 @@ __install_saltstack_ubuntu_repository() {
         return 1
     fi
 
-    __PY_VERSION_REPO="salt/py3"
+    __PY_VERSION_REPO="py3"
 
     # SaltStack's stable Ubuntu repository:
     SALTSTACK_UBUNTU_URL="${HTTP_VAL}://${_REPO_URL}/${__PY_VERSION_REPO}/ubuntu/${UBUNTU_VERSION}/${__REPO_ARCH}/${STABLE_REV}"
@@ -3094,7 +3094,7 @@ __install_saltstack_ubuntu_onedir_repository() {
     # shellcheck disable=SC2086,SC2090
     __apt_get_install_noinput ${__PACKAGES} || return 1
 
-    __PY_VERSION_REPO="salt/py3"
+    __PY_VERSION_REPO="py3"
 
     # SaltStack's stable Ubuntu repository:
     SALTSTACK_UBUNTU_URL="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_DIR}/${__PY_VERSION_REPO}/ubuntu/${UBUNTU_VERSION}/${__REPO_ARCH}/${ONEDIR_REV}/"
@@ -3518,7 +3518,7 @@ __install_saltstack_debian_repository() {
         return 1
     fi
 
-    __PY_VERSION_REPO="salt/py3"
+    __PY_VERSION_REPO="py3"
 
     # Install downloader backend for GPG keys fetching
     __PACKAGES='wget'
@@ -3554,7 +3554,7 @@ __install_saltstack_debian_onedir_repository() {
         return 1
     fi
 
-    __PY_VERSION_REPO="salt/py3"
+    __PY_VERSION_REPO="py3"
 
     # Install downloader backend for GPG keys fetching
     __PACKAGES='wget'
@@ -4128,7 +4128,7 @@ __install_saltstack_fedora_onedir_repository() {
         return 1
     fi
 
-    __PY_VERSION_REPO="salt/py3"
+    __PY_VERSION_REPO="py3"
 
     GPG_KEY="SALT-PROJECT-GPG-PUBKEY-2023.pub"
 
@@ -4524,7 +4524,7 @@ __install_saltstack_rhel_onedir_repository() {
         return 1
     fi
 
-    __PY_VERSION_REPO="salt/py3"
+    __PY_VERSION_REPO="py3"
 
     # Avoid using '$releasever' variable for yum.
     # Instead, this should work correctly on all RHEL variants.
@@ -5872,7 +5872,7 @@ install_amazon_linux_ami_2_deps() {
     if [ "$_DISABLE_REPOS" -eq "$BS_FALSE" ] || [ "$_CUSTOM_REPO_URL" != "null" ]; then
         __REPO_FILENAME="salt.repo"
         PY_PKG_VER=3
-        __PY_VERSION_REPO="salt/py3"
+        __PY_VERSION_REPO="py3"
         repo_label="saltstack-py3-repo"
         repo_name="SaltStack Python 3 repo for Amazon Linux 2"
 
@@ -5926,7 +5926,7 @@ install_amazon_linux_ami_2_onedir_deps() {
 
     if [ "$_DISABLE_REPOS" -eq "$BS_FALSE" ] || [ "$_CUSTOM_REPO_URL" != "null" ]; then
         __REPO_FILENAME="salt.repo"
-        __PY_VERSION_REPO="salt/py3"
+        __PY_VERSION_REPO="py3"
         PY_PKG_VER=3
         repo_label="saltstack-py3-repo"
         repo_name="SaltStack Python 3 repo for Amazon Linux 2"
@@ -6066,7 +6066,7 @@ install_amazon_linux_ami_2023_onedir_deps() {
 
     if [ "$_DISABLE_REPOS" -eq "$BS_FALSE" ] || [ "$_CUSTOM_REPO_URL" != "null" ]; then
         __REPO_FILENAME="salt.repo"
-        __PY_VERSION_REPO="salt/py3"
+        __PY_VERSION_REPO="py3"
         PY_PKG_VER=3
         repo_label="saltstack-py3-repo"
         repo_name="SaltStack Python 3 repo for Amazon Linux 2023"
@@ -6417,7 +6417,7 @@ __install_saltstack_photon_onedir_repository() {
         REPO_REV="latest"
     fi
 
-    __PY_VERSION_REPO="salt/py3"
+    __PY_VERSION_REPO="py3"
     REPO_FILE="/etc/yum.repos.d/salt.repo"
 
     if [ ! -s "$REPO_FILE" ] || [ "$_FORCE_OVERWRITE" -eq "$BS_TRUE" ]; then

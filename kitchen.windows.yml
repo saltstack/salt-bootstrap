@@ -17,27 +17,13 @@ platforms:
   - name: windows-2019
 
 suites:
-  - name: stable-3003
-    provisioner:
-      salt_version: 3003.4-1
-      salt_call_command: c:\salt\salt-call.bat
-  - name: stable-3004
-    provisioner:
-      salt_version: 3004.1-1
-      salt_call_command: c:\Program Files\Salt Project\Salt\salt-call.bat
-  - name: stable-3005
-    provisioner:
-      salt_version: 3005.5-1
-  - name: stable-3005-1
-    provisioner:
-      salt_version: 3005.5-1
   - name: stable-3006
     provisioner:
-      salt_version: 3006.0
+      salt_version: 3006.6
       salt_call_command: c:\Program Files\Salt Project\Salt\salt-call.exe
-  - name: stable-3006-1
+  - name: stable-3006-6
     provisioner:
-      salt_version: 3006.1
+      salt_version: 3006.6
       salt_call_command: c:\Program Files\Salt Project\Salt\salt-call.exe
   - name: latest
     provisioner:

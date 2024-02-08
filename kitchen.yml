@@ -138,17 +138,17 @@ platforms:
   - name: ubuntu-20.04
     driver:
       run_command: /lib/systemd/systemd
-  - name: photon-3
+  - name: photon-4
     driver:
-      image: photon:3.0
+      image: photon:4.0
       provision_command:
         - tdnf -y install rpm procps-ng coreutils gawk
         - echo "PubkeyAcceptedKeyTypes +ssh-rsa" | tee -a /etc/ssh/sshd_config
         - sed -ie 's/PermitRootLogin no/PermitRootLogin yes/' /etc/ssh/sshd_config
         - systemctl enable sshd.service
-  - name: photon-4
+  - name: photon-5
     driver:
-      image: photon:4.0
+      image: photon:5.0
       provision_command:
         - tdnf -y install rpm procps-ng coreutils gawk
         - echo "PubkeyAcceptedKeyTypes +ssh-rsa" | tee -a /etc/ssh/sshd_config
@@ -252,7 +252,6 @@ suites:
       - openbsd-6
       - opensuse-15
       - opensuse-tumbleweed
-      - ubuntu-1804
 
   - name: quickstart
     provisioner:

@@ -14,6 +14,7 @@ provisioner:
 
 platforms:
   - name: macos-12
+  - name: macos-13
 
 suites:
   - name: stable-3006

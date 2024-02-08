@@ -2,7 +2,7 @@
 minimum_pre_commit_version: 1.15.2
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.3.0
+    rev: v4.5.0
     hooks:
       - id: check-merge-conflict  # Check for files that contain merge conflict strings.
       - id: trailing-whitespace   # Trims trailing whitespace.
@@ -12,12 +12,12 @@ repos:
       - id: end-of-file-fixer     # Makes sure files end in a newline and only a newline.
 
   - repo: https://github.com/executablebooks/mdformat
-    rev: 0.7.14
+    rev: 0.7.17
     hooks:
       - id: mdformat
 
   - repo: https://github.com/s0undt3ch/python-tools-scripts
-    rev: "0.12.0"
+    rev: "0.18.6"
     hooks:
       - id: tools
         alias: actionlint
@@ -30,7 +30,7 @@ repos:
           - actionlint
 
   - repo: https://github.com/jazzband/pip-tools
-    rev: 6.13.0
+    rev: 7.3.0
     hooks:
       - id: pip-compile
         files: ^requirements/release\.(in|txt)$
@@ -38,20 +38,20 @@ repos:
           - requirements/release.in
 
   - repo: https://github.com/asottile/pyupgrade
-    rev: v2.37.3
+    rev: v3.15.0
     hooks:
       - id: pyupgrade
         name: Rewrite Code to be Py3.9+
         args: [--py39-plus]
 
   - repo: https://github.com/asottile/reorder_python_imports
-    rev: v3.8.2
+    rev: v3.12.0
     hooks:
       - id: reorder-python-imports
         args: [--py39-plus]
 
   - repo: https://github.com/psf/black
-    rev: 22.6.0
+    rev: 24.1.0
     hooks:
       - id: black
         args: []

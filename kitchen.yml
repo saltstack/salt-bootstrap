@@ -33,7 +33,7 @@ platforms:
     driver:
       provision_command:
         - dnf -y install crypto-policies-scripts procps-ng
-        - update-crypto-policies --set DEFAULT:SHA1
+        - update-crypto-policies
         - echo "PubkeyAcceptedAlgorithms +ssh-rsa" | tee -a /etc/ssh/sshd_config
   - name: almalinux-8
   - name: amazon-2
@@ -61,7 +61,7 @@ platforms:
       image: quay.io/centos/centos:stream9
       provision_command:
         - dnf -y install crypto-policies-scripts procps-ng
-        - update-crypto-policies --set DEFAULT:SHA1
+        - update-crypto-policies
         - echo "PubkeyAcceptedAlgorithms +ssh-rsa" | tee -a /etc/ssh/sshd_config
   - name: centos-stream8
     driver:
@@ -84,7 +84,7 @@ platforms:
     driver:
       provision_command: &fedora_provision_command
         - dnf -y install procps-ng crypto-policies-scripts
-        - update-crypto-policies --set LEGACY
+        - update-crypto-policies
   - name: fedora-39
     driver:
       provision_command: *fedora_provision_command
@@ -123,20 +123,18 @@ platforms:
       run_command: /usr/lib/systemd/systemd
       provision_command:
         - dnf -y install crypto-policies-scripts procps-ng
-        - update-crypto-policies --set DEFAULT:SHA1
+        - update-crypto-policies
         - echo "PubkeyAcceptedAlgorithms +ssh-rsa" | tee -a /etc/ssh/sshd_config
   - name: rockylinux-8
   - name: oraclelinux-8
   - name: oraclelinux-7
   - name: rockylinux-8
   - name: ubuntu-22.04
+  - name: ubuntu-23.10
     driver:
       run_command: /lib/systemd/systemd
       provision_command:
         - echo "PubkeyAcceptedAlgorithms +ssh-rsa" | tee -a /etc/ssh/sshd_config
-  - name: ubuntu-23.10
-    driver:
-      run_command: /lib/systemd/systemd
   - name: ubuntu-20.04
     driver:
       run_command: /lib/systemd/systemd

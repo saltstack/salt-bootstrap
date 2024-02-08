@@ -47,7 +47,7 @@ def target_python_version():
 
 @pytest.fixture(scope="session")
 def target_salt_version():
-    bootstrap_types = ("git", "stable", "old", "stable", "onedir", "onedir_rc")
+    bootstrap_types = ("git", "stable", "onedir", "onedir_rc")
 
     # filter out any bootstrap types and then join
     target_salt = ".".join(

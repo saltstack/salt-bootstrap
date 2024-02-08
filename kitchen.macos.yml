@@ -14,32 +14,15 @@ provisioner:
 
 platforms:
   - name: macos-12
-  - name: macos-11
-  - name: macos-1015
 
 suites:
-  - name: old-stable-3003
-    provisioner:
-      salt_bootstrap_options: -MP old-stable %s
-      salt_version: 3003.4
-      salt_call_command: /opt/salt/bin/salt-call
-  - name: old-stable-3004
-    provisioner:
-      salt_bootstrap_options: -MP old-stable %s
-      salt_version: 3004.1
-      salt_call_command: /opt/salt/bin/salt-call
-  - name: old-stable-3005
-    provisioner:
-      salt_bootstrap_options: -MP old-stable %s
-      salt_version: 3005.5
-      salt_call_command: /opt/salt/bin/salt-call
   - name: stable-3006
     provisioner:
       salt_version: 3006
       salt_call_command: /opt/salt/salt-call
-  - name: stable-3006-1
+  - name: stable-3006-6
     provisioner:
-      salt_version: 3006.1
+      salt_version: 3006.6
       salt_call_command: /opt/salt/salt-call
   - name: latest
     provisioner:

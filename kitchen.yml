@@ -66,7 +66,6 @@ platforms:
   - name: centos-stream8
     driver:
       image: quay.io/centos/centos:stream8
-  ## DGM - name: debian-9
   - name: centos-7
     driver:
       run_command: /lib/systemd/systemd
@@ -81,17 +80,6 @@ platforms:
     driver:
       image: debian:bullseye
       run_command: /lib/systemd/systemd
-  ## DGM - name: fedora-35
-  ## DGM   driver:
-  ## DGM     provision_command: &fedora_provision_command
-  ## DGM       - dnf -y install procps-ng crypto-policies-scripts
-  ## DGM       - update-crypto-policies --set LEGACY
-  ## DGM - name: fedora-36
-  ## DGM   driver:
-  ## DGM     provision_command: *fedora_provision_command
-  - name: fedora-37
-    driver:
-      provision_command: *fedora_provision_command
   - name: fedora-38
     driver:
       provision_command: *fedora_provision_command
@@ -144,13 +132,10 @@ platforms:
       run_command: /lib/systemd/systemd
       provision_command:
         - echo "PubkeyAcceptedAlgorithms +ssh-rsa" | tee -a /etc/ssh/sshd_config
-  - name: ubuntu-21.10
+  - name: ubuntu-23.10
     driver:
       run_command: /lib/systemd/systemd
   - name: ubuntu-20.04
-    driver:
-      run_command: /lib/systemd/systemd
-  - name: ubuntu-18.04
     driver:
       run_command: /lib/systemd/systemd
   - name: photon-3
@@ -171,40 +156,6 @@ platforms:
         - systemctl enable sshd.service
 
 suites:
-  - name: git-3003
-    provisioner:
-      salt_version: v3003
-      salt_bootstrap_options: -x python3 -MPfq git %s
-  - name: git-3004
-    provisioner:
-      salt_version: v3004
-      salt_bootstrap_options: -x python3 -MPfq git %s
-    excludes:
-      - opensuse-15
-      - opensuse-tumbleweed
-      - debian-11
-      - debian-12
-      - arch
-      - gentoo
-      - gentoo-systemd
-      - freebsd-131
-      - freebsd-123
-      - openbsd-6
-  - name: git-3005
-    provisioner:
-      salt_version: v3005
-      salt_bootstrap_options: -x python3 -MPfq git %s
-    excludes:
-      - opensuse-15
-      - opensuse-tumbleweed
-      - debian-11
-      - debian-12
-      - arch
-      - gentoo
-      - gentoo-systemd
-      - freebsd-131
-      - freebsd-123
-      - openbsd-6
   - name: git-3006
     provisioner:
       salt_version: v3006
@@ -232,108 +183,9 @@ suites:
       - freebsd-131
       - freebsd-123
       - openbsd-6
-  - name: old-stable-3003-0
-    provisioner:
-      salt_version: 3003
-      salt_bootstrap_options: -x python3 -MP old-stable 3003.0
-    excludes:
-      - opensuse-15
-      - opensuse-tumbleweed
-      - arch
-      - gentoo
-      - gentoo-systemd
-      - freebsd-131
-      - freebsd-123
-      - openbsd-6
-    excludes:
-      - opensuse-15
-      - opensuse-tumbleweed
-      - arch
-      - freebsd-131
-      - freebsd-123
-      - openbsd-6
-  - name: old-stable-3003
-    provisioner:
-      salt_version: 3003
-      salt_bootstrap_options: -x python3 -MP old-stable %s
-    excludes:
-      - opensuse-15
-      - opensuse-tumbleweed
-      - arch
-      - freebsd-131
-      - freebsd-123
-      - openbsd-6
-  - name: old-stable-3004-0
-    provisioner:
-      salt_version: 3004
-      salt_bootstrap_options: -x python3 -MP old-stable 3004.0
-    excludes:
-      - opensuse-15
-      - opensuse-tumbleweed
-      - arch
-      - gentoo
-      - gentoo-systemd
-      - freebsd-131
-      - freebsd-123
-      - openbsd-6
-  - name: old-stable-3004
-    provisioner:
-      salt_version: 3004
-      salt_bootstrap_options: -x python3 -MP old-stable %s
-    excludes:
-      - opensuse-15
-      - opensuse-tumbleweed
-      - arch
-      - freebsd-131
-      - freebsd-123
-      - openbsd-6
-  - name: old-stable-3005
-    provisioner:
-      salt_version: 3005
-      salt_bootstrap_options: -x python3 -MP old-stable %s
-    excludes:
-      - opensuse-15
-      - opensuse-tumbleweed
-      - arch
-      - freebsd-131
-      - freebsd-123
-      - openbsd-6
-  - name: stable-3005
-    provisioner:
-      salt_version: 3005
-      salt_bootstrap_options: -x python3 -MP stable %s
-    excludes:
-      - opensuse-15
-      - opensuse-tumbleweed
-      - arch
-      - freebsd-131
-      - freebsd-123
-      - openbsd-6
-  - name: stable-3005-1
-    provisioner:
-      salt_version: 3005.5
-      salt_bootstrap_options: -x python3 -MP stable %s
-    excludes:
-      - opensuse-15
-      - opensuse-tumbleweed
-      - arch
-      - freebsd-131
-      - freebsd-123
-      - openbsd-6
   - name: stable-3006
     provisioner:
       salt_version: 3006
-      salt_bootstrap_options: -x python3 -MP stable %s
-    excludes:
-      - opensuse-15
-      - opensuse-tumbleweed
-      - arch
-      - freebsd-131
-      - freebsd-123
-      - openbsd-6
-  - name: stable-3006-1
-    provisioner:
-      salt_version: 3006.1
       salt_bootstrap_options: -x python3 -MP stable %s
     excludes:
       - opensuse-15
@@ -387,20 +239,6 @@ suites:
     provisioner:
       salt_version: 3006
       salt_bootstrap_options: -MP onedir %s
-
-  ## DGM - name: onedir-rc-3006-0rc2
-  ## DGM   provisioner:
-  ## DGM     salt_version: 3006.0rc2
-  ## DGM     salt_bootstrap_options: -R staging.repo.saltproject.io -MP onedir_rc %s
-  ## DGM   excludes:
-  ## DGM     - arch
-  ## DGM     - freebsd-131
-  ## DGM     - freebsd-123
-  ## DGM     - gentoo
-  ## DGM     - openbsd-6
-  ## DGM     - opensuse-15
-  ## DGM     - opensuse-tumbleweed
-  ## DGM     - ubuntu-1804
 
   - name: onedir-rc-3007-0rc1
     provisioner:

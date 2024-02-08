@@ -4167,7 +4167,10 @@ install_fedora_deps() {
     # Salt on Fedora is Py3
     PY_PKG_VER=3
 
-    __PACKAGES="${__PACKAGES} dnf-utils libyaml procps-ng python${PY_PKG_VER}-crypto python${PY_PKG_VER}-jinja2"
+    ## DGM can find no dnf-utils in Fedora packaging archives and yum-utils EL7 and F30, none after
+    ## DGM but find it on 8 and 9 Centos Stream
+    ## DGM __PACKAGES="${__PACKAGES} dnf-utils libyaml procps-ng python${PY_PKG_VER}-crypto python${PY_PKG_VER}-jinja2"
+    __PACKAGES="${__PACKAGES} libyaml procps-ng python${PY_PKG_VER}-crypto python${PY_PKG_VER}-jinja2"
     __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-msgpack python${PY_PKG_VER}-requests python${PY_PKG_VER}-zmq"
     __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-pip python${PY_PKG_VER}-m2crypto python${PY_PKG_VER}-pyyaml"
     __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-systemd"
@@ -4450,13 +4453,18 @@ install_fedora_onedir_deps() {
         __install_saltstack_fedora_onedir_repository || return 1
     fi
 
-    if [ "$DISTRO_MAJOR_VERSION" -ge 8 ]; then
-        __PACKAGES="dnf-utils chkconfig"
-    else
-        __PACKAGES="yum-utils chkconfig"
-    fi
+    ## DGM can find no dnf-utils in Fedora packaging archives and yum-utils EL7 and F30, none after
+    ## DGM but find it on 8 and 9 Centos Stream
+    ## DGM if [ "$DISTRO_MAJOR_VERSION" -ge 8 ]; then
+    ## DGM     __PACKAGES="dnf-utils chkconfig"
+    ## DGM else
+    ## DGM     __PACKAGES="yum-utils chkconfig"
+    ## DGM fi
 
-    __PACKAGES="${__PACKAGES} procps"
+
+    ## DGM __PACKAGES="yum-utils chkconfig procps"
+
+    __PACKAGES="chkconfig procps"
 
     # shellcheck disable=SC2086
     __yum_install_noinput "${__PACKAGES}" || return 1
@@ -4593,13 +4601,7 @@ install_centos_stable_deps() {
         __install_saltstack_rhel_onedir_repository || return 1
     fi
 
-    if [ "$DISTRO_MAJOR_VERSION" -ge 8 ]; then
-        __PACKAGES="dnf-utils chkconfig"
-    else
-        __PACKAGES="yum-utils chkconfig"
-    fi
-
-    __PACKAGES="${__PACKAGES} procps"
+    __PACKAGES="yum-utils chkconfig procps"
 
     # shellcheck disable=SC2086
     __yum_install_noinput "${__PACKAGES}" || return 1
@@ -4807,13 +4809,15 @@ install_centos_onedir_deps() {
         __install_saltstack_rhel_onedir_repository || return 1
     fi
 
-    if [ "$DISTRO_MAJOR_VERSION" -ge 8 ]; then
-        __PACKAGES="dnf-utils chkconfig"
-    else
-        __PACKAGES="yum-utils chkconfig"
-    fi
+    ## DGM if [ "$DISTRO_MAJOR_VERSION" -ge 8 ]; then
+    ## DGM     __PACKAGES="dnf-utils chkconfig"
+    ## DGM else
+    ## DGM     __PACKAGES="yum-utils chkconfig"
+    ## DGM fi
 
-    __PACKAGES="${__PACKAGES} procps"
+    ## DGM __PACKAGES="${__PACKAGES} procps"
+
+    __PACKAGES="yum-utils chkconfig procps"
 
     # shellcheck disable=SC2086
     __yum_install_noinput "${__PACKAGES}" || return 1

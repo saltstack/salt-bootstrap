@@ -4455,9 +4455,13 @@ install_fedora_onedir_deps() {
     ## DGM     __PACKAGES="yum-utils chkconfig"
     ## DGM fi
 
-    ## DGM __PACKAGES="${__PACKAGES} chkconfig procps"
+    if [ "$DISTRO_MAJOR_VERSION" -ge 8 ]; then
+        __PACKAGES="chkconfig"
+    else
+        __PACKAGES="yum-utils chkconfig"
+    fi
 
-    __PACKAGES="chkconfig procps"
+    __PACKAGES="${__PACKAGES} procps"
 
     # shellcheck disable=SC2086
     __yum_install_noinput "${__PACKAGES}" || return 1
@@ -4602,9 +4606,14 @@ install_centos_stable_deps() {
     ## DGM else
     ## DGM     __PACKAGES="yum-utils chkconfig"
     ## DGM fi
-    ## DGM __PACKAGES="${__PACKAGES} chkconfig procps"
 
-    __PACKAGES="chkconfig procps"
+    if [ "$DISTRO_MAJOR_VERSION" -ge 8 ]; then
+        __PACKAGES="chkconfig"
+    else
+        __PACKAGES="yum-utils chkconfig"
+    fi
+
+    __PACKAGES="${__PACKAGES} procps"
 
     # shellcheck disable=SC2086
     __yum_install_noinput "${__PACKAGES}" || return 1
@@ -4812,15 +4821,22 @@ install_centos_onedir_deps() {
         __install_saltstack_rhel_onedir_repository || return 1
     fi
 
+    ## DGM can find no dnf-utils in Fedora packaging archives and yum-utils EL7 and F30, none after
+    ## DGM but find it on 8 and 9 Centos Stream, and Alma 8 & 9 but versions we are using doesn't have them
+    ## DGM and probably don't need these packages since using onedir
     ## DGM if [ "$DISTRO_MAJOR_VERSION" -ge 8 ]; then
     ## DGM     __PACKAGES="dnf-utils chkconfig"
     ## DGM else
     ## DGM     __PACKAGES="yum-utils chkconfig"
     ## DGM fi
 
-    ## DGM __PACKAGES="${__PACKAGES} procps"
+    if [ "$DISTRO_MAJOR_VERSION" -ge 8 ]; then
+        __PACKAGES="chkconfig"
+    else
+        __PACKAGES="yum-utils chkconfig"
+    fi
 
-    __PACKAGES="yum-utils chkconfig procps"
+    __PACKAGES="${__PACKAGES} procps"
 
     # shellcheck disable=SC2086
     __yum_install_noinput "${__PACKAGES}" || return 1

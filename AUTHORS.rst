@@ -54,6 +54,7 @@ Daniel Wallace              gtmanfred              danielwallace@gtmanfred.com
 Darko Cerdic                darkocerdic
 Daryl Turner                darylturner            d.turner@arkadin.com
 David J. Felix              DavidJFelix
+David Murphy                daithi                david-dm.murphy@broadcom.com
 denmat                      denmat
 Denys Havrysh               vutny                  denys.gavrysh@gmail.com
 deployboy                   deployboy

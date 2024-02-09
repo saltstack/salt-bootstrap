@@ -21,20 +21,20 @@ Please read the following guidelines before you
 1. **Use the GitHub issue search** -- check if the issue has
    already been reported. If it has been, please comment on the existing issue.
 
-2. **Check if the issue has been fixed** -- If you found a possible problem, or bug,
+1. **Check if the issue has been fixed** -- If you found a possible problem, or bug,
    please try to bootstrap using the bootstrap scirpt from the develop branch. The
    issue you are having might have already been fixed and it's just not yet included
    in the stable release.
 
-    ```
-    curl -o bootstrap-salt.sh -L https://raw.githubusercontent.com/saltstack/salt-bootstrap/develop/bootstrap-salt.sh
-    sudo sh bootstrap-salt.sh git master
-    ```
+   ```
+   curl -o bootstrap-salt.sh -L https://raw.githubusercontent.com/saltstack/salt-bootstrap/develop/bootstrap-salt.sh
+   sudo sh bootstrap-salt.sh git master
+   ```
 
-3. **Isolate the demonstrable problem** -- make sure that the
+1. **Isolate the demonstrable problem** -- make sure that the
    code in the project's repository is *definitely* responsible for the issue.
 
-4. **Include a reproducible example** -- Provide the steps which
+1. **Include a reproducible example** -- Provide the steps which
    led you to the problem.
 
 Please try to be as detailed as possible in your report. What is your
@@ -163,8 +163,8 @@ The release process consists of the following steps:
 1. Merge in any outstanding PRs that are ready.
 1. Add new contributors to the [AUTHORS](https://github.com/saltstack/salt-bootstrap/blob/develop/AUTHORS.rst) file.
 1. Update the [ChangeLog](https://github.com/saltstack/salt-bootstrap/blob/develop/ChangeLog).
-1. Update the version number in the bootstrap script. The version number is date-based, `<year.month.day>`.
-   For example, version `2018.08.15` was released on August 15, 2018.
+1. Update the version number in the bootstrap script. The version number is number-based major version with minor version, `<300X.Y>`.
+   For example, version `3006.6` is major version `3006` and minior version `6`.
 1. Merge the `develop` branch into the `stable` branch.
 1. Update `bootstrap.saltproject.io` with the new stable release. The checksum on the
    [README page](https://github.com/saltstack/salt-bootstrap/blob/develop/README.rst)
@@ -177,83 +177,82 @@ The following operating systems are detected, but Salt and its dependency
 installation functions are not developed yet:
 
 - BSD:
-    - NetBSD
+  - NetBSD
 - Linux:
-    - Slackware
+  - Slackware
 - SunOS:
-    - OpenIndiana
-    - Oracle Solaris
-    - OmniOS (Illumos)
-
+  - OpenIndiana
+  - Oracle Solaris
+  - OmniOS (Illumos)
 
 In order to install Salt for a distribution, you need to define the following:
 
 1. To Install Dependencies, which is required, one of:
 
-    ```
-    install_<distro>_<major_version>_<install_type>_deps
-    install_<distro>_<major_version>_<minor_version>_<install_type>_deps
-    install_<distro>_<major_version>_deps
-    install_<distro>_<major_version>_<minor_version>_deps
-    install_<distro>_<install_type>_deps
-    install_<distro>_deps
-    ```
+   ```
+   install_<distro>_<major_version>_<install_type>_deps
+   install_<distro>_<major_version>_<minor_version>_<install_type>_deps
+   install_<distro>_<major_version>_deps
+   install_<distro>_<major_version>_<minor_version>_deps
+   install_<distro>_<install_type>_deps
+   install_<distro>_deps
+   ```
 
-2. Optionally, define a minion configuration function, which will be called if the
-   ``-c`` option is passed. One of:
+1. Optionally, define a minion configuration function, which will be called if the
+   `-c` option is passed. One of:
 
-    ```
-    config_<distro>_<major_version>_<install_type>_salt
-    config_<distro>_<major_version>_<minor_version>_<install_type>_salt
-    config_<distro>_<major_version>_salt
-    config_<distro>_<major_version>_<minor_version>_salt
-    config_<distro>_<install_type>_salt
-    config_<distro>_salt
-    config_salt (THIS ONE IS ALREADY DEFINED AS THE DEFAULT)
-    ```
+   ```
+   config_<distro>_<major_version>_<install_type>_salt
+   config_<distro>_<major_version>_<minor_version>_<install_type>_salt
+   config_<distro>_<major_version>_salt
+   config_<distro>_<major_version>_<minor_version>_salt
+   config_<distro>_<install_type>_salt
+   config_<distro>_salt
+   config_salt (THIS ONE IS ALREADY DEFINED AS THE DEFAULT)
+   ```
 
-3. Optionally, define a Salt master pre-seed function, which will be called if the
-   ``-k`` (pre-seed master keys) option is passed. One of:
+1. Optionally, define a Salt master pre-seed function, which will be called if the
+   `-k` (pre-seed master keys) option is passed. One of:
 
-    ```
-    preseed_<distro>_<major_version>_<install_type>_master
-    preseed_<distro>_<major_version>_<minor_version>_<install_type>_master
-    preseed_<distro>_<major_version>_master
-    preseed_<distro>_<major_version>_<minor_version>_master
-    preseed_<distro>_<install_type>_master
-    preseed_<distro>_master
-    preseed_master (THIS ONE IS ALREADY DEFINED AS THE DEFAULT)
-    ```
+   ```
+   preseed_<distro>_<major_version>_<install_type>_master
+   preseed_<distro>_<major_version>_<minor_version>_<install_type>_master
+   preseed_<distro>_<major_version>_master
+   preseed_<distro>_<major_version>_<minor_version>_master
+   preseed_<distro>_<install_type>_master
+   preseed_<distro>_master
+   preseed_master (THIS ONE IS ALREADY DEFINED AS THE DEFAULT)
+   ```
 
-4. To install salt, which, of course, is required, one of:
+1. To install salt, which, of course, is required, one of:
 
-    ```
-    install_<distro>_<major_version>_<install_type>
-    install_<distro>_<major_version>_<minor_version>_<install_type>
-    install_<distro>_<install_type>
-    ```
+   ```
+   install_<distro>_<major_version>_<install_type>
+   install_<distro>_<major_version>_<minor_version>_<install_type>
+   install_<distro>_<install_type>
+   ```
 
-5. Optionally, define a post install function, one of:
+1. Optionally, define a post install function, one of:
 
-    ```
-    install_<distro>_<major_version>_<install_type>_post
-    install_<distro>_<major_version>_<minor_version>_<install_type>_post
-    install_<distro>_<major_version>_post
-    install_<distro>_<major_version>_<minor_version>_post
-    install_<distro>_<install_type>_post
-    install_<distro>_post
-    ```
+   ```
+   install_<distro>_<major_version>_<install_type>_post
+   install_<distro>_<major_version>_<minor_version>_<install_type>_post
+   install_<distro>_<major_version>_post
+   install_<distro>_<major_version>_<minor_version>_post
+   install_<distro>_<install_type>_post
+   install_<distro>_post
+   ```
 
-6. Optionally, define a start daemons function, one of:
+1. Optionally, define a start daemons function, one of:
 
-    ```
-    install_<distro>_<major_version>_<install_type>_restart_daemons
-    install_<distro>_<major_version>_<minor_version>_<install_type>_restart_daemons
-    install_<distro>_<major_version>_restart_daemons
-    install_<distro>_<major_version>_<minor_version>_restart_daemons
-    install_<distro>_<install_type>_restart_daemons
-    install_<distro>_restart_daemons
-    ```
+   ```
+   install_<distro>_<major_version>_<install_type>_restart_daemons
+   install_<distro>_<major_version>_<minor_version>_<install_type>_restart_daemons
+   install_<distro>_<major_version>_restart_daemons
+   install_<distro>_<major_version>_<minor_version>_restart_daemons
+   install_<distro>_<install_type>_restart_daemons
+   install_<distro>_restart_daemons
+   ```
 
 **NOTE**
 
@@ -262,26 +261,26 @@ start if they're not running.
 
 7. Optionally, define a daemons running function, one of:
 
-    ```
-    daemons_running_<distro>_<major_version>_<install_type>
-    daemons_running_<distro>_<major_version>_<minor_version>_<install_type>
-    daemons_running_<distro>_<major_version>
-    daemons_running_<distro>_<major_version>_<minor_version>
-    daemons_running_<distro>_<install_type>
-    daemons_running_<distro>
-    daemons_running  (THIS ONE IS ALREADY DEFINED AS THE DEFAULT)
-    ```
+   ```
+   daemons_running_<distro>_<major_version>_<install_type>
+   daemons_running_<distro>_<major_version>_<minor_version>_<install_type>
+   daemons_running_<distro>_<major_version>
+   daemons_running_<distro>_<major_version>_<minor_version>
+   daemons_running_<distro>_<install_type>
+   daemons_running_<distro>
+   daemons_running  (THIS ONE IS ALREADY DEFINED AS THE DEFAULT)
+   ```
 
-8. Optionally, check enabled Services:
+1. Optionally, check enabled Services:
 
-    ```
-    install_<distro>_<major_version>_<install_type>_check_services
-    install_<distro>_<major_version>_<minor_version>_<install_type>_check_services
-    install_<distro>_<major_version>_check_services
-    install_<distro>_<major_version>_<minor_version>_check_services
-    install_<distro>_<install_type>_check_services
-    install_<distro>_check_services
-    ```
+   ```
+   install_<distro>_<major_version>_<install_type>_check_services
+   install_<distro>_<major_version>_<minor_version>_<install_type>_check_services
+   install_<distro>_<major_version>_check_services
+   install_<distro>_<major_version>_<minor_version>_check_services
+   install_<distro>_<install_type>_check_services
+   install_<distro>_check_services
+   ```
 
 **NOTE**
 

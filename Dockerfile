@@ -1,4 +1,4 @@
-FROM ubuntu-upstart:14.04
+FROM ubuntu:20.04
 MAINTAINER "SaltStack Team"
 
 # Bootstrap script options: install Salt Master by default

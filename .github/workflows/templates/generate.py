@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 import datetime
 import json
 import os
@@ -10,23 +10,24 @@ LINUX_DISTROS = [
     "almalinux-8",
     "almalinux-9",
     "amazon-2",
+    "amazon-2023",
     "arch",
     "centos-7",
     "centos-stream8",
     "centos-stream9",
     "debian-10",
     "debian-11",
-    "fedora-36",
-    "fedora-37",
+    "debian-12",
     "fedora-38",
+    "fedora-39",
     "gentoo",
     "gentoo-systemd",
     "opensuse-15",
     "opensuse-tumbleweed",
     "oraclelinux-7",
     "oraclelinux-8",
-    "photon-3",
     "photon-4",
+    "photon-5",
     "rockylinux-8",
     "rockylinux-9",
     "ubuntu-2004",
@@ -38,52 +39,36 @@ WINDOWS = [
 ]
 
 OSX = [
-    "macos-11",
     "macos-12",
+    "macos-13",
 ]
+
 BSD = [
     "freebsd-131",
     "freebsd-123",
     "openbsd-7",
 ]
 
-OLD_STABLE_DISTROS = [
-    "almalinux-8",
-    "amazon-2",
-    "arch",
-    "centos-7",
-    "centos-stream8",
-    "debian-10",
-    "debian-11",
-    "gentoo",
-    "gentoo-systemd",
-    "opensuse-15",
-    "opensuse-tumbleweed",
-    "oraclelinux-7",
-    "oraclelinux-8",
-    "rockylinux-8",
-    "ubuntu-2004",
-]
-
 STABLE_DISTROS = [
     "almalinux-8",
     "almalinux-9",
     "amazon-2",
+    "amazon-2023",
     "arch",
     "centos-7",
     "centos-stream8",
     "centos-stream9",
     "debian-10",
     "debian-11",
-    "fedora-36",
-    "fedora-37",
+    "debian-12",
     "fedora-38",
+    "fedora-39",
     "opensuse-15",
     "opensuse-tumbleweed",
     "oraclelinux-7",
     "oraclelinux-8",
-    "photon-3",
     "photon-4",
+    "photon-5",
     "rockylinux-8",
     "rockylinux-9",
     "ubuntu-2004",
@@ -94,18 +79,19 @@ ONEDIR_DISTROS = [
     "almalinux-8",
     "almalinux-9",
     "amazon-2",
+    "amazon-2023",
     "centos-7",
     "centos-stream8",
     "centos-stream9",
     "debian-10",
     "debian-11",
-    "fedora-36",
-    "fedora-37",
+    "debian-12",
     "fedora-38",
+    "fedora-39",
     "oraclelinux-7",
     "oraclelinux-8",
-    "photon-3",
     "photon-4",
+    "photon-5",
     "rockylinux-8",
     "rockylinux-9",
     "ubuntu-2004",
@@ -116,133 +102,20 @@ ONEDIR_RC_DISTROS = [
     "almalinux-8",
     "almalinux-9",
     "amazon-2",
+    "amazon-2023",
     "centos-7",
     "centos-stream8",
     "centos-stream9",
     "debian-10",
     "debian-11",
+    "debian-12",
     "oraclelinux-7",
     "oraclelinux-8",
-    "photon-3",
     "photon-4",
+    "photon-5",
     "rockylinux-8",
     "rockylinux-9",
     "ubuntu-2004",
-    "ubuntu-2204",
-]
-
-BLACKLIST_3003 = [
-    "almalinux-9",
-    "arch",
-    "centos-stream9",
-    "debian-11",
-    "fedora-36",
-    "fedora-37",
-    "fedora-38",
-    "gentoo",
-    "gentoo-systemd",
-    "opensuse-15",
-    "opensuse-tumbleweed",
-    "photon-3",
-    "photon-4",
-    "rockylinux-8",
-    "rockylinux-9",
-    "ubuntu-2204",
-]
-
-BLACKLIST_GIT_3003 = [
-    "almalinux-9",
-    "amazon-2",
-    "arch",
-    "centos-stream9",
-    "debian-10",
-    "debian-11",
-    "fedora-36",
-    "fedora-37",
-    "fedora-38",
-    "gentoo",
-    "gentoo-systemd",
-    "opensuse-15",
-    "opensuse-tumbleweed",
-    "photon-3",
-    "photon-4",
-    "rockylinux-8",
-    "rockylinux-9",
-    "ubuntu-2004",
-    "ubuntu-2110",
-    "ubuntu-2204",
-]
-
-BLACKLIST_3004 = [
-    "almalinux-9",
-    "arch",
-    "centos-stream9",
-    "fedora-36",
-    "fedora-37",
-    "fedora-38",
-    "gentoo",
-    "gentoo-systemd",
-    "opensuse-15",
-    "opensuse-tumbleweed",
-    "photon-3",
-    "photon-4",
-    "rockylinux-9",
-]
-
-BLACKLIST_3005 = [
-    "almalinux-9",
-    "arch",
-    "centos-stream9",
-    "fedora-36",
-    "fedora-37",
-    "fedora-38",
-    "gentoo",
-    "gentoo-systemd",
-    "opensuse-15",
-    "opensuse-tumbleweed",
-    "photon-3",
-    "photon-4",
-    "rockylinux-9",
-]
-
-BLACKLIST_GIT_3004 = [
-    "almalinux-9",
-    "amazon-2",
-    "arch",
-    "centos-stream9",
-    "debian-10",
-    "debian-11",
-    "fedora-36",
-    "fedora-37",
-    "fedora-38",
-    "gentoo",
-    "gentoo-systemd",
-    "opensuse-15",
-    "opensuse-tumbleweed",
-    "ubuntu-2004",
-    "ubuntu-2110",
-    "ubuntu-2204",
-    "rockylinux-9",
-    "photon-3",
-    "photon-4",
-]
-
-BLACKLIST_GIT_3005 = [
-    "amazon-2",
-    "arch",
-    "debian-10",
-    "debian-11",
-    "fedora-36",
-    "fedora-37",
-    "fedora-38",
-    "gentoo",
-    "gentoo-systemd",
-    "opensuse-15",
-    "opensuse-tumbleweed",
-    "photon-3",
-    "photon-4",
-    "ubuntu-2004",
-    "ubuntu-2110",
     "ubuntu-2204",
 ]
 
@@ -261,19 +134,19 @@ BLACKLIST_GIT_3006 = [
     "centos-stream9",
     "debian-10",
     "debian-11",
-    "fedora-36",
-    "fedora-37",
+    "debian-12",
     "fedora-38",
+    "fedora-39",
     "gentoo",
     "gentoo-systemd",
     "opensuse-15",
     "opensuse-tumbleweed",
-    "photon-3",
     "photon-4",
+    "photon-5",
     "rockylinux-9",
     "ubuntu-2004",
-    "ubuntu-2110",
     "ubuntu-2204",
+    "ubuntu-2310",
 ]
 
 BLACKLIST_GIT_MASTER = [
@@ -281,23 +154,17 @@ BLACKLIST_GIT_MASTER = [
     "debian-10",
     "freebsd-131",
     "freebsd-123",
-    "photon-3",
 ]
 
 SALT_VERSIONS = [
-    "3003",
-    "3004",
-    "3005",
-    "3005-1",
     "3006",
-    "3006-1",
+    "3006-6",
     "master",
     "latest",
     "nightly",
 ]
 
 ONEDIR_SALT_VERSIONS = [
-    "3005",
     "3006",
     "latest",
 ]
@@ -305,52 +172,25 @@ ONEDIR_SALT_VERSIONS = [
 ONEDIR_RC_SALT_VERSIONS = []
 
 VERSION_DISPLAY_NAMES = {
-    "3003": "v3003",
-    "3004": "v3004",
-    "3005": "v3005",
-    "3005-1": "v3005.1",
     "3006": "v3006",
-    "3006-1": "v3006.1",
+    "3006-6": "v3006.6",
     "master": "Master",
     "latest": "Latest",
     "nightly": "Nightly",
 }
 
-OLD_STABLE_VERSION_BLACKLIST = [
-    "3005-1",
-    "3006",
-    "3006-1",
-    "master",
-    "nightly",
-]
-
 STABLE_VERSION_BLACKLIST = [
-    "3003",
-    "3004",
-    "master",
-    "nightly",
-]
-
-MAC_OLD_STABLE_VERSION_BLACKLIST = [
-    "3005-1",
-    "3006",
-    "3006-1",
     "master",
     "nightly",
 ]
 
 MAC_STABLE_VERSION_BLACKLIST = [
-    "3003",
-    "3004",
-    "3005",
-    "3005-1",
     "master",
     "nightly",
 ]
 
 GIT_VERSION_BLACKLIST = [
-    "3005-1",
-    "3006-1",
+    "3006-6",
     "nightly",
 ]
 
@@ -367,8 +207,8 @@ GIT_DISTRO_BLACKLIST = [
     "almalinux-8",
     "centos-7",
     "centos-stream8",
-    "fedora-37",
     "fedora-38",
+    "fedora-39",
     "opensuse-15",
     "oraclelinux-7",
     "oraclelinux-8",
@@ -384,30 +224,30 @@ DISTRO_DISPLAY_NAMES = {
     "almalinux-8": "AlmaLinux 8",
     "almalinux-9": "AlmaLinux 9",
     "amazon-2": "Amazon 2",
+    "amazon-2023": "Amazon 2023",
     "arch": "Arch",
     "centos-7": "CentOS 7",
     "centos-stream8": "CentOS Stream 8",
     "centos-stream9": "CentOS Stream 9",
     "debian-10": "Debian 10",
     "debian-11": "Debian 11",
-    "fedora-36": "Fedora 36",
-    "fedora-37": "Fedora 37",
+    "debian-12": "Debian 12",
     "fedora-38": "Fedora 38",
+    "fedora-39": "Fedora 39",
     "gentoo": "Gentoo",
     "gentoo-systemd": "Gentoo (systemd)",
     "opensuse-15": "Opensuse 15",
     "opensuse-tumbleweed": "Opensuse Tumbleweed",
     "oraclelinux-7": "Oracle Linux 7",
     "oraclelinux-8": "Oracle Linux 8",
-    "photon-3": "Photon OS 3",
     "photon-4": "Photon OS 4",
+    "photon-5": "Photon OS 5",
     "rockylinux-8": "Rocky Linux 8",
     "rockylinux-9": "Rocky Linux 9",
     "ubuntu-2004": "Ubuntu 20.04",
     "ubuntu-2204": "Ubuntu 22.04",
-    "macos-1015": "macOS 10.15",
-    "macos-11": "macOS 11",
     "macos-12": "macOS 12",
+    "macos-13": "macOS 13",
     "freebsd-131": "FreeBSD 13.1",
     "freebsd-123": "FreeBSD 12.3",
     "openbsd-7": "OpenBSD 7",
@@ -474,29 +314,21 @@ def generate_test_jobs():
                 continue
 
             # BSD's don't have a stable release, only use git
-            for bootstrap_type in ("git",):
+            for bootstrap_type in ["git"]:
 
-                BLACKLIST = {
-                    "3003": BLACKLIST_3003,
-                    "3004": BLACKLIST_3004,
-                }
+                BLACKLIST = {}
                 if bootstrap_type == "git":
                     BLACKLIST = {
-                        "3003": BLACKLIST_GIT_3003,
-                        "3004": BLACKLIST_GIT_3004,
                         "master": BLACKLIST_GIT_MASTER,
                     }
 
                     # .0 versions are a virtual version for pinning to the first
-                    # point release of a major release, such as 3003,
+                    # point release of a major release, such as 3006,
                     # there is no git version.
                     if salt_version.endswith("-0"):
                         continue
 
-                if (
-                    salt_version in ("3003", "3004", "master")
-                    and distro in BLACKLIST[salt_version]
-                ):
+                if salt_version in ("master") and distro in BLACKLIST[salt_version]:
                     continue
 
                 kitchen_target = f"{bootstrap_type}-{salt_version}"
@@ -517,10 +349,7 @@ def generate_test_jobs():
     test_jobs += "\n"
     for distro in OSX:
         test_jobs += "\n"
-        if distro == "macos-1015":
-            runs_on = "macos-10.15"
-        else:
-            runs_on = distro
+        runs_on = distro
         runs_on = f"\n      runs-on: {runs_on}"
         ifcheck = "\n    if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'"
         uses = "./.github/workflows/test-macos.yml"
@@ -532,25 +361,19 @@ def generate_test_jobs():
         )
 
         for salt_version in SALT_VERSIONS:
-
             if salt_version == "latest":
-
                 instances.append(salt_version)
                 continue
 
-            for bootstrap_type in ("stable", "old-stable"):
+            for bootstrap_type in ["stable"]:
                 if bootstrap_type == "stable":
                     if salt_version in MAC_STABLE_VERSION_BLACKLIST:
-                        continue
-
-                if bootstrap_type == "old-stable":
-                    if salt_version in MAC_OLD_STABLE_VERSION_BLACKLIST:
                         continue
 
                 kitchen_target = f"{bootstrap_type}-{salt_version}"
                 instances.append(kitchen_target)
 
-        for bootstrap_type in ("default",):
+        for bootstrap_type in ["default"]:
             if distro not in STABLE_DISTROS:
                 continue
             instances.append(bootstrap_type)
@@ -587,7 +410,7 @@ def generate_test_jobs():
                 instances.append(salt_version)
                 continue
 
-            for bootstrap_type in ("stable",):
+            for bootstrap_type in ["stable"]:
                 if bootstrap_type == "stable":
                     if salt_version in STABLE_VERSION_BLACKLIST:
                         continue
@@ -595,7 +418,7 @@ def generate_test_jobs():
                 kitchen_target = f"{bootstrap_type}-{salt_version}"
                 instances.append(kitchen_target)
 
-        for bootstrap_type in ("default",):
+        for bootstrap_type in ["default"]:
             if distro not in STABLE_DISTROS:
                 continue
             instances.append(bootstrap_type)
@@ -637,7 +460,6 @@ def generate_test_jobs():
                 continue
 
             for bootstrap_type in (
-                "old-stable",
                 "stable",
                 "git",
                 "onedir",
@@ -655,12 +477,6 @@ def generate_test_jobs():
                     if distro not in ONEDIR_RC_DISTROS:
                         continue
 
-                if bootstrap_type == "old-stable":
-                    if salt_version in OLD_STABLE_VERSION_BLACKLIST:
-                        continue
-                    if distro not in OLD_STABLE_DISTROS:
-                        continue
-
                 if bootstrap_type == "stable":
                     if salt_version in STABLE_VERSION_BLACKLIST:
                         continue
@@ -674,18 +490,11 @@ def generate_test_jobs():
                         continue
 
                 BLACKLIST = {
-                    "3003": BLACKLIST_3003,
-                    "3004": BLACKLIST_3004,
-                    "3005": BLACKLIST_3005,
-                    "3005-1": BLACKLIST_3005,
                     "3006": BLACKLIST_3006,
-                    "3006-1": BLACKLIST_3006,
+                    "3006-6": BLACKLIST_3006,
                 }
                 if bootstrap_type == "git":
                     BLACKLIST = {
-                        "3003": BLACKLIST_GIT_3003,
-                        "3004": BLACKLIST_GIT_3004,
-                        "3005": BLACKLIST_GIT_3005,
                         "3006": BLACKLIST_GIT_3006,
                         "master": BLACKLIST_GIT_MASTER,
                     }
@@ -697,8 +506,7 @@ def generate_test_jobs():
                         continue
 
                 if (
-                    salt_version
-                    in ("3003", "3004", "3005", "3005-1", "3006", "3006-1", "master")
+                    salt_version in ("3006", "3006-6", "master")
                     and distro in BLACKLIST[salt_version]
                 ):
                     continue
@@ -706,7 +514,7 @@ def generate_test_jobs():
                 kitchen_target = f"{bootstrap_type}-{salt_version}"
                 instances.append(kitchen_target)
 
-        for bootstrap_type in ("default",):
+        for bootstrap_type in ["default"]:
             if distro not in STABLE_DISTROS:
                 continue
             instances.append(bootstrap_type)

@@ -47,23 +47,7 @@ BSD = [
     "openbsd-7",
 ]
 
-OLD_STABLE_DISTROS = [
-    "almalinux-8",
-    "amazon-2",
-    "arch",
-    "centos-7",
-    "centos-stream8",
-    "debian-10",
-    "debian-11",
-    "gentoo",
-    "gentoo-systemd",
-    "opensuse-15",
-    "opensuse-tumbleweed",
-    "oraclelinux-7",
-    "oraclelinux-8",
-    "rockylinux-8",
-    "ubuntu-2004",
-]
+OLD_STABLE_DISTROS = []
 
 STABLE_DISTROS = [
     "almalinux-8",

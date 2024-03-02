@@ -4808,7 +4808,7 @@ install_centos_stable_deps() {
         fi
     fi
 
-    __PACKAGES="${__PACKAGES} procps"
+    __PACKAGES="${__PACKAGES} procps findutils"
 
     # shellcheck disable=SC2086
     __yum_install_noinput ${__PACKAGES} || return 1
@@ -5108,7 +5108,7 @@ install_centos_onedir_deps() {
         __PACKAGES="yum-utils chkconfig"
     fi
 
-    __PACKAGES="${__PACKAGES} procps"
+    __PACKAGES="${__PACKAGES} procps findutils"
 
     # shellcheck disable=SC2086
     __yum_install_noinput ${__PACKAGES} || return 1

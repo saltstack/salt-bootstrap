@@ -539,9 +539,9 @@ if($Master -ne "not-specified") {$parameters = "$parameters /master=$Master"}
 #===============================================================================
 # Install minion silently
 #===============================================================================
-#Wait for process to exit before continuing.
 Write-Host "Installing Salt Minion: " -NoNewline
 $process = Start-Process $localFile `
+    -WorkingDirectory $(Split-Path $test -Parent) `
     -ArgumentList "/S /start-service=0 $parameters" `
     -NoNewWindow -PassThru
 

@@ -14,21 +14,21 @@
     install the latest version of Salt
 
 .EXAMPLE
-    ./bootstrap-salt.ps1 -version 3006.7
+    ./bootstrap-salt.ps1 -Version 3006.7
     Specifies a particular version of the installer.
 
 .EXAMPLE
-    ./bootstrap-salt.ps1 -runservice false
+    ./bootstrap-salt.ps1 -RunService false
     Specifies the salt-minion service to stop and be set to manual. Useful for
     testing locally from the command line with the --local switch
 
 .EXAMPLE
-    ./bootstrap-salt.ps1 -minion minion-box -master master-box
+    ./bootstrap-salt.ps1 -Minion minion-box -Master master-box
     Specifies the minion and master ids in the minion config. Defaults to the
     installer values of host name for the minion id and "salt" for the master.
 
 .EXAMPLE
-    ./bootstrap-salt.ps1 -minion minion-box -master master-box -version 3006.7 -runservice false
+    ./bootstrap-salt.ps1 -Minion minion-box -Master master-box -Version 3006.7 -RunService false
     Specifies all the optional parameters in no particular order.
 
 .NOTES
@@ -243,6 +243,7 @@ function Get-FileHash {
         }
     } catch {
         Write-Verbose "Error hashing: $Path"
+        Write-Verbose "ERROR: $_"
         return @{}
     } finally {
         if ($null -ne $data) {
@@ -404,24 +405,30 @@ $saltSha512= ""
 $saltFileUrl = ""
 # Look for a repo.json file
 try {
+    Write-Verbose "Looking for $RepoUrl/repo.json"
     $response = Invoke-WebRequest "$RepoUrl/repo.json" `
     -DisableKeepAlive `
     -UseBasicParsing `
     -Method Head
     if ( $response.StatusCode -eq "200" ) {
+        Write-Verbose "Found $RepoUrl/repo.json"
         # This URL contains a repo.json file, let's use it
         $use_repo_json = $true
     } else {
-        #
+        Write-Verbose "Did not find $RepoUrl/repo.json"
+        # No repo.json file found at the default location
         $use_repo_json = $false
     }
 } catch {
+    Write-Verbose "There was an error looking up $RepoUrl/repo.json"
+    Write-Verbose "ERROR: $_"
     $use_repo_json = $false
 }
 if ( $use_repo_json ) {
     # We will use the json file to get the name of the installer
     $enc = [System.Text.Encoding]::UTF8
     try {
+        Write-Verbose "Downloading $RepoUrl/repo.json"
         $response = Invoke-WebRequest -Uri "$RepoUrl/repo.json" -UseBasicParsing
         if ($response.Content.GetType().Name -eq "Byte[]") {
             $psobj = $enc.GetString($response.Content) | ConvertFrom-Json
@@ -431,14 +438,16 @@ if ( $use_repo_json ) {
         $hash = Convert-PSObjectToHashtable $psobj
     } catch {
         Write-Verbose "repo.json not found at: $RepoUrl"
+        Write-Host "ERROR: $_"
         $hash = @{}
     }
 
     $searchVersion = $Version.ToLower()
     if ( $hash.Contains($searchVersion)) {
+        Write-Verbose "Found $searchVersion in $RepoUrl/repo.json"
         foreach ($item in $hash.($searchVersion).Keys) {
-            if ( $item.EndsWith(".exe") ) {
-                if ( $item.Contains($arch) ) {
+            if ( $item.ToLower().EndsWith(".exe") ) {
+                if ( $item.ToLower().Contains($arch.ToLower()) ) {
                     $saltFileName = $hash.($searchVersion).($item).name
                     $saltVersion = $hash.($searchVersion).($item).version
                     $saltSha512 = $hash.($searchVersion).($item).SHA512
@@ -447,6 +456,7 @@ if ( $use_repo_json ) {
         }
     } else {
         try {
+            Write-Verbose "Searching for $searchVersion in $RepoUrl/minor/repo.json"
             $response = Invoke-WebRequest -Uri "$RepoUrl/minor/repo.json" -UseBasicParsing
             if ($response.Content.GetType().Name -eq "Byte[]") {
                 $psobj = $enc.GetString($response.Content) | ConvertFrom-Json
@@ -455,13 +465,15 @@ if ( $use_repo_json ) {
             }
             $hash = Convert-PSObjectToHashtable $psobj
         } catch {
-            Write-Verbose "repo.json not found at: $RepoUrl"
+            Write-Verbose "repo.json not found at: $RepoUrl/minor/repo.json"
+            Write-Verbose "ERROR: $_"
             $hash = @{}
         }
         if ( $hash.Contains($searchVersion)) {
+            Write-Verbose "Found $searchVersion in $RepoUrl/minor/repo.json"
             foreach ($item in $hash.($searchVersion).Keys) {
-                if ( $item.EndsWith(".exe") ) {
-                    if ( $item.Contains($arch) ) {
+                if ( $item.ToLower().EndsWith(".exe") ) {
+                    if ( $item.ToLower().Contains($arch.ToLower()) ) {
                         $saltFileName = $hash.($searchVersion).($item).name
                         $saltVersion = $hash.($searchVersion).($item).version
                         $saltSha512 = $hash.($searchVersion).($item).SHA512
@@ -469,25 +481,59 @@ if ( $use_repo_json ) {
                 }
             }
         } else {
-            Write-Host "Version not found in $RepoUrl/repo.json"
-            exit 1
+            Write-Verbose "Version not found in $RepoUrl/minor/repo.json"
         }
     }
-    if ( $saltFileName -and $saltVersion -and $saltSha512 ) {
-        if ( $RepoUrl.Contains("minor") ) {
-            $saltFileUrl = @($RepoUrl, $saltVersion, $saltFileName) -join "/"
-        } else {
-            $saltFileUrl = @($RepoUrl, "minor", $saltVersion, $saltFileName) -join "/"
-        }
-    } else {
-        Write-Host "Failed to get Name, Version, and Sha"
-        exit 1
-    }
+}
+
+if ( $saltFileName -and $saltVersion -and $saltSha512 ) {
+    Write-Verbose "Found Name, Version, and Sha"
 } else {
     # We will guess the name of the installer
+    Write-Verbose "Failed to get Name, Version, and Sha from repo.json"
+    Write-Verbose "We'll try to find the file in standard paths"
     $saltFileName = "Salt-Minion-$Version-Py3-$arch-Setup.exe"
     $saltVersion = $Version
-    $saltFileUrl = "$RepoUrl/$saltFileName"
+}
+
+Write-Verbose "Creating list of urls using the following:"
+Write-Verbose "RepoUrl: $RepoUrl"
+Write-Verbose "Version: $saltVersion"
+Write-Verbose "File Name: $saltFileName"
+$urls = $(@($RepoUrl, $saltVersion, $saltFileName) -join "/"),
+        $(@($RepoUrl, "minor", $saltVersion, $saltFileName) -join "/"),
+        $(@($RepoUrl, $saltFileName) -join "/"),
+        $(@($oldRepoUrl, $saltFileName) -join "/")
+
+$saltFileUrl = $null
+
+foreach ($url in $urls) {
+    try {
+        Write-Verbose "Looking for installer at: $url"
+        $response = Invoke-WebRequest "$url" `
+                    -DisableKeepAlive `
+                    -UseBasicParsing `
+                    -Method Head
+        if ( $response.StatusCode -eq "200" ) {
+            Write-Verbose "Found installer"
+            # This URL contains a repo.json file, let's use it
+            $saltFileUrl = $url
+            break
+        } else {
+            Write-Verbose "Installer not found: $url"
+        }
+    } catch {
+        Write-Verbose "ERROR: $url"
+    }
+}
+
+if ( !$saltFileUrl ) {
+    Write-Host "Could not find an installer:"
+    Write-Verbose "Here are the urls searched:"
+    foreach ($url in $urls) {
+        Write-Verbose $url
+    }
+    exit 1
 }
 
 
@@ -503,9 +549,15 @@ Write-Host " - master: $Master"
 Write-Host " - minion id: $Minion"
 Write-Host " - start service: $RunService"
 Write-Host "-------------------------------------------------------------------------------" -ForegroundColor Yellow
-Write-Host "Downloading Installer: " -NoNewline
-$webclient = New-Object System.Net.WebClient
+
 $localFile = "$env:TEMP\$saltFileName"
+
+Write-Host "Downloading Installer: " -NoNewline
+Write-Verbose ""
+Write-Verbose "Salt File URL: $saltFileUrl"
+Write-Verbose "Local File: $localFile"
+
+$webclient = New-Object System.Net.WebClient
 $webclient.DownloadFile($saltFileUrl, $localFile)
 
 if ( Test-Path -Path $localFile ) {
@@ -517,6 +569,9 @@ if ( Test-Path -Path $localFile ) {
 if ( $saltSha512 ) {
     $localSha512 = (Get-FileHash -Path $localFile -Algorithm SHA512).Hash
     Write-Host "Comparing Hash: " -NoNewline
+    Write-Verbose ""
+    Write-Verbose "Local Hash: $localSha512"
+    Write-Verbose "Remote Hash: $saltSha512"
     if ( $localSha512 -eq $saltSha512 ) {
         Write-Host "Success" -ForegroundColor Green
     } else {
@@ -539,14 +594,19 @@ if($Master -ne "not-specified") {$parameters = "$parameters /master=$Master"}
 #===============================================================================
 # Install minion silently
 #===============================================================================
-Write-Host "Installing Salt Minion: " -NoNewline
+Write-Host "Installing Salt Minion (5 min timeout): " -NoNewline
+Write-Verbose ""
+Write-Verbose "Local File: $localFile"
+Write-Verbose "Parameters: $parameters"
 $process = Start-Process $localFile `
-    -WorkingDirectory $(Split-Path $test -Parent) `
+    -WorkingDirectory $(Split-Path $localFile -Parent) `
     -ArgumentList "/S /start-service=0 $parameters" `
     -NoNewWindow -PassThru
 
-# Sometimes the installer hangs... we'll wait 60s and then kill it
-$process | Wait-Process -Timeout 60 -ErrorAction SilentlyContinue
+# Sometimes the installer hangs... we'll wait 5 minutes and then kill it
+Write-Verbose ""
+Write-Verbose "Waiting for installer to finish"
+$process | Wait-Process -Timeout 300 -ErrorAction SilentlyContinue
 $process.Refresh()
 
 if ( !$process.HasExited ) {
@@ -568,7 +628,8 @@ if ( !$process.HasExited ) {
 # installation
 $service = Get-Service salt-minion -ErrorAction SilentlyContinue
 $tries = 0
-$max_tries = 5  # We'll try for 10 seconds
+$max_tries = 15 # We'll try for 30 seconds
+Write-Verbose "Checking that the service is installed"
 while ( ! $service ) {
     # We'll keep trying to get a service object until we're successful, or we
     # reach max_tries
@@ -594,6 +655,7 @@ Write-Host "Success" -ForegroundColor Green
 if( $RunService ) {
     # Start the service
     Write-Host "Starting Service: " -NoNewline
+    Write-Verbose ""
     $tries = 0
     # We'll try for 2 minutes, sometimes the minion takes that long to start as
     # it compiles python code for the first time
@@ -603,6 +665,7 @@ if( $RunService ) {
             Start-Service -Name "salt-minion" -ErrorAction SilentlyContinue
         }
         Start-Sleep -Seconds 2
+        Write-Verbose "Checking the service status"
         $service.Refresh()
         if ( $service.Status -eq "Running" ) {
             Write-Host "Success" -ForegroundColor Green

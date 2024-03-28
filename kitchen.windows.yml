@@ -9,7 +9,7 @@ driver:
 
 provisioner:
   salt_bootstrap_url: D:/a/salt-bootstrap/salt-bootstrap/bootstrap-salt.ps1
-  salt_bootstrap_options: -pythonVersion 3 -version %s
+  salt_bootstrap_options: -Version %s -Verbose
   init_environment: ''
 
 platforms:

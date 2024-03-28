@@ -565,7 +565,7 @@
 - add apt-transport-https for ubuntu. (epcim) #896
 - Fix expanding shell script position parameters with nounset enabled. (vutny) #895
 - RFC: Add tests for bootstrap-salt.ps1. (themalkolm) #893
-- Keep original name of salt executable executable. (themalkolm) #857
+- Keep original name of salt executable. (themalkolm) #857
 
 # v2016.06.27:
 

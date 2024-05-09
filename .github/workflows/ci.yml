@@ -377,20 +377,6 @@ jobs:
       instances: '["stable-3006", "onedir-3006", "stable-3006-6", "git-master", "latest", "default"]'
 
 
-  fedora-38:
-    name: Fedora 38
-    if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
-    uses: ./.github/workflows/test-linux.yml
-    needs:
-      - lint
-      - generate-actions-workflow
-    with:
-      distro-slug: fedora-38
-      display-name: Fedora 38
-      timeout: 20
-      instances: '["stable-3006", "onedir-3006", "stable-3006-6", "latest", "default"]'
-
-
   fedora-39:
     name: Fedora 39
     if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
@@ -403,6 +389,20 @@ jobs:
       display-name: Fedora 39
       timeout: 20
       instances: '["stable-3006", "onedir-3006", "stable-3006-6", "latest", "default"]'
+
+
+  fedora-40:
+    name: Fedora 40
+    if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
+    uses: ./.github/workflows/test-linux.yml
+    needs:
+      - lint
+      - generate-actions-workflow
+    with:
+      distro-slug: fedora-40
+      display-name: Fedora 40
+      timeout: 20
+      instances: '["stable-3006", "git-3006", "stable-3006-6", "git-master", "latest", "default"]'
 
 
   gentoo:
@@ -485,6 +485,20 @@ jobs:
     with:
       distro-slug: oraclelinux-8
       display-name: Oracle Linux 8
+      timeout: 20
+      instances: '["stable-3006", "onedir-3006", "stable-3006-6", "latest", "default"]'
+
+
+  oraclelinux-9:
+    name: Oracle Linux 9
+    if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
+    uses: ./.github/workflows/test-linux.yml
+    needs:
+      - lint
+      - generate-actions-workflow
+    with:
+      distro-slug: oraclelinux-9
+      display-name: Oracle Linux 9
       timeout: 20
       instances: '["stable-3006", "onedir-3006", "stable-3006-6", "latest", "default"]'
 
@@ -573,6 +587,20 @@ jobs:
       instances: '["stable-3006", "onedir-3006", "stable-3006-6", "git-master", "latest", "default"]'
 
 
+  ubuntu-2404:
+    name: Ubuntu 24.04
+    if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
+    uses: ./.github/workflows/test-linux.yml
+    needs:
+      - lint
+      - generate-actions-workflow
+    with:
+      distro-slug: ubuntu-2404
+      display-name: Ubuntu 24.04
+      timeout: 20
+      instances: '["stable-3006", "onedir-3006", "stable-3006-6", "git-master", "latest", "default"]'
+
+
   set-pipeline-exit-status:
     # This step is just so we can make github require this step, to pass checks
     # on a pull request instead of requiring all
@@ -599,20 +627,22 @@ jobs:
       - debian-10
       - debian-11
       - debian-12
-      - fedora-38
       - fedora-39
+      - fedora-40
       - gentoo
       - gentoo-systemd
       - opensuse-15
       - opensuse-tumbleweed
       - oraclelinux-7
       - oraclelinux-8
+      - oraclelinux-9
       - photon-4
       - photon-5
       - rockylinux-8
       - rockylinux-9
       - ubuntu-2004
       - ubuntu-2204
+      - ubuntu-2404
     if: always()
     steps:
 

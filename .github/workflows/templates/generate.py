@@ -18,20 +18,22 @@ LINUX_DISTROS = [
     "debian-10",
     "debian-11",
     "debian-12",
-    "fedora-38",
     "fedora-39",
+    "fedora-40",
     "gentoo",
     "gentoo-systemd",
     "opensuse-15",
     "opensuse-tumbleweed",
     "oraclelinux-7",
     "oraclelinux-8",
+    "oraclelinux-9",
     "photon-4",
     "photon-5",
     "rockylinux-8",
     "rockylinux-9",
     "ubuntu-2004",
     "ubuntu-2204",
+    "ubuntu-2404",
 ]
 WINDOWS = [
     "windows-2019",
@@ -61,18 +63,20 @@ STABLE_DISTROS = [
     "debian-10",
     "debian-11",
     "debian-12",
-    "fedora-38",
     "fedora-39",
+    "fedora-40",
     "opensuse-15",
     "opensuse-tumbleweed",
     "oraclelinux-7",
     "oraclelinux-8",
+    "oraclelinux-9",
     "photon-4",
     "photon-5",
     "rockylinux-8",
     "rockylinux-9",
     "ubuntu-2004",
     "ubuntu-2204",
+    "ubuntu-2404",
 ]
 
 ONEDIR_DISTROS = [
@@ -90,12 +94,14 @@ ONEDIR_DISTROS = [
     "fedora-39",
     "oraclelinux-7",
     "oraclelinux-8",
+    "oraclelinux-9",
     "photon-4",
     "photon-5",
     "rockylinux-8",
     "rockylinux-9",
     "ubuntu-2004",
     "ubuntu-2204",
+    "ubuntu-2404",
 ]
 
 ONEDIR_RC_DISTROS = [
@@ -111,12 +117,14 @@ ONEDIR_RC_DISTROS = [
     "debian-12",
     "oraclelinux-7",
     "oraclelinux-8",
+    "oraclelinux-9",
     "photon-4",
     "photon-5",
     "rockylinux-8",
     "rockylinux-9",
     "ubuntu-2004",
     "ubuntu-2204",
+    "ubuntu-2404",
 ]
 
 BLACKLIST_3006 = [
@@ -147,6 +155,7 @@ BLACKLIST_GIT_3006 = [
     "ubuntu-2004",
     "ubuntu-2204",
     "ubuntu-2310",
+    "ubuntu-2404",
 ]
 
 BLACKLIST_GIT_MASTER = [
@@ -212,6 +221,7 @@ GIT_DISTRO_BLACKLIST = [
     "opensuse-15",
     "oraclelinux-7",
     "oraclelinux-8",
+    "oraclelinux-9",
     "rockylinux-8",
 ]
 
@@ -232,20 +242,22 @@ DISTRO_DISPLAY_NAMES = {
     "debian-10": "Debian 10",
     "debian-11": "Debian 11",
     "debian-12": "Debian 12",
-    "fedora-38": "Fedora 38",
     "fedora-39": "Fedora 39",
+    "fedora-40": "Fedora 40",
     "gentoo": "Gentoo",
     "gentoo-systemd": "Gentoo (systemd)",
     "opensuse-15": "Opensuse 15",
     "opensuse-tumbleweed": "Opensuse Tumbleweed",
     "oraclelinux-7": "Oracle Linux 7",
     "oraclelinux-8": "Oracle Linux 8",
+    "oraclelinux-9": "Oracle Linux 9",
     "photon-4": "Photon OS 4",
     "photon-5": "Photon OS 5",
     "rockylinux-8": "Rocky Linux 8",
     "rockylinux-9": "Rocky Linux 9",
     "ubuntu-2004": "Ubuntu 20.04",
     "ubuntu-2204": "Ubuntu 22.04",
+    "ubuntu-2404": "Ubuntu 24.04",
     "macos-12": "macOS 12",
     "macos-13": "macOS 13",
     "freebsd-131": "FreeBSD 13.1",

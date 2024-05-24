@@ -630,7 +630,7 @@ elif [ "$ITYPE" = "stable" ]; then
         _ONEDIR_REV="latest"
         ITYPE="onedir"
     else
-        if [ "$(echo "$1" | grep -E '^(nightly|latest|3005|3006)$')" != "" ]; then
+        if [ "$(echo "$1" | grep -E '^(nightly|latest|3005|3006|3007)$')" != "" ]; then
             ONEDIR_REV="$1"
             _ONEDIR_REV="$1"
             ITYPE="onedir"
@@ -641,7 +641,7 @@ elif [ "$ITYPE" = "stable" ]; then
             ITYPE="onedir"
             shift
         else
-            echo "Unknown stable version: $1 (valid: 3005, 3006, latest)"
+            echo "Unknown stable version: $1 (valid: 3005, 3006, 3007, latest)"
             exit 1
         fi
     fi
@@ -673,7 +673,7 @@ elif [ "$ITYPE" = "onedir" ]; then
     if [ "$#" -eq 0 ];then
         ONEDIR_REV="latest"
     else
-        if [ "$(echo "$1" | grep -E '^(nightly|latest|3005|3006)$')" != "" ]; then
+        if [ "$(echo "$1" | grep -E '^(nightly|latest|3005|3006|3007)$')" != "" ]; then
             ONEDIR_REV="$1"
             shift
         elif [ "$(echo "$1" | grep -E '^(3005(\.[0-9]*)?)')" != "" ]; then
@@ -685,7 +685,7 @@ elif [ "$ITYPE" = "onedir" ]; then
             ONEDIR_REV="minor/$1"
             shift
         else
-            echo "Unknown onedir version: $1 (valid: 3005, 3006, latest, nightly.)"
+            echo "Unknown onedir version: $1 (valid: 3005, 3006, 3007, latest, nightly.)"
             exit 1
         fi
     fi

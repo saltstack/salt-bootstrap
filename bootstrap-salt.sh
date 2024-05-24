@@ -1612,6 +1612,9 @@ __ubuntu_codename_translation() {
         "22")
             DISTRO_CODENAME="jammy"
             ;;
+        "24")
+            DISTRO_CODENAME="noble"
+            ;;
         *)
             DISTRO_CODENAME="trusty"
             ;;

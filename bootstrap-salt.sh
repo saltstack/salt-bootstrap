@@ -1713,11 +1713,6 @@ __debian_codename_translation() {
             ;;
         "12")
             DISTRO_CODENAME="bookworm"
-            # FIXME - TEMPORARY
-            # use bullseye packages until bookworm packages are available
-            DISTRO_CODENAME="bullseye"
-            DISTRO_MAJOR_VERSION=11
-            rv=11
             ;;
         *)
             DISTRO_CODENAME="stretch"

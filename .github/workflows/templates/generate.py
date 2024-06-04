@@ -12,10 +12,8 @@ LINUX_DISTROS = [
     "amazon-2",
     "amazon-2023",
     "arch",
-    "centos-7",
     "centos-stream8",
     "centos-stream9",
-    "debian-10",
     "debian-11",
     "debian-12",
     "fedora-39",
@@ -45,11 +43,6 @@ OSX = [
     "macos-13",
 ]
 
-BSD = [
-    "freebsd-131",
-    "freebsd-123",
-    "openbsd-7",
-]
 
 STABLE_DISTROS = [
     "almalinux-8",
@@ -57,10 +50,8 @@ STABLE_DISTROS = [
     "amazon-2",
     "amazon-2023",
     "arch",
-    "centos-7",
     "centos-stream8",
     "centos-stream9",
-    "debian-10",
     "debian-11",
     "debian-12",
     "fedora-39",
@@ -84,14 +75,12 @@ ONEDIR_DISTROS = [
     "almalinux-9",
     "amazon-2",
     "amazon-2023",
-    "centos-7",
     "centos-stream8",
     "centos-stream9",
-    "debian-10",
     "debian-11",
     "debian-12",
-    "fedora-38",
     "fedora-39",
+    "fedora-40",
     "oraclelinux-7",
     "oraclelinux-8",
     "oraclelinux-9",
@@ -109,10 +98,8 @@ ONEDIR_RC_DISTROS = [
     "almalinux-9",
     "amazon-2",
     "amazon-2023",
-    "centos-7",
     "centos-stream8",
     "centos-stream9",
-    "debian-10",
     "debian-11",
     "debian-12",
     "oraclelinux-7",
@@ -140,11 +127,10 @@ BLACKLIST_GIT_3006 = [
     "amazon-2",
     "arch",
     "centos-stream9",
-    "debian-10",
     "debian-11",
     "debian-12",
-    "fedora-38",
     "fedora-39",
+    "fedora-40",
     "gentoo",
     "gentoo-systemd",
     "opensuse-15",
@@ -160,9 +146,6 @@ BLACKLIST_GIT_3006 = [
 
 BLACKLIST_GIT_MASTER = [
     "amazon-2",
-    "debian-10",
-    "freebsd-131",
-    "freebsd-123",
 ]
 
 SALT_VERSIONS = [
@@ -214,10 +197,9 @@ GIT_VERSION_BLACKLIST = [
 #
 GIT_DISTRO_BLACKLIST = [
     "almalinux-8",
-    "centos-7",
     "centos-stream8",
-    "fedora-38",
     "fedora-39",
+    "fedora-40",
     "opensuse-15",
     "oraclelinux-7",
     "oraclelinux-8",
@@ -236,10 +218,8 @@ DISTRO_DISPLAY_NAMES = {
     "amazon-2": "Amazon 2",
     "amazon-2023": "Amazon 2023",
     "arch": "Arch",
-    "centos-7": "CentOS 7",
     "centos-stream8": "CentOS Stream 8",
     "centos-stream9": "CentOS Stream 9",
-    "debian-10": "Debian 10",
     "debian-11": "Debian 11",
     "debian-12": "Debian 12",
     "fedora-39": "Fedora 39",
@@ -260,9 +240,6 @@ DISTRO_DISPLAY_NAMES = {
     "ubuntu-2404": "Ubuntu 24.04",
     "macos-12": "macOS 12",
     "macos-13": "macOS 13",
-    "freebsd-131": "FreeBSD 13.1",
-    "freebsd-123": "FreeBSD 12.3",
-    "openbsd-7": "OpenBSD 7",
     "windows-2019": "Windows 2019",
     "windows-2022": "Windows 2022",
 }
@@ -295,68 +272,6 @@ TEMPLATE = """
 def generate_test_jobs():
     test_jobs = ""
     needs = ["lint", "generate-actions-workflow"]
-
-    for distro in BSD:
-        test_jobs += "\n"
-        runs_on = "macos-12"
-        runs_on = f"\n      runs-on: {runs_on}"
-        ifcheck = "\n    if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'"
-        uses = "./.github/workflows/test-bsd.yml"
-        instances = []
-        timeout_minutes = (
-            TIMEOUT_OVERRIDES[distro]
-            if distro in TIMEOUT_OVERRIDES
-            else TIMEOUT_DEFAULT
-        )
-        for salt_version in SALT_VERSIONS:
-
-            if salt_version == "latest":
-                if distro in LATEST_PKG_BLACKLIST:
-                    continue
-
-                instances.append(salt_version)
-                continue
-
-            if distro == "openbsd-7":
-                # Only test latest on OpenBSD 6
-                continue
-
-            if salt_version != "master":
-                # Only test the master branch on BSD's
-                continue
-
-            # BSD's don't have a stable release, only use git
-            for bootstrap_type in ["git"]:
-
-                BLACKLIST = {}
-                if bootstrap_type == "git":
-                    BLACKLIST = {
-                        "master": BLACKLIST_GIT_MASTER,
-                    }
-
-                    # .0 versions are a virtual version for pinning to the first
-                    # point release of a major release, such as 3006,
-                    # there is no git version.
-                    if salt_version.endswith("-0"):
-                        continue
-
-                if salt_version in ("master") and distro in BLACKLIST[salt_version]:
-                    continue
-
-                kitchen_target = f"{bootstrap_type}-{salt_version}"
-                instances.append(kitchen_target)
-
-        if instances:
-            needs.append(distro)
-            test_jobs += TEMPLATE.format(
-                distro=distro,
-                runs_on=runs_on,
-                uses=uses,
-                ifcheck=ifcheck,
-                instances=json.dumps(instances),
-                display_name=DISTRO_DISPLAY_NAMES[distro],
-                timeout_minutes=timeout_minutes,
-            )
 
     test_jobs += "\n"
     for distro in OSX:

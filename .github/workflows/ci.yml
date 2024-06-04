@@ -115,51 +115,6 @@ jobs:
           path: exitstatus
 
 
-  freebsd-131:
-    name: FreeBSD 13.1
-    if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
-    uses: ./.github/workflows/test-bsd.yml
-    needs:
-      - lint
-      - generate-actions-workflow
-    with:
-      distro-slug: freebsd-131
-      display-name: FreeBSD 13.1
-      timeout: 20
-      runs-on: macos-12
-      instances: '["latest"]'
-
-
-  freebsd-123:
-    name: FreeBSD 12.3
-    if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
-    uses: ./.github/workflows/test-bsd.yml
-    needs:
-      - lint
-      - generate-actions-workflow
-    with:
-      distro-slug: freebsd-123
-      display-name: FreeBSD 12.3
-      timeout: 20
-      runs-on: macos-12
-      instances: '["latest"]'
-
-
-  openbsd-7:
-    name: OpenBSD 7
-    if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
-    uses: ./.github/workflows/test-bsd.yml
-    needs:
-      - lint
-      - generate-actions-workflow
-    with:
-      distro-slug: openbsd-7
-      display-name: OpenBSD 7
-      timeout: 20
-      runs-on: macos-12
-      instances: '["latest"]'
-
-
 
   macos-12:
     name: macOS 12
@@ -293,20 +248,6 @@ jobs:
       instances: '["git-master", "latest", "default"]'
 
 
-  centos-7:
-    name: CentOS 7
-    if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
-    uses: ./.github/workflows/test-linux.yml
-    needs:
-      - lint
-      - generate-actions-workflow
-    with:
-      distro-slug: centos-7
-      display-name: CentOS 7
-      timeout: 20
-      instances: '["stable-3006", "onedir-3006", "stable-3006-6", "latest", "default"]'
-
-
   centos-stream8:
     name: CentOS Stream 8
     if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
@@ -333,20 +274,6 @@ jobs:
       display-name: CentOS Stream 9
       timeout: 20
       instances: '["stable-3006", "onedir-3006", "stable-3006-6", "git-master", "latest", "default"]'
-
-
-  debian-10:
-    name: Debian 10
-    if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
-    uses: ./.github/workflows/test-linux.yml
-    needs:
-      - lint
-      - generate-actions-workflow
-    with:
-      distro-slug: debian-10
-      display-name: Debian 10
-      timeout: 20
-      instances: '["stable-3006", "onedir-3006", "stable-3006-6", "latest", "default"]'
 
 
   debian-11:
@@ -402,7 +329,7 @@ jobs:
       distro-slug: fedora-40
       display-name: Fedora 40
       timeout: 20
-      instances: '["stable-3006", "git-3006", "stable-3006-6", "git-master", "latest", "default"]'
+      instances: '["stable-3006", "onedir-3006", "stable-3006-6", "latest", "default"]'
 
 
   gentoo:
@@ -609,9 +536,6 @@ jobs:
     needs:
       - lint
       - generate-actions-workflow
-      - freebsd-131
-      - freebsd-123
-      - openbsd-7
       - macos-12
       - macos-13
       - windows-2019
@@ -621,10 +545,8 @@ jobs:
       - amazon-2
       - amazon-2023
       - arch
-      - centos-7
       - centos-stream8
       - centos-stream9
-      - debian-10
       - debian-11
       - debian-12
       - fedora-39

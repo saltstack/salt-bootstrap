@@ -24,7 +24,7 @@
 #======================================================================================================================
 set -o nounset                              # Treat unset variables as an error
 
-__ScriptVersion="2024.04.03"
+__ScriptVersion="2024.06.04"
 __ScriptName="bootstrap-salt.sh"
 
 __ScriptFullName="$0"
@@ -1419,18 +1419,19 @@ __ubuntu_derivatives_translation() {
     # Mappings
     trisquel_10_ubuntu_base="20.04"
     trisquel_11_ubuntu_base="22.04"
-    ## DGM linaro_12_ubuntu_base="12.04"
-    ## DGM elementary_os_02_ubuntu_base="12.04"
-    ## DGM neon_16_ubuntu_base="16.04"
-    ## DGM neon_18_ubuntu_base="18.04"
+    trisquel_12_ubuntu_base="24.04"
     neon_20_ubuntu_base="20.04"
     neon_22_ubuntu_base="22.04"
+    neon_24_ubuntu_base="24.04"
     linuxmint_20_ubuntu_base="20.04"
-    linuxmint_21_ubuntu_base="20.04"
+    linuxmint_21_ubuntu_base="22.04"
+    linuxmint_22_ubuntu_base="24.04"
     elementary_os_06_ubuntu_base="20.04"
-    elementary_os_07_ubuntu_base="20.04"
+    elementary_os_07_ubuntu_base="22.04"
+    elementary_os_08_ubuntu_base="24.04"
     pop_20_ubuntu_base="22.04"
     pop_22_ubuntu_base="22.04"
+    pop_24_ubuntu_base="24.04"
 
     # Translate Ubuntu derivatives to their base Ubuntu version
     match=$(echo "$DISTRO_NAME_L" | grep -E ${UBUNTU_DERIVATIVES})
@@ -1592,21 +1593,21 @@ __debian_derivatives_translation() {
 
     DEBIAN_DERIVATIVES="(cumulus|devuan|kali|linuxmint|raspbian|bunsenlabs|turnkey)"
     # Mappings
-    cumulus_2_debian_base="7.0"
-    cumulus_3_debian_base="8.0"
-    cumulus_4_debian_base="10.0"
-    devuan_1_debian_base="8.0"
-    devuan_2_debian_base="9.0"
+    cumulus_5_debian_base="11.0"
+    cumulus_6_debian_base="12.0"
+    devuan_4_debian_base="11.0"
+    devuan_5_debian_base="12.0"
     kali_1_debian_base="7.0"
     kali_2021_debian_base="10.0"
-    linuxmint_1_debian_base="8.0"
-    raspbian_8_debian_base="8.0"
-    raspbian_9_debian_base="9.0"
-    raspbian_10_debian_base="10.0"
+    linuxmint_4_debian_base="11.0"
+    linuxmint_5_debian_base="12.0"
     raspbian_11_debian_base="11.0"
     raspbian_12_debian_base="12.0"
     bunsenlabs_9_debian_base="9.0"
-    turnkey_9_debian_base="9.0"
+    bunsenlabs_11_debian_base="11.0"
+    bunsenlabs_12_debian_base="12.0"
+    turnkey_11_debian_base="11.0"
+    turnkey_12_debian_base="12.0"
 
     # Translate Debian derivatives to their base Debian version
     match=$(echo "$DISTRO_NAME_L" | grep -E ${DEBIAN_DERIVATIVES})
@@ -3026,8 +3027,8 @@ __install_saltstack_ubuntu_repository() {
        { [ "$DISTRO_MAJOR_VERSION" -eq 22 ] && [ "$DISTRO_MINOR_VERSION" -eq 10 ]; } || \
         [ "$DISTRO_MAJOR_VERSION" -eq 21 ] ||  [ "$DISTRO_MAJOR_VERSION" -eq 23 ]; then
         echowarn "Non-LTS Ubuntu detected, but stable packages requested. Trying packages for previous LTS release. You may experience problems."
-        UBUNTU_VERSION=22.04
-        UBUNTU_CODENAME="jammy"
+        UBUNTU_VERSION=24.04
+        UBUNTU_CODENAME="noble"
     else
         UBUNTU_VERSION=${DISTRO_VERSION}
         UBUNTU_CODENAME=${DISTRO_CODENAME}
@@ -3071,8 +3072,8 @@ __install_saltstack_ubuntu_onedir_repository() {
        { [ "$DISTRO_MAJOR_VERSION" -eq 22 ] && [ "$DISTRO_MINOR_VERSION" -eq 10 ]; } || \
         [ "$DISTRO_MAJOR_VERSION" -eq 21 ] ||  [ "$DISTRO_MAJOR_VERSION" -eq 23 ]; then
         echowarn "Non-LTS Ubuntu detected, but stable packages requested. Trying packages for previous LTS release. You may experience problems."
-        UBUNTU_VERSION=22.04
-        UBUNTU_CODENAME="jammy"
+        UBUNTU_VERSION=24.04
+        UBUNTU_CODENAME="noble"
     else
         UBUNTU_VERSION=${DISTRO_VERSION}
         UBUNTU_CODENAME=${DISTRO_CODENAME}
@@ -3176,9 +3177,9 @@ install_ubuntu_stable_deps() {
 
     if [ "${_UPGRADE_SYS}" -eq "$BS_TRUE" ]; then
         if [ "${_INSECURE_DL}" -eq "$BS_TRUE" ]; then
-            ## TBD DGM Need to understand what this code is doing, since '-ge 20' already covers '-ge 21' etc.
+            ## TBD DGM Need to understand what this code is doing, since '-ge 20' already covers '-ge 21' etc., added 23 & 24 to continue style
             ## also apt-key is deprecated
-            if [ "$DISTRO_MAJOR_VERSION" -ge 20 ] || [ "$DISTRO_MAJOR_VERSION" -ge 21 ] || [ "$DISTRO_MAJOR_VERSION" -ge 22 ]; then
+            if [ "$DISTRO_MAJOR_VERSION" -ge 20 ] || [ "$DISTRO_MAJOR_VERSION" -ge 21 ] || [ "$DISTRO_MAJOR_VERSION" -ge 22 ] || [ "$DISTRO_MAJOR_VERSION" -ge 23 ] || [ "$DISTRO_MAJOR_VERSION" -ge 24 ]; then
                 __apt_get_install_noinput --allow-unauthenticated debian-archive-keyring && apt-get update || return 1
             else
                 __apt_get_install_noinput --allow-unauthenticated debian-archive-keyring &&
@@ -3490,12 +3491,11 @@ install_ubuntu_check_services() {
         [ "$fname" = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq "$BS_FALSE" ] && continue
 
         if [ -f /bin/systemctl ] && [ "$DISTRO_MAJOR_VERSION" -ge 16 ]; then
-            __check_services_systemd "salt-$fname" || return 1
-        elif [ -f /sbin/initctl ] && [ -f "/etc/init/salt-${fname}.conf" ]; then
-            __check_services_upstart "salt-$fname" || return 1
-        elif [ -f "/etc/init.d/salt-$fname" ]; then
-            __check_services_debian "salt-$fname" || return 1
+            __check_services_systemd salt-$fname || return 1
+        elif [ -f /etc/init.d/salt-$fname ]; then
+            __check_services_debian salt-$fname || return 1
         fi
+
     done
 
     return 0
@@ -3726,158 +3726,7 @@ install_debian_git_deps() {
     return 0
 }
 
-install_debian_7_git_deps() {
-    install_debian_deps || return 1
-    install_debian_git_deps || return 1
 
-    return 0
-}
-
-install_debian_8_git_deps() {
-
-    if [ "${_POST_NEON_INSTALL}" -eq "$BS_TRUE" ]; then
-        echodebug "CALLING install_debian_git_deps"
-        install_debian_git_deps || return 1
-        return 0
-    else
-        echoerror "Python 2 is no longer supported, only Py3 packages"
-        return 1
-    fi
-
-    ## DGM install_debian_deps || return 1
-
-    ## DGM if ! __check_command_exists git; then
-    ## DGM     __apt_get_install_noinput git || return 1
-    ## DGM fi
-
-    ## DGM if [ "$_INSECURE_DL" -eq "$BS_FALSE" ] && [ "${_SALT_REPO_URL%%://*}" = "https" ]; then
-    ## DGM     __apt_get_install_noinput ca-certificates
-    ## DGM fi
-
-    ## DGM __git_clone_and_checkout || return 1
-
-    ## DGM __PACKAGES="libzmq3 libzmq3-dev lsb-release python-apt python-crypto python-jinja2"
-    ## DGM __PACKAGES="${__PACKAGES} python-m2crypto python-msgpack python-requests python-systemd"
-    ## DGM __PACKAGES="${__PACKAGES} python-yaml python-zmq python-concurrent.futures"
-
-    ## DGM if [ "$_INSTALL_CLOUD" -eq "$BS_TRUE" ]; then
-    ## DGM     # Install python-libcloud if asked to
-    ## DGM     __PACKAGES="${__PACKAGES} python-libcloud"
-    ## DGM fi
-
-    ## DGM __PIP_PACKAGES=''
-    ## DGM if (__check_pip_allowed >/dev/null 2>&1); then
-    ## DGM     __PIP_PACKAGES='tornado<5.0'
-    ## DGM     # Install development environment for building tornado Python module
-    ## DGM     __PACKAGES="${__PACKAGES} build-essential python-dev"
-
-    ## DGM     if ! __check_command_exists pip; then
-    ## DGM         __PACKAGES="${__PACKAGES} python-pip"
-    ## DGM     fi
-    ## DGM # Attempt to configure backports repo on non-x86_64 system
-    ## DGM elif [ "$_DISABLE_REPOS" -eq "$BS_FALSE" ] && [ "$DPKG_ARCHITECTURE" != "amd64" ]; then
-    ## DGM     # Check if Debian Backports repo already configured
-    ## DGM     if ! apt-cache policy | grep -q 'Debian Backports'; then
-    ## DGM         echo 'deb http://httpredir.debian.org/debian jessie-backports main' > \
-    ## DGM             /etc/apt/sources.list.d/backports.list
-    ## DGM     fi
-
-    ## DGM     __wait_for_apt apt-get update || return 1
-
-    ## DGM     # python-tornado package should be installed from backports repo
-    ## DGM     __PACKAGES="${__PACKAGES} python-backports.ssl-match-hostname python-tornado/jessie-backports"
-    ## DGM else
-    ## DGM     __PACKAGES="${__PACKAGES} python-backports.ssl-match-hostname python-tornado"
-    ## DGM fi
-
-    ## DGM # shellcheck disable=SC2086
-    ## DGM __apt_get_install_noinput "${__PACKAGES}" || return 1
-
-    ## DGM if [ "${__PIP_PACKAGES}" != "" ]; then
-    ## DGM     # shellcheck disable=SC2086,SC2090
-    ## DGM     pip install -U "${__PIP_PACKAGES}" || return 1
-    ## DGM fi
-
-    ## DGM # Let's trigger config_salt()
-    ## DGM if [ "$_TEMP_CONFIG_DIR" = "null" ]; then
-    ## DGM     _TEMP_CONFIG_DIR="${_SALT_GIT_CHECKOUT_DIR}/conf/"
-    ## DGM     CONFIG_SALT_FUNC="config_salt"
-    ## DGM fi
-
-    ## DGM return 0
-}
-
-install_debian_9_git_deps() {
-
-    if [ "${_POST_NEON_INSTALL}" -eq "$BS_TRUE" ]; then
-        install_debian_git_deps || return 1
-        return 0
-    else
-        echoerror "Python 2 is no longer supported, only Py3 packages"
-        return 1
-    fi
-
-    ## DGM install_debian_deps || return 1
-    ## DGM install_debian_git_pre || return 1
-
-    ## DGM __PACKAGES="libzmq5 lsb-release"
-
-    ## DGM if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 3 ]; then
-    ## DGM     PY_PKG_VER=3
-    ## DGM else
-    ## DGM     PY_PKG_VER=""
-
-    ## DGM     # These packages are PY2-ONLY
-    ## DGM     __PACKAGES="${__PACKAGES} python-backports-abc python-m2crypto python-concurrent.futures"
-    ## DGM fi
-
-    ## DGM __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-apt python${PY_PKG_VER}-crypto python${PY_PKG_VER}-jinja2"
-    ## DGM __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-msgpack python${PY_PKG_VER}-requests python${PY_PKG_VER}-systemd"
-    ## DGM __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado python${PY_PKG_VER}-yaml python${PY_PKG_VER}-zmq"
-
-    ## DGM if [ "$_INSTALL_CLOUD" -eq "$BS_TRUE" ]; then
-    ## DGM     # Install python-libcloud if asked to
-    ## DGM     __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-libcloud"
-    ## DGM fi
-
-    ## DGM # shellcheck disable=SC2086
-    ## DGM __apt_get_install_noinput ${__PACKAGES} || return 1
-
-    ## DGM return 0
-}
-
-install_debian_10_git_deps() {
-
-    if [ "${_POST_NEON_INSTALL}" -eq "$BS_TRUE" ]; then
-        install_debian_git_deps || return 1
-        return 0
-    else
-        echoerror "Python 2 is no longer supported, only Py3 packages"
-        return 1
-    fi
-
-    ## DGM install_debian_deps || return 1
-    ## DGM install_debian_git_pre || return 1
-
-    ## DGM if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 3 ]; then
-    ## DGM     _py=${_PY_EXE}
-    ## DGM     PY_PKG_VER=3
-    ## DGM     __PACKAGES="python${PY_PKG_VER}-distutils"
-    ## DGM else
-    ## DGM     _py="python"
-    ## DGM     PY_PKG_VER=""
-    ## DGM     __PACKAGES=""
-    ## DGM fi
-
-    ## DGM __install_tornado_pip "${_py}" || return 1
-    ## DGM __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-msgpack python${PY_PKG_VER}-jinja2"
-    ## DGM __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado python${PY_PKG_VER}-yaml python${PY_PKG_VER}-zmq"
-
-    ## DGM # shellcheck disable=SC2086
-    ## DGM __apt_get_install_noinput "${__PACKAGES}" || return 1
-
-    ## DGM return 0
-}
 
 install_debian_stable() {
     __PACKAGES=""
@@ -3898,21 +3747,6 @@ install_debian_stable() {
     # shellcheck disable=SC2086
     __apt_get_install_noinput "${__PACKAGES}" || return 1
 
-    return 0
-}
-
-install_debian_7_stable() {
-    install_debian_stable || return 1
-    return 0
-}
-
-install_debian_8_stable() {
-    install_debian_stable || return 1
-    return 0
-}
-
-install_debian_9_stable() {
-    install_debian_stable || return 1
     return 0
 }
 
@@ -3957,21 +3791,6 @@ install_debian_git() {
         # shellcheck disable=SC2086
         "${_PYEXE}" setup.py "${SETUP_PY_INSTALL_ARGS}" install --install-layout=deb || return 1
     fi
-}
-
-install_debian_7_git() {
-    install_debian_git || return 1
-    return 0
-}
-
-install_debian_8_git() {
-    install_debian_git || return 1
-    return 0
-}
-
-install_debian_9_git() {
-    install_debian_git || return 1
-    return 0
 }
 
 install_debian_onedir() {
@@ -4462,6 +4281,8 @@ install_fedora_onedir_deps() {
     ## DGM     __PACKAGES="yum-utils chkconfig"
     ## DGM fi
 
+    __PACKAGES=""
+
     if [ "$DISTRO_MAJOR_VERSION" -ge 9 ]; then
         __PACKAGES="chkconfig"
     elif [ "$DISTRO_MAJOR_VERSION" -ge 8 ]; then
@@ -4469,8 +4290,6 @@ install_fedora_onedir_deps() {
     else
         __PACKAGES="yum-utils chkconfig procps"
     fi
-
-    __PACKAGES="${__PACKAGES}"
 
     # shellcheck disable=SC2086
     __yum_install_noinput "${__PACKAGES}" || return 1
@@ -4617,6 +4436,8 @@ install_centos_stable_deps() {
     ## DGM     __PACKAGES="yum-utils chkconfig"
     ## DGM fi
 
+    __PACKAGES=""
+
     if [ "$DISTRO_MAJOR_VERSION" -ge 9 ]; then
         __PACKAGES="chkconfig"
     elif [ "$DISTRO_MAJOR_VERSION" -ge 8 ]; then
@@ -4624,8 +4445,6 @@ install_centos_stable_deps() {
     else
         __PACKAGES="yum-utils chkconfig procps"
     fi
-
-    __PACKAGES="${__PACKAGES}"
 
     # shellcheck disable=SC2086
     __yum_install_noinput "${__PACKAGES}" || return 1
@@ -4843,6 +4662,8 @@ install_centos_onedir_deps() {
     ## DGM     __PACKAGES="yum-utils chkconfig"
     ## DGM fi
 
+    __PACKAGES=""
+
     if [ "$DISTRO_MAJOR_VERSION" -ge 9 ]; then
         __PACKAGES="chkconfig"
     elif [ "$DISTRO_MAJOR_VERSION" -ge 8 ]; then
@@ -4850,8 +4671,6 @@ install_centos_onedir_deps() {
     else
         __PACKAGES="yum-utils chkconfig procps"
     fi
-
-    __PACKAGES="${__PACKAGES}"
 
     # shellcheck disable=SC2086
     __yum_install_noinput "${__PACKAGES}" || return 1

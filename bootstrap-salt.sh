@@ -1288,91 +1288,6 @@ __install_python() {
 }
 
 
-#---  FUNCTION  -------------------------------------------------------------------------------------------------------
-#          NAME:  __gather_sunos_system_info
-#   DESCRIPTION:  Discover SunOS system info
-#----------------------------------------------------------------------------------------------------------------------
-__gather_sunos_system_info() {
-    if [ -f /sbin/uname ]; then
-        DISTRO_VERSION=$(/sbin/uname -X | awk '/[kK][eE][rR][nN][eE][lL][iI][dD]/ { print $3 }')
-    fi
-
-    DISTRO_NAME=""
-    if [ -f /etc/release ]; then
-        while read -r line; do
-            [ "${DISTRO_NAME}" != "" ] && break
-            case "$line" in
-                *OpenIndiana*oi_[0-9]*)
-                    DISTRO_NAME="OpenIndiana"
-                    DISTRO_VERSION=$(echo "$line" | sed -nE "s/OpenIndiana(.*)oi_([[:digit:]]+)(.*)/\\2/p")
-                    break
-                    ;;
-                *OpenSolaris*snv_[0-9]*)
-                    DISTRO_NAME="OpenSolaris"
-                    DISTRO_VERSION=$(echo "$line" | sed -nE "s/OpenSolaris(.*)snv_([[:digit:]]+)(.*)/\\2/p")
-                    break
-                    ;;
-                *Oracle*Solaris*[0-9]*)
-                    DISTRO_NAME="Oracle Solaris"
-                    DISTRO_VERSION=$(echo "$line" | sed -nE "s/(Oracle Solaris) ([[:digit:]]+)(.*)/\\2/p")
-                    break
-                    ;;
-                *Solaris*)
-                    DISTRO_NAME="Solaris"
-                    # Let's make sure we not actually on a Joyent's SmartOS VM since some releases
-                    # don't have SmartOS in `/etc/release`, only `Solaris`
-                    if uname -v | grep joyent >/dev/null 2>&1; then
-                        DISTRO_NAME="SmartOS"
-                    fi
-                    break
-                    ;;
-                *NexentaCore*)
-                    DISTRO_NAME="Nexenta Core"
-                    break
-                    ;;
-                *SmartOS*)
-                    DISTRO_NAME="SmartOS"
-                    break
-                    ;;
-                *OmniOS*)
-                    DISTRO_NAME="OmniOS"
-                    DISTRO_VERSION=$(echo "$line" | awk '{print $3}')
-                    _SIMPLIFY_VERSION=$BS_FALSE
-                    break
-                    ;;
-            esac
-        done < /etc/release
-    fi
-
-    if [ "${DISTRO_NAME}" = "" ]; then
-        DISTRO_NAME="Solaris"
-        DISTRO_VERSION=$(
-            echo "${OS_VERSION}" |
-            sed -e 's;^4\.;1.;' \
-                -e 's;^5\.\([0-6]\)[^0-9]*$;2.\1;' \
-                -e 's;^5\.\([0-9][0-9]*\).*;\1;'
-        )
-    fi
-
-    if [ "${DISTRO_NAME}" = "SmartOS" ]; then
-        VIRTUAL_TYPE="smartmachine"
-        # shellcheck disable=SC2034
-        if [ "$(zonename)" = "global" ]; then
-            VIRTUAL_TYPE="global"
-        fi
-    fi
-}
-
-
-#---  FUNCTION  -------------------------------------------------------------------------------------------------------
-#          NAME:  __gather_bsd_system_info
-#   DESCRIPTION:  Discover OpenBSD, NetBSD and FreeBSD systems information
-#----------------------------------------------------------------------------------------------------------------------
-__gather_bsd_system_info() {
-    DISTRO_NAME=${OS_NAME}
-    DISTRO_VERSION=$(echo "${OS_VERSION}" | sed -e 's;[()];;' -e 's/-.*$//')
-}
-
 
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #          NAME:  __gather_osx_system_info
@@ -1392,12 +1307,6 @@ __gather_system_info() {
     case ${OS_NAME_L} in
         linux )
             __gather_linux_system_info
-            ;;
-        sunos )
-            __gather_sunos_system_info
-            ;;
-        openbsd|freebsd|netbsd )
-            __gather_bsd_system_info
             ;;
         darwin )
             __gather_osx_system_info
@@ -1832,14 +1741,6 @@ __check_end_of_life_versions() {
             fi
             ;;
 
-        freebsd)
-            # FreeBSD versions lower than 11 are EOL
-            if [ "$DISTRO_MAJOR_VERSION" -lt 11 ]; then
-                echoerror "Versions lower than FreeBSD 11 are EOL and no longer supported."
-                exit 1
-            fi
-            ;;
-
         *)
             ;;
     esac
@@ -1969,7 +1870,7 @@ if [ "$ITYPE" = "git" ]; then
         __TAG_REGEX_MATCH="MATCH"
     else
         case ${OS_NAME_L} in
-            openbsd|freebsd|netbsd|darwin )
+            darwin )
                 __NEW_VS_TAG_REGEX_MATCH=$(echo "${GIT_REV}" | sed -E 's/^(v?3[0-9]{3}(\.[0-9]{1,2})?).*$/MATCH/')
                 if [ "$__NEW_VS_TAG_REGEX_MATCH" = "MATCH" ]; then
                     _POST_NEON_INSTALL=$BS_TRUE
@@ -2610,32 +2511,6 @@ __check_services_debian() {
     fi
 }   # ----------  end of function __check_services_debian  ----------
 
-
-#---  FUNCTION  -------------------------------------------------------------------------------------------------------
-#          NAME:  __check_services_openbsd
-#   DESCRIPTION:  Return 0 or 1 in case the service is enabled or not
-#    PARAMETERS:  servicename
-#----------------------------------------------------------------------------------------------------------------------
-__check_services_openbsd() {
-    if [ $# -eq 0 ]; then
-        echoerror "You need to pass a service name to check!"
-        exit 1
-    elif [ $# -ne 1 ]; then
-        echoerror "You need to pass a service name to check as the single argument to the function"
-    fi
-
-    servicename=$1
-    echodebug "Checking if service ${servicename} is enabled"
-
-    # shellcheck disable=SC2086,SC2046,SC2144
-    if rcctl get ${servicename} status; then
-        echodebug "Service ${servicename} is enabled"
-        return 0
-    else
-        echodebug "Service ${servicename} is NOT enabled"
-        return 1
-    fi
-}   # ----------  end of function __check_services_openbsd  ----------
 
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #          NAME:  __check_services_openrc
@@ -6548,267 +6423,6 @@ install_photon_onedir_post() {
 }
 #
 #   Ended Fedora Install Functions
-#
-#######################################################################################################################
-
-#######################################################################################################################
-#
-#   FreeBSD Install Functions
-#
-
-# Using a separate conf step to head for idempotent install...
-__configure_freebsd_pkg_details() {
-    _SALT_ETC_DIR="/usr/local/etc/salt"
-    _PKI_DIR="${_SALT_ETC_DIR}/pki"
-    _POST_NEON_PIP_INSTALL_ARGS="--prefix=/usr/local"
-}
-
-install_freebsd_deps() {
-    __configure_freebsd_pkg_details
-    pkg install -y pkg
-}
-
-install_freebsd_git_deps() {
-    install_freebsd_deps || return 1
-
-    if ! __check_command_exists git; then
-        /usr/local/sbin/pkg install -y git || return 1
-    fi
-    __git_clone_and_checkout || return 1
-
-    /usr/local/sbin/pkg install -y python py39-pip py39-setuptools libzmq4 libunwind || return 1
-
-    echodebug "Adapting paths to FreeBSD"
-    # The list of files was taken from Salt's BSD port Makefile
-    for file in doc/man/salt-key.1 doc/man/salt-cp.1 doc/man/salt-minion.1 \
-                doc/man/salt-syndic.1 doc/man/salt-master.1 doc/man/salt-run.1 \
-                doc/man/salt.7 doc/man/salt.1 doc/man/salt-call.1; do
-        [ ! -f "$file" ] && continue
-        echodebug "Patching ${file}"
-        sed -in -e "s|/etc/salt|${_SALT_ETC_DIR}|" \
-                -e "s|/srv/salt|${_SALT_ETC_DIR}/states|" \
-                -e "s|/srv/pillar|${_SALT_ETC_DIR}/pillar|" "${file}"
-    done
-    if [ ! -f salt/syspaths.py ]; then
-        # We still can't provide the system paths, salt 0.16.x
-        # Let's patch salt's source and adapt paths to what's expected on FreeBSD
-        echodebug "Replacing occurrences of '/etc/salt' with ${_SALT_ETC_DIR}"
-        # The list of files was taken from Salt's BSD port Makefile
-        for file in conf/minion conf/master salt/config.py salt/client.py \
-                    salt/modules/mysql.py salt/utils/parsers.py salt/modules/tls.py \
-                    salt/modules/postgres.py salt/utils/migrations.py; do
-            [ ! -f "$file" ] && continue
-            echodebug "Patching ${file}"
-            sed -in -e "s|/etc/salt|${_SALT_ETC_DIR}|" \
-                    -e "s|/srv/salt|${_SALT_ETC_DIR}/states|" \
-                    -e "s|/srv/pillar|${_SALT_ETC_DIR}/pillar|" "${file}"
-        done
-    fi
-    echodebug "Finished patching"
-
-    # Let's trigger config_salt()
-    if [ "$_TEMP_CONFIG_DIR" = "null" ]; then
-        _TEMP_CONFIG_DIR="${_SALT_GIT_CHECKOUT_DIR}/conf/"
-        CONFIG_SALT_FUNC="config_salt"
-
-    fi
-
-    return 0
-}
-
-install_freebsd_stable() {
-#
-# installing latest version of salt from FreeBSD CURRENT ports repo
-#
-    # shellcheck disable=SC2086
-    /usr/local/sbin/pkg install -y py39-salt || return 1
-
-    return 0
-}
-
-install_freebsd_git() {
-
-    # /usr/local/bin/python3 in FreeBSD is a symlink to /usr/local/bin/python3.7
-    __PYTHON_PATH=$(readlink -f "$(command -v python3)")
-    __ESCAPED_PYTHON_PATH=$(echo "${__PYTHON_PATH}" | sed 's/\//\\\//g')
-
-     __install_salt_from_repo_post_neon "${__PYTHON_PATH}" || return 1
-    for script in salt_api salt_master salt_minion salt_proxy salt_syndic; do
-        __fetch_url "/usr/local/etc/rc.d/${script}" "https://raw.githubusercontent.com/freebsd/freebsd-ports/master/sysutils/py-salt/files/${script}.in" || return 1
-        sed -i '' 's/%%PREFIX%%/\/usr\/local/g' "/usr/local/etc/rc.d/${script}"
-        sed -i '' "s/%%PYTHON_CMD%%/${__ESCAPED_PYTHON_PATH}/g" "/usr/local/etc/rc.d/${script}"
-        chmod +x "/usr/local/etc/rc.d/${script}" || return 1
-    done
-
-    # And we're good to go
-    return 0
-}
-
-install_freebsd_stable_post() {
-    for fname in api master minion syndic; do
-        # Skip salt-api since the service should be opt-in and not necessarily started on boot
-        [ "$fname" = "api" ] && continue
-
-        # Skip if not meant to be installed
-        [ "$fname" = "minion" ] && [ "$_INSTALL_MINION" -eq "$BS_FALSE" ] && continue
-        [ "$fname" = "master" ] && [ "$_INSTALL_MASTER" -eq "$BS_FALSE" ] && continue
-        [ "$fname" = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq "$BS_FALSE" ] && continue
-
-        enable_string="salt_${fname}_enable=YES"
-        grep "$enable_string" /etc/rc.conf >/dev/null 2>&1
-        [ $? -eq 1 ] && sysrc "$enable_string"
-
-    done
-}
-
-install_freebsd_git_post() {
-    install_freebsd_stable_post || return 1
-    return 0
-}
-
-install_freebsd_restart_daemons() {
-    [ "$_START_DAEMONS" -eq "$BS_FALSE" ] && return
-
-    for fname in api master minion syndic; do
-        # Skip salt-api since the service should be opt-in and not necessarily started on boot
-        [ "$fname" = "api" ] && continue
-
-        # Skip if not meant to be installed
-        [ "$fname" = "master" ] && [ "$_INSTALL_MASTER" -eq "$BS_FALSE" ] && continue
-        [ "$fname" = "minion" ] && [ "$_INSTALL_MINION" -eq "$BS_FALSE" ] && continue
-        [ "$fname" = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq "$BS_FALSE" ] && continue
-
-        service "salt_$fname" stop > /dev/null 2>&1
-        service "salt_$fname" start
-    done
-}
-
-install_freebsd_onedir() {
-#
-# call install_freebsd_stable
-#
-    install_freebsd_stable || return 1
-
-    return 0
-}
-#
-#   Ended FreeBSD Install Functions
-#
-#######################################################################################################################
-
-#######################################################################################################################
-#
-#   OpenBSD Install Functions
-#
-
-install_openbsd_deps() {
-    if [ "$_DISABLE_REPOS" -eq "$BS_FALSE" ]; then
-        OPENBSD_REPO='https://cdn.openbsd.org/pub/OpenBSD'
-        echoinfo "setting package repository to $OPENBSD_REPO"
-        echo "${OPENBSD_REPO}" >/etc/installurl || return 1
-    fi
-
-    if [ "${_EXTRA_PACKAGES}" != "" ]; then
-        echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
-        # shellcheck disable=SC2086
-        pkg_add -I -v "${_EXTRA_PACKAGES}" || return 1
-    fi
-    return 0
-}
-
-install_openbsd_git_deps() {
-    install_openbsd_deps || return 1
-
-    if ! __check_command_exists git; then
-        pkg_add -I -v git || return 1
-    fi
-    __git_clone_and_checkout || return 1
-
-    pkg_add -I -v py3-pip py3-setuptools
-
-    #
-    # Let's trigger config_salt()
-    #
-    if [ "$_TEMP_CONFIG_DIR" = "null" ]; then
-        _TEMP_CONFIG_DIR="${_SALT_GIT_CHECKOUT_DIR}/conf/"
-        CONFIG_SALT_FUNC="config_salt"
-    fi
-
-    return 0
-}
-
-install_openbsd_git() {
-    #
-    # Install from git
-    #
-    __install_salt_from_repo_post_neon "${_PY_EXE}" || return 1
-    return 0
-}
-
-install_openbsd_stable() {
-    pkg_add -r -I -v salt || return 1
-    return 0
-}
-
-install_openbsd_post() {
-    for fname in api master minion syndic; do
-        [ "$fname" = "api" ] && continue
-        [ "$fname" = "minion" ] && [ "$_INSTALL_MINION" -eq "$BS_FALSE" ] && continue
-        [ "$fname" = "master" ] && [ "$_INSTALL_MASTER" -eq "$BS_FALSE" ] && continue
-        [ "$fname" = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq "$BS_FALSE" ] && continue
-
-        rcctl enable "salt_$fname"
-    done
-
-    return 0
-}
-
-install_openbsd_check_services() {
-    for fname in api master minion syndic; do
-        # Skip salt-api since the service should be opt-in and not necessarily started on boot
-        [ "$fname" = "api" ] && continue
-
-        # Skip if not meant to be installed
-        [ "$fname" = "master" ] && [ "$_INSTALL_MASTER" -eq "$BS_FALSE" ] && continue
-        [ "$fname" = "minion" ] && [ "$_INSTALL_MINION" -eq "$BS_FALSE" ] && continue
-        [ "$fname" = "syndic" ] && continue
-
-        if [ -f "/etc/rc.d/salt_${fname}" ]; then
-            __check_services_openbsd "salt_${fname}" || return 1
-        fi
-    done
-
-    return 0
-}
-
-install_openbsd_restart_daemons() {
-    [ "$_START_DAEMONS" -eq "$BS_FALSE" ] && return
-
-    for fname in api master minion syndic; do
-        # Skip salt-api since the service should be opt-in and not necessarily started on boot
-        [ "$fname" = "api" ] && continue
-
-        # Skip if not meant to be installed
-        [ "$fname" = "master" ] && [ "$_INSTALL_MASTER" -eq "$BS_FALSE" ] && continue
-        [ "$fname" = "minion" ] && [ "$_INSTALL_MINION" -eq "$BS_FALSE" ] && continue
-        [ "$fname" = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq "$BS_FALSE" ] && continue
-
-        rcctl restart "salt_${fname}"
-    done
-
-    return 0
-}
-
-install_openbsd_onedir() {
-#
-# Call install_openbsd_stable
-#
-    install_openbsd_stable || return 1
-
-    return 0
-}
-#
-#   Ended OpenBSD Install Functions
 #
 #######################################################################################################################
 

@@ -125,7 +125,6 @@ platforms:
         - echo "PubkeyAcceptedAlgorithms +ssh-rsa" | tee -a /etc/ssh/sshd_config
   - name: rockylinux-8
   - name: oraclelinux-8
-  - name: oraclelinux-7
   - name: rockylinux-8
   - name: ubuntu-22.04
   - name: ubuntu-23.10
@@ -166,9 +165,6 @@ suites:
       - arch
       - gentoo
       - gentoo-systemd
-      - freebsd-131
-      - freebsd-123
-      - openbsd-6
   - name: git-3006x
     provisioner:
       salt_version: 3006.x
@@ -179,9 +175,6 @@ suites:
       - arch
       - gentoo
       - gentoo-systemd
-      - freebsd-131
-      - freebsd-123
-      - openbsd-6
   - name: stable-3006
     provisioner:
       salt_version: 3006
@@ -190,9 +183,6 @@ suites:
       - opensuse-15
       - opensuse-tumbleweed
       - arch
-      - freebsd-131
-      - freebsd-123
-      - openbsd-6
   - name: stable-3006-8
     provisioner:
       salt_version: 3006.8
@@ -201,9 +191,6 @@ suites:
       - opensuse-15
       - opensuse-tumbleweed
       - arch
-      - freebsd-131
-      - freebsd-123
-      - openbsd-6
   - name: git-master
     provisioner:
       salt_version: master
@@ -245,10 +232,7 @@ suites:
       salt_bootstrap_options: -R staging.repo.saltproject.io -MP onedir_rc %s
     excludes:
       - arch
-      - freebsd-131
-      - freebsd-123
       - gentoo
-      - openbsd-6
       - opensuse-15
       - opensuse-tumbleweed
 

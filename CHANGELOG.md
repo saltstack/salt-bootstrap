@@ -6,6 +6,7 @@
 - Migrated to using GitHub Actions
 - Removed support of End-Of-Life OS's, for example: Debian 7, 8, 9 & 10, RHEL 7
 - Removed support for FreeBSD and OpenBSD
+- Removed support for Solaris and it's derivatives
 - Removed support for EOL Salt releases, pre-3006
 - Added support for new OS's, for example: Ubuntu 24.04, Debian 12
 - Updated to minimum Python 3.10 version from 3.9

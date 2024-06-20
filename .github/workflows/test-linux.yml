@@ -38,11 +38,11 @@ jobs:
       - uses: actions/checkout@v3
 
       ## DGM Need to replace this
-      - name: Setup Ruby
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: 3.2.3
-          bundler-cache: true
+      ## DGM - name: Setup Ruby
+      ## DGM   uses: ruby/setup-ruby@v1
+      ## DGM   with:
+      ## DGM     ruby-version: 3.2.3
+      ## DGM     bundler-cache: true
 
       - name: Set up Python 3.10
         uses: actions/setup-python@v4

@@ -52,6 +52,7 @@ jobs:
   update-develop:
     name: Update CHANGELOG.md and bootstrap-salt.sh
     runs-on:
+      ## DGM wonder about these
       - self-hosted
       - linux
       - repo-release
@@ -295,6 +296,7 @@ jobs:
   update-s3-bucket:
     name: Update S3 Bucket
     runs-on:
+      ## DGM wonder about these
       - self-hosted
       - linux
       - repo-release
@@ -356,6 +358,7 @@ jobs:
   update-develop-checksums:
     name: Update Release Checksums on Develop
     runs-on:
+      ## DGM wonder about these
       - self-hosted
       - linux
       - repo-release

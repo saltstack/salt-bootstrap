@@ -57,7 +57,6 @@ STABLE_DISTROS = [
     "fedora-40",
     "opensuse-15",
     "opensuse-tumbleweed",
-    "oraclelinux-7",
     "oraclelinux-8",
     "oraclelinux-9",
     "photon-4",
@@ -80,7 +79,6 @@ ONEDIR_DISTROS = [
     "debian-12",
     "fedora-39",
     "fedora-40",
-    "oraclelinux-7",
     "oraclelinux-8",
     "oraclelinux-9",
     "photon-4",
@@ -113,6 +111,14 @@ BLACKLIST_3006 = [
     "opensuse-tumbleweed",
 ]
 
+BLACKLIST_3007 = [
+    "arch",
+    "gentoo",
+    "gentoo-systemd",
+    "opensuse-15",
+    "opensuse-tumbleweed",
+]
+
 BLACKLIST_GIT_3006 = [
     "almalinux-9",
     "amazon-2",
@@ -131,7 +137,27 @@ BLACKLIST_GIT_3006 = [
     "rockylinux-9",
     "ubuntu-2004",
     "ubuntu-2204",
-    "ubuntu-2310",
+    "ubuntu-2404",
+]
+
+BLACKLIST_GIT_3007 = [
+    "almalinux-9",
+    "amazon-2",
+    "arch",
+    "centos-stream9",
+    "debian-11",
+    "debian-12",
+    "fedora-39",
+    "fedora-40",
+    "gentoo",
+    "gentoo-systemd",
+    "opensuse-15",
+    "opensuse-tumbleweed",
+    "photon-4",
+    "photon-5",
+    "rockylinux-9",
+    "ubuntu-2004",
+    "ubuntu-2204",
     "ubuntu-2404",
 ]
 
@@ -142,6 +168,8 @@ BLACKLIST_GIT_MASTER = [
 SALT_VERSIONS = [
     "3006",
     "3006-8",
+    "3007",
+    "3007-1",
     "master",
     "latest",
     "nightly",
@@ -149,6 +177,7 @@ SALT_VERSIONS = [
 
 ONEDIR_SALT_VERSIONS = [
     "3006",
+    "3007",
     "latest",
 ]
 
@@ -157,6 +186,8 @@ ONEDIR_RC_SALT_VERSIONS = []
 VERSION_DISPLAY_NAMES = {
     "3006": "v3006",
     "3006-8": "v3006.8",
+    "3007": "v3007",
+    "3007-1": "v3007.1",
     "master": "Master",
     "latest": "Latest",
     "nightly": "Nightly",
@@ -174,6 +205,7 @@ MAC_STABLE_VERSION_BLACKLIST = [
 
 GIT_VERSION_BLACKLIST = [
     "3006-8",
+    "3007-1",
     "nightly",
 ]
 
@@ -192,7 +224,6 @@ GIT_DISTRO_BLACKLIST = [
     "fedora-39",
     "fedora-40",
     "opensuse-15",
-    "oraclelinux-7",
     "oraclelinux-8",
     "oraclelinux-9",
     "rockylinux-8",
@@ -409,10 +440,13 @@ def generate_test_jobs():
                 BLACKLIST = {
                     "3006": BLACKLIST_3006,
                     "3006-8": BLACKLIST_3006,
+                    "3007": BLACKLIST_3007,
+                    "3007-1": BLACKLIST_3007,
                 }
                 if bootstrap_type == "git":
                     BLACKLIST = {
                         "3006": BLACKLIST_GIT_3006,
+                        "3007": BLACKLIST_GIT_3007,
                         "master": BLACKLIST_GIT_MASTER,
                     }
 
@@ -423,7 +457,7 @@ def generate_test_jobs():
                         continue
 
                 if (
-                    salt_version in ("3006", "3006-8", "master")
+                    salt_version in ("3006", "3006-8", "3007", "3007-1", "master")
                     and distro in BLACKLIST[salt_version]
                 ):
                     continue

@@ -61,7 +61,7 @@ jobs:
           ## DGM   (sleep 10 && bundle exec kitchen create ${{ matrix.instance }}-${{ inputs.distro-slug }})
           ## DGM
           ## DGM Need to select a GitHub runner here , ubuntu-latest
-         sleep 2
+          sleep 2
 
       - name: Test Bootstrap
         run: |

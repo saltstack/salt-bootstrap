@@ -24,7 +24,7 @@
 #======================================================================================================================
 set -o nounset                              # Treat unset variables as an error
 
-__ScriptVersion="2024.06.04"
+__ScriptVersion="2024.06.10"
 __ScriptName="bootstrap-salt.sh"
 
 __ScriptFullName="$0"
@@ -627,7 +627,8 @@ elif [ "$ITYPE" = "stable" ]; then
             _ONEDIR_REV="$1"
             ITYPE="onedir"
             shift
-        elif [ "$(echo "$1" | grep -E '^([3-9][0-5]{2}[5-9](\.[0-9]*)?)')" != "" ]; then
+        ## DGM elif [ "$(echo "$1" | grep -E '^([3-9][0-5]{2}[5-9](\.[0-9]*)?)')" != "" ]; then
+        elif [ "$(echo "$1" | grep -E '^([3-10][0-5]{2}[5-9](\.[0-9]*)?)')" != "" ]; then
             ONEDIR_REV="minor/$1"
             _ONEDIR_REV="$1"
             ITYPE="onedir"
@@ -645,7 +646,8 @@ elif [ "$ITYPE" = "onedir" ]; then
         if [ "$(echo "$1" | grep -E '^(nightly|latest|3006)$')" != "" ]; then
             ONEDIR_REV="$1"
             shift
-        elif [ "$(echo "$1" | grep -E '^([3-9][0-9]{3}(\.[0-9]*)?)')" != "" ]; then
+        ## DGM elif [ "$(echo "$1" | grep -E '^([3-9][0-9]{3}(\.[0-9]*)?)')" != "" ]; then
+        elif [ "$(echo "$1" | grep -E '^([3-10][0-9]{3}(\.[0-9]*)?)')" != "" ]; then
             ONEDIR_REV="minor/$1"
             shift
         else
@@ -667,18 +669,20 @@ elif [ "$ITYPE" = "onedir_rc" ]; then
         if [ "$(echo "$1" | grep -E '^(latest)$')" != "" ]; then
             ONEDIR_REV="$1"
             shift
-        elif [ "$(echo "$1" | grep -E '^([3-9][0-9]{3}?rc[0-9]-[0-9]$)')" != "" ]; then
+        ## DGM elif [ "$(echo "$1" | grep -E '^([3-9][0-9]{3}?rc[0-9]-[0-9]$)')" != "" ]; then
+        elif [ "$(echo "$1" | grep -E '^([3-10][0-9]{3}?rc[0-9]-[0-9]$)')" != "" ]; then
             # Handle the 3xxx.0 version as 3xxx archive (pin to minor) and strip the fake ".0" suffix
             #ONEDIR_REV=$(echo "$1" | sed -E 's/^([3-9][0-9]{3})\.0$/\1/')
             ONEDIR_REV="minor/$1"
             shift
-        elif [ "$(echo "$1" | grep -E '^([3-9][0-9]{3}\.[0-9]?rc[0-9]$)')" != "" ]; then
+        ## DGM elif [ "$(echo "$1" | grep -E '^([3-9][0-9]{3}\.[0-9]?rc[0-9]$)')" != "" ]; then
+        elif [ "$(echo "$1" | grep -E '^([3-10][0-9]{3}\.[0-9]?rc[0-9]$)')" != "" ]; then
             # Handle the 3xxx.0 version as 3xxx archive (pin to minor) and strip the fake ".0" suffix
             #ONEDIR_REV=$(echo "$1" | sed -E 's/^([3-9][0-9]{3})\.0$/\1/')
             ONEDIR_REV="minor/$1"
             shift
         else
-            echo "Unknown onedir_rc version: $1 (valid: 3006-6, latest.)"
+            echo "Unknown onedir_rc version: $1 (valid: 3006-8, latest.)"
             exit 1
         fi
     fi
@@ -7725,13 +7729,15 @@ __macosx_get_packagesite_onedir() {
         return 1
     fi
 
+    ## DGM TBD need to allow for arm64 arch too
     DARWIN_ARCH="x86_64"
 
     __PY_VERSION_REPO="py3"
 
     if [ "$(echo "$_ONEDIR_REV" | grep -E '^(latest)$')" != "" ]; then
       _PKG_VERSION=$(__parse_repo_json_python)
-    elif [ "$(echo "$_ONEDIR_REV" | grep -E '^([3-9][0-9]{3}(\.[0-9]*))')" != "" ]; then
+    ## DGM elif [ "$(echo "$_ONEDIR_REV" | grep -E '^([3-9][0-9]{3}(\.[0-9]*))')" != "" ]; then
+    elif [ "$(echo "$_ONEDIR_REV" | grep -E '^([3-10][0-9]{3}(\.[0-9]*))')" != "" ]; then
       _PKG_VERSION=$_ONEDIR_REV
     else
       _PKG_VERSION=$(__parse_repo_json_python)

@@ -41,14 +41,14 @@ repos:
     rev: v3.15.0
     hooks:
       - id: pyupgrade
-        name: Rewrite Code to be Py3.9+
-        args: [--py39-plus]
+        name: Rewrite Code to be Py3.10+
+        args: [--py310-plus]
 
   - repo: https://github.com/asottile/reorder_python_imports
     rev: v3.12.0
     hooks:
       - id: reorder-python-imports
-        args: [--py39-plus]
+        args: [--py310-plus]
 
   - repo: https://github.com/psf/black
     rev: 24.1.0

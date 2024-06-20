@@ -22,7 +22,6 @@ LINUX_DISTROS = [
     "gentoo-systemd",
     "opensuse-15",
     "opensuse-tumbleweed",
-    "oraclelinux-7",
     "oraclelinux-8",
     "oraclelinux-9",
     "photon-4",
@@ -94,23 +93,15 @@ ONEDIR_DISTROS = [
 ]
 
 ONEDIR_RC_DISTROS = [
-    "almalinux-8",
     "almalinux-9",
     "amazon-2",
     "amazon-2023",
-    "centos-stream8",
     "centos-stream9",
-    "debian-11",
     "debian-12",
-    "oraclelinux-7",
-    "oraclelinux-8",
     "oraclelinux-9",
     "photon-4",
     "photon-5",
-    "rockylinux-8",
     "rockylinux-9",
-    "ubuntu-2004",
-    "ubuntu-2204",
     "ubuntu-2404",
 ]
 
@@ -150,7 +141,7 @@ BLACKLIST_GIT_MASTER = [
 
 SALT_VERSIONS = [
     "3006",
-    "3006-6",
+    "3006-8",
     "master",
     "latest",
     "nightly",
@@ -165,7 +156,7 @@ ONEDIR_RC_SALT_VERSIONS = []
 
 VERSION_DISPLAY_NAMES = {
     "3006": "v3006",
-    "3006-6": "v3006.6",
+    "3006-8": "v3006.8",
     "master": "Master",
     "latest": "Latest",
     "nightly": "Nightly",
@@ -182,7 +173,7 @@ MAC_STABLE_VERSION_BLACKLIST = [
 ]
 
 GIT_VERSION_BLACKLIST = [
-    "3006-6",
+    "3006-8",
     "nightly",
 ]
 
@@ -228,7 +219,6 @@ DISTRO_DISPLAY_NAMES = {
     "gentoo-systemd": "Gentoo (systemd)",
     "opensuse-15": "Opensuse 15",
     "opensuse-tumbleweed": "Opensuse Tumbleweed",
-    "oraclelinux-7": "Oracle Linux 7",
     "oraclelinux-8": "Oracle Linux 8",
     "oraclelinux-9": "Oracle Linux 9",
     "photon-4": "Photon OS 4",
@@ -297,8 +287,8 @@ def generate_test_jobs():
                     if salt_version in MAC_STABLE_VERSION_BLACKLIST:
                         continue
 
-                kitchen_target = f"{bootstrap_type}-{salt_version}"
-                instances.append(kitchen_target)
+                test_target = f"{bootstrap_type}-{salt_version}"
+                instances.append(test_target)
 
         for bootstrap_type in ["default"]:
             if distro not in STABLE_DISTROS:
@@ -342,8 +332,8 @@ def generate_test_jobs():
                     if salt_version in STABLE_VERSION_BLACKLIST:
                         continue
 
-                kitchen_target = f"{bootstrap_type}-{salt_version}"
-                instances.append(kitchen_target)
+                test_target = f"{bootstrap_type}-{salt_version}"
+                instances.append(test_target)
 
         for bootstrap_type in ["default"]:
             if distro not in STABLE_DISTROS:
@@ -418,7 +408,7 @@ def generate_test_jobs():
 
                 BLACKLIST = {
                     "3006": BLACKLIST_3006,
-                    "3006-6": BLACKLIST_3006,
+                    "3006-8": BLACKLIST_3006,
                 }
                 if bootstrap_type == "git":
                     BLACKLIST = {
@@ -433,13 +423,13 @@ def generate_test_jobs():
                         continue
 
                 if (
-                    salt_version in ("3006", "3006-6", "master")
+                    salt_version in ("3006", "3006-8", "master")
                     and distro in BLACKLIST[salt_version]
                 ):
                     continue
 
-                kitchen_target = f"{bootstrap_type}-{salt_version}"
-                instances.append(kitchen_target)
+                test_target = f"{bootstrap_type}-{salt_version}"
+                instances.append(test_target)
 
         for bootstrap_type in ["default"]:
             if distro not in STABLE_DISTROS:

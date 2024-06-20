@@ -28,8 +28,10 @@ on:
         default: 20
         description: The timeout(in minutes) for the workflow
 
-env:
-  KITCHEN_LOCAL_YAML: 'kitchen.macos.yml'
+## DGM env:
+## DGM   KITCHEN_LOCAL_YAML: 'kitchen.macos.yml'
+## DGM
+## DGM Wonder what the KITCHEN_LOCAL_YAML had to be set here for MacOS, do we need to do something similar for runners ?
 
 jobs:
   Test:
@@ -44,16 +46,17 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      ## DGM Need to replace this
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: 3.2.3
           bundler-cache: true
 
-      - name: Set up Python 3.9
+      - name: Set up Python 3.10
         uses: actions/setup-python@v4
         with:
-          python-version: 3.9
+          python-version: "3.10"
 
       - name: Install Python Dependencies
         run: |
@@ -62,17 +65,26 @@ jobs:
 
       - name: Create Test Instance
         run: |
-          bundle exec kitchen create ${{ matrix.instance }}-${{ inputs.distro-slug }} || \
-            (sleep 10 && bundle exec kitchen create ${{ matrix.instance }}-${{ inputs.distro-slug }})
+          ## DGM bundle exec kitchen create ${{ matrix.instance }}-${{ inputs.distro-slug }} || \
+          ## DGM   (sleep 10 && bundle exec kitchen create ${{ matrix.instance }}-${{ inputs.distro-slug }})
+          ## DGM
+          ## DGM Need to select a GitHub runner here , macos-latest
+          sleep 2
 
       - name: Test Bootstrap
         run: |
-          bundle exec kitchen verify ${{ matrix.instance }}-${{ inputs.distro-slug }}
+          ## DGM bundle exec kitchen verify ${{ matrix.instance }}-${{ inputs.distro-slug }}
+          ## DGM
+          ## DGM Need to run the bootstrap tests for MacOS here
+          sleep 2
 
       - name: Destroy Test Instance
         if: always()
         run: |
-          bundle exec kitchen destroy ${{ matrix.instance }}-${{ inputs.distro-slug }}
+          ## DGM bundle exec kitchen destroy ${{ matrix.instance }}-${{ inputs.distro-slug }}
+          ## DGM
+          ## DGM this can be removed since using GitHub shared runners, and it should just close when done with it
+          sleep 2
 
       - name: Set Exit Status
         if: always()

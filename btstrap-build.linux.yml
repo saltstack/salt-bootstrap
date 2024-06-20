@@ -80,14 +80,12 @@ platforms:
     driver:
       image: debian:bullseye
       run_command: /lib/systemd/systemd
-  - name: fedora-38
+  - name: fedora-39
+  - name: fedora-40
     driver:
       provision_command: &fedora_provision_command
         - dnf -y install procps-ng crypto-policies-scripts
         - update-crypto-policies
-  - name: fedora-39
-    driver:
-      provision_command: *fedora_provision_command
   - name: gentoo
     driver:
       image: gentoo/stage3:latest
@@ -131,6 +129,7 @@ platforms:
   - name: rockylinux-8
   - name: ubuntu-22.04
   - name: ubuntu-23.10
+  - name: ubuntu-24.04
     driver:
       run_command: /lib/systemd/systemd
       provision_command:
@@ -230,19 +229,19 @@ suites:
       salt_version: latest
       salt_bootstrap_options: -MP onedir %s
 
-  - name: onedir-3005
-    provisioner:
-      salt_version: 3005
-      salt_bootstrap_options: -MP onedir %s
-
   - name: onedir-3006
     provisioner:
       salt_version: 3006
       salt_bootstrap_options: -MP onedir %s
 
-  - name: onedir-rc-3007-0rc1
+  - name: onedir-3007
     provisioner:
-      salt_version: 3007.0rc1
+      salt_version: 3007
+      salt_bootstrap_options: -MP onedir %s
+
+  - name: onedir-rc-3008-0rc1
+    provisioner:
+      salt_version: 3008.0rc1
       salt_bootstrap_options: -R staging.repo.saltproject.io -MP onedir_rc %s
     excludes:
       - arch

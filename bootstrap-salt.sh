@@ -3873,7 +3873,7 @@ install_fedora_deps() {
     ## DGM can find no dnf-utils in Fedora packaging archives and yum-utils EL7 and F30, none after
     ## DGM but find it on 8 and 9 Centos Stream
     ## DGM __PACKAGES="${__PACKAGES} dnf-utils libyaml procps-ng python${PY_PKG_VER}-crypto python${PY_PKG_VER}-jinja2"
-    __PACKAGES="${__PACKAGES} libyaml procps-ng python${PY_PKG_VER}-crypto python${PY_PKG_VER}-jinja2"
+    __PACKAGES="${__PACKAGES} dnf-utils libyaml procps-ng python${PY_PKG_VER}-crypto python${PY_PKG_VER}-jinja2"
     __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-msgpack python${PY_PKG_VER}-requests python${PY_PKG_VER}-zmq"
     __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-pip python${PY_PKG_VER}-m2crypto python${PY_PKG_VER}-pyyaml"
     __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-systemd"
@@ -4158,14 +4158,15 @@ install_fedora_onedir_deps() {
 
     ## DGM can find no dnf-utils in Fedora packaging archives and yum-utils EL7 and F30, none after
     ## DGM but find it on 8 and 9 Centos Stream  also EL9 doesn't have propcs
-    if [ "$DISTRO_MAJOR_VERSION" -ge 8 ]; then
-        __PACKAGES="dnf-utils chkconfig"
-    else
-        __PACKAGES="yum-utils chkconfig"
-    fi
+    ## DGM if [ "$DISTRO_MAJOR_VERSION" -ge 8 ]; then
+    ## DGM     __PACKAGES="dnf-utils chkconfig"
+    ## DGM else
+    ## DGM     __PACKAGES="yum-utils chkconfig"
+    ## DGM fi
 
-    __PACKAGES="${__PACKAGES} procps"
+    ## DGM __PACKAGES="${__PACKAGES} procps"
 
+    __PACKAGES="dnf-utils chkconfig procps-ng"
 
     # shellcheck disable=SC2086
     __yum_install_noinput "${__PACKAGES}" || return 1
@@ -4305,13 +4306,15 @@ install_centos_stable_deps() {
     ## DGM can find no dnf-utils in Fedora packaging archives and yum-utils EL7 and F30, none after
     ## DGM but find it on 8 and 9 Centos Stream, and Alma 8 & 9 but versions we are using doesn't have them
     ## DGM also EL9 doesn't have propcs and probably don't need these packages since using onedir
-    if [ "$DISTRO_MAJOR_VERSION" -ge 8 ]; then
-        __PACKAGES="dnf-utils chkconfig"
-    else
-        __PACKAGES="yum-utils chkconfig"
-    fi
+    ## DGM if [ "$DISTRO_MAJOR_VERSION" -ge 8 ]; then
+    ## DGM     __PACKAGES="dnf-utils chkconfig"
+    ## DGM else
+    ## DGM     __PACKAGES="yum-utils chkconfig"
+    ## DGM fi
 
-    __PACKAGES="${__PACKAGES} procps"
+    ## DGM __PACKAGES="${__PACKAGES} procps"
+
+    __PACKAGES="yum-utils chkconfig procps-ng"
 
     # shellcheck disable=SC2086
     __yum_install_noinput "${__PACKAGES}" || return 1
@@ -4522,13 +4525,15 @@ install_centos_onedir_deps() {
     ## DGM can find no dnf-utils in Fedora packaging archives and yum-utils EL7 and F30, none after
     ## DGM but find it on 8 and 9 Centos Stream, and Alma 8 & 9 but versions we are using doesn't have them
     ## DGM also EL9 doesn't have propcs and probably don't need these packages since using onedir
-    if [ "$DISTRO_MAJOR_VERSION" -ge 8 ]; then
-        __PACKAGES="dnf-utils chkconfig"
-    else
-        __PACKAGES="yum-utils chkconfig"
-    fi
+    ## DGM if [ "$DISTRO_MAJOR_VERSION" -ge 8 ]; then
+    ## DGM     __PACKAGES="dnf-utils chkconfig"
+    ## DGM else
+    ## DGM     __PACKAGES="yum-utils chkconfig"
+    ## DGM fi
 
-    __PACKAGES="${__PACKAGES} procps"
+    ## DGM __PACKAGES="${__PACKAGES} procps"
+
+    __PACKAGES="yum-utils chkconfig procps-ng"
 
     # shellcheck disable=SC2086
     __yum_install_noinput "${__PACKAGES}" || return 1

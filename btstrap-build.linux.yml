@@ -1,4 +1,7 @@
 ---
+## DGM this was the ruby file used with kitchen-salt to provide the instances to test on using docker.
+## DGM Need to duplicate this creation of docker containers process.
+
 driver:
   name: docker
   use_sudo: false
@@ -175,6 +178,7 @@ suites:
       - arch
       - gentoo
       - gentoo-systemd
+
   - name: stable-3006
     provisioner:
       salt_version: 3006
@@ -183,9 +187,40 @@ suites:
       - opensuse-15
       - opensuse-tumbleweed
       - arch
+
   - name: stable-3006-8
     provisioner:
       salt_version: 3006.8
+      salt_bootstrap_options: -x python3 -MP stable %s
+    excludes:
+      - opensuse-15
+      - opensuse-tumbleweed
+      - arch
+
+  - name: git-3007
+    provisioner:
+      salt_version: v3007
+      salt_bootstrap_options: -x python3 -MPfq git %s
+    excludes:
+      - opensuse-15
+      - opensuse-tumbleweed
+      - debian-11
+      - arch
+      - gentoo
+      - gentoo-systemd
+  - name: git-3007x
+    provisioner:
+      salt_version: 3007.x
+      salt_bootstrap_options: -x python3 -MPfq git %s
+    excludes:
+      - opensuse-15
+      - opensuse-tumbleweed
+      - arch
+      - gentoo
+      - gentoo-systemd
+  - name: stable-3007-1
+    provisioner:
+      salt_version: 3007.1
       salt_bootstrap_options: -x python3 -MP stable %s
     excludes:
       - opensuse-15

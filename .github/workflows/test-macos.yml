@@ -28,9 +28,9 @@ on:
         default: 20
         description: The timeout(in minutes) for the workflow
 
-## DGM env:
-## DGM   KITCHEN_LOCAL_YAML: 'kitchen.macos.yml'
-## DGM
+env:
+  KITCHEN_LOCAL_YAML: 'kitchen.macos.yml'
+
 ## DGM Wonder what the KITCHEN_LOCAL_YAML had to be set here for MacOS, do we need to do something similar for runners ?
 
 jobs:
@@ -50,13 +50,14 @@ jobs:
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: 3.2.3
+          ## DGM ruby-version: 3.2.3
+          ruby-version: 2.6.10
           bundler-cache: true
 
-      - name: Set up Python 3.10
+      - name: Set up Python 3.9
         uses: actions/setup-python@v4
         with:
-          python-version: "3.10"
+          python-version: 3.9
 
       - name: Install Python Dependencies
         run: |
@@ -65,25 +66,19 @@ jobs:
 
       - name: Create Test Instance
         run: |
-          ## DGM bundle exec kitchen create ${{ matrix.instance }}-${{ inputs.distro-slug }} || \
-          ## DGM   (sleep 10 && bundle exec kitchen create ${{ matrix.instance }}-${{ inputs.distro-slug }})
-          ## DGM
-          ## DGM Need to select a GitHub runner here , macos-latest
+          bundle exec kitchen create ${{ matrix.instance }}-${{ inputs.distro-slug }} || \
+            (sleep 10 && bundle exec kitchen create ${{ matrix.instance }}-${{ inputs.distro-slug }})
           sleep 2
 
       - name: Test Bootstrap
         run: |
-          ## DGM bundle exec kitchen verify ${{ matrix.instance }}-${{ inputs.distro-slug }}
-          ## DGM
-          ## DGM Need to run the bootstrap tests for MacOS here
+          bundle exec kitchen verify ${{ matrix.instance }}-${{ inputs.distro-slug }}
           sleep 2
 
       - name: Destroy Test Instance
         if: always()
         run: |
-          ## DGM bundle exec kitchen destroy ${{ matrix.instance }}-${{ inputs.distro-slug }}
-          ## DGM
-          ## DGM this can be removed since using GitHub shared runners, and it should just close when done with it
+          bundle exec kitchen destroy ${{ matrix.instance }}-${{ inputs.distro-slug }}
           sleep 2
 
       - name: Set Exit Status

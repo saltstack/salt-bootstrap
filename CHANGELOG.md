@@ -2,7 +2,8 @@
 
 ## What's Changed
 
-- Removed support for Ruby, Kitchen and kitchen-salt and it's associated utilities
+## DGM - Removed support for Ruby, Kitchen and kitchen-salt and it's associated utilities
+
 - Migrated to using GitHub Actions
 - Removed support of End-Of-Life OS's, for example: Debian 7, 8, 9 & 10, RHEL 7
 - Removed support for FreeBSD and OpenBSD

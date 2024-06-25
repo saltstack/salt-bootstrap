@@ -627,8 +627,8 @@ elif [ "$ITYPE" = "stable" ]; then
             _ONEDIR_REV="$1"
             ITYPE="onedir"
             shift
-        ## DGM elif [ "$(echo "$1" | grep -E '^([3-9][0-5]{2}[5-9](\.[0-9]*)?)')" != "" ]; then
-        elif [ "$(echo "$1" | grep -E '^([3-10][0-5]{2}[5-9](\.[0-9]*)?)')" != "" ]; then
+        elif [ "$(echo "$1" | grep -E '^([3-9][0-5]{2}[5-9](\.[0-9]*)?)')" != "" ]; then
+        ## DGM elif [ "$(echo "$1" | grep -E '^([3-10][0-5]{2}[5-9](\.[0-9]*)?)')" != "" ]; then
             ONEDIR_REV="minor/$1"
             _ONEDIR_REV="$1"
             ITYPE="onedir"
@@ -646,8 +646,8 @@ elif [ "$ITYPE" = "onedir" ]; then
         if [ "$(echo "$1" | grep -E '^(nightly|latest|3006)$')" != "" ]; then
             ONEDIR_REV="$1"
             shift
-        ## DGM elif [ "$(echo "$1" | grep -E '^([3-9][0-9]{3}(\.[0-9]*)?)')" != "" ]; then
-        elif [ "$(echo "$1" | grep -E '^([3-10][0-9]{3}(\.[0-9]*)?)')" != "" ]; then
+        elif [ "$(echo "$1" | grep -E '^([3-9][0-9]{3}(\.[0-9]*)?)')" != "" ]; then
+        ## DGM elif [ "$(echo "$1" | grep -E '^([3-10][0-9]{3}(\.[0-9]*)?)')" != "" ]; then
             ONEDIR_REV="minor/$1"
             shift
         else
@@ -669,14 +669,14 @@ elif [ "$ITYPE" = "onedir_rc" ]; then
         if [ "$(echo "$1" | grep -E '^(latest)$')" != "" ]; then
             ONEDIR_REV="$1"
             shift
-        ## DGM elif [ "$(echo "$1" | grep -E '^([3-9][0-9]{3}?rc[0-9]-[0-9]$)')" != "" ]; then
-        elif [ "$(echo "$1" | grep -E '^([3-10][0-9]{3}?rc[0-9]-[0-9]$)')" != "" ]; then
+        elif [ "$(echo "$1" | grep -E '^([3-9][0-9]{3}?rc[0-9]-[0-9]$)')" != "" ]; then
+        ## DGM elif [ "$(echo "$1" | grep -E '^([3-10][0-9]{3}?rc[0-9]-[0-9]$)')" != "" ]; then
             # Handle the 3xxx.0 version as 3xxx archive (pin to minor) and strip the fake ".0" suffix
             #ONEDIR_REV=$(echo "$1" | sed -E 's/^([3-9][0-9]{3})\.0$/\1/')
             ONEDIR_REV="minor/$1"
             shift
-        ## DGM elif [ "$(echo "$1" | grep -E '^([3-9][0-9]{3}\.[0-9]?rc[0-9]$)')" != "" ]; then
-        elif [ "$(echo "$1" | grep -E '^([3-10][0-9]{3}\.[0-9]?rc[0-9]$)')" != "" ]; then
+        elif [ "$(echo "$1" | grep -E '^([3-9][0-9]{3}\.[0-9]?rc[0-9]$)')" != "" ]; then
+        ## DGM elif [ "$(echo "$1" | grep -E '^([3-10][0-9]{3}\.[0-9]?rc[0-9]$)')" != "" ]; then
             # Handle the 3xxx.0 version as 3xxx archive (pin to minor) and strip the fake ".0" suffix
             #ONEDIR_REV=$(echo "$1" | sed -E 's/^([3-9][0-9]{3})\.0$/\1/')
             ONEDIR_REV="minor/$1"
@@ -768,6 +768,11 @@ if [ "$_CUSTOM_MINION_CONFIG" != "null" ]; then
     fi
 fi
 
+
+# Default to Python 3, no longer support for Python 2
+_PY_PKG_VER="3.10"
+_PY_MAJOR_VERSION="3"
+
 # Check if we're installing via a different Python executable and set major version variables
 if [ -n "$_PY_EXE" ]; then
     if [ "$(uname)" = "Darwin" ]; then
@@ -776,8 +781,8 @@ if [ -n "$_PY_EXE" ]; then
       _PY_PKG_VER=$(echo "$_PY_EXE" | sed -E "s/\\.//g")
     fi
 
-    _PY_MAJOR_VERSION=$(echo "$_PY_PKG_VER" | cut -c 7)
-    if [ "$_PY_MAJOR_VERSION" -eq 2 ]; then
+    TEST_PY_MAJOR_VERSION=$(echo "$_PY_PKG_VER" | cut -c 7)
+    if [ "$TEST_PY_MAJOR_VERSION" -eq 2 ]; then
         echoerror "Python 2 is no longer supported, only Python 3"
         return 1
     fi
@@ -792,8 +797,8 @@ if [ -n "$_PY_EXE" ]; then
         echoinfo "Detected -x option. Using $_PY_EXE to install Salt."
     fi
 else
-    _PY_PKG_VER=""
-    _PY_MAJOR_VERSION=""
+    _PY_PKG_VER="3.10"
+    _PY_MAJOR_VERSION="3"
 fi
 
 # If the configuration directory or archive does not exist, error out
@@ -4152,23 +4157,15 @@ install_fedora_onedir_deps() {
     fi
 
     ## DGM can find no dnf-utils in Fedora packaging archives and yum-utils EL7 and F30, none after
-    ## DGM but find it on 8 and 9 Centos Stream
-    ## DGM also EL9 doesn't have propcs
-    ## DGM if [ "$DISTRO_MAJOR_VERSION" -ge 8 ]; then
-    ## DGM     __PACKAGES="dnf-utils chkconfig"
-    ## DGM else
-    ## DGM     __PACKAGES="yum-utils chkconfig"
-    ## DGM fi
-
-    __PACKAGES=""
-
-    if [ "$DISTRO_MAJOR_VERSION" -ge 9 ]; then
-        __PACKAGES="chkconfig"
-    elif [ "$DISTRO_MAJOR_VERSION" -ge 8 ]; then
-        __PACKAGES="chkconfig procps"
+    ## DGM but find it on 8 and 9 Centos Stream  also EL9 doesn't have propcs
+    if [ "$DISTRO_MAJOR_VERSION" -ge 8 ]; then
+        __PACKAGES="dnf-utils chkconfig"
     else
-        __PACKAGES="yum-utils chkconfig procps"
+        __PACKAGES="yum-utils chkconfig"
     fi
+
+    __PACKAGES="${__PACKAGES} procps"
+
 
     # shellcheck disable=SC2086
     __yum_install_noinput "${__PACKAGES}" || return 1
@@ -4307,23 +4304,14 @@ install_centos_stable_deps() {
 
     ## DGM can find no dnf-utils in Fedora packaging archives and yum-utils EL7 and F30, none after
     ## DGM but find it on 8 and 9 Centos Stream, and Alma 8 & 9 but versions we are using doesn't have them
-    ## DGM also EL9 doesn't have propcs
-    ## DGM and probably don't need these packages since using onedir
-    ## DGM if [ "$DISTRO_MAJOR_VERSION" -ge 8 ]; then
-    ## DGM     __PACKAGES="dnf-utils chkconfig"
-    ## DGM else
-    ## DGM     __PACKAGES="yum-utils chkconfig"
-    ## DGM fi
-
-    __PACKAGES=""
-
-    if [ "$DISTRO_MAJOR_VERSION" -ge 9 ]; then
-        __PACKAGES="chkconfig"
-    elif [ "$DISTRO_MAJOR_VERSION" -ge 8 ]; then
-        __PACKAGES="chkconfig procps"
+    ## DGM also EL9 doesn't have propcs and probably don't need these packages since using onedir
+    if [ "$DISTRO_MAJOR_VERSION" -ge 8 ]; then
+        __PACKAGES="dnf-utils chkconfig"
     else
-        __PACKAGES="yum-utils chkconfig procps"
+        __PACKAGES="yum-utils chkconfig"
     fi
+
+    __PACKAGES="${__PACKAGES} procps"
 
     # shellcheck disable=SC2086
     __yum_install_noinput "${__PACKAGES}" || return 1
@@ -4533,23 +4521,14 @@ install_centos_onedir_deps() {
 
     ## DGM can find no dnf-utils in Fedora packaging archives and yum-utils EL7 and F30, none after
     ## DGM but find it on 8 and 9 Centos Stream, and Alma 8 & 9 but versions we are using doesn't have them
-    ## DGM also EL9 doesn't have propcs
-    ## DGM and probably don't need these packages since using onedir
-    ## DGM if [ "$DISTRO_MAJOR_VERSION" -ge 8 ]; then
-    ## DGM     __PACKAGES="dnf-utils chkconfig"
-    ## DGM else
-    ## DGM     __PACKAGES="yum-utils chkconfig"
-    ## DGM fi
-
-    __PACKAGES=""
-
-    if [ "$DISTRO_MAJOR_VERSION" -ge 9 ]; then
-        __PACKAGES="chkconfig"
-    elif [ "$DISTRO_MAJOR_VERSION" -ge 8 ]; then
-        __PACKAGES="chkconfig procps"
+    ## DGM also EL9 doesn't have propcs and probably don't need these packages since using onedir
+    if [ "$DISTRO_MAJOR_VERSION" -ge 8 ]; then
+        __PACKAGES="dnf-utils chkconfig"
     else
-        __PACKAGES="yum-utils chkconfig procps"
+        __PACKAGES="yum-utils chkconfig"
     fi
+
+    __PACKAGES="${__PACKAGES} procps"
 
     # shellcheck disable=SC2086
     __yum_install_noinput "${__PACKAGES}" || return 1
@@ -7350,8 +7329,8 @@ __macosx_get_packagesite_onedir() {
 
     if [ "$(echo "$_ONEDIR_REV" | grep -E '^(latest)$')" != "" ]; then
       _PKG_VERSION=$(__parse_repo_json_python)
-    ## DGM elif [ "$(echo "$_ONEDIR_REV" | grep -E '^([3-9][0-9]{3}(\.[0-9]*))')" != "" ]; then
-    elif [ "$(echo "$_ONEDIR_REV" | grep -E '^([3-10][0-9]{3}(\.[0-9]*))')" != "" ]; then
+    elif [ "$(echo "$_ONEDIR_REV" | grep -E '^([3-9][0-9]{3}(\.[0-9]*))')" != "" ]; then
+    ## DGM elif [ "$(echo "$_ONEDIR_REV" | grep -E '^([3-10][0-9]{3}(\.[0-9]*))')" != "" ]; then
       _PKG_VERSION=$_ONEDIR_REV
     else
       _PKG_VERSION=$(__parse_repo_json_python)

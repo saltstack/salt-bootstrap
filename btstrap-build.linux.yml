@@ -69,12 +69,6 @@ platforms:
   - name: centos-stream8
     driver:
       image: quay.io/centos/centos:stream8
-  - name: centos-7
-    driver:
-      run_command: /lib/systemd/systemd
-  - name: debian-10
-    driver:
-      run_command: /lib/systemd/systemd
   - name: debian-11
     driver:
       image: debian:bullseye

@@ -11,14 +11,16 @@
 
       - name: Download Exit Status Files
         if: always()
-        uses: actions/download-artifact@v4
+        ## DGM uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v3
         with:
           name: exitstatus
           path: exitstatus
 
       - name: Delete Exit Status Artifacts
         if: always()
-        uses: geekyeggo/delete-artifact@v4
+        ## DGM uses: geekyeggo/delete-artifact@v4
+        uses: geekyeggo/delete-artifact@v3
         with:
           name: exitstatus
           failOnError: false

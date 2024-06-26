@@ -622,19 +622,18 @@ elif [ "$ITYPE" = "stable" ]; then
         _ONEDIR_REV="latest"
         ITYPE="onedir"
     else
-        if [ "$(echo "$1" | grep -E '^(nightly|latest|3006)$')" != "" ]; then
+        if [ "$(echo "$1" | grep -E '^(nightly|latest|3006|3007)$')" != "" ]; then
             ONEDIR_REV="$1"
             _ONEDIR_REV="$1"
             ITYPE="onedir"
             shift
         elif [ "$(echo "$1" | grep -E '^([3-9][0-5]{2}[5-9](\.[0-9]*)?)')" != "" ]; then
-        ## DGM elif [ "$(echo "$1" | grep -E '^([3-10][0-5]{2}[5-9](\.[0-9]*)?)')" != "" ]; then
             ONEDIR_REV="minor/$1"
             _ONEDIR_REV="$1"
             ITYPE="onedir"
             shift
         else
-            echo "Unknown stable version: $1 (valid: 3006, latest)"
+            echo "Unknown stable version: $1 (valid: 3006, 3007, latest)"
             exit 1
         fi
     fi
@@ -643,15 +642,14 @@ elif [ "$ITYPE" = "onedir" ]; then
     if [ "$#" -eq 0 ];then
         ONEDIR_REV="latest"
     else
-        if [ "$(echo "$1" | grep -E '^(nightly|latest|3006)$')" != "" ]; then
+        if [ "$(echo "$1" | grep -E '^(nightly|latest|3006|3007)$')" != "" ]; then
             ONEDIR_REV="$1"
             shift
         elif [ "$(echo "$1" | grep -E '^([3-9][0-9]{3}(\.[0-9]*)?)')" != "" ]; then
-        ## DGM elif [ "$(echo "$1" | grep -E '^([3-10][0-9]{3}(\.[0-9]*)?)')" != "" ]; then
             ONEDIR_REV="minor/$1"
             shift
         else
-            echo "Unknown onedir version: $1 (valid: 3006, latest, nightly.)"
+            echo "Unknown onedir version: $1 (valid: 3006, 3007, latest, nightly.)"
             exit 1
         fi
     fi
@@ -670,19 +668,17 @@ elif [ "$ITYPE" = "onedir_rc" ]; then
             ONEDIR_REV="$1"
             shift
         elif [ "$(echo "$1" | grep -E '^([3-9][0-9]{3}?rc[0-9]-[0-9]$)')" != "" ]; then
-        ## DGM elif [ "$(echo "$1" | grep -E '^([3-10][0-9]{3}?rc[0-9]-[0-9]$)')" != "" ]; then
             # Handle the 3xxx.0 version as 3xxx archive (pin to minor) and strip the fake ".0" suffix
             #ONEDIR_REV=$(echo "$1" | sed -E 's/^([3-9][0-9]{3})\.0$/\1/')
             ONEDIR_REV="minor/$1"
             shift
         elif [ "$(echo "$1" | grep -E '^([3-9][0-9]{3}\.[0-9]?rc[0-9]$)')" != "" ]; then
-        ## DGM elif [ "$(echo "$1" | grep -E '^([3-10][0-9]{3}\.[0-9]?rc[0-9]$)')" != "" ]; then
             # Handle the 3xxx.0 version as 3xxx archive (pin to minor) and strip the fake ".0" suffix
             #ONEDIR_REV=$(echo "$1" | sed -E 's/^([3-9][0-9]{3})\.0$/\1/')
             ONEDIR_REV="minor/$1"
             shift
         else
-            echo "Unknown onedir_rc version: $1 (valid: 3006-8, latest.)"
+            echo "Unknown onedir_rc version: $1 (valid: 3006-8, 3007-1, latest)"
             exit 1
         fi
     fi
@@ -3511,6 +3507,9 @@ install_debian_deps() {
 }
 
 install_debian_onedir_deps() {
+    ## DGM Debugging
+    set -v
+    set -x
     if [ "$_START_DAEMONS" -eq "$BS_FALSE" ]; then
         echowarn "Not starting daemons on Debian based distributions is not working mostly because starting them is the default behaviour."
     fi
@@ -7312,7 +7311,6 @@ __macosx_get_packagesite_onedir() {
     if [ "$(echo "$_ONEDIR_REV" | grep -E '^(latest)$')" != "" ]; then
       _PKG_VERSION=$(__parse_repo_json_python)
     elif [ "$(echo "$_ONEDIR_REV" | grep -E '^([3-9][0-9]{3}(\.[0-9]*))')" != "" ]; then
-    ## DGM elif [ "$(echo "$_ONEDIR_REV" | grep -E '^([3-10][0-9]{3}(\.[0-9]*))')" != "" ]; then
       _PKG_VERSION=$_ONEDIR_REV
     else
       _PKG_VERSION=$(__parse_repo_json_python)

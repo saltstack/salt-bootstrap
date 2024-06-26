@@ -83,10 +83,15 @@ jobs:
           winrm set winrm/config/service '@{AllowUnencrypted="True"}'
           env
 
-      - name: Set up Python 3.9
+      ## DGM - name: Set up Python 3.9
+      ## DGM   uses: actions/setup-python@v4
+      ## DGM   with:
+      ## DGM     python-version: 3.9
+
+      - name: Set up Python 3.10
         uses: actions/setup-python@v4
         with:
-          python-version: 3.9
+          python-version: "3.10"
 
       - name: Install Python Dependencies
         run: |

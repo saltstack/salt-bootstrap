@@ -770,7 +770,9 @@ fi
 
 
 # Default to Python 3, no longer support for Python 2
-_PY_PKG_VER="3.10"
+PY_PKG_VER=3
+__PY_VERSION_REPO="py3"
+_PY_PKG_VER="python3"
 _PY_MAJOR_VERSION="3"
 
 # Check if we're installing via a different Python executable and set major version variables
@@ -787,7 +789,7 @@ if [ -n "$_PY_EXE" ]; then
         return 1
     fi
 
-    if [ "$_PY_MAJOR_VERSION" != 3 ]; then
+    if [ "$TEST_PY_MAJOR_VERSION" != 3 ]; then
         echoerror "Detected -x option, but Python major version is not 3."
         echoerror "The -x option must be passed as python3, python38, or python3.8 (use the Python '3' versions of examples)."
         exit 1
@@ -797,7 +799,7 @@ if [ -n "$_PY_EXE" ]; then
         echoinfo "Detected -x option. Using $_PY_EXE to install Salt."
     fi
 else
-    _PY_PKG_VER="3.10"
+    _PY_PKG_VER="python3"
     _PY_MAJOR_VERSION="3"
 fi
 
@@ -2741,8 +2743,8 @@ EOM
     fi
 
     _setuptools_dep="setuptools>=${_MINIMUM_SETUPTOOLS_VERSION}"
-    if [ "$_PY_MAJOR_VERSION" -eq 2 ]; then
-        echoerror "Python 2 is no longer supported, only Python 3"
+    if [ "$_PY_MAJOR_VERSION" -ne 3 ]; then
+        echoerror "Python version is no longer supported, only Python 3"
         return 1
     fi
 
@@ -2939,8 +2941,6 @@ __install_saltstack_ubuntu_repository() {
         return 1
     fi
 
-    __PY_VERSION_REPO="py3"
-
     # SaltStack's stable Ubuntu repository:
     SALTSTACK_UBUNTU_URL="${HTTP_VAL}://${_REPO_URL}/${__PY_VERSION_REPO}/ubuntu/${UBUNTU_VERSION}/${__REPO_ARCH}/${STABLE_REV}"
     echo "$__REPO_ARCH_DEB $SALTSTACK_UBUNTU_URL $UBUNTU_CODENAME main" > /etc/apt/sources.list.d/salt.list
@@ -2979,8 +2979,6 @@ __install_saltstack_ubuntu_onedir_repository() {
     # shellcheck disable=SC2086,SC2090
     __apt_get_install_noinput ${__PACKAGES} || return 1
 
-    __PY_VERSION_REPO="py3"
-
     # SaltStack's stable Ubuntu repository:
     SALTSTACK_UBUNTU_URL="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_DIR}/${__PY_VERSION_REPO}/ubuntu/${UBUNTU_VERSION}/${__REPO_ARCH}/${ONEDIR_REV}/"
     if [ "${ONEDIR_REV}" = "nightly" ] ; then
@@ -3007,10 +3005,8 @@ install_ubuntu_deps() {
 
     __PACKAGES=''
 
-    if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 3 ]; then
-        PY_PKG_VER=3
-    else
-        echoerror "Python 2 is no longer supported, only Python 3"
+    if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -ne 3 ]; then
+        echoerror "Python version is no longer supported, only Python 3"
         return 1
     fi
 
@@ -3095,10 +3091,8 @@ install_ubuntu_git_deps() {
 
     __git_clone_and_checkout || return 1
 
-    if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 3 ]; then
-        PY_PKG_VER=3
-    else
-        echoerror "Python 2 is no longer supported, only Python 3"
+    if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -ne 3 ]; then
+        echoerror "Python version is no longer supported, only Python 3"
         return 1
     fi
 
@@ -3402,8 +3396,6 @@ __install_saltstack_debian_repository() {
         return 1
     fi
 
-    __PY_VERSION_REPO="py3"
-
     # Install downloader backend for GPG keys fetching
     __PACKAGES='wget'
 
@@ -3420,7 +3412,7 @@ __install_saltstack_debian_repository() {
     # shellcheck disable=SC2086,SC2090
     __apt_get_install_noinput "${__PACKAGES}" || return 1
 
-    # amd64 is just a part of repository URI, 32-bit pkgs are hosted under the same location
+    # amd64 is just a part of repository URI
     SALTSTACK_DEBIAN_URL="${HTTP_VAL}://${_REPO_URL}/${__PY_VERSION_REPO}/debian/${DEBIAN_RELEASE}/${__REPO_ARCH}"
     echo "$__REPO_ARCH_DEB $SALTSTACK_DEBIAN_URL $DEBIAN_CODENAME main" > "/etc/apt/sources.list.d/salt.list"
 
@@ -3438,8 +3430,6 @@ __install_saltstack_debian_onedir_repository() {
         return 1
     fi
 
-    __PY_VERSION_REPO="py3"
-
     # Install downloader backend for GPG keys fetching
     __PACKAGES='wget'
 
@@ -3456,7 +3446,7 @@ __install_saltstack_debian_onedir_repository() {
     # shellcheck disable=SC2086,SC2090
     __apt_get_install_noinput "${__PACKAGES}" || return 1
 
-    # amd64 is just a part of repository URI, 32-bit pkgs are hosted under the same location
+    # amd64 is just a part of repository URI
     SALTSTACK_DEBIAN_URL="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_DIR}/${__PY_VERSION_REPO}/debian/${DEBIAN_RELEASE}/${__REPO_ARCH}/${ONEDIR_REV}/"
     if [ "${ONEDIR_REV}" = "nightly" ] ; then
         SALTSTACK_DEBIAN_URL="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_NIGHTLY_DIR}/${__PY_VERSION_REPO}/debian/${DEBIAN_RELEASE}/${__REPO_ARCH}/"
@@ -3492,10 +3482,9 @@ install_debian_deps() {
         __apt_get_upgrade_noinput || return 1
     fi
 
-    if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 3 ]; then
-        PY_PKG_VER=3
-    else
-        PY_PKG_VER=""
+    if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -ne 3 ]; then
+        echoerror "Python version is no longer supported, only Python 3"
+        return 1
     fi
 
     # Additionally install procps and pciutils which allows for Docker bootstraps. See 366#issuecomment-39666813
@@ -3545,10 +3534,9 @@ install_debian_onedir_deps() {
         __apt_get_upgrade_noinput || return 1
     fi
 
-    if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 3 ]; then
-        PY_PKG_VER=3
-    else
-        PY_PKG_VER=""
+    if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -ne 3 ]; then
+        echoerror "Python version is no longer supported, only Python 3"
+        return 1
     fi
 
     # Additionally install procps and pciutils which allows for Docker bootstraps. See 366#issuecomment-39666813
@@ -3596,10 +3584,9 @@ install_debian_git_deps() {
     install_debian_deps || return 1
     install_debian_git_pre || return 1
 
-    if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 3 ]; then
-        PY_PKG_VER=3
-    else
-        PY_PKG_VER=""
+    if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -ne 3 ]; then
+        echoerror "Python version is no longer supported, only Python 3"
+        return 1
     fi
 
     __PACKAGES="python${PY_PKG_VER}-dev python${PY_PKG_VER}-pip python${PY_PKG_VER}-setuptools gcc"
@@ -3643,38 +3630,21 @@ install_debian_git() {
         return 1
     fi
 
-    if [ "${_POST_NEON_INSTALL}" -eq "$BS_TRUE" ]; then
-        # We can use --prefix on debian based ditributions
-        ## DGM if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 3 ]; then
-        ## DGM     _POST_NEON_PIP_INSTALL_ARGS="--target=/usr/lib/python3/dist-packages --install-option=--install-scripts=/usr/bin"
-        ## DGM else
-        ## DGM     _POST_NEON_PIP_INSTALL_ARGS="--target=/usr/lib/python3/dist-packages --install-option=--install-scripts=/usr/bin"
-        ## DGM fi
-        _POST_NEON_PIP_INSTALL_ARGS=""
-        __install_salt_from_repo_post_neon "${_PY_EXE}" || return 1
-        cd "${_SALT_GIT_CHECKOUT_DIR}" || return 1
+    # We can use --prefix on debian based ditributions
+    _POST_NEON_PIP_INSTALL_ARGS="--target=/usr/lib/python3/dist-packages --install-option=--install-scripts=/usr/bin"
 
-        # Account for new path for services files in later releases
-        if [ -d "pkg/common" ]; then
-          _SERVICE_DIR="pkg/common"
-        else
-          _SERVICE_DIR="pkg"
-        fi
+    __install_salt_from_repo_post_neon "${_PY_EXE}" || return 1
+    cd "${_SALT_GIT_CHECKOUT_DIR}" || return 1
 
-        sed -i 's:/usr/bin:/usr/local/bin:g' "${_SERVICE_DIR}"/*.service
-        return 0
+    # Account for new path for services files in later releases
+    if [ -d "pkg/common" ]; then
+      _SERVICE_DIR="pkg/common"
     else
-        echoerror "Python 2 is no longer supported, only Py3 packages"
-        return 1
+      _SERVICE_DIR="pkg"
     fi
 
-    if [ -f "${_SALT_GIT_CHECKOUT_DIR}/salt/syspaths.py" ]; then
-        # shellcheck disable=SC2086
-        "${_PYEXE}" setup.py --salt-config-dir="$_SALT_ETC_DIR" --salt-cache-dir="${_SALT_CACHE_DIR}" "${SETUP_PY_INSTALL_ARGS}" install --install-layout=deb || return 1
-    else
-        # shellcheck disable=SC2086
-        "${_PYEXE}" setup.py "${SETUP_PY_INSTALL_ARGS}" install --install-layout=deb || return 1
-    fi
+    sed -i 's:/usr/bin:/usr/local/bin:g' "${_SERVICE_DIR}"/*.service
+    return 0
 }
 
 install_debian_onedir() {
@@ -3776,7 +3746,7 @@ install_debian_restart_daemons() {
         [ "$fname" = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq "$BS_FALSE" ] && continue
 
         if [ -f /bin/systemctl ]; then
-            # Debian 8 uses systemd
+            # Debian 8 and above uses systemd
             /bin/systemctl stop "salt-$fname" > /dev/null 2>&1
             /bin/systemctl start "salt-$fname.service" && continue
             if [ "$_ECHO_DEBUG" -eq "$BS_TRUE" ]; then
@@ -3862,8 +3832,8 @@ install_fedora_deps() {
     fi
 
     __PACKAGES="${__PACKAGES:=}"
-    if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -lt 3 ]; then
-        echoerror "There are no Python 2 stable packages for Fedora, only Py3 packages"
+    if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -ne 3 ]; then
+        echoerror "Python version is no longer supported, only Python 3"
         return 1
     fi
 
@@ -3961,12 +3931,8 @@ install_fedora_stable_post() {
 }
 
 install_fedora_git_deps() {
-    if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 3 ]; then
-        # Packages are named python3-<whatever>
-        PY_PKG_VER=3
-    else
-        ## DGM PY_PKG_VER=2
-        echoerror "Python 2 is no longer supported, only Py3 packages"
+    if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -ne 3 ]; then
+        echoerror "Python version is no longer supported, only Python 3"
         return 1
     fi
 
@@ -6127,7 +6093,7 @@ install_arch_linux_onedir_post() {
 
 __install_saltstack_photon_onedir_repository() {
     if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -ne 3 ]; then
-        echoerror "Python 2 is no longer supported, only Python 3"
+        echoerror "Python version is no longer supported, only Python 3"
         return 1
     fi
 
@@ -6163,7 +6129,7 @@ __install_saltstack_photon_onedir_repository() {
 
 install_photon_deps() {
     if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -ne 3 ]; then
-        echoerror "Python 2 is no longer supported, only Python 3"
+        echoerror "Python version is no longer supported, only Python 3"
         return 1
     fi
 
@@ -6207,7 +6173,7 @@ install_photon_stable_post() {
 
 install_photon_git_deps() {
     if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -ne 3 ]; then
-        echoerror "Python 2 is no longer supported, only Python 3"
+        echoerror "Python version is no longer supported, only Python 3"
         return 1
     fi
 
@@ -6743,8 +6709,6 @@ install_opensuse_15_stable_deps() {
         echoerror "Python version is no longer supported, only Python 3"
         return 1
     fi
-
-    PY_PKG_VER=3
 
     # YAML module is used for generating custom master/minion configs
     # requests is still used by many salt modules
@@ -7298,7 +7262,6 @@ __macosx_get_packagesite() {
     # TBD DGM need to update for arch and 3006+ repo locations
 
     DARWIN_ARCH="x86_64"
-    __PY_VERSION_REPO="py3"
     PKG="salt-${STABLE_REV}-${__PY_VERSION_REPO}-${DARWIN_ARCH}.pkg"
     SALTPKGCONFURL="https://${_REPO_URL}/osx/${PKG}"
 }
@@ -7323,14 +7286,12 @@ __macosx_get_packagesite_onedir() {
     # TBD DGM need to update for arch and 3006+ repo locations
 
     if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -ne 3 ]; then
-        echoerror "Python 2 is no longer supported, only Python 3"
+        echoerror "Python version is no longer supported, only Python 3"
         return 1
     fi
 
     ## DGM TBD need to allow for arm64 arch too
     DARWIN_ARCH="x86_64"
-
-    __PY_VERSION_REPO="py3"
 
     if [ "$(echo "$_ONEDIR_REV" | grep -E '^(latest)$')" != "" ]; then
       _PKG_VERSION=$(__parse_repo_json_python)

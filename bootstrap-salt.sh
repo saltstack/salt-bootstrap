@@ -1,4 +1,4 @@
-#!/bin/sh -
+#!/bin/sh -x
 
 # WARNING: Changes to this file in the salt repo will be overwritten!
 # Please submit pull requests against the salt-bootstrap repo:
@@ -24,7 +24,7 @@
 #======================================================================================================================
 set -o nounset                              # Treat unset variables as an error
 
-__ScriptVersion="2024.06.10"
+__ScriptVersion="2024.06.26"
 __ScriptName="bootstrap-salt.sh"
 
 __ScriptFullName="$0"
@@ -1494,7 +1494,7 @@ __ubuntu_codename_translation() {
             DISTRO_CODENAME="noble"
             ;;
         *)
-            DISTRO_CODENAME="jammy"
+            DISTRO_CODENAME="noble"
             ;;
     esac
 }
@@ -1610,9 +1610,9 @@ __debian_codename_translation() {
 __check_end_of_life_versions() {
     case "${DISTRO_NAME_L}" in
         debian)
-            # Debian versions below 9 are not supported
+            # Debian versions below 11 are not supported
             ## DGM if [ "$DISTRO_MAJOR_VERSION" -lt 9 ]; then
-            if [ "$DISTRO_MAJOR_VERSION" -lt 10 ]; then
+            if [ "$DISTRO_MAJOR_VERSION" -le 10 ]; then
                 echoerror "End of life distributions are not supported."
                 echoerror "Please consider upgrading to the next stable. See:"
                 echoerror "    https://wiki.debian.org/DebianReleases"
@@ -1679,7 +1679,7 @@ __check_end_of_life_versions() {
 
         fedora)
             # Fedora lower than 38 are no longer supported
-            if [ "$DISTRO_MAJOR_VERSION" -lt 38 ]; then
+            if [ "$DISTRO_MAJOR_VERSION" -lt 39 ]; then
                 echoerror "End of life distributions are not supported."
                 echoerror "Please consider upgrading to the next stable. See:"
                 echoerror "    https://fedoraproject.org/wiki/Releases"
@@ -1688,8 +1688,8 @@ __check_end_of_life_versions() {
             ;;
 
         centos)
-            # CentOS versions lower than 7 are no longer supported
-            if [ "$DISTRO_MAJOR_VERSION" -lt 7 ]; then
+            # CentOS versions lower than 8 are no longer supported
+            if [ "$DISTRO_MAJOR_VERSION" -lt 8 ]; then
                 echoerror "End of life distributions are not supported."
                 echoerror "Please consider upgrading to the next stable. See:"
                 echoerror "    http://wiki.centos.org/Download"
@@ -1698,8 +1698,8 @@ __check_end_of_life_versions() {
             ;;
 
         red_hat*linux)
-            # Red Hat (Enterprise) Linux versions lower than 7 are no longer supported
-            if [ "$DISTRO_MAJOR_VERSION" -lt 7 ]; then
+            # Red Hat (Enterprise) Linux versions lower than 8 are no longer supported
+            if [ "$DISTRO_MAJOR_VERSION" -lt 8 ]; then
                 echoerror "End of life distributions are not supported."
                 echoerror "Please consider upgrading to the next stable. See:"
                 echoerror "    https://access.redhat.com/support/policy/updates/errata/"
@@ -1708,8 +1708,8 @@ __check_end_of_life_versions() {
             ;;
 
         oracle*linux)
-            # Oracle Linux versions lower than 7 are no longer supported
-            if [ "$DISTRO_MAJOR_VERSION" -lt 7 ]; then
+            # Oracle Linux versions lower than 8 are no longer supported
+            if [ "$DISTRO_MAJOR_VERSION" -lt 8 ]; then
                 echoerror "End of life distributions are not supported."
                 echoerror "Please consider upgrading to the next stable. See:"
                 echoerror "    http://www.oracle.com/us/support/library/elsp-lifetime-069338.pdf"
@@ -1718,8 +1718,8 @@ __check_end_of_life_versions() {
             ;;
 
         scientific*linux)
-            # Scientific Linux versions lower than 7 are no longer supported
-            if [ "$DISTRO_MAJOR_VERSION" -lt 7 ]; then
+            # Scientific Linux versions lower than 8 are no longer supported
+            if [ "$DISTRO_MAJOR_VERSION" -lt 8 ]; then
                 echoerror "End of life distributions are not supported."
                 echoerror "Please consider upgrading to the next stable. See:"
                 echoerror "    https://www.scientificlinux.org/downloads/sl-versions/"
@@ -1728,8 +1728,8 @@ __check_end_of_life_versions() {
             ;;
 
         cloud*linux)
-            # Cloud Linux versions lower than 7 are no longer supported
-            if [ "$DISTRO_MAJOR_VERSION" -lt 7 ]; then
+            # Cloud Linux versions lower than 8 are no longer supported
+            if [ "$DISTRO_MAJOR_VERSION" -lt 8 ]; then
                 echoerror "End of life distributions are not supported."
                 echoerror "Please consider upgrading to the next stable. See:"
                 echoerror "    https://docs.cloudlinux.com/index.html?cloudlinux_life-cycle.html"
@@ -4200,8 +4200,6 @@ __install_saltstack_rhel_onedir_repository() {
         return 1
     fi
 
-    __PY_VERSION_REPO="py3"
-
     # Avoid using '$releasever' variable for yum.
     # Instead, this should work correctly on all RHEL variants.
     base_url="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_DIR}/${__PY_VERSION_REPO}/redhat/${DISTRO_MAJOR_VERSION}/\$basearch/${ONEDIR_REV}/"
@@ -4269,18 +4267,27 @@ install_centos_stable_deps() {
         __install_saltstack_rhel_onedir_repository || return 1
     fi
 
-    ## DGM can find no dnf-utils in Fedora packaging archives and yum-utils EL7 and F30, none after
-    ## DGM but find it on 8 and 9 Centos Stream, and Alma 8 & 9 but versions we are using doesn't have them
-    ## DGM also EL9 doesn't have propcs and probably don't need these packages since using onedir
-    ## DGM if [ "$DISTRO_MAJOR_VERSION" -ge 8 ]; then
-    ## DGM     __PACKAGES="dnf-utils chkconfig"
-    ## DGM else
-    ## DGM     __PACKAGES="yum-utils chkconfig"
-    ## DGM fi
+    ## DGM ## DGM can find no dnf-utils in Fedora packaging archives and yum-utils EL7 and F30, none after
+    ## DGM ## DGM but find it on 8 and 9 Centos Stream, and Alma 8 & 9 but versions we are using doesn't have them
+    ## DGM ## DGM also EL9 doesn't have propcs and probably don't need these packages since using onedir
+    ## DGM ## DGM if [ "$DISTRO_MAJOR_VERSION" -ge 8 ]; then
+    ## DGM ## DGM     __PACKAGES="dnf-utils chkconfig"
+    ## DGM ## DGM else
+    ## DGM ## DGM     __PACKAGES="yum-utils chkconfig"
+    ## DGM ## DGM fi
 
-    ## DGM __PACKAGES="${__PACKAGES} procps"
+    ## DGM ## DGM __PACKAGES="${__PACKAGES} procps"
 
-    __PACKAGES="yum-utils chkconfig procps-ng"
+    ## DGM __PACKAGES="yum-utils chkconfig procps-ng"
+
+    ## DGM Trying original
+    if [ "$DISTRO_MAJOR_VERSION" -ge 8 ]; then
+        __PACKAGES="dnf-utils chkconfig"
+    else
+        __PACKAGES="yum-utils chkconfig"
+    fi
+
+    __PACKAGES="${__PACKAGES} procps"
 
     # shellcheck disable=SC2086
     __yum_install_noinput "${__PACKAGES}" || return 1
@@ -4290,7 +4297,6 @@ install_centos_stable_deps() {
         # shellcheck disable=SC2086
         __yum_install_noinput "${_EXTRA_PACKAGES}" || return 1
     fi
-
 
     return 0
 }
@@ -4362,8 +4368,7 @@ install_centos_git_deps() {
     # Set ONEDIR_REV to STABLE_REV in case we
     # end up calling install_centos_onedir_deps
     ONEDIR_REV="${STABLE_REV}"
-    install_centos_onedir_deps || \
-    return 1
+    install_centos_onedir_deps || return 1
 
     if [ "$_INSECURE_DL" -eq "$BS_FALSE" ] && [ "${_SALT_REPO_URL%%://*}" = "https" ]; then
         __yum_install_noinput ca-certificates || return 1
@@ -4499,7 +4504,20 @@ install_centos_onedir_deps() {
 
     ## DGM __PACKAGES="${__PACKAGES} procps"
 
-    __PACKAGES="yum-utils chkconfig procps-ng"
+    ## DGM __PACKAGES="yum-utils chkconfig procps-ng"
+
+    ## DGM can find no dnf-utils in Fedora packaging archives and yum-utils EL7 and F30, none after
+    ## DGM but find it on 8 and 9 Centos Stream, and Alma 8 & 9 but versions we are using doesn't have them
+    ## DGM also EL9 doesn't have propcs and probably don't need these packages since using onedir
+
+    ## DGM trying original
+    if [ "$DISTRO_MAJOR_VERSION" -ge 8 ]; then
+        __PACKAGES="dnf-utils chkconfig"
+    else
+        __PACKAGES="yum-utils chkconfig"
+    fi
+
+    __PACKAGES="${__PACKAGES} procps"
 
     # shellcheck disable=SC2086
     __yum_install_noinput "${__PACKAGES}" || return 1
@@ -5391,7 +5409,6 @@ install_alpine_linux_stable() {
 }
 
 install_alpine_linux_git() {
-
      __install_salt_from_repo_post_neon "${_PY_EXE}" || return 1
     return 0
 }
@@ -5945,7 +5962,6 @@ install_arch_linux_git() {
     _PIP_DOWNLOAD_ARGS="${_PIP_DOWNLOAD_ARGS} --use-pep517"
 
     __install_salt_from_repo_post_neon "${_PY_EXE}" || return 1
-    return 0
 
     return 0
 }

@@ -1936,6 +1936,9 @@ __function_defined() {
 #                 process is finished so the script doesn't exit on a locked proc.
 #----------------------------------------------------------------------------------------------------------------------
 __wait_for_apt(){
+    ## DGM Debugging
+    set -v
+    set -x
     # Timeout set at 15 minutes
     WAIT_TIMEOUT=900
 
@@ -2007,6 +2010,10 @@ __temp_gpg_pub() {
 #    PARAMETERS:  url
 #----------------------------------------------------------------------------------------------------------------------
 __apt_key_fetch() {
+    ## DGM Debugging
+    set -v
+    set -x
+
     url=$1
 
     tempfile="$(__temp_gpg_pub)"
@@ -2049,6 +2056,10 @@ __rpm_import_gpg() {
 #   DESCRIPTION:  (DRY) yum install with noinput options
 #----------------------------------------------------------------------------------------------------------------------
 __yum_install_noinput() {
+    ## DGM Debugging
+    set -v
+    set -x
+
 
     if [ "$DISTRO_NAME_L" = "oracle_linux" ]; then
         # We need to install one package at a time because --enablerepo=X disables ALL OTHER REPOS!!!!
@@ -2673,6 +2684,10 @@ __install_pip_deps() {
 #    PARAMETERS:  py_exe
 #----------------------------------------------------------------------------------------------------------------------
 __install_salt_from_repo_post_neon() {
+    ## DGM Debugging
+    set -v
+    set -x
+
     _py_exe="$1"
 
     if [ "${_py_exe}" = "" ]; then
@@ -3109,6 +3124,9 @@ install_ubuntu_git_deps() {
 }
 
 install_ubuntu_onedir_deps() {
+    ## DGM Debugging
+    set -v
+    set -x
     if [ "$_START_DAEMONS" -eq "$BS_FALSE" ]; then
         echowarn "Not starting daemons on Debian based distributions is not working mostly because starting them is the default behaviour."
     fi
@@ -4099,6 +4117,9 @@ install_fedora_check_services() {
 }
 
 install_fedora_onedir_deps() {
+    ## DGM Debugging
+    set -v
+    set -x
 
     if [ "$_UPGRADE_SYS" -eq "$BS_TRUE" ]; then
         yum -y update || return 1
@@ -4280,13 +4301,15 @@ install_centos_stable_deps() {
     ## DGM __PACKAGES="yum-utils chkconfig procps-ng"
 
     ## DGM Trying original
-    if [ "$DISTRO_MAJOR_VERSION" -ge 8 ]; then
-        __PACKAGES="dnf-utils chkconfig"
-    else
-        __PACKAGES="yum-utils chkconfig"
-    fi
+    ### if [ "$DISTRO_MAJOR_VERSION" -ge 8 ]; then
+    ###     __PACKAGES="dnf-utils chkconfig"
+    ### else
+    ###     __PACKAGES="yum-utils chkconfig"
+    ### fi
 
-    __PACKAGES="${__PACKAGES} procps"
+    ### __PACKAGES="${__PACKAGES} procps"
+
+    __PACKAGES="yum-utils chkconfig procps-ng"
 
     # shellcheck disable=SC2086
     __yum_install_noinput "${__PACKAGES}" || return 1
@@ -4361,6 +4384,9 @@ install_centos_stable_post() {
 }
 
 install_centos_git_deps() {
+    ## DGM Debugging
+    set -v
+    set -x
     # First try stable deps then fall back to onedir deps if that one fails
     # if we're installing on a Red Hat based host that doesn't have the classic
     # package repos available.
@@ -4471,6 +4497,9 @@ install_centos_git_post() {
 }
 
 install_centos_onedir_deps() {
+    ## DGM Debugging
+    set -v
+    set -x
     if [ "$_UPGRADE_SYS" -eq "$BS_TRUE" ]; then
         yum -y update || return 1
     fi
@@ -4510,13 +4539,15 @@ install_centos_onedir_deps() {
     ## DGM also EL9 doesn't have propcs and probably don't need these packages since using onedir
 
     ## DGM trying original
-    if [ "$DISTRO_MAJOR_VERSION" -ge 8 ]; then
-        __PACKAGES="dnf-utils chkconfig"
-    else
-        __PACKAGES="yum-utils chkconfig"
-    fi
+    ## if [ "$DISTRO_MAJOR_VERSION" -ge 8 ]; then
+    ##     __PACKAGES="dnf-utils chkconfig"
+    ## else
+    ##     __PACKAGES="yum-utils chkconfig"
+    ## fi
 
-    __PACKAGES="${__PACKAGES} procps"
+    ## __PACKAGES="${__PACKAGES} procps"
+
+    __PACKAGES="yum-utils chkconfig procps-ng"
 
     # shellcheck disable=SC2086
     __yum_install_noinput "${__PACKAGES}" || return 1

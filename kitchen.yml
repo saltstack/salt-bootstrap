@@ -33,7 +33,8 @@ platforms:
     driver:
       provision_command:
         - dnf -y install crypto-policies-scripts procps-ng
-        - update-crypto-policies --set DEFAULT:SHA1
+        ## DGM - update-crypto-policies --set DEFAULT:SHA1
+        - update-crypto-policies
         - echo "PubkeyAcceptedAlgorithms +ssh-rsa" | tee -a /etc/ssh/sshd_config
   - name: almalinux-8
   - name: amazon-2
@@ -61,7 +62,8 @@ platforms:
       image: quay.io/centos/centos:stream9
       provision_command:
         - dnf -y install crypto-policies-scripts procps-ng
-        - update-crypto-policies --set DEFAULT:SHA1
+        ## DGM - update-crypto-policies --set DEFAULT:SHA1
+        - update-crypto-policies
         - echo "PubkeyAcceptedAlgorithms +ssh-rsa" | tee -a /etc/ssh/sshd_config
   - name: centos-stream8
     driver:
@@ -119,7 +121,7 @@ platforms:
         ## DGM - dnf -y install crypto-policies-scripts procps-ng
         ## DGM - update-crypto-policies --set DEFAULT:SHA1
         - yum -y install crypto-policies-scripts procps-ng
-        - update-crypto-policies --set DEFAULT:SHA1
+        - update-crypto-policies
         - echo "PubkeyAcceptedAlgorithms +ssh-rsa" | tee -a /etc/ssh/sshd_config
   - name: rockylinux-8
     driver:

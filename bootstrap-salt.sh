@@ -271,7 +271,7 @@ _REPO_URL="repo.saltproject.io"
 _ONEDIR_DIR="salt"
 _ONEDIR_NIGHTLY_DIR="salt-dev/${_ONEDIR_DIR}"
 _PY_EXE="python3"
-_INSTALL_PY="$BS_FALSE"
+## DGM _INSTALL_PY="$BS_FALSE"
 ## DGM _TORNADO_MAX_PY3_VERSION="5.0"
 _POST_NEON_INSTALL=$BS_FALSE
 _MINIMUM_PIP_VERSION="9.0.1"
@@ -410,19 +410,20 @@ __usage() {
         Python 2.7 is no longer supported.
         Fedora git installation, CentOS 8, Ubuntu 20.04 support python3.
     -X  Do not start daemons after installation
-    -y  Installs a different python version on host. Currently this has only been
-        tested with CentOS 7 and is considered experimental. This will install the
-        ius repo on the box if disable repo is false. This must be used in conjunction
-        with -x <pythonversion>.  For example:
-            sh bootstrap.sh -P -y -x python3.8 git v3006.3
-        The above will install python38 and install the git version of salt using the
-        python3.8 executable. This only works for git and pip installations.
 
 EOT
 }   # ----------  end of function __usage  ----------
 
+## DGM     -y  Installs a different python version on host. Currently this has only been
+## DGM         tested with CentOS 7 and is considered experimental. This will install the
+## DGM         ius repo on the box if disable repo is false. This must be used in conjunction
+## DGM         with -x <pythonversion>.  For example:
+## DGM             sh bootstrap.sh -P -y -x python3.8 git v3006.3
+## DGM         The above will install python38 and install the git version of salt using the
+## DGM         python3.8 executable. This only works for git and pip installations.
 
-while getopts ':hvnDc:g:Gyx:k:s:MSNXCPFUKIA:i:Lp:dH:bflV:J:j:rR:aqQ' opt
+## DGM while getopts ':hvnDc:g:Gyx:k:s:MSNXCPFUKIA:i:Lp:dH:bflV:J:j:rR:aqQ' opt
+while getopts ':hvnDc:g:Gx:k:s:MSNXCPFUKIA:i:Lp:dH:bflV:J:j:rR:aqQ' opt
 do
   case "${opt}" in
 
@@ -468,7 +469,6 @@ do
     q )  _QUIET_GIT_INSTALLATION=$BS_TRUE               ;;
     Q )  _QUICK_START=$BS_TRUE                          ;;
     x )  _PY_EXE="$OPTARG"                              ;;
-    y )  _INSTALL_PY="$BS_TRUE"                         ;;
 
     \?)  echo
          echoerror "Option does not exist : $OPTARG"
@@ -480,6 +480,7 @@ do
 done
 shift $((OPTIND-1))
 
+## DGM    y )  _INSTALL_PY="$BS_TRUE"                         ;;
 
 # Define our logging file and pipe paths
 LOGFILE="/tmp/$( echo "$__ScriptName" | sed s/.sh/.log/g )"
@@ -2741,7 +2742,8 @@ EOM
     if ! ${_py_exe} -c "$CHECK_PIP_VERSION_SCRIPT"; then
         # Upgrade pip to at least 1.2 which is when we can start using "python3 -m pip"
         echodebug "Running '${_pip_cmd} install ${_POST_NEON_PIP_INSTALL_ARGS} pip>=${_MINIMUM_PIP_VERSION}'"
-        ${_pip_cmd} install "${_POST_NEON_PIP_INSTALL_ARGS}" -v "pip>=${_MINIMUM_PIP_VERSION}"
+        ## DGM ${_pip_cmd} install "${_POST_NEON_PIP_INSTALL_ARGS}" -v "pip>=${_MINIMUM_PIP_VERSION}"
+        ${_pip_cmd} install ${_POST_NEON_PIP_INSTALL_ARGS} -v "pip>=${_MINIMUM_PIP_VERSION}"
         sleep 1
         echodebug "PATH: ${PATH}"
         _pip_cmd="pip${_py_version}"
@@ -2767,7 +2769,8 @@ EOM
     fi
 
     echodebug "Running '${_pip_cmd} install wheel ${_setuptools_dep}'"
-    ${_pip_cmd} install --upgrade "${_POST_NEON_PIP_INSTALL_ARGS}"  wheel "${_setuptools_dep}"
+    ## DGM ${_pip_cmd} install --upgrade "${_POST_NEON_PIP_INSTALL_ARGS}"  wheel "${_setuptools_dep}"
+    ${_pip_cmd} install --upgrade ${_POST_NEON_PIP_INSTALL_ARGS}  wheel "${_setuptools_dep}"
 
     echoinfo "Installing salt using ${_py_exe}"
     cd "${_SALT_GIT_CHECKOUT_DIR}" || return 1
@@ -2775,11 +2778,13 @@ EOM
     mkdir /tmp/git/deps
     echoinfo "Downloading Salt Dependencies from PyPi"
     echodebug "Running '${_pip_cmd} download -d /tmp/git/deps ${_PIP_DOWNLOAD_ARGS} .'"
-    ${_pip_cmd} download -d /tmp/git/deps "${_PIP_DOWNLOAD_ARGS}" . || (echo "Failed to download salt dependencies" && return 1)
+    ## DGM ${_pip_cmd} download -d /tmp/git/deps "${_PIP_DOWNLOAD_ARGS}" . || (echo "Failed to download salt dependencies" && return 1)
+    ${_pip_cmd} download -d /tmp/git/deps ${_PIP_DOWNLOAD_ARGS} . || (echo "Failed to download salt dependencies" && return 1)
 
     echoinfo "Installing Downloaded Salt Dependencies"
     echodebug "Running '${_pip_cmd} install --ignore-installed ${_POST_NEON_PIP_INSTALL_ARGS} /tmp/git/deps/*'"
-    ${_pip_cmd} install --ignore-installed "${_POST_NEON_PIP_INSTALL_ARGS}" /tmp/git/deps/* || return 1
+    ## ${_pip_cmd} install --ignore-installed "${_POST_NEON_PIP_INSTALL_ARGS}" /tmp/git/deps/* || return 1
+    ${_pip_cmd} install --ignore-installed ${_POST_NEON_PIP_INSTALL_ARGS} /tmp/git/deps/* || return 1
     rm -f /tmp/git/deps/*
 
     echoinfo "Building Salt Python Wheel"
@@ -2797,8 +2802,10 @@ EOM
     echoinfo "Installing Built Salt Wheel"
     ${_pip_cmd} uninstall --yes salt 2>/dev/null || true
     echodebug "Running '${_pip_cmd} install --no-deps --force-reinstall ${_POST_NEON_PIP_INSTALL_ARGS} /tmp/git/deps/salt*.whl'"
+
+    ## DGM "${_POST_NEON_PIP_INSTALL_ARGS}" \
     ${_pip_cmd} install --no-deps --force-reinstall \
-        "${_POST_NEON_PIP_INSTALL_ARGS}" \
+        ${_POST_NEON_PIP_INSTALL_ARGS} \
         --global-option="--salt-config-dir=$_SALT_ETC_DIR --salt-cache-dir=${_SALT_CACHE_DIR} ${SETUP_PY_INSTALL_ARGS}" \
         /tmp/git/deps/salt*.whl || return 1
 
@@ -3097,6 +3104,10 @@ install_ubuntu_stable_deps() {
 }
 
 install_ubuntu_git_deps() {
+    ## DGM Debugging
+    set -v
+    set -x
+
     __wait_for_apt apt-get update || return 1
 
     if ! __check_command_exists git; then
@@ -3201,6 +3212,14 @@ install_ubuntu_git() {
         echoerror "Python 2 is no longer supported, only Python 3"
         return 1
     fi
+
+    ## DGM this original code was then negated to "" originally, why was it not removed ?
+    ## DGM # We can use --prefix on debian based ditributions
+    ## DGM if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 3 ]; then
+    ## DGM     _POST_NEON_PIP_INSTALL_ARGS="--target=/usr/lib/python3/dist-packages --install-option=--install-scripts=/usr/bin"
+    ## DGM else
+    ## DGM     _POST_NEON_PIP_INSTALL_ARGS="--target=/usr/lib/python2.7/dist-packages --install-option=--install-scripts=/usr/bin"
+    ## DGM fi
 
     _POST_NEON_PIP_INSTALL_ARGS=""
     __install_salt_from_repo_post_neon "${_PY_EXE}" || return 1
@@ -3630,7 +3649,17 @@ install_debian_git_deps() {
     return 0
 }
 
+install_debian_11_git_deps() {
 
+    install_debian_git_deps || return 1
+    return 0
+}
+
+install_debian_12_git_deps() {
+
+    install_debian_git_deps || return 1
+    return 0
+}
 
 install_debian_stable() {
     __PACKAGES=""
@@ -3665,7 +3694,15 @@ install_debian_git() {
     fi
 
     # We can use --prefix on debian based ditributions
-    _POST_NEON_PIP_INSTALL_ARGS="--target=/usr/lib/python3/dist-packages --install-option=--install-scripts=/usr/bin"
+    ## DGM this original code was then negated to "" originally, why was it not removed ?
+    ## DGM # We can use --prefix on debian based ditributions
+    ## DGM if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 3 ]; then
+    ## DGM     _POST_NEON_PIP_INSTALL_ARGS="--target=/usr/lib/python3/dist-packages --install-option=--install-scripts=/usr/bin"
+    ## DGM else
+    ## DGM     _POST_NEON_PIP_INSTALL_ARGS="--target=/usr/lib/python2.7/dist-packages --install-option=--install-scripts=/usr/bin"
+    ## DGM fi
+
+    _POST_NEON_PIP_INSTALL_ARGS=""
 
     __install_salt_from_repo_post_neon "${_PY_EXE}" || return 1
     cd "${_SALT_GIT_CHECKOUT_DIR}" || return 1
@@ -3990,52 +4027,13 @@ install_fedora_git_deps() {
 
     __git_clone_and_checkout || return 1
 
-    if [ "${_POST_NEON_INSTALL}" -eq "$BS_FALSE" ]; then
-
-        if [ "$_INSECURE_DL" -eq "$BS_FALSE" ] && [ "${_SALT_REPO_URL%%://*}" = "https" ]; then
-            __PACKAGES="${__PACKAGES} ca-certificates"
-        fi
-        if [ "$_INSTALL_CLOUD" -eq "$BS_TRUE" ]; then
-            __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-libcloud python${PY_PKG_VER}-netaddr"
-        fi
-
-        install_fedora_deps || return 1
-
-        if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 3 ]; then
-            if __check_command_exists python3; then
-                __python="python3"
-            fi
-        elif [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 2 ]; then
-            ## DGM how did that get set
-            echoerror "Python 2 is no longer supported, only Py3 packages"
-            return 1
-            ## DGM if __check_command_exists python2; then
-            ## DGM     __python="python2"
-            ## DGM fi
-        else
-            if ! __check_command_exists python; then
-                echoerror "Unable to find a python binary?!"
-                return 1
-            fi
-            # Let's hope it's the right one
-            ## TBD DGM check if Fedora has made python equiv. to python3
-            __python="python"
-        fi
-
-        grep tornado "${_SALT_GIT_CHECKOUT_DIR}/requirements/base.txt" | while IFS='
-    '         read -r dep; do
-                echodebug "Running '${__python}' -m pip install '${dep}'"
-                "${__python}" -m pip install "${dep}" || return 1
-            done
-    else
-        __PACKAGES="python${PY_PKG_VER}-devel python${PY_PKG_VER}-pip python${PY_PKG_VER}-setuptools gcc"
-        if [ "${DISTRO_VERSION}" -ge 35 ]; then
-            __PACKAGES="${__PACKAGES} gcc-c++"
-        fi
-        # shellcheck disable=SC2086
-        ## DGM __dnf_install_noinput "${__PACKAGES}" || return 1
-        __dnf_install_noinput ${__PACKAGES} || return 1
+    __PACKAGES="python${PY_PKG_VER}-devel python${PY_PKG_VER}-pip python${PY_PKG_VER}-setuptools gcc"
+    if [ "${DISTRO_VERSION}" -ge 35 ]; then
+        __PACKAGES="${__PACKAGES} gcc-c++"
     fi
+    # shellcheck disable=SC2086
+    ## DGM __dnf_install_noinput "${__PACKAGES}" || return 1
+    __dnf_install_noinput ${__PACKAGES} || return 1
 
     # Let's trigger config_salt()
     if [ "$_TEMP_CONFIG_DIR" = "null" ]; then
@@ -4415,6 +4413,7 @@ install_centos_git_deps() {
     ## DGM Debugging
     set -v
     set -x
+
     # First try stable deps then fall back to onedir deps if that one fails
     # if we're installing on a Red Hat based host that doesn't have the classic
     # package repos available.
@@ -4436,23 +4435,12 @@ install_centos_git_deps() {
     __PACKAGES=""
 
     if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 3 ]; then
-        if [ "$DISTRO_MAJOR_VERSION" -ge 8 ]; then
-            # Packages are named python3-<whatever>
-            PY_PKG_VER=3
-            __PACKAGES="${__PACKAGES} python3"
-        else
-            # Packages are named python36-<whatever>
-            PY_PKG_VER=36
-            __PACKAGES="${__PACKAGES} python36"
-        fi
+        # Packages are named python3-<whatever>
+        PY_PKG_VER=3
+        __PACKAGES="${__PACKAGES} python3"
     else
         echoerror "Python 2 is no longer supported, only Python 3"
         return 1
-    fi
-
-    if [ "${_INSTALL_PY}" -eq "${BS_TRUE}" ] && [ "$DISTRO_MAJOR_VERSION" -lt 8 ]; then
-        # Install Python if "-y" was passed in.
-        __install_python || return 1
     fi
 
     __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-devel python${PY_PKG_VER}-pip python${PY_PKG_VER}-setuptools gcc"
@@ -5975,13 +5963,6 @@ install_arch_linux_stable_deps() {
 }
 
 install_arch_linux_git_deps() {
-    if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 2 ]; then
-        echoerror "Python 2 is no longer supported, only Python 3"
-        return 1
-    else
-        PY_PKG_VER=""
-    fi
-
     install_arch_linux_stable_deps
 
     # Don't fail if un-installing python2-distribute threw an error
@@ -5990,6 +5971,14 @@ install_arch_linux_git_deps() {
     fi
 
     __git_clone_and_checkout || return 1
+
+    if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 2 ]; then
+        echoerror "Python 2 is no longer supported, only Python 3"
+        return 1
+    else
+        PY_PKG_VER=""
+    fi
+
     __PACKAGES="python${PY_PKG_VER}-pip python${PY_PKG_VER}-setuptools gcc"
     # shellcheck disable=SC2086
     pacman -Su --noconfirm --needed "${__PACKAGES}"
@@ -6607,6 +6596,7 @@ install_opensuse_git_deps() {
 
     __git_clone_and_checkout || return 1
 
+    # Check for Tumbleweed
     if [ "${DISTRO_MAJOR_VERSION}" -ge 20210101 ]; then
         __PACKAGES="python3-pip gcc-c++ python3-pyzmq-devel"
     else
@@ -6818,11 +6808,6 @@ install_opensuse_15_stable_deps() {
 }
 
 install_opensuse_15_git_deps() {
-    if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -ne 3 ]; then
-        echoerror "Python version is no longer supported, only Python 3"
-        return 1
-    fi
-
     install_opensuse_15_stable_deps || return 1
 
     if ! __check_command_exists git; then
@@ -6830,6 +6815,11 @@ install_opensuse_15_git_deps() {
     fi
 
     __git_clone_and_checkout || return 1
+
+    if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -ne 3 ]; then
+        echoerror "Python version is no longer supported, only Python 3"
+        return 1
+    fi
 
     PY_PKG_VER=3
     __PACKAGES="python${PY_PKG_VER}-xml python${PY_PKG_VER}-devel python${PY_PKG_VER}-pip python${PY_PKG_VER}-setuptools gcc"

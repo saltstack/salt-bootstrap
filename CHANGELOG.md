@@ -11,6 +11,7 @@
 - Removed support for EOL Salt releases, pre-3006
 - Added support for new OS's, for example: Ubuntu 24.04, Debian 12
 - Updated to minimum Python 3.10 version from 3.9
+- Removed '-y' option which was experimental and only on RHEL 7 or less which are now EOL
 
 **Full Changelog**: https://github.com/saltstack/salt-bootstrap/compare/v2024.04.03...v2024.06.XX
 

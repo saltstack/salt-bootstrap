@@ -1942,9 +1942,14 @@ __wait_for_apt(){
     # Timeout set at 15 minutes
     WAIT_TIMEOUT=900
 
+    ## DGM see if sync'ing the clocks helps
+    hwclock -s
+
     # Run our passed in apt command
     "${@}" 2>"$APT_ERR"
     APT_RETURN=$?
+
+    echoerror"DGM __wait_for_apt APT_ERR: $APT_ERR"
 
     # Make sure we're not waiting on a lock
     while [ "$APT_RETURN" -ne 0 ] && grep -q '^E: Could not get lock' "$APT_ERR"; do
@@ -1971,7 +1976,8 @@ __wait_for_apt(){
 #    PARAMETERS:  packages
 #----------------------------------------------------------------------------------------------------------------------
 __apt_get_install_noinput() {
-    __wait_for_apt apt-get install -y -o DPkg::Options::=--force-confold "${@}"; return $?
+    ## DGM __wait_for_apt apt-get install -y -o DPkg::Options::=--force-confold "${@}"; return $?
+    __wait_for_apt apt-get install -V -y -o DPkg::Options::=--force-confold "${@}"; return $?
 }   # ----------  end of function __apt_get_install_noinput  ----------
 
 
@@ -1980,7 +1986,8 @@ __apt_get_install_noinput() {
 #   DESCRIPTION:  (DRY) apt-get upgrade with noinput options
 #----------------------------------------------------------------------------------------------------------------------
 __apt_get_upgrade_noinput() {
-    __wait_for_apt apt-get upgrade -y -o DPkg::Options::=--force-confold; return $?
+    ## DGM __wait_for_apt apt-get upgrade -y -o DPkg::Options::=--force-confold; return $?
+    __wait_for_apt apt-get upgrade -V -y -o DPkg::Options::=--force-confold; return $?
 }   # ----------  end of function __apt_get_upgrade_noinput  ----------
 
 
@@ -3176,7 +3183,8 @@ install_ubuntu_stable() {
     fi
 
     # shellcheck disable=SC2086
-    __apt_get_install_noinput "${__PACKAGES}" || return 1
+    ## DGM __apt_get_install_noinput "${__PACKAGES}" || return 1
+    __apt_get_install_noinput ${__PACKAGES} || return 1
 
     return 0
 }
@@ -3227,7 +3235,8 @@ install_ubuntu_onedir() {
     fi
 
     # shellcheck disable=SC2086
-    __apt_get_install_noinput "${__PACKAGES}" || return 1
+    ## DGM __apt_get_install_noinput "${__PACKAGES}" || return 1
+    __apt_get_install_noinput ${__PACKAGES} || return 1
 
     return 0
 }
@@ -3424,7 +3433,8 @@ __install_saltstack_debian_repository() {
     fi
 
     # shellcheck disable=SC2086,SC2090
-    __apt_get_install_noinput "${__PACKAGES}" || return 1
+    ## DGM __apt_get_install_noinput "${__PACKAGES}" || return 1
+    __apt_get_install_noinput ${__PACKAGES} || return 1
 
     # amd64 is just a part of repository URI
     SALTSTACK_DEBIAN_URL="${HTTP_VAL}://${_REPO_URL}/${__PY_VERSION_REPO}/debian/${DEBIAN_RELEASE}/${__REPO_ARCH}"
@@ -3458,7 +3468,8 @@ __install_saltstack_debian_onedir_repository() {
     fi
 
     # shellcheck disable=SC2086,SC2090
-    __apt_get_install_noinput "${__PACKAGES}" || return 1
+    ## DGM __apt_get_install_noinput "${__PACKAGES}" || return 1
+    __apt_get_install_noinput ${__PACKAGES} || return 1
 
     # amd64 is just a part of repository URI
     SALTSTACK_DEBIAN_URL="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_DIR}/${__PY_VERSION_REPO}/debian/${DEBIAN_RELEASE}/${__REPO_ARCH}/${ONEDIR_REV}/"
@@ -3508,7 +3519,8 @@ install_debian_deps() {
     __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-yaml"
 
     # shellcheck disable=SC2086
-    __apt_get_install_noinput "${__PACKAGES}" || return 1
+    ## DGM __apt_get_install_noinput "${__PACKAGES}" || return 1
+    __apt_get_install_noinput ${__PACKAGES} || return 1
 
     if [ "$_DISABLE_REPOS" -eq "$BS_FALSE" ] || [ "$_CUSTOM_REPO_URL" != "null" ]; then
         __check_dpkg_architecture || return 1
@@ -3518,7 +3530,8 @@ install_debian_deps() {
     if [ "${_EXTRA_PACKAGES}" != "" ]; then
         echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
         # shellcheck disable=SC2086
-        __apt_get_install_noinput "${_EXTRA_PACKAGES}" || return 1
+        ## DGM __apt_get_install_noinput "${_EXTRA_PACKAGES}" || return 1
+        __apt_get_install_noinput ${_EXTRA_PACKAGES} || return 1
     fi
 
     return 0
@@ -3563,7 +3576,8 @@ install_debian_onedir_deps() {
     __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-yaml"
 
     # shellcheck disable=SC2086
-    __apt_get_install_noinput "${__PACKAGES}" || return 1
+    ## DGM __apt_get_install_noinput "${__PACKAGES}" || return 1
+    __apt_get_install_noinput ${__PACKAGES} || return 1
 
     if [ "$_DISABLE_REPOS" -eq "$BS_FALSE" ] || [ "$_CUSTOM_REPO_URL" != "null" ]; then
         __check_dpkg_architecture || return 1
@@ -3573,7 +3587,8 @@ install_debian_onedir_deps() {
     if [ "${_EXTRA_PACKAGES}" != "" ]; then
         echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
         # shellcheck disable=SC2086
-        __apt_get_install_noinput "${_EXTRA_PACKAGES}" || return 1
+        ## DGM __apt_get_install_noinput "${_EXTRA_PACKAGES}" || return 1
+        __apt_get_install_noinput ${_EXTRA_PACKAGES} || return 1
     fi
 
     return 0
@@ -3609,7 +3624,8 @@ install_debian_git_deps() {
     __PACKAGES="python${PY_PKG_VER}-dev python${PY_PKG_VER}-pip python${PY_PKG_VER}-setuptools gcc"
     echodebug "install_debian_git_deps() Installing ${__PACKAGES}"
     # shellcheck disable=SC2086
-    __apt_get_install_noinput "${__PACKAGES}" || return 1
+    ## DGM __apt_get_install_noinput "${__PACKAGES}" || return 1
+    __apt_get_install_noinput ${__PACKAGES} || return 1
 
     return 0
 }
@@ -3633,7 +3649,8 @@ install_debian_stable() {
     fi
 
     # shellcheck disable=SC2086
-    __apt_get_install_noinput "${__PACKAGES}" || return 1
+    ## DGM __apt_get_install_noinput "${__PACKAGES}" || return 1
+    __apt_get_install_noinput ${__PACKAGES} || return 1
 
     return 0
 }
@@ -3681,7 +3698,8 @@ install_debian_onedir() {
     fi
 
     # shellcheck disable=SC2086
-    __apt_get_install_noinput "${__PACKAGES}" || return 1
+    ## __apt_get_install_noinput "${__PACKAGES}" || return 1
+    __apt_get_install_noinput ${__PACKAGES} || return 1
 
     return 0
 }
@@ -3869,7 +3887,8 @@ install_fedora_deps() {
     fi
 
     # shellcheck disable=SC2086
-    __dnf_install_noinput "${__PACKAGES}" "${_EXTRA_PACKAGES}" || return 1
+    ## DGM __dnf_install_noinput "${__PACKAGES}" "${_EXTRA_PACKAGES}" || return 1
+    __dnf_install_noinput ${__PACKAGES} ${_EXTRA_PACKAGES} || return 1
 
     return 0
 }
@@ -3903,7 +3922,8 @@ install_fedora_stable() {
     fi
 
     # shellcheck disable=SC2086
-    __dnf_install_noinput "${__PACKAGES}" || return 1
+    ## DGM __dnf_install_noinput "${__PACKAGES}" || return 1
+    __dnf_install_noinput ${__PACKAGES} || return 1
 
     __python="python3"
     if ! __check_command_exists python3; then
@@ -3963,7 +3983,8 @@ install_fedora_git_deps() {
 
     if [ -n "${__PACKAGES}" ]; then
         # shellcheck disable=SC2086
-        __dnf_install_noinput "${__PACKAGES}" || return 1
+        ## DGM __dnf_install_noinput "${__PACKAGES}" || return 1
+        __dnf_install_noinput ${__PACKAGES} || return 1
         __PACKAGES=""
     fi
 
@@ -4012,7 +4033,8 @@ install_fedora_git_deps() {
             __PACKAGES="${__PACKAGES} gcc-c++"
         fi
         # shellcheck disable=SC2086
-        __dnf_install_noinput "${__PACKAGES}" || return 1
+        ## DGM __dnf_install_noinput "${__PACKAGES}" || return 1
+        __dnf_install_noinput ${__PACKAGES} || return 1
     fi
 
     # Let's trigger config_salt()
@@ -4155,12 +4177,14 @@ install_fedora_onedir_deps() {
     __PACKAGES="dnf-utils chkconfig procps-ng"
 
     # shellcheck disable=SC2086
-    __yum_install_noinput "${__PACKAGES}" || return 1
+    ## DGM __yum_install_noinput "${__PACKAGES}" || return 1
+    __yum_install_noinput ${__PACKAGES} || return 1
 
     if [ "${_EXTRA_PACKAGES}" != "" ]; then
         echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
         # shellcheck disable=SC2086
-        __yum_install_noinput "${_EXTRA_PACKAGES}" || return 1
+        ## DGM __yum_install_noinput "${_EXTRA_PACKAGES}" || return 1
+        __yum_install_noinput ${_EXTRA_PACKAGES} || return 1
     fi
 
     return 0
@@ -4188,7 +4212,8 @@ install_fedora_onedir() {
     fi
 
     # shellcheck disable=SC2086
-    __yum_install_noinput "${__PACKAGES}" || return 1
+    ## DGM __yum_install_noinput "${__PACKAGES}" || return 1
+    __yum_install_noinput ${__PACKAGES} || return 1
 
     return 0
 }
@@ -4312,12 +4337,14 @@ install_centos_stable_deps() {
     __PACKAGES="yum-utils chkconfig procps-ng"
 
     # shellcheck disable=SC2086
-    __yum_install_noinput "${__PACKAGES}" || return 1
+    ## DGM __yum_install_noinput "${__PACKAGES}" || return 1
+    __yum_install_noinput ${__PACKAGES} || return 1
 
     if [ "${_EXTRA_PACKAGES}" != "" ]; then
         echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
         # shellcheck disable=SC2086
-        __yum_install_noinput "${_EXTRA_PACKAGES}" || return 1
+        ## DGM __yum_install_noinput "${_EXTRA_PACKAGES}" || return 1
+        __yum_install_noinput ${_EXTRA_PACKAGES} || return 1
     fi
 
     return 0
@@ -4340,7 +4367,8 @@ install_centos_stable() {
     fi
 
     # shellcheck disable=SC2086
-    __yum_install_noinput "${__PACKAGES}" || return 1
+    ## DGM __yum_install_noinput "${__PACKAGES}" || return 1
+    __yum_install_noinput ${__PACKAGES} || return 1
 
     # Workaround for 3.11 broken on CentOS Stream 8.x
     # Re-install Python 3.6
@@ -4429,7 +4457,8 @@ install_centos_git_deps() {
 
     __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-devel python${PY_PKG_VER}-pip python${PY_PKG_VER}-setuptools gcc"
     # shellcheck disable=SC2086
-    __yum_install_noinput "${__PACKAGES}" || return 1
+    ## DGM __yum_install_noinput "${__PACKAGES}" || return 1
+    __yum_install_noinput ${__PACKAGES} || return 1
 
 
     # Let's trigger config_salt()
@@ -4550,12 +4579,14 @@ install_centos_onedir_deps() {
     __PACKAGES="yum-utils chkconfig procps-ng"
 
     # shellcheck disable=SC2086
-    __yum_install_noinput "${__PACKAGES}" || return 1
+    ## DGM __yum_install_noinput "${__PACKAGES}" || return 1
+    __yum_install_noinput ${__PACKAGES} || return 1
 
     if [ "${_EXTRA_PACKAGES}" != "" ]; then
         echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
         # shellcheck disable=SC2086
-        __yum_install_noinput "${_EXTRA_PACKAGES}" || return 1
+        ## DGM __yum_install_noinput "${_EXTRA_PACKAGES}" || return 1
+        __yum_install_noinput ${_EXTRA_PACKAGES} || return 1
     fi
 
     return 0
@@ -4578,7 +4609,8 @@ install_centos_onedir() {
     fi
 
     # shellcheck disable=SC2086
-    __yum_install_noinput "${__PACKAGES}" || return 1
+    ## DGM __yum_install_noinput "${__PACKAGES}" || return 1
+    __yum_install_noinput ${__PACKAGES} || return 1
 
     return 0
 }
@@ -5001,7 +5033,9 @@ install_oracle_linux_stable_deps() {
     if [ "${_EPEL_REPOS_INSTALLED}" -eq "$BS_FALSE" ]; then
         _EPEL_REPO="oracle-epel-release-el${DISTRO_MAJOR_VERSION}"
         if ! rpm -q "${_EPEL_REPO}" > /dev/null; then
-            __yum_install_noinput "${_EPEL_REPO}"
+            # shellcheck disable=SC2086
+            ## DGM __yum_install_noinput "${_EPEL_REPO}"
+            __yum_install_noinput ${_EPEL_REPO}
         fi
         _EPEL_REPOS_INSTALLED="$BS_TRUE"
     fi
@@ -5559,7 +5593,8 @@ install_amazon_linux_ami_2_git_deps() {
 
     if ! __check_command_exists "${PIP_EXE}"; then
         # shellcheck disable=SC2086
-        __yum_install_noinput "${__PACKAGES}" || return 1
+        ## DGM __yum_install_noinput "${__PACKAGES}" || return 1
+        __yum_install_noinput ${__PACKAGES} || return 1
     fi
 
     if ! __check_command_exists git; then
@@ -5570,7 +5605,8 @@ install_amazon_linux_ami_2_git_deps() {
 
     __PACKAGES="python${PY_PKG_VER}-pip python${PY_PKG_VER}-setuptools python${PY_PKG_VER}-devel gcc"
     # shellcheck disable=SC2086
-    __yum_install_noinput "${__PACKAGES}" || return 1
+    ## DGM __yum_install_noinput "${__PACKAGES}" || return 1
+    __yum_install_noinput ${__PACKAGES} || return 1
 
     # Let's trigger config_salt()
     if [ "$_TEMP_CONFIG_DIR" = "null" ]; then
@@ -5632,7 +5668,8 @@ _eof
     if [ "${_EXTRA_PACKAGES}" != "" ]; then
         echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
         # shellcheck disable=SC2086
-        __yum_install_noinput "${_EXTRA_PACKAGES}" || return 1
+        ## DGM __yum_install_noinput "${_EXTRA_PACKAGES}" || return 1
+        __yum_install_noinput ${_EXTRA_PACKAGES} || return 1
     fi
 }
 
@@ -5690,7 +5727,8 @@ _eof
     if [ "${_EXTRA_PACKAGES}" != "" ]; then
         echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
         # shellcheck disable=SC2086
-        __yum_install_noinput "${_EXTRA_PACKAGES}" || return 1
+        ## DGM __yum_install_noinput "${_EXTRA_PACKAGES}" || return 1
+        __yum_install_noinput ${_EXTRA_PACKAGES} || return 1
     fi
 }
 
@@ -5759,7 +5797,8 @@ install_amazon_linux_ami_2023_git_deps() {
 
     if ! __check_command_exists "${PIP_EXE}"; then
         # shellcheck disable=SC2086
-        __yum_install_noinput "${__PACKAGES}" || return 1
+        ## DGM __yum_install_noinput "${__PACKAGES}" || return 1
+        __yum_install_noinput ${__PACKAGES} || return 1
     fi
 
     if ! __check_command_exists git; then
@@ -5770,7 +5809,8 @@ install_amazon_linux_ami_2023_git_deps() {
 
     __PACKAGES="python${PY_PKG_VER}-pip python${PY_PKG_VER}-setuptools python${PY_PKG_VER}-devel gcc"
     # shellcheck disable=SC2086
-    __yum_install_noinput "${__PACKAGES}" || return 1
+    ## DGM __yum_install_noinput "${__PACKAGES}" || return 1
+    __yum_install_noinput ${__PACKAGES} || return 1
 
     # Let's trigger config_salt()
     if [ "$_TEMP_CONFIG_DIR" = "null" ]; then
@@ -5830,7 +5870,8 @@ _eof
     if [ "${_EXTRA_PACKAGES}" != "" ]; then
         echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
         # shellcheck disable=SC2086
-        __yum_install_noinput "${_EXTRA_PACKAGES}" || return 1
+        ## DGM __yum_install_noinput "${_EXTRA_PACKAGES}" || return 1
+        __yum_install_noinput ${_EXTRA_PACKAGES} || return 1
     fi
 }
 
@@ -6196,7 +6237,8 @@ install_photon_deps() {
     fi
 
     # shellcheck disable=SC2086
-    __tdnf_install_noinput "${__PACKAGES}" "${_EXTRA_PACKAGES}" || return 1
+    ## DGM __tdnf_install_noinput "${__PACKAGES}" "${_EXTRA_PACKAGES}" || return 1
+    __tdnf_install_noinput ${__PACKAGES} ${_EXTRA_PACKAGES} || return 1
 
     return 0
 }
@@ -6244,7 +6286,8 @@ install_photon_git_deps() {
 
     __PACKAGES="python${PY_PKG_VER}-devel python${PY_PKG_VER}-pip python${PY_PKG_VER}-setuptools gcc glibc-devel linux-devel.x86_64"
     # shellcheck disable=SC2086
-    __tdnf_install_noinput "${__PACKAGES}" || return 1
+    ## DGM __tdnf_install_noinput "${__PACKAGES}" || return 1
+    __tdnf_install_noinput ${__PACKAGES} || return 1
 
     if [ "${DISTRO_MAJOR_VERSION}" -gt 3 ]; then
       # Need newer version of setuptools on Photon
@@ -6374,12 +6417,14 @@ install_photon_onedir_deps() {
     __PACKAGES="procps-ng"
 
     # shellcheck disable=SC2086
-    __tdnf_install_noinput "${__PACKAGES}" || return 1
+    ## DGM __tdnf_install_noinput "${__PACKAGES}" || return 1
+    __tdnf_install_noinput ${__PACKAGES} || return 1
 
     if [ "${_EXTRA_PACKAGES}" != "" ]; then
         echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
         # shellcheck disable=SC2086
-        __tdnf_install_noinput "${_EXTRA_PACKAGES}" || return 1
+        ## DGM __tdnf_install_noinput "${_EXTRA_PACKAGES}" || return 1
+        __tdnf_install_noinput ${_EXTRA_PACKAGES} || return 1
     fi
 
     return 0

@@ -2027,8 +2027,9 @@ __apt_key_fetch() {
     tempfile="$(__temp_gpg_pub)"
 
     __fetch_url "$tempfile" "$url" || return 1
-    mkdir -p /etc/apt/keyrings || return 1
-    cp -f "$tempfile" /etc/apt/keyrings/salt-archive-keyring-2023.gpg && chmod 644 /etc/apt/keyrings/salt-archive-keyring-2023.gpg || return 1
+    ## DGM mkdir -p /etc/apt/keyrings || return 1
+    ## DGM cp -f "$tempfile" /etc/apt/keyrings/salt-archive-keyring-2023.gpg && chmod 644 /etc/apt/keyrings/salt-archive-keyring-2023.gpg || return 1
+    cp -f "$tempfile" /usr/share/keyrings/salt-archive-keyring.gpg && chmod 644 /usr/share/keyrings/salt-archive-keyring.gpg || return 1
     rm -f "$tempfile"
 
     return 0

@@ -33,8 +33,8 @@ platforms:
     driver:
       provision_command:
         - dnf -y install crypto-policies-scripts procps-ng
-        ## DGM - update-crypto-policies --set DEFAULT:SHA1
-        - update-crypto-policies
+        - update-crypto-policies --set DEFAULT:SHA1
+        ### DGM - update-crypto-policies --set DEFAULT:SHA256
         - echo "PubkeyAcceptedAlgorithms +ssh-rsa" | tee -a /etc/ssh/sshd_config
   - name: almalinux-8
   - name: amazon-2
@@ -62,8 +62,8 @@ platforms:
       image: quay.io/centos/centos:stream9
       provision_command:
         - dnf -y install crypto-policies-scripts procps-ng
-        ## DGM - update-crypto-policies --set DEFAULT:SHA1
-        - update-crypto-policies
+        - update-crypto-policies --set DEFAULT:SHA1
+        ### DGM - update-crypto-policies --set DEFAULT:SHA256
         - echo "PubkeyAcceptedAlgorithms +ssh-rsa" | tee -a /etc/ssh/sshd_config
   - name: centos-stream8
     driver:
@@ -118,21 +118,12 @@ platforms:
       platform: centosstream
       run_command: /usr/lib/systemd/systemd
       provision_command:
-        ## DGM - dnf -y install crypto-policies-scripts procps-ng
-        ## DGM - update-crypto-policies --set DEFAULT:SHA1
-        - yum -y install crypto-policies-scripts procps-ng
-        - update-crypto-policies
+        - dnf -y install crypto-policies-scripts procps-ng
+        - update-crypto-policies --set DEFAULT:SHA1
+        ### DGM - yum -y install crypto-policies-scripts procps-ng
+        ### DGM - update-crypto-policies --set DEFAULT:SHA256
         - echo "PubkeyAcceptedAlgorithms +ssh-rsa" | tee -a /etc/ssh/sshd_config
   - name: rockylinux-8
-    driver:
-      platform: centosstream
-      run_command: /usr/lib/systemd/systemd
-      provision_command:
-        ## DGM - dnf -y install crypto-policies-scripts procps-ng
-        ## DGM - update-crypto-policies --set DEFAULT:SHA1
-        - yum -y install crypto-policies-scripts procps-ng
-        - update-crypto-policies --set DEFAULT:SHA1
-        - echo "PubkeyAcceptedAlgorithms +ssh-rsa" | tee -a /etc/ssh/sshd_config
   - name: oraclelinux-8
   - name: ubuntu-22.04
   - name: ubuntu-24.04
@@ -283,7 +274,6 @@ suites:
       - opensuse-tumbleweed
       - ubuntu-2004
       - ubuntu-2204
-
 
   - name: quickstart
     provisioner:

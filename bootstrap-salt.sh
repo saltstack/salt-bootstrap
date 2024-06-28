@@ -4333,7 +4333,7 @@ install_centos_stable_deps() {
 
     ### __PACKAGES="${__PACKAGES} procps"
 
-    __PACKAGES="yum-utils chkconfig procps-ng"
+    __PACKAGES="yum-utils chkconfig procps-ng findutils"
 
     # shellcheck disable=SC2086
     ## DGM __yum_install_noinput "${__PACKAGES}" || return 1
@@ -4565,7 +4565,7 @@ install_centos_onedir_deps() {
 
     ## __PACKAGES="${__PACKAGES} procps"
 
-    __PACKAGES="yum-utils chkconfig procps-ng"
+    __PACKAGES="yum-utils chkconfig procps-ng findutils"
 
     # shellcheck disable=SC2086
     ## DGM __yum_install_noinput "${__PACKAGES}" || return 1

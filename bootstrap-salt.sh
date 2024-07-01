@@ -24,7 +24,7 @@
 #======================================================================================================================
 set -o nounset                              # Treat unset variables as an error
 
-__ScriptVersion="2024.06.26"
+__ScriptVersion="2024.07.01"
 __ScriptName="bootstrap-salt.sh"
 
 __ScriptFullName="$0"
@@ -601,6 +601,10 @@ if [ "$#" -gt 0 ];then
     ITYPE=$1
     shift
 fi
+
+## DGM Debugging
+set -v
+set -x
 
 # Check installation type
 if [ "$(echo "$ITYPE" | grep -E '(stable|testing|git|onedir|onedir_rc)')" = "" ]; then
@@ -1747,6 +1751,10 @@ __check_end_of_life_versions() {
             ;;
     esac
 }
+
+## DGM Debugging
+set -v
+set -x
 
 
 __gather_system_info
@@ -2935,6 +2943,12 @@ __enable_universe_repository() {
 
 __install_saltstack_ubuntu_repository() {
     # Workaround for latest non-LTS Ubuntu
+    ## DGM Debugging
+    set -v
+    set -x
+
+    echodebug "DGM Ubuntu A checking STABLE_REV ,${STABLE_REV}, ONEDIR_REV ,$ONEDIR_REV,"
+
     if { [ "$DISTRO_MAJOR_VERSION" -eq 20 ] && [ "$DISTRO_MINOR_VERSION" -eq 10 ]; } || \
        { [ "$DISTRO_MAJOR_VERSION" -eq 22 ] && [ "$DISTRO_MINOR_VERSION" -eq 10 ]; } || \
         [ "$DISTRO_MAJOR_VERSION" -eq 21 ] ||  [ "$DISTRO_MAJOR_VERSION" -eq 23 ]; then
@@ -2973,7 +2987,6 @@ __install_saltstack_ubuntu_repository() {
     # SaltStack's stable Ubuntu repository:
     SALTSTACK_UBUNTU_URL="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_DIR}/${__PY_VERSION_REPO}/ubuntu/${UBUNTU_VERSION}/${__REPO_ARCH}/${STABLE_REV}"
     echo "$__REPO_ARCH_DEB $SALTSTACK_UBUNTU_URL $UBUNTU_CODENAME main" > /etc/apt/sources.list.d/salt.list
-
     __apt_key_fetch "$SALTSTACK_UBUNTU_URL/SALT-PROJECT-GPG-PUBKEY-2023.gpg" || return 1
 
     __wait_for_apt apt-get update || return 1
@@ -2991,6 +3004,8 @@ __install_saltstack_ubuntu_onedir_repository() {
         UBUNTU_VERSION=${DISTRO_VERSION}
         UBUNTU_CODENAME=${DISTRO_CODENAME}
     fi
+
+    echodebug "DGM Ubuntu B checking STABLE_REV ,${STABLE_REV}, ONEDIR_REV ,$ONEDIR_REV,"
 
     # Install downloader backend for GPG keys fetching
     __PACKAGES='wget'
@@ -3018,7 +3033,7 @@ __install_saltstack_ubuntu_onedir_repository() {
     fi
     echo "$__REPO_ARCH_DEB $SALTSTACK_UBUNTU_URL $UBUNTU_CODENAME main" > /etc/apt/sources.list.d/salt.list
 
-    __apt_key_fetch "$SALTSTACK_UBUNTU_URL/SALT-PROJECT-GPG-PUBKEY-2023.gpg" || return 1
+    __apt_key_fetch "${SALTSTACK_UBUNTU_URL}SALT-PROJECT-GPG-PUBKEY-2023.gpg" || return 1
 
     __wait_for_apt apt-get update || return 1
 }
@@ -3446,6 +3461,10 @@ install_ubuntu_check_services() {
 #   Debian Install Functions
 #
 __install_saltstack_debian_repository() {
+    ## DGM Debugging
+    set -v
+    set -x
+
     DEBIAN_RELEASE="$DISTRO_MAJOR_VERSION"
     DEBIAN_CODENAME="$DISTRO_CODENAME"
 
@@ -3453,6 +3472,8 @@ __install_saltstack_debian_repository() {
         echoerror "Python version is no longer supported, only Python 3"
         return 1
     fi
+
+    echodebug "DGM Debian A checking STABLE_REV ,${STABLE_REV}, ONEDIR_REV ,$ONEDIR_REV,"
 
     # Install downloader backend for GPG keys fetching
     __PACKAGES='wget'
@@ -3483,8 +3504,14 @@ __install_saltstack_debian_repository() {
 }
 
 __install_saltstack_debian_onedir_repository() {
+    ## DGM Debugging
+    set -v
+    set -x
+
     DEBIAN_RELEASE="$DISTRO_MAJOR_VERSION"
     DEBIAN_CODENAME="$DISTRO_CODENAME"
+
+    echodebug "DGM Debian B checking STABLE_REV ,${STABLE_REV}, ONEDIR_REV ,$ONEDIR_REV,"
 
     if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -ne 3 ]; then
         echoerror "Python version is no longer supported, only Python 3"
@@ -3719,6 +3746,10 @@ install_debian_12_git_deps() {
 }
 
 install_debian_git() {
+    ## DGM Debugging
+    set -v
+    set -x
+
     if [ -n "$_PY_EXE" ]; then
         _PYEXE=${_PY_EXE}
     else
@@ -3824,23 +3855,24 @@ install_debian_git_post() {
             /bin/systemctl enable "salt-${fname}.service"
             SYSTEMD_RELOAD=$BS_TRUE
 
-        # Install initscripts for Debian 7 "Wheezy"
-        elif [ ! -f "/etc/init.d/salt-$fname" ] || \
-            { [ -f "/etc/init.d/salt-$fname" ] && [ "$_FORCE_OVERWRITE" -eq $BS_TRUE ]; }; then
-            __copyfile "${_SALT_GIT_CHECKOUT_DIR}/pkg/deb/salt-${fname}.init" "/etc/init.d/salt-${fname}"
-            __copyfile "${_SALT_GIT_CHECKOUT_DIR}/pkg/deb/salt-${fname}.environment" "/etc/default/salt-${fname}"
+        ## DGM # Install initscripts for Debian 7 "Wheezy"
+        ## DGM elif [ ! -f "/etc/init.d/salt-$fname" ] || \
+        ## DGM     { [ -f "/etc/init.d/salt-$fname" ] && [ "$_FORCE_OVERWRITE" -eq $BS_TRUE ]; }; then
+        ## DGM     __copyfile "${_SALT_GIT_CHECKOUT_DIR}/pkg/deb/salt-${fname}.init" "/etc/init.d/salt-${fname}"
+        ## DGM     __copyfile "${_SALT_GIT_CHECKOUT_DIR}/pkg/deb/salt-${fname}.environment" "/etc/default/salt-${fname}"
 
-            if [ ! -f "/etc/init.d/salt-${fname}" ]; then
-                echowarn "The init script for salt-${fname} was not found, skipping it..."
-                continue
-            fi
+        ## DGM     if [ ! -f "/etc/init.d/salt-${fname}" ]; then
+        ## DGM         echowarn "The init script for salt-${fname} was not found, skipping it..."
+        ## DGM         continue
+        ## DGM     fi
 
-            chmod +x "/etc/init.d/salt-${fname}"
+        ## DGM     chmod +x "/etc/init.d/salt-${fname}"
 
-            # Skip salt-api since the service should be opt-in and not necessarily started on boot
-            [ "$fname" = "api" ] && continue
+        ## DGM     # Skip salt-api since the service should be opt-in and not necessarily started on boot
+        ## DGM     [ "$fname" = "api" ] && continue
 
-            update-rc.d "salt-${fname}" defaults
+        ## DGM     update-rc.d "salt-${fname}" defaults
+
         fi
     done
 }
@@ -3909,6 +3941,10 @@ install_debian_check_services() {
 #
 
 __install_saltstack_fedora_onedir_repository() {
+    ## DGM Debugging
+    set -v
+    set -x
+
     if [ "$ITYPE" = "stable" ]; then
         REPO_REV="$ONEDIR_REV"
     else
@@ -3929,6 +3965,7 @@ __install_saltstack_fedora_onedir_repository() {
     if [ ! -s "$REPO_FILE" ] || [ "$_FORCE_OVERWRITE" -eq $BS_TRUE ]; then
         FETCH_URL="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_DIR}/${__PY_VERSION_REPO}/fedora/${DISTRO_MAJOR_VERSION}/${CPU_ARCH_L}/${ONEDIR_REV}"
         if [ "${ONEDIR_REV}" = "nightly" ] ; then
+            ## DGM FETCH_URL="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_NIGHTLY_DIR}/${__PY_VERSION_REPO}/fedora/${DISTRO_MAJOR_VERSION}/${CPU_ARCH_L}/"
             FETCH_URL="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_NIGHTLY_DIR}/${__PY_VERSION_REPO}/fedora/${DISTRO_MAJOR_VERSION}/${CPU_ARCH_L}/"
         fi
 
@@ -3980,6 +4017,10 @@ install_fedora_deps() {
 }
 
 install_fedora_stable() {
+    ## DGM Debugging
+    set -v
+    set -x
+
     if [ "$STABLE_REV" = "latest" ]; then
         __SALT_VERSION=""
     else
@@ -4238,6 +4279,10 @@ install_fedora_onedir_deps() {
 
 
 install_fedora_onedir() {
+    ## DGM Debugging
+    set -v
+    set -x
+
     STABLE_REV=$ONEDIR_REV
     #install_fedora_stable || return 1
 
@@ -4267,6 +4312,10 @@ install_fedora_onedir() {
 }
 
 install_fedora_onedir_post() {
+    ## DGM Debugging
+    set -v
+    set -x
+
     STABLE_REV=$ONEDIR_REV
     install_fedora_stable_post || return 1
 
@@ -4282,6 +4331,10 @@ install_fedora_onedir_post() {
 #   CentOS Install Functions
 #
 __install_saltstack_rhel_onedir_repository() {
+    ## DGM Debugging
+    set -v
+    set -x
+
     if [ "$ITYPE" = "stable" ]; then
         repo_rev="$ONEDIR_REV"
     else
@@ -4337,7 +4390,12 @@ _eof
 
     return 0
 }
+
 install_centos_stable_deps() {
+    ## DGM Debugging
+    set -v
+    set -x
+
     if [ "$_UPGRADE_SYS" -eq $BS_TRUE ]; then
         yum -y update || return 1
     fi
@@ -4519,6 +4577,10 @@ install_centos_git_deps() {
 }
 
 install_centos_git() {
+    ## DGM Debugging
+    set -v
+    set -x
+
     if [ "${_PY_EXE}" != "" ]; then
         _PYEXE=${_PY_EXE}
         echoinfo "Using the following python version: ${_PY_EXE} to install salt"
@@ -4534,6 +4596,10 @@ install_centos_git() {
 }
 
 install_centos_git_post() {
+    ## DGM Debugging
+    set -v
+    set -x
+
     SYSTEMD_RELOAD=$BS_FALSE
 
     for fname in api master minion syndic; do
@@ -4577,6 +4643,7 @@ install_centos_onedir_deps() {
     ## DGM Debugging
     set -v
     set -x
+
     if [ "$_UPGRADE_SYS" -eq "$BS_TRUE" ]; then
         yum -y update || return 1
     fi
@@ -5677,6 +5744,10 @@ install_amazon_linux_ami_2_git_deps() {
 }
 
 install_amazon_linux_ami_2_deps() {
+    ## DGM Debugging
+    set -v
+    set -x
+
     if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -ne 3 ]; then
         echoerror "Python version is no longer supported, only Python 3"
         return 1
@@ -6512,6 +6583,10 @@ install_photon_onedir_deps() {
 
 
 install_photon_onedir() {
+    ## DGM Debugging
+    set -v
+    set -x
+
     STABLE_REV=$ONEDIR_REV
 
     __PACKAGES=""
@@ -6540,6 +6615,10 @@ install_photon_onedir() {
 }
 
 install_photon_onedir_post() {
+    ## DGM Debugging
+    set -v
+    set -x
+
     STABLE_REV=$ONEDIR_REV
     install_photon_stable_post || return 1
 
@@ -7187,6 +7266,10 @@ install_gentoo_git_deps() {
 }
 
 install_gentoo_stable() {
+    ## DGM Debugging
+    set -v
+    set -x
+
     GENTOO_SALT_PACKAGE="app-admin/salt"
 
     STABLE_REV_WITHOUT_PREFIX=$(echo "${STABLE_REV}" | sed 's#archive/##')
@@ -7214,6 +7297,10 @@ install_gentoo_git() {
 }
 
 install_gentoo_onedir() {
+    ## DGM Debugging
+    set -v
+    set -x
+
   STABLE_REV=${ONEDIR_REV}
   install_gentoo_stable || return 1
 }

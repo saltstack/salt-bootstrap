@@ -5679,6 +5679,9 @@ install_arch_linux_stable_deps() {
     pacman -Su --noconfirm --needed python${PY_PKG_VER}-yaml
     pacman -Su --noconfirm --needed python${PY_PKG_VER}-tornado
 
+    ## DGM 3006.x pkg doesn't have tornado in reqs
+    pacman -Su --noconfirm --needed python${PY_PKG_VER}-tornado
+
     if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
         # shellcheck disable=SC2086
         pacman -Su --noconfirm --needed python${PY_PKG_VER}-apache-libcloud || return 1

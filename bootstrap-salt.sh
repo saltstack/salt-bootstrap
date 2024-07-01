@@ -127,11 +127,14 @@ __check_command_exists() {
 #   DESCRIPTION:  Simple function to let the users know that -P needs to be used.
 #----------------------------------------------------------------------------------------------------------------------
 __check_pip_allowed() {
-    if [ $# -eq 1 ]; then
-        _PIP_ALLOWED_ERROR_MSG=$1
-    else
-        _PIP_ALLOWED_ERROR_MSG="pip based installations were not allowed. Retry using '-P'"
-    fi
+    ## DGM __install_tornado_pip supplied an error msg, but no longer used, now shellcheck complains about unused  parameter
+    ## DGM if [ $# -eq 1 ]; then
+    ## DGM     _PIP_ALLOWED_ERROR_MSG=$1
+    ## DGM else
+    ## DGM     _PIP_ALLOWED_ERROR_MSG="pip based installations were not allowed. Retry using '-P'"
+    ## DGM fi
+
+    _PIP_ALLOWED_ERROR_MSG="pip based installations were not allowed. Retry using '-P'"
 
     if [ "$_PIP_ALLOWED" -eq $BS_FALSE ]; then
         echoerror "$_PIP_ALLOWED_ERROR_MSG"
@@ -1932,6 +1935,7 @@ __wait_for_apt(){
     ## DGM Debugging
     set -v
     set -x
+
     # Timeout set at 15 minutes
     WAIT_TIMEOUT=900
 
@@ -2061,7 +2065,6 @@ __yum_install_noinput() {
     set -v
     set -x
 
-
     if [ "$DISTRO_NAME_L" = "oracle_linux" ]; then
         # We need to install one package at a time because --enablerepo=X disables ALL OTHER REPOS!!!!
         for package in "${@}"; do
@@ -2077,6 +2080,9 @@ __yum_install_noinput() {
 #   DESCRIPTION:  (DRY) dnf install with noinput options
 #----------------------------------------------------------------------------------------------------------------------
 __dnf_install_noinput() {
+    ## DGM Debugging
+    set -v
+    set -x
 
     dnf -y install "${@}" || return $?
 }   # ----------  end of function __dnf_install_noinput  ----------
@@ -2086,6 +2092,9 @@ __dnf_install_noinput() {
 #   DESCRIPTION:  (DRY) tdnf install with noinput options
 #----------------------------------------------------------------------------------------------------------------------
 __tdnf_install_noinput() {
+    ## DGM Debugging
+    set -v
+    set -x
 
     tdnf -y install "${@}" || return $?
 }   # ----------  end of function __tdnf_install_noinput  ----------
@@ -2630,17 +2639,17 @@ __install_pip_pkgs() {
     ${_pip_cmd} install ${_pip_pkgs} || return 1
 }
 
-#---  FUNCTION  -------------------------------------------------------------------------------------------------------
-#          NAME:  __install_tornado_pip
-#    PARAMETERS:  python executable
-#   DESCRIPTION:  Return 0 or 1 if successfully able to install tornado<5.0
-#----------------------------------------------------------------------------------------------------------------------
-__install_tornado_pip() {
-    # OS needs tornado <5.0 from pip
-    __check_pip_allowed "You need to allow pip based installations (-P) for Tornado <5.0 in order to install Salt on Python 3"
-    ## install pip if its not installed and install tornado
-    __install_pip_pkgs "tornado<5.0" "${1}" || return 1
-}
+## DGM #---  FUNCTION  -------------------------------------------------------------------------------------------------------
+## DGM #          NAME:  __install_tornado_pip
+## DGM #    PARAMETERS:  python executable
+## DGM #   DESCRIPTION:  Return 0 or 1 if successfully able to install tornado<5.0
+## DGM #----------------------------------------------------------------------------------------------------------------------
+## DGM __install_tornado_pip() {
+## DGM     # OS needs tornado <5.0 from pip
+## DGM     __check_pip_allowed "You need to allow pip based installations (-P) for Tornado <5.0 in order to install Salt on Python 3"
+## DGM     ## install pip if its not installed and install tornado
+## DGM     __install_pip_pkgs "tornado<5.0" "${1}" || return 1
+## DGM }
 
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #          NAME:  __install_pip_deps
@@ -2950,6 +2959,9 @@ __install_saltstack_ubuntu_repository() {
         __PACKAGES="${__PACKAGES} apt-transport-https ca-certificates"
     fi
 
+    ## DGM tornado appears to be missing in 3006.x pkg requirements
+    __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
+
     # shellcheck disable=SC2086,SC2090
     __apt_get_install_noinput ${__PACKAGES} || return 1
 
@@ -2959,7 +2971,7 @@ __install_saltstack_ubuntu_repository() {
     fi
 
     # SaltStack's stable Ubuntu repository:
-    SALTSTACK_UBUNTU_URL="${HTTP_VAL}://${_REPO_URL}/${__PY_VERSION_REPO}/ubuntu/${UBUNTU_VERSION}/${__REPO_ARCH}/${STABLE_REV}"
+    SALTSTACK_UBUNTU_URL="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_DIR}/${__PY_VERSION_REPO}/ubuntu/${UBUNTU_VERSION}/${__REPO_ARCH}/${STABLE_REV}"
     echo "$__REPO_ARCH_DEB $SALTSTACK_UBUNTU_URL $UBUNTU_CODENAME main" > /etc/apt/sources.list.d/salt.list
 
     __apt_key_fetch "$SALTSTACK_UBUNTU_URL/SALT-PROJECT-GPG-PUBKEY-2023.gpg" || return 1
@@ -2992,6 +3004,9 @@ __install_saltstack_ubuntu_onedir_repository() {
     if [ "$HTTP_VAL" = "https" ] ; then
         __PACKAGES="${__PACKAGES} apt-transport-https ca-certificates"
     fi
+
+    ## DGM tornado appears to be missing in 3006.x pkg requirements
+    __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
 
     # shellcheck disable=SC2086,SC2090
     __apt_get_install_noinput ${__PACKAGES} || return 1
@@ -3046,6 +3061,9 @@ install_ubuntu_deps() {
 
     # Additionally install procps and pciutils which allows for Docker bootstraps. See 366#issuecomment-39666813
     __PACKAGES="${__PACKAGES} procps pciutils"
+
+    ## DGM tornado appears to be missing in 3006.x pkg requirements
+    __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
 
     # shellcheck disable=SC2086,SC2090
     __apt_get_install_noinput ${__PACKAGES} || return 1
@@ -3118,6 +3136,10 @@ install_ubuntu_git_deps() {
     if [ "$DISTRO_MAJOR_VERSION" -ge 22 ]; then
         __PACKAGES="${__PACKAGES} g++"
     fi
+
+    ## DGM tornado appears to be missing in 3006.x pkg requirements
+    __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
+
     # shellcheck disable=SC2086
     __apt_get_install_noinput ${__PACKAGES} || return 1
 
@@ -3182,6 +3204,9 @@ install_ubuntu_stable() {
         __PACKAGES="${__PACKAGES} salt-syndic"
     fi
 
+    ## DGM tornado appears to be missing in 3006.x pkg requirements
+    __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
+
     # shellcheck disable=SC2086
     ## DGM __apt_get_install_noinput "${__PACKAGES}" || return 1
     __apt_get_install_noinput ${__PACKAGES} || return 1
@@ -3241,6 +3266,9 @@ install_ubuntu_onedir() {
     if [ "$_INSTALL_SYNDIC" -eq $BS_TRUE ]; then
         __PACKAGES="${__PACKAGES} salt-syndic"
     fi
+
+    ## DGM tornado appears to be missing in 3006.x pkg requirements
+    __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
 
     # shellcheck disable=SC2086
     ## DGM __apt_get_install_noinput "${__PACKAGES}" || return 1
@@ -3439,11 +3467,14 @@ __install_saltstack_debian_repository() {
         __PACKAGES="${__PACKAGES} apt-transport-https ca-certificates"
     fi
 
+    ## DGM tornado appears to be missing in 3006.x pkg requirements
+    __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
+
     # shellcheck disable=SC2086,SC2090
     ## DGM __apt_get_install_noinput "${__PACKAGES}" || return 1
     __apt_get_install_noinput ${__PACKAGES} || return 1
 
-    SALTSTACK_DEBIAN_URL="${HTTP_VAL}://${_REPO_URL}/${__PY_VERSION_REPO}/debian/${DEBIAN_RELEASE}/${__REPO_ARCH}"
+    SALTSTACK_DEBIAN_URL="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_DIR}/${__PY_VERSION_REPO}/debian/${DEBIAN_RELEASE}/${__REPO_ARCH}"
     echo "$__REPO_ARCH_DEB $SALTSTACK_DEBIAN_URL $DEBIAN_CODENAME main" > "/etc/apt/sources.list.d/salt.list"
 
     __apt_key_fetch "$SALTSTACK_DEBIAN_URL/SALT-PROJECT-GPG-PUBKEY-2023.gpg" || return 1
@@ -3472,6 +3503,9 @@ __install_saltstack_debian_onedir_repository() {
     if [ "$HTTP_VAL" = "https" ] ; then
         __PACKAGES="${__PACKAGES} apt-transport-https ca-certificates"
     fi
+
+    ## DGM tornado appears to be missing in 3006.x pkg requirements
+    __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
 
     # shellcheck disable=SC2086,SC2090
     ## DGM __apt_get_install_noinput "${__PACKAGES}" || return 1
@@ -3523,6 +3557,9 @@ install_debian_deps() {
 
     # YAML module is used for generating custom master/minion configs
     __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-yaml"
+
+    ## DGM tornado appears to be missing in 3006.x pkg requirements
+    __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
 
     # shellcheck disable=SC2086
     ## DGM __apt_get_install_noinput "${__PACKAGES}" || return 1
@@ -3581,6 +3618,9 @@ install_debian_onedir_deps() {
     # YAML module is used for generating custom master/minion configs
     __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-yaml"
 
+    ## DGM tornado appears to be missing in 3006.x pkg requirements
+    __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
+
     # shellcheck disable=SC2086
     ## DGM __apt_get_install_noinput "${__PACKAGES}" || return 1
     __apt_get_install_noinput ${__PACKAGES} || return 1
@@ -3629,6 +3669,10 @@ install_debian_git_deps() {
 
     __PACKAGES="python${PY_PKG_VER}-dev python${PY_PKG_VER}-pip python${PY_PKG_VER}-setuptools gcc"
     echodebug "install_debian_git_deps() Installing ${__PACKAGES}"
+
+    ## DGM tornado appears to be missing in 3006.x pkg requirements
+    __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
+
     # shellcheck disable=SC2086
     ## DGM __apt_get_install_noinput "${__PACKAGES}" || return 1
     __apt_get_install_noinput ${__PACKAGES} || return 1
@@ -3651,6 +3695,9 @@ install_debian_stable() {
     if [ "$_INSTALL_SYNDIC" -eq $BS_TRUE ]; then
         __PACKAGES="${__PACKAGES} salt-syndic"
     fi
+
+    ## DGM tornado appears to be missing in 3006.x pkg requirements
+    __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
 
     # shellcheck disable=SC2086
     ## DGM __apt_get_install_noinput "${__PACKAGES}" || return 1
@@ -3730,6 +3777,9 @@ install_debian_onedir() {
     if [ "$_INSTALL_SYNDIC" -eq $BS_TRUE ]; then
         __PACKAGES="${__PACKAGES} salt-syndic"
     fi
+
+    ## DGM tornado appears to be missing in 3006.x pkg requirements
+    __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
 
     # shellcheck disable=SC2086
     ## __apt_get_install_noinput "${__PACKAGES}" || return 1
@@ -3919,6 +3969,9 @@ install_fedora_deps() {
         echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
     fi
 
+    ## DGM tornado appears to be missing in 3006.x pkg requirements
+    __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
+
     # shellcheck disable=SC2086
     ## DGM __dnf_install_noinput "${__PACKAGES}" "${_EXTRA_PACKAGES}" || return 1
     __dnf_install_noinput ${__PACKAGES} ${_EXTRA_PACKAGES} || return 1
@@ -3953,6 +4006,9 @@ install_fedora_stable() {
     if [ "$_INSTALL_SYNDIC" -eq $BS_TRUE ]; then
         __PACKAGES="${__PACKAGES} salt-syndic${__SALT_VERSION}"
     fi
+
+    ## DGM tornado appears to be missing in 3006.x pkg requirements
+    __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
 
     # shellcheck disable=SC2086
     ## DGM __dnf_install_noinput "${__PACKAGES}" || return 1
@@ -4013,6 +4069,9 @@ install_fedora_git_deps() {
     if ! __check_command_exists git; then
         __PACKAGES="${__PACKAGES} git"
     fi
+
+    ## DGM tornado appears to be missing in 3006.x pkg requirements
+    __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
 
     if [ -n "${__PACKAGES}" ]; then
         # shellcheck disable=SC2086
@@ -4159,6 +4218,9 @@ install_fedora_onedir_deps() {
 
     __PACKAGES="dnf-utils chkconfig procps-ng"
 
+    ## DGM tornado appears to be missing in 3006.x pkg requirements
+    __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
+
     # shellcheck disable=SC2086
     ## DGM __yum_install_noinput "${__PACKAGES}" || return 1
     __yum_install_noinput ${__PACKAGES} || return 1
@@ -4193,6 +4255,9 @@ install_fedora_onedir() {
     if [ "$_INSTALL_SYNDIC" -eq $BS_TRUE ];then
         __PACKAGES="${__PACKAGES} salt-syndic"
     fi
+
+    ## DGM tornado appears to be missing in 3006.x pkg requirements
+    __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
 
     # shellcheck disable=SC2086
     ## DGM __yum_install_noinput "${__PACKAGES}" || return 1
@@ -4319,6 +4384,9 @@ install_centos_stable_deps() {
 
     __PACKAGES="yum-utils chkconfig procps-ng findutils"
 
+    ## DGM tornado appears to be missing in 3006.x pkg requirements
+    __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
+
     # shellcheck disable=SC2086
     ## DGM __yum_install_noinput "${__PACKAGES}" || return 1
     __yum_install_noinput ${__PACKAGES} || return 1
@@ -4348,6 +4416,9 @@ install_centos_stable() {
     if [ "$_INSTALL_SYNDIC" -eq $BS_TRUE ];then
         __PACKAGES="${__PACKAGES} salt-syndic"
     fi
+
+    ## DGM tornado appears to be missing in 3006.x pkg requirements
+    __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
 
     # shellcheck disable=SC2086
     ## DGM __yum_install_noinput "${__PACKAGES}" || return 1
@@ -4429,6 +4500,10 @@ install_centos_git_deps() {
     fi
 
     __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-devel python${PY_PKG_VER}-pip python${PY_PKG_VER}-setuptools gcc"
+
+    ## DGM tornado appears to be missing in 3006.x pkg requirements
+    __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
+
     # shellcheck disable=SC2086
     ## DGM __yum_install_noinput "${__PACKAGES}" || return 1
     __yum_install_noinput ${__PACKAGES} || return 1
@@ -4551,6 +4626,9 @@ install_centos_onedir_deps() {
 
     __PACKAGES="yum-utils chkconfig procps-ng findutils"
 
+    ## DGM tornado appears to be missing in 3006.x pkg requirements
+    __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
+
     # shellcheck disable=SC2086
     ## DGM __yum_install_noinput "${__PACKAGES}" || return 1
     __yum_install_noinput ${__PACKAGES} || return 1
@@ -4580,6 +4658,9 @@ install_centos_onedir() {
     if [ "$_INSTALL_SYNDIC" -eq $BS_TRUE ];then
         __PACKAGES="${__PACKAGES} salt-syndic"
     fi
+
+    ## DGM tornado appears to be missing in 3006.x pkg requirements
+    __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
 
     # shellcheck disable=SC2086
     ## DGM __yum_install_noinput "${__PACKAGES}" || return 1
@@ -5438,6 +5519,9 @@ install_alpine_linux_stable() {
         __PACKAGES="${__PACKAGES} salt-syndic"
     fi
 
+    ## DGM tornado appears to be missing in 3006.x pkg requirements
+    __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
+
     # shellcheck disable=SC2086
     apk -U add "${__PACKAGES}" || return 1
     return 0
@@ -5575,6 +5659,10 @@ install_amazon_linux_ami_2_git_deps() {
     __git_clone_and_checkout || return 1
 
     __PACKAGES="python${PY_PKG_VER}-pip python${PY_PKG_VER}-setuptools python${PY_PKG_VER}-devel gcc"
+
+    ## DGM tornado appears to be missing in 3006.x pkg requirements
+    __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
+
     # shellcheck disable=SC2086
     ## DGM __yum_install_noinput "${__PACKAGES}" || return 1
     __yum_install_noinput ${__PACKAGES} || return 1
@@ -5616,7 +5704,7 @@ install_amazon_linux_ami_2_deps() {
         repo_label="saltstack-py3-repo"
         repo_name="SaltStack Python 3 repo for Amazon Linux 2"
 
-        base_url="$HTTP_VAL://${_REPO_URL}/${__PY_VERSION_REPO}/amazon/2/\$basearch/$repo_rev/"
+        base_url="$HTTP_VAL://${_REPO_URL}/${_ONEDIR_DIR}/${__PY_VERSION_REPO}/amazon/2/\$basearch/$repo_rev/"
         gpg_key="${base_url}SALT-PROJECT-GPG-PUBKEY-2023.gpg"
 
         # This should prob be refactored to use __install_saltstack_rhel_onedir_repository()
@@ -5778,6 +5866,10 @@ install_amazon_linux_ami_2023_git_deps() {
     __git_clone_and_checkout || return 1
 
     __PACKAGES="python${PY_PKG_VER}-pip python${PY_PKG_VER}-setuptools python${PY_PKG_VER}-devel gcc"
+
+    ## DGM tornado appears to be missing in 3006.x pkg requirements
+    __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
+
     # shellcheck disable=SC2086
     ## DGM __yum_install_noinput "${__PACKAGES}" || return 1
     __yum_install_noinput ${__PACKAGES} || return 1
@@ -5963,6 +6055,10 @@ install_arch_linux_git_deps() {
     fi
 
     __PACKAGES="python${PY_PKG_VER}-pip python${PY_PKG_VER}-setuptools gcc"
+
+    ## DGM tornado appears to be missing in 3006.x pkg requirements
+    __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
+
     # shellcheck disable=SC2086
     ## DGM pacman -Su --noconfirm --needed "${__PACKAGES}"
     pacman -Su --noconfirm --needed ${__PACKAGES}
@@ -6209,6 +6305,9 @@ install_photon_deps() {
         echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
     fi
 
+    ## DGM tornado appears to be missing in 3006.x pkg requirements
+    __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
+
     # shellcheck disable=SC2086
     ## DGM __tdnf_install_noinput "${__PACKAGES}" "${_EXTRA_PACKAGES}" || return 1
     __tdnf_install_noinput ${__PACKAGES} ${_EXTRA_PACKAGES} || return 1
@@ -6258,6 +6357,10 @@ install_photon_git_deps() {
     __git_clone_and_checkout || return 1
 
     __PACKAGES="python${PY_PKG_VER}-devel python${PY_PKG_VER}-pip python${PY_PKG_VER}-setuptools gcc glibc-devel linux-devel.x86_64"
+
+    ## DGM tornado appears to be missing in 3006.x pkg requirements
+    __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
+
     # shellcheck disable=SC2086
     ## DGM __tdnf_install_noinput "${__PACKAGES}" || return 1
     __tdnf_install_noinput ${__PACKAGES} || return 1
@@ -6389,6 +6492,9 @@ install_photon_onedir_deps() {
 
     __PACKAGES="procps-ng"
 
+    ## DGM tornado appears to be missing in 3006.x pkg requirements
+    __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
+
     # shellcheck disable=SC2086
     ## DGM __tdnf_install_noinput "${__PACKAGES}" || return 1
     __tdnf_install_noinput ${__PACKAGES} || return 1
@@ -6422,6 +6528,9 @@ install_photon_onedir() {
     if [ "$_INSTALL_SYNDIC" -eq $BS_TRUE ];then
         __PACKAGES="${__PACKAGES} salt-syndic"
     fi
+
+    ## DGM tornado appears to be missing in 3006.x pkg requirements
+    __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
 
     # shellcheck disable=SC2086
     ## DGM __tdnf_install_noinput "${__PACKAGES}" || return 1
@@ -6554,7 +6663,10 @@ install_opensuse_stable_deps() {
     # YAML module is used for generating custom master/minion configs
     # requests is still used by many salt modules
     # Salt needs python-zypp installed in order to use the zypper module
-    __PACKAGES="python-PyYAML python-requests python-zypp"
+    __PACKAGES="python${PY_PKG_VER}-PyYAML python${PY_PKG_VER}-requests python${PY_PKG_VER}-zypp"
+
+    ## DGM tornado appears to be missing in 3006.x pkg requirements
+    __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
 
     # shellcheck disable=SC2086
     ## DGM __zypper_install "${__PACKAGES}" || return 1
@@ -6590,6 +6702,9 @@ install_opensuse_git_deps() {
         __PACKAGES="python3-pip python3-setuptools gcc"
     fi
 
+    ## DGM tornado appears to be missing in 3006.x pkg requirements
+    __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
+
     # shellcheck disable=SC2086
     ## DGM __zypper_install "${__PACKAGES}" || return 1
     __zypper_install ${__PACKAGES} || return 1
@@ -6622,6 +6737,9 @@ install_opensuse_stable() {
     if [ "$_INSTALL_SYNDIC" -eq $BS_TRUE ]; then
         __PACKAGES="${__PACKAGES} salt-syndic"
     fi
+
+    ## DGM tornado appears to be missing in 3006.x pkg requirements
+    __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
 
     # shellcheck disable=SC2086
     ## DGM __zypper_install "$__PACKAGES" || return 1
@@ -6784,6 +6902,9 @@ install_opensuse_15_stable_deps() {
     # requests is still used by many salt modules
     __PACKAGES="python${PY_PKG_VER}-PyYAML python${PY_PKG_VER}-requests"
 
+    ## DGM tornado appears to be missing in 3006.x pkg requirements
+    __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
+
     # shellcheck disable=SC2086
     ## DGM __zypper_install "${__PACKAGES}" || return 1
     __zypper_install ${__PACKAGES} || return 1
@@ -6814,6 +6935,9 @@ install_opensuse_15_git_deps() {
 
     PY_PKG_VER=3
     __PACKAGES="python${PY_PKG_VER}-xml python${PY_PKG_VER}-devel python${PY_PKG_VER}-pip python${PY_PKG_VER}-setuptools gcc"
+
+    ## DGM tornado appears to be missing in 3006.x pkg requirements
+    __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
 
     # shellcheck disable=SC2086
     ## DGM __zypper_install "${__PACKAGES}" || return 1
@@ -7329,19 +7453,19 @@ daemons_running_voidlinux() {
 #   OS X / Darwin Install Functions
 #
 
-__macosx_get_packagesite() {
-
-    if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -ne 3 ]; then
-        echoerror "Python 2 is no longer supported, only Python 3"
-        return 1
-    fi
-
-    # TBD DGM need to update for arch and 3006+ repo locations
-
-    DARWIN_ARCH="x86_64"
-    PKG="salt-${STABLE_REV}-${__PY_VERSION_REPO}-${DARWIN_ARCH}.pkg"
-    SALTPKGCONFURL="https://${_REPO_URL}/osx/${PKG}"
-}
+## DGM __macosx_get_packagesite() {
+## DGM
+## DGM     if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -ne 3 ]; then
+## DGM         echoerror "Python 2 is no longer supported, only Python 3"
+## DGM         return 1
+## DGM     fi
+## DGM
+## DGM     # TBD DGM need to update for arch and 3006+ repo locations
+## DGM
+## DGM     DARWIN_ARCH="x86_64"
+## DGM     PKG="salt-${STABLE_REV}-${__PY_VERSION_REPO}-${DARWIN_ARCH}.pkg"
+## DGM     SALTPKGCONFURL="https://${_REPO_URL}/osx/${PKG}"
+## DGM }
 
 __parse_repo_json_python() {
 
@@ -7383,10 +7507,11 @@ __macosx_get_packagesite_onedir() {
 }
 
 # Using a separate conf step to head for idempotent install...
-__configure_macosx_pkg_details() {
-    __macosx_get_packagesite || return 1
-    return 0
-}
+## DGM __configure_macosx_pkg_details() {
+## DGM     ## DGM __macosx_get_packagesite || return 1
+## DGM     __macosx_get_packagesite_onedir || return 1
+## DGM     return 0
+## DGM }
 
 __configure_macosx_pkg_details_onedir() {
     __macosx_get_packagesite_onedir || return 1
@@ -7394,7 +7519,8 @@ __configure_macosx_pkg_details_onedir() {
 }
 
 install_macosx_stable_deps() {
-    __configure_macosx_pkg_details || return 1
+    ## DGM __configure_macosx_pkg_details || return 1
+    __configure_macosx_pkg_details_onedir || return 1
     return 0
 }
 

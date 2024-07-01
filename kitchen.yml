@@ -46,7 +46,8 @@ platforms:
   - name: amazon-2023
     driver:
       image: amazonlinux:2023
-      platform: fedora
+      ## platform: fedora
+      platform: rhel
       provision_command:
         - yum -y install procps-ng
   - name: arch
@@ -113,6 +114,7 @@ platforms:
         - *opensuse_provision_command_02
         - *opensuse_provision_command_03
         - echo "PubkeyAcceptedAlgorithms +ssh-rsa" | tee -a /etc/ssh/sshd_config
+  - name: oraclelinux-8
   - name: rockylinux-9
     driver:
       platform: centosstream

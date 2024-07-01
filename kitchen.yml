@@ -285,3 +285,6 @@ verifier:
   name: shell
   remote_exec: false
   command: pytest --cache-clear -v -s -ra --log-cli-level=info tests/integration/
+
+transport:
+  name: docker

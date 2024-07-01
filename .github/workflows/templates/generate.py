@@ -105,10 +105,14 @@ ONEDIR_RC_DISTROS = [
 
 BLACKLIST_3006 = [
     "arch",
+    "debian-12",
+    "fedora-39",
+    "fedora-40",
     "gentoo",
     "gentoo-systemd",
     "opensuse-15",
     "opensuse-tumbleweed",
+    "ubuntu-2404",
 ]
 
 BLACKLIST_3007 = [
@@ -117,6 +121,8 @@ BLACKLIST_3007 = [
     "gentoo-systemd",
     "opensuse-15",
     "opensuse-tumbleweed",
+    "photon-4",
+    "photon-5",
 ]
 
 BLACKLIST_GIT_3006 = [

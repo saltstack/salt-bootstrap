@@ -602,10 +602,6 @@ if [ "$#" -gt 0 ];then
     shift
 fi
 
-## DGM Debugging
-set -v
-set -x
-
 # Check installation type
 if [ "$(echo "$ITYPE" | grep -E '(stable|testing|git|onedir|onedir_rc)')" = "" ]; then
     echoerror "Installation type \"$ITYPE\" is not known..."
@@ -1751,11 +1747,6 @@ __check_end_of_life_versions() {
             ;;
     esac
 }
-
-## DGM Debugging
-set -v
-set -x
-
 
 __gather_system_info
 
@@ -2974,7 +2965,7 @@ __install_saltstack_ubuntu_repository() {
     fi
 
     ## DGM tornado appears to be missing in 3006.x pkg requirements
-    __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
+    ## DGM __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
 
     # shellcheck disable=SC2086,SC2090
     __apt_get_install_noinput ${__PACKAGES} || return 1
@@ -3005,7 +2996,7 @@ __install_saltstack_ubuntu_onedir_repository() {
         UBUNTU_CODENAME=${DISTRO_CODENAME}
     fi
 
-    echodebug "DGM Ubuntu B checking STABLE_REV ,${STABLE_REV}, ONEDIR_REV ,$ONEDIR_REV,"
+    echodebug "DGM Ubuntu B checking ONEDIR_REV ,$ONEDIR_REV,"
 
     # Install downloader backend for GPG keys fetching
     __PACKAGES='wget'
@@ -3021,7 +3012,7 @@ __install_saltstack_ubuntu_onedir_repository() {
     fi
 
     ## DGM tornado appears to be missing in 3006.x pkg requirements
-    __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
+    ## DGM __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
 
     # shellcheck disable=SC2086,SC2090
     __apt_get_install_noinput ${__PACKAGES} || return 1
@@ -3078,7 +3069,7 @@ install_ubuntu_deps() {
     __PACKAGES="${__PACKAGES} procps pciutils"
 
     ## DGM tornado appears to be missing in 3006.x pkg requirements
-    __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
+    ## DGM __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
 
     # shellcheck disable=SC2086,SC2090
     __apt_get_install_noinput ${__PACKAGES} || return 1
@@ -3153,7 +3144,7 @@ install_ubuntu_git_deps() {
     fi
 
     ## DGM tornado appears to be missing in 3006.x pkg requirements
-    __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
+    ## DGM __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
 
     # shellcheck disable=SC2086
     __apt_get_install_noinput ${__PACKAGES} || return 1
@@ -3220,7 +3211,7 @@ install_ubuntu_stable() {
     fi
 
     ## DGM tornado appears to be missing in 3006.x pkg requirements
-    __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
+    ## DGM __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
 
     # shellcheck disable=SC2086
     ## DGM __apt_get_install_noinput "${__PACKAGES}" || return 1
@@ -3283,7 +3274,7 @@ install_ubuntu_onedir() {
     fi
 
     ## DGM tornado appears to be missing in 3006.x pkg requirements
-    __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
+    ## DGM __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
 
     # shellcheck disable=SC2086
     ## DGM __apt_get_install_noinput "${__PACKAGES}" || return 1
@@ -3473,8 +3464,6 @@ __install_saltstack_debian_repository() {
         return 1
     fi
 
-    echodebug "DGM Debian A checking STABLE_REV ,${STABLE_REV}, ONEDIR_REV ,$ONEDIR_REV,"
-
     # Install downloader backend for GPG keys fetching
     __PACKAGES='wget'
 
@@ -3489,7 +3478,7 @@ __install_saltstack_debian_repository() {
     fi
 
     ## DGM tornado appears to be missing in 3006.x pkg requirements
-    __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
+    ## DGM __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
 
     # shellcheck disable=SC2086,SC2090
     ## DGM __apt_get_install_noinput "${__PACKAGES}" || return 1
@@ -3511,7 +3500,7 @@ __install_saltstack_debian_onedir_repository() {
     DEBIAN_RELEASE="$DISTRO_MAJOR_VERSION"
     DEBIAN_CODENAME="$DISTRO_CODENAME"
 
-    echodebug "DGM Debian B checking STABLE_REV ,${STABLE_REV}, ONEDIR_REV ,$ONEDIR_REV,"
+    echodebug "DGM Debian B checking, ONEDIR_REV ,$ONEDIR_REV,"
 
     if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -ne 3 ]; then
         echoerror "Python version is no longer supported, only Python 3"
@@ -3532,7 +3521,7 @@ __install_saltstack_debian_onedir_repository() {
     fi
 
     ## DGM tornado appears to be missing in 3006.x pkg requirements
-    __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
+    ## DGM __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
 
     # shellcheck disable=SC2086,SC2090
     ## DGM __apt_get_install_noinput "${__PACKAGES}" || return 1
@@ -3586,7 +3575,7 @@ install_debian_deps() {
     __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-yaml"
 
     ## DGM tornado appears to be missing in 3006.x pkg requirements
-    __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
+    ## DGM __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
 
     # shellcheck disable=SC2086
     ## DGM __apt_get_install_noinput "${__PACKAGES}" || return 1
@@ -3646,7 +3635,7 @@ install_debian_onedir_deps() {
     __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-yaml"
 
     ## DGM tornado appears to be missing in 3006.x pkg requirements
-    __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
+    ## DGM __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
 
     # shellcheck disable=SC2086
     ## DGM __apt_get_install_noinput "${__PACKAGES}" || return 1
@@ -3698,7 +3687,7 @@ install_debian_git_deps() {
     echodebug "install_debian_git_deps() Installing ${__PACKAGES}"
 
     ## DGM tornado appears to be missing in 3006.x pkg requirements
-    __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
+    ## DGM __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
 
     # shellcheck disable=SC2086
     ## DGM __apt_get_install_noinput "${__PACKAGES}" || return 1
@@ -3724,7 +3713,7 @@ install_debian_stable() {
     fi
 
     ## DGM tornado appears to be missing in 3006.x pkg requirements
-    __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
+    ## DGM __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
 
     # shellcheck disable=SC2086
     ## DGM __apt_get_install_noinput "${__PACKAGES}" || return 1
@@ -3810,7 +3799,7 @@ install_debian_onedir() {
     fi
 
     ## DGM tornado appears to be missing in 3006.x pkg requirements
-    __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
+    ## DGM __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
 
     # shellcheck disable=SC2086
     ## __apt_get_install_noinput "${__PACKAGES}" || return 1
@@ -4007,7 +3996,7 @@ install_fedora_deps() {
     fi
 
     ## DGM tornado appears to be missing in 3006.x pkg requirements
-    __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
+    ## DGM __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
 
     # shellcheck disable=SC2086
     ## DGM __dnf_install_noinput "${__PACKAGES}" "${_EXTRA_PACKAGES}" || return 1
@@ -4049,7 +4038,7 @@ install_fedora_stable() {
     fi
 
     ## DGM tornado appears to be missing in 3006.x pkg requirements
-    __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
+    ## DGM __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
 
     # shellcheck disable=SC2086
     ## DGM __dnf_install_noinput "${__PACKAGES}" || return 1
@@ -4112,7 +4101,7 @@ install_fedora_git_deps() {
     fi
 
     ## DGM tornado appears to be missing in 3006.x pkg requirements
-    __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
+    ## DGM __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
 
     if [ -n "${__PACKAGES}" ]; then
         # shellcheck disable=SC2086
@@ -4260,7 +4249,7 @@ install_fedora_onedir_deps() {
     __PACKAGES="dnf-utils chkconfig procps-ng"
 
     ## DGM tornado appears to be missing in 3006.x pkg requirements
-    __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
+    ## DGM __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
 
     # shellcheck disable=SC2086
     ## DGM __yum_install_noinput "${__PACKAGES}" || return 1
@@ -4302,7 +4291,7 @@ install_fedora_onedir() {
     fi
 
     ## DGM tornado appears to be missing in 3006.x pkg requirements
-    __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
+    ## DGM __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
 
     # shellcheck disable=SC2086
     ## DGM __yum_install_noinput "${__PACKAGES}" || return 1
@@ -4443,7 +4432,7 @@ install_centos_stable_deps() {
     __PACKAGES="yum-utils chkconfig procps-ng findutils"
 
     ## DGM tornado appears to be missing in 3006.x pkg requirements
-    __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
+    ## DGM __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
 
     # shellcheck disable=SC2086
     ## DGM __yum_install_noinput "${__PACKAGES}" || return 1
@@ -4476,7 +4465,7 @@ install_centos_stable() {
     fi
 
     ## DGM tornado appears to be missing in 3006.x pkg requirements
-    __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
+    ## DGM __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
 
     # shellcheck disable=SC2086
     ## DGM __yum_install_noinput "${__PACKAGES}" || return 1
@@ -4560,7 +4549,7 @@ install_centos_git_deps() {
     __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-devel python${PY_PKG_VER}-pip python${PY_PKG_VER}-setuptools gcc"
 
     ## DGM tornado appears to be missing in 3006.x pkg requirements
-    __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
+    ## DGM __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
 
     # shellcheck disable=SC2086
     ## DGM __yum_install_noinput "${__PACKAGES}" || return 1
@@ -4694,7 +4683,7 @@ install_centos_onedir_deps() {
     __PACKAGES="yum-utils chkconfig procps-ng findutils"
 
     ## DGM tornado appears to be missing in 3006.x pkg requirements
-    __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
+    ## DGM __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
 
     # shellcheck disable=SC2086
     ## DGM __yum_install_noinput "${__PACKAGES}" || return 1
@@ -4727,7 +4716,7 @@ install_centos_onedir() {
     fi
 
     ## DGM tornado appears to be missing in 3006.x pkg requirements
-    __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
+    ## DGM __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
 
     # shellcheck disable=SC2086
     ## DGM __yum_install_noinput "${__PACKAGES}" || return 1
@@ -5587,7 +5576,7 @@ install_alpine_linux_stable() {
     fi
 
     ## DGM tornado appears to be missing in 3006.x pkg requirements
-    __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
+    ## DGM __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
 
     # shellcheck disable=SC2086
     apk -U add "${__PACKAGES}" || return 1
@@ -5728,7 +5717,7 @@ install_amazon_linux_ami_2_git_deps() {
     __PACKAGES="python${PY_PKG_VER}-pip python${PY_PKG_VER}-setuptools python${PY_PKG_VER}-devel gcc"
 
     ## DGM tornado appears to be missing in 3006.x pkg requirements
-    __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
+    ## DGM __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
 
     # shellcheck disable=SC2086
     ## DGM __yum_install_noinput "${__PACKAGES}" || return 1
@@ -5939,7 +5928,7 @@ install_amazon_linux_ami_2023_git_deps() {
     __PACKAGES="python${PY_PKG_VER}-pip python${PY_PKG_VER}-setuptools python${PY_PKG_VER}-devel gcc"
 
     ## DGM tornado appears to be missing in 3006.x pkg requirements
-    __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
+    ## DGM __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
 
     # shellcheck disable=SC2086
     ## DGM __yum_install_noinput "${__PACKAGES}" || return 1
@@ -6095,6 +6084,9 @@ install_arch_linux_stable_deps() {
     # shellcheck disable=SC2086
     pacman -Su --noconfirm --needed python${PY_PKG_VER}-yaml
 
+    ## DGM tornado appears to be missing in 3006.x pkg requirements
+    pacman -Su --noconfirm --needed python${PY_PKG_VER}-tornado
+
     if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
         # shellcheck disable=SC2086
         pacman -Su --noconfirm --needed python${PY_PKG_VER}-apache-libcloud || return 1
@@ -6128,7 +6120,7 @@ install_arch_linux_git_deps() {
     __PACKAGES="python${PY_PKG_VER}-pip python${PY_PKG_VER}-setuptools gcc"
 
     ## DGM tornado appears to be missing in 3006.x pkg requirements
-    __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
+    ## DGM __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
 
     # shellcheck disable=SC2086
     ## DGM pacman -Su --noconfirm --needed "${__PACKAGES}"
@@ -6377,7 +6369,7 @@ install_photon_deps() {
     fi
 
     ## DGM tornado appears to be missing in 3006.x pkg requirements
-    __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
+    ## DGM __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
 
     # shellcheck disable=SC2086
     ## DGM __tdnf_install_noinput "${__PACKAGES}" "${_EXTRA_PACKAGES}" || return 1
@@ -6430,7 +6422,7 @@ install_photon_git_deps() {
     __PACKAGES="python${PY_PKG_VER}-devel python${PY_PKG_VER}-pip python${PY_PKG_VER}-setuptools gcc glibc-devel linux-devel.x86_64"
 
     ## DGM tornado appears to be missing in 3006.x pkg requirements
-    __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
+    ## DGM __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
 
     # shellcheck disable=SC2086
     ## DGM __tdnf_install_noinput "${__PACKAGES}" || return 1
@@ -6564,7 +6556,7 @@ install_photon_onedir_deps() {
     __PACKAGES="procps-ng"
 
     ## DGM tornado appears to be missing in 3006.x pkg requirements
-    __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
+    ## DGM __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
 
     # shellcheck disable=SC2086
     ## DGM __tdnf_install_noinput "${__PACKAGES}" || return 1
@@ -6605,7 +6597,7 @@ install_photon_onedir() {
     fi
 
     ## DGM tornado appears to be missing in 3006.x pkg requirements
-    __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
+    ## DGM __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
 
     # shellcheck disable=SC2086
     ## DGM __tdnf_install_noinput "${__PACKAGES}" || return 1
@@ -6745,7 +6737,7 @@ install_opensuse_stable_deps() {
     __PACKAGES="python${PY_PKG_VER}-PyYAML python${PY_PKG_VER}-requests python${PY_PKG_VER}-zypp"
 
     ## DGM tornado appears to be missing in 3006.x pkg requirements
-    __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
+    ## DGM __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
 
     # shellcheck disable=SC2086
     ## DGM __zypper_install "${__PACKAGES}" || return 1
@@ -6782,7 +6774,7 @@ install_opensuse_git_deps() {
     fi
 
     ## DGM tornado appears to be missing in 3006.x pkg requirements
-    __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
+    ## DGM __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
 
     # shellcheck disable=SC2086
     ## DGM __zypper_install "${__PACKAGES}" || return 1
@@ -6818,7 +6810,7 @@ install_opensuse_stable() {
     fi
 
     ## DGM tornado appears to be missing in 3006.x pkg requirements
-    __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
+    ## DGM __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
 
     # shellcheck disable=SC2086
     ## DGM __zypper_install "$__PACKAGES" || return 1
@@ -6982,7 +6974,7 @@ install_opensuse_15_stable_deps() {
     __PACKAGES="python${PY_PKG_VER}-PyYAML python${PY_PKG_VER}-requests"
 
     ## DGM tornado appears to be missing in 3006.x pkg requirements
-    __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
+    ## DGM __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
 
     # shellcheck disable=SC2086
     ## DGM __zypper_install "${__PACKAGES}" || return 1
@@ -7016,7 +7008,7 @@ install_opensuse_15_git_deps() {
     __PACKAGES="python${PY_PKG_VER}-xml python${PY_PKG_VER}-devel python${PY_PKG_VER}-pip python${PY_PKG_VER}-setuptools gcc"
 
     ## DGM tornado appears to be missing in 3006.x pkg requirements
-    __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
+    ## DGM __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
 
     # shellcheck disable=SC2086
     ## DGM __zypper_install "${__PACKAGES}" || return 1

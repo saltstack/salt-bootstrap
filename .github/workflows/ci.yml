@@ -313,7 +313,7 @@ jobs:
       distro-slug: debian-12
       display-name: Debian 12
       timeout: 20
-      instances: '["stable-3006", "onedir-3006", "stable-3006-8", "stable-3007", "onedir-3007", "stable-3007-1", "git-master", "latest", "default"]'
+      instances: '["stable-3007", "onedir-3007", "stable-3007-1", "git-master", "latest", "default"]'
 
 
   fedora-39:
@@ -327,7 +327,7 @@ jobs:
       distro-slug: fedora-39
       display-name: Fedora 39
       timeout: 20
-      instances: '["stable-3006", "onedir-3006", "stable-3006-8", "stable-3007", "onedir-3007", "stable-3007-1", "latest", "default"]'
+      instances: '["stable-3007", "onedir-3007", "stable-3007-1", "latest", "default"]'
 
 
   fedora-40:
@@ -341,7 +341,7 @@ jobs:
       distro-slug: fedora-40
       display-name: Fedora 40
       timeout: 20
-      instances: '["stable-3006", "onedir-3006", "stable-3006-8", "stable-3007", "onedir-3007", "stable-3007-1", "latest", "default"]'
+      instances: '["stable-3007", "onedir-3007", "stable-3007-1", "latest", "default"]'
 
 
   gentoo:
@@ -439,7 +439,7 @@ jobs:
       distro-slug: photon-4
       display-name: Photon OS 4
       timeout: 20
-      instances: '["stable-3006", "onedir-3006", "stable-3006-8", "stable-3007", "onedir-3007", "stable-3007-1", "git-master", "latest", "default"]'
+      instances: '["stable-3006", "onedir-3006", "stable-3006-8", "git-master", "latest", "default"]'
 
 
   photon-5:
@@ -453,7 +453,7 @@ jobs:
       distro-slug: photon-5
       display-name: Photon OS 5
       timeout: 20
-      instances: '["stable-3006", "onedir-3006", "stable-3006-8", "stable-3007", "onedir-3007", "stable-3007-1", "git-master", "latest", "default"]'
+      instances: '["stable-3006", "onedir-3006", "stable-3006-8", "git-master", "latest", "default"]'
 
 
   rockylinux-8:
@@ -523,7 +523,7 @@ jobs:
       distro-slug: ubuntu-2404
       display-name: Ubuntu 24.04
       timeout: 20
-      instances: '["stable-3006", "onedir-3006", "stable-3006-8", "stable-3007", "onedir-3007", "stable-3007-1", "git-master", "latest", "default"]'
+      instances: '["stable-3007", "onedir-3007", "stable-3007-1", "git-master", "latest", "default"]'
 
 
   set-pipeline-exit-status:

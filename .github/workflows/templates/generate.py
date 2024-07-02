@@ -106,7 +106,6 @@ ONEDIR_RC_DISTROS = [
 BLACKLIST_3006 = [
     "arch",
     "debian-12",
-    "fedora-39",
     "fedora-40",
     "gentoo",
     "gentoo-systemd",
@@ -117,6 +116,7 @@ BLACKLIST_3006 = [
 
 BLACKLIST_3007 = [
     "arch",
+    "fedora-39",
     "gentoo",
     "gentoo-systemd",
     "opensuse-15",
@@ -132,7 +132,6 @@ BLACKLIST_GIT_3006 = [
     "centos-stream9",
     "debian-11",
     "debian-12",
-    "fedora-39",
     "fedora-40",
     "gentoo",
     "gentoo-systemd",
@@ -154,7 +153,6 @@ BLACKLIST_GIT_3007 = [
     "debian-11",
     "debian-12",
     "fedora-39",
-    "fedora-40",
     "gentoo",
     "gentoo-systemd",
     "opensuse-15",
@@ -228,10 +226,8 @@ GIT_DISTRO_BLACKLIST = [
     "almalinux-8",
     "centos-stream8",
     "fedora-39",
-    "fedora-40",
     "opensuse-15",
     "oraclelinux-8",
-    "oraclelinux-9",
     "rockylinux-8",
 ]
 

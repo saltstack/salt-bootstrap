@@ -1939,7 +1939,9 @@ __wait_for_apt(){
     WAIT_TIMEOUT=900
 
     ## DGM see if sync'ing the clocks helps
-    hwclock -s
+    if [ -f /usr/sbin/hwclock ]; then
+        /usr/sbin/hwclock -s
+    fi
 
     # Run our passed in apt command
     "${@}" 2>"$APT_ERR"
@@ -2932,56 +2934,61 @@ __enable_universe_repository() {
     return 0
 }
 
-__install_saltstack_ubuntu_repository() {
-    # Workaround for latest non-LTS Ubuntu
-    ## DGM Debugging
-    set -v
-    set -x
-
-    echodebug "DGM Ubuntu A checking STABLE_REV ,${STABLE_REV}, ONEDIR_REV ,$ONEDIR_REV,"
-
-    if { [ "$DISTRO_MAJOR_VERSION" -eq 20 ] && [ "$DISTRO_MINOR_VERSION" -eq 10 ]; } || \
-       { [ "$DISTRO_MAJOR_VERSION" -eq 22 ] && [ "$DISTRO_MINOR_VERSION" -eq 10 ]; } || \
-        [ "$DISTRO_MAJOR_VERSION" -eq 21 ] ||  [ "$DISTRO_MAJOR_VERSION" -eq 23 ]; then
-        echowarn "Non-LTS Ubuntu detected, but stable packages requested. Trying packages for previous LTS release. You may experience problems."
-        UBUNTU_VERSION=24.04
-        UBUNTU_CODENAME="noble"
-    else
-        UBUNTU_VERSION=${DISTRO_VERSION}
-        UBUNTU_CODENAME=${DISTRO_CODENAME}
-    fi
-
-    # Install downloader backend for GPG keys fetching
-    __PACKAGES='wget'
-
-    # Required as it is not installed by default on Ubuntu 18+
-    if [ "$DISTRO_MAJOR_VERSION" -ge 18 ]; then
-        __PACKAGES="${__PACKAGES} gnupg"
-    fi
-
-    # Make sure https transport is available
-    if [ "$HTTP_VAL" = "https" ] ; then
-        __PACKAGES="${__PACKAGES} apt-transport-https ca-certificates"
-    fi
-
-    ## DGM tornado appears to be missing in 3006.x pkg requirements
-    ## DGM __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
-
-    # shellcheck disable=SC2086,SC2090
-    __apt_get_install_noinput ${__PACKAGES} || return 1
-
-    if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -ne 3 ]; then
-        echoerror "Python version is not supported, only Python 3"
-        return 1
-    fi
-
-    # SaltStack's stable Ubuntu repository:
-    SALTSTACK_UBUNTU_URL="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_DIR}/${__PY_VERSION_REPO}/ubuntu/${UBUNTU_VERSION}/${__REPO_ARCH}/${STABLE_REV}"
-    echo "$__REPO_ARCH_DEB $SALTSTACK_UBUNTU_URL $UBUNTU_CODENAME main" > /etc/apt/sources.list.d/salt.list
-    __apt_key_fetch "$SALTSTACK_UBUNTU_URL/SALT-PROJECT-GPG-PUBKEY-2023.gpg" || return 1
-
-    __wait_for_apt apt-get update || return 1
-}
+## DGM __install_saltstack_ubuntu_repository() {
+## DGM     # Workaround for latest non-LTS Ubuntu
+## DGM     ## DGM Debugging
+## DGM     set -v
+## DGM     set -x
+## DGM
+## DGM     echodebug "DGM Ubuntu A checking STABLE_REV ,${STABLE_REV}, ONEDIR_REV ,$ONEDIR_REV,"
+## DGM
+## DGM     if { [ "$DISTRO_MAJOR_VERSION" -eq 20 ] && [ "$DISTRO_MINOR_VERSION" -eq 10 ]; } || \
+## DGM        { [ "$DISTRO_MAJOR_VERSION" -eq 22 ] && [ "$DISTRO_MINOR_VERSION" -eq 10 ]; } || \
+## DGM         [ "$DISTRO_MAJOR_VERSION" -eq 21 ] ||  [ "$DISTRO_MAJOR_VERSION" -eq 23 ]; then
+## DGM         echowarn "Non-LTS Ubuntu detected, but stable packages requested. Trying packages for previous LTS release. You may experience problems."
+## DGM         UBUNTU_VERSION=24.04
+## DGM         UBUNTU_CODENAME="noble"
+## DGM     else
+## DGM         UBUNTU_VERSION=${DISTRO_VERSION}
+## DGM         UBUNTU_CODENAME=${DISTRO_CODENAME}
+## DGM     fi
+## DGM
+## DGM     # Install downloader backend for GPG keys fetching
+## DGM     __PACKAGES='wget'
+## DGM
+## DGM     # Required as it is not installed by default on Ubuntu 18+
+## DGM     if [ "$DISTRO_MAJOR_VERSION" -ge 18 ]; then
+## DGM         __PACKAGES="${__PACKAGES} gnupg"
+## DGM     fi
+## DGM
+## DGM     # Make sure https transport is available
+## DGM     if [ "$HTTP_VAL" = "https" ] ; then
+## DGM         __PACKAGES="${__PACKAGES} apt-transport-https ca-certificates"
+## DGM     fi
+## DGM
+## DGM     ## DGM tornado appears to be missing in 3006.x pkg requirements
+## DGM     ## DGM __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
+## DGM
+## DGM     ## DGM include hwclock if not part of base OS (23.10 and up)
+## DGM     if [ ! -f /usr/sbin/hwclock ]; then
+## DGM         __PACKAGES="${__PACKAGES} util-linux-extra"
+## DGM     fi
+## DGM
+## DGM     # shellcheck disable=SC2086,SC2090
+## DGM     __apt_get_install_noinput ${__PACKAGES} || return 1
+## DGM
+## DGM     if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -ne 3 ]; then
+## DGM         echoerror "Python version is not supported, only Python 3"
+## DGM         return 1
+## DGM     fi
+## DGM
+## DGM     # SaltStack's stable Ubuntu repository:
+## DGM     SALTSTACK_UBUNTU_URL="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_DIR}/${__PY_VERSION_REPO}/ubuntu/${UBUNTU_VERSION}/${__REPO_ARCH}/${STABLE_REV}"
+## DGM     echo "$__REPO_ARCH_DEB $SALTSTACK_UBUNTU_URL $UBUNTU_CODENAME main" > /etc/apt/sources.list.d/salt.list
+## DGM     __apt_key_fetch "$SALTSTACK_UBUNTU_URL/SALT-PROJECT-GPG-PUBKEY-2023.gpg" || return 1
+## DGM
+## DGM     __wait_for_apt apt-get update || return 1
+## DGM }
 
 __install_saltstack_ubuntu_onedir_repository() {
     # Workaround for latest non-LTS Ubuntu
@@ -3013,6 +3020,11 @@ __install_saltstack_ubuntu_onedir_repository() {
 
     ## DGM tornado appears to be missing in 3006.x pkg requirements
     ## DGM __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
+
+    ## DGM include hwclock if not part of base OS (23.10 and up)
+    if [ ! -f /usr/sbin/hwclock ]; then
+        __PACKAGES="${__PACKAGES} util-linux-extra"
+    fi
 
     # shellcheck disable=SC2086,SC2090
     __apt_get_install_noinput ${__PACKAGES} || return 1
@@ -3071,6 +3083,11 @@ install_ubuntu_deps() {
     ## DGM tornado appears to be missing in 3006.x pkg requirements
     ## DGM __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
 
+    ## DGM include hwclock if not part of base OS (23.10 and up)
+    if [ ! -f /usr/sbin/hwclock ]; then
+        __PACKAGES="${__PACKAGES} util-linux-extra"
+    fi
+
     # shellcheck disable=SC2086,SC2090
     __apt_get_install_noinput ${__PACKAGES} || return 1
 
@@ -3083,38 +3100,38 @@ install_ubuntu_deps() {
     return 0
 }
 
-install_ubuntu_stable_deps() {
-    if [ "$_START_DAEMONS" -eq $BS_FALSE ]; then
-        echowarn "Not starting daemons on Debian based distributions is not working mostly because starting them is the default behaviour."
-    fi
-
-    # No user interaction, libc6 restart services for example
-    export DEBIAN_FRONTEND=noninteractive
-
-    __wait_for_apt apt-get update || return 1
-
-    if [ "${_UPGRADE_SYS}" -eq $BS_TRUE ]; then
-        if [ "${_INSECURE_DL}" -eq $BS_TRUE ]; then
-            ## TBD DGM Need to understand what this code is doing, since '-ge 20' already covers '-ge 21' etc., added 23 & 24 to continue style
-            ## also apt-key is deprecated
-            if [ "$DISTRO_MAJOR_VERSION" -ge 20 ] || [ "$DISTRO_MAJOR_VERSION" -ge 21 ] || [ "$DISTRO_MAJOR_VERSION" -ge 22 ] || [ "$DISTRO_MAJOR_VERSION" -ge 23 ] || [ "$DISTRO_MAJOR_VERSION" -ge 24 ]; then
-                __apt_get_install_noinput --allow-unauthenticated debian-archive-keyring && apt-get update || return 1
-            else
-                __apt_get_install_noinput --allow-unauthenticated debian-archive-keyring &&
-                    apt-key update && apt-get update || return 1
-            fi
-        fi
-
-        __apt_get_upgrade_noinput || return 1
-    fi
-
-    if [ "$_DISABLE_REPOS" -eq "$BS_FALSE" ] || [ "$_CUSTOM_REPO_URL" != "null" ]; then
-        __check_dpkg_architecture || return 1
-        __install_saltstack_ubuntu_repository || return 1
-    fi
-
-    install_ubuntu_deps || return 1
-}
+## DGM install_ubuntu_stable_deps() {
+## DGM     if [ "$_START_DAEMONS" -eq $BS_FALSE ]; then
+## DGM         echowarn "Not starting daemons on Debian based distributions is not working mostly because starting them is the default behaviour."
+## DGM     fi
+## DGM
+## DGM     # No user interaction, libc6 restart services for example
+## DGM     export DEBIAN_FRONTEND=noninteractive
+## DGM
+## DGM     __wait_for_apt apt-get update || return 1
+## DGM
+## DGM     if [ "${_UPGRADE_SYS}" -eq $BS_TRUE ]; then
+## DGM         if [ "${_INSECURE_DL}" -eq $BS_TRUE ]; then
+## DGM             ## TBD DGM Need to understand what this code is doing, since '-ge 20' already covers '-ge 21' etc., added 23 & 24 to continue style
+## DGM             ## also apt-key is deprecated
+## DGM             if [ "$DISTRO_MAJOR_VERSION" -ge 20 ] || [ "$DISTRO_MAJOR_VERSION" -ge 21 ] || [ "$DISTRO_MAJOR_VERSION" -ge 22 ] || [ "$DISTRO_MAJOR_VERSION" -ge 23 ] || [ "$DISTRO_MAJOR_VERSION" -ge 24 ]; then
+## DGM                 __apt_get_install_noinput --allow-unauthenticated debian-archive-keyring && apt-get update || return 1
+## DGM             else
+## DGM                 __apt_get_install_noinput --allow-unauthenticated debian-archive-keyring &&
+## DGM                     apt-key update && apt-get update || return 1
+## DGM             fi
+## DGM         fi
+## DGM
+## DGM         __apt_get_upgrade_noinput || return 1
+## DGM     fi
+## DGM
+## DGM     if [ "$_DISABLE_REPOS" -eq "$BS_FALSE" ] || [ "$_CUSTOM_REPO_URL" != "null" ]; then
+## DGM         __check_dpkg_architecture || return 1
+## DGM         __install_saltstack_ubuntu_repository || return 1
+## DGM     fi
+## DGM
+## DGM     install_ubuntu_deps || return 1
+## DGM }
 
 install_ubuntu_git_deps() {
     ## DGM Debugging
@@ -3145,6 +3162,11 @@ install_ubuntu_git_deps() {
 
     ## DGM tornado appears to be missing in 3006.x pkg requirements
     ## DGM __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
+
+    ## DGM include hwclock if not part of base OS (23.10 and up)
+    if [ ! -f /usr/sbin/hwclock ]; then
+        __PACKAGES="${__PACKAGES} util-linux-extra"
+    fi
 
     # shellcheck disable=SC2086
     __apt_get_install_noinput ${__PACKAGES} || return 1
@@ -3451,46 +3473,46 @@ install_ubuntu_check_services() {
 #
 #   Debian Install Functions
 #
-__install_saltstack_debian_repository() {
-    ## DGM Debugging
-    set -v
-    set -x
-
-    DEBIAN_RELEASE="$DISTRO_MAJOR_VERSION"
-    DEBIAN_CODENAME="$DISTRO_CODENAME"
-
-    if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -ne 3 ]; then
-        echoerror "Python version is no longer supported, only Python 3"
-        return 1
-    fi
-
-    # Install downloader backend for GPG keys fetching
-    __PACKAGES='wget'
-
-    # Required as it is not installed by default on Debian 9+
-    if [ "$DISTRO_MAJOR_VERSION" -ge 9 ]; then
-        __PACKAGES="${__PACKAGES} gnupg2"
-    fi
-
-    # Make sure https transport is available
-    if [ "$HTTP_VAL" = "https" ] ; then
-        __PACKAGES="${__PACKAGES} apt-transport-https ca-certificates"
-    fi
-
-    ## DGM tornado appears to be missing in 3006.x pkg requirements
-    ## DGM __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
-
-    # shellcheck disable=SC2086,SC2090
-    ## DGM __apt_get_install_noinput "${__PACKAGES}" || return 1
-    __apt_get_install_noinput ${__PACKAGES} || return 1
-
-    SALTSTACK_DEBIAN_URL="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_DIR}/${__PY_VERSION_REPO}/debian/${DEBIAN_RELEASE}/${__REPO_ARCH}"
-    echo "$__REPO_ARCH_DEB $SALTSTACK_DEBIAN_URL $DEBIAN_CODENAME main" > "/etc/apt/sources.list.d/salt.list"
-
-    __apt_key_fetch "$SALTSTACK_DEBIAN_URL/SALT-PROJECT-GPG-PUBKEY-2023.gpg" || return 1
-
-    __wait_for_apt apt-get update || return 1
-}
+## DGM __install_saltstack_debian_repository() {
+## DGM     ## DGM Debugging
+## DGM     set -v
+## DGM     set -x
+## DGM
+## DGM     DEBIAN_RELEASE="$DISTRO_MAJOR_VERSION"
+## DGM     DEBIAN_CODENAME="$DISTRO_CODENAME"
+## DGM
+## DGM     if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -ne 3 ]; then
+## DGM         echoerror "Python version is no longer supported, only Python 3"
+## DGM         return 1
+## DGM     fi
+## DGM
+## DGM     # Install downloader backend for GPG keys fetching
+## DGM     __PACKAGES='wget'
+## DGM
+## DGM     # Required as it is not installed by default on Debian 9+
+## DGM     if [ "$DISTRO_MAJOR_VERSION" -ge 9 ]; then
+## DGM         __PACKAGES="${__PACKAGES} gnupg2"
+## DGM     fi
+## DGM
+## DGM     # Make sure https transport is available
+## DGM     if [ "$HTTP_VAL" = "https" ] ; then
+## DGM         __PACKAGES="${__PACKAGES} apt-transport-https ca-certificates"
+## DGM     fi
+## DGM
+## DGM     ## DGM tornado appears to be missing in 3006.x pkg requirements
+## DGM     ## DGM __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
+## DGM
+## DGM     # shellcheck disable=SC2086,SC2090
+## DGM     ## DGM __apt_get_install_noinput "${__PACKAGES}" || return 1
+## DGM     __apt_get_install_noinput ${__PACKAGES} || return 1
+## DGM
+## DGM     SALTSTACK_DEBIAN_URL="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_DIR}/${__PY_VERSION_REPO}/debian/${DEBIAN_RELEASE}/${__REPO_ARCH}/${STABLE_REV}"
+## DGM     echo "$__REPO_ARCH_DEB $SALTSTACK_DEBIAN_URL $DEBIAN_CODENAME main" > "/etc/apt/sources.list.d/salt.list"
+## DGM
+## DGM     __apt_key_fetch "$SALTSTACK_DEBIAN_URL/SALT-PROJECT-GPG-PUBKEY-2023.gpg" || return 1
+## DGM
+## DGM     __wait_for_apt apt-get update || return 1
+## DGM }
 
 __install_saltstack_debian_onedir_repository() {
     ## DGM Debugging
@@ -3528,73 +3550,73 @@ __install_saltstack_debian_onedir_repository() {
     __apt_get_install_noinput ${__PACKAGES} || return 1
 
     # amd64 is just a part of repository URI
-    SALTSTACK_DEBIAN_URL="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_DIR}/${__PY_VERSION_REPO}/debian/${DEBIAN_RELEASE}/${__REPO_ARCH}/${ONEDIR_REV}/"
+    SALTSTACK_DEBIAN_URL="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_DIR}/${__PY_VERSION_REPO}/debian/${DEBIAN_RELEASE}/${__REPO_ARCH}/${ONEDIR_REV}"
     if [ "${ONEDIR_REV}" = "nightly" ] ; then
-        SALTSTACK_DEBIAN_URL="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_NIGHTLY_DIR}/${__PY_VERSION_REPO}/debian/${DEBIAN_RELEASE}/${__REPO_ARCH}/"
+        SALTSTACK_DEBIAN_URL="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_NIGHTLY_DIR}/${__PY_VERSION_REPO}/debian/${DEBIAN_RELEASE}/${__REPO_ARCH}"
     fi
     echo "$__REPO_ARCH_DEB $SALTSTACK_DEBIAN_URL $DEBIAN_CODENAME main" > "/etc/apt/sources.list.d/salt.list"
 
-    __apt_key_fetch "${SALTSTACK_DEBIAN_URL}SALT-PROJECT-GPG-PUBKEY-2023.gpg" || return 1
+    __apt_key_fetch "${SALTSTACK_DEBIAN_URL}/SALT-PROJECT-GPG-PUBKEY-2023.gpg" || return 1
 
     __wait_for_apt apt-get update || return 1
 }
 
-install_debian_deps() {
-    if [ "$_START_DAEMONS" -eq $BS_FALSE ]; then
-        echowarn "Not starting daemons on Debian based distributions is not working mostly because starting them is the default behaviour."
-    fi
-
-    # No user interaction, libc6 restart services for example
-    export DEBIAN_FRONTEND=noninteractive
-
-    __wait_for_apt apt-get update || return 1
-
-    if [ "${_UPGRADE_SYS}" -eq $BS_TRUE ]; then
-        # Try to update GPG keys first if allowed
-        if [ "${_INSECURE_DL}" -eq $BS_TRUE ]; then
-            if [ "$DISTRO_MAJOR_VERSION" -ge 10 ]; then
-                __apt_get_install_noinput --allow-unauthenticated debian-archive-keyring && apt-get update || return 1
-            else
-                __apt_get_install_noinput --allow-unauthenticated debian-archive-keyring &&
-                    apt-key update && apt-get update || return 1
-            fi
-        fi
-
-        __apt_get_upgrade_noinput || return 1
-    fi
-
-    if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -ne 3 ]; then
-        echoerror "Python version is no longer supported, only Python 3"
-        return 1
-    fi
-
-    # Additionally install procps and pciutils which allows for Docker bootstraps. See 366#issuecomment-39666813
-    __PACKAGES='procps pciutils'
-
-    # YAML module is used for generating custom master/minion configs
-    __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-yaml"
-
-    ## DGM tornado appears to be missing in 3006.x pkg requirements
-    ## DGM __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
-
-    # shellcheck disable=SC2086
-    ## DGM __apt_get_install_noinput "${__PACKAGES}" || return 1
-    __apt_get_install_noinput ${__PACKAGES} || return 1
-
-    if [ "$_DISABLE_REPOS" -eq "$BS_FALSE" ] || [ "$_CUSTOM_REPO_URL" != "null" ]; then
-        __check_dpkg_architecture || return 1
-        __install_saltstack_debian_repository || return 1
-    fi
-
-    if [ "${_EXTRA_PACKAGES}" != "" ]; then
-        echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
-        # shellcheck disable=SC2086
-        ## DGM __apt_get_install_noinput "${_EXTRA_PACKAGES}" || return 1
-        __apt_get_install_noinput ${_EXTRA_PACKAGES} || return 1
-    fi
-
-    return 0
-}
+## DGM install_debian_deps() {
+## DGM     if [ "$_START_DAEMONS" -eq $BS_FALSE ]; then
+## DGM         echowarn "Not starting daemons on Debian based distributions is not working mostly because starting them is the default behaviour."
+## DGM     fi
+## DGM
+## DGM     # No user interaction, libc6 restart services for example
+## DGM     export DEBIAN_FRONTEND=noninteractive
+## DGM
+## DGM     __wait_for_apt apt-get update || return 1
+## DGM
+## DGM     if [ "${_UPGRADE_SYS}" -eq $BS_TRUE ]; then
+## DGM         # Try to update GPG keys first if allowed
+## DGM         if [ "${_INSECURE_DL}" -eq $BS_TRUE ]; then
+## DGM             if [ "$DISTRO_MAJOR_VERSION" -ge 10 ]; then
+## DGM                 __apt_get_install_noinput --allow-unauthenticated debian-archive-keyring && apt-get update || return 1
+## DGM             else
+## DGM                 __apt_get_install_noinput --allow-unauthenticated debian-archive-keyring &&
+## DGM                     apt-key update && apt-get update || return 1
+## DGM             fi
+## DGM         fi
+## DGM
+## DGM         __apt_get_upgrade_noinput || return 1
+## DGM     fi
+## DGM
+## DGM     if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -ne 3 ]; then
+## DGM         echoerror "Python version is no longer supported, only Python 3"
+## DGM         return 1
+## DGM     fi
+## DGM
+## DGM     # Additionally install procps and pciutils which allows for Docker bootstraps. See 366#issuecomment-39666813
+## DGM     __PACKAGES='procps pciutils'
+## DGM
+## DGM     # YAML module is used for generating custom master/minion configs
+## DGM     __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-yaml"
+## DGM
+## DGM     ## DGM tornado appears to be missing in 3006.x pkg requirements
+## DGM     ## DGM __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
+## DGM
+## DGM     # shellcheck disable=SC2086
+## DGM     ## DGM __apt_get_install_noinput "${__PACKAGES}" || return 1
+## DGM     __apt_get_install_noinput ${__PACKAGES} || return 1
+## DGM
+## DGM     if [ "$_DISABLE_REPOS" -eq "$BS_FALSE" ] || [ "$_CUSTOM_REPO_URL" != "null" ]; then
+## DGM         __check_dpkg_architecture || return 1
+## DGM         __install_saltstack_debian_repository || return 1
+## DGM     fi
+## DGM
+## DGM     if [ "${_EXTRA_PACKAGES}" != "" ]; then
+## DGM         echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
+## DGM         # shellcheck disable=SC2086
+## DGM         ## DGM __apt_get_install_noinput "${_EXTRA_PACKAGES}" || return 1
+## DGM         __apt_get_install_noinput ${_EXTRA_PACKAGES} || return 1
+## DGM     fi
+## DGM
+## DGM     return 0
+## DGM }
 
 install_debian_onedir_deps() {
     ## DGM Debugging
@@ -3675,7 +3697,7 @@ install_debian_git_pre() {
 }
 
 install_debian_git_deps() {
-    install_debian_deps || return 1
+    install_debian_onedir_deps || return 1
     install_debian_git_pre || return 1
 
     if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -ne 3 ]; then
@@ -4005,86 +4027,86 @@ install_fedora_deps() {
     return 0
 }
 
-install_fedora_stable() {
-    ## DGM Debugging
-    set -v
-    set -x
-
-    if [ "$STABLE_REV" = "latest" ]; then
-        __SALT_VERSION=""
-    else
-        __SALT_VERSION="$(dnf list --showduplicates salt | grep "$STABLE_REV" | head -n 1 | awk '{print $2}')"
-        # shellcheck disable=SC2268
-        if [ "x${__SALT_VERSION}" = "x" ]; then
-            echoerror "Could not find a stable install for Salt ${STABLE_REV}"
-            exit 1
-        fi
-        echoinfo "Installing Stable Package Version ${__SALT_VERSION}"
-        __SALT_VERSION="-${__SALT_VERSION}"
-    fi
-    __PACKAGES=""
-
-    if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ];then
-        __PACKAGES="${__PACKAGES} salt-cloud${__SALT_VERSION}"
-    fi
-    if [ "$_INSTALL_MASTER" -eq $BS_TRUE ]; then
-        __PACKAGES="${__PACKAGES} salt-master${__SALT_VERSION}"
-    fi
-    if [ "$_INSTALL_MINION" -eq $BS_TRUE ]; then
-        __PACKAGES="${__PACKAGES} salt-minion${__SALT_VERSION}"
-    fi
-    if [ "$_INSTALL_SYNDIC" -eq $BS_TRUE ]; then
-        __PACKAGES="${__PACKAGES} salt-syndic${__SALT_VERSION}"
-    fi
-
-    ## DGM tornado appears to be missing in 3006.x pkg requirements
-    ## DGM __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
-
-    # shellcheck disable=SC2086
-    ## DGM __dnf_install_noinput "${__PACKAGES}" || return 1
-    __dnf_install_noinput ${__PACKAGES} || return 1
-
-    ## DGM __python="python3"
-    if ! __check_command_exists python3; then
-        echoerror "Could not find a python3 binary?!"
-        return 1
-    fi
-
-## DGM     if [ "${_POST_NEON_INSTALL}" -eq $BS_FALSE ]; then
-## DGM         __check_pip_allowed "You need to allow pip based installations (-P) for Tornado <5.0 in order to install Salt"
-## DGM         __installed_tornado_rpm=$(rpm -qa | grep python${PY_PKG_VER}-tornado)
-## DGM         if [ -n "${__installed_tornado_rpm}" ]; then
-## DGM             echodebug "Removing system package ${__installed_tornado_rpm}"
-## DGM             rpm -e --nodeps "${__installed_tornado_rpm}" || return 1
+## DGM install_fedora_stable() {
+## DGM     ## DGM Debugging
+## DGM     set -v
+## DGM     set -x
+## DGM
+## DGM     if [ "$STABLE_REV" = "latest" ]; then
+## DGM         __SALT_VERSION=""
+## DGM     else
+## DGM         __SALT_VERSION="$(dnf list --showduplicates salt | grep "$STABLE_REV" | head -n 1 | awk '{print $2}')"
+## DGM         # shellcheck disable=SC2268
+## DGM         if [ "x${__SALT_VERSION}" = "x" ]; then
+## DGM             echoerror "Could not find a stable install for Salt ${STABLE_REV}"
+## DGM             exit 1
 ## DGM         fi
-## DGM         __get_site_packages_dir_code=$(cat << EOM
-## DGM import site
-## DGM print([d for d in site.getsitepackages() if d.startswith('/usr/lib/python')][0])
-## DGM EOM
-## DGM )
-## DGM         __target_path=$(${__python} -c "${__get_site_packages_dir_code}")
-## DGM         echodebug "Running '${__python}' -m pip install --target ${__target_path} 'tornado<5.0'"
-## DGM         "${__python}" -m pip install --target "${__target_path}" "tornado<5" || return 1
+## DGM         echoinfo "Installing Stable Package Version ${__SALT_VERSION}"
+## DGM         __SALT_VERSION="-${__SALT_VERSION}"
 ## DGM     fi
+## DGM     __PACKAGES=""
+## DGM
+## DGM     if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ];then
+## DGM         __PACKAGES="${__PACKAGES} salt-cloud${__SALT_VERSION}"
+## DGM     fi
+## DGM     if [ "$_INSTALL_MASTER" -eq $BS_TRUE ]; then
+## DGM         __PACKAGES="${__PACKAGES} salt-master${__SALT_VERSION}"
+## DGM     fi
+## DGM     if [ "$_INSTALL_MINION" -eq $BS_TRUE ]; then
+## DGM         __PACKAGES="${__PACKAGES} salt-minion${__SALT_VERSION}"
+## DGM     fi
+## DGM     if [ "$_INSTALL_SYNDIC" -eq $BS_TRUE ]; then
+## DGM         __PACKAGES="${__PACKAGES} salt-syndic${__SALT_VERSION}"
+## DGM     fi
+## DGM
+## DGM     ## DGM tornado appears to be missing in 3006.x pkg requirements
+## DGM     ## DGM __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
+## DGM
+## DGM     # shellcheck disable=SC2086
+## DGM     ## DGM __dnf_install_noinput "${__PACKAGES}" || return 1
+## DGM     __dnf_install_noinput ${__PACKAGES} || return 1
+## DGM
+## DGM     ## DGM __python="python3"
+## DGM     if ! __check_command_exists python3; then
+## DGM         echoerror "Could not find a python3 binary?!"
+## DGM         return 1
+## DGM     fi
+## DGM
+## DGM ## DGM     if [ "${_POST_NEON_INSTALL}" -eq $BS_FALSE ]; then
+## DGM ## DGM         __check_pip_allowed "You need to allow pip based installations (-P) for Tornado <5.0 in order to install Salt"
+## DGM ## DGM         __installed_tornado_rpm=$(rpm -qa | grep python${PY_PKG_VER}-tornado)
+## DGM ## DGM         if [ -n "${__installed_tornado_rpm}" ]; then
+## DGM ## DGM             echodebug "Removing system package ${__installed_tornado_rpm}"
+## DGM ## DGM             rpm -e --nodeps "${__installed_tornado_rpm}" || return 1
+## DGM ## DGM         fi
+## DGM ## DGM         __get_site_packages_dir_code=$(cat << EOM
+## DGM ## DGM import site
+## DGM ## DGM print([d for d in site.getsitepackages() if d.startswith('/usr/lib/python')][0])
+## DGM ## DGM EOM
+## DGM ## DGM )
+## DGM ## DGM         __target_path=$(${__python} -c "${__get_site_packages_dir_code}")
+## DGM ## DGM         echodebug "Running '${__python}' -m pip install --target ${__target_path} 'tornado<5.0'"
+## DGM ## DGM         "${__python}" -m pip install --target "${__target_path}" "tornado<5" || return 1
+## DGM ## DGM     fi
+## DGM
+## DGM     return 0
+## DGM }
 
-    return 0
-}
-
-install_fedora_stable_post() {
-    for fname in api master minion syndic; do
-        # Skip salt-api since the service should be opt-in and not necessarily started on boot
-        [ $fname = "api" ] && continue
-
-        # Skip if not meant to be installed
-        [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
-        [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
-        [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
-
-        systemctl is-enabled salt-$fname.service || (systemctl preset salt-$fname.service && systemctl enable salt-$fname.service)
-        sleep 1
-        systemctl daemon-reload
-    done
-}
+## DGM install_fedora_stable_post() {
+## DGM     for fname in api master minion syndic; do
+## DGM         # Skip salt-api since the service should be opt-in and not necessarily started on boot
+## DGM         [ $fname = "api" ] && continue
+## DGM
+## DGM         # Skip if not meant to be installed
+## DGM         [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
+## DGM         [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
+## DGM         [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
+## DGM
+## DGM         systemctl is-enabled salt-$fname.service || (systemctl preset salt-$fname.service && systemctl enable salt-$fname.service)
+## DGM         sleep 1
+## DGM         systemctl daemon-reload
+## DGM     done
+## DGM }
 
 install_fedora_git_deps() {
     if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -ne 3 ]; then
@@ -4306,10 +4328,27 @@ install_fedora_onedir_post() {
     set -x
 
     STABLE_REV=$ONEDIR_REV
-    install_fedora_stable_post || return 1
+
+    ## DGM install_fedora_stable_post || return 1
+    ## DGM this was the only caller to install_fedora_stable_post, so moved it here
+
+    for fname in api master minion syndic; do
+        # Skip salt-api since the service should be opt-in and not necessarily started on boot
+        [ $fname = "api" ] && continue
+
+        # Skip if not meant to be installed
+        [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
+        [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
+        [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
+
+        systemctl is-enabled salt-$fname.service || (systemctl preset salt-$fname.service && systemctl enable salt-$fname.service)
+        sleep 1
+        systemctl daemon-reload
+    done
 
     return 0
 }
+
 #
 #   Ended Fedora Install Functions
 #
@@ -6326,9 +6365,15 @@ __install_saltstack_photon_onedir_repository() {
     REPO_FILE="/etc/yum.repos.d/salt.repo"
 
     if [ ! -s "$REPO_FILE" ] || [ "$_FORCE_OVERWRITE" -eq $BS_TRUE ]; then
-        FETCH_URL="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_DIR}/${__PY_VERSION_REPO}/photon/${DISTRO_MAJOR_VERSION}/${CPU_ARCH_L}/${ONEDIR_REV}"
+        ## DGM FETCH_URL="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_DIR}/${__PY_VERSION_REPO}/photon/${DISTRO_MAJOR_VERSION}/${CPU_ARCH_L}/${ONEDIR_REV}"
+        ## DGM if [ "${ONEDIR_REV}" = "nightly" ] ; then
+        ## DGM     FETCH_URL="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_NIGHTLY_DIR}/${__PY_VERSION_REPO}/photon/${DISTRO_MAJOR_VERSION}/${CPU_ARCH_L}/"
+        ## DGM fi
+
+        ## DGM the salt repo has issues, need the Major version dot Zero, eg: 4.0, 5.0
+        FETCH_URL="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_DIR}/${__PY_VERSION_REPO}/photon/${DISTRO_MAJOR_VERSION}.0/${CPU_ARCH_L}/${ONEDIR_REV}"
         if [ "${ONEDIR_REV}" = "nightly" ] ; then
-            FETCH_URL="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_NIGHTLY_DIR}/${__PY_VERSION_REPO}/photon/${DISTRO_MAJOR_VERSION}/${CPU_ARCH_L}/"
+            FETCH_URL="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_NIGHTLY_DIR}/${__PY_VERSION_REPO}/photon/${DISTRO_MAJOR_VERSION}.0/${CPU_ARCH_L}/"
         fi
 
         __fetch_url "${REPO_FILE}" "${FETCH_URL}.repo"

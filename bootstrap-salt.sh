@@ -2770,11 +2770,20 @@ EOM
         return 1
     fi
 
+    _USE_BREAK_SYSTEM_PACKAGES=""
+    _PIP_VERSION=$(${_pip_cmd} --version | awk '{print $2}')
+
+    # shellcheck disable=SC2086,SC2090
+    if [  ${_PIP_VERSION} -ge 24 ]; then
+        _USE_BREAK_SYSTEM_PACKAGES="--break-system-packages"
+        echodebug "pip command is greater than / equal 24, using ${_USE_BREAK_SYSTEM_PACKAGES}"
+    fi
+
     echodebug "Running '${_pip_cmd} install wheel ${_setuptools_dep}'"
     ## DGM ${_pip_cmd} install --upgrade "${_POST_NEON_PIP_INSTALL_ARGS}"  wheel "${_setuptools_dep}"
 
     ### DGM ${_pip_cmd} install --upgrade ${_POST_NEON_PIP_INSTALL_ARGS}  wheel "${_setuptools_dep}"
-    ${_pip_cmd} install --break-system-packages --upgrade ${_POST_NEON_PIP_INSTALL_ARGS}  wheel "${_setuptools_dep}"
+    ${_pip_cmd} install ${_USE_BREAK_SYSTEM_PACKAGES} --upgrade ${_POST_NEON_PIP_INSTALL_ARGS}  wheel "${_setuptools_dep}"
 
     echoinfo "Installing salt using ${_py_exe}"
     cd "${_SALT_GIT_CHECKOUT_DIR}" || return 1
@@ -2789,7 +2798,7 @@ EOM
     echodebug "Running '${_pip_cmd} install --ignore-installed ${_POST_NEON_PIP_INSTALL_ARGS} /tmp/git/deps/*'"
     ## ${_pip_cmd} install --ignore-installed "${_POST_NEON_PIP_INSTALL_ARGS}" /tmp/git/deps/* || return 1
     ## DGM ${_pip_cmd} install --ignore-installed ${_POST_NEON_PIP_INSTALL_ARGS} /tmp/git/deps/* || return 1
-    ${_pip_cmd} install --break-system-packages --ignore-installed ${_POST_NEON_PIP_INSTALL_ARGS} /tmp/git/deps/* || return 1
+    ${_pip_cmd} install ${_USE_BREAK_SYSTEM_PACKAGES} --ignore-installed ${_POST_NEON_PIP_INSTALL_ARGS} /tmp/git/deps/* || return 1
     rm -f /tmp/git/deps/*
 
     echoinfo "Building Salt Python Wheel"

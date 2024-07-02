@@ -2772,7 +2772,9 @@ EOM
 
     echodebug "Running '${_pip_cmd} install wheel ${_setuptools_dep}'"
     ## DGM ${_pip_cmd} install --upgrade "${_POST_NEON_PIP_INSTALL_ARGS}"  wheel "${_setuptools_dep}"
-    ${_pip_cmd} install --upgrade ${_POST_NEON_PIP_INSTALL_ARGS}  wheel "${_setuptools_dep}"
+
+    ### DGM ${_pip_cmd} install --upgrade ${_POST_NEON_PIP_INSTALL_ARGS}  wheel "${_setuptools_dep}"
+    ${_pip_cmd} install --break-system-packages --upgrade ${_POST_NEON_PIP_INSTALL_ARGS}  wheel "${_setuptools_dep}"
 
     echoinfo "Installing salt using ${_py_exe}"
     cd "${_SALT_GIT_CHECKOUT_DIR}" || return 1
@@ -2786,7 +2788,8 @@ EOM
     echoinfo "Installing Downloaded Salt Dependencies"
     echodebug "Running '${_pip_cmd} install --ignore-installed ${_POST_NEON_PIP_INSTALL_ARGS} /tmp/git/deps/*'"
     ## ${_pip_cmd} install --ignore-installed "${_POST_NEON_PIP_INSTALL_ARGS}" /tmp/git/deps/* || return 1
-    ${_pip_cmd} install --ignore-installed ${_POST_NEON_PIP_INSTALL_ARGS} /tmp/git/deps/* || return 1
+    ## DGM ${_pip_cmd} install --ignore-installed ${_POST_NEON_PIP_INSTALL_ARGS} /tmp/git/deps/* || return 1
+    ${_pip_cmd} install --break-system-packages --ignore-installed ${_POST_NEON_PIP_INSTALL_ARGS} /tmp/git/deps/* || return 1
     rm -f /tmp/git/deps/*
 
     echoinfo "Building Salt Python Wheel"
@@ -3243,6 +3246,10 @@ install_ubuntu_stable() {
 }
 
 install_ubuntu_git() {
+    ## DGM Debugging
+    set -v
+    set -x
+
     # Activate virtualenv before install
     if [ "${_VIRTUALENV_DIR}" != "null" ]; then
         __activate_virtualenv || return 1
@@ -6464,10 +6471,17 @@ install_photon_git_deps() {
 
     __git_clone_and_checkout || return 1
 
-    __PACKAGES="python${PY_PKG_VER}-devel python${PY_PKG_VER}-pip python${PY_PKG_VER}-setuptools gcc glibc-devel linux-devel.x86_64"
+    ## DGM __PACKAGES="python${PY_PKG_VER}-devel python${PY_PKG_VER}-pip python${PY_PKG_VER}-setuptools gcc glibc-devel linux-devel.x86_64"
+    __PACKAGES="python${PY_PKG_VER}-devel python${PY_PKG_VER}-pip python${PY_PKG_VER}-setuptools gcc glibc-devel linux-devel.x86_64 cython${PY_PKG_VER}"
 
     ## DGM tornado appears to be missing in 3006.x pkg requirements
     ## DGM __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
+
+    ## DGM Photon 5 container is missing systemd on default installation
+    if [ "${DISTRO_MAJOR_VERSION}" -ge 5  ]; then
+        # Photon 5 container is missing systemd on default installation
+        __PACKAGES="${__PACKAGES} systemd"
+    fi
 
     # shellcheck disable=SC2086
     ## DGM __tdnf_install_noinput "${__PACKAGES}" || return 1

@@ -619,6 +619,7 @@ if [ "$ITYPE" = "git" ]; then
 
     # Disable shell warning about unbound variable during git install
     STABLE_REV="latest"
+    ONEDIR_REV="latest"
 
 # If doing stable install, check if version specified
 elif [ "$ITYPE" = "stable" ]; then
@@ -3534,6 +3535,7 @@ __install_saltstack_debian_onedir_repository() {
     ## DGM Debugging
     set -v
     set -x
+    echodebug "__install_saltstack_debian_onedir_repository() entry"
 
     DEBIAN_RELEASE="$DISTRO_MAJOR_VERSION"
     DEBIAN_CODENAME="$DISTRO_CODENAME"
@@ -3638,6 +3640,11 @@ install_debian_onedir_deps() {
     ## DGM Debugging
     set -v
     set -x
+
+    echodebug "install_debian_onedir_git_deps() entry"
+
+    echodebug "DGM Debian A checking STABLE_REV ,${STABLE_REV}, ONEDIR_REV ,$ONEDIR_REV,"
+
     if [ "$_START_DAEMONS" -eq $BS_FALSE ]; then
         echowarn "Not starting daemons on Debian based distributions is not working mostly because starting them is the default behaviour."
     fi

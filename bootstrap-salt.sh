@@ -2782,10 +2782,9 @@ EOM
         echodebug "pip command is greater than / equal 24, using ${_USE_BREAK_SYSTEM_PACKAGES}"
     fi
 
-    echodebug "Running '${_pip_cmd} install wheel ${_setuptools_dep}'"
     ## DGM ${_pip_cmd} install --upgrade "${_POST_NEON_PIP_INSTALL_ARGS}"  wheel "${_setuptools_dep}"
-
     ### DGM ${_pip_cmd} install --upgrade ${_POST_NEON_PIP_INSTALL_ARGS}  wheel "${_setuptools_dep}"
+    echodebug "Running '${_pip_cmd} install ${_USE_BREAK_SYSTEM_PACKAGES} --upgrade ${_POST_NEON_PIP_INSTALL_ARGS}  wheel ${_setuptools_dep}"
     ${_pip_cmd} install ${_USE_BREAK_SYSTEM_PACKAGES} --upgrade ${_POST_NEON_PIP_INSTALL_ARGS}  wheel "${_setuptools_dep}"
 
     echoinfo "Installing salt using ${_py_exe}"
@@ -2798,7 +2797,7 @@ EOM
     ${_pip_cmd} download -d /tmp/git/deps ${_PIP_DOWNLOAD_ARGS} . || (echo "Failed to download salt dependencies" && return 1)
 
     echoinfo "Installing Downloaded Salt Dependencies"
-    echodebug "Running '${_pip_cmd} install --ignore-installed ${_POST_NEON_PIP_INSTALL_ARGS} /tmp/git/deps/*'"
+    echodebug "Running '${_pip_cmd} install ${_USE_BREAK_SYSTEM_PACKAGES} --ignore-installed ${_POST_NEON_PIP_INSTALL_ARGS} /tmp/git/deps/*'"
     ## ${_pip_cmd} install --ignore-installed "${_POST_NEON_PIP_INSTALL_ARGS}" /tmp/git/deps/* || return 1
     ## DGM ${_pip_cmd} install --ignore-installed ${_POST_NEON_PIP_INSTALL_ARGS} /tmp/git/deps/* || return 1
     ${_pip_cmd} install ${_USE_BREAK_SYSTEM_PACKAGES} --ignore-installed ${_POST_NEON_PIP_INSTALL_ARGS} /tmp/git/deps/* || return 1
@@ -2817,11 +2816,12 @@ EOM
     cd "${__SALT_GIT_CHECKOUT_PARENT_DIR}" || return 1
 
     echoinfo "Installing Built Salt Wheel"
-    ${_pip_cmd} uninstall --yes salt 2>/dev/null || true
-    echodebug "Running '${_pip_cmd} install --no-deps --force-reinstall ${_POST_NEON_PIP_INSTALL_ARGS} /tmp/git/deps/salt*.whl'"
+    ${_pip_cmd} uninstall --yes ${_USE_BREAK_SYSTEM_PACKAGES} salt 2>/dev/null || true
+    echodebug "Running '${_pip_cmd} install ${_USE_BREAK_SYSTEM_PACKAGES} --no-deps --force-reinstall ${_POST_NEON_PIP_INSTALL_ARGS} /tmp/git/deps/salt*.whl'"
 
     ## DGM "${_POST_NEON_PIP_INSTALL_ARGS}" \
-    ${_pip_cmd} install --no-deps --force-reinstall \
+    ## DGM ${_pip_cmd} install --no-deps --force-reinstall \
+    ${_pip_cmd} install ${_USE_BREAK_SYSTEM_PACKAGES} --no-deps --force-reinstall \
         ${_POST_NEON_PIP_INSTALL_ARGS} \
         --global-option="--salt-config-dir=$_SALT_ETC_DIR --salt-cache-dir=${_SALT_CACHE_DIR} ${SETUP_PY_INSTALL_ARGS}" \
         /tmp/git/deps/salt*.whl || return 1

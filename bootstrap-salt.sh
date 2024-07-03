@@ -2774,10 +2774,10 @@ EOM
     fi
 
     _USE_BREAK_SYSTEM_PACKAGES=""
-    _PIP_VERSION=$(${_pip_cmd} --version | awk '{print $2}')
+    _PIP_MAJOR_VERSION=$(${_pip_cmd} --version | awk '{print $2}' | awk -F '.' '{print $1}')
 
     # shellcheck disable=SC2086,SC2090
-    if [  ${_PIP_VERSION} -ge 24 ]; then
+    if [  ${_PIP_MAJOR_VERSION} -ge 24 ]; then
         _USE_BREAK_SYSTEM_PACKAGES="--break-system-packages"
         echodebug "pip command is greater than / equal 24, using ${_USE_BREAK_SYSTEM_PACKAGES}"
     fi
@@ -6628,7 +6628,7 @@ install_photon_git() {
     set -x
     echodebug "install_photon_git() entry"
 
-    install_photon_git_deps || return 1
+    ## DGM install_photon_git_deps || return 1
 
     if [ "${_PY_EXE}" != "" ]; then
         _PYEXE=${_PY_EXE}

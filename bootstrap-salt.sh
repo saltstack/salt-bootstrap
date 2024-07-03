@@ -6456,6 +6456,11 @@ install_arch_linux_onedir_post() {
 #
 
 __install_saltstack_photon_onedir_repository() {
+    ## DGM Debugging
+    set -v
+    set -x
+    echodebug "__install_saltstack_photon_onedir_repository() entry"
+
     if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -ne 3 ]; then
         echoerror "Python version is no longer supported, only Python 3"
         return 1
@@ -6498,6 +6503,11 @@ __install_saltstack_photon_onedir_repository() {
 }
 
 install_photon_deps() {
+    ## DGM Debugging
+    set -v
+    set -x
+    echodebug "install_photon_deps() entry"
+
     if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -ne 3 ]; then
         echoerror "Python version is no longer supported, only Python 3"
         return 1
@@ -6530,6 +6540,11 @@ install_photon_deps() {
 }
 
 install_photon_stable_post() {
+    ## DGM Debugging
+    set -v
+    set -x
+    echodebug "install_photon_stable_post() entry"
+
     for fname in api master minion syndic; do
         # Skip salt-api since the service should be opt-in and not necessarily started on boot
         [ $fname = "api" ] && continue
@@ -6546,6 +6561,11 @@ install_photon_stable_post() {
 }
 
 install_photon_git_deps() {
+    ## DGM Debugging
+    set -v
+    set -x
+    echodebug "install_photon_git_deps() entry"
+
     if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -ne 3 ]; then
         echoerror "Python version is no longer supported, only Python 3"
         return 1
@@ -6603,6 +6623,13 @@ install_photon_git_deps() {
 }
 
 install_photon_git() {
+    ## DGM Debugging
+    set -v
+    set -x
+    echodebug "install_photon_git() entry"
+
+    install_photon_git_deps || return 1
+
     if [ "${_PY_EXE}" != "" ]; then
         _PYEXE=${_PY_EXE}
         echoinfo "Using the following python version: ${_PY_EXE} to install salt"
@@ -6620,6 +6647,11 @@ install_photon_git() {
 }
 
 install_photon_git_post() {
+    ## DGM Debugging
+    set -v
+    set -x
+    echodebug "install_photon_git_post() entry"
+
     for fname in api master minion syndic; do
         # Skip if not meant to be installed
         [ $fname = "api" ] && \
@@ -6652,6 +6684,11 @@ install_photon_git_post() {
 
 install_photon_restart_daemons() {
     [ "$_START_DAEMONS" -eq $BS_FALSE ] && return
+    ## DGM Debugging
+    set -v
+    set -x
+    echodebug "install_photon_restart_daemons() entry"
+
 
     for fname in api master minion syndic; do
         # Skip salt-api since the service should be opt-in and not necessarily started on boot
@@ -6673,6 +6710,11 @@ install_photon_restart_daemons() {
 }
 
 install_photon_check_services() {
+    ## DGM Debugging
+    set -v
+    set -x
+    echodebug "install_photon_check_services() entry"
+
     for fname in api master minion syndic; do
         # Skip salt-api since the service should be opt-in and not necessarily started on boot
         [ $fname = "api" ] && continue
@@ -6689,6 +6731,11 @@ install_photon_check_services() {
 }
 
 install_photon_onedir_deps() {
+    ## DGM Debugging
+    set -v
+    set -x
+    echodebug "install_photon_onedir_deps() entry"
+
 
     if [ "$_UPGRADE_SYS" -eq $BS_TRUE ]; then
         tdnf -y update || return 1
@@ -6736,6 +6783,7 @@ install_photon_onedir() {
     ## DGM Debugging
     set -v
     set -x
+    echodebug "install_photon_onedir() entry"
 
     STABLE_REV=$ONEDIR_REV
 

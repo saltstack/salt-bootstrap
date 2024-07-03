@@ -3196,7 +3196,7 @@ install_ubuntu_git_deps() {
     # shellcheck disable=SC2086
     __apt_get_install_noinput ${__PACKAGES} || return 1
 
-    install_ubuntu_stable_deps || return 1
+    ## DGM install_ubuntu_stable_deps || return 1
 
     # Let's trigger config_salt()
     if [ "$_TEMP_CONFIG_DIR" = "null" ]; then
@@ -3596,68 +3596,68 @@ __install_saltstack_debian_onedir_repository() {
     __wait_for_apt apt-get update || return 1
 }
 
-install_debian_deps() {
-    ## DGM Debugging
-    set -v
-    set -x
-
-    echodebug "install_debian_deps() entry"
-
-    if [ "$_START_DAEMONS" -eq $BS_FALSE ]; then
-        echowarn "Not starting daemons on Debian based distributions is not working mostly because starting them is the default behaviour."
-    fi
-
-    # No user interaction, libc6 restart services for example
-    export DEBIAN_FRONTEND=noninteractive
-
-    __wait_for_apt apt-get update || return 1
-
-    if [ "${_UPGRADE_SYS}" -eq $BS_TRUE ]; then
-        # Try to update GPG keys first if allowed
-        if [ "${_INSECURE_DL}" -eq $BS_TRUE ]; then
-            if [ "$DISTRO_MAJOR_VERSION" -ge 10 ]; then
-                __apt_get_install_noinput --allow-unauthenticated debian-archive-keyring && apt-get update || return 1
-            else
-                __apt_get_install_noinput --allow-unauthenticated debian-archive-keyring &&
-                    apt-key update && apt-get update || return 1
-            fi
-        fi
-
-        __apt_get_upgrade_noinput || return 1
-    fi
-
-    if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -ne 3 ]; then
-        echoerror "Python version is no longer supported, only Python 3"
-        return 1
-    fi
-
-    # Additionally install procps and pciutils which allows for Docker bootstraps. See 366#issuecomment-39666813
-    __PACKAGES='procps pciutils'
-
-    # YAML module is used for generating custom master/minion configs
-    __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-yaml"
-
-    ## DGM tornado appears to be missing in 3006.x pkg requirements
-    ## DGM __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
-
-    # shellcheck disable=SC2086
-    ## DGM __apt_get_install_noinput "${__PACKAGES}" || return 1
-    __apt_get_install_noinput ${__PACKAGES} || return 1
-
-    if [ "$_DISABLE_REPOS" -eq "$BS_FALSE" ] || [ "$_CUSTOM_REPO_URL" != "null" ]; then
-        __check_dpkg_architecture || return 1
-        __install_saltstack_debian_repository || return 1
-    fi
-
-    if [ "${_EXTRA_PACKAGES}" != "" ]; then
-        echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
-        # shellcheck disable=SC2086
-        ## DGM __apt_get_install_noinput "${_EXTRA_PACKAGES}" || return 1
-        __apt_get_install_noinput ${_EXTRA_PACKAGES} || return 1
-    fi
-
-    return 0
-}
+## DGM install_debian_deps() {
+## DGM     ## DGM Debugging
+## DGM     set -v
+## DGM     set -x
+## DGM
+## DGM     echodebug "install_debian_deps() entry"
+## DGM
+## DGM     if [ "$_START_DAEMONS" -eq $BS_FALSE ]; then
+## DGM         echowarn "Not starting daemons on Debian based distributions is not working mostly because starting them is the default behaviour."
+## DGM     fi
+## DGM
+## DGM     # No user interaction, libc6 restart services for example
+## DGM     export DEBIAN_FRONTEND=noninteractive
+## DGM
+## DGM     __wait_for_apt apt-get update || return 1
+## DGM
+## DGM     if [ "${_UPGRADE_SYS}" -eq $BS_TRUE ]; then
+## DGM         # Try to update GPG keys first if allowed
+## DGM         if [ "${_INSECURE_DL}" -eq $BS_TRUE ]; then
+## DGM             if [ "$DISTRO_MAJOR_VERSION" -ge 10 ]; then
+## DGM                 __apt_get_install_noinput --allow-unauthenticated debian-archive-keyring && apt-get update || return 1
+## DGM             else
+## DGM                 __apt_get_install_noinput --allow-unauthenticated debian-archive-keyring &&
+## DGM                     apt-key update && apt-get update || return 1
+## DGM             fi
+## DGM         fi
+## DGM
+## DGM         __apt_get_upgrade_noinput || return 1
+## DGM     fi
+## DGM
+## DGM     if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -ne 3 ]; then
+## DGM         echoerror "Python version is no longer supported, only Python 3"
+## DGM         return 1
+## DGM     fi
+## DGM
+## DGM     # Additionally install procps and pciutils which allows for Docker bootstraps. See 366#issuecomment-39666813
+## DGM     __PACKAGES='procps pciutils'
+## DGM
+## DGM     # YAML module is used for generating custom master/minion configs
+## DGM     __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-yaml"
+## DGM
+## DGM     ## DGM tornado appears to be missing in 3006.x pkg requirements
+## DGM     ## DGM __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
+## DGM
+## DGM     # shellcheck disable=SC2086
+## DGM     ## DGM __apt_get_install_noinput "${__PACKAGES}" || return 1
+## DGM     __apt_get_install_noinput ${__PACKAGES} || return 1
+## DGM
+## DGM     if [ "$_DISABLE_REPOS" -eq "$BS_FALSE" ] || [ "$_CUSTOM_REPO_URL" != "null" ]; then
+## DGM         __check_dpkg_architecture || return 1
+## DGM         __install_saltstack_debian_repository || return 1
+## DGM     fi
+## DGM
+## DGM     if [ "${_EXTRA_PACKAGES}" != "" ]; then
+## DGM         echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
+## DGM         # shellcheck disable=SC2086
+## DGM         ## DGM __apt_get_install_noinput "${_EXTRA_PACKAGES}" || return 1
+## DGM         __apt_get_install_noinput ${_EXTRA_PACKAGES} || return 1
+## DGM     fi
+## DGM
+## DGM     return 0
+## DGM }
 
 install_debian_onedir_deps() {
     ## DGM Debugging
@@ -3666,7 +3666,7 @@ install_debian_onedir_deps() {
 
     echodebug "install_debian_onedir_git_deps() entry"
 
-    echodebug "DGM Debian A checking STABLE_REV ,${STABLE_REV}, ONEDIR_REV ,$ONEDIR_REV,"
+    echodebug "DGM Debian A checking ONEDIR_REV ,$ONEDIR_REV,"
 
     if [ "$_START_DAEMONS" -eq $BS_FALSE ]; then
         echowarn "Not starting daemons on Debian based distributions is not working mostly because starting them is the default behaviour."
@@ -3724,23 +3724,29 @@ install_debian_onedir_deps() {
     return 0
 }
 
-install_debian_git_pre() {
-    if ! __check_command_exists git; then
-        __apt_get_install_noinput git || return 1
-    fi
-
-    if [ "$_INSECURE_DL" -eq $BS_FALSE ] && [ "${_SALT_REPO_URL%%://*}" = "https" ]; then
-        __apt_get_install_noinput ca-certificates
-    fi
-
-    __git_clone_and_checkout || return 1
-
-    # Let's trigger config_salt()
-    if [ "$_TEMP_CONFIG_DIR" = "null" ]; then
-        _TEMP_CONFIG_DIR="${_SALT_GIT_CHECKOUT_DIR}/conf/"
-        CONFIG_SALT_FUNC="config_salt"
-    fi
-}
+## DGM install_debian_git_pre() {
+## DGM     ## DGM Debugging
+## DGM     set -v
+## DGM     set -x
+## DGM
+## DGM     echodebug "install_debian_git_pre() entry"
+## DGM
+## DGM     if ! __check_command_exists git; then
+## DGM         __apt_get_install_noinput git || return 1
+## DGM     fi
+## DGM
+## DGM     if [ "$_INSECURE_DL" -eq $BS_FALSE ] && [ "${_SALT_REPO_URL%%://*}" = "https" ]; then
+## DGM         __apt_get_install_noinput ca-certificates
+## DGM     fi
+## DGM
+## DGM     __git_clone_and_checkout || return 1
+## DGM
+## DGM     # Let's trigger config_salt()
+## DGM     if [ "$_TEMP_CONFIG_DIR" = "null" ]; then
+## DGM         _TEMP_CONFIG_DIR="${_SALT_GIT_CHECKOUT_DIR}/conf/"
+## DGM         CONFIG_SALT_FUNC="config_salt"
+## DGM     fi
+## DGM }
 
 install_debian_git_deps() {
     ## DGM Debugging
@@ -3749,8 +3755,21 @@ install_debian_git_deps() {
 
     echodebug "install_debian_git_deps() entry"
 
-    install_debian_deps || return 1
-    install_debian_git_pre || return 1
+    __wait_for_apt apt-get update || return 1
+
+    ## DGM ? if ! __check_command_exists git; then
+    ## DGM ?     __apt_get_install_noinput git || return 1
+    ## DGM ? fi
+
+    if ! __check_command_exists git; then
+        __apt_get_install_noinput git-core || return 1
+    fi
+
+    if [ "$_INSECURE_DL" -eq $BS_FALSE ] && [ "${_SALT_REPO_URL%%://*}" = "https" ]; then
+        __apt_get_install_noinput ca-certificates
+    fi
+
+    __git_clone_and_checkout || return 1
 
     if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -ne 3 ]; then
         echoerror "Python version is no longer supported, only Python 3"
@@ -3767,8 +3786,43 @@ install_debian_git_deps() {
     ## DGM __apt_get_install_noinput "${__PACKAGES}" || return 1
     __apt_get_install_noinput ${__PACKAGES} || return 1
 
+    # Let's trigger config_salt()
+    if [ "$_TEMP_CONFIG_DIR" = "null" ]; then
+        _TEMP_CONFIG_DIR="${_SALT_GIT_CHECKOUT_DIR}/conf/"
+        CONFIG_SALT_FUNC="config_salt"
+    fi
+
     return 0
 }
+
+## DGM DGM -------------------------------------
+## DGM     ## DGM Debugging
+## DGM     set -v
+## DGM     set -x
+## DGM
+## DGM     echodebug "install_debian_git_deps() entry"
+## DGM
+## DGM     install_debian_deps || return 1
+## DGM     install_debian_git_pre || return 1
+## DGM
+## DGM     if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -ne 3 ]; then
+## DGM         echoerror "Python version is no longer supported, only Python 3"
+## DGM         return 1
+## DGM     fi
+## DGM
+## DGM     __PACKAGES="python${PY_PKG_VER}-dev python${PY_PKG_VER}-pip python${PY_PKG_VER}-setuptools gcc"
+## DGM     echodebug "install_debian_git_deps() Installing ${__PACKAGES}"
+## DGM
+## DGM     ## DGM tornado appears to be missing in 3006.x pkg requirements
+## DGM     ## DGM __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
+## DGM
+## DGM     # shellcheck disable=SC2086
+## DGM     ## DGM __apt_get_install_noinput "${__PACKAGES}" || return 1
+## DGM     __apt_get_install_noinput ${__PACKAGES} || return 1
+## DGM
+## DGM     return 0
+## DGM
+## DGM }
 
 install_debian_stable() {
     __PACKAGES=""

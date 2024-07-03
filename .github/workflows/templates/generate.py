@@ -6,13 +6,13 @@ import pathlib
 
 os.chdir(os.path.abspath(os.path.dirname(__file__)))
 
+## DGM "centos-stream8",
 LINUX_DISTROS = [
     "almalinux-8",
     "almalinux-9",
     "amazon-2",
     "amazon-2023",
     "arch",
-    "centos-stream8",
     "centos-stream9",
     "debian-11",
     "debian-12",
@@ -43,13 +43,13 @@ OSX = [
 ]
 
 
+## DGM "centos-stream8",
 STABLE_DISTROS = [
     "almalinux-8",
     "almalinux-9",
     "amazon-2",
     "amazon-2023",
     "arch",
-    "centos-stream8",
     "centos-stream9",
     "debian-11",
     "debian-12",
@@ -68,12 +68,12 @@ STABLE_DISTROS = [
     "ubuntu-2404",
 ]
 
+## DGM "centos-stream8",
 ONEDIR_DISTROS = [
     "almalinux-8",
     "almalinux-9",
     "amazon-2",
     "amazon-2023",
-    "centos-stream8",
     "centos-stream9",
     "debian-11",
     "debian-12",
@@ -222,9 +222,9 @@ GIT_VERSION_BLACKLIST = [
 #           SetuptoolsDeprecationWarning: setup.py install is deprecated.
 #           Use build and pip and other standards-based tools.
 #
+## DGM "centos-stream8",
 GIT_DISTRO_BLACKLIST = [
     "almalinux-8",
-    "centos-stream8",
     "fedora-39",
     "opensuse-15",
     "oraclelinux-8",
@@ -236,13 +236,13 @@ LATEST_PKG_BLACKLIST = [
     "gentoo-systemd",
 ]
 
+## DGM    "centos-stream8": "CentOS Stream 8",
 DISTRO_DISPLAY_NAMES = {
     "almalinux-8": "AlmaLinux 8",
     "almalinux-9": "AlmaLinux 9",
     "amazon-2": "Amazon 2",
     "amazon-2023": "Amazon 2023",
     "arch": "Arch",
-    "centos-stream8": "CentOS Stream 8",
     "centos-stream9": "CentOS Stream 9",
     "debian-11": "Debian 11",
     "debian-12": "Debian 12",

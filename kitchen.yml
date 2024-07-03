@@ -66,9 +66,9 @@ platforms:
         - update-crypto-policies --set DEFAULT:SHA1
         ### DGM - update-crypto-policies --set DEFAULT:SHA256
         - echo "PubkeyAcceptedAlgorithms +ssh-rsa" | tee -a /etc/ssh/sshd_config
-  - name: centos-stream8
-    driver:
-      image: quay.io/centos/centos:stream8
+  ## DGM - name: centos-stream8
+  ## DGM   driver:
+  ## DGM     image: quay.io/centos/centos:stream8
   - name: debian-11
     driver:
       image: debian:bullseye

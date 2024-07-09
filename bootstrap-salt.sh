@@ -6593,6 +6593,7 @@ install_photon_git_deps() {
     ## DGM __PACKAGES="python${PY_PKG_VER}-devel python${PY_PKG_VER}-pip python${PY_PKG_VER}-setuptools gcc glibc-devel linux-devel.x86_64"
     __PACKAGES="python${PY_PKG_VER}-devel python${PY_PKG_VER}-pip python${PY_PKG_VER}-setuptools gcc glibc-devel linux-devel.x86_64 cython${PY_PKG_VER}"
 
+    echodebug "install_photon_git_deps() distro major version, ${DISTRO_MAJOR_VERSION}"
 
     ## DGM Photon 5 container is missing systemd on default installation
     if [ "${DISTRO_MAJOR_VERSION}" -lt 5  ]; then

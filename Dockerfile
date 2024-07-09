@@ -1,8 +1,8 @@
-FROM ubuntu:20.04
+FROM ubuntu:24.04
 MAINTAINER "SaltStack Team"
 
 # Bootstrap script options: install Salt Master by default
-ENV BOOTSTRAP_OPTS='-M'
+ENV BOOTSTRAP_OPTS='-M -x python3'
 # Version of salt to install: stable or git
 ENV SALT_VERSION=stable
 

@@ -46,10 +46,11 @@ platforms:
   - name: amazon-2023
     driver:
       image: amazonlinux:2023
-      ## platform: fedora
-      platform: rhel
+      platform: fedora
+      ## DGM platform: rhel
       provision_command:
-        - yum -y install procps-ng
+        ## DGM - yum -y install procps-ng
+        - yum -y install --allowerasing procps-ng curl
   - name: arch
     driver:
       image: archlinux/archlinux
@@ -285,6 +286,3 @@ verifier:
   name: shell
   remote_exec: false
   command: pytest --cache-clear -v -s -ra --log-cli-level=info tests/integration/
-
-## DGM transport:
-## DGM   name: docker

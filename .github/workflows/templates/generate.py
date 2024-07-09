@@ -267,7 +267,8 @@ DISTRO_DISPLAY_NAMES = {
     "windows-2022": "Windows 2022",
 }
 
-TIMEOUT_DEFAULT = 20
+## DGM TIMEOUT_DEFAULT = 20
+TIMEOUT_DEFAULT = 40
 TIMEOUT_OVERRIDES = {
     "gentoo": 90,
     "gentoo-systemd": 90,

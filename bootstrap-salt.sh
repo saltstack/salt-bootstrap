@@ -5,6 +5,7 @@
 # https://github.com/saltstack/salt-bootstrap
 # shellcheck disable=SC2317
 # shellcheck disable=SC2086
+# shellcheck disable=SC2329
 #
 #======================================================================================================================
 # vim: softtabstop=4 shiftwidth=4 expandtab fenc=utf-8 spell spelllang=en cc=120

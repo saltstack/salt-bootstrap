@@ -6581,8 +6581,13 @@ install_photon_git_deps() {
     if ! __check_command_exists ps; then
         __PACKAGES="${__PACKAGES} procps-ng"
     fi
+
     if ! __check_command_exists git; then
         __PACKAGES="${__PACKAGES} git"
+    fi
+
+    if ! __check_command_exists gcc; then
+        __PACKAGES="${__PACKAGES} gcc"
     fi
 
     if [ -n "${__PACKAGES}" ]; then

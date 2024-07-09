@@ -128,6 +128,7 @@ BLACKLIST_3007 = [
 BLACKLIST_GIT_3006 = [
     "almalinux-9",
     "amazon-2",
+    "amazon-2023",
     "arch",
     "centos-stream9",
     "debian-11",
@@ -137,6 +138,7 @@ BLACKLIST_GIT_3006 = [
     "gentoo-systemd",
     "opensuse-15",
     "opensuse-tumbleweed",
+    "oraclelinux-9",
     "photon-4",
     "photon-5",
     "rockylinux-9",
@@ -148,15 +150,18 @@ BLACKLIST_GIT_3006 = [
 BLACKLIST_GIT_3007 = [
     "almalinux-9",
     "amazon-2",
+    "amazon-2023",
     "arch",
     "centos-stream9",
     "debian-11",
     "debian-12",
     "fedora-39",
+    "fedora-40",
     "gentoo",
     "gentoo-systemd",
     "opensuse-15",
     "opensuse-tumbleweed",
+    "oraclelinux-9",
     "photon-4",
     "photon-5",
     "rockylinux-9",
@@ -167,6 +172,7 @@ BLACKLIST_GIT_3007 = [
 
 BLACKLIST_GIT_MASTER = [
     "amazon-2",
+    "fedora-39",
     "photon-4",
     "photon-5",
 ]

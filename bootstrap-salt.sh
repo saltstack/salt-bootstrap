@@ -6593,13 +6593,11 @@ install_photon_git_deps() {
     ## DGM __PACKAGES="python${PY_PKG_VER}-devel python${PY_PKG_VER}-pip python${PY_PKG_VER}-setuptools gcc glibc-devel linux-devel.x86_64"
     __PACKAGES="python${PY_PKG_VER}-devel python${PY_PKG_VER}-pip python${PY_PKG_VER}-setuptools gcc glibc-devel linux-devel.x86_64 cython${PY_PKG_VER}"
 
-    ## DGM tornado appears to be missing in 3006.x pkg requirements
-    ## DGM __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
 
     ## DGM Photon 5 container is missing systemd on default installation
-    if [ "${DISTRO_MAJOR_VERSION}" -ge 5  ]; then
-        # Photon 5 container is missing systemd on default installation
-        __PACKAGES="${__PACKAGES} systemd"
+    if [ "${DISTRO_MAJOR_VERSION}" -lt 5  ]; then
+        ## DGM tornado appears to be missing in 3006.x pkg requirements
+        __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
     fi
 
     # shellcheck disable=SC2086

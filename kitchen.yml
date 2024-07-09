@@ -148,7 +148,7 @@ platforms:
     driver:
       image: photon:5.0
       provision_command:
-        - tdnf -y install rpm procps-ng coreutils gawk
+        - tdnf -y install rpm procps-ng coreutils gawk systemd
         - echo "PubkeyAcceptedKeyTypes +ssh-rsa" | tee -a /etc/ssh/sshd_config
         - sed -ie 's/PermitRootLogin no/PermitRootLogin yes/' /etc/ssh/sshd_config
         - systemctl enable sshd.service

@@ -1098,6 +1098,7 @@ __gather_linux_system_info() {
     DISTRO_VERSION=""
 
     # Let's test if the lsb_release binary is available
+    # shellcheck disable=SC2327,SC2328
     rv=$(lsb_release >/dev/null 2>&1)
 
     # shellcheck disable=SC2181

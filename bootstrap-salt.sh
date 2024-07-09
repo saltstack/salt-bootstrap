@@ -4,7 +4,8 @@
 # Please submit pull requests against the salt-bootstrap repo:
 # https://github.com/saltstack/salt-bootstrap
 # shellcheck disable=SC2317
-
+# shellcheck disable=SC2086
+#
 #======================================================================================================================
 # vim: softtabstop=4 shiftwidth=4 expandtab fenc=utf-8 spell spelllang=en cc=120
 #======================================================================================================================
@@ -24,7 +25,7 @@
 #======================================================================================================================
 set -o nounset                              # Treat unset variables as an error
 
-__ScriptVersion="2024.07.01"
+__ScriptVersion="2024.07.09"
 __ScriptName="bootstrap-salt.sh"
 
 __ScriptFullName="$0"

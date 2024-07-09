@@ -16,15 +16,15 @@ jobs:
     outputs:
       run-tests: ${{ steps.set-output.outputs.run-tests }}
     steps:
-      ## DGM - uses: actions/checkout@v4
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
+      ## DGM - uses: actions/checkout@v3
         with:
           fetch-depth: 0
 
       - name: Get specific changed files
         id: changed-files
-        ## DGM uses: tj-actions/changed-files@v42
-        uses: tj-actions/changed-files@v25
+        uses: tj-actions/changed-files@v42
+        ## DGM uses: tj-actions/changed-files@v25
         with:
           separator: ","
           files: |
@@ -49,8 +49,8 @@ jobs:
 
       - name: Upload Exit Status
         if: always()
-        ## DGM uses: actions/upload-artifact@v4
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
+        ## DGM uses: actions/upload-artifact@v3
         with:
           name: exitstatus
           path: exitstatus
@@ -62,8 +62,8 @@ jobs:
 
     if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
     steps:
-      ## DGM - uses: actions/checkout@v4
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
+      ## DGM - uses: actions/checkout@v3
 
       ## DGM - name: Set up Python 3.9
       ## DGM   uses: actions/setup-python@v4
@@ -93,8 +93,8 @@ jobs:
 
       - name: Upload Exit Status
         if: always()
-        ## DGM uses: actions/upload-artifact@v4
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
+        ## DGM uses: actions/upload-artifact@v3
         with:
           name: exitstatus
           path: exitstatus
@@ -106,8 +106,8 @@ jobs:
     container: koalaman/shellcheck-alpine:v0.7.0
     if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
     steps:
-      ## DGM - uses: actions/checkout@v4
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
+      ## DGM - uses: actions/checkout@v3
       - name: ShellCheck
         run: |
           shellcheck -s sh -f tty bootstrap-salt.sh
@@ -120,8 +120,8 @@ jobs:
 
       - name: Upload Exit Status
         if: always()
-        ## DGM uses: actions/upload-artifact@v4
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
+        ## DGM uses: actions/upload-artifact@v3
         with:
           name: exitstatus
           path: exitstatus

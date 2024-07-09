@@ -167,6 +167,8 @@ BLACKLIST_GIT_3007 = [
 
 BLACKLIST_GIT_MASTER = [
     "amazon-2",
+    "photon-4",
+    "photon-5",
 ]
 
 SALT_VERSIONS = [

@@ -3203,7 +3203,7 @@ install_ubuntu_git_deps() {
 
     # Let's trigger config_salt()
     if [ "$_TEMP_CONFIG_DIR" = "null" ]; then
-        _TEMP_CONFIG_DIR="${_SALT_GIT_CHECKOUT_DIR}/conf/"
+        _TEMP_CONFIG_DIR="${_SALT_GIT_CHECKOUT_DIR}/conf"
         CONFIG_SALT_FUNC="config_salt"
     fi
 
@@ -3746,7 +3746,7 @@ install_debian_onedir_deps() {
 ## DGM
 ## DGM     # Let's trigger config_salt()
 ## DGM     if [ "$_TEMP_CONFIG_DIR" = "null" ]; then
-## DGM         _TEMP_CONFIG_DIR="${_SALT_GIT_CHECKOUT_DIR}/conf/"
+## DGM         _TEMP_CONFIG_DIR="${_SALT_GIT_CHECKOUT_DIR}/conf/" <----- trailing slash ????
 ## DGM         CONFIG_SALT_FUNC="config_salt"
 ## DGM     fi
 ## DGM }
@@ -3791,7 +3791,7 @@ install_debian_git_deps() {
 
     # Let's trigger config_salt()
     if [ "$_TEMP_CONFIG_DIR" = "null" ]; then
-        _TEMP_CONFIG_DIR="${_SALT_GIT_CHECKOUT_DIR}/conf/"
+        _TEMP_CONFIG_DIR="${_SALT_GIT_CHECKOUT_DIR}/conf"
         CONFIG_SALT_FUNC="config_salt"
     fi
 
@@ -4250,7 +4250,7 @@ install_fedora_git_deps() {
 
     # Let's trigger config_salt()
     if [ "$_TEMP_CONFIG_DIR" = "null" ]; then
-        _TEMP_CONFIG_DIR="${_SALT_GIT_CHECKOUT_DIR}/conf/"
+        _TEMP_CONFIG_DIR="${_SALT_GIT_CHECKOUT_DIR}/conf"
         CONFIG_SALT_FUNC="config_salt"
     fi
 
@@ -4706,7 +4706,7 @@ install_centos_git_deps() {
 
     # Let's trigger config_salt()
     if [ "$_TEMP_CONFIG_DIR" = "null" ]; then
-        _TEMP_CONFIG_DIR="${_SALT_GIT_CHECKOUT_DIR}/conf/"
+        _TEMP_CONFIG_DIR="${_SALT_GIT_CHECKOUT_DIR}/conf"
         CONFIG_SALT_FUNC="config_salt"
     fi
 
@@ -5873,7 +5873,7 @@ install_amazon_linux_ami_2_git_deps() {
 
     # Let's trigger config_salt()
     if [ "$_TEMP_CONFIG_DIR" = "null" ]; then
-        _TEMP_CONFIG_DIR="${_SALT_GIT_CHECKOUT_DIR}/conf/"
+        _TEMP_CONFIG_DIR="${_SALT_GIT_CHECKOUT_DIR}/conf"
         CONFIG_SALT_FUNC="config_salt"
     fi
 
@@ -6084,7 +6084,7 @@ install_amazon_linux_ami_2023_git_deps() {
 
     # Let's trigger config_salt()
     if [ "$_TEMP_CONFIG_DIR" = "null" ]; then
-        _TEMP_CONFIG_DIR="${_SALT_GIT_CHECKOUT_DIR}/conf/"
+        _TEMP_CONFIG_DIR="${_SALT_GIT_CHECKOUT_DIR}/conf"
         CONFIG_SALT_FUNC="config_salt"
     fi
 
@@ -6276,7 +6276,7 @@ install_arch_linux_git_deps() {
 
     # Let's trigger config_salt()
     if [ "$_TEMP_CONFIG_DIR" = "null" ]; then
-        _TEMP_CONFIG_DIR="${_SALT_GIT_CHECKOUT_DIR}/conf/"
+        _TEMP_CONFIG_DIR="${_SALT_GIT_CHECKOUT_DIR}/conf"
         CONFIG_SALT_FUNC="config_salt"
     fi
 
@@ -6586,10 +6586,6 @@ install_photon_git_deps() {
         __PACKAGES="${__PACKAGES} git"
     fi
 
-    if ! __check_command_exists gcc; then
-        __PACKAGES="${__PACKAGES} gcc"
-    fi
-
     if [ -n "${__PACKAGES}" ]; then
         # shellcheck disable=SC2086
         __tdnf_install_noinput ${__PACKAGES} || return 1
@@ -6616,13 +6612,13 @@ install_photon_git_deps() {
     if [ "${DISTRO_MAJOR_VERSION}" -gt 3 ]; then
       # Need newer version of setuptools on Photon
       _setuptools_dep="setuptools>=${_MINIMUM_SETUPTOOLS_VERSION}"
-      echodebug "Running '${_PY_EXE} -m pip --upgrade install ${_setuptools_dep}'"
+      echodebug "Running '${_PY_EXE} -m pip install --upgrade ${_setuptools_dep}'"
       ${_PY_EXE} -m pip install --upgrade "${_setuptools_dep}"
     fi
 
     # Let's trigger config_salt()
     if [ "$_TEMP_CONFIG_DIR" = "null" ]; then
-        _TEMP_CONFIG_DIR="${_SALT_GIT_CHECKOUT_DIR}/conf/"
+        _TEMP_CONFIG_DIR="${_SALT_GIT_CHECKOUT_DIR}/conf"
         CONFIG_SALT_FUNC="config_salt"
     fi
 
@@ -6995,7 +6991,7 @@ install_opensuse_git_deps() {
 
     # Let's trigger config_salt()
     if [ "$_TEMP_CONFIG_DIR" = "null" ]; then
-        _TEMP_CONFIG_DIR="${_SALT_GIT_CHECKOUT_DIR}/conf/"
+        _TEMP_CONFIG_DIR="${_SALT_GIT_CHECKOUT_DIR}/conf"
         CONFIG_SALT_FUNC="config_salt"
     fi
 
@@ -7229,7 +7225,7 @@ install_opensuse_15_git_deps() {
 
     # Let's trigger config_salt()
     if [ "$_TEMP_CONFIG_DIR" = "null" ]; then
-        _TEMP_CONFIG_DIR="${_SALT_GIT_CHECKOUT_DIR}/conf/"
+        _TEMP_CONFIG_DIR="${_SALT_GIT_CHECKOUT_DIR}/conf"
         CONFIG_SALT_FUNC="config_salt"
     fi
 

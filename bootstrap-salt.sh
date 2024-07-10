@@ -2795,6 +2795,13 @@ EOM
     cd "${_SALT_GIT_CHECKOUT_DIR}" || return 1
 
     mkdir /tmp/git/deps
+
+    if [ ${DISTRO_NAME_L} = "ubuntu" ] && [ "$DISTRO_MAJOR_VERSION" -eq 22 ]; then
+        echodebug "DGM Ubuntu 22.04 has problem with base.txt requirements file, not parsing sys_platform == 'win32', trying upgrading pip"
+        echodebug "${_pip_cmd} install ${_USE_BREAK_SYSTEM_PACKAGES} --upgrade  pip"
+        ${_pip_cmd} install ${_USE_BREAK_SYSTEM_PACKAGES} --upgrade  pip || (echo "Failed to upgrade pip" && return 1)
+    fi
+
     echoinfo "Downloading Salt Dependencies from PyPi"
     echodebug "Running '${_pip_cmd} download -d /tmp/git/deps ${_PIP_DOWNLOAD_ARGS} .'"
     ## DGM ${_pip_cmd} download -d /tmp/git/deps "${_PIP_DOWNLOAD_ARGS}" . || (echo "Failed to download salt dependencies" && return 1)

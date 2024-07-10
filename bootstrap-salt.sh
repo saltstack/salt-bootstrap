@@ -26,7 +26,7 @@
 #======================================================================================================================
 set -o nounset                              # Treat unset variables as an error
 
-__ScriptVersion="2024.07.09"
+__ScriptVersion="2024.07.10"
 __ScriptName="bootstrap-salt.sh"
 
 __ScriptFullName="$0"
@@ -2777,12 +2777,13 @@ EOM
     fi
 
     _USE_BREAK_SYSTEM_PACKAGES=""
-    _PIP_MAJOR_VERSION=$(${_pip_cmd} --version | awk '{print $2}' | awk -F '.' '{print $1}')
+    ## DGM _PIP_MAJOR_VERSION=$(${_pip_cmd} --version | awk '{print $2}' | awk -F '.' '{print $1}')
 
     # shellcheck disable=SC2086,SC2090
-    if [  ${_PIP_MAJOR_VERSION} -ge 24 ]; then
+    if { [ ${DISTRO_NAME_L} = "ubuntu" ] && [ "$DISTRO_MAJOR_VERSION" -ge 24 ]; } || \
+        [ ${DISTRO_NAME_L} = "debian" ] && [ "$DISTRO_MAJOR_VERSION" -ge 12 ]; then
         _USE_BREAK_SYSTEM_PACKAGES="--break-system-packages"
-        echodebug "pip command is greater than / equal 24, using ${_USE_BREAK_SYSTEM_PACKAGES}"
+        echodebug "OS is greater than / equal Debian 12 or Ubuntu 24.04, using ${_USE_BREAK_SYSTEM_PACKAGES}"
     fi
 
     ## DGM ${_pip_cmd} install --upgrade "${_POST_NEON_PIP_INSTALL_ARGS}"  wheel "${_setuptools_dep}"
@@ -2797,7 +2798,9 @@ EOM
     echoinfo "Downloading Salt Dependencies from PyPi"
     echodebug "Running '${_pip_cmd} download -d /tmp/git/deps ${_PIP_DOWNLOAD_ARGS} .'"
     ## DGM ${_pip_cmd} download -d /tmp/git/deps "${_PIP_DOWNLOAD_ARGS}" . || (echo "Failed to download salt dependencies" && return 1)
-    ${_pip_cmd} download -d /tmp/git/deps ${_PIP_DOWNLOAD_ARGS} . || (echo "Failed to download salt dependencies" && return 1)
+
+    ## DGM ${_pip_cmd} download -d /tmp/git/deps ${_PIP_DOWNLOAD_ARGS} . || (echo "Failed to download salt dependencies" && return 1)
+    ${_pip_cmd} download -d /tmp/git/deps
 
     echodebug "DGM checking salt deps downloaded"
     ls -alrth /tmp/git/deps/*

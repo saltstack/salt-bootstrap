@@ -46,8 +46,8 @@ platforms:
   - name: amazon-2023
     driver:
       image: amazonlinux:2023
-      platform: fedora
-      ## DGM platform: rhel
+      ## DGM platform: fedora
+      platform: rhel
       provision_command:
         ## DGM - yum -y install procps-ng
         - yum -y install --allowerasing procps-ng curl
@@ -137,8 +137,12 @@ platforms:
         - echo "PubkeyAcceptedAlgorithms +ssh-rsa" | tee -a /etc/ssh/sshd_config
   - name: rockylinux-8
   - name: oraclelinux-8
-  - name: ubuntu-22.04
   - name: ubuntu-24.04
+    driver:
+      run_command: /lib/systemd/systemd
+      provision_command:
+        - echo "PubkeyAcceptedAlgorithms +ssh-rsa" | tee -a /etc/ssh/sshd_config
+  - name: ubuntu-22.04
     driver:
       run_command: /lib/systemd/systemd
       provision_command:

@@ -78,6 +78,8 @@ platforms:
     driver:
       image: debian:bookworm
       run_command: /lib/systemd/systemd
+      provision_command:
+        - echo "PubkeyAcceptedAlgorithms +ssh-rsa" | tee -a /etc/ssh/sshd_config
   - name: fedora-39
     driver:
       provision_command: &fedora_provision_command
@@ -176,6 +178,7 @@ suites:
       - opensuse-15
       - opensuse-tumbleweed
       - debian-11
+      - debian-12
       - arch
       - gentoo
       - gentoo-systemd
@@ -187,6 +190,7 @@ suites:
       - opensuse-15
       - opensuse-tumbleweed
       - debian-11
+      - debian-12
       - arch
       - gentoo
       - gentoo-systemd

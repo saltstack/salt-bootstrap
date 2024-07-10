@@ -115,10 +115,19 @@ platforms:
         - *opensuse_provision_command_02
         - *opensuse_provision_command_03
         - echo "PubkeyAcceptedAlgorithms +ssh-rsa" | tee -a /etc/ssh/sshd_config
-  - name: oraclelinux-9
   - name: rockylinux-9
     driver:
       platform: centosstream
+      run_command: /usr/lib/systemd/systemd
+      provision_command:
+        - dnf -y install crypto-policies-scripts procps-ng
+        - update-crypto-policies --set DEFAULT:SHA1
+        ### DGM - yum -y install crypto-policies-scripts procps-ng
+        ### DGM - update-crypto-policies --set DEFAULT:SHA256
+        - echo "PubkeyAcceptedAlgorithms +ssh-rsa" | tee -a /etc/ssh/sshd_config
+  - name: oraclelinux-9
+    driver:
+      ## DGM platform: centosstream
       run_command: /usr/lib/systemd/systemd
       provision_command:
         - dnf -y install crypto-policies-scripts procps-ng

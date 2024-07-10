@@ -41,8 +41,9 @@ jobs:
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
+          ## DGM ruby-version: 2.6.10
           ## DGM ruby-version: 3.2.3
-          ruby-version: 2.6.10
+          ruby-version: 3.3.4
           bundler-cache: true
 
       ## DGM - name: Set up Python 3.9

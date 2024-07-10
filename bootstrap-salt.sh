@@ -2800,7 +2800,7 @@ EOM
     ## DGM ${_pip_cmd} download -d /tmp/git/deps "${_PIP_DOWNLOAD_ARGS}" . || (echo "Failed to download salt dependencies" && return 1)
 
     ## DGM ${_pip_cmd} download -d /tmp/git/deps ${_PIP_DOWNLOAD_ARGS} . || (echo "Failed to download salt dependencies" && return 1)
-    ${_pip_cmd} download -d /tmp/git/deps
+    ${_pip_cmd} download -vvv -d /tmp/git/deps ${_PIP_DOWNLOAD_ARGS} . || (echo "Failed to download salt dependencies" && return 1)
 
     echodebug "DGM checking salt deps downloaded"
     ls -alrth /tmp/git/deps/*

@@ -47,10 +47,11 @@ platforms:
     driver:
       image: amazonlinux:2023
       ## DGM platform: fedora
-      platform: rhel
+      ## DGM platform: rhel
       provision_command:
         ## DGM - yum -y install procps-ng
         - yum -y install --allowerasing procps-ng curl
+        - echo "PubkeyAcceptedAlgorithms +ssh-rsa" | tee -a /etc/ssh/sshd_config
   - name: arch
     driver:
       image: archlinux/archlinux

@@ -49,8 +49,8 @@ jobs:
 
       - name: Upload Exit Status
         if: always()
-        uses: actions/upload-artifact@v4
-        ## DGM uses: actions/upload-artifact@v3
+        ## DGM uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v3
         with:
           name: exitstatus
           path: exitstatus
@@ -88,8 +88,8 @@ jobs:
 
       - name: Upload Exit Status
         if: always()
-        uses: actions/upload-artifact@v4
-        ## DGM uses: actions/upload-artifact@v3
+        ## DGM uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v3
         with:
           name: exitstatus
           path: exitstatus
@@ -116,8 +116,8 @@ jobs:
 
       - name: Upload Exit Status
         if: always()
-        uses: actions/upload-artifact@v4
-        ## DGM uses: actions/upload-artifact@v3
+        ## DGM uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v3
         with:
           name: exitstatus
           path: exitstatus

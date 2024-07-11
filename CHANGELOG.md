@@ -1,8 +1,6 @@
-# v2024.07.XX
+# v2024.07.11
 
 ## What's Changed
-
-## DGM - Removed support for Ruby, Kitchen and kitchen-salt and it's associated utilities
 
 - Migrated to using GitHub Actions
 - Removed support of End-Of-Life OS's, for example: Debian 7, 8, 9 & 10, RHEL 7
@@ -14,8 +12,9 @@
 - Removed '-y' option which was experimental and only on RHEL 7 or less which are now EOL
 - Updated to current stable version of Ruby v3.3.4
 - Removed git-master support for Photon 4 & 5 due to gcc errors building salt.
+- Add support for Arm64 for MacOS
 
-**Full Changelog**: https://github.com/saltstack/salt-bootstrap/compare/v2024.04.03...v2024.06.XX
+**Full Changelog**: https://github.com/saltstack/salt-bootstrap/compare/v2024.04.03...v2024.07.11
 
 # v2024.04.03
 

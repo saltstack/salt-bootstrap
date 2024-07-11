@@ -1,4 +1,4 @@
-#!/bin/sh -x
+#!/bin/sh
 
 # WARNING: Changes to this file in the salt repo will be overwritten!
 # Please submit pull requests against the salt-bootstrap repo:
@@ -1913,14 +1913,10 @@ __function_defined() {
 #                 process is finished so the script doesn't exit on a locked proc.
 #----------------------------------------------------------------------------------------------------------------------
 __wait_for_apt(){
-    ## DGM Debugging
-    set -v
-    set -x
-
     # Timeout set at 15 minutes
     WAIT_TIMEOUT=900
 
-    ## DGM see if sync'ing the clocks helps
+    ## see if sync'ing the clocks helps
     if [ -f /usr/sbin/hwclock ]; then
         /usr/sbin/hwclock -s
     fi
@@ -1928,8 +1924,6 @@ __wait_for_apt(){
     # Run our passed in apt command
     "${@}" 2>"$APT_ERR"
     APT_RETURN=$?
-
-    echoerror"DGM __wait_for_apt APT_ERR: $APT_ERR"
 
     # Make sure we're not waiting on a lock
     while [ "$APT_RETURN" -ne 0 ] && grep -q '^E: Could not get lock' "$APT_ERR"; do
@@ -1995,9 +1989,6 @@ __temp_gpg_pub() {
 #    PARAMETERS:  url
 #----------------------------------------------------------------------------------------------------------------------
 __apt_key_fetch() {
-    ## DGM Debugging
-    set -v
-    set -x
 
     url=$1
 
@@ -2040,10 +2031,6 @@ __rpm_import_gpg() {
 #   DESCRIPTION:  (DRY) yum install with noinput options
 #----------------------------------------------------------------------------------------------------------------------
 __yum_install_noinput() {
-    ## DGM Debugging
-    set -v
-    set -x
-
     if [ "$DISTRO_NAME_L" = "oracle_linux" ]; then
         # We need to install one package at a time because --enablerepo=X disables ALL OTHER REPOS!!!!
         for package in "${@}"; do
@@ -2059,10 +2046,6 @@ __yum_install_noinput() {
 #   DESCRIPTION:  (DRY) dnf install with noinput options
 #----------------------------------------------------------------------------------------------------------------------
 __dnf_install_noinput() {
-    ## DGM Debugging
-    set -v
-    set -x
-
     dnf -y install "${@}" || return $?
 }   # ----------  end of function __dnf_install_noinput  ----------
 
@@ -2071,10 +2054,6 @@ __dnf_install_noinput() {
 #   DESCRIPTION:  (DRY) tdnf install with noinput options
 #----------------------------------------------------------------------------------------------------------------------
 __tdnf_install_noinput() {
-    ## DGM Debugging
-    set -v
-    set -x
-
     tdnf -y install "${@}" || return $?
 }   # ----------  end of function __tdnf_install_noinput  ----------
 
@@ -2084,10 +2063,6 @@ __tdnf_install_noinput() {
 #                 specific revision.
 #----------------------------------------------------------------------------------------------------------------------
 __git_clone_and_checkout() {
-    ## DGM Debugging
-    set -v
-    set -x
-
     echodebug "Installed git version: $(git --version | awk '{ print $3 }')"
     # Turn off SSL verification if -I flag was set for insecure downloads
     if [ "$_INSECURE_DL" -eq $BS_TRUE ]; then
@@ -2664,10 +2639,6 @@ __install_pip_deps() {
 #    PARAMETERS:  py_exe
 #----------------------------------------------------------------------------------------------------------------------
 __install_salt_from_repo_post_neon() {
-    ## DGM Debugging
-    set -v
-    set -x
-
     _py_exe="$1"
 
     if [ "${_py_exe}" = "" ]; then
@@ -2916,10 +2887,6 @@ __enable_universe_repository() {
 
 __install_saltstack_ubuntu_repository() {
     # Workaround for latest non-LTS Ubuntu
-    ## DGM Debugging
-    set -v
-    set -x
-
     echodebug "__install_saltstack_ubuntu_repository() entry"
 
     if { [ "$DISTRO_MAJOR_VERSION" -eq 20 ] && [ "$DISTRO_MINOR_VERSION" -eq 10 ]; } || \
@@ -3070,10 +3037,6 @@ install_ubuntu_deps() {
 }
 
 install_ubuntu_stable_deps() {
-    ## DGM Debugging
-    set -v
-    set -x
-
     echodebug "install_ubuntu_stable_deps() entry"
 
     if [ "$_START_DAEMONS" -eq $BS_FALSE ]; then
@@ -3108,10 +3071,6 @@ install_ubuntu_stable_deps() {
 }
 
 install_ubuntu_git_deps() {
-    ## DGM Debugging
-    set -v
-    set -x
-
     echodebug "install_ubuntu_git_deps() entry"
 
     __wait_for_apt apt-get update || return 1
@@ -3154,9 +3113,6 @@ install_ubuntu_git_deps() {
 }
 
 install_ubuntu_onedir_deps() {
-    ## DGM Debugging
-    set -v
-    set -x
     if [ "$_START_DAEMONS" -eq $BS_FALSE ]; then
         echowarn "Not starting daemons on Debian based distributions is not working mostly because starting them is the default behaviour."
     fi
@@ -3211,10 +3167,6 @@ install_ubuntu_stable() {
 }
 
 install_ubuntu_git() {
-    ## DGM Debugging
-    set -v
-    set -x
-
     # Activate virtualenv before install
     if [ "${_VIRTUALENV_DIR}" != "null" ]; then
         __activate_virtualenv || return 1
@@ -3434,9 +3386,6 @@ install_ubuntu_check_services() {
 #   Debian Install Functions
 #
 __install_saltstack_debian_repository() {
-    ## DGM Debugging
-    set -v
-    set -x
     echodebug "__install_saltstack_debian_repository() entry"
 
     DEBIAN_RELEASE="$DISTRO_MAJOR_VERSION"
@@ -3472,9 +3421,6 @@ __install_saltstack_debian_repository() {
 }
 
 __install_saltstack_debian_onedir_repository() {
-    ## DGM Debugging
-    set -v
-    set -x
     echodebug "__install_saltstack_debian_onedir_repository() entry"
 
     DEBIAN_RELEASE="$DISTRO_MAJOR_VERSION"
@@ -3514,10 +3460,6 @@ __install_saltstack_debian_onedir_repository() {
 }
 
 install_debian_onedir_deps() {
-    ## DGM Debugging
-    set -v
-    set -x
-
     echodebug "install_debian_onedir_git_deps() entry"
 
     if [ "$_START_DAEMONS" -eq $BS_FALSE ]; then
@@ -3572,10 +3514,6 @@ install_debian_onedir_deps() {
 }
 
 install_debian_git_deps() {
-    ## DGM Debugging
-    set -v
-    set -x
-
     echodebug "install_debian_git_deps() entry"
 
     __wait_for_apt apt-get update || return 1
@@ -3645,10 +3583,6 @@ install_debian_12_git_deps() {
 }
 
 install_debian_git() {
-    ## DGM Debugging
-    set -v
-    set -x
-
     if [ -n "$_PY_EXE" ]; then
         _PYEXE=${_PY_EXE}
     else
@@ -3810,10 +3744,6 @@ install_debian_check_services() {
 #
 
 __install_saltstack_fedora_onedir_repository() {
-    ## DGM Debugging
-    set -v
-    set -x
-
     if [ "$ITYPE" = "stable" ]; then
         REPO_REV="$ONEDIR_REV"
     else
@@ -3904,7 +3834,6 @@ install_fedora_git_deps() {
 
     __PACKAGES="python${PY_PKG_VER}-devel python${PY_PKG_VER}-pip python${PY_PKG_VER}-setuptools gcc gcc-c++"
     # shellcheck disable=SC2086
-    ## DGM __dnf_install_noinput "${__PACKAGES}" || return 1
     __dnf_install_noinput ${__PACKAGES} || return 1
 
     # Let's trigger config_salt()
@@ -3921,7 +3850,6 @@ install_fedora_git() {
         _PYEXE=${_PY_EXE}
         echoinfo "Using the following python version: ${_PY_EXE} to install salt"
     else
-        ## DGM _PYEXE='python2'
         echoerror "Python 2 is no longer supported, only Py3 packages"
         return 1
     fi
@@ -4001,10 +3929,6 @@ install_fedora_check_services() {
 }
 
 install_fedora_onedir_deps() {
-    ## DGM Debugging
-    set -v
-    set -x
-
     if [ "$_UPGRADE_SYS" -eq $BS_TRUE ]; then
         yum -y update || return 1
     fi
@@ -4026,29 +3950,14 @@ install_fedora_onedir_deps() {
         __install_saltstack_fedora_onedir_repository || return 1
     fi
 
-    ## DGM can find no dnf-utils in Fedora packaging archives and yum-utils EL7 and F30, none after
-    ## DGM but find it on 8 and 9 Centos Stream  also EL9 doesn't have propcs
-    ## DGM if [ "$DISTRO_MAJOR_VERSION" -ge 8 ]; then
-    ## DGM     __PACKAGES="dnf-utils chkconfig"
-    ## DGM else
-    ## DGM     __PACKAGES="yum-utils chkconfig"
-    ## DGM fi
-
-    ## DGM __PACKAGES="${__PACKAGES} procps"
-
     __PACKAGES="dnf-utils chkconfig procps-ng"
 
-    ## DGM tornado appears to be missing in 3006.x pkg requirements
-    ## DGM __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-tornado"
-
     # shellcheck disable=SC2086
-    ## DGM __yum_install_noinput "${__PACKAGES}" || return 1
     __yum_install_noinput ${__PACKAGES} || return 1
 
     if [ "${_EXTRA_PACKAGES}" != "" ]; then
         echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
         # shellcheck disable=SC2086
-        ## DGM __yum_install_noinput "${_EXTRA_PACKAGES}" || return 1
         __yum_install_noinput ${_EXTRA_PACKAGES} || return 1
     fi
 
@@ -4058,10 +3967,6 @@ install_fedora_onedir_deps() {
 
 
 install_fedora_onedir() {
-    ## DGM Debugging
-    set -v
-    set -x
-
     STABLE_REV=$ONEDIR_REV
     #install_fedora_stable || return 1
 
@@ -4087,10 +3992,6 @@ install_fedora_onedir() {
 }
 
 install_fedora_onedir_post() {
-    ## DGM Debugging
-    set -v
-    set -x
-
     STABLE_REV=$ONEDIR_REV
 
     for fname in api master minion syndic; do
@@ -4120,10 +4021,6 @@ install_fedora_onedir_post() {
 #   CentOS Install Functions
 #
 __install_saltstack_rhel_onedir_repository() {
-    ## DGM Debugging
-    set -v
-    set -x
-
     if [ "$ITYPE" = "stable" ]; then
         repo_rev="$ONEDIR_REV"
     else
@@ -4181,10 +4078,6 @@ _eof
 }
 
 install_centos_stable_deps() {
-    ## DGM Debugging
-    set -v
-    set -x
-
     if [ "$_UPGRADE_SYS" -eq $BS_TRUE ]; then
         yum -y update || return 1
     fi
@@ -4282,10 +4175,6 @@ install_centos_stable_post() {
 }
 
 install_centos_git_deps() {
-    ## DGM Debugging
-    set -v
-    set -x
-
     # First try stable deps then fall back to onedir deps if that one fails
     # if we're installing on a Red Hat based host that doesn't have the classic
     # package repos available.
@@ -4331,10 +4220,6 @@ install_centos_git_deps() {
 }
 
 install_centos_git() {
-    ## DGM Debugging
-    set -v
-    set -x
-
     if [ "${_PY_EXE}" != "" ]; then
         _PYEXE=${_PY_EXE}
         echoinfo "Using the following python version: ${_PY_EXE} to install salt"
@@ -4350,10 +4235,6 @@ install_centos_git() {
 }
 
 install_centos_git_post() {
-    ## DGM Debugging
-    set -v
-    set -x
-
     SYSTEMD_RELOAD=$BS_FALSE
 
     for fname in api master minion syndic; do
@@ -4394,10 +4275,6 @@ install_centos_git_post() {
 }
 
 install_centos_onedir_deps() {
-    ## DGM Debugging
-    set -v
-    set -x
-
     if [ "$_UPGRADE_SYS" -eq "$BS_TRUE" ]; then
         yum -y update || return 1
     fi
@@ -5454,10 +5331,6 @@ install_amazon_linux_ami_2_git_deps() {
 }
 
 install_amazon_linux_ami_2_deps() {
-    ## DGM Debugging
-    set -v
-    set -x
-
     if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -ne 3 ]; then
         echoerror "Python version is no longer supported, only Python 3"
         return 1
@@ -6017,9 +5890,6 @@ install_arch_linux_onedir_post() {
 #
 
 __install_saltstack_photon_onedir_repository() {
-    ## DGM Debugging
-    set -v
-    set -x
     echodebug "__install_saltstack_photon_onedir_repository() entry"
 
     if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -ne 3 ]; then
@@ -6059,9 +5929,6 @@ __install_saltstack_photon_onedir_repository() {
 }
 
 install_photon_deps() {
-    ## DGM Debugging
-    set -v
-    set -x
     echodebug "install_photon_deps() entry"
 
     if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -ne 3 ]; then
@@ -6092,9 +5959,6 @@ install_photon_deps() {
 }
 
 install_photon_stable_post() {
-    ## DGM Debugging
-    set -v
-    set -x
     echodebug "install_photon_stable_post() entry"
 
     for fname in api master minion syndic; do
@@ -6113,9 +5977,6 @@ install_photon_stable_post() {
 }
 
 install_photon_git_deps() {
-    ## DGM Debugging
-    set -v
-    set -x
     echodebug "install_photon_git_deps() entry"
 
     if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -ne 3 ]; then
@@ -6172,9 +6033,6 @@ install_photon_git_deps() {
 }
 
 install_photon_git() {
-    ## DGM Debugging
-    set -v
-    set -x
     echodebug "install_photon_git() entry"
 
     if [ "${_PY_EXE}" != "" ]; then
@@ -6194,9 +6052,6 @@ install_photon_git() {
 }
 
 install_photon_git_post() {
-    ## DGM Debugging
-    set -v
-    set -x
     echodebug "install_photon_git_post() entry"
 
     for fname in api master minion syndic; do
@@ -6231,9 +6086,6 @@ install_photon_git_post() {
 
 install_photon_restart_daemons() {
     [ "$_START_DAEMONS" -eq $BS_FALSE ] && return
-    ## DGM Debugging
-    set -v
-    set -x
     echodebug "install_photon_restart_daemons() entry"
 
 
@@ -6257,9 +6109,6 @@ install_photon_restart_daemons() {
 }
 
 install_photon_check_services() {
-    ## DGM Debugging
-    set -v
-    set -x
     echodebug "install_photon_check_services() entry"
 
     for fname in api master minion syndic; do
@@ -6278,9 +6127,6 @@ install_photon_check_services() {
 }
 
 install_photon_onedir_deps() {
-    ## DGM Debugging
-    set -v
-    set -x
     echodebug "install_photon_onedir_deps() entry"
 
 
@@ -6322,9 +6168,6 @@ install_photon_onedir_deps() {
 
 
 install_photon_onedir() {
-    ## DGM Debugging
-    set -v
-    set -x
     echodebug "install_photon_onedir() entry"
 
     STABLE_REV=$ONEDIR_REV
@@ -6351,10 +6194,6 @@ install_photon_onedir() {
 }
 
 install_photon_onedir_post() {
-    ## DGM Debugging
-    set -v
-    set -x
-
     STABLE_REV=$ONEDIR_REV
     install_photon_stable_post || return 1
 
@@ -6977,10 +6816,6 @@ install_gentoo_git_deps() {
 }
 
 install_gentoo_stable() {
-    ## DGM Debugging
-    set -v
-    set -x
-
     GENTOO_SALT_PACKAGE="app-admin/salt"
 
     STABLE_REV_WITHOUT_PREFIX=$(echo "${STABLE_REV}" | sed 's#archive/##')
@@ -7005,10 +6840,6 @@ install_gentoo_git() {
 }
 
 install_gentoo_onedir() {
-    ## DGM Debugging
-    set -v
-    set -x
-
   STABLE_REV=${ONEDIR_REV}
   install_gentoo_stable || return 1
 }
@@ -7248,20 +7079,6 @@ daemons_running_voidlinux() {
 #   OS X / Darwin Install Functions
 #
 
-## DGM __macosx_get_packagesite() {
-## DGM
-## DGM     if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -ne 3 ]; then
-## DGM         echoerror "Python 2 is no longer supported, only Python 3"
-## DGM         return 1
-## DGM     fi
-## DGM
-## DGM     # TBD DGM need to update for arch and 3006+ repo locations
-## DGM
-## DGM     DARWIN_ARCH="x86_64"
-## DGM     PKG="salt-${STABLE_REV}-${__PY_VERSION_REPO}-${DARWIN_ARCH}.pkg"
-## DGM     SALTPKGCONFURL="https://${_REPO_URL}/osx/${PKG}"
-## DGM }
-
 __parse_repo_json_python() {
 
   # Using latest, grab the right
@@ -7279,15 +7096,12 @@ echo "${_JSON_VERSION}"
 }
 
 __macosx_get_packagesite_onedir() {
-    # TBD DGM need to update for arch and 3006+ repo locations
-
     if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -ne 3 ]; then
         echoerror "Python version is no longer supported, only Python 3"
         return 1
     fi
 
-    ## DGM TBD need to allow for arm64 arch too
-    DARWIN_ARCH="x86_64"
+    DARWIN_ARCH=${CPU_ARCH_L}
 
     if [ "$(echo "$_ONEDIR_REV" | grep -E '^(latest)$')" != "" ]; then
       _PKG_VERSION=$(__parse_repo_json_python)

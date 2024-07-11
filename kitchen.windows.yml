@@ -40,6 +40,3 @@ suites:
 
 verifier:
   command: pytest --cache-clear -v -s -ra --log-cli-level=debug -k "not test_ping" tests/integration/
-
-## DGM transport:
-## DGM   name: docker

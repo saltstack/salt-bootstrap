@@ -6,12 +6,11 @@ import pathlib
 
 os.chdir(os.path.abspath(os.path.dirname(__file__)))
 
-## DGM "centos-stream8",
+##    "amazon-2023",
 LINUX_DISTROS = [
     "almalinux-8",
     "almalinux-9",
     "amazon-2",
-    "amazon-2023",
     "arch",
     "centos-stream9",
     "debian-11",
@@ -43,12 +42,11 @@ OSX = [
 ]
 
 
-## DGM "centos-stream8",
+##    "amazon-2023",
 STABLE_DISTROS = [
     "almalinux-8",
     "almalinux-9",
     "amazon-2",
-    "amazon-2023",
     "arch",
     "centos-stream9",
     "debian-11",
@@ -68,12 +66,11 @@ STABLE_DISTROS = [
     "ubuntu-2404",
 ]
 
-## DGM "centos-stream8",
+##    "amazon-2023",
 ONEDIR_DISTROS = [
     "almalinux-8",
     "almalinux-9",
     "amazon-2",
-    "amazon-2023",
     "centos-stream9",
     "debian-11",
     "debian-12",
@@ -93,7 +90,6 @@ ONEDIR_DISTROS = [
 ONEDIR_RC_DISTROS = [
     "almalinux-9",
     "amazon-2",
-    "amazon-2023",
     "centos-stream9",
     "debian-12",
     "oraclelinux-9",
@@ -125,10 +121,10 @@ BLACKLIST_3007 = [
     "photon-5",
 ]
 
+##    "amazon-2023",
 BLACKLIST_GIT_3006 = [
     "almalinux-9",
     "amazon-2",
-    "amazon-2023",
     "arch",
     "centos-stream9",
     "debian-11",
@@ -147,10 +143,10 @@ BLACKLIST_GIT_3006 = [
     "ubuntu-2404",
 ]
 
+##    "amazon-2023",
 BLACKLIST_GIT_3007 = [
     "almalinux-9",
     "amazon-2",
-    "amazon-2023",
     "arch",
     "centos-stream9",
     "debian-11",
@@ -230,7 +226,6 @@ GIT_VERSION_BLACKLIST = [
 #           SetuptoolsDeprecationWarning: setup.py install is deprecated.
 #           Use build and pip and other standards-based tools.
 #
-## DGM "centos-stream8",
 GIT_DISTRO_BLACKLIST = [
     "almalinux-8",
     "fedora-39",
@@ -244,12 +239,11 @@ LATEST_PKG_BLACKLIST = [
     "gentoo-systemd",
 ]
 
-## DGM    "centos-stream8": "CentOS Stream 8",
+##    "amazon-2023": "Amazon 2023",
 DISTRO_DISPLAY_NAMES = {
     "almalinux-8": "AlmaLinux 8",
     "almalinux-9": "AlmaLinux 9",
     "amazon-2": "Amazon 2",
-    "amazon-2023": "Amazon 2023",
     "arch": "Arch",
     "centos-stream9": "CentOS Stream 9",
     "debian-11": "Debian 11",
@@ -275,8 +269,7 @@ DISTRO_DISPLAY_NAMES = {
     "windows-2022": "Windows 2022",
 }
 
-## DGM TIMEOUT_DEFAULT = 20
-TIMEOUT_DEFAULT = 40
+TIMEOUT_DEFAULT = 20
 TIMEOUT_OVERRIDES = {
     "gentoo": 90,
     "gentoo-systemd": 90,

@@ -134,7 +134,7 @@ jobs:
     with:
       distro-slug: macos-12
       display-name: macOS 12
-      timeout: 40
+      timeout: 20
       runs-on: macos-12
       instances: '["stable-3006", "stable-3006-8", "stable-3007", "stable-3007-1", "latest"]'
 
@@ -149,7 +149,7 @@ jobs:
     with:
       distro-slug: macos-13
       display-name: macOS 13
-      timeout: 40
+      timeout: 20
       runs-on: macos-13
       instances: '["stable-3006", "stable-3006-8", "stable-3007", "stable-3007-1", "latest"]'
 
@@ -165,7 +165,7 @@ jobs:
     with:
       distro-slug: windows-2019
       display-name: Windows 2019
-      timeout: 40
+      timeout: 20
       runs-on: windows-2019
       instances: '["stable-3006", "stable-3006-8", "stable-3007", "stable-3007-1", "latest"]'
 
@@ -180,7 +180,7 @@ jobs:
     with:
       distro-slug: windows-2022
       display-name: Windows 2022
-      timeout: 40
+      timeout: 20
       runs-on: windows-2022
       instances: '["stable-3006", "stable-3006-8", "stable-3007", "stable-3007-1", "latest"]'
 
@@ -196,7 +196,7 @@ jobs:
     with:
       distro-slug: almalinux-8
       display-name: AlmaLinux 8
-      timeout: 40
+      timeout: 20
       instances: '["stable-3006", "onedir-3006", "stable-3006-8", "stable-3007", "onedir-3007", "stable-3007-1", "latest", "default"]'
 
 
@@ -210,7 +210,7 @@ jobs:
     with:
       distro-slug: almalinux-9
       display-name: AlmaLinux 9
-      timeout: 40
+      timeout: 20
       instances: '["stable-3006", "onedir-3006", "stable-3006-8", "stable-3007", "onedir-3007", "stable-3007-1", "git-master", "latest", "default"]'
 
 
@@ -224,22 +224,8 @@ jobs:
     with:
       distro-slug: amazon-2
       display-name: Amazon 2
-      timeout: 40
+      timeout: 20
       instances: '["stable-3006", "onedir-3006", "stable-3006-8", "stable-3007", "onedir-3007", "stable-3007-1", "latest", "default"]'
-
-
-  amazon-2023:
-    name: Amazon 2023
-    if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
-    uses: ./.github/workflows/test-linux.yml
-    needs:
-      - lint
-      - generate-actions-workflow
-    with:
-      distro-slug: amazon-2023
-      display-name: Amazon 2023
-      timeout: 40
-      instances: '["stable-3006", "onedir-3006", "stable-3006-8", "stable-3007", "onedir-3007", "stable-3007-1", "git-master", "latest", "default"]'
 
 
   arch:
@@ -252,7 +238,7 @@ jobs:
     with:
       distro-slug: arch
       display-name: Arch
-      timeout: 40
+      timeout: 20
       instances: '["git-master", "latest", "default"]'
 
 
@@ -266,7 +252,7 @@ jobs:
     with:
       distro-slug: centos-stream9
       display-name: CentOS Stream 9
-      timeout: 40
+      timeout: 20
       instances: '["stable-3006", "onedir-3006", "stable-3006-8", "stable-3007", "onedir-3007", "stable-3007-1", "git-master", "latest", "default"]'
 
 
@@ -280,7 +266,7 @@ jobs:
     with:
       distro-slug: debian-11
       display-name: Debian 11
-      timeout: 40
+      timeout: 20
       instances: '["stable-3006", "onedir-3006", "stable-3006-8", "stable-3007", "onedir-3007", "stable-3007-1", "git-master", "latest", "default"]'
 
 
@@ -294,7 +280,7 @@ jobs:
     with:
       distro-slug: debian-12
       display-name: Debian 12
-      timeout: 40
+      timeout: 20
       instances: '["stable-3007", "onedir-3007", "stable-3007-1", "git-master", "latest", "default"]'
 
 
@@ -308,7 +294,7 @@ jobs:
     with:
       distro-slug: fedora-39
       display-name: Fedora 39
-      timeout: 40
+      timeout: 20
       instances: '["stable-3006", "onedir-3006", "stable-3006-8", "latest", "default"]'
 
 
@@ -322,7 +308,7 @@ jobs:
     with:
       distro-slug: fedora-40
       display-name: Fedora 40
-      timeout: 40
+      timeout: 20
       instances: '["stable-3007", "onedir-3007", "stable-3007-1", "git-master", "latest", "default"]'
 
 
@@ -364,7 +350,7 @@ jobs:
     with:
       distro-slug: opensuse-15
       display-name: Opensuse 15
-      timeout: 40
+      timeout: 20
       instances: '["latest", "default"]'
 
 
@@ -378,7 +364,7 @@ jobs:
     with:
       distro-slug: opensuse-tumbleweed
       display-name: Opensuse Tumbleweed
-      timeout: 40
+      timeout: 20
       instances: '["git-master", "latest", "default"]'
 
 
@@ -392,7 +378,7 @@ jobs:
     with:
       distro-slug: oraclelinux-8
       display-name: Oracle Linux 8
-      timeout: 40
+      timeout: 20
       instances: '["stable-3006", "onedir-3006", "stable-3006-8", "stable-3007", "onedir-3007", "stable-3007-1", "latest", "default"]'
 
 
@@ -406,7 +392,7 @@ jobs:
     with:
       distro-slug: oraclelinux-9
       display-name: Oracle Linux 9
-      timeout: 40
+      timeout: 20
       instances: '["stable-3006", "onedir-3006", "stable-3006-8", "stable-3007", "onedir-3007", "stable-3007-1", "git-master", "latest", "default"]'
 
 
@@ -420,7 +406,7 @@ jobs:
     with:
       distro-slug: photon-4
       display-name: Photon OS 4
-      timeout: 40
+      timeout: 20
       instances: '["stable-3006", "onedir-3006", "stable-3006-8", "latest", "default"]'
 
 
@@ -434,7 +420,7 @@ jobs:
     with:
       distro-slug: photon-5
       display-name: Photon OS 5
-      timeout: 40
+      timeout: 20
       instances: '["stable-3006", "onedir-3006", "stable-3006-8", "latest", "default"]'
 
 
@@ -448,7 +434,7 @@ jobs:
     with:
       distro-slug: rockylinux-8
       display-name: Rocky Linux 8
-      timeout: 40
+      timeout: 20
       instances: '["stable-3006", "onedir-3006", "stable-3006-8", "stable-3007", "onedir-3007", "stable-3007-1", "latest", "default"]'
 
 
@@ -462,7 +448,7 @@ jobs:
     with:
       distro-slug: rockylinux-9
       display-name: Rocky Linux 9
-      timeout: 40
+      timeout: 20
       instances: '["stable-3006", "onedir-3006", "stable-3006-8", "stable-3007", "onedir-3007", "stable-3007-1", "git-master", "latest", "default"]'
 
 
@@ -476,7 +462,7 @@ jobs:
     with:
       distro-slug: ubuntu-2004
       display-name: Ubuntu 20.04
-      timeout: 40
+      timeout: 20
       instances: '["stable-3006", "onedir-3006", "stable-3006-8", "stable-3007", "onedir-3007", "stable-3007-1", "git-master", "latest", "default"]'
 
 
@@ -490,7 +476,7 @@ jobs:
     with:
       distro-slug: ubuntu-2204
       display-name: Ubuntu 22.04
-      timeout: 40
+      timeout: 20
       instances: '["stable-3006", "onedir-3006", "stable-3006-8", "stable-3007", "onedir-3007", "stable-3007-1", "git-master", "latest", "default"]'
 
 
@@ -504,7 +490,7 @@ jobs:
     with:
       distro-slug: ubuntu-2404
       display-name: Ubuntu 24.04
-      timeout: 40
+      timeout: 20
       instances: '["stable-3007", "onedir-3007", "stable-3007-1", "git-master", "latest", "default"]'
 
 
@@ -523,7 +509,6 @@ jobs:
       - almalinux-8
       - almalinux-9
       - amazon-2
-      - amazon-2023
       - arch
       - centos-stream9
       - debian-11

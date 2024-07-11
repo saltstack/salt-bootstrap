@@ -28,13 +28,20 @@ provisioner:
     mv /tmp/auto-accept-keys.conf /etc/salt/master.d/auto-accept-keys.conf
     sh -c 't=$(shuf -i 1-15 -n 1); echo Sleeping $t seconds; sleep $t'
 
+
+##  - name: amazon-2023
+##    driver:
+##      image: amazonlinux:2023
+##      provision_command:
+##        - yum -y install --allowerasing procps-ng curl
+##        - echo "PubkeyAcceptedAlgorithms +ssh-rsa" | tee -a /etc/ssh/sshd_config
+
 platforms:
   - name: almalinux-9
     driver:
       provision_command:
         - dnf -y install crypto-policies-scripts procps-ng
         - update-crypto-policies --set DEFAULT:SHA1
-        ### DGM - update-crypto-policies --set DEFAULT:SHA256
         - echo "PubkeyAcceptedAlgorithms +ssh-rsa" | tee -a /etc/ssh/sshd_config
   - name: almalinux-8
   - name: amazon-2
@@ -43,15 +50,6 @@ platforms:
       platform: rhel
       provision_command:
         - yum -y install procps-ng
-  - name: amazon-2023
-    driver:
-      image: amazonlinux:2023
-      ## DGM platform: fedora
-      ## DGM platform: rhel
-      provision_command:
-        ## DGM - yum -y install procps-ng
-        - yum -y install --allowerasing procps-ng curl
-        - echo "PubkeyAcceptedAlgorithms +ssh-rsa" | tee -a /etc/ssh/sshd_config
   - name: arch
     driver:
       image: archlinux/archlinux
@@ -66,11 +64,7 @@ platforms:
       provision_command:
         - dnf -y install crypto-policies-scripts procps-ng
         - update-crypto-policies --set DEFAULT:SHA1
-        ### DGM - update-crypto-policies --set DEFAULT:SHA256
         - echo "PubkeyAcceptedAlgorithms +ssh-rsa" | tee -a /etc/ssh/sshd_config
-  ## DGM - name: centos-stream8
-  ## DGM   driver:
-  ## DGM     image: quay.io/centos/centos:stream8
   - name: debian-11
     driver:
       image: debian:bullseye
@@ -125,18 +119,13 @@ platforms:
       provision_command:
         - dnf -y install crypto-policies-scripts procps-ng
         - update-crypto-policies --set DEFAULT:SHA1
-        ### DGM - yum -y install crypto-policies-scripts procps-ng
-        ### DGM - update-crypto-policies --set DEFAULT:SHA256
         - echo "PubkeyAcceptedAlgorithms +ssh-rsa" | tee -a /etc/ssh/sshd_config
   - name: oraclelinux-9
     driver:
-      ## DGM platform: centosstream
       run_command: /usr/lib/systemd/systemd
       provision_command:
         - dnf -y install crypto-policies-scripts procps-ng
         - update-crypto-policies --set DEFAULT:SHA1
-        ### DGM - yum -y install crypto-policies-scripts procps-ng
-        ### DGM - update-crypto-policies --set DEFAULT:SHA256
         - echo "PubkeyAcceptedAlgorithms +ssh-rsa" | tee -a /etc/ssh/sshd_config
   - name: rockylinux-8
   - name: oraclelinux-8

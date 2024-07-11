@@ -541,8 +541,8 @@ jobs:
 
       - name: Delete Exit Status Artifacts
         if: always()
-        ## DGM uses: geekyeggo/delete-artifact@v4
-        uses: geekyeggo/delete-artifact@v3
+        ## DGM uses: geekyeggo/delete-artifact@v3
+        uses: geekyeggo/delete-artifact@v4
         with:
           name: exitstatus
           failOnError: false

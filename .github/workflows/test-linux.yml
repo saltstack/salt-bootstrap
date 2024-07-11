@@ -37,19 +37,12 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      ## DGM Need to replace this
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ## DGM ruby-version: 2.6.10
-          ruby-version: 3.2.3
-          ## DGM ruby-version: 3.3.4
+          ruby-version: 2.6.10
+          ## ruby-version: 3.3.4
           bundler-cache: true
-
-      ## DGM - name: Set up Python 3.9
-      ## DGM   uses: actions/setup-python@v4
-      ## DGM   with:
-      ## DGM     python-version: 3.9
 
       - name: Set up Python 3.10
         uses: actions/setup-python@v4
@@ -63,20 +56,17 @@ jobs:
 
       - name: Create Test Instance
         run: |
-          ## DGM Need to replace this
           (sleep 10 && bundle exec kitchen create ${{ matrix.instance }}-${{ inputs.distro-slug }})
           sleep 2
 
       - name: Test Bootstrap
         run: |
-          ## DGM Need to replace this
           bundle exec kitchen verify ${{ matrix.instance }}-${{ inputs.distro-slug }}
           sleep 2
 
       - name: Destroy Test Instance
         if: always()
         run: |
-          ## DGM Need to replace this
           bundle exec kitchen destroy ${{ matrix.instance }}-${{ inputs.distro-slug }}
           sleep 2
 

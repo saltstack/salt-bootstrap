@@ -34,8 +34,6 @@ env:
   machine_port: 5985
   KITCHEN_LOCAL_YAML: 'kitchen.windows.yml'
 
-## DGM Wonder what the KITCHEN_LOCAL_YAML had to be set here for Windows, do we need to do something similar for runners ?
-
 jobs:
   Test:
     name: ${{ matrix.instance }}
@@ -49,13 +47,11 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      ## DGM Need to replace this
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ## DGM ruby-version: 2.6.10
-          ruby-version: 3.2.3
-          ## DGM ruby-version: 3.3.4
+          ruby-version: 2.6.10
+          ## ruby-version: 3.3.4
           bundler-cache: true
 
       - name: Install Chef
@@ -83,11 +79,6 @@ jobs:
           Set-WSManQuickConfig -Force
           winrm set winrm/config/service '@{AllowUnencrypted="True"}'
           env
-
-      ## DGM - name: Set up Python 3.9
-      ## DGM   uses: actions/setup-python@v4
-      ## DGM   with:
-      ## DGM     python-version: 3.9
 
       - name: Set up Python 3.10
         uses: actions/setup-python@v4

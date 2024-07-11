@@ -46,7 +46,6 @@ jobs:
     name: Update S3 Bucket
     if: ${{ fromJSON(needs.workflow-requirements.outputs.requirements-met) }}
     runs-on:
-      ## DGM wonder about these
       - self-hosted
       - linux
       - repo-release

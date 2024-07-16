@@ -1,3 +1,17 @@
+# v2024.07.16
+
+## What's Changed
+
+- Update bootstrap-salt.sh by @javatask in https://github.com/saltstack/salt-bootstrap/pull/2005
+- Updated GitHub actions to later v4 by @dmurphy18 in https://github.com/saltstack/salt-bootstrap/pull/2004
+- Don't sort lists and dicts, as order of items matters  by @dmurphy18 in https://github.com/saltstack/salt-bootstrap/pull/2006
+
+## New Contributors
+
+- @javatask made their first contribution in https://github.com/saltstack/salt-bootstrap/pull/2005
+
+**Full Changelog**: https://github.com/saltstack/salt-bootstrap/compare/v2024.07.12...v2024.07.16
+
 # v2024.07.12
 
 ## What's Changed

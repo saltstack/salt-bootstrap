@@ -35,7 +35,7 @@ jobs:
         instance: ${{ fromJSON(inputs.instances) }}
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
@@ -56,6 +56,7 @@ jobs:
 
       - name: Create Test Instance
         run: |
+          bundle exec kitchen create ${{ matrix.instance }}-${{ inputs.distro-slug }} || \
           (sleep 10 && bundle exec kitchen create ${{ matrix.instance }}-${{ inputs.distro-slug }})
           sleep 2
 

@@ -22,6 +22,11 @@ that, please read the generated help by passing ``-h`` to the script or even bet
 
 Also, to secure your Salt installation, check out these instructions for `hardening salt`_.
 
+Older versions of Salt prior to 3006 are no longer supported by this bootstrap script as they have
+reached their End-Of-Life. Only onedir-based architecture versions of Salt are supported by this
+bootstrap script.
+
+
 Bootstrap
 =========
 
@@ -32,6 +37,7 @@ sum** of the downloaded ``bootstrap-salt.sh`` file.
 
 The SHA256 sum of the ``bootstrap-salt.sh`` file, per release, is:
 
+- 2024.07.16: ``4f76d1549c71d696a605f97645d8633b6269c4d9ae54b1fbdfedca1dcf893e7a``
 - 2024.07.12: ``526f4a5383db308081a120e26988679238ca6add4bf7a82120cbe71d57ab826e``
 - 2024.04.03: ``450ba5cde4af8d6cb5c56c66791f87b918bcda70ccdfb10abf3cc294143c8073``
 - 2024.01.04: ``cebcbc67895e238d1cf0024922a7fe5c772b9aaba346490c8fa6193bb0d993d4``
@@ -87,12 +93,12 @@ To view the latest options and descriptions for ``salt-bootstrap``, use ``-h`` a
   Examples:
     - bootstrap-salt.sh
     - bootstrap-salt.sh stable
-    - bootstrap-salt.sh stable 3004.1
-    - bootstrap-salt.sh stable v3003.4
+    - bootstrap-salt.sh stable 3006.7
+    - bootstrap-salt.sh stable v3006.8
     - bootstrap-salt.sh testing
     - bootstrap-salt.sh git
-    - bootstrap-salt.sh git 3004.1
-    - bootstrap-salt.sh git v3003.4
+    - bootstrap-salt.sh git 3007.1
+    - bootstrap-salt.sh git v3007.1
     - bootstrap-salt.sh git 06f249901a2e2f1ed310d58ea3921a129f214358
 
   Options:
@@ -173,16 +179,8 @@ To view the latest options and descriptions for ``salt-bootstrap``, use ``-h`` a
         no ".bak" file will be created as either of those options will force
         a complete overwrite of the file.
     -q  Quiet salt installation from git (setup.py install -q)
-    -x  Changes the Python version used to install Salt.
-        For CentOS 6 git installations python2.7 is supported.
-        Fedora git installation, CentOS 7, Ubuntu 18.04 support python3.
-    -y  Installs a different python version on host. Currently this has only been
-        tested with CentOS 6 and is considered experimental. This will install the
-        ius repo on the box if disable repo is false. This must be used in conjunction
-        with -x <pythonversion>.  For example:
-            sh bootstrap.sh -P -y -x python2.7 git v2017.7.2
-        The above will install python27 and install the git version of salt using the
-        python2.7 executable. This only works for git and pip installations.
+    -x  Changes the Python version used to install Salt (default: Python 3)
+        Python 2.7 is not longer supported.
     -Q  Quickstart, install the Salt master and the Salt minion.
         And automatically accept the minion key.
 
@@ -285,19 +283,12 @@ However, the ``-P`` flag is not necessary for Git-based bootstraps.
 Install using Python
 ~~~~~~~~~~~~~~~~~~~~
 
-If you already have Python installed, ``python 2.7``, then it's as easy as:
+If you already have Python installed, ``python 3.10``, then it's as easy as:
 
 .. code:: console
 
   python -m urllib "https://bootstrap.saltproject.io" > bootstrap-salt.sh
   sudo sh bootstrap-salt.sh -P stable 3006.1
-
-With python version 2, the following in-line code should always work:
-
-.. code:: console
-
-  python -c 'import urllib; print urllib.urlopen("https://bootstrap.saltproject.io").read()' > bootstrap-salt.sh
-  sudo sh bootstrap-salt.sh git master
 
 With python version 3:
 
@@ -306,34 +297,7 @@ With python version 3:
   python3 -c 'import urllib.request; print(urllib.request.urlopen("https://bootstrap.saltproject.io").read().decode("ascii"))' > bootstrap-salt.sh
   sudo sh bootstrap-salt.sh git v3006.1
 
-Install using fetch
-~~~~~~~~~~~~~~~~~~~
-
-On a FreeBSD-based system you usually don't have either of the above binaries available. You **do**
-have ``fetch`` available though:
-
-.. code:: console
-
-  fetch -o bootstrap-salt.sh https://bootstrap.saltproject.io
-  sudo sh bootstrap-salt.sh
-
-If you have any SSL issues install ``ca_root_nss``:
-
-.. code:: console
-
-  pkg install ca_root_nss
-
-And either copy the certificates to the place where fetch can find them:
-
-.. code:: console
-
-  cp /usr/local/share/certs/ca-root-nss.crt /etc/ssl/cert.pem
-
-Or link them to the right place:
-
-.. code:: console
-
-  ln -s /usr/local/share/certs/ca-root-nss.crt /etc/ssl/cert.pem
+Note: Python 2.x is no longer supported given it reached it's End-Of-Life Jan. 1st, 2020
 
 
 Installing via an Insecure One-Liner
@@ -365,13 +329,17 @@ Installing a target version package of Salt from the Salt Project repo:
 
 .. code:: console
 
-  curl -L https://bootstrap.saltproject.io | sudo sh -s -- stable 3006.1
+  curl -L https://bootstrap.saltproject.io | sudo sh -s -- stable 3006.8
 
 Installing the latest master branch of Salt from git:
 
 .. code:: console
 
   curl -L https://bootstrap.saltproject.io | sudo sh -s -- git master
+
+Note: use of git is recommended for development environments, for example: testing new features of
+Salt which have not yet been released.
+It is recommended that production environments should use ``stable``.
 
 
 Install on Windows
@@ -404,10 +372,10 @@ Supported Operating Systems
 ---------------------------
 
 The salt-bootstrap script officially supports the distributions outlined in
-`Salt's Supported Operating Systems`_ document, except for Solaris and AIX. The operating systems
-listed below should reflect this document but may become out of date. If an operating system is
-listed below, but is not listed on the official supported operating systems document, the level of
-support is "best-effort".
+`Salt's Supported Operating Systems`_ document, (BSD-based OSs, Solaris and AIX are no longer
+supported).  The operating systems listed below should reflect this document but may become out of
+date. If an operating system is listed below, but is not listed on the official supported operating
+systems document, the level of support is "best-effort".
 
 Since Salt is written in Python, the packages available from the `Salt Project's repository`_ are
 CPU architecture independent and could be installed on any hardware supported by Linux kernel.
@@ -415,7 +383,7 @@ However, the Salt Project does package Salt's binary dependencies only for ``x86
 and ``AArch64`` (``arm64``).
 
 It is recommended to use ``git`` bootstrap mode as described above to install Salt on other
-architectures, such as ``x86`` (``i386``), ``AArch64`` (``arm64``) or ``ARM EABI`` (``armel``).
+architectures, such as ``x86`` (``i386``) or ``ARM EABI`` (``armel``).
 You also may need to disable repository configuration and allow ``pip`` installations by providing
 ``-r`` and ``-P`` options to the bootstrap script, i.e.:
 
@@ -434,8 +402,8 @@ Debian and derivatives
 ~~~~~~~~~~~~~~~~~~~~~~
 
 - Cumulus Linux 2/3
-- Debian GNU/Linux 9/10/11
-- Devuan GNU/Linux 1/2
+- Debian GNU/Linux 9/10/11/12
+- Devuan GNU/Linux 1/2/3/4/5
 - Kali Linux 1.0 (based on Debian 7)
 - Linux Mint Debian Edition 1 (based on Debian 8)
 - Raspbian 8 (``armhf`` packages) and 9 (using ``git`` installation mode only)
@@ -446,10 +414,11 @@ Red Hat family
 
 - Amazon Linux 2012.3 and later
 - Amazon Linux 2
+- Amazon Linux 2023
 - CentOS 7/8/9
 - Cloud Linux 6/7
-- Fedora 36/37/38 (install latest stable from standard repositories)
-- Oracle Linux 7/8
+- Fedora 38/39/40 (install latest stable from standard repositories)
+- Oracle Linux 7/8/9
 - Red Hat Enterprise Linux 7/8/9
 - Scientific Linux 7/8/9
 
@@ -463,8 +432,7 @@ SUSE family
 - SUSE Linux Enterprise Server 11 SP4, 12 SP2
 
 **NOTE:** Leap 15 installs Python 3 Salt packages by default. Salt is packaged by SUSE, and
-Leap 15 ships with Python 3. Salt with Python 2 can be installed using the the ``-x`` option
-in combination with the ``git`` installation method.
+Leap 15 ships with Python 3.
 
 .. code:: console
 
@@ -474,7 +442,7 @@ in combination with the ``git`` installation method.
 Ubuntu and derivatives
 ~~~~~~~~~~~~~~~~~~~~~~
 
-- KDE neon (based on Ubuntu 18.04/20.04/22.04)
+- KDE neon (based on Ubuntu 20.04/22.04/24.04)
 - Linux Mint 17/18
 
 Ubuntu Best Effort Support: Non-LTS Releases
@@ -505,12 +473,11 @@ UNIX systems
 
 **BSD**:
 
-- OpenBSD (``pip`` installation)
-- FreeBSD 11/12/13/14-CURRENT
+- No longer supported
 
 **SunOS**:
 
-- SmartOS (2015Q4 and later)
+- No longer supported
 
 
 Using a custom salt bootstrap
@@ -588,8 +555,8 @@ Salt is ready and working in the Docker container with the Minion authenticated 
 
 **NOTE**
 
-The ``Dockerfile`` here inherits the Ubuntu 14.04 public image with Upstart configured as the init
-system. Use it as an example or starting point of how to make your own Docker images with suitable
-Salt components, custom configurations, and even `pre-accepted Minion keys`_ already installed.
+The ``Dockerfile`` here inherits the Ubuntu 20.04 public image. Use it as an example or starting
+point of how to make your own Docker images with suitable Salt components, custom configurations,
+and even `pre-accepted Minion keys`_ already installed.
 
 .. vim: fenc=utf-8 spell spl=en cc=100 tw=99 fo=want sts=2 sw=2 et

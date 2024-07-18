@@ -1,3 +1,11 @@
+# v2024.07.18
+
+## What's Changed
+
+- Updated README, and removed experimental  to ability install different Python version which was limited to RHEL 7, which is EOL by @dmurphy18 in https://github.com/saltstack/salt-bootstrap/pull/2009
+
+**Full Changelog**: https://github.com/saltstack/salt-bootstrap/compare/v2024.07.16...v2024.07.18
+
 # v2024.07.16
 
 ## What's Changed

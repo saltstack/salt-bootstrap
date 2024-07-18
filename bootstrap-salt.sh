@@ -26,7 +26,7 @@
 #======================================================================================================================
 set -o nounset                              # Treat unset variables as an error
 
-__ScriptVersion="2024.07.16"
+__ScriptVersion="2024.07.18"
 __ScriptName="bootstrap-salt.sh"
 
 __ScriptFullName="$0"
@@ -404,9 +404,8 @@ __usage() {
     -v  Display script version
     -V  Install Salt into virtualenv
         (only available for Ubuntu based distributions)
-    -x  Changes the Python version used to install Salt.
+    -x  Changes the Python version used to install Salt (default: Python 3).
         Python 2.7 is no longer supported.
-        Fedora git installation, CentOS 8, Ubuntu 20.04 support python3.
     -X  Do not start daemons after installation
 
 EOT
@@ -1236,43 +1235,6 @@ __gather_linux_system_info() {
         break
     done
 }
-
-
-#---  FUNCTION  -------------------------------------------------------------------------------------------------------
-#          NAME:  __install_python()
-#   DESCRIPTION:  Install a different version of python on a host. Currently this has only been tested on CentOS 6 and
-#                 is considered experimental.
-#----------------------------------------------------------------------------------------------------------------------
-__install_python() {
-    if [ "$_PY_EXE" = "" ]; then
-        echoerror "Must specify -x <pythonversion> with -y to install a specific python version"
-        exit 1
-    fi
-
-    __PACKAGES="$_PY_PKG_VER"
-
-    if [ ${_DISABLE_REPOS} -eq ${BS_FALSE} ]; then
-        echoinfo "Attempting to install a repo to help provide a separate python package"
-        echoinfo "$DISTRO_NAME_L"
-        case "$DISTRO_NAME_L" in
-            "red_hat"|"centos")
-                __PYTHON_REPO_URL="https://repo.ius.io/ius-release-el${DISTRO_MAJOR_VERSION}.rpm"
-                ;;
-            *)
-                echoerror "Installing a repo to provide a python package is only supported on Redhat/CentOS.
-                If a repo is already available, please try running script with -r."
-                exit 1
-                ;;
-        esac
-
-        echoinfo "Installing IUS repo"
-        __yum_install_noinput "${__PYTHON_REPO_URL}" || return 1
-    fi
-
-    echoinfo "Installing ${__PACKAGES}"
-    __yum_install_noinput "${__PACKAGES}" || return 1
-}
-
 
 
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------

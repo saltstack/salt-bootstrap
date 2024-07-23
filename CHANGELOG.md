@@ -1,3 +1,13 @@
+# v2024.07.23
+
+## What's Changed
+
+- Updated link for Supported Operating Systems and Repository supported by Salt by @dmurphy18 in https://github.com/saltstack/salt-bootstrap/pull/2010
+- Cleanup use of the term 'Post Neon' given only support 3006 and up by @dmurphy18 in https://github.com/saltstack/salt-bootstrap/pull/2011
+- Added support with -W for installing salt-api by @dmurphy18 in https://github.com/saltstack/salt-bootstrap/pull/2013
+
+**Full Changelog**: https://github.com/saltstack/salt-bootstrap/compare/v2024.07.18...v2024.07.23
+
 # v2024.07.18
 
 ## What's Changed

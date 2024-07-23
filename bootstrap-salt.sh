@@ -26,7 +26,7 @@
 #======================================================================================================================
 set -o nounset                              # Treat unset variables as an error
 
-__ScriptVersion="2024.07.18"
+__ScriptVersion="2024.07.23"
 __ScriptName="bootstrap-salt.sh"
 
 __ScriptFullName="$0"
@@ -228,6 +228,7 @@ _TEMP_KEYS_DIR="null"
 _SLEEP="${__DEFAULT_SLEEP}"
 _INSTALL_MASTER=$BS_FALSE
 _INSTALL_SYNDIC=$BS_FALSE
+_INSTALL_SALT_API=$BS_FALSE
 _INSTALL_MINION=$BS_TRUE
 _INSTALL_CLOUD=$BS_FALSE
 _VIRTUALENV_DIR=${BS_VIRTUALENV_DIR:-"null"}
@@ -272,7 +273,7 @@ _ONEDIR_NIGHTLY_DIR="salt-dev/${_ONEDIR_DIR}"
 _PY_EXE="python3"
 _MINIMUM_PIP_VERSION="9.0.1"
 _MINIMUM_SETUPTOOLS_VERSION="9.1"
-_POST_NEON_PIP_INSTALL_ARGS="--prefix=/usr"
+_PIP_INSTALL_ARGS="--prefix=/usr"
 _PIP_DOWNLOAD_ARGS=""
 _QUICK_START="$BS_FALSE"
 _AUTO_ACCEPT_MINION_KEYS="$BS_FALSE"
@@ -339,7 +340,7 @@ __usage() {
         step.
     -c  Temporary configuration directory
     -C  Only run the configuration function. Implies -F (forced overwrite).
-        To overwrite Master or Syndic configs, -M or -S, respectively, must
+        To overwrite Master, Syndic or Api configs, -M,-S or -W, respectively, must
         also be specified. Salt installation will be ommitted, but some of the
         dependencies could be installed to write configuration with -j or -J.
     -d  Disables checking if Salt services are enabled to start on system boot.
@@ -404,6 +405,7 @@ __usage() {
     -v  Display script version
     -V  Install Salt into virtualenv
         (only available for Ubuntu based distributions)
+    -W  Also install salt-api
     -x  Changes the Python version used to install Salt (default: Python 3).
         Python 2.7 is no longer supported.
     -X  Do not start daemons after installation
@@ -411,7 +413,7 @@ __usage() {
 EOT
 }   # ----------  end of function __usage  ----------
 
-while getopts ':hvnDc:g:Gx:k:s:MSNXCPFUKIA:i:Lp:dH:bflV:J:j:rR:aqQ' opt
+while getopts ':hvnDc:g:Gx:k:s:MSWNXCPFUKIA:i:Lp:dH:bflV:J:j:rR:aqQ' opt
 do
   case "${opt}" in
 
@@ -431,6 +433,7 @@ do
     s )  _SLEEP=$OPTARG                                 ;;
     M )  _INSTALL_MASTER=$BS_TRUE                       ;;
     S )  _INSTALL_SYNDIC=$BS_TRUE                       ;;
+    W )  _INSTALL_SALT_API=$BS_TRUE                     ;;
     N )  _INSTALL_MINION=$BS_FALSE                      ;;
     X )  _START_DAEMONS=$BS_FALSE                       ;;
     C )  _CONFIG_ONLY=$BS_TRUE                          ;;
@@ -717,7 +720,7 @@ if [ "$($whoami)" != "root" ]; then
 fi
 
 # Check that we're actually installing one of minion/master/syndic
-if [ "$_INSTALL_MINION" -eq $BS_FALSE ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && [ "$_CONFIG_ONLY" -eq $BS_FALSE ]; then
+if [ "$_INSTALL_MINION" -eq $BS_FALSE ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && [ "$_INSTALL_SALT_API" -eq $BS_FALSE ] && [ "$_CONFIG_ONLY" -eq $BS_FALSE ]; then
     echowarn "Nothing to install or configure"
     exit 1
 fi
@@ -1766,6 +1769,14 @@ if [ "$_INSTALL_SYNDIC" -eq $BS_TRUE ]; then
     fi
 fi
 
+if [ "$_INSTALL_SALT_API" -eq $BS_TRUE ]; then
+    if [ "$_CONFIG_ONLY" -eq $BS_FALSE ]; then
+        echoinfo "Installing salt api"
+    else
+        echoinfo "Configuring salt api"
+    fi
+fi
+
 if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ] && [ "$_CONFIG_ONLY" -eq $BS_FALSE ]; then
     echoinfo "Installing salt-cloud and required python3-libcloud package"
 fi
@@ -1818,7 +1829,7 @@ if [ "$ITYPE" = "git" ]; then
                 __NEW_VS_TAG_REGEX_MATCH=$(echo "${GIT_REV}" | sed -E 's/^(v?3[0-9]{3}(\.[0-9]{1,2})?).*$/MATCH/')
                 if [ "$__NEW_VS_TAG_REGEX_MATCH" = "MATCH" ]; then
                     __TAG_REGEX_MATCH="${__NEW_VS_TAG_REGEX_MATCH}"
-                    echodebug "Post Neon Tag Regex Match On: ${GIT_REV}"
+                    echodebug "Tag Regex Match On: ${GIT_REV}"
                 else
                     __TAG_REGEX_MATCH=$(echo "${GIT_REV}" | sed -E 's/^(v?[0-9]{1,4}\.[0-9]{1,2})(\.[0-9]{1,2})?.*$/MATCH/')
                     echodebug "Pre Neon Tag Regex Match On: ${GIT_REV}"
@@ -1828,7 +1839,7 @@ if [ "$ITYPE" = "git" ]; then
                 __NEW_VS_TAG_REGEX_MATCH=$(echo "${GIT_REV}" | sed 's/^.*\(v\?3[[:digit:]]\{3\}\(\.[[:digit:]]\{1,2\}\)\?\).*$/MATCH/')
                 if [ "$__NEW_VS_TAG_REGEX_MATCH" = "MATCH" ]; then
                     __TAG_REGEX_MATCH="${__NEW_VS_TAG_REGEX_MATCH}"
-                    echodebug "Post Neon Tag Regex Match On: ${GIT_REV}"
+                    echodebug "Tag Regex Match On: ${GIT_REV}"
                 else
                     __TAG_REGEX_MATCH=$(echo "${GIT_REV}" | sed 's/^.*\(v\?[[:digit:]]\{1,4\}\.[[:digit:]]\{1,2\}\)\(\.[[:digit:]]\{1,2\}\)\?.*$/MATCH/')
                     echodebug "Pre Neon Tag Regex Match On: ${GIT_REV}"
@@ -1838,7 +1849,7 @@ if [ "$ITYPE" = "git" ]; then
     fi
 
     echo
-    echowarn "Post Neon git based installations will always install salt"
+    echowarn "git based installations will always install salt"
     echowarn "and its dependencies using pip which will be upgraded to"
     echowarn "at least v${_MINIMUM_PIP_VERSION}, and, in case the setuptools version is also"
     echowarn "too old, it will be upgraded to at least v${_MINIMUM_SETUPTOOLS_VERSION}"
@@ -2595,19 +2606,19 @@ __install_pip_deps() {
 }   # ----------  end of function __install_pip_deps  ----------
 
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
-#          NAME:  __install_salt_from_repo_post_neon
+#          NAME:  __install_salt_from_repo
 #   DESCRIPTION:  Return 0 or 1 if successfully able to install. Can provide a different python version to
 #                 install pip packages with. If $py_exe is not specified it will use the default python version.
 #    PARAMETERS:  py_exe
 #----------------------------------------------------------------------------------------------------------------------
-__install_salt_from_repo_post_neon() {
+__install_salt_from_repo() {
     _py_exe="$1"
 
     if [ "${_py_exe}" = "" ]; then
         _py_exe="python3"
     fi
 
-    echodebug "__install_salt_from_repo_post_neon py_exe=$_py_exe"
+    echodebug "__install_salt_from_repo py_exe=$_py_exe"
 
     _py_version=$(${_py_exe} -c "import sys; print('{0}.{1}'.format(*sys.version_info))")
     _pip_cmd="pip${_py_version}"
@@ -2646,8 +2657,8 @@ EOM
 )
     if ! ${_py_exe} -c "$CHECK_PIP_VERSION_SCRIPT"; then
         # Upgrade pip to at least 1.2 which is when we can start using "python3 -m pip"
-        echodebug "Running '${_pip_cmd} install ${_POST_NEON_PIP_INSTALL_ARGS} pip>=${_MINIMUM_PIP_VERSION}'"
-        ${_pip_cmd} install ${_POST_NEON_PIP_INSTALL_ARGS} -v "pip>=${_MINIMUM_PIP_VERSION}"
+        echodebug "Running '${_pip_cmd} install ${_PIP_INSTALL_ARGS} pip>=${_MINIMUM_PIP_VERSION}'"
+        ${_pip_cmd} install ${_PIP_INSTALL_ARGS} -v "pip>=${_MINIMUM_PIP_VERSION}"
         sleep 1
         echodebug "PATH: ${PATH}"
         _pip_cmd="pip${_py_version}"
@@ -2680,8 +2691,8 @@ EOM
         echodebug "OS is greater than / equal Debian 12 or Ubuntu 24.04, using ${_USE_BREAK_SYSTEM_PACKAGES}"
     fi
 
-    echodebug "Running '${_pip_cmd} install ${_USE_BREAK_SYSTEM_PACKAGES} --upgrade ${_POST_NEON_PIP_INSTALL_ARGS}  wheel ${_setuptools_dep}"
-    ${_pip_cmd} install ${_USE_BREAK_SYSTEM_PACKAGES} --upgrade ${_POST_NEON_PIP_INSTALL_ARGS}  wheel "${_setuptools_dep}"
+    echodebug "Running '${_pip_cmd} install ${_USE_BREAK_SYSTEM_PACKAGES} --upgrade ${_PIP_INSTALL_ARGS}  wheel ${_setuptools_dep}"
+    ${_pip_cmd} install ${_USE_BREAK_SYSTEM_PACKAGES} --upgrade ${_PIP_INSTALL_ARGS}  wheel "${_setuptools_dep}"
 
     echoinfo "Installing salt using ${_py_exe}"
     cd "${_SALT_GIT_CHECKOUT_DIR}" || return 1
@@ -2699,8 +2710,8 @@ EOM
     ${_pip_cmd} download -d /tmp/git/deps ${_PIP_DOWNLOAD_ARGS} . || (echo "Failed to download salt dependencies" && return 1)
 
     echoinfo "Installing Downloaded Salt Dependencies"
-    echodebug "Running '${_pip_cmd} install ${_USE_BREAK_SYSTEM_PACKAGES} --ignore-installed ${_POST_NEON_PIP_INSTALL_ARGS} /tmp/git/deps/*'"
-    ${_pip_cmd} install ${_USE_BREAK_SYSTEM_PACKAGES} --ignore-installed ${_POST_NEON_PIP_INSTALL_ARGS} /tmp/git/deps/* || return 1
+    echodebug "Running '${_pip_cmd} install ${_USE_BREAK_SYSTEM_PACKAGES} --ignore-installed ${_PIP_INSTALL_ARGS} /tmp/git/deps/*'"
+    ${_pip_cmd} install ${_USE_BREAK_SYSTEM_PACKAGES} --ignore-installed ${_PIP_INSTALL_ARGS} /tmp/git/deps/* || return 1
     rm -f /tmp/git/deps/*
 
     echoinfo "Building Salt Python Wheel"
@@ -2717,10 +2728,10 @@ EOM
 
     echoinfo "Installing Built Salt Wheel"
     ${_pip_cmd} uninstall --yes ${_USE_BREAK_SYSTEM_PACKAGES} salt 2>/dev/null || true
-    echodebug "Running '${_pip_cmd} install ${_USE_BREAK_SYSTEM_PACKAGES} --no-deps --force-reinstall ${_POST_NEON_PIP_INSTALL_ARGS} /tmp/git/deps/salt*.whl'"
+    echodebug "Running '${_pip_cmd} install ${_USE_BREAK_SYSTEM_PACKAGES} --no-deps --force-reinstall ${_PIP_INSTALL_ARGS} /tmp/git/deps/salt*.whl'"
 
     ${_pip_cmd} install ${_USE_BREAK_SYSTEM_PACKAGES} --no-deps --force-reinstall \
-        ${_POST_NEON_PIP_INSTALL_ARGS} \
+        ${_PIP_INSTALL_ARGS} \
         --global-option="--salt-config-dir=$_SALT_ETC_DIR --salt-cache-dir=${_SALT_CACHE_DIR} ${SETUP_PY_INSTALL_ARGS}" \
         /tmp/git/deps/salt*.whl || return 1
 
@@ -2743,12 +2754,12 @@ EOM
         return 1
     fi
     return 0
-}   # ----------  end of function __install_salt_from_repo_post_neon  ----------
+}   # ----------  end of function __install_salt_from_repo  ----------
 
 
 # shellcheck disable=SC2268
 if [ "x${_PY_MAJOR_VERSION}" = "x" ]; then
-    # Default to python 3 for post Neon install
+    # Default to python 3 for install
     _PY_MAJOR_VERSION=3
 fi
 
@@ -3122,6 +3133,10 @@ install_ubuntu_stable() {
         __PACKAGES="${__PACKAGES} salt-syndic"
     fi
 
+    if [ "$_INSTALL_SALT_API" -eq $BS_TRUE ]; then
+        __PACKAGES="${__PACKAGES} salt-api"
+    fi
+
     # shellcheck disable=SC2086
     __apt_get_install_noinput ${__PACKAGES} || return 1
 
@@ -3141,8 +3156,8 @@ install_ubuntu_git() {
         return 1
     fi
 
-    _POST_NEON_PIP_INSTALL_ARGS=""
-    __install_salt_from_repo_post_neon "${_PY_EXE}" || return 1
+    _PIP_INSTALL_ARGS=""
+    __install_salt_from_repo "${_PY_EXE}" || return 1
     cd "${_SALT_GIT_CHECKOUT_DIR}" || return 1
 
     # Account for new path for services files in later releases
@@ -3171,6 +3186,10 @@ install_ubuntu_onedir() {
     fi
     if [ "$_INSTALL_SYNDIC" -eq $BS_TRUE ]; then
         __PACKAGES="${__PACKAGES} salt-syndic"
+    fi
+
+    if [ "$_INSTALL_SALT_API" -eq $BS_TRUE ]; then
+        __PACKAGES="${__PACKAGES} salt-api"
     fi
 
     # shellcheck disable=SC2086
@@ -3526,6 +3545,10 @@ install_debian_stable() {
         __PACKAGES="${__PACKAGES} salt-syndic"
     fi
 
+    if [ "$_INSTALL_SALT_API" -eq $BS_TRUE ]; then
+        __PACKAGES="${__PACKAGES} salt-api"
+    fi
+
     # shellcheck disable=SC2086
     __apt_get_install_noinput ${__PACKAGES} || return 1
 
@@ -3555,9 +3578,9 @@ install_debian_git() {
 
     # We can use --prefix on debian based ditributions
 
-    _POST_NEON_PIP_INSTALL_ARGS=""
+    _PIP_INSTALL_ARGS=""
 
-    __install_salt_from_repo_post_neon "${_PY_EXE}" || return 1
+    __install_salt_from_repo "${_PY_EXE}" || return 1
     cd "${_SALT_GIT_CHECKOUT_DIR}" || return 1
 
     # Account for new path for services files in later releases
@@ -3595,6 +3618,10 @@ install_debian_onedir() {
     fi
     if [ "$_INSTALL_SYNDIC" -eq $BS_TRUE ]; then
         __PACKAGES="${__PACKAGES} salt-syndic"
+    fi
+
+    if [ "$_INSTALL_SALT_API" -eq $BS_TRUE ]; then
+        __PACKAGES="${__PACKAGES} salt-api"
     fi
 
     # shellcheck disable=SC2086
@@ -3816,7 +3843,7 @@ install_fedora_git() {
         return 1
     fi
 
-     __install_salt_from_repo_post_neon "${_PY_EXE}" || return 1
+     __install_salt_from_repo "${_PY_EXE}" || return 1
     return 0
 
 }
@@ -3945,6 +3972,10 @@ install_fedora_onedir() {
     fi
     if [ "$_INSTALL_SYNDIC" -eq $BS_TRUE ];then
         __PACKAGES="${__PACKAGES} salt-syndic"
+    fi
+
+    if [ "$_INSTALL_SALT_API" -eq $BS_TRUE ]; then
+        __PACKAGES="${__PACKAGES} salt-api"
     fi
 
     # shellcheck disable=SC2086
@@ -4092,6 +4123,10 @@ install_centos_stable() {
         __PACKAGES="${__PACKAGES} salt-syndic"
     fi
 
+    if [ "$_INSTALL_SALT_API" -eq $BS_TRUE ]; then
+        __PACKAGES="${__PACKAGES} salt-api"
+    fi
+
     # shellcheck disable=SC2086
     __yum_install_noinput ${__PACKAGES} || return 1
 
@@ -4191,7 +4226,7 @@ install_centos_git() {
     fi
 
     echodebug "_PY_EXE: $_PY_EXE"
-     __install_salt_from_repo_post_neon "${_PY_EXE}" || return 1
+     __install_salt_from_repo "${_PY_EXE}" || return 1
 
     return 0
 }
@@ -4286,6 +4321,10 @@ install_centos_onedir() {
     fi
     if [ "$_INSTALL_SYNDIC" -eq $BS_TRUE ];then
         __PACKAGES="${__PACKAGES} salt-syndic"
+    fi
+
+    if [ "$_INSTALL_SALT_API" -eq $BS_TRUE ]; then
+        __PACKAGES="${__PACKAGES} salt-api"
     fi
 
     # shellcheck disable=SC2086
@@ -5143,13 +5182,17 @@ install_alpine_linux_stable() {
         __PACKAGES="${__PACKAGES} salt-syndic"
     fi
 
+    if [ "$_INSTALL_SALT_API" -eq $BS_TRUE ]; then
+        __PACKAGES="${__PACKAGES} salt-api"
+    fi
+
     # shellcheck disable=SC2086
     apk -U add "${__PACKAGES}" || return 1
     return 0
 }
 
 install_alpine_linux_git() {
-     __install_salt_from_repo_post_neon "${_PY_EXE}" || return 1
+     __install_salt_from_repo "${_PY_EXE}" || return 1
     return 0
 }
 
@@ -5702,10 +5745,10 @@ install_arch_linux_git() {
         return 1
     fi
 
-    _POST_NEON_PIP_INSTALL_ARGS="${_POST_NEON_PIP_INSTALL_ARGS} --use-pep517"
+    _PIP_INSTALL_ARGS="${_PIP_INSTALL_ARGS} --use-pep517"
     _PIP_DOWNLOAD_ARGS="${_PIP_DOWNLOAD_ARGS} --use-pep517"
 
-    __install_salt_from_repo_post_neon "${_PY_EXE}" || return 1
+    __install_salt_from_repo "${_PY_EXE}" || return 1
 
     return 0
 }
@@ -6149,6 +6192,10 @@ install_photon_onedir() {
         __PACKAGES="${__PACKAGES} salt-syndic"
     fi
 
+    if [ "$_INSTALL_SALT_API" -eq $BS_TRUE ]; then
+        __PACKAGES="${__PACKAGES} salt-api"
+    fi
+
     # shellcheck disable=SC2086
     __tdnf_install_noinput ${__PACKAGES} || return 1
 
@@ -6345,6 +6392,10 @@ install_opensuse_stable() {
         __PACKAGES="${__PACKAGES} salt-syndic"
     fi
 
+    if [ "$_INSTALL_SALT_API" -eq $BS_TRUE ]; then
+        __PACKAGES="${__PACKAGES} salt-api"
+    fi
+
     # shellcheck disable=SC2086
     __zypper_install $__PACKAGES || return 1
 
@@ -6352,7 +6403,7 @@ install_opensuse_stable() {
 }
 
 install_opensuse_git() {
-    __install_salt_from_repo_post_neon "${_PY_EXE}" || return 1
+    __install_salt_from_repo "${_PY_EXE}" || return 1
     return 0
 }
 
@@ -6555,7 +6606,7 @@ install_opensuse_15_git() {
         _PYEXE=python3
     fi
 
-    __install_salt_from_repo_post_neon "${_PY_EXE}" || return 1
+    __install_salt_from_repo "${_PY_EXE}" || return 1
     return 0
 }
 
@@ -6697,9 +6748,15 @@ __gentoo_pre_dep() {
         mkdir /etc/portage
     fi
 
-    # Enable Python 3.7 target for Salt Neon using GIT
-    if [ "${ITYPE}" = "git" ] && [ "${GIT_REV}" = "v3000" ]; then
-        EXTRA_PYTHON_TARGET=python3_7
+    # Enable Python 3.10 target for Salt 3006 or later, otherwise 3.7 as previously, using GIT
+    if [ "${ITYPE}" = "git" ]; then
+        GIT_REV_MAJOR=$(echo "${GIT_REV}" | awk -F "." '{print $1}')
+        if [ "${GIT_REV_MAJOR}" = "v3006" ] || [ "${GIT_REV_MAJOR}" = "v3007" ]; then
+            EXTRA_PYTHON_TARGET=python3_10
+        else
+            # assume pre-3006, so leave it as Python 3.7
+            EXTRA_PYTHON_TARGET=python3_7
+        fi
     fi
 
     if [ -n "${EXTRA_PYTHON_TARGET:-}" ]; then
@@ -6797,7 +6854,7 @@ install_gentoo_git() {
         _PYEXE=$(emerge --info | grep -oE 'PYTHON_SINGLE_TARGET="[^"]*"' | sed -e 's/"//g' -e 's/_/./g' | cut -d= -f2)
     fi
 
-    __install_salt_from_repo_post_neon "${_PYEXE}" || return 1
+    __install_salt_from_repo "${_PYEXE}" || return 1
     return 0
 }
 
@@ -7146,7 +7203,7 @@ install_macosx_git() {
         return 1
     fi
 
-    __install_salt_from_repo_post_neon "${_PY_EXE}" || return 1
+    __install_salt_from_repo "${_PY_EXE}" || return 1
     return 0
 }
 
@@ -7287,8 +7344,11 @@ config_salt() {
     if [ "$_INSTALL_SYNDIC" -eq $BS_TRUE ] && [ "$_CONFIG_ONLY" -eq $BS_TRUE ]; then
         OVERWRITE_MASTER_CONFIGS=$BS_TRUE
     fi
+    if [ "$_INSTALL_SALT_API" -eq $BS_TRUE ] && [ "$_CONFIG_ONLY" -eq $BS_TRUE ]; then
+        OVERWRITE_MASTER_CONFIGS=$BS_TRUE
+    fi
 
-    if [ "$_INSTALL_MASTER" -eq $BS_TRUE ] || [ "$_INSTALL_SYNDIC" -eq $BS_TRUE ] || [ "$OVERWRITE_MASTER_CONFIGS" -eq $BS_TRUE ] || [ "$_CUSTOM_MASTER_CONFIG" != "null" ]; then
+    if [ "$_INSTALL_MASTER" -eq $BS_TRUE ] || [ "$_INSTALL_SYNDIC" -eq $BS_TRUE ] || [ "$_INSTALL_SALT_API" -eq $BS_TRUE ] || [ "$OVERWRITE_MASTER_CONFIGS" -eq $BS_TRUE ] || [ "$_CUSTOM_MASTER_CONFIG" != "null" ]; then
         # Create the PKI directory
         [ -d "$_PKI_DIR/master" ] || (mkdir -p "$_PKI_DIR/master" && chmod 700 "$_PKI_DIR/master") || return 1
 

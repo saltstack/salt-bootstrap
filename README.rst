@@ -37,6 +37,7 @@ sum** of the downloaded ``bootstrap-salt.sh`` file.
 
 The SHA256 sum of the ``bootstrap-salt.sh`` file, per release, is:
 
+- 2024.07.18: ``92a74e7ff8a9032a7713c2b3955991d66aaca08a4eb9494ce3dd66b5044f6bc3``
 - 2024.07.16: ``4f76d1549c71d696a605f97645d8633b6269c4d9ae54b1fbdfedca1dcf893e7a``
 - 2024.07.12: ``526f4a5383db308081a120e26988679238ca6add4bf7a82120cbe71d57ab826e``
 - 2024.04.03: ``450ba5cde4af8d6cb5c56c66791f87b918bcda70ccdfb10abf3cc294143c8073``
@@ -118,6 +119,7 @@ To view the latest options and descriptions for ``salt-bootstrap``, use ``-h`` a
     -L  Also install salt-cloud and required python-libcloud package
     -M  Also install salt-master
     -S  Also install salt-syndic
+    -W  Also install salt-api
     -N  Do not install salt-minion
     -X  Do not start daemons after installation
     -d  Disables checking if Salt services are enabled to start on system boot.
@@ -372,12 +374,15 @@ Supported Operating Systems
 ---------------------------
 
 The salt-bootstrap script officially supports the distributions outlined in
-`Salt's Supported Operating Systems`_ document, (BSD-based OSs, Solaris and AIX are no longer
+`Salt's Supported Operating Systems
+<https://docs.saltproject.io/salt/install-guide/en/latest/topics/salt-supported-operating-systems.html>`_
+document, (BSD-based OSs, Solaris and AIX are no longer
 supported).  The operating systems listed below should reflect this document but may become out of
 date. If an operating system is listed below, but is not listed on the official supported operating
 systems document, the level of support is "best-effort".
 
-Since Salt is written in Python, the packages available from the `Salt Project's repository`_ are
+Since Salt is written in Python, the packages available from the `Salt Project's repository
+<https://repo.saltproject.io/salt/py3>`_ are
 CPU architecture independent and could be installed on any hardware supported by Linux kernel.
 However, the Salt Project does package Salt's binary dependencies only for ``x86_64`` (``amd64``)
 and ``AArch64`` (``arm64``).

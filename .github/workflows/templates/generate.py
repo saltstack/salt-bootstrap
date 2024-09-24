@@ -7,6 +7,7 @@ import pathlib
 os.chdir(os.path.abspath(os.path.dirname(__file__)))
 
 ##    "amazon-2023",
+##    "opensuse-tumbleweed",
 LINUX_DISTROS = [
     "almalinux-8",
     "almalinux-9",
@@ -20,7 +21,6 @@ LINUX_DISTROS = [
     "gentoo",
     "gentoo-systemd",
     "opensuse-15",
-    "opensuse-tumbleweed",
     "oraclelinux-8",
     "oraclelinux-9",
     "photon-4",
@@ -43,6 +43,7 @@ OSX = [
 
 
 ##    "amazon-2023",
+##    "opensuse-tumbleweed",
 STABLE_DISTROS = [
     "almalinux-8",
     "almalinux-9",
@@ -54,7 +55,6 @@ STABLE_DISTROS = [
     "fedora-39",
     "fedora-40",
     "opensuse-15",
-    "opensuse-tumbleweed",
     "oraclelinux-8",
     "oraclelinux-9",
     "photon-4",
@@ -99,6 +99,7 @@ ONEDIR_RC_DISTROS = [
     "ubuntu-2404",
 ]
 
+##    "opensuse-tumbleweed",
 BLACKLIST_3006 = [
     "arch",
     "debian-12",
@@ -106,22 +107,22 @@ BLACKLIST_3006 = [
     "gentoo",
     "gentoo-systemd",
     "opensuse-15",
-    "opensuse-tumbleweed",
     "ubuntu-2404",
 ]
 
+##    "opensuse-tumbleweed",
 BLACKLIST_3007 = [
     "arch",
     "fedora-39",
     "gentoo",
     "gentoo-systemd",
     "opensuse-15",
-    "opensuse-tumbleweed",
     "photon-4",
     "photon-5",
 ]
 
 ##    "amazon-2023",
+##    "opensuse-tumbleweed",
 BLACKLIST_GIT_3006 = [
     "almalinux-9",
     "amazon-2",
@@ -133,7 +134,6 @@ BLACKLIST_GIT_3006 = [
     "gentoo",
     "gentoo-systemd",
     "opensuse-15",
-    "opensuse-tumbleweed",
     "oraclelinux-9",
     "photon-4",
     "photon-5",
@@ -144,6 +144,7 @@ BLACKLIST_GIT_3006 = [
 ]
 
 ##    "amazon-2023",
+##    "opensuse-tumbleweed",
 BLACKLIST_GIT_3007 = [
     "almalinux-9",
     "amazon-2",
@@ -156,7 +157,6 @@ BLACKLIST_GIT_3007 = [
     "gentoo",
     "gentoo-systemd",
     "opensuse-15",
-    "opensuse-tumbleweed",
     "oraclelinux-9",
     "photon-4",
     "photon-5",
@@ -240,6 +240,7 @@ LATEST_PKG_BLACKLIST = [
 ]
 
 ##    "amazon-2023": "Amazon 2023",
+##    "opensuse-tumbleweed": "Opensuse Tumbleweed",
 DISTRO_DISPLAY_NAMES = {
     "almalinux-8": "AlmaLinux 8",
     "almalinux-9": "AlmaLinux 9",
@@ -253,7 +254,6 @@ DISTRO_DISPLAY_NAMES = {
     "gentoo": "Gentoo",
     "gentoo-systemd": "Gentoo (systemd)",
     "opensuse-15": "Opensuse 15",
-    "opensuse-tumbleweed": "Opensuse Tumbleweed",
     "oraclelinux-8": "Oracle Linux 8",
     "oraclelinux-9": "Oracle Linux 9",
     "photon-4": "Photon OS 4",

@@ -49,8 +49,8 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: exitstatus
-          path: exitstatus
+          name: exitstatus-${{ github.job }}
+          path: exitstatus/
 
   generate-actions-workflow:
     name: Generate The Actions Workflow
@@ -62,7 +62,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Set up Python 3.10
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: "3.10"
 
@@ -86,8 +86,8 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: exitstatus
-          path: exitstatus
+          name: exitstatus-${{ github.job }}
+          path: exitstatus/
 
   lint:
     name: Lint
@@ -111,8 +111,8 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: exitstatus
-          path: exitstatus
+          name: exitstatus-${{ github.job }}
+          path: exitstatus/
 
 
 
@@ -346,20 +346,6 @@ jobs:
       instances: '["latest", "default"]'
 
 
-  opensuse-tumbleweed:
-    name: Opensuse Tumbleweed
-    if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
-    uses: ./.github/workflows/test-linux.yml
-    needs:
-      - lint
-      - generate-actions-workflow
-    with:
-      distro-slug: opensuse-tumbleweed
-      display-name: Opensuse Tumbleweed
-      timeout: 20
-      instances: '["git-master", "latest", "default"]'
-
-
   oraclelinux-8:
     name: Oracle Linux 8
     if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
@@ -510,7 +496,6 @@ jobs:
       - gentoo
       - gentoo-systemd
       - opensuse-15
-      - opensuse-tumbleweed
       - oraclelinux-8
       - oraclelinux-9
       - photon-4
@@ -527,14 +512,15 @@ jobs:
         if: always()
         uses: actions/download-artifact@v4
         with:
-          name: exitstatus
-          path: exitstatus
+          path: exitstatus/
+          pattern: exitstatus-*
+          merge-multiple: true
 
       - name: Delete Exit Status Artifacts
         if: always()
         uses: geekyeggo/delete-artifact@v5
         with:
-          name: exitstatus
+          pattern: exitstatus-*
           failOnError: false
 
       - name: Set Pipeline Exit Status

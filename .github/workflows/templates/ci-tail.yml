@@ -13,14 +13,15 @@
         if: always()
         uses: actions/download-artifact@v4
         with:
-          name: exitstatus
-          path: exitstatus
+          path: exitstatus/
+          pattern: exitstatus-*
+          merge-multiple: true
 
       - name: Delete Exit Status Artifacts
         if: always()
         uses: geekyeggo/delete-artifact@v5
         with:
-          name: exitstatus
+          pattern: exitstatus-*
           failOnError: false
 
       - name: Set Pipeline Exit Status

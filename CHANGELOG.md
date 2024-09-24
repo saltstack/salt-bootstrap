@@ -1,3 +1,36 @@
+# v2024.09.24
+
+## What's Changed
+
+- Add KDE neon to list of Ubuntu derivates (again) by @digitalkram in https://github.com/saltstack/salt-bootstrap/pull/2016
+- Debugging build failures on Arch, Fedora and Tumbleweed by @dmurphy18 in https://github.com/saltstack/salt-bootstrap/pull/2018
+- Reset \_PIP_INSTALL_ARGS to empty for Alpine, similar to Ubuntu and Debian by @dmurphy18 in https://github.com/saltstack/salt-bootstrap/pull/2019
+- Updated deprecated versions for actions for upload, download, checkout for release by @dmurphy18 in https://github.com/saltstack/salt-bootstrap/pull/2020
+- Further action updates by @dmurphy18 in https://github.com/saltstack/salt-bootstrap/pull/2021
+
+**Full Changelog**: https://github.com/saltstack/salt-bootstrap/compare/v2024.07.23...v2024.09.24
+
+# v2024.09.23
+
+## What's Changed
+
+- Add KDE neon to list of Ubuntu derivates (again) by @digitalkram in https://github.com/saltstack/salt-bootstrap/pull/2016
+- Debugging build failures on Arch, Fedora and Tumbleweed by @dmurphy18 in https://github.com/saltstack/salt-bootstrap/pull/2018
+- Reset \_PIP_INSTALL_ARGS to empty for Alpine, similar to Ubuntu and Debian by @dmurphy18 in https://github.com/saltstack/salt-bootstrap/pull/2019
+- Updated deprecated versions for actions for upload, download, checkout for release by @dmurphy18 in https://github.com/saltstack/salt-bootstrap/pull/2020
+
+**Full Changelog**: https://github.com/saltstack/salt-bootstrap/compare/v2024.07.23...v2024.09.23
+
+# v2024.09.23
+
+## What's Changed
+
+- Add KDE neon to list of Ubuntu derivates (again) by @digitalkram in https://github.com/saltstack/salt-bootstrap/pull/2016
+- Debugging build failures on Arch, Fedora and Tumbleweed by @dmurphy18 in https://github.com/saltstack/salt-bootstrap/pull/2018
+- Reset \_PIP_INSTALL_ARGS to empty for Alpine, similar to Ubuntu and Debian by @dmurphy18 in https://github.com/saltstack/salt-bootstrap/pull/2019
+
+**Full Changelog**: https://github.com/saltstack/salt-bootstrap/compare/v2024.07.23...v2024.09.23
+
 # v2024.07.23
 
 ## What's Changed

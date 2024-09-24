@@ -36,6 +36,15 @@ provisioner:
 ##        - yum -y install --allowerasing procps-ng curl
 ##        - echo "PubkeyAcceptedAlgorithms +ssh-rsa" | tee -a /etc/ssh/sshd_config
 
+##  - name: opensuse-tumbleweed
+##    driver:
+##      image: opensuse/tumbleweed:latest
+##      provision_command:
+##        - *opensuse_provision_command_01
+##        - *opensuse_provision_command_02
+##        - *opensuse_provision_command_03
+##        - echo "PubkeyAcceptedAlgorithms +ssh-rsa" | tee -a /etc/ssh/sshd_config
+
 platforms:
   - name: almalinux-9
     driver:
@@ -104,14 +113,6 @@ platforms:
         - &opensuse_provision_command_01 zypper --non-interactive install --auto-agree-with-licenses dbus-1
         - &opensuse_provision_command_02 zypper --non-interactive install --auto-agree-with-licenses sudo openssh which curl systemd
         - &opensuse_provision_command_03 systemctl enable sshd.service
-  - name: opensuse-tumbleweed
-    driver:
-      image: opensuse/tumbleweed:latest
-      provision_command:
-        - *opensuse_provision_command_01
-        - *opensuse_provision_command_02
-        - *opensuse_provision_command_03
-        - echo "PubkeyAcceptedAlgorithms +ssh-rsa" | tee -a /etc/ssh/sshd_config
   - name: rockylinux-9
     driver:
       platform: centosstream

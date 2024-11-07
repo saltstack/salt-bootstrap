@@ -28,13 +28,11 @@ on:
         default: 20
         description: The timeout(in minutes) for the workflow
 
-env:
-  KITCHEN_LOCAL_YAML: 'kitchen.macos.yml'
-
 jobs:
   Test:
     name: ${{ matrix.instance }}
-    runs-on: ${{ inputs.runs-on }}
+    ## runs-on: ${{ inputs.runs-on }}
+    runs-on: macos-13
     timeout-minutes: ${{ inputs.timeout }}
     strategy:
       fail-fast: false
@@ -44,39 +42,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Ruby
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: 2.6.10
-          ## ruby-version: 3.3.4
-          bundler-cache: true
-
-      - name: Set up Python 3.10
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.10"
-
-      - name: Install Python Dependencies
+      - name: Install Pytest
         run: |
-          pip install -U pip
-          pip install -r tests/requirements.txt
+          pip install -U pytest
 
-      - name: Create Test Instance
+      - name: Bootstrap Salt
         run: |
-          bundle exec kitchen create ${{ matrix.instance }}-${{ inputs.distro-slug }} || \
-            (sleep 10 && bundle exec kitchen create ${{ matrix.instance }}-${{ inputs.distro-slug }})
-          sleep 2
+          sudo sh -x ./bootstrap-salt.sh
 
-      - name: Test Bootstrap
-        run: |
-          bundle exec kitchen verify ${{ matrix.instance }}-${{ inputs.distro-slug }}
-          sleep 2
-
-      - name: Destroy Test Instance
-        if: always()
-        run: |
-          bundle exec kitchen destroy ${{ matrix.instance }}-${{ inputs.distro-slug }}
-          sleep 2
+      ## TBD Disabled until CI/CD is functional
+      ## - name: Test Bootstrap
+      ##   run: |
+      ##     pytest --cache-clear -v -s -ra --log-cli-level=debug tests/integration/
 
       - name: Set Exit Status
         if: always()

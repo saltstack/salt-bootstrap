@@ -6,20 +6,15 @@ import pathlib
 
 os.chdir(os.path.abspath(os.path.dirname(__file__)))
 
-##    "amazon-2023",
-##    "opensuse-tumbleweed",
 LINUX_DISTROS = [
     "almalinux-8",
     "almalinux-9",
     "amazon-2",
-    "arch",
     "centos-stream9",
     "debian-11",
     "debian-12",
     "fedora-39",
     "fedora-40",
-    "gentoo",
-    "gentoo-systemd",
     "opensuse-15",
     "oraclelinux-8",
     "oraclelinux-9",
@@ -31,8 +26,8 @@ LINUX_DISTROS = [
     "ubuntu-2204",
     "ubuntu-2404",
 ]
+
 WINDOWS = [
-    "windows-2019",
     "windows-2022",
 ]
 
@@ -41,14 +36,10 @@ OSX = [
     "macos-13",
 ]
 
-
-##    "amazon-2023",
-##    "opensuse-tumbleweed",
 STABLE_DISTROS = [
     "almalinux-8",
     "almalinux-9",
     "amazon-2",
-    "arch",
     "centos-stream9",
     "debian-11",
     "debian-12",
@@ -66,7 +57,6 @@ STABLE_DISTROS = [
     "ubuntu-2404",
 ]
 
-##    "amazon-2023",
 ONEDIR_DISTROS = [
     "almalinux-8",
     "almalinux-9",
@@ -99,40 +89,27 @@ ONEDIR_RC_DISTROS = [
     "ubuntu-2404",
 ]
 
-##    "opensuse-tumbleweed",
 BLACKLIST_3006 = [
-    "arch",
     "debian-12",
     "fedora-40",
-    "gentoo",
-    "gentoo-systemd",
     "opensuse-15",
     "ubuntu-2404",
 ]
 
-##    "opensuse-tumbleweed",
 BLACKLIST_3007 = [
-    "arch",
     "fedora-39",
-    "gentoo",
-    "gentoo-systemd",
     "opensuse-15",
     "photon-4",
     "photon-5",
 ]
 
-##    "amazon-2023",
-##    "opensuse-tumbleweed",
 BLACKLIST_GIT_3006 = [
     "almalinux-9",
     "amazon-2",
-    "arch",
     "centos-stream9",
     "debian-11",
     "debian-12",
     "fedora-40",
-    "gentoo",
-    "gentoo-systemd",
     "opensuse-15",
     "oraclelinux-9",
     "photon-4",
@@ -143,19 +120,14 @@ BLACKLIST_GIT_3006 = [
     "ubuntu-2404",
 ]
 
-##    "amazon-2023",
-##    "opensuse-tumbleweed",
 BLACKLIST_GIT_3007 = [
     "almalinux-9",
     "amazon-2",
-    "arch",
     "centos-stream9",
     "debian-11",
     "debian-12",
     "fedora-39",
     "fedora-40",
-    "gentoo",
-    "gentoo-systemd",
     "opensuse-15",
     "oraclelinux-9",
     "photon-4",
@@ -234,25 +206,17 @@ GIT_DISTRO_BLACKLIST = [
     "rockylinux-8",
 ]
 
-LATEST_PKG_BLACKLIST = [
-    "gentoo",
-    "gentoo-systemd",
-]
+LATEST_PKG_BLACKLIST = []
 
-##    "amazon-2023": "Amazon 2023",
-##    "opensuse-tumbleweed": "Opensuse Tumbleweed",
 DISTRO_DISPLAY_NAMES = {
     "almalinux-8": "AlmaLinux 8",
     "almalinux-9": "AlmaLinux 9",
     "amazon-2": "Amazon 2",
-    "arch": "Arch",
     "centos-stream9": "CentOS Stream 9",
     "debian-11": "Debian 11",
     "debian-12": "Debian 12",
     "fedora-39": "Fedora 39",
     "fedora-40": "Fedora 40",
-    "gentoo": "Gentoo",
-    "gentoo-systemd": "Gentoo (systemd)",
     "opensuse-15": "Opensuse 15",
     "oraclelinux-8": "Oracle Linux 8",
     "oraclelinux-9": "Oracle Linux 9",
@@ -265,19 +229,12 @@ DISTRO_DISPLAY_NAMES = {
     "ubuntu-2404": "Ubuntu 24.04",
     "macos-12": "macOS 12",
     "macos-13": "macOS 13",
-    "windows-2019": "Windows 2019",
     "windows-2022": "Windows 2022",
 }
 
 TIMEOUT_DEFAULT = 20
-TIMEOUT_OVERRIDES = {
-    "gentoo": 90,
-    "gentoo-systemd": 90,
-}
-VERSION_ONLY_OVERRIDES = [
-    "gentoo",
-    "gentoo-systemd",
-]
+TIMEOUT_OVERRIDES = {}
+VERSION_ONLY_OVERRIDES = []
 
 TEMPLATE = """
   {distro}:

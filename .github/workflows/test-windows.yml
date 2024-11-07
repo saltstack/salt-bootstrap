@@ -28,16 +28,10 @@ on:
         default: 20
         description: The timeout(in minutes) for the workflow
 
-env:
-  machine_user: kitchen
-  machine_pass: Password1
-  machine_port: 5985
-  KITCHEN_LOCAL_YAML: 'kitchen.windows.yml'
-
 jobs:
   Test:
     name: ${{ matrix.instance }}
-    runs-on: ${{ inputs.runs-on }}
+    runs-on: windows-latest
     timeout-minutes: ${{ inputs.timeout }}
     strategy:
       fail-fast: false
@@ -47,65 +41,34 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Ruby
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: 2.6.10
-          ## ruby-version: 3.3.4
-          bundler-cache: true
-
-      - name: Install Chef
-        uses: actionshub/chef-install@1.1.0
-        with:
-          project: chef
-          version: 16.10.8
-
-      - name: Add Chef bindir to PATH
-        uses: myci-actions/export-env-var-powershell@1
-        with:
-          name: PATH
-          value: "C:\\opscode\\chef\\bin;C:\\opscode\\chef\\embedded\\bin;$env:PATH"
-
-      - name: Setup test user
-        run: |
-          $password = ConvertTo-SecureString $env:machine_pass -AsPlainText -Force
-          New-LocalUser $env:machine_user -Password $password
-          Add-LocalGroupMember -Group "Administrators" -Member $env:machine_user
-          Get-LocalUser
-          Get-LocalGroupMember -Group "Administrators"
-
-      - name: Set up WinRM
-        run: |
-          Set-WSManQuickConfig -Force
-          winrm set winrm/config/service '@{AllowUnencrypted="True"}'
-          env
-
       - name: Set up Python 3.10
         uses: actions/setup-python@v5
         with:
           python-version: "3.10"
 
-      - name: Install Python Dependencies
+      - name: Install Pytest
         run: |
-          pip install -U pip
-          pip install -r tests/requirements.txt
+          pip install -r tests\requirements.txt
 
-      - name: Create Test Instance
+      - name: Get Version
         run: |
-          bundle exec kitchen create ${{ matrix.instance }}-${{ inputs.distro-slug }}
-          sleep 2
+          # We need to get the version here and make it an environment variable
+          # It is used to install via bootstrap and in the test
+          # The version is in the instance name
+          $instance = "${{ matrix.instance }}"
+          $version = $instance -split "-",2
+          if ( $version.Count -gt 1 ) {
+            $version = $version[1].Replace("-", ".")
+          }
+          Write-Output "SaltVersion=$version" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+      - name: Bootstrap Salt
+        run: |
+          . .\bootstrap-salt.ps1 -RunService $false -Version $env:SaltVersion
 
       - name: Test Bootstrap
         run: |
-          env
-          bundle exec kitchen verify ${{ matrix.instance }}-${{ inputs.distro-slug }}
-          sleep 2
-
-      - name: Destroy Test Instance
-        if: always()
-        run: |
-          bundle exec kitchen destroy ${{ matrix.instance }}-${{ inputs.distro-slug }}
-          sleep 2
+          pytest --cache-clear -v -s -ra --log-cli-level=debug tests/integration/
 
       - name: Set Exit Status
         if: always()

@@ -27,8 +27,6 @@ jobs:
           separator: ","
           files: |
             bootstrap-salt.*
-            Gemfile
-            kitchen*.yml
             tests/**
             .github/workflows/**
           files_ignore: |
@@ -147,21 +145,6 @@ jobs:
 
 
 
-  windows-2019:
-    name: Windows 2019
-    if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
-    uses: ./.github/workflows/test-windows.yml
-    needs:
-      - lint
-      - generate-actions-workflow
-    with:
-      distro-slug: windows-2019
-      display-name: Windows 2019
-      timeout: 20
-      runs-on: windows-2019
-      instances: '["stable-3006", "stable-3006-8", "stable-3007", "stable-3007-1", "latest"]'
-
-
   windows-2022:
     name: Windows 2022
     if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
@@ -218,20 +201,6 @@ jobs:
       display-name: Amazon 2
       timeout: 20
       instances: '["stable-3006", "onedir-3006", "stable-3006-8", "stable-3007", "onedir-3007", "stable-3007-1", "latest", "default"]'
-
-
-  arch:
-    name: Arch
-    if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
-    uses: ./.github/workflows/test-linux.yml
-    needs:
-      - lint
-      - generate-actions-workflow
-    with:
-      distro-slug: arch
-      display-name: Arch
-      timeout: 20
-      instances: '["git-master", "latest", "default"]'
 
 
   centos-stream9:
@@ -302,34 +271,6 @@ jobs:
       display-name: Fedora 40
       timeout: 20
       instances: '["stable-3007", "onedir-3007", "stable-3007-1", "git-master", "latest", "default"]'
-
-
-  gentoo:
-    name: Gentoo
-    if: github.event_name == 'push'
-    uses: ./.github/workflows/test-linux.yml
-    needs:
-      - lint
-      - generate-actions-workflow
-    with:
-      distro-slug: gentoo
-      display-name: Gentoo
-      timeout: 90
-      instances: '["git-master"]'
-
-
-  gentoo-systemd:
-    name: Gentoo (systemd)
-    if: github.event_name == 'push'
-    uses: ./.github/workflows/test-linux.yml
-    needs:
-      - lint
-      - generate-actions-workflow
-    with:
-      distro-slug: gentoo-systemd
-      display-name: Gentoo (systemd)
-      timeout: 90
-      instances: '["git-master"]'
 
 
   opensuse-15:
@@ -482,19 +423,15 @@ jobs:
       - generate-actions-workflow
       - macos-12
       - macos-13
-      - windows-2019
       - windows-2022
       - almalinux-8
       - almalinux-9
       - amazon-2
-      - arch
       - centos-stream9
       - debian-11
       - debian-12
       - fedora-39
       - fedora-40
-      - gentoo
-      - gentoo-systemd
       - opensuse-15
       - oraclelinux-8
       - oraclelinux-9

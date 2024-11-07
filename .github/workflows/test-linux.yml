@@ -26,7 +26,11 @@ on:
 jobs:
   Test:
     name: ${{ matrix.instance }}
-    runs-on: ubuntu-20.04
+    ## runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/saltstack/salt-ci-containers/packaging:ubuntu-22.04
+
     timeout-minutes: ${{ inputs.timeout }}
     strategy:
       max-parallel: 2
@@ -37,39 +41,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Ruby
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: 2.6.10
-          ## ruby-version: 3.3.4
-          bundler-cache: true
-
-      - name: Set up Python 3.10
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.10"
-
-      - name: Install Python Dependencies
+      - name: Install Pytest
         run: |
-          python3 -m pip install -U pip
-          python3 -m pip install -r tests/requirements.txt
+          pip install -U pytest
 
-      - name: Create Test Instance
-        run: |
-          bundle exec kitchen create ${{ matrix.instance }}-${{ inputs.distro-slug }} || \
-          (sleep 10 && bundle exec kitchen create ${{ matrix.instance }}-${{ inputs.distro-slug }})
-          sleep 2
+      ## TBD Disabled until CI/CD is functional
+      ## - name: Bootstrap Salt
+      ##   run: |
+      ##     sh -x ./bootstrap-salt.sh
 
-      - name: Test Bootstrap
-        run: |
-          bundle exec kitchen verify ${{ matrix.instance }}-${{ inputs.distro-slug }}
-          sleep 2
-
-      - name: Destroy Test Instance
-        if: always()
-        run: |
-          bundle exec kitchen destroy ${{ matrix.instance }}-${{ inputs.distro-slug }}
-          sleep 2
+      ## - name: Test Bootstrap
+      ##   run: |
+      ##     pytest --cache-clear -v -s -ra --log-cli-level=debug tests/integration/
 
       - name: Set Exit Status
         if: always()

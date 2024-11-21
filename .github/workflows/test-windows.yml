@@ -22,6 +22,11 @@ on:
         required: true
         description: The Instances To Test
 
+      container-slug:
+        type: string
+        required: true
+        description: The Container Slug
+
       timeout:
         type: number
         required: false
@@ -46,9 +51,9 @@ jobs:
         with:
           python-version: "3.10"
 
-      - name: Install Pytest
+      - name: Install Python Dependencies
         run: |
-          pip install -r tests\requirements.txt
+          python3 -m pip install -r tests/requirements.txt
 
       - name: Get Version
         run: |

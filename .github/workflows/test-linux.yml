@@ -17,6 +17,11 @@ on:
         required: true
         description: The Instances To Test
 
+      container-slug:
+        type: string
+        required: true
+        description: The Container Slug
+
       timeout:
         type: number
         required: false
@@ -26,10 +31,10 @@ on:
 jobs:
   Test:
     name: ${{ matrix.instance }}
-    ## runs-on: ubuntu-20.04
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/saltstack/salt-ci-containers/packaging:ubuntu-22.04
+      image: ghcr.io/saltstack/salt-ci-containers/testing:${{ inputs.container-slug }}
+      options: --privileged
 
     timeout-minutes: ${{ inputs.timeout }}
     strategy:
@@ -41,18 +46,36 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install Pytest
+      - name: Install Python Dependencies with pip breakage
+        if: ${{ ( inputs.distro-slug == 'debian-11' ) || ( inputs.distro-slug == 'debian-12' ) || ( inputs.distro-slug == 'debian-13' ) || ( inputs.distro-slug == 'ubuntu-2404' ) }}
         run: |
-          pip install -U pytest
+          python3 -m pip install --break-system-packages -r tests/requirements.txt
 
-      ## TBD Disabled until CI/CD is functional
-      ## - name: Bootstrap Salt
-      ##   run: |
-      ##     sh -x ./bootstrap-salt.sh
+      - name: Install Python Dependencies without pip breakage
+        if: ${{ ( inputs.distro-slug != 'debian-11' ) && ( inputs.distro-slug != 'debian-12' ) && ( inputs.distro-slug != 'debian-13' ) && ( inputs.distro-slug != 'ubuntu-2404' ) }}
+        run: |
+          python3 -m pip install -r tests/requirements.txt
 
-      ## - name: Test Bootstrap
-      ##   run: |
-      ##     pytest --cache-clear -v -s -ra --log-cli-level=debug tests/integration/
+      - name: Get Version
+        run: |
+          # We need to get the version here and make it an environment variable
+          # It is used to install via bootstrap and in the test
+          # The version is in the instance name
+          # sed 1st - becomes space, 2nd - becomes dot
+          vt_parm_ver=$(echo "${{ matrix.instance }}" | sed 's/-/ /' | sed 's/-/./' | awk -F ' ' '{print $2}')
+          echo "SaltVersion=$vt_parm_ver" >> $GITHUB_ENV
+
+      - name: Bootstrap Salt
+        run: |
+          # sed 1st - becomes space, 2nd - becomes dot
+          bt_arg1=$(echo "${{ matrix.instance }}" | sed 's/-/ /' | sed 's/-/./' | awk -F ' ' '{print $1}')
+          bt_arg2=$(echo "${{ matrix.instance }}" | sed 's/-/ /' | sed 's/-/./' | awk -F ' ' '{print $2}')
+          echo "bt parms ,$bt_parms, bt_arg1 ,$bt_arg1, bt_arg2 ,$bt_arg2,"
+          sh -x ./bootstrap-salt.sh "$bt_arg1" "$bt_arg2"
+
+      - name: Test Bootstrap
+        run: |
+          pytest --cache-clear -v -s -ra --log-cli-level=debug tests/integration/
 
       - name: Set Exit Status
         if: always()

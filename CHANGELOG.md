@@ -1,3 +1,17 @@
+# v2024.11.21
+
+## What's Changed
+
+- Make universal repo url by @twangboy in https://github.com/saltstack/salt-bootstrap/pull/2045
+- Update bootstrap shell CI/CD to utilize containers and clean up by @dmurphy18 in https://github.com/saltstack/salt-bootstrap/pull/2039
+- \[WIP\] hwclock check missing additional condition on major version by @ruslantum in https://github.com/saltstack/salt-bootstrap/pull/2048
+
+## New Contributors
+
+- @ruslantum made their first contribution in https://github.com/saltstack/salt-bootstrap/pull/2048
+
+**Full Changelog**: https://github.com/saltstack/salt-bootstrap/compare/v2024.11.07...v2024.11.21
+
 # v2024.11.07
 
 ## What's Changed

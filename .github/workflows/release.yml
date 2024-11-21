@@ -51,11 +51,7 @@ jobs:
 
   update-develop:
     name: Update CHANGELOG.md and bootstrap-salt.sh
-    runs-on:
-      - ubuntu-latest
-      ## - self-hosted
-      ## - linux
-      ## - repo-release
+    runs-on: ubuntu-latest
     permissions:
       contents: write  # To be able to publish the release
     environment: release
@@ -75,36 +71,6 @@ jobs:
           python3 -m pip install -r requirements/release.txt
           pre-commit install --install-hooks
 
-      ## - name: Setup GnuPG
-      ##   run: |
-      ##     sudo install -d -m 0700 -o "$(id -u)" -g "$(id -g)" /run/gpg
-      ##     GNUPGHOME="$(mktemp -d -p /run/gpg)"
-      ##     echo "GNUPGHOME=${GNUPGHOME}" >> "$GITHUB_ENV"
-      ##     cat <<EOF > "${GNUPGHOME}/gpg.conf"
-      ##     batch
-      ##     no-tty
-      ##     pinentry-mode loopback
-      ##     EOF
-
-      ## - name: Get Secrets
-      ##   id: get-secrets
-      ##   env:
-      ##     SECRETS_KEY: ${{ secrets.SECRETS_KEY }}
-      ##   run: |
-      ##     SECRETS_KEY_FILE=$(mktemp /tmp/output.XXXXXXXXXX)
-      ##     echo "$SECRETS_KEY" > "$SECRETS_KEY_FILE"
-      ##     aws --region us-west-2 secretsmanager get-secret-value --secret-id /cmbu-saltstack/signing/repo-signing-keys-sha256-2023 \
-      ##       --query SecretString --output text | jq .default_key -r | base64 -d \
-      ##       | gpg --passphrase-file "${SECRETS_KEY_FILE}" -d - \
-      ##       | gpg --import -
-      ##     sync
-      ##     aws --region us-west-2 secretsmanager get-secret-value --secret-id /cmbu-saltstack/signing/repo-signing-keys-sha256-2023 \
-      ##       --query SecretString --output text| jq .default_passphrase -r | base64 -d \
-      ##       | gpg --passphrase-file "${SECRETS_KEY_FILE}" -o "${GNUPGHOME}/passphrase" -d -
-      ##     sync
-      ##     rm "$SECRETS_KEY_FILE"
-      ##     echo "passphrase-file ${GNUPGHOME}/passphrase" >> "${GNUPGHOME}/gpg.conf"
-
       - name: Configure Git
         shell: bash
         run: |
@@ -112,8 +78,6 @@ jobs:
           git config --global user.name "Salt Project Packaging"
           git config --global user.email saltproject-packaging@vmware.com
           git config --global commit.gpgsign false
-          ## git config --global user.signingkey 64CBBC8173D76B3F
-          ## git config --global commit.gpgsign true
 
       - name: Update Repository
         id: update-repo
@@ -151,11 +115,7 @@ jobs:
 
   merge-develop-into-stable:
     name: Merge develop into stable
-    runs-on:
-      - ubuntu-latest
-      ## - self-hosted
-      ## - linux
-      ## - repo-release
+    runs-on: ubuntu-latest
     needs:
       - update-develop
     environment: release
@@ -169,36 +129,6 @@ jobs:
           ssh-key: ${{ secrets.SALT_BOOTSTRAP_RELEASE_KEY }}
           fetch-depth: 0
 
-      ## - name: Setup GnuPG
-      ##   run: |
-      ##     sudo install -d -m 0700 -o "$(id -u)" -g "$(id -g)" /run/gpg
-      ##     GNUPGHOME="$(mktemp -d -p /run/gpg)"
-      ##     echo "GNUPGHOME=${GNUPGHOME}" >> "$GITHUB_ENV"
-      ##     cat <<EOF > "${GNUPGHOME}/gpg.conf"
-      ##     batch
-      ##     no-tty
-      ##     pinentry-mode loopback
-      ##     EOF
-
-      ## - name: Get Secrets
-      ##   id: get-secrets
-      ##   env:
-      ##     SECRETS_KEY: ${{ secrets.SECRETS_KEY }}
-      ##   run: |
-      ##     SECRETS_KEY_FILE=$(mktemp /tmp/output.XXXXXXXXXX)
-      ##     echo "$SECRETS_KEY" > "$SECRETS_KEY_FILE"
-      ##     aws --region us-west-2 secretsmanager get-secret-value --secret-id /cmbu-saltstack/signing/repo-signing-keys-sha256-2023 \
-      ##       --query SecretString --output text | jq .default_key -r | base64 -d \
-      ##       | gpg --passphrase-file "${SECRETS_KEY_FILE}" -d - \
-      ##       | gpg --import -
-      ##     sync
-      ##     aws --region us-west-2 secretsmanager get-secret-value --secret-id /cmbu-saltstack/signing/repo-signing-keys-sha256-2023 \
-      ##       --query SecretString --output text| jq .default_passphrase -r | base64 -d \
-      ##       | gpg --passphrase-file "${SECRETS_KEY_FILE}" -o "${GNUPGHOME}/passphrase" -d -
-      ##     sync
-      ##     rm "$SECRETS_KEY_FILE"
-      ##     echo "passphrase-file ${GNUPGHOME}/passphrase" >> "${GNUPGHOME}/gpg.conf"
-
       - name: Configure Git
         shell: bash
         run: |
@@ -206,8 +136,6 @@ jobs:
           git config --global user.name "Salt Project Packaging"
           git config --global user.email saltproject-packaging@vmware.com
           git config --global commit.gpgsign false
-          ## git config --global user.signingkey 64CBBC8173D76B3F
-          ## git config --global commit.gpgsign true
 
       - name: Download Release Details
         uses: actions/download-artifact@v4
@@ -250,10 +178,7 @@ jobs:
 
   publish-release:
     name: Create GitHub Release
-    runs-on:
-      - ubuntu-latest
-      ## - self-hosted
-      ## - linux
+    runs-on: ubuntu-latest
     needs:
       - merge-develop-into-stable
     environment: release
@@ -299,75 +224,9 @@ jobs:
           name: release-details
           failOnError: false
 
-  ## update-s3-bucket:
-  ##   name: Update S3 Bucket
-  ##   runs-on:
-  ##     - ubuntu-latest
-  ##     ## - self-hosted
-  ##     ## - linux
-  ##     ## - repo-release
-  ##   needs:
-  ##     - publish-release
-  ##   environment: release
-
-  ##   steps:
-  ##     - uses: actions/checkout@v4
-  ##       with:
-  ##         ref: stable
-  ##         repository: ${{ github.repository }}
-  ##         ssh-key: ${{ secrets.SALT_BOOTSTRAP_RELEASE_KEY }}
-
-  ##     - name: Get Salt Project GitHub Actions Bot Environment
-  ##       run: |
-  ##         TOKEN=$(curl -sS -f -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 30")
-  ##         SPB_ENVIRONMENT=$(curl -sS -f -H "X-aws-ec2-metadata-token: $TOKEN" http://169.254.169.254/latest/meta-data/tags/instance/spb:environment)
-  ##         echo "SPB_ENVIRONMENT=$SPB_ENVIRONMENT" >> "$GITHUB_ENV"
-
-  ##     ## - name: Setup GnuPG
-  ##     ##   run: |
-  ##     ##     sudo install -d -m 0700 -o "$(id -u)" -g "$(id -g)" /run/gpg
-  ##     ##     GNUPGHOME="$(mktemp -d -p /run/gpg)"
-  ##     ##     echo "GNUPGHOME=${GNUPGHOME}" >> "$GITHUB_ENV"
-  ##     ##     cat <<EOF > "${GNUPGHOME}/gpg.conf"
-  ##     ##     batch
-  ##     ##     no-tty
-  ##     ##     pinentry-mode loopback
-  ##     ##     EOF
-
-  ##     ## - name: Get Secrets
-  ##     ##   id: get-secrets
-  ##     ##   env:
-  ##     ##     SECRETS_KEY: ${{ secrets.SECRETS_KEY }}
-  ##     ##   run: |
-  ##     ##     SECRETS_KEY_FILE=$(mktemp /tmp/output.XXXXXXXXXX)
-  ##     ##     echo "$SECRETS_KEY" > "$SECRETS_KEY_FILE"
-  ##     ##     aws --region us-west-2 secretsmanager get-secret-value --secret-id /cmbu-saltstack/signing/repo-signing-keys-sha256-2023 \
-  ##     ##       --query SecretString --output text | jq .default_key -r | base64 -d \
-  ##     ##       | gpg --passphrase-file "${SECRETS_KEY_FILE}" -d - \
-  ##     ##       | gpg --import -
-  ##     ##     sync
-  ##     ##     aws --region us-west-2 secretsmanager get-secret-value --secret-id /cmbu-saltstack/signing/repo-signing-keys-sha256-2023 \
-  ##     ##       --query SecretString --output text| jq .default_passphrase -r | base64 -d \
-  ##     ##       | gpg --passphrase-file "${SECRETS_KEY_FILE}" -o "${GNUPGHOME}/passphrase" -d -
-  ##     ##     sync
-  ##     ##     rm "$SECRETS_KEY_FILE"
-  ##     ##     echo "passphrase-file ${GNUPGHOME}/passphrase" >> "${GNUPGHOME}/gpg.conf"
-
-  ##     ## - name: Install Requirements
-  ##     ##   run: |
-  ##     ##     python3 -m pip install -r requirements/release.txt
-
-  ##     ## - name: Upload Stable Release to S3
-  ##     ##   run: |
-  ##     ##     tools release s3-publish --key-id 64CBBC8173D76B3F stable
-
   update-develop-checksums:
     name: Update Release Checksums on Develop
-    runs-on:
-      - ubuntu-latest
-      ## - self-hosted
-      ## - linux
-      ## - repo-release
+    runs-on: ubuntu-latest
     needs:
       - publish-release
     environment: release
@@ -393,36 +252,6 @@ jobs:
           repository: ${{ github.repository }}
           ssh-key: ${{ secrets.SALT_BOOTSTRAP_RELEASE_KEY }}
 
-      ## - name: Setup GnuPG
-      ##   run: |
-      ##     sudo install -d -m 0700 -o "$(id -u)" -g "$(id -g)" /run/gpg
-      ##     GNUPGHOME="$(mktemp -d -p /run/gpg)"
-      ##     echo "GNUPGHOME=${GNUPGHOME}" >> "$GITHUB_ENV"
-      ##     cat <<EOF > "${GNUPGHOME}/gpg.conf"
-      ##     batch
-      ##     no-tty
-      ##     pinentry-mode loopback
-      ##     EOF
-
-      ## - name: Get Secrets
-      ##   id: get-secrets
-      ##   env:
-      ##     SECRETS_KEY: ${{ secrets.SECRETS_KEY }}
-      ##   run: |
-      ##     SECRETS_KEY_FILE=$(mktemp /tmp/output.XXXXXXXXXX)
-      ##     echo "$SECRETS_KEY" > "$SECRETS_KEY_FILE"
-      ##     aws --region us-west-2 secretsmanager get-secret-value --secret-id /cmbu-saltstack/signing/repo-signing-keys-sha256-2023 \
-      ##       --query SecretString --output text | jq .default_key -r | base64 -d \
-      ##       | gpg --passphrase-file "${SECRETS_KEY_FILE}" -d - \
-      ##       | gpg --import -
-      ##     sync
-      ##     aws --region us-west-2 secretsmanager get-secret-value --secret-id /cmbu-saltstack/signing/repo-signing-keys-sha256-2023 \
-      ##       --query SecretString --output text| jq .default_passphrase -r | base64 -d \
-      ##       | gpg --passphrase-file "${SECRETS_KEY_FILE}" -o "${GNUPGHOME}/passphrase" -d -
-      ##     sync
-      ##     rm "$SECRETS_KEY_FILE"
-      ##     echo "passphrase-file ${GNUPGHOME}/passphrase" >> "${GNUPGHOME}/gpg.conf"
-
       - name: Configure Git
         shell: bash
         run: |
@@ -430,8 +259,6 @@ jobs:
           git config --global user.name "Salt Project Packaging"
           git config --global user.email saltproject-packaging@vmware.com
           git config --global commit.gpgsign false
-          ## git config --global user.signingkey 64CBBC8173D76B3F
-          ## git config --global commit.gpgsign true
 
       - name: Update Latest Release on README
         run: |

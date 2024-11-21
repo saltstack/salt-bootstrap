@@ -22,6 +22,11 @@ on:
         required: true
         description: The Instances To Test
 
+      container-slug:
+        type: string
+        required: true
+        description: The Container Slug
+
       timeout:
         type: number
         required: false
@@ -31,8 +36,8 @@ on:
 jobs:
   Test:
     name: ${{ matrix.instance }}
-    ## runs-on: ${{ inputs.runs-on }}
-    runs-on: macos-13
+    runs-on: ${{ inputs.runs-on }}
+    ## runs-on: macos-13
     timeout-minutes: ${{ inputs.timeout }}
     strategy:
       fail-fast: false
@@ -42,18 +47,37 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install Pytest
+      - name: Install Python Dependencies with pip breakage
+        if: ${{ ( inputs.distro-slug != 'macos-12' ) && ( inputs.distro-slug != 'macos-13' ) }}
         run: |
-          pip install -U pytest
+          python3 -m pip install --break-system-packages -r tests/requirements.txt
+
+      - name: Install Python Dependencies without pip breakage
+        if: ${{ ( inputs.distro-slug == 'macos-12' ) || ( inputs.distro-slug == 'macos-13' ) }}
+        run: |
+          python3 -m pip install -r tests/requirements.txt
+
+      - name: Get Version
+        run: |
+          # We need to get the version here and make it an environment variable
+          # It is used to install via bootstrap and in the test
+          # The version is in the instance name
+          # sed 1st - becomes space, 2nd - becomes dot
+          vt_parms=$(echo "${{ matrix.instance }}" | sed 's/-/ /' | sed 's/-/./')
+          vt_parm_ver=$(echo "$vt_parms" | awk -F ' ' '{print $2}')
+          echo "SaltVersion=$vt_parm_ver" >> $GITHUB_ENV
 
       - name: Bootstrap Salt
         run: |
-          sudo sh -x ./bootstrap-salt.sh
+          # sed 1st - becomes space, 2nd - becomes dot
+          bt_parms=$(echo "${{ matrix.instance }}" | sed 's/-/ /' | sed 's/-/./')
+          bt_arg1=$(echo "$bt_parms" | awk -F ' ' '{print $1}')
+          bt_arg2=$(echo "$bt_parms" | awk -F ' ' '{print $2}')
+          sudo sh ./bootstrap-salt.sh "$bt_arg1" "$bt_arg2"
 
-      ## TBD Disabled until CI/CD is functional
-      ## - name: Test Bootstrap
-      ##   run: |
-      ##     pytest --cache-clear -v -s -ra --log-cli-level=debug tests/integration/
+      - name: Test Bootstrap
+        run: |
+          pytest --cache-clear -v -s -ra --log-cli-level=debug tests/integration/
 
       - name: Set Exit Status
         if: always()

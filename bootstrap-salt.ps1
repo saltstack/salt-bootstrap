@@ -48,7 +48,6 @@
 [CmdletBinding()]
 param(
     [Parameter(Mandatory=$false, ValueFromPipeline=$True)]
-    [ValidatePattern('^(\d{4}(\.\d{1,2}){0,2}(\-\d{1})?)|(latest)$', Options=1)]
     [Alias("v")]
     # The version of the Salt minion to install. Default is "latest" which will
     # install the latest version of Salt minion available. Doesn't support
@@ -108,7 +107,7 @@ if ($help) {
     exit 0
 }
 
-$__ScriptVersion = "2024.11.07"
+$__ScriptVersion = "2024.11.21"
 $ScriptName = $myInvocation.MyCommand.Name
 
 # We'll check for the Version next, because it also has no requirements
@@ -153,34 +152,116 @@ function Get-MajorVersion {
     return ( $Version -split "\." )[0]
 }
 
-function Convert-PSObjectToHashtable {
-    param (
-        [Parameter(ValueFromPipeline)]
-        $InputObject
-    )
-    if ($null -eq $InputObject) { return $null }
+function Get-AvailableVersions {
+    # Get available versions from a remote location specified in the Source
+    # Parameter
+    Write-Verbose "Getting version information from the repo"
+    Write-Verbose "base_url: $base_url"
 
-    $is_enum = $InputObject -is [System.Collections.IEnumerable]
-    $not_string = $InputObject -isnot [string]
-    if ($is_enum -and $not_string) {
-        $collection = @(
-            foreach ($object in $InputObject) {
-                Convert-PSObjectToHashtable $object
-            }
-        )
+    $available_versions = [System.Collections.ArrayList]@()
 
-        Write-Host -NoEnumerate $collection
-    } elseif ($InputObject -is [PSObject]) {
-        $hash = @{}
-
-        foreach ($property in $InputObject.PSObject.Properties) {
-            $hash[$property.Name] = Convert-PSObjectToHashtable $property.Value
+    if ( $base_url.StartsWith("http") -or $base_url.StartsWith("ftp") ) {
+        # We're dealing with HTTP, HTTPS, or FTP
+        $response = Invoke-WebRequest "$base_url" -UseBasicParsing
+        try {
+            $response = Invoke-WebRequest "$base_url" -UseBasicParsing
+        } catch {
+            Write-Host "Failed to get version information" -ForegroundColor Red
+            exit 1
         }
 
-        $hash
+        if ( $response.StatusCode -ne 200 ) {
+            Write-Host "There was an error getting version information" -ForegroundColor Red
+            Write-Host "Error: $($response.StatusCode)" -ForegroundColor red
+            exit 1
+        }
+
+        $response.links | ForEach-Object {
+            if ( $_.href.Length -gt 8) {
+                Write-Host "The content at this location is unexpected" -ForegroundColor Red
+                Write-Host "Should be a list of directories where the name is a version of Salt" -ForegroundColor Red
+                exit 1
+            }
+        }
+
+        # Getting available versions from response
+        Write-Verbose "Getting available versions from response"
+        $filtered = $response.Links | Where-Object -Property href -NE "../"
+        $filtered | Select-Object -Property href | ForEach-Object {
+            $available_versions.Add($_.href.Trim("/")) | Out-Null
+        }
+    } elseif ( $base_url.StartsWith("\\") -or $base_url -match "^[A-Za-z]:\\" ) {
+        # We're dealing with a local directory or SMB source
+        Get-ChildItem -Path $base_url -Directory | ForEach-Object {
+            $available_versions.Add($_.Name) | Out-Null
+        }
     } else {
-        $InputObject
+        Write-Host "Unknown Source Type" -ForegroundColor Red
+        Write-Host "Must be one of HTTP, HTTPS, FTP, SMB Share, Local Directory" -ForegroundColor Red
+        exit 1
     }
+
+    Write-Verbose "Available versions:"
+    $available_versions | ForEach-Object {
+        Write-Verbose "- $_"
+    }
+
+    # Get the latest version, should be the last in the list
+    Write-Verbose "Getting latest available version"
+    $latest = $available_versions | Select-Object -Last 1
+    Write-Verbose "Latest available version: $latest"
+
+    # Create a versions table
+    # This will have the latest version available, the latest version available
+    # for each major version, and every version available. This makes the
+    # version lookup logic easier. The contents of the versions table can be
+    # found by running -Verbose
+    Write-Verbose "Populating the versions table"
+    $versions_table = [ordered]@{"latest"=$latest}
+    $available_versions | ForEach-Object {
+        $versions_table[$(Get-MajorVersion $_)] = $_
+        $versions_table[$_.ToLower()] = $_.ToLower()
+    }
+
+    Write-Verbose "Versions Table:"
+    $versions_table | Sort-Object Name | Out-String | ForEach-Object {
+        Write-Verbose "$_"
+    }
+
+    return $versions_table
+}
+
+function Get-HashFromArtifactory {
+    # This function uses the artifactory API to get the SHA265 Hash for the file
+    # If Source is NOT artifactory, the sha will not be checked
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory=$true)]
+        [String] $SaltVersion,
+
+        [Parameter(Mandatory=$true)]
+        [String] $SaltFileName
+    )
+    if ( $api_url ) {
+        $full_url = "$api_url/$SaltVersion/$SaltFileName"
+        Write-Verbose "Querying Artifactory API for hash:"
+        Write-Verbose $full_url
+        try {
+            $response = Invoke-RestMethod $full_url -UseBasicParsing
+            return $response.checksums.sha256
+        } catch {
+            Write-Verbose "Artifactory API Not available or file not"
+            Write-Verbose "available at specified location"
+            Write-Verbose "Hash will not be checked"
+            return ""
+        }
+        Write-Verbose "No hash found for this file: $SaltFileName"
+        Write-Verbose "Hash will not be checked"
+        return ""
+    }
+    Write-Verbose "No artifactory API defined"
+    Write-Verbose "Hash will not be checked"
+    return ""
 }
 
 function Get-FileHash {
@@ -313,16 +394,26 @@ if ($majorVersion -lt "3006") {
 #===============================================================================
 $ConfDir = "$RootDir\conf"
 $PkiDir  = "$ConfDir\pki\minion"
-$RootDir = "$env:ProgramData\Salt Project\Salt"
-$DfltUrl = "https://packages.broadcom.com/artifactory/saltproject-generic/windows/"
-$ApiUrl  = "https://packages.broadcom.com/artifactory/api/storage/saltproject-generic/windows"
 
+$RootDir = "$env:ProgramData\Salt Project\Salt"
 # Check for existing installation where RootDir is stored in the registry
 $SaltRegKey = "HKLM:\SOFTWARE\Salt Project\Salt"
 if (Test-Path -Path $SaltRegKey) {
     if ($null -ne (Get-ItemProperty $SaltRegKey).root_dir) {
         $RootDir = (Get-ItemProperty $SaltRegKey).root_dir
     }
+}
+
+# Get repo and api URLs. An artifactory URL will have "artifactory" in it
+$domain, $target = $RepoUrl -split "/artifactory/"
+if ( $target ) {
+    # Create $base_url and $api_url
+    $base_url = "$domain/artifactory/$target"
+    $api_url = "$domain/artifactory/api/storage/$target"
+} else {
+    # This is a non-artifactory url, there is no api
+    $base_url = $domain
+    $api_url = ""
 }
 
 #===============================================================================
@@ -335,8 +426,8 @@ Write-Verbose "version: $Version"
 Write-Verbose "runservice: $RunService"
 Write-Verbose "master: $Master"
 Write-Verbose "minion: $Minion"
-Write-Verbose "repourl: $RepoUrl"
-Write-Verbose "apiurl: $ApiUrl"
+Write-Verbose "repourl: $base_url"
+Write-Verbose "apiurl: $api_url"
 Write-Verbose "ConfDir: $ConfDir"
 Write-Verbose "RootDir: $RootDir"
 
@@ -393,89 +484,33 @@ if ( $ConfigureOnly ) {
 #===============================================================================
 # Detect architecture
 #===============================================================================
-if ([IntPtr]::Size -eq 4) {
-    $arch = "x86"
-} else {
-    $arch = "AMD64"
-}
+if ([IntPtr]::Size -eq 4) { $arch = "x86" } else { $arch = "AMD64" }
 
 #===============================================================================
 # Getting version information from the repo
 #===============================================================================
-if ( $RepoUrl -eq $DfltUrl ) {
-    Write-Verbose "Getting version information from Artifactory"
-    $response = Invoke-WebRequest $ApiUrl -UseBasicParsing
-    # Convert the output to a powershell object
-    $psobj = $response.ToString() | ConvertFrom-Json
+$versions = Get-AvailableVersions
 
-    # Filter the object for folders
-    $filtered = $psobj.children | Where-Object -Property folder -EQ $true
-
-    # Get each uri and add it to the list of versions
-    $available_versions = [System.Collections.ArrayList]@()
-    $filtered | Select-Object -Property uri | ForEach-Object {
-        $available_versions.Add($_.uri.Trim("/")) | Out-Null
-    }
-
-    # Create a versions table, similar to repo.json
-    # This will have the latest version available, the latest version available for
-    # each major version, and every version available. This makes the version
-    # lookup logic easier. You can view the contents of the versions table by
-    # passing the -Verbose command
-    $latest = $available_versions | Select-Object -Last 1
-    $versions_table = [ordered]@{"latest"=$latest}
-
-    $available_versions | ForEach-Object {
-        $versions_table[$(Get-MajorVersion $_)] = $_
-        $versions_table[$_.ToLower()] = $_.ToLower()
-    }
-
-    Write-Verbose "Available versions:"
-    $available_versions | ForEach-Object {
-        Write-Verbose "- $_"
-    }
-    Write-Verbose "Versions Table:"
-    $versions_table | Sort-Object Name | Out-String | Write-Verbose
-
-    #===============================================================================
-    # Validate passed version
-    #===============================================================================
-    if ( $versions_table.Contains($Version.ToLower()) ) {
-        $Version = $versions_table[$Version.ToLower()]
-    } else {
-        Write-Host "Version $Version is not available" -ForegroundColor Red
-        Write-Host "Available versions are:" -ForegroundColor Yellow
-        $available_versions | ForEach-Object { Write-Host "- $_" -ForegroundColor Yellow }
-        exit 1
-    }
-
-    #===============================================================================
-    # Get file url and sha256
-    #===============================================================================
-    $saltFileName = "Salt-Minion-$Version-Py3-$arch-Setup.exe"
-    $response = Invoke-WebRequest "$ApiUrl/$Version/$saltFileName" -UseBasicParsing
-    $psobj = $response.ToString() | ConvertFrom-Json
-    $saltFileUrl = $psobj.downloadUri
-    $saltSha256  = $psobj.checksums.sha256
-
-    if ( $saltFileName -and $saltVersion -and $saltSha256) {
-        Write-Verbose "Found Name, Version, and Sha"
-    } else {
-        # We will guess the name of the installer
-        Write-Verbose "Failed to get Name, Version, and Sha from Artifactory API"
-        Write-Verbose "We'll try to find the file in standard paths"
-        $saltFileName = "Salt-Minion-$Version-Py3-$arch-Setup.exe"
-        $saltVersion = $Version
-    }
+#===============================================================================
+# Validate passed version
+#===============================================================================
+Write-Verbose "Looking up version: $Version"
+if ( $versions.Contains($Version.ToLower()) ) {
+    $Version = $versions[$Version.ToLower()]
+    Write-Verbose "Found version: $Version"
 } else {
-    # If we're using a custom RepoUrl, we're going to assum that the binary is
-    # in the reoot of the RepoUrl/Version. We will not check the sha on custom
-    # repos
-    $saltFileName = "Salt-Minion-$Version-Py3-$arch-Setup.exe"
-    $saltFileUrl = "$RepoUrl/$Version/$saltFileName"
-    $saltVersion = $Version
-    $saltSha256 = ""
+    Write-Host "Version $Version is not available" -ForegroundColor Red
+    Write-Host "Available versions are:" -ForegroundColor Yellow
+    $versions
+    exit 1
 }
+
+#===============================================================================
+# Get file url and sha256
+#===============================================================================
+$saltFileName = "Salt-Minion-$Version-Py3-$arch-Setup.exe"
+$saltFileUrl = "$base_url/$Version/$saltFileName"
+$saltSha256 = Get-HashFromArtifactory -SaltVersion $Version -SaltFileName $saltFileName
 
 #===============================================================================
 # Download minion setup file
@@ -484,7 +519,7 @@ Write-Host "====================================================================
 Write-Host " Bootstrapping Salt Minion" -ForegroundColor Green
 Write-Host " - version: $Version"
 Write-Host " - file name: $saltFileName"
-Write-Host " - file url: $saltFileUrl"
+Write-Host " - file url : $saltFileUrl"
 Write-Host " - file hash: $saltSha256"
 Write-Host " - master: $Master"
 Write-Host " - minion id: $Minion"
@@ -498,9 +533,11 @@ Write-Verbose ""
 Write-Verbose "Salt File URL: $saltFileUrl"
 Write-Verbose "Local File: $localFile"
 
-if ( Test-Path -Path $localFile ) {Remove-Item -Path $localFile -Force}
-Invoke-WebRequest -Uri $saltFileUrl -OutFile $localFile
+# Remove existing local file
+if ( Test-Path -Path $localFile ) { Remove-Item -Path $localFile -Force }
 
+# Download the file
+Invoke-WebRequest -Uri $saltFileUrl -OutFile $localFile
 if ( Test-Path -Path $localFile ) {
     Write-Host "Success" -ForegroundColor Green
 } else {
@@ -508,6 +545,7 @@ if ( Test-Path -Path $localFile ) {
     exit 1
 }
 
+# Compare the hash if there is a hash to compare
 if ( $saltSha256 ) {
     $localSha256 = (Get-FileHash -Path $localFile -Algorithm SHA256).Hash
     Write-Host "Comparing Hash: " -NoNewline
@@ -546,13 +584,13 @@ $process = Start-Process $localFile `
     -NoNewWindow -PassThru
 
 # Sometimes the installer hangs... we'll wait 5 minutes and then kill it
-Write-Verbose ""
 Write-Verbose "Waiting for installer to finish"
 $process | Wait-Process -Timeout 300 -ErrorAction SilentlyContinue
 $process.Refresh()
 
 if ( !$process.HasExited ) {
-    Write-Host "Installer Timeout" -ForegroundColor Yellow
+    Write-Verbose "Installer Timeout"
+    Write-Host ""
     Write-Host "Killing hung installer: " -NoNewline
     $process | Stop-Process
     $process.Refresh()

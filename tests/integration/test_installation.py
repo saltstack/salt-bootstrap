@@ -15,7 +15,9 @@ def path():
         salt_path = "C:\\Program Files\\Salt Project\\Salt"
         if salt_path not in os.environ["path"]:
             os.environ["path"] = f'{os.environ["path"]};{salt_path}'
-    yield os.environ["path"]
+        yield os.environ["path"]
+    else:
+        yield ""
 
 
 def run_salt_call(cmd):
@@ -23,9 +25,33 @@ def run_salt_call(cmd):
     Runs salt call command and returns a dictionary
     Accepts cmd as a list
     """
-    cmd.append("--out=json")
-    result = subprocess.run(cmd, capture_output=True, text=True)
-    json_data = json.loads(result.stdout)
+    json_data = {"local": {}}
+    if platform.system() == "Windows":
+        cmd.append("--out=json")
+        result = subprocess.run(cmd, capture_output=True, text=True)
+        print(
+            f"DGM run_salt_call, cmd '{cmd}', result '{result}', stdout '{result.stdout}'",
+            flush=True,
+        )
+        if 0 == result.returncode:
+            json_data = json.loads(result.stdout)
+        else:
+            log.error(f"failed to produce output result, '{result}'")
+
+    else:
+        cmdl = ["sudo"]
+        cmdl.extend(cmd)
+        cmdl.append("--out=json")
+        result = subprocess.run(cmdl, capture_output=True, text=True)
+        print(
+            f"DGM run_salt_call, cmdl '{cmdl}', result '{result}', stdout '{result.stdout}'",
+            flush=True,
+        )
+        if 0 == result.returncode:
+            json_data = json.loads(result.stdout)
+        else:
+            log.error(f"failed to produce output result, '{result}'")
+
     return json_data["local"]
 
 
@@ -48,5 +74,10 @@ def test_target_salt_version(path, target_salt_version):
         pytest.skip(f"No target version specified")
     cmd = ["salt-call", "--local", "grains.item", "saltversion", "--timeout=120"]
     result = run_salt_call(cmd)
+    dgm_saltversion = result["saltversion"]
+    print(
+        f"DGM test_target_salt_version, target_salt_version '{target_salt_version}', result saltversion '{dgm_saltversion }', result '{result}'",
+        flush=True,
+    )
     # Returns: {'saltversion': '3006.9+217.g53cfa53040'}
     assert result["saltversion"] == target_salt_version

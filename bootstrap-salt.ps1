@@ -39,7 +39,8 @@
     Salt Bootstrap GitHub Project (script home) - https://github.com/saltstack/salt-bootstrap
     Original Vagrant Provisioner Project - https://github.com/saltstack/salty-vagrant
     Vagrant Project (utilizes this script) - https://github.com/mitchellh/vagrant
-    Salt Download Location - https://repo.saltproject.io/salt/py3/windows
+    Salt Download Location - https://packages.broadcom.com/artifactory/saltproject-generic/windows/
+    Salt Manual Install Directions (Windows) - https://docs.saltproject.io/salt/install-guide/en/latest/topics/install-by-operating-system/windows.html
 #>
 
 #===============================================================================
@@ -107,7 +108,7 @@ if ($help) {
     exit 0
 }
 
-$__ScriptVersion = "2024.11.21"
+$__ScriptVersion = "2024.11.25"
 $ScriptName = $myInvocation.MyCommand.Name
 
 # We'll check for the Version next, because it also has no requirements

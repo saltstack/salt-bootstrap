@@ -125,7 +125,7 @@ To view the latest options and descriptions for ``salt-bootstrap``, use ``-h`` a
         all pip pkgs into the virtualenv.
         (Only available for Ubuntu based distributions)
     -A  Pass the salt-master DNS name or IP. This will be stored under
-        ${BS_SALT_ETC_DIR}/minion.d/99-master-address.conf
+        \${BS_SALT_ETC_DIR}/minion.d/99-master-address.conf
     -b  Assume that dependencies are already installed and software sources are
         set up. If git is selected, git tree is still checked out as dependency
         step.
@@ -136,7 +136,7 @@ To view the latest options and descriptions for ``salt-bootstrap``, use ``-h`` a
         dependencies could be installed to write configuration with -j or -J.
     -d  Disables checking if Salt services are enabled to start on system boot.
         You can also do this by touching /tmp/disable_salt_checks on the target
-        host. Default: ${BS_FALSE}
+        host. Default: \${BS_FALSE}
     -D  Show debug output
     -f  Force shallow cloning for git installations.
         This may result in an "n/a" in the version number.
@@ -146,7 +146,7 @@ To view the latest options and descriptions for ``salt-bootstrap``, use ``-h`` a
     -H  Use the specified HTTP proxy for all download URLs (including https://).
         For example: http://myproxy.example.com:3128
     -i  Pass the salt-minion id. This will be stored under
-        ${BS_SALT_ETC_DIR}/minion_id
+        \${BS_SALT_ETC_DIR}/minion_id
     -I  If set, allow insecure connections while downloading any files. For
         example, pass '--no-check-certificate' to 'wget' or '--insecure' to
         'curl'. On Debian and Ubuntu, using this option with -U allows obtaining

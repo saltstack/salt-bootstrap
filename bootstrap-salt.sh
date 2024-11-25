@@ -5112,79 +5112,79 @@ install_oracle_linux_check_services() {
 
 #######################################################################################################################
 #
-#   RockyLinux Install Functions
+#   AlmaLinux Install Functions
 #
-install_rockylinux_stable_deps() {
+install_almalinux_stable_deps() {
     install_centos_stable_deps || return 1
     return 0
 }
 
-install_rockylinux_git_deps() {
+install_almalinux_git_deps() {
     install_centos_git_deps || return 1
     return 0
 }
 
-install_rockylinux_onedir_deps() {
+install_almalinux_onedir_deps() {
     install_centos_onedir_deps || return 1
     return 0
 }
 
-install_rockylinux_testing_deps() {
+install_almalinux_testing_deps() {
     install_centos_testing_deps || return 1
     return 0
 }
 
-install_rockylinux_stable() {
+install_almalinux_stable() {
     install_centos_stable || return 1
     return 0
 }
 
-install_rockylinux_git() {
+install_almalinux_git() {
     install_centos_git || return 1
     return 0
 }
 
-install_rockylinux_onedir() {
+install_almalinux_onedir() {
     install_centos_onedir || return 1
     return 0
 }
 
-install_rockylinux_testing() {
+install_almalinux_testing() {
     install_centos_testing || return 1
     return 0
 }
 
-install_rockylinux_stable_post() {
+install_almalinux_stable_post() {
     install_centos_stable_post || return 1
     return 0
 }
 
-install_rockylinux_git_post() {
+install_almalinux_git_post() {
     install_centos_git_post || return 1
     return 0
 }
 
-install_rockylinux_onedir_post() {
+install_almalinux_onedir_post() {
     install_centos_onedir_post || return 1
     return 0
 }
 
-install_rockylinux_testing_post() {
+install_almalinux_testing_post() {
     install_centos_testing_post || return 1
     return 0
 }
 
-install_rockylinux_restart_daemons() {
+install_almalinux_restart_daemons() {
     install_centos_restart_daemons || return 1
     return 0
 }
 
-install_rockylinux_check_services() {
+install_almalinux_check_services() {
     install_centos_check_services || return 1
     return 0
 }
 #
-#   Ended RockyLinux Install Functions
+#   Ended AlmaLinux Install Functions
 #
 #######################################################################################################################
 

@@ -26,7 +26,7 @@
 #======================================================================================================================
 set -o nounset                              # Treat unset variables as an error
 
-__ScriptVersion="2024.11.21"
+__ScriptVersion="2024.11.26"
 __ScriptName="bootstrap-salt.sh"
 
 __ScriptFullName="$0"
@@ -544,8 +544,8 @@ __exit_cleanup() {
             echodebug "Cleaning up the Salt Temporary Git Repository"
             # shellcheck disable=SC2164
             cd "${__SALT_GIT_CHECKOUT_PARENT_DIR}"
-            rm -rf "${_SALT_GIT_CHECKOUT_DIR}"
-            #rm -rf "${_SALT_GIT_CHECKOUT_DIR}/deps"
+            rm -fR "${_SALT_GIT_CHECKOUT_DIR}"
+            #rm -fR "${_SALT_GIT_CHECKOUT_DIR}/deps"
         else
             echowarn "Not cleaning up the Salt Temporary git repository on request"
             echowarn "Note that if you intend to re-run this script using the git approach, you might encounter some issues"
@@ -2093,12 +2093,19 @@ __tdnf_install_noinput() {
 #   DESCRIPTION:  (DRY) Helper function to clone and checkout salt to a
 #                 specific revision.
 #----------------------------------------------------------------------------------------------------------------------
+# shellcheck disable=SC2120
 __git_clone_and_checkout() {
 
     echodebug "Installed git version: $(git --version | awk '{ print $3 }')"
     # Turn off SSL verification if -I flag was set for insecure downloads
     if [ "$_INSECURE_DL" -eq $BS_TRUE ]; then
         export GIT_SSL_NO_VERIFY=1
+    fi
+
+    if [ "$(echo "$GIT_REV" | grep -E '^(3006|3007)$')" != "" ]; then
+        GIT_REV_ADJ="$GIT_REV.x"  # branches are 3006.x or 3007.x
+    else
+        GIT_REV_ADJ="$GIT_REV"
     fi
 
     __SALT_GIT_CHECKOUT_PARENT_DIR=$(dirname "${_SALT_GIT_CHECKOUT_DIR}" 2>/dev/null)
@@ -2129,15 +2136,15 @@ __git_clone_and_checkout() {
             git fetch --tags upstream
         fi
 
-        echodebug "Hard reseting the cloned repository to ${GIT_REV}"
-        git reset --hard "$GIT_REV" || return 1
+        echodebug "Hard reseting the cloned repository to ${GIT_REV_ADJ}"
+        git reset --hard "$GIT_REV_ADJ" || return 1
 
-        # Just calling `git reset --hard $GIT_REV` on a branch name that has
+        # Just calling `git reset --hard $GIT_REV_ADJ` on a branch name that has
         # already been checked out will not update that branch to the upstream
         # HEAD; instead it will simply reset to itself.  Check the ref to see
         # if it is a branch name, check out the branch, and pull in the
         # changes.
-        if git branch -a | grep -q "${GIT_REV}"; then
+        if git branch -a | grep -q "${GIT_REV_ADJ}"; then
             echodebug "Rebasing the cloned repository branch"
             git pull --rebase || return 1
         fi
@@ -2159,16 +2166,16 @@ __git_clone_and_checkout() {
             # cloning we need actually works
             if [ "$(git clone 2>&1 | grep 'single-branch')" != "" ]; then
                 # The "--single-branch" option is supported, attempt shallow cloning
-                echoinfo "Attempting to shallow clone $GIT_REV from Salt's repository ${_SALT_REPO_URL}"
+                echoinfo "Attempting to shallow clone $GIT_REV_ADJ from Salt's repository ${_SALT_REPO_URL}"
                 ## Shallow cloning is resulting in the wrong version of Salt, even with a depth of 5
                 ## getting 3007.0+0na.246d066 when it should be 3007.1+410.g246d066457, disabling for now
-                ## if git clone --depth 1 --branch "$GIT_REV" "$_SALT_REPO_URL" "$__SALT_CHECKOUT_REPONAME"; then
-                echodebug "git command, git clone --branch $GIT_REV $_SALT_REPO_URL $__SALT_CHECKOUT_REPONAME"
-                if git clone --branch "$GIT_REV" "$_SALT_REPO_URL" "$__SALT_CHECKOUT_REPONAME"; then
+                ## if git clone --depth 1 --branch "$GIT_REV_ADJ" "$_SALT_REPO_URL" "$__SALT_CHECKOUT_REPONAME"; then
+                echodebug "git command, git clone --branch $GIT_REV_ADJ $_SALT_REPO_URL $__SALT_CHECKOUT_REPONAME"
+                if git clone --branch "$GIT_REV_ADJ" "$_SALT_REPO_URL" "$__SALT_CHECKOUT_REPONAME"; then
                     # shellcheck disable=SC2164
                     cd "${_SALT_GIT_CHECKOUT_DIR}"
                     __SHALLOW_CLONE=$BS_TRUE
-                    echoinfo  "shallow path (disabled shallow) git cloned $GIT_REV, version $(python3 salt/version.py)"
+                    echoinfo  "shallow path (disabled shallow) git cloned $GIT_REV_ADJ, version $(python3 salt/version.py)"
                 else
                     # Shallow clone above failed(missing upstream tags???), let's resume the old behaviour.
                     echowarn "Failed to shallow clone."
@@ -2187,7 +2194,7 @@ __git_clone_and_checkout() {
             # shellcheck disable=SC2164
             cd "${_SALT_GIT_CHECKOUT_DIR}"
 
-            echoinfo  "git cloned $GIT_REV, version $(python3 salt/version.py)"
+            echoinfo  "git cloned $GIT_REV_ADJ, version $(python3 salt/version.py)"
 
             if ! echo "$_SALT_REPO_URL" | grep -q -F -w "${_SALTSTACK_REPO_URL#*://}"; then
                 # We need to add the saltstack repository as a remote and fetch tags for proper versioning
@@ -2197,14 +2204,14 @@ __git_clone_and_checkout() {
                 echodebug "Fetching upstream (SaltStack's Salt repository) git tags"
                 git fetch --tags upstream || return 1
 
-                # Check if GIT_REV is a remote branch or just a commit hash
-                if git branch -r | grep -q -F -w "origin/$GIT_REV"; then
-                    GIT_REV="origin/$GIT_REV"
+                # Check if GIT_REV_ADJ is a remote branch or just a commit hash
+                if git branch -r | grep -q -F -w "origin/$GIT_REV_ADJ"; then
+                    GIT_REV_ADJ="origin/$GIT_REV_ADJ"
                 fi
             fi
 
-            echodebug "Checking out $GIT_REV"
-            git checkout "$GIT_REV" || return 1
+            echodebug "Checking out $GIT_REV_ADJ"
+            git checkout "$GIT_REV_ADJ" || return 1
         fi
 
     fi
@@ -2800,12 +2807,23 @@ EOM
     if [ ${DISTRO_NAME_L} = "ubuntu" ] && [ "$DISTRO_MAJOR_VERSION" -eq 22 ]; then
         echodebug "Ubuntu 22.04 has problem with base.txt requirements file, not parsing sys_platform == 'win32', upgrading from default pip works"
         echodebug "${_pip_cmd} install ${_USE_BREAK_SYSTEM_PACKAGES} --upgrade  pip"
-        ${_pip_cmd} install ${_USE_BREAK_SYSTEM_PACKAGES} --upgrade  pip || (echo "Failed to upgrade pip" && return 1)
+        ${_pip_cmd} install ${_USE_BREAK_SYSTEM_PACKAGES} --upgrade  pip
+        # shellcheck disable=SC2181
+        if [ $? -ne 0 ]; then
+            echo "Failed to upgrade pip"
+            return 1
+        fi
     fi
 
     echoinfo "Downloading Salt Dependencies from PyPi"
     echodebug "Running '${_pip_cmd} download -d /tmp/git/deps ${_PIP_DOWNLOAD_ARGS} .'"
-    ${_pip_cmd} download -d /tmp/git/deps ${_PIP_DOWNLOAD_ARGS} . || (echo "Failed to download salt dependencies" && return 1)
+    ${_pip_cmd} download -d /tmp/git/deps ${_PIP_DOWNLOAD_ARGS} .
+    # shellcheck disable=SC2181
+    if [ $? -ne 0 ]; then
+        echo "Failed to download salt dependencies"
+        return 1
+    fi
+
 
     echoinfo "Installing Downloaded Salt Dependencies"
     echodebug "Running '${_pip_cmd} install ${_USE_BREAK_SYSTEM_PACKAGES} --ignore-installed ${_PIP_INSTALL_ARGS} /tmp/git/deps/*'"
@@ -3119,7 +3137,7 @@ install_ubuntu_deps() {
     # Additionally install procps and pciutils which allows for Docker bootstraps. See 366#issuecomment-39666813
     __PACKAGES="${__PACKAGES} procps pciutils"
 
-    # ensure sudo installed
+    # ensure sudo, ps installed
     __PACKAGES="${__PACKAGES} sudo"
 
     ## include hwclock if not part of base OS (23.10 and up)
@@ -3188,6 +3206,7 @@ install_ubuntu_git_deps() {
         __apt_get_install_noinput ca-certificates
     fi
 
+    # shellcheck disable=SC2119
     __git_clone_and_checkout || return 1
 
     if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -ne 3 ]; then
@@ -3204,6 +3223,9 @@ install_ubuntu_git_deps() {
     if [ ! -f /usr/sbin/hwclock ]; then
         __PACKAGES="${__PACKAGES} util-linux-extra"
     fi
+
+    # Additionally install procps and pciutils which allows for Docker bootstraps. See 366#issuecomment-39666813
+    __PACKAGES="${__PACKAGES} procps pciutils"
 
     # ensure sudo installed
     __PACKAGES="${__PACKAGES} sudo"
@@ -3642,6 +3664,7 @@ install_debian_git_deps() {
         __apt_get_install_noinput ca-certificates
     fi
 
+    # shellcheck disable=SC2119
     __git_clone_and_checkout || return 1
 
     if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -ne 3 ]; then
@@ -3651,6 +3674,9 @@ install_debian_git_deps() {
 
     __PACKAGES="python${PY_PKG_VER}-dev python${PY_PKG_VER}-pip python${PY_PKG_VER}-setuptools gcc"
     echodebug "install_debian_git_deps() Installing ${__PACKAGES}"
+
+    # Additionally install procps and pciutils which allows for Docker bootstraps. See 366#issuecomment-39666813
+    __PACKAGES="${__PACKAGES} procps pciutils"
 
     # ensure sudo installed
     __PACKAGES="${__PACKAGES} sudo"
@@ -3987,6 +4013,7 @@ install_fedora_git_deps() {
         __PACKAGES=""
     fi
 
+    # shellcheck disable=SC2119
     __git_clone_and_checkout || return 1
 
     __PACKAGES="python${PY_PKG_VER}-devel python${PY_PKG_VER}-pip python${PY_PKG_VER}-setuptools gcc gcc-c++"
@@ -4397,6 +4424,7 @@ install_centos_git_deps() {
         __yum_install_noinput git || return 1
     fi
 
+    # shellcheck disable=SC2119
     __git_clone_and_checkout || return 1
 
     __PACKAGES=""
@@ -5442,6 +5470,7 @@ install_alpine_linux_git_deps() {
         apk -U add git  || return 1
     fi
 
+    # shellcheck disable=SC2119
     __git_clone_and_checkout || return 1
 
     apk -U add python3 python3-dev py3-pip py3-setuptools g++ linux-headers zeromq-dev openrc || return 1
@@ -5608,6 +5637,7 @@ install_amazon_linux_ami_2_git_deps() {
         __yum_install_noinput git || return 1
     fi
 
+    # shellcheck disable=SC2119
     __git_clone_and_checkout || return 1
 
     __PACKAGES="python${PY_PKG_VER}-pip python${PY_PKG_VER}-setuptools python${PY_PKG_VER}-devel gcc"
@@ -5827,6 +5857,7 @@ install_amazon_linux_ami_2023_git_deps() {
         __yum_install_noinput git || return 1
     fi
 
+    # shellcheck disable=SC2119
     __git_clone_and_checkout || return 1
 
     __PACKAGES="python${PY_PKG_VER}-pip python${PY_PKG_VER}-setuptools python${PY_PKG_VER}-devel gcc"
@@ -6014,6 +6045,7 @@ install_arch_linux_git_deps() {
         pacman -Sy --noconfirm --needed git  || return 1
     fi
 
+    # shellcheck disable=SC2119
     __git_clone_and_checkout || return 1
 
     if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 2 ]; then
@@ -6397,6 +6429,7 @@ install_photon_git_deps() {
         __PACKAGES=""
     fi
 
+    # shellcheck disable=SC2119
     __git_clone_and_checkout || return 1
 
     __PACKAGES="python${PY_PKG_VER}-devel python${PY_PKG_VER}-pip python${PY_PKG_VER}-setuptools gcc glibc-devel linux-devel.x86_64 cython${PY_PKG_VER}"
@@ -6756,6 +6789,7 @@ install_opensuse_git_deps() {
         __zypper_install git  || return 1
     fi
 
+    # shellcheck disable=SC2119
     __git_clone_and_checkout || return 1
 
     # Check for Tumbleweed
@@ -6990,6 +7024,7 @@ install_opensuse_15_git_deps() {
         __zypper_install git  || return 1
     fi
 
+    # shellcheck disable=SC2119
     __git_clone_and_checkout || return 1
 
     if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -ne 3 ]; then
@@ -7245,6 +7280,7 @@ install_gentoo_git_deps() {
     echoinfo "Running emerge -v1 setuptools"
     __emerge -v1 setuptools || return 1
 
+    # shellcheck disable=SC2119
     __git_clone_and_checkout || return 1
     __gentoo_post_dep || return 1
 }
@@ -7613,6 +7649,7 @@ install_macosx_git_deps() {
     # Install PIP
     $_PYEXE /tmp/get-pip.py || return 1
 
+    # shellcheck disable=SC2119
     __git_clone_and_checkout || return 1
 
     return 0
@@ -8149,6 +8186,7 @@ fi
 
 
 if [ "${ITYPE}" = "git" ] && [ ${_NO_DEPS} -eq ${BS_TRUE} ]; then
+    # shellcheck disable=SC2119
     if ! __git_clone_and_checkout; then
         echo "Failed to clone and checkout git repository."
         exit 1

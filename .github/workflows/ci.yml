@@ -180,6 +180,21 @@ jobs:
 
 
 
+  debian-12:
+    name: Debian 12
+    if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
+    uses: ./.github/workflows/test-linux.yml
+    needs:
+      - lint
+      - generate-actions-workflow
+    with:
+      distro-slug: debian-12
+      display-name: Debian 12
+      container-slug: systemd-debian-12
+      timeout: 20
+      instances: '["stable-3007", "onedir-3007", "stable-3007-1", "latest", "default"]'
+
+
   photon-5:
     name: Photon OS 5
     if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
@@ -237,7 +252,7 @@ jobs:
       display-name: Ubuntu 22.04
       container-slug: systemd-ubuntu-22.04
       timeout: 20
-      instances: '["stable-3006", "onedir-3006", "stable-3006-8", "stable-3007", "onedir-3007", "stable-3007-1", "git-master", "latest", "default"]'
+      instances: '["stable-3006", "git-3006", "onedir-3006", "stable-3006-8", "stable-3007", "git-3007", "onedir-3007", "stable-3007-1", "git-master", "latest", "default"]'
 
 
   set-pipeline-exit-status:
@@ -252,6 +267,7 @@ jobs:
       - macos-13
       - macos-14
       - windows-2022
+      - debian-12
       - photon-5
       - rockylinux-8
       - rockylinux-9

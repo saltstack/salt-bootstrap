@@ -29,10 +29,6 @@ def run_salt_call(cmd):
     if platform.system() == "Windows":
         cmd.append("--out=json")
         result = subprocess.run(cmd, capture_output=True, text=True)
-        print(
-            f"DGM run_salt_call, cmd '{cmd}', result '{result}', stdout '{result.stdout}'",
-            flush=True,
-        )
         if 0 == result.returncode:
             json_data = json.loads(result.stdout)
         else:
@@ -43,10 +39,6 @@ def run_salt_call(cmd):
         cmdl.extend(cmd)
         cmdl.append("--out=json")
         result = subprocess.run(cmdl, capture_output=True, text=True)
-        print(
-            f"DGM run_salt_call, cmdl '{cmdl}', result '{result}', stdout '{result.stdout}'",
-            flush=True,
-        )
         if 0 == result.returncode:
             json_data = json.loads(result.stdout)
         else:
@@ -74,10 +66,6 @@ def test_target_salt_version(path, target_salt_version):
         pytest.skip(f"No target version specified")
     cmd = ["salt-call", "--local", "grains.item", "saltversion", "--timeout=120"]
     result = run_salt_call(cmd)
-    dgm_saltversion = result["saltversion"]
-    print(
-        f"DGM test_target_salt_version, target_salt_version '{target_salt_version}', result saltversion '{dgm_saltversion }', result '{result}'",
-        flush=True,
-    )
     # Returns: {'saltversion': '3006.9+217.g53cfa53040'}
-    assert result["saltversion"] == target_salt_version
+    adj_saltversion = result["saltversion"].split("+")[0]
+    assert adj_saltversion == target_salt_version

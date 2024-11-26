@@ -1,3 +1,12 @@
+# v2024.11.26
+
+## What's Changed
+
+- Updated URLs in README, and fix deps download issue on RedHat family by @dmurphy18 in https://github.com/saltstack/salt-bootstrap/pull/2052
+- Update README script help output and scriptversions by @ScriptAutomate in https://github.com/saltstack/salt-bootstrap/pull/2056
+
+**Full Changelog**: https://github.com/saltstack/salt-bootstrap/compare/v2024.11.21...v2024.11.26
+
 # v2024.11.21
 
 ## What's Changed

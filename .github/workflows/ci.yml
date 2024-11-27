@@ -192,7 +192,7 @@ jobs:
       display-name: Debian 12
       container-slug: systemd-debian-12
       timeout: 20
-      instances: '["stable-3007", "onedir-3007", "stable-3007-1", "latest", "default"]'
+      instances: '["stable-3007", "git-3007", "onedir-3007", "stable-3007-1", "git-master", "latest", "default"]'
 
 
   photon-5:
@@ -207,7 +207,7 @@ jobs:
       display-name: Photon OS 5
       container-slug: systemd-photon-5
       timeout: 20
-      instances: '["stable-3006", "onedir-3006", "stable-3006-8", "latest", "default"]'
+      instances: '["stable-3006", "onedir-3006", "stable-3006-8", "stable-3007", "onedir-3007", "stable-3007-1", "latest", "default"]'
 
 
   rockylinux-8:

@@ -11,7 +11,6 @@ os.chdir(os.path.abspath(os.path.dirname(__file__)))
 #    "amazonlinux-2",
 #    "amazonlinux-2023",
 #    "debian-11",
-#    "debian-12",
 #    "debian-13",
 #    "fedora-40",
 #    "photon-4",
@@ -92,9 +91,9 @@ BLACKLIST_3006 = [
     "ubuntu-2404",
 ]
 
+#    "photon-5",
 BLACKLIST_3007 = [
     "photon-4",
-    "photon-5",
 ]
 
 #    "ubuntu-2204",
@@ -111,12 +110,12 @@ BLACKLIST_GIT_3006 = [
     "ubuntu-2404",
 ]
 
+#    "debian-12",
 #    "ubuntu-2204",
 BLACKLIST_GIT_3007 = [
     "amazonlinux-2",
     "amazonlinux-2023",
     "debian-11",
-    "debian-12",
     "debian-13",
     "fedora-40",
     "photon-4",
@@ -126,11 +125,11 @@ BLACKLIST_GIT_3007 = [
     "ubuntu-2404",
 ]
 
+#    "debian-12",
 BLACKLIST_GIT_MASTER = [
     "amazonlinux-2",
     "amazonlinux-2023",
     "debian-11",
-    "debian-12",
     "debian-13",
     "fedora-40",
     "photon-4",

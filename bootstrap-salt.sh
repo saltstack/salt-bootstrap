@@ -26,7 +26,7 @@
 #======================================================================================================================
 set -o nounset                              # Treat unset variables as an error
 
-__ScriptVersion="2024.11.26"
+__ScriptVersion="2024.11.27"
 __ScriptName="bootstrap-salt.sh"
 
 __ScriptFullName="$0"
@@ -2742,44 +2742,6 @@ __install_salt_from_repo() {
 
     echodebug "Installed pip version: $(${_pip_cmd} --version)"
 
-    CHECK_PIP_VERSION_SCRIPT=$(cat << EOM
-import sys
-try:
-    import pip
-    installed_pip_version=tuple([int(part.strip()) for part in pip.__version__.split('.') if part.isdigit()])
-    desired_pip_version=($(echo ${_MINIMUM_PIP_VERSION} | sed 's/\./, /g' ))
-    if installed_pip_version < desired_pip_version:
-        print('Desired pip version {!r} > Installed pip version {!r}'.format('.'.join(map(str, desired_pip_version)), '.'.join(map(str, installed_pip_version))))
-        sys.exit(1)
-    print('Desired pip version {!r} < Installed pip version {!r}'.format('.'.join(map(str, desired_pip_version)), '.'.join(map(str, installed_pip_version))))
-    sys.exit(0)
-except ImportError:
-    print('Failed to import pip')
-    sys.exit(1)
-EOM
-)
-    if ! ${_py_exe} -c "$CHECK_PIP_VERSION_SCRIPT"; then
-        # Upgrade pip to at least 1.2 which is when we can start using "python3 -m pip"
-        echodebug "Running '${_pip_cmd} install ${_PIP_INSTALL_ARGS} pip>=${_MINIMUM_PIP_VERSION}'"
-        ${_pip_cmd} install ${_PIP_INSTALL_ARGS} -v "pip>=${_MINIMUM_PIP_VERSION}"
-        sleep 1
-        echodebug "PATH: ${PATH}"
-        _pip_cmd="pip${_py_version}"
-        if ! __check_command_exists "${_pip_cmd}"; then
-            echodebug "The pip binary '${_pip_cmd}' was not found in PATH"
-            _pip_cmd="pip$(echo "${_py_version}" | cut -c -1)"
-            if ! __check_command_exists "${_pip_cmd}"; then
-                echodebug "The pip binary '${_pip_cmd}' was not found in PATH"
-                _pip_cmd="pip"
-                if ! __check_command_exists "${_pip_cmd}"; then
-                    echoerror "Unable to find a pip binary"
-                    return 1
-                fi
-            fi
-        fi
-        echodebug "Installed pip version: $(${_pip_cmd} --version)"
-    fi
-
     _setuptools_dep="setuptools>=${_MINIMUM_SETUPTOOLS_VERSION},<${_MAXIMUM_SETUPTOOLS_VERSION}"
     if [ "$_PY_MAJOR_VERSION" -ne 3 ]; then
         echoerror "Python version is no longer supported, only Python 3"
@@ -2802,7 +2764,6 @@ EOM
 
     mkdir -p /tmp/git/deps
     echodebug "Created directory /tmp/git/deps"
-    echodebug "Installing Salt dependencies for Salt version $(python3 salt/version.py)"
 
     if [ ${DISTRO_NAME_L} = "ubuntu" ] && [ "$DISTRO_MAJOR_VERSION" -eq 22 ]; then
         echodebug "Ubuntu 22.04 has problem with base.txt requirements file, not parsing sys_platform == 'win32', upgrading from default pip works"
@@ -2815,20 +2776,23 @@ EOM
         fi
     fi
 
-    echoinfo "Downloading Salt Dependencies from PyPi"
-    echodebug "Running '${_pip_cmd} download -d /tmp/git/deps ${_PIP_DOWNLOAD_ARGS} .'"
-    ${_pip_cmd} download -d /tmp/git/deps ${_PIP_DOWNLOAD_ARGS} .
+    rm -f /tmp/git/deps/*
+
+    echodebug "Installing Salt requirements from PyPi, ${_pip_cmd} install ${_USE_BREAK_SYSTEM_PACKAGES} --ignore-installed ${_PIP_INSTALL_ARGS} -r requirements/static/ci/py${_py_version}/linux.txt"
+    ${_pip_cmd} install ${_USE_BREAK_SYSTEM_PACKAGES} --ignore-installed ${_PIP_INSTALL_ARGS} -r "requirements/static/ci/py${_py_version}/linux.txt"
     # shellcheck disable=SC2181
     if [ $? -ne 0 ]; then
-        echo "Failed to download salt dependencies"
+        echo "Failed to install salt requirements for the version of Python ${_py_version}"
         return 1
     fi
 
-
-    echoinfo "Installing Downloaded Salt Dependencies"
-    echodebug "Running '${_pip_cmd} install ${_USE_BREAK_SYSTEM_PACKAGES} --ignore-installed ${_PIP_INSTALL_ARGS} /tmp/git/deps/*'"
-    ${_pip_cmd} install ${_USE_BREAK_SYSTEM_PACKAGES} --ignore-installed ${_PIP_INSTALL_ARGS} /tmp/git/deps/* || return 1
-    rm -f /tmp/git/deps/*
+    if [ "${OS_NAME}" = "Linux" ]; then
+        ${_pip_cmd} install ${_USE_BREAK_SYSTEM_PACKAGES} --ignore-installed --upgrade ${_PIP_INSTALL_ARGS} "jaraco.functools==4.1.0" || return 1
+        ${_pip_cmd} install ${_USE_BREAK_SYSTEM_PACKAGES} --ignore-installed --upgrade ${_PIP_INSTALL_ARGS} "jaraco.text==4.0.0" || return 1
+        ${_pip_cmd} install ${_USE_BREAK_SYSTEM_PACKAGES} --ignore-installed --upgrade ${_PIP_INSTALL_ARGS} "jaraco.collections==5.1.0" || return 1
+        ${_pip_cmd} install ${_USE_BREAK_SYSTEM_PACKAGES} --ignore-installed --upgrade ${_PIP_INSTALL_ARGS} "jaraco.context==6.0.1" || return 1
+        ${_pip_cmd} install ${_USE_BREAK_SYSTEM_PACKAGES} --ignore-installed --upgrade ${_PIP_INSTALL_ARGS} "jaraco.classes==3.4.0" || return 1
+    fi
 
     echoinfo "Building Salt Python Wheel"
     if [ "$_ECHO_DEBUG" -eq $BS_TRUE ]; then
@@ -5139,79 +5103,79 @@ install_oracle_linux_check_services() {
 
 #######################################################################################################################
 #
-#   RockyLinux Install Functions
+#   ALmaLinux Install Functions
 #
-install_rockylinux_stable_deps() {
+install_almalinux_stable_deps() {
     install_centos_stable_deps || return 1
     return 0
 }
 
-install_rockylinux_git_deps() {
+install_almalinux_git_deps() {
     install_centos_git_deps || return 1
     return 0
 }
 
-install_rockylinux_onedir_deps() {
+install_almalinux_onedir_deps() {
     install_centos_onedir_deps || return 1
     return 0
 }
 
-install_rockylinux_testing_deps() {
+install_almalinux_testing_deps() {
     install_centos_testing_deps || return 1
     return 0
 }
 
-install_rockylinux_stable() {
+install_almalinux_stable() {
     install_centos_stable || return 1
     return 0
 }
 
-install_rockylinux_git() {
+install_almalinux_git() {
     install_centos_git || return 1
     return 0
 }
 
-install_rockylinux_onedir() {
+install_almalinux_onedir() {
     install_centos_onedir || return 1
     return 0
 }
 
-install_rockylinux_testing() {
+install_almalinux_testing() {
     install_centos_testing || return 1
     return 0
 }
 
-install_rockylinux_stable_post() {
+install_almalinux_stable_post() {
     install_centos_stable_post || return 1
     return 0
 }
 
-install_rockylinux_git_post() {
+install_almalinux_git_post() {
     install_centos_git_post || return 1
     return 0
 }
 
-install_rockylinux_onedir_post() {
+install_almalinux_onedir_post() {
     install_centos_onedir_post || return 1
     return 0
 }
 
-install_rockylinux_testing_post() {
+install_almalinux_testing_post() {
     install_centos_testing_post || return 1
     return 0
 }
 
-install_rockylinux_restart_daemons() {
+install_almalinux_restart_daemons() {
     install_centos_restart_daemons || return 1
     return 0
 }
 
-install_rockylinux_check_services() {
+install_almalinux_check_services() {
     install_centos_check_services || return 1
     return 0
 }
 #
-#   Ended RockyLinux Install Functions
+#   Ended AlmaLinux Install Functions
 #
 #######################################################################################################################
 
@@ -6373,7 +6337,7 @@ install_photon_deps() {
     __PACKAGES="${__PACKAGES} libyaml procps-ng python${PY_PKG_VER}-crypto python${PY_PKG_VER}-jinja2"
     __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-msgpack python${PY_PKG_VER}-requests python${PY_PKG_VER}-zmq"
     __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-pip python${PY_PKG_VER}-m2crypto python${PY_PKG_VER}-pyyaml"
-    __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-systemd"
+    __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-systemd sudo shadow"
 
     if [ "${_EXTRA_PACKAGES}" != "" ]; then
         echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
@@ -6423,6 +6387,14 @@ install_photon_git_deps() {
         __PACKAGES="${__PACKAGES} git"
     fi
 
+    if ! __check_command_exists sudo; then
+        __PACKAGES="${__PACKAGES} sudo"
+    fi
+
+    if ! __check_command_exists usermod; then
+        __PACKAGES="${__PACKAGES} shadow"
+    fi
+
     if [ -n "${__PACKAGES}" ]; then
         # shellcheck disable=SC2086
         __tdnf_install_noinput ${__PACKAGES} || return 1
@@ -6470,6 +6442,8 @@ install_photon_git() {
         echoerror "Python 2 is no longer supported, only Python 3"
         return 1
     fi
+
+    install_photon_git_deps
 
     if [ -f "${_SALT_GIT_CHECKOUT_DIR}/salt/syspaths.py" ]; then
         ${_PYEXE} setup.py --salt-config-dir="$_SALT_ETC_DIR" --salt-cache-dir="${_SALT_CACHE_DIR}" ${SETUP_PY_INSTALL_ARGS} install --prefix=/usr || return 1
@@ -6579,7 +6553,7 @@ install_photon_onedir_deps() {
         __install_saltstack_photon_onedir_repository || return 1
     fi
 
-    __PACKAGES="procps-ng"
+    __PACKAGES="procps-ng sudo shadow"
 
     # shellcheck disable=SC2086
     __tdnf_install_noinput ${__PACKAGES} || return 1

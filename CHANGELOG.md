@@ -1,3 +1,30 @@
+# v2024.11.29
+
+## What's Changed
+
+- Updated date to overcome issue with existing tag for 2024.11.27 by @dmurphy18 in https://github.com/saltstack/salt-bootstrap/pull/2058
+- Fix date tag by @dmurphy18 in https://github.com/saltstack/salt-bootstrap/pull/2059
+- Revert forcing git tag, other issues with check sums calculated, easiest solution is wait a day to release by @dmurphy18 in https://github.com/saltstack/salt-bootstrap/pull/2060
+- Updated date by @dmurphy18 in https://github.com/saltstack/salt-bootstrap/pull/2061
+
+**Full Changelog**: https://github.com/saltstack/salt-bootstrap/compare/v2024.11.27...v2024.11.29
+
+# v2024.11.27
+
+**Full Changelog**: https://github.com/saltstack/salt-bootstrap/compare/v2024.11.27...v2024.11.27
+
+# v2024.11.27
+
+**Full Changelog**: https://github.com/saltstack/salt-bootstrap/compare/v2024.11.27...v2024.11.27
+
+# v2024.11.27
+
+## What's Changed
+
+- Testing git install methods by @dmurphy18 in https://github.com/saltstack/salt-bootstrap/pull/2057
+
+**Full Changelog**: https://github.com/saltstack/salt-bootstrap/compare/v2024.11.26...v2024.11.27
+
 # v2024.11.27
 
 ## What's Changed

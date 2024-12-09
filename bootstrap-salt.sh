@@ -26,7 +26,7 @@
 #======================================================================================================================
 set -o nounset                              # Treat unset variables as an error
 
-__ScriptVersion="2024.11.29"
+__ScriptVersion="2024.12.09"
 __ScriptName="bootstrap-salt.sh"
 
 __ScriptFullName="$0"
@@ -3053,8 +3053,9 @@ __install_saltstack_ubuntu_onedir_repository() {
             echo "Pin: version $ONEDIR_REV.*" >> /etc/apt/preferences.d/salt-pin-1001
             echo "Pin-Priority: 1001" >> /etc/apt/preferences.d/salt-pin-1001
         elif [ "$(echo "$ONEDIR_REV" | grep -E '^([3-9][0-5]{2}[6-9](\.[0-9]*)?)')" != "" ]; then
+            ONEDIR_REV_DOT=$(echo "$ONEDIR_REV" | sed 's/-/\./')
             echo "Package: salt-*" > /etc/apt/preferences.d/salt-pin-1001
-            echo "Pin: version $ONEDIR_REV" >> /etc/apt/preferences.d/salt-pin-1001
+            echo "Pin: version $ONEDIR_REV_DOT" >> /etc/apt/preferences.d/salt-pin-1001
             echo "Pin-Priority: 1001" >> /etc/apt/preferences.d/salt-pin-1001
         fi
     fi
@@ -3506,8 +3507,10 @@ __install_saltstack_debian_repository() {
             echo "Pin: version $STABLE_REV.*" >> /etc/apt/preferences.d/salt-pin-1001
             echo "Pin-Priority: 1001" >> /etc/apt/preferences.d/salt-pin-1001
         elif [ "$(echo "$STABLE_REV" | grep -E '^([3-9][0-5]{2}[6-9](\.[0-9]*)?)')" != "" ]; then
+            STABLE_REV_DOT=$(echo "$STABLE_REV" | sed 's/-/\./')
+            MINOR_VER_STRG="-$STABLE_REV_DOT"
             echo "Package: salt-*" > /etc/apt/preferences.d/salt-pin-1001
-            echo "Pin: version $STABLE_REV" >> /etc/apt/preferences.d/salt-pin-1001
+            echo "Pin: version $STABLE_REV_DOT" >> /etc/apt/preferences.d/salt-pin-1001
             echo "Pin-Priority: 1001" >> /etc/apt/preferences.d/salt-pin-1001
         fi
     fi
@@ -3549,8 +3552,9 @@ __install_saltstack_debian_onedir_repository() {
             echo "Pin: version $ONEDIR_REV.*" >> /etc/apt/preferences.d/salt-pin-1001
             echo "Pin-Priority: 1001" >> /etc/apt/preferences.d/salt-pin-1001
         elif [ "$(echo "$ONEDIR_REV" | grep -E '^([3-9][0-5]{2}[6-9](\.[0-9]*)?)')" != "" ]; then
+            ONEDIR_REV_DOT=$(echo "$ONEDIR_REV" | sed 's/-/\./')
             echo "Package: salt-*" > /etc/apt/preferences.d/salt-pin-1001
-            echo "Pin: version $ONEDIR_REV" >> /etc/apt/preferences.d/salt-pin-1001
+            echo "Pin: version $ONEDIR_REV_DOT" >> /etc/apt/preferences.d/salt-pin-1001
             echo "Pin-Priority: 1001" >> /etc/apt/preferences.d/salt-pin-1001
         fi
     fi
@@ -3895,9 +3899,10 @@ __install_saltstack_fedora_onedir_repository() {
                 fi
             elif [ "$(echo "$ONEDIR_REV" | grep -E '^([3-9][0-5]{2}[6-9](\.[0-9]*)?)')" != "" ]; then
                 # using minor version
-                echo "[salt-repo-${ONEDIR_REV}-lts]" > "${YUM_REPO_FILE}"
+                ONEDIR_REV_DOT=$(echo "$ONEDIR_REV" | sed 's/-/\./')
+                echo "[salt-repo-${ONEDIR_REV_DOT}-lts]" > "${YUM_REPO_FILE}"
                 # shellcheck disable=SC2129
-                echo "name=Salt Repo for Salt v${ONEDIR_REV} LTS" >> "${YUM_REPO_FILE}"
+                echo "name=Salt Repo for Salt v${ONEDIR_REV_DOT} LTS" >> "${YUM_REPO_FILE}"
                 echo "baseurl=https://${_REPO_URL}/saltproject-rpm/" >> "${YUM_REPO_FILE}"
                 echo "skip_if_unavailable=True" >> "${YUM_REPO_FILE}"
                 echo "priority=10" >> "${YUM_REPO_FILE}"
@@ -4140,7 +4145,8 @@ install_fedora_onedir() {
         MINOR_VER_STRG=""
     elif [ "$(echo "$STABLE_REV" | grep -E '^([3-9][0-5]{2}[6-9](\.[0-9]*)?)')" != "" ]; then
         # Minor version Salt, need to add specific minor version
-        MINOR_VER_STRG="-$STABLE_REV"
+        STABLE_REV_DOT=$(echo "$STABLE_REV" | sed 's/-/\./')
+        MINOR_VER_STRG="-$STABLE_REV_DOT"
     else
         MINOR_VER_STRG=""
     fi
@@ -4223,9 +4229,10 @@ __install_saltstack_rhel_onedir_repository() {
                 fi
             elif [ "$(echo "$ONEDIR_REV" | grep -E '^([3-9][0-5]{2}[6-9](\.[0-9]*)?)')" != "" ]; then
                 # using minor version
-                echo "[salt-repo-${ONEDIR_REV}-lts]" > "${YUM_REPO_FILE}"
+                ONEDIR_REV_DOT=$(echo "$ONEDIR_REV" | sed 's/-/\./')
+                echo "[salt-repo-${ONEDIR_REV_DOT}-lts]" > "${YUM_REPO_FILE}"
                 # shellcheck disable=SC2129
-                echo "name=Salt Repo for Salt v${ONEDIR_REV} LTS" >> "${YUM_REPO_FILE}"
+                echo "name=Salt Repo for Salt v${ONEDIR_REV_DOT} LTS" >> "${YUM_REPO_FILE}"
                 echo "baseurl=https://${_REPO_URL}/saltproject-rpm/" >> "${YUM_REPO_FILE}"
                 echo "skip_if_unavailable=True" >> "${YUM_REPO_FILE}"
                 echo "priority=10" >> "${YUM_REPO_FILE}"
@@ -4297,7 +4304,8 @@ install_centos_stable() {
         MINOR_VER_STRG=""
     elif [ "$(echo "$STABLE_REV" | grep -E '^([3-9][0-5]{2}[6-9](\.[0-9]*)?)')" != "" ]; then
         # Minor version Salt, need to add specific minor version
-        MINOR_VER_STRG="-$STABLE_REV"
+        STABLE_REV_DOT=$(echo "$STABLE_REV" | sed 's/-/\./')
+        MINOR_VER_STRG="-$STABLE_REV_DOT"
     else
         MINOR_VER_STRG=""
     fi
@@ -4525,7 +4533,8 @@ install_centos_onedir() {
         MINOR_VER_STRG=""
     elif [ "$(echo "$ONEDIR_REV" | grep -E '^([3-9][0-5]{2}[6-9](\.[0-9]*)?)')" != "" ]; then
         # Minor version Salt, need to add specific minor version
-        MINOR_VER_STRG="-$ONEDIR_REV"
+        ONEDIR_REV_DOT=$(echo "$ONEDIR_REV" | sed 's/-/\./')
+        MINOR_VER_STRG="-$ONEDIR_REV_DOT"
     else
         MINOR_VER_STRG=""
     fi
@@ -5657,9 +5666,10 @@ install_amazon_linux_ami_2_deps() {
                     fi
                 elif [ "$(echo "$STABLE_REV" | grep -E '^([3-9][0-5]{2}[6-9](\.[0-9]*)?)')" != "" ]; then
                     # using minor version
-                    echo "[salt-repo-${STABLE_REV}-lts]" > "${YUM_REPO_FILE}"
+                    STABLE_REV_DOT=$(echo "$STABLE_REV" | sed 's/-/\./')
+                    echo "[salt-repo-${STABLE_REV_DOT}-lts]" > "${YUM_REPO_FILE}"
                     # shellcheck disable=SC2129
-                    echo "name=Salt Repo for Salt v${STABLE_REV} LTS" >> "${YUM_REPO_FILE}"
+                    echo "name=Salt Repo for Salt v${STABLE_REV_DOT} LTS" >> "${YUM_REPO_FILE}"
                     echo "baseurl=https://${_REPO_URL}/saltproject-rpm/" >> "${YUM_REPO_FILE}"
                     echo "skip_if_unavailable=True" >> "${YUM_REPO_FILE}"
                     echo "priority=10" >> "${YUM_REPO_FILE}"
@@ -5721,9 +5731,10 @@ install_amazon_linux_ami_2_onedir_deps() {
                     fi
                 elif [ "$(echo "$ONEDIR_REV" | grep -E '^([3-9][0-5]{2}[6-9](\.[0-9]*)?)')" != "" ]; then
                     # using minor version
-                    echo "[salt-repo-${ONEDIR_REV}-lts]" > "${YUM_REPO_FILE}"
+                    ONEDIR_REV_DOT=$(echo "$ONEDIR_REV" | sed 's/-/\./')
+                    echo "[salt-repo-${ONEDIR_REV_DOT}-lts]" > "${YUM_REPO_FILE}"
                     # shellcheck disable=SC2129
-                    echo "name=Salt Repo for Salt v${ONEDIR_REV} LTS" >> "${YUM_REPO_FILE}"
+                    echo "name=Salt Repo for Salt v${ONEDIR_REV_DOT} LTS" >> "${YUM_REPO_FILE}"
                     echo "baseurl=https://${_REPO_URL}/saltproject-rpm/" >> "${YUM_REPO_FILE}"
                     echo "skip_if_unavailable=True" >> "${YUM_REPO_FILE}"
                     echo "priority=10" >> "${YUM_REPO_FILE}"
@@ -5873,9 +5884,10 @@ install_amazon_linux_ami_2023_onedir_deps() {
                     fi
                 elif [ "$(echo "$ONEDIR_REV" | grep -E '^([3-9][0-5]{2}[6-9](\.[0-9]*)?)')" != "" ]; then
                     # using minor version
-                    echo "[salt-repo-${ONEDIR_REV}-lts]" > "${YUM_REPO_FILE}"
+                    ONEDIR_REV_DOT=$(echo "$ONEDIR_REV" | sed 's/-/\./')
+                    echo "[salt-repo-${ONEDIR_REV_DOT}-lts]" > "${YUM_REPO_FILE}"
                     # shellcheck disable=SC2129
-                    echo "name=Salt Repo for Salt v${ONEDIR_REV} LTS" >> "${YUM_REPO_FILE}"
+                    echo "name=Salt Repo for Salt v${ONEDIR_REV_DOT} LTS" >> "${YUM_REPO_FILE}"
                     echo "baseurl=https://${_REPO_URL}/saltproject-rpm/" >> "${YUM_REPO_FILE}"
                     echo "skip_if_unavailable=True" >> "${YUM_REPO_FILE}"
                     echo "priority=10" >> "${YUM_REPO_FILE}"
@@ -6286,8 +6298,9 @@ __install_saltstack_photon_onedir_repository() {
                 fi
             elif [ "$(echo "$ONEDIR_REV" | grep -E '^([3-9][0-5]{2}[6-9](\.[0-9]*)?)')" != "" ]; then
                 # using minor version
-                echo "[salt-repo-${ONEDIR_REV}-lts]" > "${YUM_REPO_FILE}"
-                echo "name=Salt Repo for Salt v${ONEDIR_REV} LTS" >> "${YUM_REPO_FILE}"
+                ONEDIR_REV_DOT=$(echo "$ONEDIR_REV" | sed 's/-/\./')
+                echo "[salt-repo-${ONEDIR_REV_DOT}-lts]" > "${YUM_REPO_FILE}"
+                echo "name=Salt Repo for Salt v${ONEDIR_REV_DOT} LTS" >> "${YUM_REPO_FILE}"
                 echo "baseurl=https://${_REPO_URL}/saltproject-rpm/" >> "${YUM_REPO_FILE}"
                 echo "skip_if_unavailable=True" >> "${YUM_REPO_FILE}"
                 echo "priority=10" >> "${YUM_REPO_FILE}"
@@ -6582,7 +6595,8 @@ install_photon_onedir() {
         MINOR_VER_STRG="-$_GENERIC_PKG_VERSION"
     elif [ "$(echo "$STABLE_REV" | grep -E '^([3-9][0-5]{2}[6-9](\.[0-9]*)?)')" != "" ]; then
         # Minor version Salt, need to add specific minor version
-        MINOR_VER_STRG="-$STABLE_REV"
+        STABLE_REV_DOT=$(echo "$STABLE_REV" | sed 's/-/\./')
+        MINOR_VER_STRG="-$STABLE_REV_DOT"
     else
         # default to latest version Salt, config and repo already setup
         __get_packagesite_onedir_latest
@@ -6632,38 +6646,85 @@ install_photon_onedir_post() {
 #
 __ZYPPER_REQUIRES_REPLACE_FILES=-1
 
-__set_suse_pkg_repo() {
-
-    # Set distro repo variable
-    if [ "${DISTRO_MAJOR_VERSION}" -gt 2015 ]; then
-        DISTRO_REPO="openSUSE_Tumbleweed"
-    elif [ "${DISTRO_MAJOR_VERSION}" -eq 15 ] && [ "${DISTRO_MINOR_VERSION}" -ge 4 ]; then
-        DISTRO_REPO="${DISTRO_MAJOR_VERSION}.${DISTRO_MINOR_VERSION}"
-    elif [ "${DISTRO_MAJOR_VERSION}" -ge 42 ] || [ "${DISTRO_MAJOR_VERSION}" -eq 15 ]; then
-        DISTRO_REPO="openSUSE_Leap_${DISTRO_MAJOR_VERSION}.${DISTRO_MINOR_VERSION}"
-    else
-        DISTRO_REPO="SLE_${DISTRO_MAJOR_VERSION}_SP${SUSE_PATCHLEVEL}"
-    fi
-
-    suse_pkg_url_base="https://download.opensuse.org/repositories/systemsmanagement:/saltstack"
-    suse_pkg_url_path="${DISTRO_REPO}/systemsmanagement:saltstack.repo"
-    SUSE_PKG_URL="$suse_pkg_url_base/$suse_pkg_url_path"
-}
 
 __check_and_refresh_suse_pkg_repo() {
     # Check to see if systemsmanagement_saltstack exists
-    __zypper repos | grep -q systemsmanagement_saltstack
+    __zypper repos | grep -q 'salt.repo'
 
     if [ $? -eq 1 ]; then
-        # zypper does not yet know anything about systemsmanagement_saltstack
-        __zypper addrepo --refresh "${SUSE_PKG_URL}" || return 1
+        # zypper does not yet know anything about salt.repo
+        # zypper does not support exclude similar to Photon, hence have to do following
+        ZYPPER_REPO_FILE="/etc/zypp/repos.d/salt.repo"
+        # shellcheck disable=SC2129
+        if [ "$ONEDIR_REV" != "latest" ]; then
+            # 3006.x is default, and latest for 3006.x branch
+            if [ "$(echo "$ONEDIR_REV" | grep -E '^(3006|3007)$')" != "" ]; then
+                # latest version for branch 3006 | 3007
+                REPO_REV_MAJOR=$(echo "$ONEDIR_REV" | cut -d '.' -f 1)
+                if [ "$REPO_REV_MAJOR" -eq "3007" ]; then
+                    # Enable the Salt 3007 STS repo
+                    echo "[salt-repo-3007-sts]" > "${ZYPPER_REPO_FILE}"
+                    echo "name=Salt Repo for Salt v3007 STS" >> "${ZYPPER_REPO_FILE}"
+                    echo "baseurl=https://${_REPO_URL}/saltproject-rpm/" >> "${ZYPPER_REPO_FILE}"
+                    echo "skip_if_unavailable=True" >> "${ZYPPER_REPO_FILE}"
+                    echo "priority=10" >> "${ZYPPER_REPO_FILE}"
+                    echo "enabled=1" >> "${ZYPPER_REPO_FILE}"
+                    echo "enabled_metadata=1" >> "${ZYPPER_REPO_FILE}"
+                    echo "exclude=*3006* *3008* *3009* *3010*" >> "${ZYPPER_REPO_FILE}"
+                    echo "gpgcheck=1" >> "${ZYPPER_REPO_FILE}"
+                    echo "gpgkey=https://${_REPO_URL}/api/security/keypair/SaltProjectKey/public" >> "${ZYPPER_REPO_FILE}"
+                    zypper addlock "salt-* < 3007" && zypper addlock "salt-* >= 3008"
+                else
+                    # Salt 3006 repo
+                    echo "[salt-repo-3006-lts]" > "${ZYPPER_REPO_FILE}"
+                    echo "name=Salt Repo for Salt v3006 LTS" >> "${ZYPPER_REPO_FILE}"
+                    echo "baseurl=https://${_REPO_URL}/saltproject-rpm/" >> "${ZYPPER_REPO_FILE}"
+                    echo "skip_if_unavailable=True" >> "${ZYPPER_REPO_FILE}"
+                    echo "priority=10" >> "${ZYPPER_REPO_FILE}"
+                    echo "enabled=1" >> "${ZYPPER_REPO_FILE}"
+                    echo "enabled_metadata=1" >> "${ZYPPER_REPO_FILE}"
+                    echo "exclude=*3007* *3008* *3009* *3010*" >> "${ZYPPER_REPO_FILE}"
+                    echo "gpgcheck=1" >> "${ZYPPER_REPO_FILE}"
+                    echo "gpgkey=https://${_REPO_URL}/api/security/keypair/SaltProjectKey/public" >> "${ZYPPER_REPO_FILE}"
+                    zypper addlock "salt-* < 3006" && zypper addlock "salt-* >= 3007"
+                fi
+            elif [ "$(echo "$ONEDIR_REV" | grep -E '^([3-9][0-5]{2}[6-9](\.[0-9]*)?)')" != "" ]; then
+                # using minor version
+                ONEDIR_REV_DOT=$(echo "$ONEDIR_REV" | sed 's/-/\./')
+                echo "[salt-repo-${ONEDIR_REV_DOT}-lts]" > "${ZYPPER_REPO_FILE}"
+                echo "name=Salt Repo for Salt v${ONEDIR_REV_DOT} LTS" >> "${ZYPPER_REPO_FILE}"
+                echo "baseurl=https://${_REPO_URL}/saltproject-rpm/" >> "${ZYPPER_REPO_FILE}"
+                echo "skip_if_unavailable=True" >> "${ZYPPER_REPO_FILE}"
+                echo "priority=10" >> "${ZYPPER_REPO_FILE}"
+                echo "enabled=1" >> "${ZYPPER_REPO_FILE}"
+                echo "enabled_metadata=1" >> "${ZYPPER_REPO_FILE}"
+                echo "gpgcheck=1" >> "${ZYPPER_REPO_FILE}"
+                echo "gpgkey=https://${_REPO_URL}/api/security/keypair/SaltProjectKey/public" >> "${ZYPPER_REPO_FILE}"a
+                ONEDIR_MAJ_VER=$(echo "${ONEDIR_REV_DOT}" | awk -F '.' '{print $1}')
+                # shellcheck disable=SC2004
+                ONEDIR_MAJ_VER_PLUS=$((${ONEDIR_MAJ_VER} + 1))
+                zypper addlock "salt-* < ${ONEDIR_MAJ_VER}" && zypper addlock "salt-* >= ${ONEDIR_MAJ_VER_PLUS}"
+            fi
+        else
+            # Enable the Salt LATEST repo
+            echo "[salt-repo-latest]" > "${ZYPPER_REPO_FILE}"
+            echo "name=Salt Repo for Salt LATEST release" >> "${ZYPPER_REPO_FILE}"
+            echo "baseurl=https://${_REPO_URL}/saltproject-rpm/" >> "${ZYPPER_REPO_FILE}"
+            echo "skip_if_unavailable=True" >> "${ZYPPER_REPO_FILE}"
+            echo "priority=10" >> "${ZYPPER_REPO_FILE}"
+            echo "enabled=1" >> "${ZYPPER_REPO_FILE}"
+            echo "enabled_metadata=1" >> "${ZYPPER_REPO_FILE}"
+            echo "gpgcheck=1" >> "${ZYPPER_REPO_FILE}"
+            echo "gpgkey=https://${_REPO_URL}/api/security/keypair/SaltProjectKey/public" >> "${ZYPPER_REPO_FILE}"
+        fi
+        __zypper addrepo --refresh "${ZYPPER_REPO_FILE}" || return 1
     fi
 }
 
 __version_lte() {
-    if ! __check_command_exists python; then
-        zypper --non-interactive install --replacefiles --auto-agree-with-licenses python || \
-             zypper --non-interactive install --auto-agree-with-licenses python || return 1
+    if ! __check_command_exists python3; then
+        zypper --non-interactive install --replacefiles --auto-agree-with-licenses python3 || \
+             zypper --non-interactive install --auto-agree-with-licenses python3 || return 1
     fi
 
     if [ "$(${_PY_EXE} -c 'import sys; V1=tuple([int(i) for i in sys.argv[1].split(".")]); V2=tuple([int(i) for i in sys.argv[2].split(".")]); print(V1<=V2)' "$1" "$2")" = "True" ]; then
@@ -6707,8 +6768,6 @@ __zypper_install() {
 __opensuse_prep_install() {
     # DRY function for common installation preparatory steps for SUSE
     if [ "$_DISABLE_REPOS" -eq $BS_FALSE ]; then
-        # Is the repository already known
-        __set_suse_pkg_repo
         # Check zypper repos and refresh if necessary
         __check_and_refresh_suse_pkg_repo
     fi
@@ -6795,7 +6854,8 @@ install_opensuse_stable() {
         MINOR_VER_STRG=""
     elif [ "$(echo "$STABLE_REV" | grep -E '^([3-9][0-5]{2}[6-9](\.[0-9]*)?)')" != "" ]; then
         # Minor version Salt, need to add specific minor version
-        MINOR_VER_STRG="-$STABLE_REV"
+        STABLE_REV_DOT=$(echo "$STABLE_REV" | sed 's/-/\./')
+        MINOR_VER_STRG="-$STABLE_REV_DOT"
     else
         MINOR_VER_STRG=""
     fi
@@ -7110,8 +7170,90 @@ install_suse_15_restart_daemons() {
     return 0
 }
 
+install_suse_15_check_services() {
+    install_opensuse_check_services || return 1
+    return 0
+}
+
 #
 #   End of SUSE Enterprise 15
+#
+#######################################################################################################################
+
+
+#######################################################################################################################
+#
+#   SUSE Enterprise 15, now has ID sled
+#
+
+install_sled_15_stable_deps() {
+    __opensuse_prep_install || return 1
+    install_opensuse_15_stable_deps || return 1
+
+    return 0
+}
+
+install_sled_15_git_deps() {
+    install_suse_15_stable_deps || return 1
+
+    if ! __check_command_exists git; then
+        __zypper_install git-core  || return 1
+    fi
+
+    install_opensuse_15_git_deps || return 1
+
+    return 0
+}
+
+install_sled_15_onedir_deps() {
+    __opensuse_prep_install || return 1
+    install_opensuse_15_onedir_deps || return 1
+
+    return 0
+}
+
+install_sled_15_stable() {
+    install_opensuse_stable || return 1
+    return 0
+}
+
+install_sled_15_git() {
+    install_opensuse_15_git || return 1
+    return 0
+}
+
+install_sled_15_onedir() {
+    install_opensuse_stable || return 1
+    return 0
+}
+
+install_sled_15_stable_post() {
+    install_opensuse_stable_post || return 1
+    return 0
+}
+
+install_sled_15_git_post() {
+    install_opensuse_git_post || return 1
+    return 0
+}
+
+install_sled_15_onedir_post() {
+    install_opensuse_stable_post || return 1
+    return 0
+}
+
+install_sled_15_restart_daemons() {
+    install_opensuse_restart_daemons || return 1
+    return 0
+}
+
+install_sled_15_check_services() {
+    install_opensuse_check_services || return 1
+    return 0
+}
+
+#
+#   End of SUSE Enterprise 15 aka sled
 #
 #######################################################################################################################
 

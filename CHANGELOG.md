@@ -1,3 +1,12 @@
+# v2024.12.09
+
+## What's Changed
+
+- Fix quickstart for Windows with new repo by @twangboy in https://github.com/saltstack/salt-bootstrap/pull/2065
+- Utilize salt-project packages with SUSE by @dmurphy18 in https://github.com/saltstack/salt-bootstrap/pull/2066
+
+**Full Changelog**: https://github.com/saltstack/salt-bootstrap/compare/v2024.11.29...v2024.12.09
+
 # v2024.11.29
 
 ## What's Changed

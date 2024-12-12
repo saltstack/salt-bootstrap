@@ -6,17 +6,15 @@ import pathlib
 
 os.chdir(os.path.abspath(os.path.dirname(__file__)))
 
-# only test against current containers with systemd
-# will add these when they become available with systemd
 #    "amazonlinux-2",
-#    "amazonlinux-2023",
-#    "debian-11",
 #    "debian-13",
 #    "fedora-40",
 #    "photon-4",
 #    "ubuntu-2004",
 #    "ubuntu-2404",
 LINUX_DISTROS = [
+    "amazonlinux-2023",
+    "debian-11",
     "debian-12",
     "photon-5",
     "rockylinux-8",
@@ -34,17 +32,15 @@ OSX = [
     "macos-14",
 ]
 
-# only test against current containers with systemd
-# will add these when they become available with systemd
 #    "amazonlinux-2",
-#    "amazonlinux-2023",
-#    "debian-11",
 #    "debian-13",
 #    "fedora-40",
 #    "photon-4",
 #    "ubuntu-2004",
 #    "ubuntu-2404",
 STABLE_DISTROS = [
+    "amazonlinux-2023",
+    "debian-11",
     "debian-12",
     "photon-5",
     "rockylinux-8",
@@ -52,17 +48,15 @@ STABLE_DISTROS = [
     "ubuntu-2204",
 ]
 
-# only test against current containers with systemd
-# will add these when they become available with systemd
 #    "amazonlinux-2",
-#    "amazonlinux-2023",
-#    "debian-11",
 #    "debian-13",
 #    "fedora-40",
 #    "photon-4",
 #    "ubuntu-2004",
 #    "ubuntu-2404",
 ONEDIR_DISTROS = [
+    "amazonlinux-2023",
+    "debian-11",
     "debian-12",
     "photon-5",
     "rockylinux-8",
@@ -70,8 +64,6 @@ ONEDIR_DISTROS = [
     "ubuntu-2204",
 ]
 
-# only test against current containers with systemd
-# will add these when they become available with systemd
 #    "amazonlinux-2",
 #    "amazonlinux-2023",
 #    "photon-4",
@@ -102,6 +94,7 @@ BLACKLIST_GIT_3006 = [
     "amazonlinux-2023",
     "debian-11",
     "debian-12",
+    "debian-13",
     "fedora-40",
     "photon-4",
     "photon-5",
@@ -217,19 +210,19 @@ DISTRO_DISPLAY_NAMES = {
 }
 
 CONTAINER_SLUG_NAMES = {
-    "amazonlinux-2": "systemd-amazonlinux-2",
-    "amazonlinux-2023": "systemd-amazonlinux-2023",
-    "debian-11": "systemd-debian-11",
-    "debian-12": "systemd-debian-12",
-    "debian-13": "systemd-debian-13",
-    "fedora-40": "systemd-fedora-40",
-    "photon-4": "systemd-photon-4",
-    "photon-5": "systemd-photon-5",
-    "rockylinux-8": "systemd-rockylinux-8",
-    "rockylinux-9": "systemd-rockylinux-9",
-    "ubuntu-2004": "systemd-ubuntu-20.04",
-    "ubuntu-2204": "systemd-ubuntu-22.04",
-    "ubuntu-2404": "systemd-ubuntu-24.04",
+    "amazonlinux-2": "amazonlinux-2",
+    "amazonlinux-2023": "amazonlinux-2023",
+    "debian-11": "debian-11",
+    "debian-12": "debian-12",
+    "debian-13": "debian-13",
+    "fedora-40": "fedora-40",
+    "photon-4": "photon-4",
+    "photon-5": "photon-5",
+    "rockylinux-8": "rockylinux-8",
+    "rockylinux-9": "rockylinux-9",
+    "ubuntu-2004": "ubuntu-20.04",
+    "ubuntu-2204": "ubuntu-22.04",
+    "ubuntu-2404": "ubuntu-24.04",
     "macos-12": "macos-12",
     "macos-13": "macos-13",
     "macos-14": "macOS 14",

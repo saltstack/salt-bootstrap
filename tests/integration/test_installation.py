@@ -35,10 +35,21 @@ def run_salt_call(cmd):
             log.error(f"failed to produce output result, '{result}'")
 
     else:
-        cmdl = ["sudo"]
+        if platform.system() == "Darwin":
+            cmdl = ["sudo"]
+        else:
+            cmdl = []
         cmdl.extend(cmd)
         cmdl.append("--out=json")
-        result = subprocess.run(cmdl, capture_output=True, text=True)
+        try:
+            result = subprocess.run(cmdl, capture_output=True, text=True)
+        except TypeError:
+            result = subprocess.run(
+                cmdl,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                universal_newlines=True,
+            )
         if 0 == result.returncode:
             json_data = json.loads(result.stdout)
         else:

@@ -1,3 +1,12 @@
+# v2024.12.12
+
+## What's Changed
+
+- Restrict use of dnf to Fedora only, otherwise use yum when dealing with RedHat family by @dmurphy18 in https://github.com/saltstack/salt-bootstrap/pull/2070
+- Updating container usage to that used in new Salt pipelines for CI/CD, fix Amazon Linux by @dmurphy18 in https://github.com/saltstack/salt-bootstrap/pull/2071
+
+**Full Changelog**: https://github.com/saltstack/salt-bootstrap/compare/v2024.12.09...v2024.12.12
+
 # v2024.12.09
 
 ## What's Changed

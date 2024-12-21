@@ -26,7 +26,7 @@
 #======================================================================================================================
 set -o nounset                              # Treat unset variables as an error
 
-__ScriptVersion="2024.09.24"
+__ScriptVersion="2024.12.12"
 __ScriptName="bootstrap-salt.sh"
 
 __ScriptFullName="$0"
@@ -125,6 +125,28 @@ __check_command_exists() {
 }
 
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  __check_services_systemd_functional
+#   DESCRIPTION:  Set _SYSTEMD_FUNCTIONAL = BS_TRUE or BS_FALSE case where systemd is functional (for example: container may not have systemd)
+#----------------------------------------------------------------------------------------------------------------------
+__check_services_systemd_functional() {
+
+    # check if systemd is functional, having systemctl present is insufficient
+
+    if [ "$_SYSTEMD_FUNCTIONAL" -eq $BS_FALSE ]; then
+        # already determined systemd is not functional, default is 1
+        return
+    fi
+
+    if __check_command_exists systemctl; then
+        # shellcheck disable=SC2034
+        _SYSTEMD_HELP="$(systemctl --help)"
+    else
+        _SYSTEMD_FUNCTIONAL=$BS_FALSE
+        echoerror "systemctl: command not found, assume systemd not implemented, _SYSTEMD_FUNCTIONAL $_SYSTEMD_FUNCTIONAL"
+    fi
+}   # ----------  end of function __check_services_systemd_functional  ----------
+
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #          NAME:  __check_pip_allowed
 #   DESCRIPTION:  Simple function to let the users know that -P needs to be used.
 #----------------------------------------------------------------------------------------------------------------------
@@ -199,6 +221,7 @@ __check_config_dir() {
 #  DESCRIPTION:  Checks the placed after the install arguments
 #----------------------------------------------------------------------------------------------------------------------
 __check_unparsed_options() {
+
     shellopts="$1"
     # grep alternative for SunOS
     if [ -f /usr/xpg4/bin/grep ]; then
@@ -267,9 +290,7 @@ _CUSTOM_REPO_URL="null"
 _CUSTOM_MASTER_CONFIG="null"
 _CUSTOM_MINION_CONFIG="null"
 _QUIET_GIT_INSTALLATION=$BS_FALSE
-_REPO_URL="repo.saltproject.io"
-_ONEDIR_DIR="salt"
-_ONEDIR_NIGHTLY_DIR="salt-dev/${_ONEDIR_DIR}"
+_REPO_URL="packages.broadcom.com/artifactory"
 _PY_EXE="python3"
 _MINIMUM_PIP_VERSION="9.0.1"
 _MINIMUM_SETUPTOOLS_VERSION="65.6.3"
@@ -278,6 +299,7 @@ _PIP_INSTALL_ARGS="--prefix=/usr"
 _PIP_DOWNLOAD_ARGS=""
 _QUICK_START="$BS_FALSE"
 _AUTO_ACCEPT_MINION_KEYS="$BS_FALSE"
+_SYSTEMD_FUNCTIONAL=$BS_TRUE
 
 # Defaults for install arguments
 ITYPE="stable"
@@ -296,9 +318,9 @@ __usage() {
     - stable               Install latest stable release. This is the default
                            install type
     - stable [branch]      Install latest version on a branch. Only supported
-                           for packages available at repo.saltproject.io
+                           for packages available at packages.broadcom.com
     - stable [version]     Install a specific version. Only supported for
-                           packages available at repo.saltproject.io
+                           packages available at packages.broadcom.com
                            To pin a 3xxx minor version, specify it as 3xxx.0
     - testing              RHEL-family specific: configure EPEL testing repo
     - git                  Install from the head of the master branch
@@ -306,11 +328,11 @@ __usage() {
                            commit)
     - onedir               Install latest onedir release.
     - onedir [version]     Install a specific version. Only supported for
-                           onedir packages available at repo.saltproject.io
+                           onedir packages available at packages.broadcom.com
 
     - onedir_rc            Install latest onedir RC release.
     - onedir_rc [version]  Install a specific version. Only supported for
-                           onedir RC packages available at repo.saltproject.io
+                           onedir RC packages available at packages.broadcom.com
 
   Examples:
     - ${__ScriptName}
@@ -393,8 +415,8 @@ __usage() {
         And automatically accept the minion key.
     -R  Specify a custom repository URL. Assumes the custom repository URL
         points to a repository that mirrors Salt packages located at
-        repo.saltproject.io. The option passed with -R replaces the
-        "repo.saltproject.io". If -R is passed, -r is also set. Currently only
+        packages.broadcom.com. The option passed with -R replaces the
+        "packages.broadcom.com". If -R is passed, -r is also set. Currently only
         works on CentOS/RHEL and Debian based distributions and macOS.
     -s  Sleep time used when waiting for daemons to start, restart and when
         checking for the services running. Default: ${__DEFAULT_SLEEP}
@@ -522,8 +544,8 @@ __exit_cleanup() {
             echodebug "Cleaning up the Salt Temporary Git Repository"
             # shellcheck disable=SC2164
             cd "${__SALT_GIT_CHECKOUT_PARENT_DIR}"
-            rm -rf "${_SALT_GIT_CHECKOUT_DIR}"
-            #rm -rf "${_SALT_GIT_CHECKOUT_DIR}/deps"
+            rm -fR "${_SALT_GIT_CHECKOUT_DIR}"
+            #rm -fR "${_SALT_GIT_CHECKOUT_DIR}/deps"
         else
             echowarn "Not cleaning up the Salt Temporary git repository on request"
             echowarn "Note that if you intend to re-run this script using the git approach, you might encounter some issues"
@@ -579,7 +601,15 @@ fi
 echoinfo "Running version: ${__ScriptVersion}"
 echoinfo "Executed by: ${CALLER}"
 echoinfo "Command line: '${__ScriptFullName} ${__ScriptArgs}'"
-echowarn "Running the unstable version of ${__ScriptName}"
+
+# Defaults
+STABLE_REV="latest"
+ONEDIR_REV="latest"
+_ONEDIR_REV="latest"
+YUM_REPO_FILE="/etc/yum.repos.d/salt.repo"
+
+# check if systemd is functional
+__check_services_systemd_functional
 
 # Define installation type
 if [ "$#" -gt 0 ];then
@@ -589,13 +619,24 @@ if [ "$#" -gt 0 ];then
 fi
 
 # Check installation type
-if [ "$(echo "$ITYPE" | grep -E '(stable|testing|git|onedir|onedir_rc)')" = "" ]; then
+if [ "$(echo "$ITYPE" | grep -E '(latest|default|stable|testing|git|onedir|onedir_rc)')" = "" ]; then
     echoerror "Installation type \"$ITYPE\" is not known..."
     exit 1
 fi
 
+## allows GitHub Actions CI/CD easier handling of latest and default
+if [ "$ITYPE" = "latest" ] || [ "$ITYPE" = "default" ]; then
+    STABLE_REV="latest"
+    ONEDIR_REV="latest"
+    _ONEDIR_REV="latest"
+    ITYPE="onedir"
+    if [ "$#" -gt 0 ];then
+        shift
+    fi
+    echodebug "using ITYPE onedir for input 'latest' or 'default', cmd args left ,$#,"
+
 # If doing a git install, check what branch/tag/sha will be checked out
-if [ "$ITYPE" = "git" ]; then
+elif [ "$ITYPE" = "git" ]; then
     if [ "$#" -eq 0 ];then
         GIT_REV="master"
     else
@@ -609,22 +650,25 @@ if [ "$ITYPE" = "git" ]; then
 # If doing stable install, check if version specified
 elif [ "$ITYPE" = "stable" ]; then
     if [ "$#" -eq 0 ];then
+        STABLE_REV="latest"
         ONEDIR_REV="latest"
         _ONEDIR_REV="latest"
         ITYPE="onedir"
     else
-        if [ "$(echo "$1" | grep -E '^(nightly|latest|3006|3007)$')" != "" ]; then
+        if [ "$(echo "$1" | grep -E '^(latest|3006|3007)$')" != "" ]; then
+            STABLE_REV="$1"
             ONEDIR_REV="$1"
             _ONEDIR_REV="$1"
             ITYPE="onedir"
             shift
-        elif [ "$(echo "$1" | grep -E '^([3-9][0-5]{2}[5-9](\.[0-9]*)?)')" != "" ]; then
-            ONEDIR_REV="minor/$1"
+        elif [ "$(echo "$1" | grep -E '^([3-9][0-5]{2}[6-9](\.[0-9]*)?)')" != "" ]; then
+            STABLE_REV="$1"
+            ONEDIR_REV="$1"
             _ONEDIR_REV="$1"
             ITYPE="onedir"
             shift
         else
-            echo "Unknown stable version: $1 (valid: 3006, 3007, latest)"
+            echo "Unknown stable version: $1 (valid: 3006, 3007, latest), versions older than 3006 are not available"
             exit 1
         fi
     fi
@@ -632,47 +676,54 @@ elif [ "$ITYPE" = "stable" ]; then
 elif [ "$ITYPE" = "onedir" ]; then
     if [ "$#" -eq 0 ];then
         ONEDIR_REV="latest"
+        STABLE_REV="latest"
     else
-        if [ "$(echo "$1" | grep -E '^(nightly|latest|3006|3007)$')" != "" ]; then
+        if [ "$(echo "$1" | grep -E '^(latest|3006|3007)$')" != "" ]; then
             ONEDIR_REV="$1"
+            STABLE_REV="$1"
             shift
         elif [ "$(echo "$1" | grep -E '^([3-9][0-9]{3}(\.[0-9]*)?)')" != "" ]; then
-            ONEDIR_REV="minor/$1"
+            ONEDIR_REV="$1"
+            STABLE_REV="$1"
             shift
         else
-            echo "Unknown onedir version: $1 (valid: 3006, 3007, latest, nightly.)"
+            echo "Unknown onedir version: $1 (valid: 3006, 3007, latest), versions older than 3006 are not available"
             exit 1
         fi
     fi
 
 elif [ "$ITYPE" = "onedir_rc" ]; then
-    # Change the _ONEDIR_DIR to be the location for the RC packages
-    _ONEDIR_DIR="salt_rc/salt"
+    echoerror "RC Releases are not supported at this time"
 
-    # Change ITYPE to onedir so we use the regular onedir functions
-    ITYPE="onedir"
-
-    if [ "$#" -eq 0 ];then
-        ONEDIR_REV="latest"
-    else
-        if [ "$(echo "$1" | grep -E '^(latest)$')" != "" ]; then
-            ONEDIR_REV="$1"
-            shift
-        elif [ "$(echo "$1" | grep -E '^([3-9][0-9]{3}?rc[0-9]-[0-9]$)')" != "" ]; then
-            # Handle the 3xxx.0 version as 3xxx archive (pin to minor) and strip the fake ".0" suffix
-            #ONEDIR_REV=$(echo "$1" | sed -E 's/^([3-9][0-9]{3})\.0$/\1/')
-            ONEDIR_REV="minor/$1"
-            shift
-        elif [ "$(echo "$1" | grep -E '^([3-9][0-9]{3}\.[0-9]?rc[0-9]$)')" != "" ]; then
-            # Handle the 3xxx.0 version as 3xxx archive (pin to minor) and strip the fake ".0" suffix
-            #ONEDIR_REV=$(echo "$1" | sed -E 's/^([3-9][0-9]{3})\.0$/\1/')
-            ONEDIR_REV="minor/$1"
-            shift
-        else
-            echo "Unknown onedir_rc version: $1 (valid: 3006-8, 3007-1, latest)"
-            exit 1
-        fi
-    fi
+##    # Change the _ONEDIR_DIR to be the location for the RC packages
+##    _ONEDIR_DIR="salt_rc/salt"
+##
+##    # Change ITYPE to onedir so we use the regular onedir functions
+##    ITYPE="onedir"
+##
+##    if [ "$#" -eq 0 ];then
+##        ONEDIR_REV="latest"
+##    else
+##        if [ "$(echo "$1" | grep -E '^(latest)$')" != "" ]; then
+##            ONEDIR_REV="$1"
+##            shift
+##        elif [ "$(echo "$1" | grep -E '^([3-9][0-9]{3}?rc[0-9]-[0-9]$)')" != "" ]; then
+##            # Handle the 3xxx.0 version as 3xxx archive (pin to minor) and strip the fake ".0" suffix
+##            #ONEDIR_REV=$(echo "$1" | sed -E 's/^([3-9][0-9]{3})\.0$/\1/')
+##            ## ONEDIR_REV="minor/$1" don't have minor directory anymore
+##            ONEDIR_REV="$1"
+##            shift
+##        elif [ "$(echo "$1" | grep -E '^([3-9][0-9]{3}\.[0-9]?rc[0-9]$)')" != "" ]; then
+##            # Handle the 3xxx.0 version as 3xxx archive (pin to minor) and strip the fake ".0" suffix
+##            #ONEDIR_REV=$(echo "$1" | sed -E 's/^([3-9][0-9]{3})\.0$/\1/')
+##            ## ONEDIR_REV="minor/$1" don't have minor directory anymore
+##            ONEDIR_REV="$1"
+##            shift
+##        else
+##            echo "Unknown onedir_rc version: $1 (valid: 3006-8, 3007-1, latest)"
+##            exit 1
+##        fi
+##    fi
 fi
 
 # Doing a quick start, so install master
@@ -760,7 +811,6 @@ fi
 PY_PKG_VER=3
 _PY_PKG_VER="python3"
 _PY_MAJOR_VERSION="3"
-__PY_VERSION_REPO="py3"
 
 # Check if we're installing via a different Python executable and set major version variables
 if [ -n "$_PY_EXE" ]; then
@@ -811,7 +861,7 @@ if [ "$ITYPE" != "git" ]; then
     fi
 fi
 
-# Set the _REPO_URL value based on if -R was passed or not. Defaults to repo.saltproject.io.
+# Set the _REPO_URL value based on if -R was passed or not. Defaults to packages.broadcom.com/artifactory
 if [ "$_CUSTOM_REPO_URL" != "null" ]; then
     _REPO_URL="$_CUSTOM_REPO_URL"
 
@@ -882,6 +932,7 @@ fi
 #  DESCRIPTION:  Retrieves a URL and writes it to a given path
 #----------------------------------------------------------------------------------------------------------------------
 __fetch_url() {
+
     # shellcheck disable=SC2086
     curl $_CURL_ARGS -L -s -f -o "$1" "$2" >/dev/null 2>&1     ||
         wget $_WGET_ARGS -q -O "$1" "$2" >/dev/null 2>&1       ||
@@ -896,6 +947,7 @@ __fetch_url() {
 #  DESCRIPTION:  Retrieves a URL, verifies its content and writes it to standard output
 #----------------------------------------------------------------------------------------------------------------------
 __fetch_verify() {
+
     fetch_verify_url="$1"
     fetch_verify_sum="$2"
     fetch_verify_size="$3"
@@ -917,6 +969,7 @@ __fetch_verify() {
 #  DESCRIPTION:  Checks if a URL exists
 #----------------------------------------------------------------------------------------------------------------------
 __check_url_exists() {
+
   _URL="$1"
   if curl --output /dev/null --silent --fail "${_URL}"; then
     return 0
@@ -1340,8 +1393,6 @@ __check_dpkg_architecture() {
         return 1
     fi
 
-    __REPO_ARCH="$DPKG_ARCHITECTURE"
-    __REPO_ARCH_DEB='deb [signed-by=/usr/share/keyrings/salt-archive-keyring.gpg]'
     __return_code=0
 
     case $DPKG_ARCHITECTURE in
@@ -1356,8 +1407,6 @@ __check_dpkg_architecture() {
         "arm64")
             # Saltstack official repository has full arm64 support since 3006
             error_msg=""
-            __REPO_ARCH="arm64"
-            __REPO_ARCH_DEB="deb [signed-by=/usr/share/keyrings/salt-archive-keyring.gpg arch=$__REPO_ARCH]"
             ;;
         "armhf")
             error_msg="$_REPO_URL doesn't have packages for your system architecture: $DPKG_ARCHITECTURE."
@@ -1888,6 +1937,7 @@ __function_defined() {
 #                 process is finished so the script doesn't exit on a locked proc.
 #----------------------------------------------------------------------------------------------------------------------
 __wait_for_apt(){
+
     # Timeout set at 15 minutes
     WAIT_TIMEOUT=900
 
@@ -1925,6 +1975,7 @@ __wait_for_apt(){
 #    PARAMETERS:  packages
 #----------------------------------------------------------------------------------------------------------------------
 __apt_get_install_noinput() {
+
     __wait_for_apt apt-get install -y -o DPkg::Options::=--force-confold "${@}"; return $?
 }   # ----------  end of function __apt_get_install_noinput  ----------
 
@@ -1934,6 +1985,7 @@ __apt_get_install_noinput() {
 #   DESCRIPTION:  (DRY) apt-get upgrade with noinput options
 #----------------------------------------------------------------------------------------------------------------------
 __apt_get_upgrade_noinput() {
+
     __wait_for_apt apt-get upgrade -y -o DPkg::Options::=--force-confold; return $?
 }   # ----------  end of function __apt_get_upgrade_noinput  ----------
 
@@ -1968,9 +2020,9 @@ __apt_key_fetch() {
     url=$1
 
     tempfile="$(__temp_gpg_pub)"
-
     __fetch_url "$tempfile" "$url" || return 1
-    cp -f "$tempfile" /usr/share/keyrings/salt-archive-keyring.gpg && chmod 644 /usr/share/keyrings/salt-archive-keyring.gpg || return 1
+    mkdir -p /etc/apt/keyrings
+    cp -f "$tempfile" /etc/apt/keyrings/salt-archive-keyring.pgp && chmod 644 /etc/apt/keyrings/salt-archive-keyring.pgp || return 1
     rm -f "$tempfile"
 
     return 0
@@ -1983,6 +2035,7 @@ __apt_key_fetch() {
 #    PARAMETERS:  url
 #----------------------------------------------------------------------------------------------------------------------
 __rpm_import_gpg() {
+
     url=$1
 
     tempfile="$(__temp_gpg_pub)"
@@ -2006,6 +2059,7 @@ __rpm_import_gpg() {
 #   DESCRIPTION:  (DRY) yum install with noinput options
 #----------------------------------------------------------------------------------------------------------------------
 __yum_install_noinput() {
+
     if [ "$DISTRO_NAME_L" = "oracle_linux" ]; then
         # We need to install one package at a time because --enablerepo=X disables ALL OTHER REPOS!!!!
         for package in "${@}"; do
@@ -2021,6 +2075,7 @@ __yum_install_noinput() {
 #   DESCRIPTION:  (DRY) dnf install with noinput options
 #----------------------------------------------------------------------------------------------------------------------
 __dnf_install_noinput() {
+
     dnf -y install "${@}" || return $?
 }   # ----------  end of function __dnf_install_noinput  ----------
 
@@ -2029,6 +2084,7 @@ __dnf_install_noinput() {
 #   DESCRIPTION:  (DRY) tdnf install with noinput options
 #----------------------------------------------------------------------------------------------------------------------
 __tdnf_install_noinput() {
+
     tdnf -y install "${@}" || return $?
 }   # ----------  end of function __tdnf_install_noinput  ----------
 
@@ -2037,11 +2093,19 @@ __tdnf_install_noinput() {
 #   DESCRIPTION:  (DRY) Helper function to clone and checkout salt to a
 #                 specific revision.
 #----------------------------------------------------------------------------------------------------------------------
+# shellcheck disable=SC2120
 __git_clone_and_checkout() {
+
     echodebug "Installed git version: $(git --version | awk '{ print $3 }')"
     # Turn off SSL verification if -I flag was set for insecure downloads
     if [ "$_INSECURE_DL" -eq $BS_TRUE ]; then
         export GIT_SSL_NO_VERIFY=1
+    fi
+
+    if [ "$(echo "$GIT_REV" | grep -E '^(3006|3007)$')" != "" ]; then
+        GIT_REV_ADJ="$GIT_REV.x"  # branches are 3006.x or 3007.x
+    else
+        GIT_REV_ADJ="$GIT_REV"
     fi
 
     __SALT_GIT_CHECKOUT_PARENT_DIR=$(dirname "${_SALT_GIT_CHECKOUT_DIR}" 2>/dev/null)
@@ -2072,15 +2136,15 @@ __git_clone_and_checkout() {
             git fetch --tags upstream
         fi
 
-        echodebug "Hard reseting the cloned repository to ${GIT_REV}"
-        git reset --hard "$GIT_REV" || return 1
+        echodebug "Hard reseting the cloned repository to ${GIT_REV_ADJ}"
+        git reset --hard "$GIT_REV_ADJ" || return 1
 
-        # Just calling `git reset --hard $GIT_REV` on a branch name that has
+        # Just calling `git reset --hard $GIT_REV_ADJ` on a branch name that has
         # already been checked out will not update that branch to the upstream
         # HEAD; instead it will simply reset to itself.  Check the ref to see
         # if it is a branch name, check out the branch, and pull in the
         # changes.
-        if git branch -a | grep -q "${GIT_REV}"; then
+        if git branch -a | grep -q "${GIT_REV_ADJ}"; then
             echodebug "Rebasing the cloned repository branch"
             git pull --rebase || return 1
         fi
@@ -2102,14 +2166,14 @@ __git_clone_and_checkout() {
             # Test for "--filter" option introduced in git 2.19, the minimal version of git where the treeless
             # cloning we need actually works
             if [ "$(git clone 2>&1 | grep 'filter')" != "" ]; then
-                # The "--filter" option is supported, attempt treeless cloning
-                echoinfo "Attempting to shallow clone $GIT_REV from Salt's repository ${_SALT_REPO_URL}"
-                echodebug "git command, git clone --filter=tree:0 --branch $GIT_REV $_SALT_REPO_URL $__SALT_CHECKOUT_REPONAME"
-                if git clone --filter=tree:0 --branch "$GIT_REV" "$_SALT_REPO_URL" "$__SALT_CHECKOUT_REPONAME"; then
+                # The "--filter" option is supported: attempt treeless cloning
+                echoinfo "Attempting to shallow clone $GIT_REV_ADJ from Salt's repository ${_SALT_REPO_URL}"
+                echodebug "git command, git clone --filter=tree:0 --branch $GIT_REV_ADJ $_SALT_REPO_URL $__SALT_CHECKOUT_REPONAME"
+                if git clone --filter=tree:0 --branch "$GIT_REV_ADJ" "$_SALT_REPO_URL" "$__SALT_CHECKOUT_REPONAME"; then
                     # shellcheck disable=SC2164
                     cd "${_SALT_GIT_CHECKOUT_DIR}"
                     __SHALLOW_CLONE=$BS_TRUE
-                    echoinfo  "shallow path git cloned $GIT_REV, version $(python3 salt/version.py)"
+                    echoinfo  "shallow path git cloned $GIT_REV_ADJ, version $(python3 salt/version.py)"
                 else
                     # Shallow clone above failed(missing upstream tags???), let's resume the old behaviour.
                     echowarn "Failed to shallow clone."
@@ -2128,7 +2192,7 @@ __git_clone_and_checkout() {
             # shellcheck disable=SC2164
             cd "${_SALT_GIT_CHECKOUT_DIR}"
 
-            echoinfo  "git cloned $GIT_REV, version $(python3 salt/version.py)"
+            echoinfo  "git cloned $GIT_REV_ADJ, version $(python3 salt/version.py)"
 
             if ! echo "$_SALT_REPO_URL" | grep -q -F -w "${_SALTSTACK_REPO_URL#*://}"; then
                 # We need to add the saltstack repository as a remote and fetch tags for proper versioning
@@ -2138,14 +2202,14 @@ __git_clone_and_checkout() {
                 echodebug "Fetching upstream (SaltStack's Salt repository) git tags"
                 git fetch --tags upstream || return 1
 
-                # Check if GIT_REV is a remote branch or just a commit hash
-                if git branch -r | grep -q -F -w "origin/$GIT_REV"; then
-                    GIT_REV="origin/$GIT_REV"
+                # Check if GIT_REV_ADJ is a remote branch or just a commit hash
+                if git branch -r | grep -q -F -w "origin/$GIT_REV_ADJ"; then
+                    GIT_REV_ADJ="origin/$GIT_REV_ADJ"
                 fi
             fi
 
-            echodebug "Checking out $GIT_REV"
-            git checkout "$GIT_REV" || return 1
+            echodebug "Checking out $GIT_REV_ADJ"
+            git checkout "$GIT_REV_ADJ" || return 1
         fi
 
     fi
@@ -2374,11 +2438,29 @@ __overwriteconfig() {
 #    PARAMETERS:  servicename
 #----------------------------------------------------------------------------------------------------------------------
 __check_services_systemd() {
+
     if [ $# -eq 0 ]; then
         echoerror "You need to pass a service name to check!"
         exit 1
     elif [ $# -ne 1 ]; then
         echoerror "You need to pass a service name to check as the single argument to the function"
+    fi
+
+    # check if systemd is functional, having systemctl present is insufficient
+
+    if [ "$_SYSTEMD_FUNCTIONAL" -eq $BS_FALSE ]; then
+        # already determined systemd is not functional, default is 1
+        return 1
+    fi
+
+    _SYSTEMD_ACTIVE=$(/bin/systemctl daemon-reload 2>&1 | grep 'System has not been booted with systemd')
+    echodebug "__check_services_systemd _SYSTEMD_ACTIVE result ,$_SYSTEMD_ACTIVE,"
+    if [ -n "$_SYSTEMD_ACTIVE" ]; then
+        _SYSTEMD_FUNCTIONAL=$BS_FALSE
+        echodebug "systemd is not functional, despite systemctl being present, setting _SYSTEMD_FUNCTIONAL false, $_SYSTEMD_FUNCTIONAL"
+        return 1
+    else
+        echodebug "systemd is functional, _SYSTEMD_FUNCTIONAL true, $_SYSTEMD_FUNCTIONAL"
     fi
 
     servicename=$1
@@ -2400,6 +2482,7 @@ __check_services_systemd() {
 #    PARAMETERS:  servicename
 #----------------------------------------------------------------------------------------------------------------------
 __check_services_upstart() {
+
     if [ $# -eq 0 ]; then
         echoerror "You need to pass a service name to check!"
         exit 1
@@ -2427,6 +2510,7 @@ __check_services_upstart() {
 #    PARAMETERS:  servicename
 #----------------------------------------------------------------------------------------------------------------------
 __check_services_sysvinit() {
+
     if [ $# -eq 0 ]; then
         echoerror "You need to pass a service name to check!"
         exit 1
@@ -2453,6 +2537,7 @@ __check_services_sysvinit() {
 #    PARAMETERS:  servicename
 #----------------------------------------------------------------------------------------------------------------------
 __check_services_debian() {
+
     if [ $# -eq 0 ]; then
         echoerror "You need to pass a service name to check!"
         exit 1
@@ -2480,6 +2565,7 @@ __check_services_debian() {
 #    PARAMETERS:  servicename
 #----------------------------------------------------------------------------------------------------------------------
 __check_services_openrc() {
+
     if [ $# -eq 0 ]; then
         echoerror "You need to pass a service name to check!"
         exit 1
@@ -2506,6 +2592,7 @@ __check_services_openrc() {
 #   DESCRIPTION:  Return 0 or 1 depending on successful creation of virtualenv
 #----------------------------------------------------------------------------------------------------------------------
 __create_virtualenv() {
+
     if [ ! -d "$_VIRTUALENV_DIR" ]; then
         echoinfo "Creating virtualenv ${_VIRTUALENV_DIR}"
         if [ "$_PIP_ALL" -eq $BS_TRUE ]; then
@@ -2523,6 +2610,7 @@ __create_virtualenv() {
 #   DESCRIPTION:  Return 0 or 1 depending on successful activation of virtualenv
 #----------------------------------------------------------------------------------------------------------------------
 __activate_virtualenv() {
+
     set +o nounset
     # Is virtualenv empty
     if [ -z "$_VIRTUALENV_DIR" ]; then
@@ -2543,6 +2631,7 @@ __activate_virtualenv() {
 #----------------------------------------------------------------------------------------------------------------------
 
 __install_pip_pkgs() {
+
     _pip_pkgs="$1"
     _py_exe="$2"
     _py_pkg=$(echo "$_py_exe" | sed -E "s/\\.//g")
@@ -2564,8 +2653,10 @@ __install_pip_pkgs() {
         else
             __PACKAGES="${__PACKAGES} ${_py_pkg}-devel"
             if [ "$DISTRO_NAME_L" = "fedora" ];then
+              dnf makecache || return 1
               __dnf_install_noinput ${__PACKAGES} || return 1
             else
+              yum makecache || return 1
               __yum_install_noinput ${__PACKAGES} || return 1
             fi
         fi
@@ -2584,6 +2675,7 @@ __install_pip_pkgs() {
 #    PARAMETERS:  requirements_file
 #----------------------------------------------------------------------------------------------------------------------
 __install_pip_deps() {
+
     # Install virtualenv to system pip before activating virtualenv if thats going to be used
     # We assume pip pkg is installed since that is distro specific
     if [ "$_VIRTUALENV_DIR" != "null" ]; then
@@ -2620,6 +2712,7 @@ __install_pip_deps() {
 #    PARAMETERS:  py_exe
 #----------------------------------------------------------------------------------------------------------------------
 __install_salt_from_repo() {
+
     _py_exe="$1"
 
     if [ "${_py_exe}" = "" ]; then
@@ -2647,44 +2740,6 @@ __install_salt_from_repo() {
 
     echodebug "Installed pip version: $(${_pip_cmd} --version)"
 
-    CHECK_PIP_VERSION_SCRIPT=$(cat << EOM
-import sys
-try:
-    import pip
-    installed_pip_version=tuple([int(part.strip()) for part in pip.__version__.split('.') if part.isdigit()])
-    desired_pip_version=($(echo ${_MINIMUM_PIP_VERSION} | sed 's/\./, /g' ))
-    if installed_pip_version < desired_pip_version:
-        print('Desired pip version {!r} > Installed pip version {!r}'.format('.'.join(map(str, desired_pip_version)), '.'.join(map(str, installed_pip_version))))
-        sys.exit(1)
-    print('Desired pip version {!r} < Installed pip version {!r}'.format('.'.join(map(str, desired_pip_version)), '.'.join(map(str, installed_pip_version))))
-    sys.exit(0)
-except ImportError:
-    print('Failed to import pip')
-    sys.exit(1)
-EOM
-)
-    if ! ${_py_exe} -c "$CHECK_PIP_VERSION_SCRIPT"; then
-        # Upgrade pip to at least 1.2 which is when we can start using "python3 -m pip"
-        echodebug "Running '${_pip_cmd} install ${_PIP_INSTALL_ARGS} pip>=${_MINIMUM_PIP_VERSION}'"
-        ${_pip_cmd} install ${_PIP_INSTALL_ARGS} -v "pip>=${_MINIMUM_PIP_VERSION}"
-        sleep 1
-        echodebug "PATH: ${PATH}"
-        _pip_cmd="pip${_py_version}"
-        if ! __check_command_exists "${_pip_cmd}"; then
-            echodebug "The pip binary '${_pip_cmd}' was not found in PATH"
-            _pip_cmd="pip$(echo "${_py_version}" | cut -c -1)"
-            if ! __check_command_exists "${_pip_cmd}"; then
-                echodebug "The pip binary '${_pip_cmd}' was not found in PATH"
-                _pip_cmd="pip"
-                if ! __check_command_exists "${_pip_cmd}"; then
-                    echoerror "Unable to find a pip binary"
-                    return 1
-                fi
-            fi
-        fi
-        echodebug "Installed pip version: $(${_pip_cmd} --version)"
-    fi
-
     _setuptools_dep="setuptools>=${_MINIMUM_SETUPTOOLS_VERSION},<${_MAXIMUM_SETUPTOOLS_VERSION}"
     if [ "$_PY_MAJOR_VERSION" -ne 3 ]; then
         echoerror "Python version is no longer supported, only Python 3"
@@ -2707,25 +2762,37 @@ EOM
 
     mkdir -p /tmp/git/deps
     echodebug "Created directory /tmp/git/deps"
-    echodebug "Installing Salt dependencies for Salt version $(python3 salt/version.py)"
 
     if [ ${DISTRO_NAME_L} = "ubuntu" ] && [ "$DISTRO_MAJOR_VERSION" -eq 22 ]; then
         echodebug "Ubuntu 22.04 has problem with base.txt requirements file, not parsing sys_platform == 'win32', upgrading from default pip works"
         echodebug "${_pip_cmd} install ${_USE_BREAK_SYSTEM_PACKAGES} --upgrade  pip"
-        ${_pip_cmd} install ${_USE_BREAK_SYSTEM_PACKAGES} --upgrade  pip || (echo "Failed to upgrade pip" && return 1)
+        ${_pip_cmd} install ${_USE_BREAK_SYSTEM_PACKAGES} --upgrade  pip
+        # shellcheck disable=SC2181
+        if [ $? -ne 0 ]; then
+            echo "Failed to upgrade pip"
+            return 1
+        fi
     fi
 
-    echoinfo "Downloading Salt Dependencies from PyPi"
-    echodebug "Running '${_pip_cmd} download -d /tmp/git/deps ${_PIP_DOWNLOAD_ARGS} .'"
-    ${_pip_cmd} download -d /tmp/git/deps ${_PIP_DOWNLOAD_ARGS} . || (echo "Failed to download salt dependencies" && return 1)
-
-    echoinfo "Installing Downloaded Salt Dependencies"
-    echodebug "Running '${_pip_cmd} install ${_USE_BREAK_SYSTEM_PACKAGES} --ignore-installed ${_PIP_INSTALL_ARGS} /tmp/git/deps/*'"
-    ${_pip_cmd} install ${_USE_BREAK_SYSTEM_PACKAGES} --ignore-installed ${_PIP_INSTALL_ARGS} /tmp/git/deps/* || return 1
     rm -f /tmp/git/deps/*
 
-    echoinfo "Building Salt Python Wheel"
+    echodebug "Installing Salt requirements from PyPi, ${_pip_cmd} install ${_USE_BREAK_SYSTEM_PACKAGES} --ignore-installed ${_PIP_INSTALL_ARGS} -r requirements/static/ci/py${_py_version}/linux.txt"
+    ${_pip_cmd} install ${_USE_BREAK_SYSTEM_PACKAGES} --ignore-installed ${_PIP_INSTALL_ARGS} -r "requirements/static/ci/py${_py_version}/linux.txt"
+    # shellcheck disable=SC2181
+    if [ $? -ne 0 ]; then
+        echo "Failed to install salt requirements for the version of Python ${_py_version}"
+        return 1
+    fi
 
+    if [ "${OS_NAME}" = "Linux" ]; then
+        ${_pip_cmd} install ${_USE_BREAK_SYSTEM_PACKAGES} --ignore-installed --upgrade ${_PIP_INSTALL_ARGS} "jaraco.functools==4.1.0" || return 1
+        ${_pip_cmd} install ${_USE_BREAK_SYSTEM_PACKAGES} --ignore-installed --upgrade ${_PIP_INSTALL_ARGS} "jaraco.text==4.0.0" || return 1
+        ${_pip_cmd} install ${_USE_BREAK_SYSTEM_PACKAGES} --ignore-installed --upgrade ${_PIP_INSTALL_ARGS} "jaraco.collections==5.1.0" || return 1
+        ${_pip_cmd} install ${_USE_BREAK_SYSTEM_PACKAGES} --ignore-installed --upgrade ${_PIP_INSTALL_ARGS} "jaraco.context==6.0.1" || return 1
+        ${_pip_cmd} install ${_USE_BREAK_SYSTEM_PACKAGES} --ignore-installed --upgrade ${_PIP_INSTALL_ARGS} "jaraco.classes==3.4.0" || return 1
+    fi
+
+    echoinfo "Building Salt Python Wheel"
     if [ "$_ECHO_DEBUG" -eq $BS_TRUE ]; then
         SETUP_PY_INSTALL_ARGS="-v"
     fi
@@ -2782,6 +2849,7 @@ if [ "x${_PY_MAJOR_VERSION}" = "x" ]; then
     # Default to python 3 for install
     _PY_MAJOR_VERSION=3
 fi
+
 
 #######################################################################################################################
 #
@@ -2866,6 +2934,9 @@ fi
 #   Ubuntu Install Functions
 #
 __enable_universe_repository() {
+
+    echodebug "__enable_universe_repository() entry"
+
     if [ "$(grep -R universe /etc/apt/sources.list /etc/apt/sources.list.d/ | grep -v '#')" != "" ]; then
         # The universe repository is already enabled
         return 0
@@ -2879,18 +2950,15 @@ __enable_universe_repository() {
 }
 
 __install_saltstack_ubuntu_repository() {
+
     # Workaround for latest non-LTS Ubuntu
     echodebug "__install_saltstack_ubuntu_repository() entry"
 
     if { [ "$DISTRO_MAJOR_VERSION" -eq 20 ] && [ "$DISTRO_MINOR_VERSION" -eq 10 ]; } || \
        { [ "$DISTRO_MAJOR_VERSION" -eq 22 ] && [ "$DISTRO_MINOR_VERSION" -eq 10 ]; } || \
-        [ "$DISTRO_MAJOR_VERSION" -eq 21 ] ||  [ "$DISTRO_MAJOR_VERSION" -eq 23 ]; then
+       { [ "$DISTRO_MAJOR_VERSION" -eq 24 ] && [ "$DISTRO_MINOR_VERSION" -eq 10 ]; } || \
+        [ "$DISTRO_MAJOR_VERSION" -eq 21 ] ||  [ "$DISTRO_MAJOR_VERSION" -eq 23 ] || [ "$DISTRO_MAJOR_VERSION" -eq 25 ]; then
         echowarn "Non-LTS Ubuntu detected, but stable packages requested. Trying packages for previous LTS release. You may experience problems."
-        UBUNTU_VERSION=24.04
-        UBUNTU_CODENAME="noble"
-    else
-        UBUNTU_VERSION=${DISTRO_VERSION}
-        UBUNTU_CODENAME=${DISTRO_CODENAME}
     fi
 
     # Install downloader backend for GPG keys fetching
@@ -2920,24 +2988,34 @@ __install_saltstack_ubuntu_repository() {
     fi
 
     # SaltStack's stable Ubuntu repository:
-    SALTSTACK_UBUNTU_URL="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_DIR}/${__PY_VERSION_REPO}/ubuntu/${UBUNTU_VERSION}/${__REPO_ARCH}/${STABLE_REV}"
-    echo "$__REPO_ARCH_DEB $SALTSTACK_UBUNTU_URL $UBUNTU_CODENAME main" > /etc/apt/sources.list.d/salt.list
-    __apt_key_fetch "$SALTSTACK_UBUNTU_URL/SALT-PROJECT-GPG-PUBKEY-2023.gpg" || return 1
-
+    __fetch_url "/etc/apt/sources.list.d/salt.sources" "https://github.com/saltstack/salt-install-guide/releases/latest/download/salt.sources"
+    __apt_key_fetch "${HTTP_VAL}://${_REPO_URL}/api/security/keypair/SaltProjectKey/public" || return 1
     __wait_for_apt apt-get update || return 1
+
+    if [ "$STABLE_REV" != "latest" ]; then
+        # latest is default
+        if [ "$(echo "$STABLE_REV" | grep -E '^(3006|3007)$')" != "" ]; then
+            echo "Package: salt-*" > /etc/apt/preferences.d/salt-pin-1001
+            echo "Pin: version $STABLE_REV.*" >> /etc/apt/preferences.d/salt-pin-1001
+            echo "Pin-Priority: 1001" >> /etc/apt/preferences.d/salt-pin-1001
+        elif [ "$(echo "$STABLE_REV" | grep -E '^([3-9][0-5]{2}[6-9](\.[0-9]*)?)')" != "" ]; then
+            echo "Package: salt-*" > /etc/apt/preferences.d/salt-pin-1001
+            echo "Pin: version $STABLE_REV" >> /etc/apt/preferences.d/salt-pin-1001
+            echo "Pin-Priority: 1001" >> /etc/apt/preferences.d/salt-pin-1001
+        fi
+    fi
+
 }
 
 __install_saltstack_ubuntu_onedir_repository() {
+
+    echodebug "__install_saltstack_ubuntu_onedir_repository() entry"
+
     # Workaround for latest non-LTS Ubuntu
     if { [ "$DISTRO_MAJOR_VERSION" -eq 20 ] && [ "$DISTRO_MINOR_VERSION" -eq 10 ]; } || \
        { [ "$DISTRO_MAJOR_VERSION" -eq 22 ] && [ "$DISTRO_MINOR_VERSION" -eq 10 ]; } || \
-        [ "$DISTRO_MAJOR_VERSION" -eq 21 ] ||  [ "$DISTRO_MAJOR_VERSION" -eq 23 ]; then
+        [ "$DISTRO_MAJOR_VERSION" -eq 21 ] ||  [ "$DISTRO_MAJOR_VERSION" -eq 23 ] || [ "$DISTRO_MAJOR_VERSION" -eq 25 ]; then
         echowarn "Non-LTS Ubuntu detected, but stable packages requested. Trying packages for previous LTS release. You may experience problems."
-        UBUNTU_VERSION=24.04
-        UBUNTU_CODENAME="noble"
-    else
-        UBUNTU_VERSION=${DISTRO_VERSION}
-        UBUNTU_CODENAME=${DISTRO_CODENAME}
     fi
 
     # Install downloader backend for GPG keys fetching
@@ -2954,7 +3032,7 @@ __install_saltstack_ubuntu_onedir_repository() {
     fi
 
     ## include hwclock if not part of base OS (23.10 and up)
-    if [ ! -f /usr/sbin/hwclock ]; then
+    if [ "$DISTRO_MAJOR_VERSION" -ge 23 ] && [ ! -f /usr/sbin/hwclock ]; then
         __PACKAGES="${__PACKAGES} util-linux-extra"
     fi
 
@@ -2962,18 +3040,28 @@ __install_saltstack_ubuntu_onedir_repository() {
     __apt_get_install_noinput ${__PACKAGES} || return 1
 
     # SaltStack's stable Ubuntu repository:
-    SALTSTACK_UBUNTU_URL="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_DIR}/${__PY_VERSION_REPO}/ubuntu/${UBUNTU_VERSION}/${__REPO_ARCH}/${ONEDIR_REV}/"
-    if [ "${ONEDIR_REV}" = "nightly" ] ; then
-        SALTSTACK_UBUNTU_URL="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_NIGHTLY_DIR}/${__PY_VERSION_REPO}/ubuntu/${UBUNTU_VERSION}/${__REPO_ARCH}/"
-    fi
-    echo "$__REPO_ARCH_DEB $SALTSTACK_UBUNTU_URL $UBUNTU_CODENAME main" > /etc/apt/sources.list.d/salt.list
-
-    __apt_key_fetch "${SALTSTACK_UBUNTU_URL}SALT-PROJECT-GPG-PUBKEY-2023.gpg" || return 1
-
+    __fetch_url "/etc/apt/sources.list.d/salt.sources" "https://github.com/saltstack/salt-install-guide/releases/latest/download/salt.sources"
+    __apt_key_fetch "${HTTP_VAL}://${_REPO_URL}/api/security/keypair/SaltProjectKey/public" || return 1
     __wait_for_apt apt-get update || return 1
+
+    if [ "$ONEDIR_REV" != "latest" ]; then
+        # latest is default
+        if [ "$(echo "$ONEDIR_REV" | grep -E '^(3006|3007)$')" != "" ]; then
+            echo "Package: salt-*" > /etc/apt/preferences.d/salt-pin-1001
+            echo "Pin: version $ONEDIR_REV.*" >> /etc/apt/preferences.d/salt-pin-1001
+            echo "Pin-Priority: 1001" >> /etc/apt/preferences.d/salt-pin-1001
+        elif [ "$(echo "$ONEDIR_REV" | grep -E '^([3-9][0-5]{2}[6-9](\.[0-9]*)?)')" != "" ]; then
+            ONEDIR_REV_DOT=$(echo "$ONEDIR_REV" | sed 's/-/\./')
+            echo "Package: salt-*" > /etc/apt/preferences.d/salt-pin-1001
+            echo "Pin: version $ONEDIR_REV_DOT" >> /etc/apt/preferences.d/salt-pin-1001
+            echo "Pin-Priority: 1001" >> /etc/apt/preferences.d/salt-pin-1001
+        fi
+    fi
 }
 
 install_ubuntu_deps() {
+
+    echodebug "install_ubuntu_deps() entry"
     if [ "$_DISABLE_REPOS" -eq $BS_FALSE ]; then
         # Install add-apt-repository
         if ! __check_command_exists add-apt-repository; then
@@ -3012,6 +3100,9 @@ install_ubuntu_deps() {
     # Additionally install procps and pciutils which allows for Docker bootstraps. See 366#issuecomment-39666813
     __PACKAGES="${__PACKAGES} procps pciutils"
 
+    # ensure sudo, ps installed
+    __PACKAGES="${__PACKAGES} sudo"
+
     ## include hwclock if not part of base OS (23.10 and up)
     if [ ! -f /usr/sbin/hwclock ]; then
         __PACKAGES="${__PACKAGES} util-linux-extra"
@@ -3030,6 +3121,7 @@ install_ubuntu_deps() {
 }
 
 install_ubuntu_stable_deps() {
+
     echodebug "install_ubuntu_stable_deps() entry"
 
     if [ "$_START_DAEMONS" -eq $BS_FALSE ]; then
@@ -3044,7 +3136,7 @@ install_ubuntu_stable_deps() {
     if [ "${_UPGRADE_SYS}" -eq $BS_TRUE ]; then
         if [ "${_INSECURE_DL}" -eq $BS_TRUE ]; then
             ## apt-key is deprecated
-            if [ "$DISTRO_MAJOR_VERSION" -ge 20 ] || [ "$DISTRO_MAJOR_VERSION" -ge 21 ] || [ "$DISTRO_MAJOR_VERSION" -ge 22 ] || [ "$DISTRO_MAJOR_VERSION" -ge 23 ] || [ "$DISTRO_MAJOR_VERSION" -ge 24 ]; then
+            if [ "$DISTRO_MAJOR_VERSION" -ge 20 ]; then
                 __apt_get_install_noinput --allow-unauthenticated debian-archive-keyring && apt-get update || return 1
             else
                 __apt_get_install_noinput --allow-unauthenticated debian-archive-keyring &&
@@ -3064,6 +3156,7 @@ install_ubuntu_stable_deps() {
 }
 
 install_ubuntu_git_deps() {
+
     echodebug "install_ubuntu_git_deps() entry"
 
     __wait_for_apt apt-get update || return 1
@@ -3076,6 +3169,7 @@ install_ubuntu_git_deps() {
         __apt_get_install_noinput ca-certificates
     fi
 
+    # shellcheck disable=SC2119
     __git_clone_and_checkout || return 1
 
     if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -ne 3 ]; then
@@ -3093,6 +3187,9 @@ install_ubuntu_git_deps() {
         __PACKAGES="${__PACKAGES} util-linux-extra"
     fi
 
+    # Additionally install procps pciutils and sudo which allows for Docker bootstraps. See 366#issuecomment-39666813
+    __PACKAGES="${__PACKAGES} procps pciutils sudo"
+
     # shellcheck disable=SC2086
     __apt_get_install_noinput ${__PACKAGES} || return 1
 
@@ -3106,6 +3203,7 @@ install_ubuntu_git_deps() {
 }
 
 install_ubuntu_onedir_deps() {
+
     if [ "$_START_DAEMONS" -eq $BS_FALSE ]; then
         echowarn "Not starting daemons on Debian based distributions is not working mostly because starting them is the default behaviour."
     fi
@@ -3118,7 +3216,7 @@ install_ubuntu_onedir_deps() {
     if [ "${_UPGRADE_SYS}" -eq $BS_TRUE ]; then
         if [ "${_INSECURE_DL}" -eq $BS_TRUE ]; then
             ## apt-key is deprecated
-            if [ "$DISTRO_MAJOR_VERSION" -ge 20 ] || [ "$DISTRO_MAJOR_VERSION" -ge 21 ] || [ "$DISTRO_MAJOR_VERSION" -ge 22 ] || [ "$DISTRO_MAJOR_VERSION" -ge 23 ] || [ "$DISTRO_MAJOR_VERSION" -ge 24 ]; then
+            if [ "$DISTRO_MAJOR_VERSION" -ge 20 ]; then
                 __apt_get_install_noinput --allow-unauthenticated debian-archive-keyring && apt-get update || return 1
             else
                 __apt_get_install_noinput --allow-unauthenticated debian-archive-keyring &&
@@ -3138,6 +3236,9 @@ install_ubuntu_onedir_deps() {
 }
 
 install_ubuntu_stable() {
+
+    __wait_for_apt apt-get update || return 1
+
     __PACKAGES=""
 
     if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ];then
@@ -3164,6 +3265,7 @@ install_ubuntu_stable() {
 }
 
 install_ubuntu_git() {
+
     # Activate virtualenv before install
     if [ "${_VIRTUALENV_DIR}" != "null" ]; then
         __activate_virtualenv || return 1
@@ -3193,6 +3295,9 @@ install_ubuntu_git() {
 }
 
 install_ubuntu_onedir() {
+
+    __wait_for_apt apt-get update || return 1
+
     __PACKAGES=""
 
     if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ];then
@@ -3219,6 +3324,7 @@ install_ubuntu_onedir() {
 }
 
 install_ubuntu_stable_post() {
+
     for fname in api master minion syndic; do
         # Skip salt-api since the service should be opt-in and not necessarily started on boot
         [ $fname = "api" ] && continue
@@ -3228,7 +3334,7 @@ install_ubuntu_stable_post() {
         [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
         [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
 
-        if [ -f /bin/systemctl ]; then
+        if [ "$_SYSTEMD_FUNCTIONAL" -eq $BS_TRUE ]; then
             # Using systemd
             /bin/systemctl is-enabled salt-$fname.service > /dev/null 2>&1 || (
                 /bin/systemctl preset salt-$fname.service > /dev/null 2>&1 &&
@@ -3245,6 +3351,7 @@ install_ubuntu_stable_post() {
 }
 
 install_ubuntu_git_post() {
+
     for fname in api master minion syndic; do
         # Skip if not meant to be installed
         [ $fname = "api" ] && \
@@ -3260,7 +3367,7 @@ install_ubuntu_git_post() {
           _SERVICE_DIR="${_SALT_GIT_CHECKOUT_DIR}/pkg"
         fi
 
-        if [ -f /bin/systemctl ] && [ "$DISTRO_MAJOR_VERSION" -ge 16 ]; then
+        if [ "$_SYSTEMD_FUNCTIONAL" -eq $BS_TRUE ] && [ "$DISTRO_MAJOR_VERSION" -ge 16 ]; then
             __copyfile "${_SERVICE_DIR}/salt-${fname}.service" "/lib/systemd/system/salt-${fname}.service"
 
             # Skip salt-api since the service should be opt-in and not necessarily started on boot
@@ -3269,21 +3376,6 @@ install_ubuntu_git_post() {
             systemctl is-enabled salt-$fname.service || (systemctl preset salt-$fname.service && systemctl enable salt-$fname.service)
             sleep 1
             systemctl daemon-reload
-        elif [ -f /sbin/initctl ]; then
-            _upstart_conf="/etc/init/salt-$fname.conf"
-            # We have upstart support
-            echodebug "There's upstart support"
-            if [ ! -f $_upstart_conf ]; then
-                # upstart does not know about our service, let's copy the proper file
-                echowarn "Upstart does not appear to know about salt-$fname"
-                echodebug "Copying ${_SERVICE_DIR}/salt-$fname.upstart to $_upstart_conf"
-                __copyfile "${_SERVICE_DIR}/salt-${fname}.upstart" "$_upstart_conf"
-                # Set service to know about virtualenv
-                if [ "${_VIRTUALENV_DIR}" != "null" ]; then
-                    echo "SALT_USE_VIRTUALENV=${_VIRTUALENV_DIR}" > /etc/default/salt-${fname}
-                fi
-                /sbin/initctl reload-configuration || return 1
-            fi
         # No upstart support in Ubuntu!?
         elif [ -f "${_SALT_GIT_CHECKOUT_DIR}/pkg/salt-${fname}.init" ]; then
             echodebug "There's NO upstart support!?"
@@ -3296,7 +3388,7 @@ install_ubuntu_git_post() {
 
             update-rc.d salt-$fname defaults
         else
-            echoerror "Neither upstart nor init.d was setup for salt-$fname"
+            echoerror "No init.d was setup for salt-$fname"
         fi
     done
 
@@ -3304,13 +3396,12 @@ install_ubuntu_git_post() {
 }
 
 install_ubuntu_restart_daemons() {
+
     [ "$_START_DAEMONS" -eq $BS_FALSE ] && return
 
-    # Ensure upstart configs / systemd units are loaded
-    if [ -f /bin/systemctl ] && [ "$DISTRO_MAJOR_VERSION" -ge 16 ]; then
+    # Ensure systemd units are loaded
+    if [ "$_SYSTEMD_FUNCTIONAL" -eq $BS_TRUE ] && [ "$DISTRO_MAJOR_VERSION" -ge 16 ]; then
         systemctl daemon-reload
-    elif [ -f /sbin/initctl ]; then
-        /sbin/initctl reload-configuration
     fi
 
     for fname in api master minion syndic; do
@@ -3322,7 +3413,7 @@ install_ubuntu_restart_daemons() {
         [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
         [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
 
-        if [ -f /bin/systemctl ] && [ "$DISTRO_MAJOR_VERSION" -ge 16 ]; then
+        if [ "$_SYSTEMD_FUNCTIONAL" -eq $BS_TRUE ] && [ "$DISTRO_MAJOR_VERSION" -ge 16 ]; then
             echodebug "There's systemd support while checking salt-$fname"
             systemctl stop salt-$fname > /dev/null 2>&1
             systemctl start salt-$fname.service && continue
@@ -3332,18 +3423,6 @@ install_ubuntu_restart_daemons() {
                 systemctl status salt-$fname.service
                 journalctl -xe
             fi
-        fi
-
-        if [ -f /sbin/initctl ]; then
-            echodebug "There's upstart support while checking salt-$fname"
-
-            if status salt-$fname 2>/dev/null | grep -q running; then
-                stop salt-$fname || (echodebug "Failed to stop salt-$fname" && return 1)
-            fi
-
-            start salt-$fname && continue
-            # We failed to start the service, let's test the SysV code below
-            echodebug "Failed to start salt-$fname using Upstart"
         fi
 
         if [ ! -f /etc/init.d/salt-$fname ]; then
@@ -3359,6 +3438,7 @@ install_ubuntu_restart_daemons() {
 }
 
 install_ubuntu_check_services() {
+
     for fname in api master minion syndic; do
         # Skip salt-api since the service should be opt-in and not necessarily started on boot
         [ $fname = "api" ] && continue
@@ -3368,7 +3448,7 @@ install_ubuntu_check_services() {
         [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
         [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
 
-        if [ -f /bin/systemctl ] && [ "$DISTRO_MAJOR_VERSION" -ge 16 ]; then
+        if [ "$_SYSTEMD_FUNCTIONAL" -eq $BS_TRUE ] && [ "$DISTRO_MAJOR_VERSION" -ge 16 ]; then
             __check_services_systemd salt-$fname || return 1
         elif [ -f /etc/init.d/salt-$fname ]; then
             __check_services_debian salt-$fname || return 1
@@ -3387,10 +3467,8 @@ install_ubuntu_check_services() {
 #   Debian Install Functions
 #
 __install_saltstack_debian_repository() {
-    echodebug "__install_saltstack_debian_repository() entry"
 
-    DEBIAN_RELEASE="$DISTRO_MAJOR_VERSION"
-    DEBIAN_CODENAME="$DISTRO_CODENAME"
+    echodebug "__install_saltstack_debian_repository() entry"
 
     if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -ne 3 ]; then
         echoerror "Python version is no longer supported, only Python 3"
@@ -3413,19 +3491,29 @@ __install_saltstack_debian_repository() {
     # shellcheck disable=SC2086,SC2090
     __apt_get_install_noinput ${__PACKAGES} || return 1
 
-    SALTSTACK_DEBIAN_URL="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_DIR}/${__PY_VERSION_REPO}/debian/${DEBIAN_RELEASE}/${__REPO_ARCH}/${STABLE_REV}"
-    echo "$__REPO_ARCH_DEB $SALTSTACK_DEBIAN_URL $DEBIAN_CODENAME main" > "/etc/apt/sources.list.d/salt.list"
-
-    __apt_key_fetch "$SALTSTACK_DEBIAN_URL/SALT-PROJECT-GPG-PUBKEY-2023.gpg" || return 1
-
+    __fetch_url "/etc/apt/sources.list.d/salt.sources" "https://github.com/saltstack/salt-install-guide/releases/latest/download/salt.sources"
+    __apt_key_fetch "${HTTP_VAL}://${_REPO_URL}/api/security/keypair/SaltProjectKey/public" || return 1
     __wait_for_apt apt-get update || return 1
+
+    if [ "$STABLE_REV" != "latest" ]; then
+        # latest is default
+        if [ "$(echo "$STABLE_REV" | grep -E '^(3006|3007)$')" != "" ]; then
+            echo "Package: salt-*" > /etc/apt/preferences.d/salt-pin-1001
+            echo "Pin: version $STABLE_REV.*" >> /etc/apt/preferences.d/salt-pin-1001
+            echo "Pin-Priority: 1001" >> /etc/apt/preferences.d/salt-pin-1001
+        elif [ "$(echo "$STABLE_REV" | grep -E '^([3-9][0-5]{2}[6-9](\.[0-9]*)?)')" != "" ]; then
+            STABLE_REV_DOT=$(echo "$STABLE_REV" | sed 's/-/\./')
+            MINOR_VER_STRG="-$STABLE_REV_DOT"
+            echo "Package: salt-*" > /etc/apt/preferences.d/salt-pin-1001
+            echo "Pin: version $STABLE_REV_DOT" >> /etc/apt/preferences.d/salt-pin-1001
+            echo "Pin-Priority: 1001" >> /etc/apt/preferences.d/salt-pin-1001
+        fi
+    fi
 }
 
 __install_saltstack_debian_onedir_repository() {
-    echodebug "__install_saltstack_debian_onedir_repository() entry"
 
-    DEBIAN_RELEASE="$DISTRO_MAJOR_VERSION"
-    DEBIAN_CODENAME="$DISTRO_CODENAME"
+    echodebug "__install_saltstack_debian_onedir_repository() entry"
 
     if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -ne 3 ]; then
         echoerror "Python version is no longer supported, only Python 3"
@@ -3448,19 +3536,27 @@ __install_saltstack_debian_onedir_repository() {
     # shellcheck disable=SC2086,SC2090
     __apt_get_install_noinput ${__PACKAGES} || return 1
 
-    # amd64 is just a part of repository URI
-    SALTSTACK_DEBIAN_URL="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_DIR}/${__PY_VERSION_REPO}/debian/${DEBIAN_RELEASE}/${__REPO_ARCH}/${ONEDIR_REV}"
-    if [ "${ONEDIR_REV}" = "nightly" ] ; then
-        SALTSTACK_DEBIAN_URL="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_NIGHTLY_DIR}/${__PY_VERSION_REPO}/debian/${DEBIAN_RELEASE}/${__REPO_ARCH}"
-    fi
-    echo "$__REPO_ARCH_DEB $SALTSTACK_DEBIAN_URL $DEBIAN_CODENAME main" > "/etc/apt/sources.list.d/salt.list"
-
-    __apt_key_fetch "${SALTSTACK_DEBIAN_URL}/SALT-PROJECT-GPG-PUBKEY-2023.gpg" || return 1
-
+    __fetch_url "/etc/apt/sources.list.d/salt.sources" "https://github.com/saltstack/salt-install-guide/releases/latest/download/salt.sources"
+    __apt_key_fetch "${HTTP_VAL}://${_REPO_URL}/api/security/keypair/SaltProjectKey/public" || return 1
     __wait_for_apt apt-get update || return 1
+
+    if [ "$ONEDIR_REV" != "latest" ]; then
+        # latest is default
+        if [ "$(echo "$ONEDIR_REV" | grep -E '^(3006|3007)$')" != "" ]; then
+            echo "Package: salt-*" > /etc/apt/preferences.d/salt-pin-1001
+            echo "Pin: version $ONEDIR_REV.*" >> /etc/apt/preferences.d/salt-pin-1001
+            echo "Pin-Priority: 1001" >> /etc/apt/preferences.d/salt-pin-1001
+        elif [ "$(echo "$ONEDIR_REV" | grep -E '^([3-9][0-5]{2}[6-9](\.[0-9]*)?)')" != "" ]; then
+            ONEDIR_REV_DOT=$(echo "$ONEDIR_REV" | sed 's/-/\./')
+            echo "Package: salt-*" > /etc/apt/preferences.d/salt-pin-1001
+            echo "Pin: version $ONEDIR_REV_DOT" >> /etc/apt/preferences.d/salt-pin-1001
+            echo "Pin-Priority: 1001" >> /etc/apt/preferences.d/salt-pin-1001
+        fi
+    fi
 }
 
 install_debian_onedir_deps() {
+
     echodebug "install_debian_onedir_git_deps() entry"
 
     if [ "$_START_DAEMONS" -eq $BS_FALSE ]; then
@@ -3491,8 +3587,8 @@ install_debian_onedir_deps() {
         return 1
     fi
 
-    # Additionally install procps and pciutils which allows for Docker bootstraps. See 366#issuecomment-39666813
-    __PACKAGES='procps pciutils'
+    # Additionally install procps,  pciutils and sudo which allows for Docker bootstraps. See 366#issuecomment-39666813
+    __PACKAGES='procps pciutils sudo'
 
     # YAML module is used for generating custom master/minion configs
     __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-yaml"
@@ -3515,6 +3611,7 @@ install_debian_onedir_deps() {
 }
 
 install_debian_git_deps() {
+
     echodebug "install_debian_git_deps() entry"
 
     __wait_for_apt apt-get update || return 1
@@ -3527,6 +3624,7 @@ install_debian_git_deps() {
         __apt_get_install_noinput ca-certificates
     fi
 
+    # shellcheck disable=SC2119
     __git_clone_and_checkout || return 1
 
     if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -ne 3 ]; then
@@ -3536,6 +3634,9 @@ install_debian_git_deps() {
 
     __PACKAGES="python${PY_PKG_VER}-dev python${PY_PKG_VER}-pip python${PY_PKG_VER}-setuptools gcc"
     echodebug "install_debian_git_deps() Installing ${__PACKAGES}"
+
+    # Additionally install procps,  pciutils and sudo which allows for Docker bootstraps. See 366#issuecomment-39666813
+    __PACKAGES="${__PACKAGES} procps pciutils sudo"
 
     # shellcheck disable=SC2086
     __apt_get_install_noinput ${__PACKAGES} || return 1
@@ -3550,6 +3651,9 @@ install_debian_git_deps() {
 }
 
 install_debian_stable() {
+
+    __wait_for_apt apt-get update || return 1
+
     __PACKAGES=""
 
     if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ];then
@@ -3588,6 +3692,7 @@ install_debian_12_git_deps() {
 }
 
 install_debian_git() {
+
     if [ -n "$_PY_EXE" ]; then
         _PYEXE=${_PY_EXE}
     else
@@ -3615,16 +3720,21 @@ install_debian_git() {
 }
 
 install_debian_11_git() {
+
     install_debian_git || return 1
     return 0
 }
 
 install_debian_12_git() {
+
     install_debian_git || return 1
     return 0
 }
 
 install_debian_onedir() {
+
+    __wait_for_apt apt-get update || return 1
+
     __PACKAGES=""
 
     if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ];then
@@ -3651,6 +3761,7 @@ install_debian_onedir() {
 }
 
 install_debian_git_post() {
+
     for fname in api master minion syndic; do
         # Skip if not meant to be installed
         [ "$fname" = "api" ] && \
@@ -3667,7 +3778,7 @@ install_debian_git_post() {
         fi
 
         # Configure SystemD for Debian 8 "Jessie" and later
-        if [ -f /bin/systemctl ]; then
+        if [ "$_SYSTEMD_FUNCTIONAL" -eq $BS_TRUE ]; then
             if [ ! -f /lib/systemd/system/salt-${fname}.service ] || \
                 { [ -f /lib/systemd/system/salt-${fname}.service ] && [ $_FORCE_OVERWRITE -eq $BS_TRUE ]; }; then
                 if [ -f "${_SERVICE_DIR}/salt-${fname}.service" ]; then
@@ -3690,6 +3801,7 @@ install_debian_git_post() {
 }
 
 install_debian_2021_post() {
+
     # Kali 2021 (debian derivative) disables all network services by default
     # Using archlinux post function to enable salt systemd services
     install_arch_linux_post || return 1
@@ -3697,6 +3809,7 @@ install_debian_2021_post() {
 }
 
 install_debian_restart_daemons() {
+
     [ "$_START_DAEMONS" -eq $BS_FALSE ] && return 0
 
     for fname in api master minion syndic; do
@@ -3708,7 +3821,7 @@ install_debian_restart_daemons() {
         [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
         [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
 
-        if [ -f /bin/systemctl ]; then
+        if [ "$_SYSTEMD_FUNCTIONAL" -eq $BS_TRUE ]; then
             # Debian 8 and above uses systemd
             /bin/systemctl stop salt-$fname > /dev/null 2>&1
             /bin/systemctl start salt-$fname.service && continue
@@ -3725,6 +3838,7 @@ install_debian_restart_daemons() {
 }
 
 install_debian_check_services() {
+
     for fname in api master minion syndic; do
         # Skip salt-api since the service should be opt-in and not necessarily started on boot
         [ $fname = "api" ] && continue
@@ -3734,7 +3848,7 @@ install_debian_check_services() {
         [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
         [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
 
-        if [ -f /bin/systemctl ]; then
+        if [ "$_SYSTEMD_FUNCTIONAL" -eq $BS_TRUE ]; then
             __check_services_systemd salt-$fname || return 1
         elif [ -f /etc/init.d/salt-$fname ]; then
             __check_services_debian salt-$fname || return 1
@@ -3753,43 +3867,57 @@ install_debian_check_services() {
 #
 
 __install_saltstack_fedora_onedir_repository() {
-    if [ "$ITYPE" = "stable" ]; then
-        REPO_REV="$ONEDIR_REV"
-    else
-        REPO_REV="latest"
-    fi
 
     if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -ne 3 ]; then
         echoerror "Python version is no longer supported, only Python 3"
         return 1
     fi
 
-    __PY_VERSION_REPO="py3"
-
-    GPG_KEY="SALT-PROJECT-GPG-PUBKEY-2023.pub"
-
-    REPO_FILE="/etc/yum.repos.d/salt.repo"
-
-    if [ ! -s "$REPO_FILE" ] || [ "$_FORCE_OVERWRITE" -eq $BS_TRUE ]; then
-        FETCH_URL="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_DIR}/${__PY_VERSION_REPO}/fedora/${DISTRO_MAJOR_VERSION}/${CPU_ARCH_L}/${ONEDIR_REV}"
-        if [ "${ONEDIR_REV}" = "nightly" ] ; then
-            FETCH_URL="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_NIGHTLY_DIR}/${__PY_VERSION_REPO}/fedora/${DISTRO_MAJOR_VERSION}/${CPU_ARCH_L}/"
+    if [ ! -s "$YUM_REPO_FILE" ] || [ "$_FORCE_OVERWRITE" -eq $BS_TRUE ]; then
+        FETCH_URL="https://github.com/saltstack/salt-install-guide/releases/latest/download/salt.repo"
+        __fetch_url "${YUM_REPO_FILE}" "${FETCH_URL}"
+        if [ "$ONEDIR_REV" != "latest" ]; then
+            # 3006.x is default, and latest for 3006.x branch
+            if [ "$(echo "$ONEDIR_REV" | grep -E '^(3006|3007)$')" != "" ]; then
+                # latest version for branch 3006 | 3007
+                REPO_REV_MAJOR=$(echo "$ONEDIR_REV" | cut -d '.' -f 1)
+                if [ "$REPO_REV_MAJOR" -eq "3007" ]; then
+                    # Enable the Salt 3007 STS repo
+                    dnf config-manager --set-disable salt-repo-*
+                    dnf config-manager --set-enabled salt-repo-3007-sts
+                fi
+            elif [ "$(echo "$ONEDIR_REV" | grep -E '^([3-9][0-5]{2}[6-9](\.[0-9]*)?)')" != "" ]; then
+                # using minor version
+                ONEDIR_REV_DOT=$(echo "$ONEDIR_REV" | sed 's/-/\./')
+                echo "[salt-repo-${ONEDIR_REV_DOT}-lts]" > "${YUM_REPO_FILE}"
+                # shellcheck disable=SC2129
+                echo "name=Salt Repo for Salt v${ONEDIR_REV_DOT} LTS" >> "${YUM_REPO_FILE}"
+                echo "baseurl=https://${_REPO_URL}/saltproject-rpm/" >> "${YUM_REPO_FILE}"
+                echo "skip_if_unavailable=True" >> "${YUM_REPO_FILE}"
+                echo "priority=10" >> "${YUM_REPO_FILE}"
+                echo "enabled=1" >> "${YUM_REPO_FILE}"
+                echo "enabled_metadata=1" >> "${YUM_REPO_FILE}"
+                echo "gpgcheck=1" >> "${YUM_REPO_FILE}"
+                echo "gpgkey=https://${_REPO_URL}/api/security/keypair/SaltProjectKey/public" >> "${YUM_REPO_FILE}"
+            fi
+        else
+            # Enable the Salt LATEST repo
+            dnf config-manager --set-disable salt-repo-*
+            dnf config-manager --set-enabled salt-repo-latest
         fi
+        dnf clean expire-cache || return 1
+        dnf makecache || return 1
 
-        __fetch_url "${REPO_FILE}" "${FETCH_URL}.repo"
-
-        __rpm_import_gpg "${FETCH_URL}/${GPG_KEY}" || return 1
-
-        yum clean metadata || return 1
-    elif [ "$REPO_REV" != "latest" ]; then
+    elif [ "$ONEDIR_REV" != "latest" ]; then
         echowarn "salt.repo already exists, ignoring salt version argument."
-        echowarn "Use -F (forced overwrite) to install $REPO_REV."
+        echowarn "Use -F (forced overwrite) to install $ONEDIR_REV."
     fi
 
     return 0
 }
 
 install_fedora_deps() {
+
     if [ "$_UPGRADE_SYS" -eq $BS_TRUE ]; then
         dnf -y update || return 1
     fi
@@ -3808,7 +3936,7 @@ install_fedora_deps() {
     __PACKAGES="${__PACKAGES} dnf-utils libyaml procps-ng python${PY_PKG_VER}-crypto python${PY_PKG_VER}-jinja2"
     __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-msgpack python${PY_PKG_VER}-requests python${PY_PKG_VER}-zmq"
     __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-pip python${PY_PKG_VER}-m2crypto python${PY_PKG_VER}-pyyaml"
-    __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-systemd"
+    __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-systemd sudo"
     if [ "${_EXTRA_PACKAGES}" != "" ]; then
         echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
     fi
@@ -3820,6 +3948,7 @@ install_fedora_deps() {
 }
 
 install_fedora_git_deps() {
+
     if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -ne 3 ]; then
         echoerror "Python version is no longer supported, only Python 3"
         return 1
@@ -3839,9 +3968,11 @@ install_fedora_git_deps() {
         __PACKAGES=""
     fi
 
+    # shellcheck disable=SC2119
     __git_clone_and_checkout || return 1
 
-    __PACKAGES="python${PY_PKG_VER}-devel python${PY_PKG_VER}-pip python${PY_PKG_VER}-setuptools gcc gcc-c++"
+    __PACKAGES="python${PY_PKG_VER}-devel python${PY_PKG_VER}-pip python${PY_PKG_VER}-setuptools gcc gcc-c++ sudo"
+
     # shellcheck disable=SC2086
     __dnf_install_noinput ${__PACKAGES} || return 1
 
@@ -3859,6 +3990,7 @@ install_fedora_git_deps() {
 }
 
 install_fedora_git() {
+
     if [ "${_PY_EXE}" != "" ]; then
         _PYEXE=${_PY_EXE}
         echoinfo "Using the following python version: ${_PY_EXE} to install salt"
@@ -3873,6 +4005,7 @@ install_fedora_git() {
 }
 
 install_fedora_git_post() {
+
     for fname in api master minion syndic; do
         # Skip if not meant to be installed
         [ $fname = "api" ] && \
@@ -3900,10 +4033,12 @@ install_fedora_git_post() {
         systemctl is-enabled salt-$fname.service || (systemctl preset salt-$fname.service && systemctl enable salt-$fname.service)
         sleep 1
         systemctl daemon-reload
+
     done
 }
 
 install_fedora_restart_daemons() {
+
     [ $_START_DAEMONS -eq $BS_FALSE ] && return
 
     for fname in api master minion syndic; do
@@ -3926,6 +4061,7 @@ install_fedora_restart_daemons() {
 }
 
 install_fedora_check_services() {
+
     for fname in api master minion syndic; do
         # Skip salt-api since the service should be opt-in and not necessarily started on boot
         [ $fname = "api" ] && continue
@@ -3942,6 +4078,7 @@ install_fedora_check_services() {
 }
 
 install_fedora_onedir_deps() {
+
     if [ "$_UPGRADE_SYS" -eq $BS_TRUE ]; then
         yum -y update || return 1
     fi
@@ -3963,7 +4100,7 @@ install_fedora_onedir_deps() {
         __install_saltstack_fedora_onedir_repository || return 1
     fi
 
-    __PACKAGES="dnf-utils chkconfig procps-ng"
+    __PACKAGES="dnf-utils chkconfig procps-ng sudo"
 
     # shellcheck disable=SC2086
     __yum_install_noinput ${__PACKAGES} || return 1
@@ -3980,35 +4117,48 @@ install_fedora_onedir_deps() {
 
 
 install_fedora_onedir() {
+
     STABLE_REV=$ONEDIR_REV
     #install_fedora_stable || return 1
+    if [ "$(echo "$STABLE_REV" | grep -E '^(3006|3007)$')" != "" ]; then
+        # Major version Salt, config and repo already setup
+        MINOR_VER_STRG=""
+    elif [ "$(echo "$STABLE_REV" | grep -E '^([3-9][0-5]{2}[6-9](\.[0-9]*)?)')" != "" ]; then
+        # Minor version Salt, need to add specific minor version
+        STABLE_REV_DOT=$(echo "$STABLE_REV" | sed 's/-/\./')
+        MINOR_VER_STRG="-$STABLE_REV_DOT"
+    else
+        MINOR_VER_STRG=""
+    fi
 
     __PACKAGES=""
 
     if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ];then
-        __PACKAGES="${__PACKAGES} salt-cloud"
+        __PACKAGES="${__PACKAGES} salt-cloud$MINOR_VER_STRG"
     fi
     if [ "$_INSTALL_MASTER" -eq $BS_TRUE ];then
-        __PACKAGES="${__PACKAGES} salt-master"
+        __PACKAGES="${__PACKAGES} salt-master$MINOR_VER_STRG"
     fi
     if [ "$_INSTALL_MINION" -eq $BS_TRUE ]; then
-        __PACKAGES="${__PACKAGES} salt-minion"
+        __PACKAGES="${__PACKAGES} salt-minion$MINOR_VER_STRG"
     fi
     if [ "$_INSTALL_SYNDIC" -eq $BS_TRUE ];then
-        __PACKAGES="${__PACKAGES} salt-syndic"
+        __PACKAGES="${__PACKAGES} salt-syndic$MINOR_VER_STRG"
     fi
 
     if [ "$_INSTALL_SALT_API" -eq $BS_TRUE ]; then
-        __PACKAGES="${__PACKAGES} salt-api"
+        __PACKAGES="${__PACKAGES} salt-api$MINOR_VER_STRG"
     fi
 
     # shellcheck disable=SC2086
+    dnf makecache || return 1
     __yum_install_noinput ${__PACKAGES} || return 1
 
     return 0
 }
 
 install_fedora_onedir_post() {
+
     STABLE_REV=$ONEDIR_REV
 
     for fname in api master minion syndic; do
@@ -4038,63 +4188,56 @@ install_fedora_onedir_post() {
 #   CentOS Install Functions
 #
 __install_saltstack_rhel_onedir_repository() {
-    if [ "$ITYPE" = "stable" ]; then
-        repo_rev="$ONEDIR_REV"
-    else
-        repo_rev="latest"
-    fi
 
     if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -ne 3 ]; then
         echoerror "Python version is no longer supported, only Python 3"
         return 1
     fi
 
-    # Avoid using '$releasever' variable for yum.
-    # Instead, this should work correctly on all RHEL variants.
-    base_url="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_DIR}/${__PY_VERSION_REPO}/redhat/${DISTRO_MAJOR_VERSION}/\$basearch/${ONEDIR_REV}/"
-    if [ "${ONEDIR_REV}" = "nightly" ] ; then
-        base_url="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_NIGHTLY_DIR}/${__PY_VERSION_REPO}/redhat/${DISTRO_MAJOR_VERSION}/\$basearch/"
-    fi
-
-    gpg_key="SALT-PROJECT-GPG-PUBKEY-2023.pub"
-
-    gpg_key_urls=""
-    for key in $gpg_key; do
-        gpg_key_urls=$(printf "${base_url}${key},%s" "$gpg_key_urls")
-    done
-
-    repo_file="/etc/yum.repos.d/salt.repo"
-
-    if [ ! -s "$repo_file" ] || [ "$_FORCE_OVERWRITE" -eq $BS_TRUE ]; then
-        cat <<_eof > "$repo_file"
-[saltstack]
-name=SaltStack ${repo_rev} Release Channel for RHEL/CentOS \$releasever
-baseurl=${base_url}
-skip_if_unavailable=True
-gpgcheck=1
-gpgkey=${gpg_key_urls}
-enabled=1
-enabled_metadata=1
-_eof
-
-        fetch_url="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_DIR}/${__PY_VERSION_REPO}/redhat/${DISTRO_MAJOR_VERSION}/${CPU_ARCH_L}/${ONEDIR_REV}/"
-        if [ "${ONEDIR_REV}" = "nightly" ] ; then
-            fetch_url="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_NIGHTLY_DIR}/${__PY_VERSION_REPO}/redhat/${DISTRO_MAJOR_VERSION}/${CPU_ARCH_L}/"
+    if [ ! -s "$YUM_REPO_FILE" ] || [ "$_FORCE_OVERWRITE" -eq $BS_TRUE ]; then
+        FETCH_URL="https://github.com/saltstack/salt-install-guide/releases/latest/download/salt.repo"
+        __fetch_url "${YUM_REPO_FILE}" "${FETCH_URL}"
+        if [ "$ONEDIR_REV" != "latest" ]; then
+            # 3006.x is default, and latest for 3006.x branch
+            if [ "$(echo "$ONEDIR_REV" | grep -E '^(3006|3007)$')" != "" ]; then
+                # latest version for branch 3006 | 3007
+                REPO_REV_MAJOR=$(echo "$ONEDIR_REV" | cut -d '.' -f 1)
+                if [ "$REPO_REV_MAJOR" -eq "3007" ]; then
+                    # Enable the Salt 3007 STS repo
+                    yum config-manager --set-disable salt-repo-*
+                    yum config-manager --set-enabled salt-repo-3007-sts
+                fi
+            elif [ "$(echo "$ONEDIR_REV" | grep -E '^([3-9][0-5]{2}[6-9](\.[0-9]*)?)')" != "" ]; then
+                # using minor version
+                ONEDIR_REV_DOT=$(echo "$ONEDIR_REV" | sed 's/-/\./')
+                echo "[salt-repo-${ONEDIR_REV_DOT}-lts]" > "${YUM_REPO_FILE}"
+                # shellcheck disable=SC2129
+                echo "name=Salt Repo for Salt v${ONEDIR_REV_DOT} LTS" >> "${YUM_REPO_FILE}"
+                echo "baseurl=https://${_REPO_URL}/saltproject-rpm/" >> "${YUM_REPO_FILE}"
+                echo "skip_if_unavailable=True" >> "${YUM_REPO_FILE}"
+                echo "priority=10" >> "${YUM_REPO_FILE}"
+                echo "enabled=1" >> "${YUM_REPO_FILE}"
+                echo "enabled_metadata=1" >> "${YUM_REPO_FILE}"
+                echo "gpgcheck=1" >> "${YUM_REPO_FILE}"
+                echo "gpgkey=https://${_REPO_URL}/api/security/keypair/SaltProjectKey/public" >> "${YUM_REPO_FILE}"
+            fi
+        else
+            # Enable the Salt LATEST repo
+            yum config-manager --set-disable salt-repo-*
+            yum config-manager --set-enabled salt-repo-latest
         fi
-        for key in $gpg_key; do
-            __rpm_import_gpg "${fetch_url}${key}" || return 1
-        done
-
-        yum clean metadata || return 1
-    elif [ "$repo_rev" != "latest" ]; then
+        yum clean expire-cache || return 1
+        yum makecache || return 1
+    elif [ "$ONEDIR_REV" != "latest" ]; then
         echowarn "salt.repo already exists, ignoring salt version argument."
-        echowarn "Use -F (forced overwrite) to install $repo_rev."
+        echowarn "Use -F (forced overwrite) to install $ONEDIR_REV."
     fi
 
     return 0
 }
 
 install_centos_stable_deps() {
+
     if [ "$_UPGRADE_SYS" -eq $BS_TRUE ]; then
         yum -y update || return 1
     fi
@@ -4117,7 +4260,7 @@ install_centos_stable_deps() {
         __install_saltstack_rhel_onedir_repository || return 1
     fi
 
-    __PACKAGES="yum-utils chkconfig procps-ng findutils"
+    __PACKAGES="yum-utils chkconfig procps-ng findutils sudo"
 
     # shellcheck disable=SC2086
     __yum_install_noinput ${__PACKAGES} || return 1
@@ -4132,26 +4275,39 @@ install_centos_stable_deps() {
 }
 
 install_centos_stable() {
+
+    if [ "$(echo "$STABLE_REV" | grep -E '^(3006|3007)$')" != "" ]; then
+        # Major version Salt, config and repo already setup
+        MINOR_VER_STRG=""
+    elif [ "$(echo "$STABLE_REV" | grep -E '^([3-9][0-5]{2}[6-9](\.[0-9]*)?)')" != "" ]; then
+        # Minor version Salt, need to add specific minor version
+        STABLE_REV_DOT=$(echo "$STABLE_REV" | sed 's/-/\./')
+        MINOR_VER_STRG="-$STABLE_REV_DOT"
+    else
+        MINOR_VER_STRG=""
+    fi
+
     __PACKAGES=""
 
     if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ];then
-        __PACKAGES="${__PACKAGES} salt-cloud"
+        __PACKAGES="${__PACKAGES} salt-cloud$MINOR_VER_STRG"
     fi
     if [ "$_INSTALL_MASTER" -eq $BS_TRUE ];then
-        __PACKAGES="${__PACKAGES} salt-master"
+        __PACKAGES="${__PACKAGES} salt-master$MINOR_VER_STRG"
     fi
     if [ "$_INSTALL_MINION" -eq $BS_TRUE ]; then
-        __PACKAGES="${__PACKAGES} salt-minion"
+        __PACKAGES="${__PACKAGES} salt-minion$MINOR_VER_STRG"
     fi
     if [ "$_INSTALL_SYNDIC" -eq $BS_TRUE ];then
-        __PACKAGES="${__PACKAGES} salt-syndic"
+        __PACKAGES="${__PACKAGES} salt-syndic$MINOR_VER_STRG"
     fi
 
     if [ "$_INSTALL_SALT_API" -eq $BS_TRUE ]; then
-        __PACKAGES="${__PACKAGES} salt-api"
+        __PACKAGES="${__PACKAGES} salt-api$MINOR_VER_STRG"
     fi
 
     # shellcheck disable=SC2086
+    yum makecache || return 1
     __yum_install_noinput ${__PACKAGES} || return 1
 
     # Workaround for 3.11 broken on CentOS Stream 8.x
@@ -4165,6 +4321,7 @@ install_centos_stable() {
 }
 
 install_centos_stable_post() {
+
     SYSTEMD_RELOAD=$BS_FALSE
 
     for fname in api master minion syndic; do
@@ -4176,7 +4333,7 @@ install_centos_stable_post() {
         [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
         [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
 
-        if [ -f /bin/systemctl ]; then
+        if [ "$_SYSTEMD_FUNCTIONAL" -eq $BS_TRUE ]; then
             /bin/systemctl is-enabled salt-${fname}.service > /dev/null 2>&1 || (
                 /bin/systemctl preset salt-${fname}.service > /dev/null 2>&1 &&
                 /bin/systemctl enable salt-${fname}.service > /dev/null 2>&1
@@ -4196,6 +4353,7 @@ install_centos_stable_post() {
 }
 
 install_centos_git_deps() {
+
     # First try stable deps then fall back to onedir deps if that one fails
     # if we're installing on a Red Hat based host that doesn't have the classic
     # package repos available.
@@ -4212,6 +4370,7 @@ install_centos_git_deps() {
         __yum_install_noinput git || return 1
     fi
 
+    # shellcheck disable=SC2119
     __git_clone_and_checkout || return 1
 
     __PACKAGES=""
@@ -4225,7 +4384,7 @@ install_centos_git_deps() {
         return 1
     fi
 
-    __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-devel python${PY_PKG_VER}-pip python${PY_PKG_VER}-setuptools gcc"
+    __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-devel python${PY_PKG_VER}-pip python${PY_PKG_VER}-setuptools gcc sudo"
 
     # shellcheck disable=SC2086
     __yum_install_noinput ${__PACKAGES} || return 1
@@ -4241,6 +4400,7 @@ install_centos_git_deps() {
 }
 
 install_centos_git() {
+
     if [ "${_PY_EXE}" != "" ]; then
         _PYEXE=${_PY_EXE}
         echoinfo "Using the following python version: ${_PY_EXE} to install salt"
@@ -4256,6 +4416,7 @@ install_centos_git() {
 }
 
 install_centos_git_post() {
+
     SYSTEMD_RELOAD=$BS_FALSE
 
     for fname in api master minion syndic; do
@@ -4272,7 +4433,8 @@ install_centos_git_post() {
         else
           _SERVICE_FILE="${_SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-${fname}.service"
         fi
-        if [ -f /bin/systemctl ]; then
+
+        if [ "$_SYSTEMD_FUNCTIONAL" -eq $BS_TRUE ]; then
             if [ ! -f "/usr/lib/systemd/system/salt-${fname}.service" ] || \
                 { [ -f "/usr/lib/systemd/system/salt-${fname}.service" ] && [ "$_FORCE_OVERWRITE" -eq $BS_TRUE ]; }; then
                 __copyfile "${_SERVICE_FILE}" /usr/lib/systemd/system
@@ -4296,6 +4458,7 @@ install_centos_git_post() {
 }
 
 install_centos_onedir_deps() {
+
     if [ "$_UPGRADE_SYS" -eq "$BS_TRUE" ]; then
         yum -y update || return 1
     fi
@@ -4317,7 +4480,7 @@ install_centos_onedir_deps() {
         __install_saltstack_rhel_onedir_repository || return 1
     fi
 
-    __PACKAGES="yum-utils chkconfig procps-ng findutils"
+    __PACKAGES="yum-utils chkconfig procps-ng findutils sudo"
 
     # shellcheck disable=SC2086
     __yum_install_noinput ${__PACKAGES} || return 1
@@ -4332,32 +4495,47 @@ install_centos_onedir_deps() {
 }
 
 install_centos_onedir() {
+
+    if [ "$(echo "$ONEDIR_REV" | grep -E '^(3006|3007)$')" != "" ]; then
+        # Major version Salt, config and repo already setup
+        MINOR_VER_STRG=""
+    elif [ "$(echo "$ONEDIR_REV" | grep -E '^([3-9][0-5]{2}[6-9](\.[0-9]*)?)')" != "" ]; then
+        # Minor version Salt, need to add specific minor version
+        ONEDIR_REV_DOT=$(echo "$ONEDIR_REV" | sed 's/-/\./')
+        MINOR_VER_STRG="-$ONEDIR_REV_DOT"
+    else
+        MINOR_VER_STRG=""
+    fi
+
     __PACKAGES=""
 
     if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ];then
-        __PACKAGES="${__PACKAGES} salt-cloud"
+        __PACKAGES="${__PACKAGES} salt-cloud$MINOR_VER_STRG"
     fi
     if [ "$_INSTALL_MASTER" -eq $BS_TRUE ];then
-        __PACKAGES="${__PACKAGES} salt-master"
+        __PACKAGES="${__PACKAGES} salt-master$MINOR_VER_STRG"
     fi
     if [ "$_INSTALL_MINION" -eq $BS_TRUE ]; then
-        __PACKAGES="${__PACKAGES} salt-minion"
+        __PACKAGES="${__PACKAGES} salt-minion$MINOR_VER_STRG"
     fi
     if [ "$_INSTALL_SYNDIC" -eq $BS_TRUE ];then
-        __PACKAGES="${__PACKAGES} salt-syndic"
+        __PACKAGES="${__PACKAGES} salt-syndic$MINOR_VER_STRG"
     fi
 
     if [ "$_INSTALL_SALT_API" -eq $BS_TRUE ]; then
-        __PACKAGES="${__PACKAGES} salt-api"
+        __PACKAGES="${__PACKAGES} salt-api$MINOR_VER_STRG"
     fi
 
     # shellcheck disable=SC2086
+    yum makecache || return 1
+    yum list salt-minion || return 1
     __yum_install_noinput ${__PACKAGES} || return 1
 
     return 0
 }
 
 install_centos_onedir_post() {
+
     SYSTEMD_RELOAD=$BS_FALSE
 
     for fname in api master minion syndic; do
@@ -4369,7 +4547,7 @@ install_centos_onedir_post() {
         [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
         [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
 
-        if [ -f /bin/systemctl ]; then
+        if [ "$_SYSTEMD_FUNCTIONAL" -eq $BS_TRUE ]; then
             /bin/systemctl is-enabled salt-${fname}.service > /dev/null 2>&1 || (
                 /bin/systemctl preset salt-${fname}.service > /dev/null 2>&1 &&
                 /bin/systemctl enable salt-${fname}.service > /dev/null 2>&1
@@ -4389,6 +4567,7 @@ install_centos_onedir_post() {
 }
 
 install_centos_restart_daemons() {
+
     [ "$_START_DAEMONS" -eq $BS_FALSE ] && return
 
     for fname in api master minion syndic; do
@@ -4400,26 +4579,11 @@ install_centos_restart_daemons() {
         [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
         [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
 
-        if [ -f /sbin/initctl ] && [ -f /etc/init/salt-${fname}.conf ]; then
-            # We have upstart support and upstart knows about our service
-            if ! /sbin/initctl status salt-$fname > /dev/null 2>&1; then
-                # Everything is in place and upstart gave us an error code? Fail!
-                return 1
-            fi
-
-            # upstart knows about this service.
-            # Let's try to stop it, and then start it
-            /sbin/initctl stop salt-$fname > /dev/null 2>&1
-            # Restart service
-            if ! /sbin/initctl start salt-$fname > /dev/null 2>&1; then
-                # Failed the restart?!
-                return 1
-            fi
-        elif [ -f /etc/init.d/salt-$fname ]; then
+        if [ -f /etc/init.d/salt-$fname ]; then
             # Disable stdin to fix shell session hang on killing tee pipe
             service salt-$fname stop < /dev/null > /dev/null 2>&1
             service salt-$fname start < /dev/null
-        elif [ -f /usr/bin/systemctl ]; then
+        elif [ "$_SYSTEMD_FUNCTIONAL" -eq $BS_TRUE ]; then
             # CentOS 7 uses systemd
             /usr/bin/systemctl stop salt-$fname > /dev/null 2>&1
             /usr/bin/systemctl start salt-$fname.service && continue
@@ -4433,21 +4597,25 @@ install_centos_restart_daemons() {
 }
 
 install_centos_testing_deps() {
+
     install_centos_stable_deps || return 1
     return 0
 }
 
 install_centos_testing() {
+
     install_centos_stable || return 1
     return 0
 }
 
 install_centos_testing_post() {
+
     install_centos_stable_post || return 1
     return 0
 }
 
 install_centos_check_services() {
+
     for fname in api master minion syndic; do
         # Skip salt-api since the service should be opt-in and not necessarily started on boot
         [ $fname = "api" ] && continue
@@ -4459,7 +4627,7 @@ install_centos_check_services() {
 
         if [ -f "/etc/init.d/salt-$fname" ]; then
             __check_services_sysvinit "salt-$fname" || return 1
-        elif [ -f /usr/bin/systemctl ]; then
+        elif [ "$_SYSTEMD_FUNCTIONAL" -eq $BS_TRUE ]; then
             __check_services_systemd "salt-$fname" || return 1
         fi
     done
@@ -4476,286 +4644,343 @@ install_centos_check_services() {
 #   RedHat Install Functions
 #
 install_red_hat_linux_stable_deps() {
+
     install_centos_stable_deps || return 1
     return 0
 }
 
 install_red_hat_linux_git_deps() {
+
     install_centos_git_deps || return 1
     return 0
 }
 
 install_red_hat_linux_onedir_deps() {
+
     install_centos_onedir_deps || return 1
     return 0
 }
 
 install_red_hat_enterprise_stable_deps() {
+
     install_red_hat_linux_stable_deps || return 1
     return 0
 }
 
 install_red_hat_enterprise_git_deps() {
+
     install_red_hat_linux_git_deps || return 1
     return 0
 }
 
 install_red_hat_enterprise_onedir_deps() {
+
     install_red_hat_linux_onedir_deps || return 1
     return 0
 }
 
 install_red_hat_enterprise_linux_stable_deps() {
+
     install_red_hat_linux_stable_deps || return 1
     return 0
 }
 
 install_red_hat_enterprise_linux_git_deps() {
+
     install_red_hat_linux_git_deps || return 1
     return 0
 }
 
 install_red_hat_enterprise_linux_onedir_deps() {
+
     install_red_hat_linux_onedir_deps || return 1
     return 0
 }
 
 install_red_hat_enterprise_server_stable_deps() {
+
     install_red_hat_linux_stable_deps || return 1
     return 0
 }
 
 install_red_hat_enterprise_server_git_deps() {
+
     install_red_hat_linux_git_deps || return 1
     return 0
 }
 
 install_red_hat_enterprise_server_onedir_deps() {
+
     install_red_hat_linux_onedir_deps || return 1
     return 0
 }
 
 install_red_hat_enterprise_workstation_stable_deps() {
+
     install_red_hat_linux_stable_deps || return 1
     return 0
 }
 
 install_red_hat_enterprise_workstation_git_deps() {
+
     install_red_hat_linux_git_deps || return 1
     return 0
 }
 
 install_red_hat_enterprise_workstation_onedir_deps() {
+
     install_red_hat_linux_timat_deps || return 1
     return 0
 }
 
 install_red_hat_linux_stable() {
+
     install_centos_stable || return 1
     return 0
 }
 
 install_red_hat_linux_git() {
+
     install_centos_git || return 1
     return 0
 }
 
 install_red_hat_linux_onedir() {
+
     install_centos_onedir || return 1
     return 0
 }
 
 install_red_hat_enterprise_stable() {
+
     install_red_hat_linux_stable || return 1
     return 0
 }
 
 install_red_hat_enterprise_git() {
+
     install_red_hat_linux_git || return 1
     return 0
 }
 
 install_red_hat_enterprise_onedir() {
+
     install_red_hat_linux_onedir || return 1
     return 0
 }
 
 install_red_hat_enterprise_linux_stable() {
+
     install_red_hat_linux_stable || return 1
     return 0
 }
 
 install_red_hat_enterprise_linux_git() {
+
     install_red_hat_linux_git || return 1
     return 0
 }
 
 install_red_hat_enterprise_linux_onedir() {
+
     install_red_hat_linux_onedir || return 1
     return 0
 }
 
 install_red_hat_enterprise_server_stable() {
+
     install_red_hat_linux_stable || return 1
     return 0
 }
 
 install_red_hat_enterprise_server_git() {
+
     install_red_hat_linux_git || return 1
     return 0
 }
 
 install_red_hat_enterprise_server_onedir() {
+
     install_red_hat_linux_onedir || return 1
     return 0
 }
 
 install_red_hat_enterprise_workstation_stable() {
+
     install_red_hat_linux_stable || return 1
     return 0
 }
 
 install_red_hat_enterprise_workstation_git() {
+
     install_red_hat_linux_git || return 1
     return 0
 }
 
 install_red_hat_enterprise_workstation_onedir() {
+
     install_red_hat_linux_onedir || return 1
     return 0
 }
 
 install_red_hat_linux_stable_post() {
+
     install_centos_stable_post || return 1
     return 0
 }
 
 install_red_hat_linux_restart_daemons() {
+
     install_centos_restart_daemons || return 1
     return 0
 }
 
 install_red_hat_linux_git_post() {
+
     install_centos_git_post || return 1
     return 0
 }
 
 install_red_hat_enterprise_stable_post() {
+
     install_red_hat_linux_stable_post || return 1
     return 0
 }
 
 install_red_hat_enterprise_restart_daemons() {
+
     install_red_hat_linux_restart_daemons || return 1
     return 0
 }
 
 install_red_hat_enterprise_git_post() {
+
     install_red_hat_linux_git_post || return 1
     return 0
 }
 
 install_red_hat_enterprise_linux_stable_post() {
+
     install_red_hat_linux_stable_post || return 1
     return 0
 }
 
 install_red_hat_enterprise_linux_restart_daemons() {
+
     install_red_hat_linux_restart_daemons || return 1
     return 0
 }
 
 install_red_hat_enterprise_linux_git_post() {
+
     install_red_hat_linux_git_post || return 1
     return 0
 }
 
 install_red_hat_enterprise_server_stable_post() {
+
     install_red_hat_linux_stable_post || return 1
     return 0
 }
 
 install_red_hat_enterprise_server_restart_daemons() {
+
     install_red_hat_linux_restart_daemons || return 1
     return 0
 }
 
 install_red_hat_enterprise_server_git_post() {
+
     install_red_hat_linux_git_post || return 1
     return 0
 }
 
 install_red_hat_enterprise_workstation_stable_post() {
+
     install_red_hat_linux_stable_post || return 1
     return 0
 }
 
 install_red_hat_enterprise_workstation_restart_daemons() {
+
     install_red_hat_linux_restart_daemons || return 1
     return 0
 }
 
 install_red_hat_enterprise_workstation_git_post() {
+
     install_red_hat_linux_git_post || return 1
     return 0
 }
 
 install_red_hat_linux_testing_deps() {
+
     install_centos_testing_deps || return 1
     return 0
 }
 
 install_red_hat_linux_testing() {
+
     install_centos_testing || return 1
     return 0
 }
 
 install_red_hat_linux_testing_post() {
+
     install_centos_testing_post || return 1
     return 0
 }
 
 install_red_hat_enterprise_testing_deps() {
+
     install_centos_testing_deps || return 1
     return 0
 }
 
 install_red_hat_enterprise_testing() {
+
     install_centos_testing || return 1
     return 0
 }
 
 install_red_hat_enterprise_testing_post() {
+
     install_centos_testing_post || return 1
     return 0
 }
 
 install_red_hat_enterprise_server_testing_deps() {
+
     install_centos_testing_deps || return 1
     return 0
 }
 
 install_red_hat_enterprise_server_testing() {
+
     install_centos_testing || return 1
     return 0
 }
 
 install_red_hat_enterprise_server_testing_post() {
+
     install_centos_testing_post || return 1
     return 0
 }
 
 install_red_hat_enterprise_workstation_testing_deps() {
+
     install_centos_testing_deps || return 1
     return 0
 }
 
 install_red_hat_enterprise_workstation_testing() {
+
     install_centos_testing || return 1
     return 0
 }
 
 install_red_hat_enterprise_workstation_testing_post() {
+
     install_centos_testing_post || return 1
     return 0
 }
@@ -4769,6 +4994,7 @@ install_red_hat_enterprise_workstation_testing_post() {
 #   Oracle Linux Install Functions
 #
 install_oracle_linux_stable_deps() {
+
     # Install Oracle's EPEL.
     if [ "${_EPEL_REPOS_INSTALLED}" -eq $BS_FALSE ]; then
         _EPEL_REPO=oracle-epel-release-el${DISTRO_MAJOR_VERSION}
@@ -4854,7 +5080,7 @@ install_oracle_linux_check_services() {
 
 #######################################################################################################################
 #
-#   AlmaLinux Install Functions
+#   ALmaLinux Install Functions
 #
 install_almalinux_stable_deps() {
     install_centos_stable_deps || return 1
@@ -5185,6 +5411,7 @@ install_alpine_linux_git_deps() {
         apk -U add git  || return 1
     fi
 
+    # shellcheck disable=SC2119
     __git_clone_and_checkout || return 1
 
     apk -U add python3 python3-dev py3-pip py3-setuptools g++ linux-headers zeromq-dev openrc || return 1
@@ -5351,9 +5578,10 @@ install_amazon_linux_ami_2_git_deps() {
         __yum_install_noinput git || return 1
     fi
 
+    # shellcheck disable=SC2119
     __git_clone_and_checkout || return 1
 
-    __PACKAGES="python${PY_PKG_VER}-pip python${PY_PKG_VER}-setuptools python${PY_PKG_VER}-devel gcc"
+    __PACKAGES="python${PY_PKG_VER}-pip python${PY_PKG_VER}-setuptools python${PY_PKG_VER}-devel gcc sudo"
 
     # shellcheck disable=SC2086
     __yum_install_noinput ${__PACKAGES} || return 1
@@ -5373,15 +5601,11 @@ install_amazon_linux_ami_2_deps() {
         return 1
     fi
 
-    if [ "$ITYPE" = "stable" ]; then
-        repo_rev="$STABLE_REV"
-    else
-        repo_rev="latest"
-    fi
-
     # We need to install yum-utils before doing anything else when installing on
     # Amazon Linux ECS-optimized images. See issue #974.
-    __yum_install_noinput yum-utils
+    __PACKAGES="yum-utils sudo"
+
+    __yum_install_noinput ${__PACKAGES}
 
     # Do upgrade early
     if [ "$_UPGRADE_SYS" -eq $BS_TRUE ]; then
@@ -5389,30 +5613,69 @@ install_amazon_linux_ami_2_deps() {
     fi
 
     if [ $_DISABLE_REPOS -eq $BS_FALSE ] || [ "$_CUSTOM_REPO_URL" != "null" ]; then
-        __REPO_FILENAME="salt.repo"
-        PY_PKG_VER=3
-        __PY_VERSION_REPO="py3"
-        repo_label="saltstack-py3-repo"
-        repo_name="SaltStack Python 3 repo for Amazon Linux 2"
-
-        base_url="$HTTP_VAL://${_REPO_URL}/${_ONEDIR_DIR}/${__PY_VERSION_REPO}/amazon/2/\$basearch/$repo_rev/"
-        gpg_key="${base_url}SALT-PROJECT-GPG-PUBKEY-2023.gpg"
-
-        # This should prob be refactored to use __install_saltstack_rhel_onedir_repository()
-        # With args passed in to do the right thing.  Reformatted to be more like the
-        # amazon linux yum file.
-        if [ ! -s "/etc/yum.repos.d/${__REPO_FILENAME}" ]; then
-          cat <<_eof > "/etc/yum.repos.d/${__REPO_FILENAME}"
-[$repo_label]
-name=$repo_name
-failovermethod=priority
-priority=10
-gpgcheck=1
-gpgkey=$gpg_key
-baseurl=$base_url
-_eof
+        if [ ! -s "${YUM_REPO_FILE}" ]; then
+            ## Amazon Linux yum (v3) doesn't support config-manager
+            ## FETCH_URL="https://github.com/saltstack/salt-install-guide/releases/latest/download/salt.repo"
+            ## __fetch_url "${YUM_REPO_FILE}" "${FETCH_URL}"
+            # shellcheck disable=SC2129
+            if [ "$STABLE_REV" != "latest" ]; then
+                # 3006.x is default, and latest for 3006.x branch
+                if [ "$(echo "$STABLE_REV" | grep -E '^(3006|3007)$')" != "" ]; then
+                    # latest version for branch 3006 | 3007
+                    REPO_REV_MAJOR=$(echo "$STABLE_REV" | cut -d '.' -f 1)
+                    if [ "$REPO_REV_MAJOR" -eq "3007" ]; then
+                        # Enable the Salt 3007 STS repo
+                        echo "[salt-repo-3007-sts]" > "${YUM_REPO_FILE}"
+                        echo "name=Salt Repo for Salt v3007 STS" >> "${YUM_REPO_FILE}"
+                        echo "baseurl=https://${_REPO_URL}/saltproject-rpm/" >> "${YUM_REPO_FILE}"
+                        echo "skip_if_unavailable=True" >> "${YUM_REPO_FILE}"
+                        echo "priority=10" >> "${YUM_REPO_FILE}"
+                        echo "enabled=1" >> "${YUM_REPO_FILE}"
+                        echo "enabled_metadata=1" >> "${YUM_REPO_FILE}"
+                        echo "gpgcheck=1" >> "${YUM_REPO_FILE}"
+                        echo "exclude=*3006* *3008* *3009* *3010*" >> "${YUM_REPO_FILE}"
+                        echo "gpgkey=https://${_REPO_URL}/api/security/keypair/SaltProjectKey/public" >> "${YUM_REPO_FILE}"
+                    else
+                        # Salt 3006 repo
+                        echo "[salt-repo-3006-lts]" > "${YUM_REPO_FILE}"
+                        echo "name=Salt Repo for Salt v3006 LTS" >> "${YUM_REPO_FILE}"
+                        echo "baseurl=https://${_REPO_URL}/saltproject-rpm/" >> "${YUM_REPO_FILE}"
+                        echo "skip_if_unavailable=True" >> "${YUM_REPO_FILE}"
+                        echo "priority=10" >> "${YUM_REPO_FILE}"
+                        echo "enabled=1" >> "${YUM_REPO_FILE}"
+                        echo "enabled_metadata=1" >> "${YUM_REPO_FILE}"
+                        echo "gpgcheck=1" >> "${YUM_REPO_FILE}"
+                        echo "exclude=*3007* *3008* *3009* *3010*" >> "${YUM_REPO_FILE}"
+                        echo "gpgkey=https://${_REPO_URL}/api/security/keypair/SaltProjectKey/public" >> "${YUM_REPO_FILE}"
+                    fi
+                elif [ "$(echo "$STABLE_REV" | grep -E '^([3-9][0-5]{2}[6-9](\.[0-9]*)?)')" != "" ]; then
+                    # using minor version
+                    STABLE_REV_DOT=$(echo "$STABLE_REV" | sed 's/-/\./')
+                    echo "[salt-repo-${STABLE_REV_DOT}-lts]" > "${YUM_REPO_FILE}"
+                    echo "name=Salt Repo for Salt v${STABLE_REV_DOT} LTS" >> "${YUM_REPO_FILE}"
+                    echo "baseurl=https://${_REPO_URL}/saltproject-rpm/" >> "${YUM_REPO_FILE}"
+                    echo "skip_if_unavailable=True" >> "${YUM_REPO_FILE}"
+                    echo "priority=10" >> "${YUM_REPO_FILE}"
+                    echo "enabled=1" >> "${YUM_REPO_FILE}"
+                    echo "enabled_metadata=1" >> "${YUM_REPO_FILE}"
+                    echo "gpgcheck=1" >> "${YUM_REPO_FILE}"
+                    echo "gpgkey=https://${_REPO_URL}/api/security/keypair/SaltProjectKey/public" >> "${YUM_REPO_FILE}"
+                fi
+            else
+                # Enable the Salt LATEST repo
+                echo "[salt-repo-latest]" > "${YUM_REPO_FILE}"
+                echo "name=Salt Repo for Salt LATEST release" >> "${YUM_REPO_FILE}"
+                echo "baseurl=https://${_REPO_URL}/saltproject-rpm/" >> "${YUM_REPO_FILE}"
+                echo "skip_if_unavailable=True" >> "${YUM_REPO_FILE}"
+                echo "priority=10" >> "${YUM_REPO_FILE}"
+                echo "enabled=1" >> "${YUM_REPO_FILE}"
+                echo "enabled_metadata=1" >> "${YUM_REPO_FILE}"
+                echo "gpgcheck=1" >> "${YUM_REPO_FILE}"
+                echo "gpgkey=https://${_REPO_URL}/api/security/keypair/SaltProjectKey/public" >> "${YUM_REPO_FILE}"
+            fi
+            yum clean expire-cache || return 1
+            yum makecache || return 1
         fi
-
     fi
 
     if [ "${_EXTRA_PACKAGES}" != "" ]; then
@@ -5428,15 +5691,11 @@ install_amazon_linux_ami_2_onedir_deps() {
         return 1
     fi
 
-    if [ "$ITYPE" = "onedir" ]; then
-        repo_rev="$ONEDIR_REV"
-    else
-        repo_rev="latest"
-    fi
-
     # We need to install yum-utils before doing anything else when installing on
     # Amazon Linux ECS-optimized images. See issue #974.
-    __yum_install_noinput yum-utils
+    __PACKAGES="yum-utils chkconfig procps-ng findutils sudo"
+
+    __yum_install_noinput ${__PACKAGES}
 
     # Do upgrade early
     if [ "$_UPGRADE_SYS" -eq $BS_TRUE ]; then
@@ -5444,33 +5703,70 @@ install_amazon_linux_ami_2_onedir_deps() {
     fi
 
     if [ $_DISABLE_REPOS -eq $BS_FALSE ] || [ "$_CUSTOM_REPO_URL" != "null" ]; then
-        __REPO_FILENAME="salt.repo"
-        __PY_VERSION_REPO="py3"
-        PY_PKG_VER=3
-        repo_label="saltstack-py3-repo"
-        repo_name="SaltStack Python 3 repo for Amazon Linux 2"
+        if [ ! -s "${YUM_REPO_FILE}" ]; then
+            ## Amazon Linux yum (v3) doesn't support config-manager
+            ## FETCH_URL="https://github.com/saltstack/salt-install-guide/releases/latest/download/salt.repo"
+            ## __fetch_url "${YUM_REPO_FILE}" "${FETCH_URL}"
+            # shellcheck disable=SC2129
+            if [ "$ONEDIR_REV" != "latest" ]; then
+                # 3006.x is default, and latest for 3006.x branch
+                if [ "$(echo "$ONEDIR_REV" | grep -E '^(3006|3007)$')" != "" ]; then
+                    # latest version for branch 3006 | 3007
+                    REPO_REV_MAJOR=$(echo "$ONEDIR_REV" | cut -d '.' -f 1)
+                    if [ "$REPO_REV_MAJOR" -eq "3007" ]; then
+                        # Enable the Salt 3007 STS repo
+                        echo "[salt-repo-3007-sts]" > "${YUM_REPO_FILE}"
+                        echo "name=Salt Repo for Salt v3007 STS" >> "${YUM_REPO_FILE}"
+                        echo "baseurl=https://${_REPO_URL}/saltproject-rpm/" >> "${YUM_REPO_FILE}"
+                        echo "skip_if_unavailable=True" >> "${YUM_REPO_FILE}"
+                        echo "priority=10" >> "${YUM_REPO_FILE}"
+                        echo "enabled=1" >> "${YUM_REPO_FILE}"
+                        echo "enabled_metadata=1" >> "${YUM_REPO_FILE}"
+                        echo "gpgcheck=1" >> "${YUM_REPO_FILE}"
+                        echo "exclude=*3006* *3008* *3009* *3010*" >> "${YUM_REPO_FILE}"
+                        echo "gpgkey=https://${_REPO_URL}/api/security/keypair/SaltProjectKey/public" >> "${YUM_REPO_FILE}"
+                    else
+                        # Salt 3006 repo
+                        echo "[salt-repo-3006-lts]" > "${YUM_REPO_FILE}"
+                        echo "name=Salt Repo for Salt v3006 LTS" >> "${YUM_REPO_FILE}"
+                        echo "baseurl=https://${_REPO_URL}/saltproject-rpm/" >> "${YUM_REPO_FILE}"
+                        echo "skip_if_unavailable=True" >> "${YUM_REPO_FILE}"
+                        echo "priority=10" >> "${YUM_REPO_FILE}"
+                        echo "enabled=1" >> "${YUM_REPO_FILE}"
+                        echo "enabled_metadata=1" >> "${YUM_REPO_FILE}"
+                        echo "gpgcheck=1" >> "${YUM_REPO_FILE}"
+                        echo "exclude=*3007* *3008* *3009* *3010*" >> "${YUM_REPO_FILE}"
+                        echo "gpgkey=https://${_REPO_URL}/api/security/keypair/SaltProjectKey/public" >> "${YUM_REPO_FILE}"
+                    fi
+                elif [ "$(echo "$ONEDIR_REV" | grep -E '^([3-9][0-5]{2}[6-9](\.[0-9]*)?)')" != "" ]; then
+                    # using minor version
+                    ONEDIR_REV_DOT=$(echo "$ONEDIR_REV" | sed 's/-/\./')
+                    echo "[salt-repo-${ONEDIR_REV_DOT}-lts]" > "${YUM_REPO_FILE}"
+                    echo "name=Salt Repo for Salt v${ONEDIR_REV_DOT} LTS" >> "${YUM_REPO_FILE}"
+                    echo "baseurl=https://${_REPO_URL}/saltproject-rpm/" >> "${YUM_REPO_FILE}"
+                    echo "skip_if_unavailable=True" >> "${YUM_REPO_FILE}"
+                    echo "priority=10" >> "${YUM_REPO_FILE}"
+                    echo "enabled=1" >> "${YUM_REPO_FILE}"
+                    echo "enabled_metadata=1" >> "${YUM_REPO_FILE}"
+                    echo "gpgcheck=1" >> "${YUM_REPO_FILE}"
+                    echo "gpgkey=https://${_REPO_URL}/api/security/keypair/SaltProjectKey/public" >> "${YUM_REPO_FILE}"
+                fi
+            else
+                # Enable the Salt LATEST repo
+                echo "[salt-repo-latest]" > "${YUM_REPO_FILE}"
+                echo "name=Salt Repo for Salt LATEST release" >> "${YUM_REPO_FILE}"
+                echo "baseurl=https://${_REPO_URL}/saltproject-rpm/" >> "${YUM_REPO_FILE}"
+                echo "skip_if_unavailable=True" >> "${YUM_REPO_FILE}"
+                echo "priority=10" >> "${YUM_REPO_FILE}"
+                echo "enabled=1" >> "${YUM_REPO_FILE}"
+                echo "enabled_metadata=1" >> "${YUM_REPO_FILE}"
+                echo "gpgcheck=1" >> "${YUM_REPO_FILE}"
+                echo "gpgkey=https://${_REPO_URL}/api/security/keypair/SaltProjectKey/public" >> "${YUM_REPO_FILE}"
+            fi
+            yum clean expire-cache || return 1
+            yum makecache || return 1
         fi
-
-        base_url="$HTTP_VAL://${_REPO_URL}/${_ONEDIR_DIR}/${__PY_VERSION_REPO}/amazon/2/\$basearch/$repo_rev/"
-        if [ "${ONEDIR_REV}" = "nightly" ] ; then
-            base_url="$HTTP_VAL://${_REPO_URL}/${_ONEDIR_NIGHTLY_DIR}/${__PY_VERSION_REPO}/amazon/2/\$basearch/"
-        fi
-
-        gpg_key="${base_url}SALT-PROJECT-GPG-PUBKEY-2023.pub"
-
-        # With args passed in to do the right thing.  Reformatted to be more like the
-        # amazon linux yum file.
-        if [ ! -s "/etc/yum.repos.d/${__REPO_FILENAME}" ]; then
-          cat <<_eof > "/etc/yum.repos.d/${__REPO_FILENAME}"
-[$repo_label]
-name=$repo_name
-failovermethod=priority
-priority=10
-gpgcheck=1
-gpgkey=$gpg_key
-baseurl=$base_url
-_eof
-        fi
+    fi
 
     if [ "${_EXTRA_PACKAGES}" != "" ]; then
         echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
@@ -5551,9 +5847,10 @@ install_amazon_linux_ami_2023_git_deps() {
         __yum_install_noinput git || return 1
     fi
 
+    # shellcheck disable=SC2119
     __git_clone_and_checkout || return 1
 
-    __PACKAGES="python${PY_PKG_VER}-pip python${PY_PKG_VER}-setuptools python${PY_PKG_VER}-devel gcc"
+    __PACKAGES="python${PY_PKG_VER}-pip python${PY_PKG_VER}-setuptools python${PY_PKG_VER}-devel gcc sudo"
 
     # shellcheck disable=SC2086
     __yum_install_noinput ${__PACKAGES} || return 1
@@ -5567,49 +5864,89 @@ install_amazon_linux_ami_2023_git_deps() {
     return 0
 }
 
+install_amazon_linux_ami_2023_deps() {
+
+    # Set ONEDIR_REV to STABLE_REV
+    ONEDIR_REV=${STABLE_REV}
+    install_amazon_linux_ami_2023_onedir_deps || return 1
+}
+
 install_amazon_linux_ami_2023_onedir_deps() {
-    if [ "$ITYPE" = "onedir" ]; then
-        repo_rev="$ONEDIR_REV"
-    else
-        repo_rev="latest"
-    fi
 
     # We need to install yum-utils before doing anything else when installing on
     # Amazon Linux ECS-optimized images. See issue #974.
-    __yum_install_noinput yum-utils
+    __PACKAGES="yum-utils chkconfig procps-ng findutils sudo"
+
+    __yum_install_noinput ${__PACKAGES}
 
     # Do upgrade early
     if [ "$_UPGRADE_SYS" -eq $BS_TRUE ]; then
         yum -y update || return 1
     fi
 
-    if [ "$_DISABLE_REPOS" -eq $BS_FALSE ] || [ "$_CUSTOM_REPO_URL" != "null" ]; then
-        __REPO_FILENAME="salt.repo"
-        __PY_VERSION_REPO="py3"
-        PY_PKG_VER=3
-        repo_label="saltstack-py3-repo"
-        repo_name="SaltStack Python 3 repo for Amazon Linux 2023"
-
-        base_url="$HTTP_VAL://${_REPO_URL}/${_ONEDIR_DIR}/${__PY_VERSION_REPO}/amazon/2023/\$basearch/$repo_rev/"
-        if [ "${ONEDIR_REV}" = "nightly" ] ; then
-            base_url="$HTTP_VAL://${_REPO_URL}/${_ONEDIR_NIGHTLY_DIR}/${__PY_VERSION_REPO}/amazon/2023/\$basearch/"
-        fi
-
-        gpg_key="${base_url}SALT-PROJECT-GPG-PUBKEY-2023.pub"
-
-        # This should prob be refactored to use __install_saltstack_rhel_onedir_repository()
-        # With args passed in to do the right thing.  Reformatted to be more like the
-        # amazon linux yum file.
-        if [ ! -s "/etc/yum.repos.d/${__REPO_FILENAME}" ]; then
-          cat <<_eof > "/etc/yum.repos.d/${__REPO_FILENAME}"
-[$repo_label]
-name=$repo_name
-failovermethod=priority
-priority=10
-gpgcheck=1
-gpgkey=$gpg_key
-baseurl=$base_url
-_eof
+    if [ $_DISABLE_REPOS -eq $BS_FALSE ] || [ "$_CUSTOM_REPO_URL" != "null" ]; then
+        if [ ! -s "${YUM_REPO_FILE}" ]; then
+            ## Amazon Linux yum (v3) doesn't support config-manager
+            ## FETCH_URL="https://github.com/saltstack/salt-install-guide/releases/latest/download/salt.repo"
+            ## __fetch_url "${YUM_REPO_FILE}" "${FETCH_URL}"
+            # shellcheck disable=SC2129
+            if [ "$ONEDIR_REV" != "latest" ]; then
+                # 3006.x is default, and latest for 3006.x branch
+                if [ "$(echo "$ONEDIR_REV" | grep -E '^(3006|3007)$')" != "" ]; then
+                    # latest version for branch 3006 | 3007
+                    REPO_REV_MAJOR=$(echo "$ONEDIR_REV" | cut -d '.' -f 1)
+                    if [ "$REPO_REV_MAJOR" -eq "3007" ]; then
+                        # Enable the Salt 3007 STS repo
+                        echo "[salt-repo-3007-sts]" > "${YUM_REPO_FILE}"
+                        echo "name=Salt Repo for Salt v3007 STS" >> "${YUM_REPO_FILE}"
+                        echo "baseurl=https://${_REPO_URL}/saltproject-rpm/" >> "${YUM_REPO_FILE}"
+                        echo "skip_if_unavailable=True" >> "${YUM_REPO_FILE}"
+                        echo "priority=10" >> "${YUM_REPO_FILE}"
+                        echo "enabled=1" >> "${YUM_REPO_FILE}"
+                        echo "enabled_metadata=1" >> "${YUM_REPO_FILE}"
+                        echo "gpgcheck=1" >> "${YUM_REPO_FILE}"
+                        echo "exclude=*3006* *3008* *3009* *3010*" >> "${YUM_REPO_FILE}"
+                        echo "gpgkey=https://${_REPO_URL}/api/security/keypair/SaltProjectKey/public" >> "${YUM_REPO_FILE}"
+                    else
+                        # Salt 3006 repo
+                        echo "[salt-repo-3006-lts]" > "${YUM_REPO_FILE}"
+                        echo "name=Salt Repo for Salt v3006 LTS" >> "${YUM_REPO_FILE}"
+                        echo "baseurl=https://${_REPO_URL}/saltproject-rpm/" >> "${YUM_REPO_FILE}"
+                        echo "skip_if_unavailable=True" >> "${YUM_REPO_FILE}"
+                        echo "priority=10" >> "${YUM_REPO_FILE}"
+                        echo "enabled=1" >> "${YUM_REPO_FILE}"
+                        echo "enabled_metadata=1" >> "${YUM_REPO_FILE}"
+                        echo "gpgcheck=1" >> "${YUM_REPO_FILE}"
+                        echo "exclude=*3007* *3008* *3009* *3010*" >> "${YUM_REPO_FILE}"
+                        echo "gpgkey=https://${_REPO_URL}/api/security/keypair/SaltProjectKey/public" >> "${YUM_REPO_FILE}"
+                    fi
+                elif [ "$(echo "$ONEDIR_REV" | grep -E '^([3-9][0-5]{2}[6-9](\.[0-9]*)?)')" != "" ]; then
+                    # using minor version
+                    ONEDIR_REV_DOT=$(echo "$ONEDIR_REV" | sed 's/-/\./')
+                    echo "[salt-repo-${ONEDIR_REV_DOT}-lts]" > "${YUM_REPO_FILE}"
+                    echo "name=Salt Repo for Salt v${ONEDIR_REV_DOT} LTS" >> "${YUM_REPO_FILE}"
+                    echo "baseurl=https://${_REPO_URL}/saltproject-rpm/" >> "${YUM_REPO_FILE}"
+                    echo "skip_if_unavailable=True" >> "${YUM_REPO_FILE}"
+                    echo "priority=10" >> "${YUM_REPO_FILE}"
+                    echo "enabled=1" >> "${YUM_REPO_FILE}"
+                    echo "enabled_metadata=1" >> "${YUM_REPO_FILE}"
+                    echo "gpgcheck=1" >> "${YUM_REPO_FILE}"
+                    echo "gpgkey=https://${_REPO_URL}/api/security/keypair/SaltProjectKey/public" >> "${YUM_REPO_FILE}"
+                fi
+            else
+                # Enable the Salt LATEST repo
+                echo "[salt-repo-latest]" > "${YUM_REPO_FILE}"
+                echo "name=Salt Repo for Salt LATEST release" >> "${YUM_REPO_FILE}"
+                echo "baseurl=https://${_REPO_URL}/saltproject-rpm/" >> "${YUM_REPO_FILE}"
+                echo "skip_if_unavailable=True" >> "${YUM_REPO_FILE}"
+                echo "priority=10" >> "${YUM_REPO_FILE}"
+                echo "enabled=1" >> "${YUM_REPO_FILE}"
+                echo "enabled_metadata=1" >> "${YUM_REPO_FILE}"
+                echo "gpgcheck=1" >> "${YUM_REPO_FILE}"
+                echo "gpgkey=https://${_REPO_URL}/api/security/keypair/SaltProjectKey/public" >> "${YUM_REPO_FILE}"
+            fi
+            yum clean expire-cache || return 1
+            yum makecache || return 1
         fi
     fi
 
@@ -5728,6 +6065,7 @@ install_arch_linux_git_deps() {
         pacman -Sy --noconfirm --needed git  || return 1
     fi
 
+    # shellcheck disable=SC2119
     __git_clone_and_checkout || return 1
 
     if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -eq 2 ]; then
@@ -5805,7 +6143,7 @@ install_arch_linux_post() {
         # Skip salt-api since the service should be opt-in and not necessarily started on boot
         [ $fname = "api" ] && continue
 
-        if [ -f /usr/bin/systemctl ]; then
+        if [ "$_SYSTEMD_FUNCTIONAL" -eq $BS_TRUE ]; then
             # Using systemd
             /usr/bin/systemctl is-enabled salt-$fname.service > /dev/null 2>&1 || (
                 /usr/bin/systemctl preset salt-$fname.service > /dev/null 2>&1 &&
@@ -5836,7 +6174,7 @@ install_arch_linux_git_post() {
           _SERVICE_DIR="${_SALT_GIT_CHECKOUT_DIR}/pkg/rpm"
         fi
 
-        if [ -f /usr/bin/systemctl ]; then
+        if [ "$_SYSTEMD_FUNCTIONAL" -eq $BS_TRUE ]; then
             __copyfile "${_SERVICE_DIR}/salt-${fname}.service" "/lib/systemd/system/salt-${fname}.service"
 
             # Skip salt-api since the service should be opt-in and not necessarily started on boot
@@ -5869,7 +6207,7 @@ install_arch_linux_restart_daemons() {
         [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
         [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
 
-        if [ -f /usr/bin/systemctl ]; then
+        if [ "$_SYSTEMD_FUNCTIONAL" -eq $BS_TRUE ]; then
             /usr/bin/systemctl stop salt-$fname.service > /dev/null 2>&1
             /usr/bin/systemctl start salt-$fname.service && continue
             echodebug "Failed to start salt-$fname using systemd"
@@ -5885,7 +6223,7 @@ install_arch_linux_restart_daemons() {
 }
 
 install_arch_check_services() {
-    if [ ! -f /usr/bin/systemctl ]; then
+    if [ "$_SYSTEMD_FUNCTIONAL" -eq $BS_TRUE ]; then
         # Not running systemd!? Don't check!
         return 0
     fi
@@ -5926,6 +6264,37 @@ install_arch_linux_onedir_post() {
 #   Photon OS Install Functions
 #
 
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  __rpm_get_packagesite_onedir_latest
+#   DESCRIPTION:  Set _GENERIC_PKG_VERSION to the latest for RPM or latest for major version input
+#----------------------------------------------------------------------------------------------------------------------
+__get_packagesite_onedir_latest() {
+
+    echodebug "Find latest rpm release from repository"
+
+    # get dir listing from url, sort and pick highest
+    generic_versions_tmpdir=$(mktemp -d)
+    curr_pwd=$(pwd)
+    cd  ${generic_versions_tmpdir} || return 1
+
+    # leverage the windows directories since release Windows and Linux
+    wget -q -r -np -nH --exclude-directories=onedir,relenv,macos -x -l 1 "https://${_REPO_URL}/saltproject-generic/windows/"
+    if [ "$#" -gt 0 ] && [ -n "$1" ]; then
+        MAJOR_VER="$1"
+        # shellcheck disable=SC2010
+        _GENERIC_PKG_VERSION=$(ls artifactory/saltproject-generic/windows/ | grep -v 'index.html' | sort -V -u | grep -E "$MAJOR_VER" | tail -n 1)
+    else
+        # shellcheck disable=SC2010
+        _GENERIC_PKG_VERSION=$(ls artifactory/saltproject-generic/windows/ | grep -v 'index.html' | sort -V -u | tail -n 1)
+    fi
+    cd ${curr_pwd} || return "${_GENERIC_PKG_VERSION}"
+    rm -fR ${generic_versions_tmpdir}
+
+    echodebug "latest rpm release from repository found ${_GENERIC_PKG_VERSION}"
+
+}
+
+
 __install_saltstack_photon_onedir_repository() {
     echodebug "__install_saltstack_photon_onedir_repository() entry"
 
@@ -5934,32 +6303,74 @@ __install_saltstack_photon_onedir_repository() {
         return 1
     fi
 
-    if [ "$ITYPE" = "stable" ]; then
-        REPO_REV="$ONEDIR_REV"
-    else
-        REPO_REV="latest"
-    fi
-
-    __PY_VERSION_REPO="py3"
-    REPO_FILE="/etc/yum.repos.d/salt.repo"
-
-    if [ ! -s "$REPO_FILE" ] || [ "$_FORCE_OVERWRITE" -eq $BS_TRUE ]; then
-        ## salt repo 4 & 5 have issues, need the Major version dot Zero, eg: 4.0, 5.0
-        FETCH_URL="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_DIR}/${__PY_VERSION_REPO}/photon/${DISTRO_MAJOR_VERSION}.0/${CPU_ARCH_L}/${ONEDIR_REV}"
-        if [ "${ONEDIR_REV}" = "nightly" ] ; then
-            FETCH_URL="${HTTP_VAL}://${_REPO_URL}/${_ONEDIR_NIGHTLY_DIR}/${__PY_VERSION_REPO}/photon/${DISTRO_MAJOR_VERSION}.0/${CPU_ARCH_L}/"
+    if [ ! -s "$YUM_REPO_FILE" ] || [ "$_FORCE_OVERWRITE" -eq $BS_TRUE ]; then
+        ## Photon tdnf doesn't support config-manager
+        ## FETCH_URL="https://github.com/saltstack/salt-install-guide/releases/latest/download/salt.repo"
+        ## __fetch_url "${YUM_REPO_FILE}" "${FETCH_URL}"
+        # shellcheck disable=SC2129
+        if [ "$ONEDIR_REV" != "latest" ]; then
+            # 3006.x is default, and latest for 3006.x branch
+            if [ "$(echo "$ONEDIR_REV" | grep -E '^(3006|3007)$')" != "" ]; then
+                # latest version for branch 3006 | 3007
+                REPO_REV_MAJOR=$(echo "$ONEDIR_REV" | cut -d '.' -f 1)
+                if [ "$REPO_REV_MAJOR" -eq "3007" ]; then
+                    # Enable the Salt 3007 STS repo
+                    ## tdnf config-manager --set-disable salt-repo-*
+                    ## tdnf config-manager --set-enabled salt-repo-3007-sts
+                    echo "[salt-repo-3007-sts]" > "${YUM_REPO_FILE}"
+                    echo "name=Salt Repo for Salt v3007 STS" >> "${YUM_REPO_FILE}"
+                    echo "baseurl=https://${_REPO_URL}/saltproject-rpm/" >> "${YUM_REPO_FILE}"
+                    echo "skip_if_unavailable=True" >> "${YUM_REPO_FILE}"
+                    echo "priority=10" >> "${YUM_REPO_FILE}"
+                    echo "enabled=1" >> "${YUM_REPO_FILE}"
+                    echo "enabled_metadata=1" >> "${YUM_REPO_FILE}"
+                    echo "gpgcheck=1" >> "${YUM_REPO_FILE}"
+                    echo "exclude=*3006* *3008* *3009* *3010*" >> "${YUM_REPO_FILE}"
+                    echo "gpgkey=https://${_REPO_URL}/api/security/keypair/SaltProjectKey/public" >> "${YUM_REPO_FILE}"
+                else
+                    # Salt 3006 repo
+                    echo "[salt-repo-3006-lts]" > "${YUM_REPO_FILE}"
+                    echo "name=Salt Repo for Salt v3006 LTS" >> "${YUM_REPO_FILE}"
+                    echo "baseurl=https://${_REPO_URL}/saltproject-rpm/" >> "${YUM_REPO_FILE}"
+                    echo "skip_if_unavailable=True" >> "${YUM_REPO_FILE}"
+                    echo "priority=10" >> "${YUM_REPO_FILE}"
+                    echo "enabled=1" >> "${YUM_REPO_FILE}"
+                    echo "enabled_metadata=1" >> "${YUM_REPO_FILE}"
+                    echo "gpgcheck=1" >> "${YUM_REPO_FILE}"
+                    echo "exclude=*3007* *3008* *3009* *3010*" >> "${YUM_REPO_FILE}"
+                    echo "gpgkey=https://${_REPO_URL}/api/security/keypair/SaltProjectKey/public" >> "${YUM_REPO_FILE}"
+                fi
+            elif [ "$(echo "$ONEDIR_REV" | grep -E '^([3-9][0-5]{2}[6-9](\.[0-9]*)?)')" != "" ]; then
+                # using minor version
+                ONEDIR_REV_DOT=$(echo "$ONEDIR_REV" | sed 's/-/\./')
+                echo "[salt-repo-${ONEDIR_REV_DOT}-lts]" > "${YUM_REPO_FILE}"
+                echo "name=Salt Repo for Salt v${ONEDIR_REV_DOT} LTS" >> "${YUM_REPO_FILE}"
+                echo "baseurl=https://${_REPO_URL}/saltproject-rpm/" >> "${YUM_REPO_FILE}"
+                echo "skip_if_unavailable=True" >> "${YUM_REPO_FILE}"
+                echo "priority=10" >> "${YUM_REPO_FILE}"
+                echo "enabled=1" >> "${YUM_REPO_FILE}"
+                echo "enabled_metadata=1" >> "${YUM_REPO_FILE}"
+                echo "gpgcheck=1" >> "${YUM_REPO_FILE}"
+                echo "gpgkey=https://${_REPO_URL}/api/security/keypair/SaltProjectKey/public" >> "${YUM_REPO_FILE}"
+            fi
+        else
+            # Enable the Salt LATEST repo
+            ## tdnf config-manager --set-disable salt-repo-*
+            ## tdnf config-manager --set-enabled salt-repo-latest
+            echo "[salt-repo-latest]" > "${YUM_REPO_FILE}"
+            echo "name=Salt Repo for Salt LATEST release" >> "${YUM_REPO_FILE}"
+            echo "baseurl=https://${_REPO_URL}/saltproject-rpm/" >> "${YUM_REPO_FILE}"
+            echo "skip_if_unavailable=True" >> "${YUM_REPO_FILE}"
+            echo "priority=10" >> "${YUM_REPO_FILE}"
+            echo "enabled=1" >> "${YUM_REPO_FILE}"
+            echo "enabled_metadata=1" >> "${YUM_REPO_FILE}"
+            echo "gpgcheck=1" >> "${YUM_REPO_FILE}"
+            echo "gpgkey=https://${_REPO_URL}/api/security/keypair/SaltProjectKey/public" >> "${YUM_REPO_FILE}"
         fi
-
-        __fetch_url "${REPO_FILE}" "${FETCH_URL}.repo"
-
-        GPG_KEY="SALT-PROJECT-GPG-PUBKEY-2023.pub"
-
-        __rpm_import_gpg "${FETCH_URL}/${GPG_KEY}" || return 1
-
         tdnf makecache || return 1
-    elif [ "$REPO_REV" != "latest" ]; then
+    elif [ "$ONEDIR_REV" != "latest" ]; then
         echowarn "salt.repo already exists, ignoring salt version argument."
-        echowarn "Use -F (forced overwrite) to install $REPO_REV."
+        echowarn "Use -F (forced overwrite) to install $ONEDIR_REV."
     fi
 
     return 0
@@ -5983,7 +6394,7 @@ install_photon_deps() {
     __PACKAGES="${__PACKAGES} libyaml procps-ng python${PY_PKG_VER}-crypto python${PY_PKG_VER}-jinja2"
     __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-msgpack python${PY_PKG_VER}-requests python${PY_PKG_VER}-zmq"
     __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-pip python${PY_PKG_VER}-m2crypto python${PY_PKG_VER}-pyyaml"
-    __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-systemd"
+    __PACKAGES="${__PACKAGES} python${PY_PKG_VER}-systemd sudo shadow"
 
     if [ "${_EXTRA_PACKAGES}" != "" ]; then
         echoinfo "Installing the following extra packages as requested: ${_EXTRA_PACKAGES}"
@@ -6033,12 +6444,21 @@ install_photon_git_deps() {
         __PACKAGES="${__PACKAGES} git"
     fi
 
+    if ! __check_command_exists sudo; then
+        __PACKAGES="${__PACKAGES} sudo"
+    fi
+
+    if ! __check_command_exists usermod; then
+        __PACKAGES="${__PACKAGES} shadow"
+    fi
+
     if [ -n "${__PACKAGES}" ]; then
         # shellcheck disable=SC2086
         __tdnf_install_noinput ${__PACKAGES} || return 1
         __PACKAGES=""
     fi
 
+    # shellcheck disable=SC2119
     __git_clone_and_checkout || return 1
 
     __PACKAGES="python${PY_PKG_VER}-devel python${PY_PKG_VER}-pip python${PY_PKG_VER}-setuptools gcc glibc-devel linux-devel.x86_64 cython${PY_PKG_VER}"
@@ -6079,6 +6499,8 @@ install_photon_git() {
         echoerror "Python 2 is no longer supported, only Python 3"
         return 1
     fi
+
+    install_photon_git_deps
 
     if [ -f "${_SALT_GIT_CHECKOUT_DIR}/salt/syspaths.py" ]; then
         ${_PYEXE} setup.py --salt-config-dir="$_SALT_ETC_DIR" --salt-cache-dir="${_SALT_CACHE_DIR}" ${SETUP_PY_INSTALL_ARGS} install --prefix=/usr || return 1
@@ -6188,7 +6610,7 @@ install_photon_onedir_deps() {
         __install_saltstack_photon_onedir_repository || return 1
     fi
 
-    __PACKAGES="procps-ng"
+    __PACKAGES="procps-ng sudo shadow"
 
     # shellcheck disable=SC2086
     __tdnf_install_noinput ${__PACKAGES} || return 1
@@ -6205,27 +6627,43 @@ install_photon_onedir_deps() {
 
 
 install_photon_onedir() {
+
     echodebug "install_photon_onedir() entry"
 
     STABLE_REV=$ONEDIR_REV
+    _GENERIC_PKG_VERSION=""
+
+    if [ "$(echo "$STABLE_REV" | grep -E '^(3006|3007)$')" != "" ]; then
+        # Major version Salt, config and repo already setup
+        __get_packagesite_onedir_latest "$STABLE_REV"
+        MINOR_VER_STRG="-$_GENERIC_PKG_VERSION"
+    elif [ "$(echo "$STABLE_REV" | grep -E '^([3-9][0-5]{2}[6-9](\.[0-9]*)?)')" != "" ]; then
+        # Minor version Salt, need to add specific minor version
+        STABLE_REV_DOT=$(echo "$STABLE_REV" | sed 's/-/\./')
+        MINOR_VER_STRG="-$STABLE_REV_DOT"
+    else
+        # default to latest version Salt, config and repo already setup
+        __get_packagesite_onedir_latest
+        MINOR_VER_STRG="-$_GENERIC_PKG_VERSION"
+    fi
 
     __PACKAGES=""
 
     if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ];then
-        __PACKAGES="${__PACKAGES} salt-cloud"
+        __PACKAGES="${__PACKAGES} salt-cloud$MINOR_VER_STRG"
     fi
     if [ "$_INSTALL_MASTER" -eq $BS_TRUE ];then
-        __PACKAGES="${__PACKAGES} salt-master"
+        __PACKAGES="${__PACKAGES} salt-master$MINOR_VER_STRG"
     fi
     if [ "$_INSTALL_MINION" -eq $BS_TRUE ]; then
-        __PACKAGES="${__PACKAGES} salt-minion"
+        __PACKAGES="${__PACKAGES} salt-minion$MINOR_VER_STRG"
     fi
     if [ "$_INSTALL_SYNDIC" -eq $BS_TRUE ];then
-        __PACKAGES="${__PACKAGES} salt-syndic"
+        __PACKAGES="${__PACKAGES} salt-syndic$MINOR_VER_STRG"
     fi
 
     if [ "$_INSTALL_SALT_API" -eq $BS_TRUE ]; then
-        __PACKAGES="${__PACKAGES} salt-api"
+        __PACKAGES="${__PACKAGES} salt-api$MINOR_VER_STRG"
     fi
 
     # shellcheck disable=SC2086
@@ -6252,38 +6690,85 @@ install_photon_onedir_post() {
 #
 __ZYPPER_REQUIRES_REPLACE_FILES=-1
 
-__set_suse_pkg_repo() {
-
-    # Set distro repo variable
-    if [ "${DISTRO_MAJOR_VERSION}" -gt 2015 ]; then
-        DISTRO_REPO="openSUSE_Tumbleweed"
-    elif [ "${DISTRO_MAJOR_VERSION}" -eq 15 ] && [ "${DISTRO_MINOR_VERSION}" -ge 4 ]; then
-        DISTRO_REPO="${DISTRO_MAJOR_VERSION}.${DISTRO_MINOR_VERSION}"
-    elif [ "${DISTRO_MAJOR_VERSION}" -ge 42 ] || [ "${DISTRO_MAJOR_VERSION}" -eq 15 ]; then
-        DISTRO_REPO="openSUSE_Leap_${DISTRO_MAJOR_VERSION}.${DISTRO_MINOR_VERSION}"
-    else
-        DISTRO_REPO="SLE_${DISTRO_MAJOR_VERSION}_SP${SUSE_PATCHLEVEL}"
-    fi
-
-    suse_pkg_url_base="https://download.opensuse.org/repositories/systemsmanagement:/saltstack"
-    suse_pkg_url_path="${DISTRO_REPO}/systemsmanagement:saltstack.repo"
-    SUSE_PKG_URL="$suse_pkg_url_base/$suse_pkg_url_path"
-}
 
 __check_and_refresh_suse_pkg_repo() {
     # Check to see if systemsmanagement_saltstack exists
-    __zypper repos | grep -q systemsmanagement_saltstack
+    __zypper repos | grep -q 'salt.repo'
 
     if [ $? -eq 1 ]; then
-        # zypper does not yet know anything about systemsmanagement_saltstack
-        __zypper addrepo --refresh "${SUSE_PKG_URL}" || return 1
+        # zypper does not yet know anything about salt.repo
+        # zypper does not support exclude similar to Photon, hence have to do following
+        ZYPPER_REPO_FILE="/etc/zypp/repos.d/salt.repo"
+        # shellcheck disable=SC2129
+        if [ "$ONEDIR_REV" != "latest" ]; then
+            # 3006.x is default, and latest for 3006.x branch
+            if [ "$(echo "$ONEDIR_REV" | grep -E '^(3006|3007)$')" != "" ]; then
+                # latest version for branch 3006 | 3007
+                REPO_REV_MAJOR=$(echo "$ONEDIR_REV" | cut -d '.' -f 1)
+                if [ "$REPO_REV_MAJOR" -eq "3007" ]; then
+                    # Enable the Salt 3007 STS repo
+                    echo "[salt-repo-3007-sts]" > "${ZYPPER_REPO_FILE}"
+                    echo "name=Salt Repo for Salt v3007 STS" >> "${ZYPPER_REPO_FILE}"
+                    echo "baseurl=https://${_REPO_URL}/saltproject-rpm/" >> "${ZYPPER_REPO_FILE}"
+                    echo "skip_if_unavailable=True" >> "${ZYPPER_REPO_FILE}"
+                    echo "priority=10" >> "${ZYPPER_REPO_FILE}"
+                    echo "enabled=1" >> "${ZYPPER_REPO_FILE}"
+                    echo "enabled_metadata=1" >> "${ZYPPER_REPO_FILE}"
+                    echo "exclude=*3006* *3008* *3009* *3010*" >> "${ZYPPER_REPO_FILE}"
+                    echo "gpgcheck=1" >> "${ZYPPER_REPO_FILE}"
+                    echo "gpgkey=https://${_REPO_URL}/api/security/keypair/SaltProjectKey/public" >> "${ZYPPER_REPO_FILE}"
+                    zypper addlock "salt-* < 3007" && zypper addlock "salt-* >= 3008"
+                else
+                    # Salt 3006 repo
+                    echo "[salt-repo-3006-lts]" > "${ZYPPER_REPO_FILE}"
+                    echo "name=Salt Repo for Salt v3006 LTS" >> "${ZYPPER_REPO_FILE}"
+                    echo "baseurl=https://${_REPO_URL}/saltproject-rpm/" >> "${ZYPPER_REPO_FILE}"
+                    echo "skip_if_unavailable=True" >> "${ZYPPER_REPO_FILE}"
+                    echo "priority=10" >> "${ZYPPER_REPO_FILE}"
+                    echo "enabled=1" >> "${ZYPPER_REPO_FILE}"
+                    echo "enabled_metadata=1" >> "${ZYPPER_REPO_FILE}"
+                    echo "exclude=*3007* *3008* *3009* *3010*" >> "${ZYPPER_REPO_FILE}"
+                    echo "gpgcheck=1" >> "${ZYPPER_REPO_FILE}"
+                    echo "gpgkey=https://${_REPO_URL}/api/security/keypair/SaltProjectKey/public" >> "${ZYPPER_REPO_FILE}"
+                    zypper addlock "salt-* < 3006" && zypper addlock "salt-* >= 3007"
+                fi
+            elif [ "$(echo "$ONEDIR_REV" | grep -E '^([3-9][0-5]{2}[6-9](\.[0-9]*)?)')" != "" ]; then
+                # using minor version
+                ONEDIR_REV_DOT=$(echo "$ONEDIR_REV" | sed 's/-/\./')
+                echo "[salt-repo-${ONEDIR_REV_DOT}-lts]" > "${ZYPPER_REPO_FILE}"
+                echo "name=Salt Repo for Salt v${ONEDIR_REV_DOT} LTS" >> "${ZYPPER_REPO_FILE}"
+                echo "baseurl=https://${_REPO_URL}/saltproject-rpm/" >> "${ZYPPER_REPO_FILE}"
+                echo "skip_if_unavailable=True" >> "${ZYPPER_REPO_FILE}"
+                echo "priority=10" >> "${ZYPPER_REPO_FILE}"
+                echo "enabled=1" >> "${ZYPPER_REPO_FILE}"
+                echo "enabled_metadata=1" >> "${ZYPPER_REPO_FILE}"
+                echo "gpgcheck=1" >> "${ZYPPER_REPO_FILE}"
+                echo "gpgkey=https://${_REPO_URL}/api/security/keypair/SaltProjectKey/public" >> "${ZYPPER_REPO_FILE}"a
+                ONEDIR_MAJ_VER=$(echo "${ONEDIR_REV_DOT}" | awk -F '.' '{print $1}')
+                # shellcheck disable=SC2004
+                ONEDIR_MAJ_VER_PLUS=$((${ONEDIR_MAJ_VER} + 1))
+                zypper addlock "salt-* < ${ONEDIR_MAJ_VER}" && zypper addlock "salt-* >= ${ONEDIR_MAJ_VER_PLUS}"
+            fi
+        else
+            # Enable the Salt LATEST repo
+            echo "[salt-repo-latest]" > "${ZYPPER_REPO_FILE}"
+            echo "name=Salt Repo for Salt LATEST release" >> "${ZYPPER_REPO_FILE}"
+            echo "baseurl=https://${_REPO_URL}/saltproject-rpm/" >> "${ZYPPER_REPO_FILE}"
+            echo "skip_if_unavailable=True" >> "${ZYPPER_REPO_FILE}"
+            echo "priority=10" >> "${ZYPPER_REPO_FILE}"
+            echo "enabled=1" >> "${ZYPPER_REPO_FILE}"
+            echo "enabled_metadata=1" >> "${ZYPPER_REPO_FILE}"
+            echo "gpgcheck=1" >> "${ZYPPER_REPO_FILE}"
+            echo "gpgkey=https://${_REPO_URL}/api/security/keypair/SaltProjectKey/public" >> "${ZYPPER_REPO_FILE}"
+        fi
+        __zypper addrepo --refresh "${ZYPPER_REPO_FILE}" || return 1
     fi
 }
 
 __version_lte() {
-    if ! __check_command_exists python; then
-        zypper --non-interactive install --replacefiles --auto-agree-with-licenses python || \
-             zypper --non-interactive install --auto-agree-with-licenses python || return 1
+    if ! __check_command_exists python3; then
+        zypper --non-interactive install --replacefiles --auto-agree-with-licenses python3 || \
+             zypper --non-interactive install --auto-agree-with-licenses python3 || return 1
     fi
 
     if [ "$(${_PY_EXE} -c 'import sys; V1=tuple([int(i) for i in sys.argv[1].split(".")]); V2=tuple([int(i) for i in sys.argv[2].split(".")]); print(V1<=V2)' "$1" "$2")" = "True" ]; then
@@ -6327,8 +6812,6 @@ __zypper_install() {
 __opensuse_prep_install() {
     # DRY function for common installation preparatory steps for SUSE
     if [ "$_DISABLE_REPOS" -eq $BS_FALSE ]; then
-        # Is the repository already known
-        __set_suse_pkg_repo
         # Check zypper repos and refresh if necessary
         __check_and_refresh_suse_pkg_repo
     fi
@@ -6383,6 +6866,7 @@ install_opensuse_git_deps() {
         __zypper_install git  || return 1
     fi
 
+    # shellcheck disable=SC2119
     __git_clone_and_checkout || return 1
 
     # Check for Tumbleweed
@@ -6409,23 +6893,34 @@ install_opensuse_onedir_deps() {
 }
 
 install_opensuse_stable() {
+    if [ "$(echo "$STABLE_REV" | grep -E '^(3006|3007)$')" != "" ]; then
+        # Major version Salt, config and repo already setup
+        MINOR_VER_STRG=""
+    elif [ "$(echo "$STABLE_REV" | grep -E '^([3-9][0-5]{2}[6-9](\.[0-9]*)?)')" != "" ]; then
+        # Minor version Salt, need to add specific minor version
+        STABLE_REV_DOT=$(echo "$STABLE_REV" | sed 's/-/\./')
+        MINOR_VER_STRG="-$STABLE_REV_DOT"
+    else
+        MINOR_VER_STRG=""
+    fi
+
     __PACKAGES=""
 
     if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ];then
-        __PACKAGES="${__PACKAGES} salt-cloud"
+        __PACKAGES="${__PACKAGES} salt-cloud$MINOR_VER_STRG"
     fi
     if [ "$_INSTALL_MASTER" -eq $BS_TRUE ]; then
-        __PACKAGES="${__PACKAGES} salt-master"
+        __PACKAGES="${__PACKAGES} salt-master$MINOR_VER_STRG"
     fi
     if [ "$_INSTALL_MINION" -eq $BS_TRUE ]; then
-        __PACKAGES="${__PACKAGES} salt-minion"
+        __PACKAGES="${__PACKAGES} salt-minion$MINOR_VER_STRG"
     fi
     if [ "$_INSTALL_SYNDIC" -eq $BS_TRUE ]; then
-        __PACKAGES="${__PACKAGES} salt-syndic"
+        __PACKAGES="${__PACKAGES} salt-syndic$MINOR_VER_STRG"
     fi
 
     if [ "$_INSTALL_SALT_API" -eq $BS_TRUE ]; then
-        __PACKAGES="${__PACKAGES} salt-api"
+        __PACKAGES="${__PACKAGES} salt-api$MINOR_VER_STRG"
     fi
 
     # shellcheck disable=SC2086
@@ -6453,7 +6948,7 @@ install_opensuse_stable_post() {
         [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
         [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
 
-        if [ -f /bin/systemctl ] || [ -f /usr/bin/systemctl ]; then
+        if [ "$_SYSTEMD_FUNCTIONAL" -eq $BS_TRUE ]; then
             systemctl is-enabled salt-$fname.service || (systemctl preset salt-$fname.service && systemctl enable salt-$fname.service)
             sleep 1
             systemctl daemon-reload
@@ -6476,7 +6971,7 @@ install_opensuse_git_post() {
         [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
         [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
 
-        if command -v systemctl; then
+        if [ "$_SYSTEMD_FUNCTIONAL" -eq $BS_TRUE ]; then
             use_usr_lib=$BS_FALSE
 
             if [ "${DISTRO_MAJOR_VERSION}" -ge 15 ]; then
@@ -6528,7 +7023,7 @@ install_opensuse_restart_daemons() {
         [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
         [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
 
-        if [ -f /bin/systemctl ]; then
+        if [ "$_SYSTEMD_FUNCTIONAL" -eq $BS_TRUE ]; then
             systemctl stop salt-$fname > /dev/null 2>&1
             systemctl start salt-$fname.service && continue
             echodebug "Failed to start salt-$fname using systemd"
@@ -6544,7 +7039,7 @@ install_opensuse_restart_daemons() {
 }
 
 install_opensuse_check_services() {
-    if [ ! -f /bin/systemctl ]; then
+    if [ "$_SYSTEMD_FUNCTIONAL" -eq $BS_TRUE ]; then
         # Not running systemd!? Don't check!
         return 0
     fi
@@ -6607,6 +7102,7 @@ install_opensuse_15_git_deps() {
         __zypper_install git  || return 1
     fi
 
+    # shellcheck disable=SC2119
     __git_clone_and_checkout || return 1
 
     if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -ne 3 ]; then
@@ -6718,8 +7214,90 @@ install_suse_15_restart_daemons() {
     return 0
 }
 
+install_suse_15_check_services() {
+    install_opensuse_check_services || return 1
+    return 0
+}
+
 #
 #   End of SUSE Enterprise 15
+#
+#######################################################################################################################
+
+
+#######################################################################################################################
+#
+#   SUSE Enterprise 15, now has ID sled
+#
+
+install_sled_15_stable_deps() {
+    __opensuse_prep_install || return 1
+    install_opensuse_15_stable_deps || return 1
+
+    return 0
+}
+
+install_sled_15_git_deps() {
+    install_suse_15_stable_deps || return 1
+
+    if ! __check_command_exists git; then
+        __zypper_install git-core  || return 1
+    fi
+
+    install_opensuse_15_git_deps || return 1
+
+    return 0
+}
+
+install_sled_15_onedir_deps() {
+    __opensuse_prep_install || return 1
+    install_opensuse_15_onedir_deps || return 1
+
+    return 0
+}
+
+install_sled_15_stable() {
+    install_opensuse_stable || return 1
+    return 0
+}
+
+install_sled_15_git() {
+    install_opensuse_15_git || return 1
+    return 0
+}
+
+install_sled_15_onedir() {
+    install_opensuse_stable || return 1
+    return 0
+}
+
+install_sled_15_stable_post() {
+    install_opensuse_stable_post || return 1
+    return 0
+}
+
+install_sled_15_git_post() {
+    install_opensuse_git_post || return 1
+    return 0
+}
+
+install_sled_15_onedir_post() {
+    install_opensuse_stable_post || return 1
+    return 0
+}
+
+install_sled_15_restart_daemons() {
+    install_opensuse_restart_daemons || return 1
+    return 0
+}
+
+install_sled_15_check_services() {
+    install_opensuse_check_services || return 1
+    return 0
+}
+
+#
+#   End of SUSE Enterprise 15 aka sled
 #
 #######################################################################################################################
 
@@ -6862,6 +7440,7 @@ install_gentoo_git_deps() {
     echoinfo "Running emerge -v1 setuptools"
     __emerge -v1 setuptools || return 1
 
+    # shellcheck disable=SC2119
     __git_clone_and_checkout || return 1
     __gentoo_post_dep || return 1
 }
@@ -7130,58 +7709,87 @@ daemons_running_voidlinux() {
 #   OS X / Darwin Install Functions
 #
 
-__parse_repo_json_python() {
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  __macosx_get_packagesite_onedir_latest
+#   DESCRIPTION:  Set _PKG_VERSION to the latest for MacOS or latest for major version input
+#----------------------------------------------------------------------------------------------------------------------
+__macosx_get_packagesite_onedir_latest() {
 
-  # Using latest, grab the right
-  # version from the repo.json
-  _JSON_VERSION=$(python - <<-EOF
-import json, urllib.request
-url = "https://repo.saltproject.io/salt/py3/macos/repo.json"
-response = urllib.request.urlopen(url)
-data = json.loads(response.read())
-version = data["${_ONEDIR_REV}"][list(data["${_ONEDIR_REV}"])[0]]['version']
-print(version)
-EOF
-)
-echo "${_JSON_VERSION}"
+    echodebug "Find latest MacOS release from repository"
+
+    # get dir listing from url, sort and pick highest
+    macos_versions_tmpdir=$(mktemp -d)
+    curr_pwd=$(pwd)
+    cd  ${macos_versions_tmpdir} || return 1
+    wget -q -r -np -nH --exclude-directories=onedir,relenv,windows -x -l 1 "$SALT_MACOS_PKGDIR_URL/"
+    if [ "$#" -gt 0 ] && [ -n "$1" ]; then
+        MAJOR_VER="$1"
+        # shellcheck disable=SC2010
+        _PKG_VERSION=$(ls artifactory/saltproject-generic/macos/ | grep -v 'index.html' | sort -V -u | grep -E "$MAJOR_VER" | tail -n 1)
+    else
+        # shellcheck disable=SC2010
+        _PKG_VERSION=$(ls artifactory/saltproject-generic/macos/ | grep -v 'index.html' | sort -V -u | tail -n 1)
+    fi
+    cd ${curr_pwd} || return "${_PKG_VERSION}"
+    rm -fR ${macos_versions_tmpdir}
+
+    echodebug "latest MacOS release from repository found ${_PKG_VERSION}"
+
 }
 
+
 __macosx_get_packagesite_onedir() {
+
+    echodebug "Get package site for onedir from repository"
+
     if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -ne 3 ]; then
         echoerror "Python version is no longer supported, only Python 3"
         return 1
     fi
 
     DARWIN_ARCH=${CPU_ARCH_L}
+    _PKG_VERSION=""
 
+    _ONEDIR_TYPE="saltproject-generic"
+    SALT_MACOS_PKGDIR_URL="https://${_REPO_URL}/${_ONEDIR_TYPE}/macos"
     if [ "$(echo "$_ONEDIR_REV" | grep -E '^(latest)$')" != "" ]; then
-      _PKG_VERSION=$(__parse_repo_json_python)
-    elif [ "$(echo "$_ONEDIR_REV" | grep -E '^([3-9][0-9]{3}(\.[0-9]*))')" != "" ]; then
-      _PKG_VERSION=$_ONEDIR_REV
+        __macosx_get_packagesite_onedir_latest
+    elif [ "$(echo "$_ONEDIR_REV" | grep -E '^(3006|3007)$')" != "" ]; then
+        # need to get latest for major version
+        __macosx_get_packagesite_onedir_latest "$_ONEDIR_REV"
+    elif [ "$(echo "$_ONEDIR_REV" | grep -E '^([3-9][0-9]{3}(\.[0-9]*)?)')" != "" ]; then
+        _PKG_VERSION=$_ONEDIR_REV
     else
-      _PKG_VERSION=$(__parse_repo_json_python)
+        # default to getting latest
+        __macosx_get_packagesite_onedir_latest
     fi
 
-    PKG="salt-${_PKG_VERSION}-${__PY_VERSION_REPO}-${DARWIN_ARCH}.pkg"
-    SALTPKGCONFURL="https://${_REPO_URL}/${_ONEDIR_DIR}/${__PY_VERSION_REPO}/macos/${ONEDIR_REV}/${PKG}"
+    PKG="salt-${_PKG_VERSION}-py3-${DARWIN_ARCH}.pkg"
+    SALTPKGCONFURL="${SALT_MACOS_PKGDIR_URL}/${_PKG_VERSION}/${PKG}"
+
+
 }
 
 __configure_macosx_pkg_details_onedir() {
+
     __macosx_get_packagesite_onedir || return 1
     return 0
 }
 
 install_macosx_stable_deps() {
+
     __configure_macosx_pkg_details_onedir || return 1
     return 0
 }
 
 install_macosx_onedir_deps() {
+
     __configure_macosx_pkg_details_onedir || return 1
     return 0
 }
 
 install_macosx_git_deps() {
+
     install_macosx_stable_deps || return 1
 
     if ! echo "$PATH" | grep -q /usr/local/bin; then
@@ -7201,12 +7809,14 @@ install_macosx_git_deps() {
     # Install PIP
     $_PYEXE /tmp/get-pip.py || return 1
 
+    # shellcheck disable=SC2119
     __git_clone_and_checkout || return 1
 
     return 0
 }
 
 install_macosx_stable() {
+
     install_macosx_stable_deps || return 1
 
     __fetch_url "/tmp/${PKG}" "${SALTPKGCONFURL}" || return 1
@@ -7217,6 +7827,7 @@ install_macosx_stable() {
 }
 
 install_macosx_onedir() {
+
     install_macosx_onedir_deps || return 1
 
     __fetch_url "/tmp/${PKG}" "${SALTPKGCONFURL}" || return 1
@@ -7227,6 +7838,7 @@ install_macosx_onedir() {
 }
 
 install_macosx_git() {
+
 
     if [ -n "$_PY_EXE" ]; then
         _PYEXE="${_PY_EXE}"
@@ -7240,6 +7852,7 @@ install_macosx_git() {
 }
 
 install_macosx_stable_post() {
+
     if [ ! -f /etc/paths.d/salt ]; then
         print "%s\n" "/opt/salt/bin" "/usr/local/sbin" > /etc/paths.d/salt
     fi
@@ -7255,16 +7868,19 @@ install_macosx_stable_post() {
 }
 
 install_macosx_onedir_post() {
+
     install_macosx_stable_post || return 1
     return 0
 }
 
 install_macosx_git_post() {
+
     install_macosx_stable_post || return 1
     return 0
 }
 
 install_macosx_restart_daemons() {
+
     [ "$_START_DAEMONS" -eq $BS_FALSE ] && return
 
     if [ "$_INSTALL_MINION" -eq $BS_TRUE ]; then
@@ -7290,6 +7906,7 @@ install_macosx_restart_daemons() {
 #   the -c options is passed.
 #
 config_salt() {
+
     # If the configuration directory is not passed, return
     [ "$_TEMP_CONFIG_DIR" = "null" ] && return
 
@@ -7451,6 +8068,7 @@ config_salt() {
 #   as long as the -k option is passed.
 #
 preseed_master() {
+
     # Create the PKI directory
 
     if [ "$(find "$_TEMP_KEYS_DIR" -maxdepth 1 -type f | wc -l)" -lt 1 ]; then
@@ -7485,6 +8103,7 @@ preseed_master() {
 #   This function checks if all of the installed daemons are running or not.
 #
 daemons_running_onedir() {
+
     [ "$_START_DAEMONS" -eq $BS_FALSE ] && return 0
 
     FAILED_DAEMONS=0
@@ -7522,6 +8141,7 @@ daemons_running_onedir() {
 #   This function checks if all of the installed daemons are running or not.
 #
 daemons_running() {
+
     [ "$_START_DAEMONS" -eq $BS_FALSE ] && return 0
 
     FAILED_DAEMONS=0
@@ -7726,6 +8346,7 @@ fi
 
 
 if [ "${ITYPE}" = "git" ] && [ ${_NO_DEPS} -eq ${BS_TRUE} ]; then
+    # shellcheck disable=SC2119
     if ! __git_clone_and_checkout; then
         echo "Failed to clone and checkout git repository."
         exit 1

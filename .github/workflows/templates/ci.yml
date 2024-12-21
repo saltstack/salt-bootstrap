@@ -27,8 +27,6 @@ jobs:
           separator: ","
           files: |
             bootstrap-salt.*
-            Gemfile
-            kitchen*.yml
             tests/**
             .github/workflows/**
           files_ignore: |

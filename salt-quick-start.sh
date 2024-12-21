@@ -1,7 +1,7 @@
 #!/bin/sh
 
 __ScriptName="salt-quick-start.sh"
-SALT_REPO_URL="https://repo.saltproject.io/salt/py3/onedir"
+SALT_REPO_URL="https://packages.broadcom.com/artifactory/salt-project-generic/onedir"
 _COLORS=${QS_COLORS:-$(tput colors 2>/dev/null || echo 0)}
 
 _LOCAL=0
@@ -89,8 +89,20 @@ if [[ "$_LOCAL" == "1" && "$_FULL" == "1" ]]; then
 fi
 
 __parse_repo_json_jq() {
-  _JSON_FILE="${SALT_REPO_URL}/repo.json"
-  _JSON_VERSION=$(curl -s ${_JSON_FILE} | jq -sr ".[].latest[] | select(.os == \"$1\") | select(.arch == \"$2\").version")
+
+    # $1 is OS_NAME
+    # $2 is ARCH
+
+    # get dir listing from url, sort and pick highest
+    onedir_versions_tmpf=$(mktemp)
+    curr_pwd=$(pwd)
+    cd  ${onedir_versions_tmpf} || return 1
+    wget -r -np -nH --exclude-directories=onedir,relenv,windows -x -l 1 "$SALT_REPO_URL/"
+    # shellcheck disable=SC2010
+    LATEST_VERSION=$(ls artifactory/saltproject-generic/onedir/ | grep -v 'index.html' | sort -V -u | tail -n 1)
+    cd ${curr_pwd} || return "${LATEST_VERSION}"
+    rm -fR ${onedir_versions_tmpf}
+    _JSON_VERSION="${LATEST_VERSION}"
 }
 
 __fetch_url() {
@@ -146,7 +158,7 @@ fi
 __parse_repo_json_jq ${OS_NAME} ${CPU_ARCH_L}
 
 FILE="salt-${_JSON_VERSION}-onedir-${OS_NAME_L}-${CPU_ARCH_L}.tar.xz"
-URL="${SALT_REPO_URL}/latest/${FILE}"
+URL="${SALT_REPO_URL}/${_JSON_VERSION}/${FILE}"
 
 if [[ ! -f ${FILE} ]]; then
   echoinfo "Downloading Salt"

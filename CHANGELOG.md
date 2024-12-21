@@ -1,3 +1,106 @@
+# v2024.12.12
+
+## What's Changed
+
+- Restrict use of dnf to Fedora only, otherwise use yum when dealing with RedHat family by @dmurphy18 in https://github.com/saltstack/salt-bootstrap/pull/2070
+- Updating container usage to that used in new Salt pipelines for CI/CD, fix Amazon Linux by @dmurphy18 in https://github.com/saltstack/salt-bootstrap/pull/2071
+
+**Full Changelog**: https://github.com/saltstack/salt-bootstrap/compare/v2024.12.09...v2024.12.12
+
+# v2024.12.09
+
+## What's Changed
+
+- Fix quickstart for Windows with new repo by @twangboy in https://github.com/saltstack/salt-bootstrap/pull/2065
+- Utilize salt-project packages with SUSE by @dmurphy18 in https://github.com/saltstack/salt-bootstrap/pull/2066
+
+**Full Changelog**: https://github.com/saltstack/salt-bootstrap/compare/v2024.11.29...v2024.12.09
+
+# v2024.11.29
+
+## What's Changed
+
+- Updated date to overcome issue with existing tag for 2024.11.27 by @dmurphy18 in https://github.com/saltstack/salt-bootstrap/pull/2058
+- Fix date tag by @dmurphy18 in https://github.com/saltstack/salt-bootstrap/pull/2059
+- Revert forcing git tag, other issues with check sums calculated, easiest solution is wait a day to release by @dmurphy18 in https://github.com/saltstack/salt-bootstrap/pull/2060
+- Updated date by @dmurphy18 in https://github.com/saltstack/salt-bootstrap/pull/2061
+
+**Full Changelog**: https://github.com/saltstack/salt-bootstrap/compare/v2024.11.27...v2024.11.29
+
+# v2024.11.27
+
+**Full Changelog**: https://github.com/saltstack/salt-bootstrap/compare/v2024.11.27...v2024.11.27
+
+# v2024.11.27
+
+**Full Changelog**: https://github.com/saltstack/salt-bootstrap/compare/v2024.11.27...v2024.11.27
+
+# v2024.11.27
+
+## What's Changed
+
+- Testing git install methods by @dmurphy18 in https://github.com/saltstack/salt-bootstrap/pull/2057
+
+**Full Changelog**: https://github.com/saltstack/salt-bootstrap/compare/v2024.11.26...v2024.11.27
+
+# v2024.11.27
+
+## What's Changed
+
+- Testing git install methods by @dmurphy18 in https://github.com/saltstack/salt-bootstrap/pull/2057
+
+**Full Changelog**: https://github.com/saltstack/salt-bootstrap/compare/v2024.11.26...v2024.11.27
+
+# v2024.11.26
+
+## What's Changed
+
+- Updated URLs in README, and fix deps download issue on RedHat family by @dmurphy18 in https://github.com/saltstack/salt-bootstrap/pull/2052
+- Update README script help output and scriptversions by @ScriptAutomate in https://github.com/saltstack/salt-bootstrap/pull/2056
+
+**Full Changelog**: https://github.com/saltstack/salt-bootstrap/compare/v2024.11.21...v2024.11.26
+
+# v2024.11.21
+
+## What's Changed
+
+- Make universal repo url by @twangboy in https://github.com/saltstack/salt-bootstrap/pull/2045
+- Update bootstrap shell CI/CD to utilize containers and clean up by @dmurphy18 in https://github.com/saltstack/salt-bootstrap/pull/2039
+- \[WIP\] hwclock check missing additional condition on major version by @ruslantum in https://github.com/saltstack/salt-bootstrap/pull/2048
+
+## New Contributors
+
+- @ruslantum made their first contribution in https://github.com/saltstack/salt-bootstrap/pull/2048
+
+**Full Changelog**: https://github.com/saltstack/salt-bootstrap/compare/v2024.11.07...v2024.11.21
+
+# v2024.11.07
+
+## What's Changed
+
+- Changed release runners and shell script date by @dmurphy18 in https://github.com/saltstack/salt-bootstrap/pull/2035
+- Forcing git tag to not sign by @dmurphy18 in https://github.com/saltstack/salt-bootstrap/pull/2036
+- Fixing git tag signing issue by @dmurphy18 in https://github.com/saltstack/salt-bootstrap/pull/2037
+
+**Full Changelog**: https://github.com/saltstack/salt-bootstrap/compare/v2024.11.06...v2024.11.07
+
+# v2024.11.07
+
+## What's Changed
+
+- Changed release runners and shell script date by @dmurphy18 in https://github.com/saltstack/salt-bootstrap/pull/2035
+- Forcing git tag to not sign by @dmurphy18 in https://github.com/saltstack/salt-bootstrap/pull/2036
+
+**Full Changelog**: https://github.com/saltstack/salt-bootstrap/compare/v2024.11.06...v2024.11.07
+
+# v2024.11.07
+
+## What's Changed
+
+- Changed release runners and shell script date by @dmurphy18 in https://github.com/saltstack/salt-bootstrap/pull/2035
+
+**Full Changelog**: https://github.com/saltstack/salt-bootstrap/compare/v2024.11.06...v2024.11.07
+
 # v2024.09.24
 
 ## What's Changed

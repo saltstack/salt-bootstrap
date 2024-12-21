@@ -6,171 +6,128 @@ import pathlib
 
 os.chdir(os.path.abspath(os.path.dirname(__file__)))
 
-##    "amazon-2023",
-##    "opensuse-tumbleweed",
+#    "amazonlinux-2",
+#    "debian-13",
+#    "fedora-40",
+#    "photon-4",
+#    "ubuntu-2004",
+#    "ubuntu-2404",
 LINUX_DISTROS = [
-    "almalinux-8",
-    "almalinux-9",
-    "amazon-2",
-    "arch",
-    "centos-stream9",
+    "amazonlinux-2023",
     "debian-11",
     "debian-12",
-    "fedora-39",
-    "fedora-40",
-    "gentoo",
-    "gentoo-systemd",
-    "opensuse-15",
-    "oraclelinux-8",
-    "oraclelinux-9",
-    "photon-4",
     "photon-5",
     "rockylinux-8",
     "rockylinux-9",
-    "ubuntu-2004",
     "ubuntu-2204",
-    "ubuntu-2404",
 ]
+
 WINDOWS = [
-    "windows-2019",
     "windows-2022",
 ]
 
 OSX = [
     "macos-12",
     "macos-13",
+    "macos-14",
 ]
 
-
-##    "amazon-2023",
-##    "opensuse-tumbleweed",
+#    "amazonlinux-2",
+#    "debian-13",
+#    "fedora-40",
+#    "photon-4",
+#    "ubuntu-2004",
+#    "ubuntu-2404",
 STABLE_DISTROS = [
-    "almalinux-8",
-    "almalinux-9",
-    "amazon-2",
-    "arch",
-    "centos-stream9",
+    "amazonlinux-2023",
     "debian-11",
     "debian-12",
-    "fedora-39",
-    "fedora-40",
-    "opensuse-15",
-    "oraclelinux-8",
-    "oraclelinux-9",
-    "photon-4",
     "photon-5",
     "rockylinux-8",
     "rockylinux-9",
-    "ubuntu-2004",
     "ubuntu-2204",
-    "ubuntu-2404",
 ]
 
-##    "amazon-2023",
+#    "amazonlinux-2",
+#    "debian-13",
+#    "fedora-40",
+#    "photon-4",
+#    "ubuntu-2004",
+#    "ubuntu-2404",
 ONEDIR_DISTROS = [
-    "almalinux-8",
-    "almalinux-9",
-    "amazon-2",
-    "centos-stream9",
+    "amazonlinux-2023",
     "debian-11",
     "debian-12",
-    "fedora-39",
-    "fedora-40",
-    "oraclelinux-8",
-    "oraclelinux-9",
-    "photon-4",
     "photon-5",
     "rockylinux-8",
     "rockylinux-9",
-    "ubuntu-2004",
     "ubuntu-2204",
-    "ubuntu-2404",
 ]
 
+#    "amazonlinux-2",
+#    "amazonlinux-2023",
+#    "photon-4",
+#    "photon-5",
+#    "rockylinux-8",
+#    "ubuntu-2404",
 ONEDIR_RC_DISTROS = [
-    "almalinux-9",
-    "amazon-2",
-    "centos-stream9",
     "debian-12",
-    "oraclelinux-9",
-    "photon-4",
     "photon-5",
     "rockylinux-9",
-    "ubuntu-2404",
+    "ubuntu-2204",
 ]
 
-##    "opensuse-tumbleweed",
 BLACKLIST_3006 = [
-    "arch",
     "debian-12",
     "fedora-40",
-    "gentoo",
-    "gentoo-systemd",
-    "opensuse-15",
     "ubuntu-2404",
 ]
 
-##    "opensuse-tumbleweed",
+#    "photon-5",
 BLACKLIST_3007 = [
-    "arch",
-    "fedora-39",
-    "gentoo",
-    "gentoo-systemd",
-    "opensuse-15",
     "photon-4",
-    "photon-5",
 ]
 
-##    "amazon-2023",
-##    "opensuse-tumbleweed",
+#    "ubuntu-2204",
 BLACKLIST_GIT_3006 = [
-    "almalinux-9",
-    "amazon-2",
-    "arch",
-    "centos-stream9",
+    "amazonlinux-2",
+    "amazonlinux-2023",
     "debian-11",
     "debian-12",
+    "debian-13",
     "fedora-40",
-    "gentoo",
-    "gentoo-systemd",
-    "opensuse-15",
-    "oraclelinux-9",
     "photon-4",
     "photon-5",
     "rockylinux-9",
     "ubuntu-2004",
-    "ubuntu-2204",
     "ubuntu-2404",
 ]
 
-##    "amazon-2023",
-##    "opensuse-tumbleweed",
+#    "debian-12",
+#    "ubuntu-2204",
 BLACKLIST_GIT_3007 = [
-    "almalinux-9",
-    "amazon-2",
-    "arch",
-    "centos-stream9",
+    "amazonlinux-2",
+    "amazonlinux-2023",
     "debian-11",
-    "debian-12",
-    "fedora-39",
+    "debian-13",
     "fedora-40",
-    "gentoo",
-    "gentoo-systemd",
-    "opensuse-15",
-    "oraclelinux-9",
     "photon-4",
     "photon-5",
     "rockylinux-9",
     "ubuntu-2004",
-    "ubuntu-2204",
     "ubuntu-2404",
 ]
 
+#    "debian-12",
 BLACKLIST_GIT_MASTER = [
-    "amazon-2",
-    "fedora-39",
+    "amazonlinux-2",
+    "amazonlinux-2023",
+    "debian-11",
+    "debian-13",
+    "fedora-40",
     "photon-4",
     "photon-5",
+    "rockylinux-9",
 ]
 
 SALT_VERSIONS = [
@@ -227,35 +184,18 @@ GIT_VERSION_BLACKLIST = [
 #           Use build and pip and other standards-based tools.
 #
 GIT_DISTRO_BLACKLIST = [
-    "almalinux-8",
-    "fedora-39",
-    "opensuse-15",
-    "oraclelinux-8",
     "rockylinux-8",
 ]
 
-LATEST_PKG_BLACKLIST = [
-    "gentoo",
-    "gentoo-systemd",
-]
+LATEST_PKG_BLACKLIST = []
 
-##    "amazon-2023": "Amazon 2023",
-##    "opensuse-tumbleweed": "Opensuse Tumbleweed",
 DISTRO_DISPLAY_NAMES = {
-    "almalinux-8": "AlmaLinux 8",
-    "almalinux-9": "AlmaLinux 9",
-    "amazon-2": "Amazon 2",
-    "arch": "Arch",
-    "centos-stream9": "CentOS Stream 9",
+    "amazonlinux-2": "Amazon 2",
+    "amazonlinux-2023": "Amazon 2023",
     "debian-11": "Debian 11",
     "debian-12": "Debian 12",
-    "fedora-39": "Fedora 39",
+    "debian-13": "Debian 13",
     "fedora-40": "Fedora 40",
-    "gentoo": "Gentoo",
-    "gentoo-systemd": "Gentoo (systemd)",
-    "opensuse-15": "Opensuse 15",
-    "oraclelinux-8": "Oracle Linux 8",
-    "oraclelinux-9": "Oracle Linux 9",
     "photon-4": "Photon OS 4",
     "photon-5": "Photon OS 5",
     "rockylinux-8": "Rocky Linux 8",
@@ -265,19 +205,33 @@ DISTRO_DISPLAY_NAMES = {
     "ubuntu-2404": "Ubuntu 24.04",
     "macos-12": "macOS 12",
     "macos-13": "macOS 13",
-    "windows-2019": "Windows 2019",
+    "macos-14": "macOS 14",
     "windows-2022": "Windows 2022",
 }
 
-TIMEOUT_DEFAULT = 20
-TIMEOUT_OVERRIDES = {
-    "gentoo": 90,
-    "gentoo-systemd": 90,
+CONTAINER_SLUG_NAMES = {
+    "amazonlinux-2": "amazonlinux-2",
+    "amazonlinux-2023": "amazonlinux-2023",
+    "debian-11": "debian-11",
+    "debian-12": "debian-12",
+    "debian-13": "debian-13",
+    "fedora-40": "fedora-40",
+    "photon-4": "photon-4",
+    "photon-5": "photon-5",
+    "rockylinux-8": "rockylinux-8",
+    "rockylinux-9": "rockylinux-9",
+    "ubuntu-2004": "ubuntu-20.04",
+    "ubuntu-2204": "ubuntu-22.04",
+    "ubuntu-2404": "ubuntu-24.04",
+    "macos-12": "macos-12",
+    "macos-13": "macos-13",
+    "macos-14": "macOS 14",
+    "windows-2022": "windows-2022",
 }
-VERSION_ONLY_OVERRIDES = [
-    "gentoo",
-    "gentoo-systemd",
-]
+
+TIMEOUT_DEFAULT = 20
+TIMEOUT_OVERRIDES = {}
+VERSION_ONLY_OVERRIDES = []
 
 TEMPLATE = """
   {distro}:
@@ -289,6 +243,7 @@ TEMPLATE = """
     with:
       distro-slug: {distro}
       display-name: {display_name}
+      container-slug: {container_name}
       timeout: {timeout_minutes}{runs_on}
       instances: '{instances}'
 """
@@ -339,6 +294,7 @@ def generate_test_jobs():
                 ifcheck=ifcheck,
                 instances=json.dumps(instances),
                 display_name=DISTRO_DISPLAY_NAMES[distro],
+                container_name=CONTAINER_SLUG_NAMES[distro],
                 timeout_minutes=timeout_minutes,
             )
 
@@ -384,6 +340,7 @@ def generate_test_jobs():
                 ifcheck=ifcheck,
                 instances=json.dumps(instances),
                 display_name=DISTRO_DISPLAY_NAMES[distro],
+                container_name=CONTAINER_SLUG_NAMES[distro],
                 timeout_minutes=timeout_minutes,
             )
 
@@ -483,6 +440,7 @@ def generate_test_jobs():
                 ifcheck=ifcheck,
                 instances=json.dumps(instances),
                 display_name=DISTRO_DISPLAY_NAMES[distro],
+                container_name=CONTAINER_SLUG_NAMES[distro],
                 timeout_minutes=timeout_minutes,
             )
 

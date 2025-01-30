@@ -2172,8 +2172,9 @@ __git_clone_and_checkout() {
         fi
 
         if [ "$__SHALLOW_CLONE" -eq $BS_TRUE ]; then
-            # Let's try shallow cloning to speed up.
-            # Test for "--single-branch" option introduced in git 1.7.10, the minimal version of git where the shallow
+            # Let's try 'treeless' cloning to speed up. Treeless cloning omits trees and blobs ('files')
+            # but includes metadata (commit history, tags, branches etc.
+            # Test for "--filter" option introduced in git 2.19, the minimal version of git where the treeless
             # cloning we need actually works
             if [ "$(git clone 2>&1 | grep 'single-branch')" != "" ]; then
                 # The "--single-branch" option is supported, attempt shallow cloning

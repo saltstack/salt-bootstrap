@@ -114,22 +114,6 @@ jobs:
 
 
 
-  macos-12:
-    name: macOS 12
-    if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
-    uses: ./.github/workflows/test-macos.yml
-    needs:
-      - lint
-      - generate-actions-workflow
-    with:
-      distro-slug: macos-12
-      display-name: macOS 12
-      container-slug: macos-12
-      timeout: 20
-      runs-on: macos-12
-      instances: '["stable-3006", "stable-3006-8", "stable-3007", "stable-3007-1", "latest"]'
-
-
   macos-13:
     name: macOS 13
     if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
@@ -293,7 +277,6 @@ jobs:
     needs:
       - lint
       - generate-actions-workflow
-      - macos-12
       - macos-13
       - macos-14
       - windows-2022

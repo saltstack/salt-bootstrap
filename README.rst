@@ -37,6 +37,7 @@ sum** of the downloaded ``bootstrap-salt.sh`` file.
 
 The SHA256 sum of the ``bootstrap-salt.sh`` file, per release, is:
 
+- 2024.12.12: ``7cc91adfa5a15ff57d203dc2b79608c773efc639d4e9bf03861198903e11becd``
 - 2024.12.09: ``44f9405a6d9622ad8fa7c93e83a52e01ca328f27e4e9dea4a52268c6a22dbe6d``
 - 2024.11.29: ``0ac87384dee051aceded69704485a5de0e4a308551a462b10c262111b57acff0``
 - 2024.11.27: ``e972bd1ef01d09cd1d9294374ef974c9e3dd9a2aee37cf3859144585fd8bf1d0``
@@ -373,7 +374,7 @@ Using ``PowerShell`` to install latest stable version:
 
   [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]'Tls12'
   Invoke-WebRequest -Uri https://github.com/saltstack/salt-bootstrap/releases/latest/download/bootstrap-salt.ps1 -OutFile "$env:TEMP\bootstrap-salt.ps1"
-  Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser & "$env:TEMP\bootstrap-salt.ps1"
+  Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser -Force; & "$env:TEMP\bootstrap-salt.ps1"
 
 Display information about the install script parameters:
 

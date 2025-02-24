@@ -27,7 +27,6 @@ WINDOWS = [
 ]
 
 OSX = [
-    "macos-12",
     "macos-13",
     "macos-14",
 ]
@@ -203,7 +202,6 @@ DISTRO_DISPLAY_NAMES = {
     "ubuntu-2004": "Ubuntu 20.04",
     "ubuntu-2204": "Ubuntu 22.04",
     "ubuntu-2404": "Ubuntu 24.04",
-    "macos-12": "macOS 12",
     "macos-13": "macOS 13",
     "macos-14": "macOS 14",
     "windows-2022": "Windows 2022",
@@ -223,7 +221,6 @@ CONTAINER_SLUG_NAMES = {
     "ubuntu-2004": "ubuntu-20.04",
     "ubuntu-2204": "ubuntu-22.04",
     "ubuntu-2404": "ubuntu-24.04",
-    "macos-12": "macos-12",
     "macos-13": "macos-13",
     "macos-14": "macOS 14",
     "windows-2022": "windows-2022",

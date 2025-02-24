@@ -26,7 +26,7 @@
 #======================================================================================================================
 set -o nounset                              # Treat unset variables as an error
 
-__ScriptVersion="2024.12.12"
+__ScriptVersion="2025.02.24"
 __ScriptName="bootstrap-salt.sh"
 
 __ScriptFullName="$0"
@@ -2161,21 +2161,19 @@ __git_clone_and_checkout() {
         fi
 
         if [ "$__SHALLOW_CLONE" -eq $BS_TRUE ]; then
-            # Let's try shallow cloning to speed up.
-            # Test for "--single-branch" option introduced in git 1.7.10, the minimal version of git where the shallow
+            # Let's try 'treeless' cloning to speed up. Treeless cloning omits trees and blobs ('files')
+	    # but includes metadata (commit history, tags, branches etc.
+            # Test for "--filter" option introduced in git 2.19, the minimal version of git where the treeless
             # cloning we need actually works
-            if [ "$(git clone 2>&1 | grep 'single-branch')" != "" ]; then
-                # The "--single-branch" option is supported, attempt shallow cloning
+            if [ "$(git clone 2>&1 | grep 'filter')" != "" ]; then
+                # The "--filter" option is supported: attempt treeless cloning
                 echoinfo "Attempting to shallow clone $GIT_REV_ADJ from Salt's repository ${_SALT_REPO_URL}"
-                ## Shallow cloning is resulting in the wrong version of Salt, even with a depth of 5
-                ## getting 3007.0+0na.246d066 when it should be 3007.1+410.g246d066457, disabling for now
-                ## if git clone --depth 1 --branch "$GIT_REV_ADJ" "$_SALT_REPO_URL" "$__SALT_CHECKOUT_REPONAME"; then
-                echodebug "git command, git clone --branch $GIT_REV_ADJ $_SALT_REPO_URL $__SALT_CHECKOUT_REPONAME"
-                if git clone --branch "$GIT_REV_ADJ" "$_SALT_REPO_URL" "$__SALT_CHECKOUT_REPONAME"; then
+                echodebug "git command, git clone --filter=tree:0 --branch $GIT_REV_ADJ $_SALT_REPO_URL $__SALT_CHECKOUT_REPONAME"
+                if git clone --filter=tree:0 --branch "$GIT_REV_ADJ" "$_SALT_REPO_URL" "$__SALT_CHECKOUT_REPONAME"; then
                     # shellcheck disable=SC2164
                     cd "${_SALT_GIT_CHECKOUT_DIR}"
                     __SHALLOW_CLONE=$BS_TRUE
-                    echoinfo  "shallow path (disabled shallow) git cloned $GIT_REV_ADJ, version $(python3 salt/version.py)"
+                    echoinfo  "shallow path git cloned $GIT_REV_ADJ, version $(python3 salt/version.py)"
                 else
                     # Shallow clone above failed(missing upstream tags???), let's resume the old behaviour.
                     echowarn "Failed to shallow clone."

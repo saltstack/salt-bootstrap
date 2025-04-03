@@ -1,3 +1,14 @@
+# v2025.02.24
+
+## What's Changed
+
+- Update requirements to address security issues by @twangboy in https://github.com/saltstack/salt-bootstrap/pull/2073
+- Use treeless clone to 'shallow' clone again. by @mrichar1 in https://github.com/saltstack/salt-bootstrap/pull/2022
+- Fix powershell instructions by @twangboy in https://github.com/saltstack/salt-bootstrap/pull/2074
+- Remove support for macos-12, as deprecated by github by @dmurphy18 in https://github.com/saltstack/salt-bootstrap/pull/2076
+
+**Full Changelog**: https://github.com/saltstack/salt-bootstrap/compare/v2024.12.12...v2025.02.24
+
 # v2024.12.12
 
 ## What's Changed

@@ -6610,7 +6610,7 @@ install_vmware_photon_os_onedir_deps() {
         __install_saltstack_vmware_photon_os_onedir_repository || return 1
     fi
 
-    __PACKAGES="procps-ng sudo shadow"
+    __PACKAGES="procps-ng sudo shadow wget"
 
     # shellcheck disable=SC2086
     __tdnf_install_noinput ${__PACKAGES} || return 1

@@ -199,6 +199,9 @@ To view the latest options and descriptions for ``salt-bootstrap``, use ``-h`` a
     -r  Disable all repository configuration performed by this script. This
         option assumes all necessary repository configuration is already present
         on the system.
+    -T  If set this overrides the use of /tmp for script execution. This is
+        to allow for systems in which noexec is applied to temp filesystem mounts
+        for security reasons
     -U  If set, fully upgrade the system prior to bootstrapping Salt
     -v  Display script version
     -V  Install Salt into virtualenv

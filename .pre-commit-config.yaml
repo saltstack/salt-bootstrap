@@ -2,7 +2,7 @@
 minimum_pre_commit_version: 1.15.2
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.5.0
+    rev: v5.0.0
     hooks:
       - id: check-merge-conflict  # Check for files that contain merge conflict strings.
       - id: trailing-whitespace   # Trims trailing whitespace.

@@ -4,6 +4,7 @@
 
 - Fixed installation on Photon 4 and Photon 5 by @erwindon in https://github.com/saltstack/salt-bootstrap/pull/2080
 - Properly handle 2 digit minor versions of Salt by @twangboy in https://github.com/saltstack/salt-bootstrap/pull/2081
+- Added an option to specify something other than ``/tmp`` for installation execution by @edlitmus in https://github.com/saltstack/salt-bootstrap/pull/2068
 
 # v2025.02.24
 

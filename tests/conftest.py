@@ -1,8 +1,9 @@
 import json
 import os
+import requests
+from packaging.version import Version
 
 import pytest
-import requests
 
 API_URL = (
     "https://packages.broadcom.com/artifactory/api/storage/saltproject-generic/windows"
@@ -27,9 +28,18 @@ def target_salt_version():
             version = folder["uri"].strip("/")
             versions[version] = version
             # We're trying to get the latest major version and latest overall
-            maj_version = version.split(".")[0]
-            versions[maj_version] = version
-            versions["latest"] = version
+            maj_ver, _ = version.split(".")
+            if maj_ver in versions:
+                if Version(version) > Version(versions[maj_ver]):
+                    versions[maj_ver] = version
+            else:
+                versions[maj_ver] = version
+
+            if "latest" in versions:
+                if Version(version) > Version(versions["latest"]):
+                    versions["latest"] = version
+            else:
+                versions["latest"] = version
 
     if target_salt.startswith("v"):
         target_salt = target_salt[1:]

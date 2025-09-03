@@ -207,25 +207,36 @@ function Get-AvailableVersions {
         Write-Verbose "- $_"
     }
 
-    # Get the latest version, should be the last in the list
-    Write-Verbose "Getting latest available version"
-    $latest = $available_versions | Select-Object -Last 1
-    Write-Verbose "Latest available version: $latest"
-
     # Create a versions table
     # This will have the latest version available, the latest version available
     # for each major version, and every version available. This makes the
     # version lookup logic easier. The contents of the versions table can be
     # found by running -Verbose
     Write-Verbose "Populating the versions table"
-    $versions_table = [ordered]@{"latest"=$latest}
+    $versions_table = [ordered]@{}
     $available_versions | ForEach-Object {
-        $versions_table[$(Get-MajorVersion $_)] = $_
+        $major_version = $(Get-MajorVersion $_)
+        if ( $versions_table.Keys -contains $major_version ) {
+            if ( [System.Version]$_ -gt [System.Version]$versions_table[$major_version] ) {
+                $versions_table[$major_version] = $_
+            }
+        } else {
+            $versions_table[$major_version] = $_
+        }
+
+        if ( $versions_table -contains "latest" ) {
+            if ( [System.Version]$_ -gt [System.Version]$versions_table["latest"] ) {
+                $versions_table["latest"] = $_
+            }
+        } else {
+            $versions_table["latest"] = $_
+        }
+
         $versions_table[$_.ToLower()] = $_.ToLower()
     }
 
     Write-Verbose "Versions Table:"
-    $versions_table | Sort-Object Name | Out-String | ForEach-Object {
+    $versions_table.GetEnumerator() | Sort-Object Name | Out-String | ForEach-Object {
         Write-Verbose "$_"
     }
 

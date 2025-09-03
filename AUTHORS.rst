@@ -68,6 +68,7 @@ Emiel Kollof                ekollof
 Eric Radman                 eradman                ericshane@eradman.com
 Erik Ankrom                 erikankrom
 Erik Johnson                terminalmage           erik@saltstack.com
+Erwin Dondorp               erwindon               from_github@dondorp.com
 EYJ                         eyj
 Felippe Burk                felippeb
 fizmat                      fizmat
@@ -170,7 +171,7 @@ Sam                         sticky-note            sammy.smati@skazy.nc
 Sebastian Wendel            sourceindex
 Sebastien Blaisot           sblaisot
 Sergey Paramonov            serge-p                serg.paramonov@s-vp.com
-Shane Lee                   twangboy               slee@saltstack.com
+Shane Lee                   twangboy               shane.lee@broadcom.com
 Shawn Butts                 shawnbutts
 Skyler Berg                 skylerberg             skylertheberg@gmail.com
 Stanislav B                 stanislavb

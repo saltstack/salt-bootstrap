@@ -31,7 +31,7 @@ Ashok Raja R                ashokrajar             ashokrajar@users.noreply.gith
 Beau Hargis                 beaucephus             beau@customermobile.com
 Benjamin Drung              bdrung                 bdrung@debian.org
 BlaineAtAffirmOnceMore      BlaineAtAffirm
-Boris Feld                  Lothiraldan
+Boris Feld                  Lothiraldan            lothiraldan@gmail.com
 Brad Thurber                bradthurber
 Brandon Clifford            brandon099             brandon.clifford@vivint.com
 Bret Fisher                 BretFisher             bret@fishbrains.com
@@ -60,9 +60,10 @@ Denys Havrysh               vutny                  denys.gavrysh@gmail.com
 deployboy                   deployboy
 Diego Woitasen              diegows                diego@flugel.it
 Dmitry Kuzmenko             DmitryKuzmenko         dmitry.kuzmenko@dsr-corporation.com
+Ed Silva                    edlitmus               ed@edlitmus.info
 EHJ-52n                     EHJ-52n                EHJ-52n@users.noreply.github.com
 ek9                         ek9
-Elias Probst                eliasp
+Elias Probst                eliasp                 eliasp@mastodan.social
 eliezerlp                   eliezerlp
 Emiel Kollof                ekollof
 Eric Radman                 eradman                ericshane@eradman.com

@@ -59,7 +59,8 @@ jobs:
         run: |
           # We need to get the version here and make it an environment variable
           # It is used to install via bootstrap and in the test
-          # The version is in the instance name
+          # The version is in the instance name:
+          # ["stable-3006", "stable-3006-8", "stable-3007", "stable-3007-1", "latest"]
           $instance = "${{ matrix.instance }}"
           $version = $instance -split "-",2
           if ( $version.Count -gt 1 ) {

@@ -1,3 +1,10 @@
+# v2025.09.03
+
+## What's Changed
+
+- Fixed installation on Photon 4 and Photon 5 by @erwindon in https://github.com/saltstack/salt-bootstrap/pull/2080
+- Properly handle 2 digit minor versions of Salt by @twangboy in https://github.com/saltstack/salt-bootstrap/pull/2081
+
 # v2025.02.24
 
 ## What's Changed

@@ -6306,8 +6306,8 @@ __get_packagesite_onedir_latest() {
 }
 
 
-__install_saltstack_photon_onedir_repository() {
-    echodebug "__install_saltstack_photon_onedir_repository() entry"
+__install_saltstack_vmware_photon_os_onedir_repository() {
+    echodebug "__install_saltstack_vmware_photon_os_onedir_repository() entry"
 
     if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -ne 3 ]; then
         echoerror "Python version is no longer supported, only Python 3"
@@ -6387,8 +6387,8 @@ __install_saltstack_photon_onedir_repository() {
     return 0
 }
 
-install_photon_deps() {
-    echodebug "install_photon_deps() entry"
+install_vmware_photon_os_deps() {
+    echodebug "install_vmware_photon_os_deps() entry"
 
     if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -ne 3 ]; then
         echoerror "Python version is no longer supported, only Python 3"
@@ -6417,8 +6417,8 @@ install_photon_deps() {
     return 0
 }
 
-install_photon_stable_post() {
-    echodebug "install_photon_stable_post() entry"
+install_vmware_photon_os_stable_post() {
+    echodebug "install_vmware_photon_os_stable_post() entry"
 
     for fname in api master minion syndic; do
         # Skip salt-api since the service should be opt-in and not necessarily started on boot
@@ -6435,8 +6435,8 @@ install_photon_stable_post() {
     done
 }
 
-install_photon_git_deps() {
-    echodebug "install_photon_git_deps() entry"
+install_vmware_photon_os_git_deps() {
+    echodebug "install_vmware_photon_os_git_deps() entry"
 
     if [ -n "$_PY_EXE" ] && [ "$_PY_MAJOR_VERSION" -ne 3 ]; then
         echoerror "Python version is no longer supported, only Python 3"
@@ -6474,7 +6474,7 @@ install_photon_git_deps() {
 
     __PACKAGES="python${PY_PKG_VER}-devel python${PY_PKG_VER}-pip python${PY_PKG_VER}-setuptools gcc glibc-devel linux-devel.x86_64 cython${PY_PKG_VER}"
 
-    echodebug "install_photon_git_deps() distro major version, ${DISTRO_MAJOR_VERSION}"
+    echodebug "install_vmware_photon_os_git_deps() distro major version, ${DISTRO_MAJOR_VERSION}"
 
     ## Photon 5 container is missing systemd on default installation
     if [ "${DISTRO_MAJOR_VERSION}" -lt 5  ]; then
@@ -6500,8 +6500,8 @@ install_photon_git_deps() {
     return 0
 }
 
-install_photon_git() {
-    echodebug "install_photon_git() entry"
+install_vmware_photon_os_git() {
+    echodebug "install_vmware_photon_os_git() entry"
 
     if [ "${_PY_EXE}" != "" ]; then
         _PYEXE=${_PY_EXE}
@@ -6511,7 +6511,7 @@ install_photon_git() {
         return 1
     fi
 
-    install_photon_git_deps
+    install_vmware_photon_os_git_deps
 
     if [ -f "${_SALT_GIT_CHECKOUT_DIR}/salt/syspaths.py" ]; then
         ${_PYEXE} setup.py --salt-config-dir="$_SALT_ETC_DIR" --salt-cache-dir="${_SALT_CACHE_DIR}" ${SETUP_PY_INSTALL_ARGS} install --prefix=/usr || return 1
@@ -6521,8 +6521,8 @@ install_photon_git() {
     return 0
 }
 
-install_photon_git_post() {
-    echodebug "install_photon_git_post() entry"
+install_vmware_photon_os_git_post() {
+    echodebug "install_vmware_photon_os_git_post() entry"
 
     for fname in api master minion syndic; do
         # Skip if not meant to be installed
@@ -6554,9 +6554,9 @@ install_photon_git_post() {
     done
 }
 
-install_photon_restart_daemons() {
+install_vmware_photon_os_restart_daemons() {
     [ "$_START_DAEMONS" -eq $BS_FALSE ] && return
-    echodebug "install_photon_restart_daemons() entry"
+    echodebug "install_vmware_photon_os_restart_daemons() entry"
 
 
     for fname in api master minion syndic; do
@@ -6578,8 +6578,8 @@ install_photon_restart_daemons() {
     done
 }
 
-install_photon_check_services() {
-    echodebug "install_photon_check_services() entry"
+install_vmware_photon_os_check_services() {
+    echodebug "install_vmware_photon_os_check_services() entry"
 
     for fname in api master minion syndic; do
         # Skip salt-api since the service should be opt-in and not necessarily started on boot
@@ -6596,8 +6596,8 @@ install_photon_check_services() {
     return 0
 }
 
-install_photon_onedir_deps() {
-    echodebug "install_photon_onedir_deps() entry"
+install_vmware_photon_os_onedir_deps() {
+    echodebug "install_vmware_photon_os_onedir_deps() entry"
 
 
     if [ "$_UPGRADE_SYS" -eq $BS_TRUE ]; then
@@ -6611,17 +6611,17 @@ install_photon_onedir_deps() {
     fi
 
     if [ "$_DISABLE_REPOS" -eq "$BS_FALSE" ]; then
-        __install_saltstack_photon_onedir_repository || return 1
+        __install_saltstack_vmware_photon_os_onedir_repository || return 1
     fi
 
     # If -R was passed, we need to configure custom repo url with rsync-ed packages
     # Which was handled in __install_saltstack_rhel_repository buu that hanlded old-stable which is for
     # releases which are End-Of-Life. This call has its own check in case -r was passed without -R.
     if [ "$_CUSTOM_REPO_URL" != "null" ]; then
-        __install_saltstack_photon_onedir_repository || return 1
+        __install_saltstack_vmware_photon_os_onedir_repository || return 1
     fi
 
-    __PACKAGES="procps-ng sudo shadow"
+    __PACKAGES="procps-ng sudo shadow wget"
 
     # shellcheck disable=SC2086
     __tdnf_install_noinput ${__PACKAGES} || return 1
@@ -6637,9 +6637,9 @@ install_photon_onedir_deps() {
 }
 
 
-install_photon_onedir() {
+install_vmware_photon_os_onedir() {
 
-    echodebug "install_photon_onedir() entry"
+    echodebug "install_vmware_photon_os_onedir() entry"
 
     STABLE_REV=$ONEDIR_REV
     _GENERIC_PKG_VERSION=""
@@ -6683,9 +6683,9 @@ install_photon_onedir() {
     return 0
 }
 
-install_photon_onedir_post() {
+install_vmware_photon_os_onedir_post() {
     STABLE_REV=$ONEDIR_REV
-    install_photon_stable_post || return 1
+    install_vmware_photon_os_stable_post || return 1
 
     return 0
 }

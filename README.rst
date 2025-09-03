@@ -37,6 +37,7 @@ sum** of the downloaded ``bootstrap-salt.sh`` file.
 
 The SHA256 sum of the ``bootstrap-salt.sh`` file, per release, is:
 
+- 2025.02.24: ``a0e3a58fc6358a7c6f708ee4910229e72fbdab7161819514b0696146a2edb62d``
 - 2024.12.12: ``7cc91adfa5a15ff57d203dc2b79608c773efc639d4e9bf03861198903e11becd``
 - 2024.12.09: ``44f9405a6d9622ad8fa7c93e83a52e01ca328f27e4e9dea4a52268c6a22dbe6d``
 - 2024.11.29: ``0ac87384dee051aceded69704485a5de0e4a308551a462b10c262111b57acff0``
@@ -198,6 +199,9 @@ To view the latest options and descriptions for ``salt-bootstrap``, use ``-h`` a
     -r  Disable all repository configuration performed by this script. This
         option assumes all necessary repository configuration is already present
         on the system.
+    -T  If set this overrides the use of /tmp for script execution. This is
+        to allow for systems in which noexec is applied to temp filesystem mounts
+        for security reasons
     -U  If set, fully upgrade the system prior to bootstrapping Salt
     -v  Display script version
     -V  Install Salt into virtualenv

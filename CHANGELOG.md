@@ -1,3 +1,28 @@
+# v2025.09.03
+
+## What's Changed
+
+- fixes for Photon4/5 by @erwindon in https://github.com/saltstack/salt-bootstrap/pull/2080
+- Get versions correctly by @twangboy in https://github.com/saltstack/salt-bootstrap/pull/2081
+- Prep release by @twangboy in https://github.com/saltstack/salt-bootstrap/pull/2082
+- Add support for specifying a directory other than /tmp for installation execution by @edlitmus in https://github.com/saltstack/salt-bootstrap/pull/2068
+- Add another PR and a few more emails by @twangboy in https://github.com/saltstack/salt-bootstrap/pull/2083
+
+## New Contributors
+
+- @erwindon made their first contribution in https://github.com/saltstack/salt-bootstrap/pull/2080
+- @edlitmus made their first contribution in https://github.com/saltstack/salt-bootstrap/pull/2068
+
+**Full Changelog**: https://github.com/saltstack/salt-bootstrap/compare/v2025.02.24...v2025.09.03
+
+# v2025.09.03
+
+## What's Changed
+
+- Fixed installation on Photon 4 and Photon 5 by @erwindon in https://github.com/saltstack/salt-bootstrap/pull/2080
+- Properly handle 2 digit minor versions of Salt by @twangboy in https://github.com/saltstack/salt-bootstrap/pull/2081
+- Added an option to specify something other than `/tmp` for installation execution by @edlitmus in https://github.com/saltstack/salt-bootstrap/pull/2068
+
 # v2025.02.24
 
 ## What's Changed

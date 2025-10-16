@@ -1952,11 +1952,6 @@ __wait_for_apt(){
     # Timeout set at 15 minutes
     WAIT_TIMEOUT=900
 
-    ## see if sync'ing the clocks helps
-    if [ -f /usr/sbin/hwclock ]; then
-        /usr/sbin/hwclock -s
-    fi
-
     # Run our passed in apt command
     "${@}" 2>"$APT_ERR"
     APT_RETURN=$?

@@ -114,22 +114,6 @@ jobs:
 
 
 
-  macos-13:
-    name: macOS 13
-    if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
-    uses: ./.github/workflows/test-macos.yml
-    needs:
-      - lint
-      - generate-actions-workflow
-    with:
-      distro-slug: macos-13
-      display-name: macOS 13
-      container-slug: macos-13
-      timeout: 20
-      runs-on: macos-13
-      instances: '["stable-3006", "stable-3006-8", "stable-3007", "stable-3007-1", "latest"]'
-
-
   macos-14:
     name: macOS 14
     if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
@@ -140,9 +124,25 @@ jobs:
     with:
       distro-slug: macos-14
       display-name: macOS 14
-      container-slug: macOS 14
+      container-slug: macos-14
       timeout: 20
       runs-on: macos-14
+      instances: '["stable-3006", "stable-3006-8", "stable-3007", "stable-3007-1", "latest"]'
+
+
+  macos-15-intel:
+    name: macOS 15 (intel)
+    if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
+    uses: ./.github/workflows/test-macos.yml
+    needs:
+      - lint
+      - generate-actions-workflow
+    with:
+      distro-slug: macos-15-intel
+      display-name: macOS 15 (intel)
+      container-slug: macos-15-intel
+      timeout: 20
+      runs-on: macos-15-intel
       instances: '["stable-3006", "stable-3006-8", "stable-3007", "stable-3007-1", "latest"]'
 
 
@@ -160,6 +160,22 @@ jobs:
       container-slug: windows-2022
       timeout: 20
       runs-on: windows-2022
+      instances: '["stable-3006", "stable-3006-8", "stable-3007", "stable-3007-1", "latest"]'
+
+
+  windows-2025:
+    name: Windows 2025
+    if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
+    uses: ./.github/workflows/test-windows.yml
+    needs:
+      - lint
+      - generate-actions-workflow
+    with:
+      distro-slug: windows-2025
+      display-name: Windows 2025
+      container-slug: windows-2025
+      timeout: 20
+      runs-on: windows-2025
       instances: '["stable-3006", "stable-3006-8", "stable-3007", "stable-3007-1", "latest"]'
 
 
@@ -277,9 +293,10 @@ jobs:
     needs:
       - lint
       - generate-actions-workflow
-      - macos-13
       - macos-14
+      - macos-15-intel
       - windows-2022
+      - windows-2025
       - amazonlinux-2023
       - debian-11
       - debian-12

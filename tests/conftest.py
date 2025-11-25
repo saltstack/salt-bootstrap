@@ -1,9 +1,9 @@
 import json
 import os
-import requests
-from packaging.version import Version
 
 import pytest
+import requests
+from packaging.version import Version
 
 API_URL = (
     "https://packages.broadcom.com/artifactory/api/storage/saltproject-generic/windows"

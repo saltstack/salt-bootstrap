@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
-import datetime
+"""
+To generate the workflows run the following:
+pre-commit run -av generate-actions-workflow
+"""
 import json
 import os
 import pathlib
@@ -24,11 +27,12 @@ LINUX_DISTROS = [
 
 WINDOWS = [
     "windows-2022",
+    "windows-2025",
 ]
 
 OSX = [
-    "macos-13",
     "macos-14",
+    "macos-15-intel",
 ]
 
 #    "amazonlinux-2",
@@ -202,9 +206,10 @@ DISTRO_DISPLAY_NAMES = {
     "ubuntu-2004": "Ubuntu 20.04",
     "ubuntu-2204": "Ubuntu 22.04",
     "ubuntu-2404": "Ubuntu 24.04",
-    "macos-13": "macOS 13",
     "macos-14": "macOS 14",
+    "macos-15-intel": "macOS 15 (intel)",
     "windows-2022": "Windows 2022",
+    "windows-2025": "Windows 2025",
 }
 
 CONTAINER_SLUG_NAMES = {
@@ -221,9 +226,10 @@ CONTAINER_SLUG_NAMES = {
     "ubuntu-2004": "ubuntu-20.04",
     "ubuntu-2204": "ubuntu-22.04",
     "ubuntu-2404": "ubuntu-24.04",
-    "macos-13": "macos-13",
-    "macos-14": "macOS 14",
+    "macos-14": "macos-14",
+    "macos-15-intel": "macos-15-intel",
     "windows-2022": "windows-2022",
+    "windows-2025": "windows-2025",
 }
 
 TIMEOUT_DEFAULT = 20

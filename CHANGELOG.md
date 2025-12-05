@@ -2,6 +2,22 @@
 
 ## What's Changed
 
+- Remove hardware clock sync by @twangboy in https://github.com/saltstack/salt-bootstrap/pull/2085
+- Update deps that contain CVEs by @twangboy in https://github.com/saltstack/salt-bootstrap/pull/2086
+- replace the --global-option command with --config-settings since --global-option has been removed in pip 25.3 by @julian9499 in https://github.com/saltstack/salt-bootstrap/pull/2088
+- Include filename in shasum file by @twangboy in https://github.com/saltstack/salt-bootstrap/pull/2090
+- Update changelog and author to prep for release by @twangboy in https://github.com/saltstack/salt-bootstrap/pull/2092
+
+## New Contributors
+
+- @julian9499 made their first contribution in https://github.com/saltstack/salt-bootstrap/pull/2088
+
+**Full Changelog**: https://github.com/saltstack/salt-bootstrap/compare/v2025.09.03...v2025.12.05
+
+# v2025.12.05
+
+## What's Changed
+
 - Include filename in the shasum file: https://github.com/saltstack/salt-bootstrap/pull/2090
 - Replace --global-option with --config-settings for pip: https://github.com/saltstack/salt-bootstrap/pull/2088
 - Update some dependencies that have CVEs: https://github.com/saltstack/salt-bootstrap/pull/2086

@@ -163,8 +163,8 @@ jobs:
 
       - name: Update bootstrap-salt.sh sha256sum's
         run: |
-          sha256sum bootstrap-salt.sh | awk '{ print $1 }' > bootstrap-salt.sh.sha256
-          sha256sum bootstrap-salt.ps1 | awk '{ print $1 }' > bootstrap-salt.ps1.sha256
+          sha256sum bootstrap-salt.sh > bootstrap-salt.sh.sha256
+          sha256sum bootstrap-salt.ps1 > bootstrap-salt.ps1.sha256
           git commit -a -m "Update sha256 checksums" || git commit -a -m "Update sha256 checksums"
 
       - name: Push Changes

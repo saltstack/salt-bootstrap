@@ -1,3 +1,34 @@
+# v2025.12.05
+
+## What's Changed
+
+- Remove hardware clock sync by @twangboy in https://github.com/saltstack/salt-bootstrap/pull/2085
+- Update deps that contain CVEs by @twangboy in https://github.com/saltstack/salt-bootstrap/pull/2086
+- replace the --global-option command with --config-settings since --global-option has been removed in pip 25.3 by @julian9499 in https://github.com/saltstack/salt-bootstrap/pull/2088
+- Include filename in shasum file by @twangboy in https://github.com/saltstack/salt-bootstrap/pull/2090
+- Update changelog and author to prep for release by @twangboy in https://github.com/saltstack/salt-bootstrap/pull/2092
+
+## New Contributors
+
+- @julian9499 made their first contribution in https://github.com/saltstack/salt-bootstrap/pull/2088
+
+**Full Changelog**: https://github.com/saltstack/salt-bootstrap/compare/v2025.09.03...v2025.12.05
+
+# v2025.12.05
+
+## What's Changed
+
+- Include filename in the shasum file: https://github.com/saltstack/salt-bootstrap/pull/2090
+- Replace --global-option with --config-settings for pip: https://github.com/saltstack/salt-bootstrap/pull/2088
+- Update some dependencies that have CVEs: https://github.com/saltstack/salt-bootstrap/pull/2086
+- Remove hardware clock sync: https://github.com/saltstack/salt-bootstrap/pull/2085
+
+## New Contributors
+
+- @julian9499 made their first contribution in https://github.com/saltstack/salt-bootstrap/pull/2088
+
+  **Full Changelog**: https://github.com/saltstack/salt-bootstrap/compare/v2025.09.03...v2025.12.05
+
 # v2025.09.03
 
 ## What's Changed
@@ -7,6 +38,9 @@
 - Prep release by @twangboy in https://github.com/saltstack/salt-bootstrap/pull/2082
 - Add support for specifying a directory other than /tmp for installation execution by @edlitmus in https://github.com/saltstack/salt-bootstrap/pull/2068
 - Add another PR and a few more emails by @twangboy in https://github.com/saltstack/salt-bootstrap/pull/2083
+- Fixed installation on Photon 4 and Photon 5 by @erwindon in https://github.com/saltstack/salt-bootstrap/pull/2080
+- Properly handle 2 digit minor versions of Salt by @twangboy in https://github.com/saltstack/salt-bootstrap/pull/2081
+- Added an option to specify something other than `/tmp` for installation execution by @edlitmus in https://github.com/saltstack/salt-bootstrap/pull/2068
 
 ## New Contributors
 
@@ -14,14 +48,6 @@
 - @edlitmus made their first contribution in https://github.com/saltstack/salt-bootstrap/pull/2068
 
 **Full Changelog**: https://github.com/saltstack/salt-bootstrap/compare/v2025.02.24...v2025.09.03
-
-# v2025.09.03
-
-## What's Changed
-
-- Fixed installation on Photon 4 and Photon 5 by @erwindon in https://github.com/saltstack/salt-bootstrap/pull/2080
-- Properly handle 2 digit minor versions of Salt by @twangboy in https://github.com/saltstack/salt-bootstrap/pull/2081
-- Added an option to specify something other than `/tmp` for installation execution by @edlitmus in https://github.com/saltstack/salt-bootstrap/pull/2068
 
 # v2025.02.24
 

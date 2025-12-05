@@ -1,13 +1,15 @@
 """
 These commands are used by pre-commit.
 """
+
 # pylint: disable=resource-leakage,broad-except,3rd-party-module-not-gated
 from __future__ import annotations
 
 import logging
 import shutil
 
-from ptscripts import Context, command_group
+from ptscripts import command_group
+from ptscripts import Context
 
 
 log = logging.getLogger(__name__)

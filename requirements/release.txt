@@ -56,8 +56,10 @@ python-tools-scripts==0.20.5
     # via -r requirements/release.in
 pyyaml==6.0.2
     # via pre-commit
-requests==2.32.3
-    # via python-tools-scripts
+requests==2.32.5
+    # via
+    #   -r requirements/release.in
+    #   python-tools-scripts
 rich==13.9.4
     # via python-tools-scripts
 s3transfer==0.10.4
@@ -70,8 +72,9 @@ typing-extensions==4.12.2
     #   pydantic-core
     #   python-tools-scripts
     #   rich
-urllib3==2.3.0
+urllib3==2.5.0
     # via
+    #   -r requirements/release.in
     #   botocore
     #   requests
 virtualenv==20.28.1

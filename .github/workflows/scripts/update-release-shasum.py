@@ -1,7 +1,7 @@
 #!/usr/bin/env python
-import sys
 import pathlib
 import subprocess
+import sys
 
 THIS_FILE = pathlib.Path(__file__).resolve()
 CODE_ROOT = THIS_FILE.parent.parent.parent.parent
@@ -25,7 +25,7 @@ def main(version, sha256sum):
                 if not line.startswith("-"):
                     out_contents += line
                     continue
-                out_contents += "- {}: ``{}``\n".format(version, sha256sum)
+                out_contents += f"- {version}: ``{sha256sum}``\n"
                 out_contents += line
                 updated_version = True
                 continue

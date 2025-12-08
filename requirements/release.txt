@@ -72,7 +72,7 @@ typing-extensions==4.12.2
     #   pydantic-core
     #   python-tools-scripts
     #   rich
-urllib3==2.5.0
+urllib3==2.6.0
     # via
     #   -r requirements/release.in
     #   botocore

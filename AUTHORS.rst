@@ -13,7 +13,8 @@ order.
 ==========================  =====================  ============================
 Name                        Nick                   Email
 ==========================  =====================  ============================
-abednarik                   abednarik              alejandro.bednarik@gmail.com
+andreanadr                 andreanadr 121737246+andreanadr@users.noreply.github.com
+abednarik              alejandro.bednarik@gmail.com
 Adam Wright                 hipikat                adam@hipikat.org
 Alec Koumjian               akoumjian              akoumjian@gmail.com
 Alex Van't Hof              alexvh

@@ -369,7 +369,7 @@ __usage() {
         also be specified. Salt installation will be ommitted, but some of the
         dependencies could be installed to write configuration with -j or -J.
     -d  Disables checking if Salt services are enabled to start on system boot.
-        You can also do this by touching ${BS_TMP_DIR}/disable_salt_checks on the target
+        You can also do this by touching ${_TMP_DIR}/disable_salt_checks on the target
         host. Default: \${BS_FALSE}
     -D  Show debug output
     -f  Force shallow cloning for git installations.

@@ -125,7 +125,6 @@ BLACKLIST_GIT_3007 = [
 BLACKLIST_GIT_MASTER = [
     "amazonlinux-2",
     "amazonlinux-2023",
-    "debian-11",
     "debian-13",
     "fedora-40",
     "photon-4",

@@ -2821,12 +2821,25 @@ __install_salt_from_repo() {
 
     echodebug "Running '${_pip_cmd} install ${_USE_BREAK_SYSTEM_PACKAGES} --no-deps --force-reinstall ${_PIP_INSTALL_ARGS} ${_TMP_DIR}/git/deps/salt*.whl'"
 
-    echodebug "Running ${_pip_cmd} install ${_USE_BREAK_SYSTEM_PACKAGES} --no-deps --force-reinstall ${_PIP_INSTALL_ARGS} --config-settings=--global-option=--salt-config-dir=$_SALT_ETC_DIR --salt-cache-dir=${_SALT_CACHE_DIR} ${SETUP_PY_INSTALL_ARGS} ${_TMP_DIR}/git/deps/salt*.whl"
+    _PIP_VERSION_STRING=$(${_pip_cmd} --version)
+    echodebug "Installed pip version: $_PIP_VERSION_STRING"
+    _PIP_MAJOR_VERSION=$(echo "$_PIP_VERSION_STRING" | sed -E 's/^pip ([0-9]+)\..*/\1/')
 
-    ${_pip_cmd} install ${_USE_BREAK_SYSTEM_PACKAGES} --no-deps --force-reinstall \
-        ${_PIP_INSTALL_ARGS} \
-        --config-settings="--global-option=--salt-config-dir=$_SALT_ETC_DIR --salt-cache-dir=${_SALT_CACHE_DIR} ${SETUP_PY_INSTALL_ARGS}" \
-        ${_TMP_DIR}/git/deps/salt*.whl || return 1
+    # The following branching can be removed once we no longer support distros that still ship with
+    # versions of `pip` earlier than v22.1 such as Debian 11
+    if [ "$_PIP_MAJOR_VERSION" -lt 23 ]; then
+        echodebug "Running ${_pip_cmd} install ${_USE_BREAK_SYSTEM_PACKAGES} --no-deps --force-reinstall ${_PIP_INSTALL_ARGS} --global-option=--salt-config-dir=$_SALT_ETC_DIR --salt-cache-dir=${_SALT_CACHE_DIR} ${SETUP_PY_INSTALL_ARGS} ${_TMP_DIR}/git/deps/salt*.whl"
+        ${_pip_cmd} install ${_USE_BREAK_SYSTEM_PACKAGES} --no-deps --force-reinstall \
+            ${_PIP_INSTALL_ARGS} \
+            --global-option="--salt-config-dir=$_SALT_ETC_DIR --salt-cache-dir=${_SALT_CACHE_DIR} ${SETUP_PY_INSTALL_ARGS}" \
+            ${_TMP_DIR}/git/deps/salt*.whl || return 1
+    else
+        echodebug "Running ${_pip_cmd} install ${_USE_BREAK_SYSTEM_PACKAGES} --no-deps --force-reinstall ${_PIP_INSTALL_ARGS} --config-settings=--global-option=--salt-config-dir=$_SALT_ETC_DIR --salt-cache-dir=${_SALT_CACHE_DIR} ${SETUP_PY_INSTALL_ARGS} ${_TMP_DIR}/git/deps/salt*.whl"
+        ${_pip_cmd} install ${_USE_BREAK_SYSTEM_PACKAGES} --no-deps --force-reinstall \
+            ${_PIP_INSTALL_ARGS} \
+            --config-settings="--global-option=--salt-config-dir=$_SALT_ETC_DIR --salt-cache-dir=${_SALT_CACHE_DIR} ${SETUP_PY_INSTALL_ARGS}" \
+            ${_TMP_DIR}/git/deps/salt*.whl || return 1
+    fi
 
     echoinfo "Checking if Salt can be imported using ${_py_exe}"
     CHECK_SALT_SCRIPT=$(cat << EOM

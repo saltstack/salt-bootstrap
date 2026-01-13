@@ -30,7 +30,7 @@ repos:
           - actionlint
 
   - repo: https://github.com/jazzband/pip-tools
-    rev: 7.4.1
+    rev: v7.5.2
     hooks:
       - id: pip-compile
         files: ^requirements/release\.(in|txt)$

@@ -71,10 +71,12 @@ typing-extensions==4.12.2
     # via
     #   pydantic
     #   pydantic-core
-urllib3==2.6.0
+urllib3==2.6.3
     # via
     #   -r requirements/release.in
     #   botocore
     #   requests
-virtualenv==20.28.1
-    # via pre-commit
+virtualenv==20.36.1
+    # via
+    #   -r requirements/release.in
+    #   pre-commit

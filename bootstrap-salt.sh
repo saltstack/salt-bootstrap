@@ -2819,8 +2819,6 @@ __install_salt_from_repo() {
         ${_pip_cmd} install --force-reinstall --break-system-packages "${_arch_dep}"
     fi
 
-    echodebug "Running '${_pip_cmd} install ${_USE_BREAK_SYSTEM_PACKAGES} --no-deps --force-reinstall ${_PIP_INSTALL_ARGS} ${_TMP_DIR}/git/deps/salt*.whl'"
-
     _PIP_VERSION_STRING=$(${_pip_cmd} --version)
     echodebug "Installed pip version: $_PIP_VERSION_STRING"
     _PIP_MAJOR_VERSION=$(echo "$_PIP_VERSION_STRING" | sed -E 's/^pip ([0-9]+)\..*/\1/')

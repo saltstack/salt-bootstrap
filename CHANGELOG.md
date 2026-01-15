@@ -1,3 +1,19 @@
+# v2026.01.15
+
+## What's Changed
+
+- Update urllib3 to 2.6.0 by @twangboy in https://github.com/saltstack/salt-bootstrap/pull/2093
+- Update filelock to v3.20.1 by @twangboy in https://github.com/saltstack/salt-bootstrap/pull/2098
+- Update urllib3=2.6.3 and virtualenv=20.36.1 by @twangboy in https://github.com/saltstack/salt-bootstrap/pull/2099
+- fix: reinstate the old method of setting `pip` global options by @dafyddj in https://github.com/saltstack/salt-bootstrap/pull/2100
+- Fixes #2094 by changing reference to script var BS_TMP_DIR to \_TMP_DIR in help message text. by @jsbiff in https://github.com/saltstack/salt-bootstrap/pull/2097
+
+## New Contributors
+
+- @jsbiff made their first contribution in https://github.com/saltstack/salt-bootstrap/pull/2097
+
+**Full Changelog**: https://github.com/saltstack/salt-bootstrap/compare/v2025.12.05...v2026.01.15
+
 # v2025.12.05
 
 ## What's Changed
@@ -128,7 +144,7 @@
 
 - Make universal repo url by @twangboy in https://github.com/saltstack/salt-bootstrap/pull/2045
 - Update bootstrap shell CI/CD to utilize containers and clean up by @dmurphy18 in https://github.com/saltstack/salt-bootstrap/pull/2039
-- \[WIP\] hwclock check missing additional condition on major version by @ruslantum in https://github.com/saltstack/salt-bootstrap/pull/2048
+- [WIP] hwclock check missing additional condition on major version by @ruslantum in https://github.com/saltstack/salt-bootstrap/pull/2048
 
 ## New Contributors
 
@@ -210,7 +226,7 @@
 
 ## What's Changed
 
-- Updated README, and removed experimental  to ability install different Python version which was limited to RHEL 7, which is EOL by @dmurphy18 in https://github.com/saltstack/salt-bootstrap/pull/2009
+- Updated README, and removed experimental to ability install different Python version which was limited to RHEL 7, which is EOL by @dmurphy18 in https://github.com/saltstack/salt-bootstrap/pull/2009
 
 **Full Changelog**: https://github.com/saltstack/salt-bootstrap/compare/v2024.07.16...v2024.07.18
 
@@ -220,7 +236,7 @@
 
 - Update bootstrap-salt.sh by @javatask in https://github.com/saltstack/salt-bootstrap/pull/2005
 - Updated GitHub actions to later v4 by @dmurphy18 in https://github.com/saltstack/salt-bootstrap/pull/2004
-- Don't sort lists and dicts, as order of items matters  by @dmurphy18 in https://github.com/saltstack/salt-bootstrap/pull/2006
+- Don't sort lists and dicts, as order of items matters by @dmurphy18 in https://github.com/saltstack/salt-bootstrap/pull/2006
 
 ## New Contributors
 
@@ -378,7 +394,7 @@
 - Debian ARM Fix by @garethgreenaway in https://github.com/saltstack/salt-bootstrap/pull/1887
 - Added Pop!\_OS as a Ubuntu derivative by @shombando in https://github.com/saltstack/salt-bootstrap/pull/1888
 - Don't attempt to stable install on Red Hat onedir only systems by @garethgreenaway in https://github.com/saltstack/salt-bootstrap/pull/1889
-- \[docs\] Improve Windows readme instructions and links in script by @dafyddj in https://github.com/saltstack/salt-bootstrap/pull/1897
+- [docs] Improve Windows readme instructions and links in script by @dafyddj in https://github.com/saltstack/salt-bootstrap/pull/1897
 - Adding newer versions of CentOS Stream and AlmaLinux by @garethgreenaway in https://github.com/saltstack/salt-bootstrap/pull/1890
 - Add support for KDE neon based on Ubuntu 22.04 by @digitalkram in https://github.com/saltstack/salt-bootstrap/pull/1894
 - Removing Ubuntu 16.04 by @garethgreenaway in https://github.com/saltstack/salt-bootstrap/pull/1886
@@ -529,7 +545,7 @@
 - Add support for Ubuntu 20.04 (bryceml) #1479
 - Default Ubuntu 20.04 to Py3 since there isn't a Py2 release for it (bryceml) #1480
 - Warn instead of exit when using -R and -x python3 on centos to allow installing python3
-  versions of salt on centos from other repos.  Old unsupported releases probably need to
+  versions of salt on centos from other repos. Old unsupported releases probably need to
   manually install epel-release before running the bootstrap script for versions before 2018.3.5
   and before 2019.2.1 (bryceml) #1482
 - Start maintaining .sha256 files for the bootstrap script
@@ -560,8 +576,8 @@
 # v2020.02.04:
 
 - Add support for the Salt Neon(3000) release (s0undt3ch) #1424
-- Drop support for Fedora \< 30 (s0undt3ch) #1424
-- Drop support for Debian \< 8 (s0undt3ch) #1424
+- Drop support for Fedora < 30 (s0undt3ch) #1424
+- Drop support for Debian < 8 (s0undt3ch) #1424
 
 # v2020.01.29:
 
@@ -625,7 +641,7 @@
 - Fedora Py3 fixes (The-Loeki) #1273
 - Handle commented lines in the requirements files for pip pkgs (rallytime) #1271
 - Remove typo: extra 'c' was accidentally added in #1269 (rallytime) #1270
-- \[Arch\] Add python2-futures to list of pkgs on git install (rallytime) #1269
+- [Arch] Add python2-futures to list of pkgs on git install (rallytime) #1269
 - Fix undefined variable warn_msg on amd64 (alexandruavadanii) #1268
 - SLES12SP changed packages git to git-core and libzmq3 to libzmq4 (mfapouw) #1266
 - Add opensuse 15 specific installation functions (rallytime) #1263
@@ -756,8 +772,8 @@
 - Shallow cloning and Python setup fix for BSD (amontalban) #1040
 - Fix not needed quoting for salt/salt-bootstrap#1026 (amontalban) #1039
 - Update README file with supported release documentation (rallytime) #1034
-- Remove \<\<\< bashism (The-Loeki) #1032
-- \[-R option\] Fix logic error where we trying to enable epel with -R (rallytime) #1033
+- Remove \<<< bashism (The-Loeki) #1032
+- [-R option] Fix logic error where we trying to enable epel with -R (rallytime) #1033
 - Alpine: check Salt services have been enabled to start on boot (vutny) #1031
 - AWS Linux Native Support (bkruger99) #1022
 - Correct package name for FreeBSD installation (amontalban) #1030
@@ -812,7 +828,7 @@
 - Add python-futures package to install_centos_git_deps (rallytime) #948
 - Add /etc/portage/package.accept_keywords to CONFIG_PROTECT_MASK (rallytime) #947
 - Deprecate `-G` option: use `https` scheme for GitHub by default (vutny) #945
-- \[SECURITY\] Properly handle GnuPG keys for APT repositories (vutny) #940
+- [SECURITY] Properly handle GnuPG keys for APT repositories (vutny) #940
 
 # v2016.08.16:
 
@@ -881,7 +897,7 @@
 # v2016.04.18:
 
 - Add support for openSUSE Leap. Thanks Roman Inflianskas(rominf). #693
-- Fix missing deps installation on Debian. Thanks  Steve Groesz(wolfpackmars2). #699
+- Fix missing deps installation on Debian. Thanks Steve Groesz(wolfpackmars2). #699
 - Update SaltStack repo location and latest version for Windows. (brandon099) #711
 - Better EPEL repository detection on RHEL and CentOS. (vutny) #717
 - Fix git invocation fail when `man` command is not available. (vutny) #718
@@ -951,7 +967,7 @@
 # v2015.08.06:
 
 - Fix python-requests installations for Ubuntu >= 14.04 LTS. #631, #632, #633
-- Install python-crypto from Chris Lea's PPA for Ubuntu \< 14.04
+- Install python-crypto from Chris Lea's PPA for Ubuntu < 14.04
 - Exit the git checkout directory before deleting it. Thanks Bret Fisher. #634
 - Use prefix /usr for centos git install. Thanks Stanislav B. #638
 - Drop Ubuntu EOL versions. All Ubuntu version before 12.04.
@@ -1249,7 +1265,7 @@
 # v1.5.9:
 
 - Allow to not start the daemons after bootstrapping salt. This will allow `vagrant-lxc`
-  installations,  `debootstrap*`, etc, to finish properly. Thanks Henrik Holmboe (holmboe).
+  installations, `debootstrap*`, etc, to finish properly. Thanks Henrik Holmboe (holmboe).
 - Distro Support Fixed:
 - Salt >= 0.17 requires ElementTree which is on the python standard library after python
   2.6 but openSUSE split that into a separate package.
@@ -1269,7 +1285,7 @@
   and RedHat based distributions support system upgrades).
 - Fixed an issue where passing BS_KEEP_TEMP_FILES=1 to the script was causing an error. #206.
 - Switched FreeBSD default packages repository to PCBSD(http://www.pcbsd.org) and added
-  multiple repository support to install salt from the SaltStack's FreeBSD repository.  Thanks
+  multiple repository support to install salt from the SaltStack's FreeBSD repository. Thanks
   Christer Edwards(cedwards).
 - Improved Gentoo Support. Thanks Elias Probst(eliasp).
 - Stop execution soon for end of life distributions or non supported distribution versions.

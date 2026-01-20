@@ -6122,7 +6122,29 @@ install_arch_linux_stable() {
     pacman -S --noconfirm --needed bash || return 1
     pacman -Su --noconfirm || return 1
     # We can now resume regular salt update
-    pacman -Syu --noconfirm salt || return 1
+    # Except that this hasn't been in arch repos for years;
+    # so we have to build from AUR
+    # We use "buildgirl" because Eve demanded it.
+    build_user=${build_user:-buildgirl}
+    userdel "$build_user" || true
+    useradd -M -r -s /usr/bin/nologin "$build_user"
+    echo "$build_user ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/"$build_user"
+    rm -rf /tmp/yay-bin || true
+
+    git clone https://aur.archlinux.org/salt.git /tmp/yay-bin
+    chown -R "$build_user":"$build_user" /tmp/yay-bin
+    sudo -u "$build_user" env -i \
+        HOME=/tmp \
+        PATH=/usr/bin:/bin:/usr/sbin:/sbin \
+        MAKEFLAGS="-j$(nproc)" \
+        LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8 \
+        makepkg -CcsiD /tmp/yay-bin \
+        --noconfirm --needed \
+        --noprogressbar || return 1
+
+    rm -f /etc/sudoers.d/"$build_user"
+    rm -rf /tmp/yay-bin
+    userdel "$build_user"
     return 0
 }
 

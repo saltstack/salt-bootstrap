@@ -6324,6 +6324,13 @@ EOF
 
     systemctl daemon-reload
 
+    # Add onedir paths system-wide
+    cat >/etc/profile.d/saltstack.sh <<'EOF'
+export PATH=/opt/saltstack/salt:/opt/saltstack/salt/bin:$PATH
+EOF
+
+    chmod 644 /etc/profile.d/saltstack.sh
+
     if [ "$_START_DAEMONS" -eq $BS_TRUE ]; then
         systemctl enable --now salt-minion.service
     fi

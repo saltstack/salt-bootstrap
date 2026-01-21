@@ -187,6 +187,7 @@ Thomas S. Hatch             thatch45               thatch45@saltstack.com
 Tobias Jungel               toanju                 Tobias.Jungel@gmail.com
 Tony Narlock                tony
 Valentin Bud                valentinbud            valentin@databus.pro
+vegcom                      vegcom                 vegcom@protonmail.com
 Vernon Cole                 vernondcole            vernondcole@gmail.com
 Vladimir Kozhukalov         kozhukalov
 Whit Morriss                whitmo                 whit@nocoast.us

@@ -6114,15 +6114,52 @@ install_arch_linux_onedir_deps() {
 
     # Reuse stable deps for python-yaml etc. if you want config_salt() parity
     install_arch_linux_stable_deps || return 1
+    return 0
+}
 
+install_arch_linux_stable() {
+    # Pacman does not resolve dependencies on outdated versions
+    # They always need to be updated
+    pacman -Syy --noconfirm
+
+    pacman -Su --noconfirm --needed pacman || return 1
+    # See https://mailman.archlinux.org/pipermail/arch-dev-public/2013-June/025043.html
+    # to know why we're ignoring below.
+    pacman -Syu --noconfirm --ignore filesystem,bash || return 1
+    pacman -S --noconfirm --needed bash || return 1
+    pacman -Su --noconfirm || return 1
+    # We can now resume regular salt update
+    # Except that this hasn't been in arch repos for years;
+    # so we have to build from AUR
+    # We use "buildgirl" because Eve demanded it.
+    build_user=${build_user:-buildgirl}
+    userdel "$build_user" || true
+    useradd -M -r -s /usr/bin/nologin "$build_user"
+    echo "$build_user ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/"$build_user"
+    rm -rf /tmp/yay-bin || true
+
+    git clone https://aur.archlinux.org/salt.git /tmp/yay-bin
+    chown -R "$build_user":"$build_user" /tmp/yay-bin
+    sudo -u "$build_user" env -i \
+        HOME=/tmp \
+        PATH=/usr/bin:/bin:/usr/sbin:/sbin \
+        MAKEFLAGS="-j$(nproc)" \
+        LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8 \
+        makepkg -CcsiD /tmp/yay-bin \
+        --noconfirm --needed \
+        --noprogressbar || return 1
+
+    rm -f /etc/sudoers.d/"$build_user"
+    rm -rf /tmp/yay-bin
+    userdel "$build_user"
     return 0
 }
 
 install_arch_linux_onedir() {
     echodebug "install_arch_linux_onedir() entry"
 
-    local version="${ONEDIR_REV:-latest}"
-    local arch="x86_64"
+    version="${ONEDIR_REV:-latest}"
+    arch="x86_64"
     [ "$(uname -m)" = "aarch64" ] && arch="aarch64"
 
     # Resolve "latest" to actual version
@@ -6132,9 +6169,9 @@ install_arch_linux_onedir() {
                   | sed 's/"tag_name": *"v//;s/"//') || return 1
     fi
 
-    local tarball="salt-${version}-onedir-linux-${arch}.tar.xz"
-    local url="https://github.com/saltstack/salt/releases/download/v${version}/${tarball}"
-    local extractdir="/tmp/salt-${version}-onedir-linux-${arch}"
+    tarball="salt-${version}-onedir-linux-${arch}.tar.xz"
+    url="https://github.com/saltstack/salt/releases/download/v${version}/${tarball}"
+    extractdir="/tmp/salt-${version}-onedir-linux-${arch}"
 
     echoinfo "Downloading Salt onedir: $url"
     wget -q "$url" -O "/tmp/${tarball}" || return 1
@@ -6247,45 +6284,6 @@ install_arch_linux_git_post() {
         chmod +x /etc/rc.d/init.d/salt-$fname
     done
 }
-
-install_arch_linux_stable() {
-    # Pacman does not resolve dependencies on outdated versions
-    # They always need to be updated
-    pacman -Syy --noconfirm
-
-    pacman -Su --noconfirm --needed pacman || return 1
-    # See https://mailman.archlinux.org/pipermail/arch-dev-public/2013-June/025043.html
-    # to know why we're ignoring below.
-    pacman -Syu --noconfirm --ignore filesystem,bash || return 1
-    pacman -S --noconfirm --needed bash || return 1
-    pacman -Su --noconfirm || return 1
-    # We can now resume regular salt update
-    # Except that this hasn't been in arch repos for years;
-    # so we have to build from AUR
-    # We use "buildgirl" because Eve demanded it.
-    build_user=${build_user:-buildgirl}
-    userdel "$build_user" || true
-    useradd -M -r -s /usr/bin/nologin "$build_user"
-    echo "$build_user ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/"$build_user"
-    rm -rf /tmp/yay-bin || true
-
-    git clone https://aur.archlinux.org/salt.git /tmp/yay-bin
-    chown -R "$build_user":"$build_user" /tmp/yay-bin
-    sudo -u "$build_user" env -i \
-        HOME=/tmp \
-        PATH=/usr/bin:/bin:/usr/sbin:/sbin \
-        MAKEFLAGS="-j$(nproc)" \
-        LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8 \
-        makepkg -CcsiD /tmp/yay-bin \
-        --noconfirm --needed \
-        --noprogressbar || return 1
-
-    rm -f /etc/sudoers.d/"$build_user"
-    rm -rf /tmp/yay-bin
-    userdel "$build_user"
-    return 0
-}
-
 
 install_arch_linux_restart_daemons() {
     [ "$_START_DAEMONS" -eq $BS_FALSE ] && return

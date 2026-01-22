@@ -1,7 +1,7 @@
 #!/bin/sh
 
 __ScriptName="salt-quick-start.sh"
-SALT_REPO_URL="https://packages.broadcom.com/artifactory/salt-project-generic/onedir"
+SALT_REPO_URL="https://packages.broadcom.com/artifactory/saltproject-generic/onedir"
 _COLORS=${QS_COLORS:-$(tput colors 2>/dev/null || echo 0)}
 
 _LOCAL=0
@@ -94,7 +94,7 @@ __parse_repo_json_jq() {
     # $2 is ARCH
 
     # get dir listing from url, sort and pick highest
-    onedir_versions_tmpf=$(mktemp)
+    onedir_versions_tmpf=$(mktemp -d)
     curr_pwd=$(pwd)
     cd  ${onedir_versions_tmpf} || return 1
     wget -r -np -nH --exclude-directories=onedir,relenv,windows -x -l 1 "$SALT_REPO_URL/"

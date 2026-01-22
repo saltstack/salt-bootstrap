@@ -1,3 +1,17 @@
+# v2026.01.22
+
+## What's Changed
+
+- Fix SALT_REPO_URL and mktemp command in salt-quick-start.sh by @OttaviaB in https://github.com/saltstack/salt-bootstrap/pull/2102
+- Tidy/fix archlinux install by @vegcom in https://github.com/saltstack/salt-bootstrap/pull/2101
+
+## New Contributors
+
+- @OttaviaB made their first contribution in https://github.com/saltstack/salt-bootstrap/pull/2102
+- @vegcom made their first contribution in https://github.com/saltstack/salt-bootstrap/pull/2101
+
+**Full Changelog**: https://github.com/saltstack/salt-bootstrap/compare/v2026.01.15...v2026.01.22
+
 # v2026.01.15
 
 ## What's Changed

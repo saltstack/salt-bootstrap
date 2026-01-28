@@ -21,7 +21,7 @@
         if: always()
         uses: geekyeggo/delete-artifact@v5
         with:
-          pattern: exitstatus-*
+          name: exitstatus-*
           failOnError: false
 
       - name: Set Pipeline Exit Status

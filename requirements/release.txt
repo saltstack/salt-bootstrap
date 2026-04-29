@@ -49,8 +49,10 @@ pydantic==2.10.5
     # via python-tools-scripts
 pydantic-core==2.27.2
     # via pydantic
-pygments==2.19.1
-    # via rich
+pygments==2.20.0
+    # via
+    #   -r requirements/release.in
+    #   rich
 python-dateutil==2.9.0.post0
     # via botocore
 python-tools-scripts==0.20.5

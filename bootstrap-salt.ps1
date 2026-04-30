@@ -50,9 +50,13 @@
 param(
     [Parameter(Mandatory=$false, ValueFromPipeline=$True)]
     [Alias("v")]
-    # The version of the Salt minion to install. Default is "latest" which will
-    # install the latest version of Salt minion available. Doesn't support
-    # versions prior to "YYYY.M.R-B"
+    # The version of the Salt minion to install. Use "latest" for the most recent
+    # GA (general availability) build at RepoUrl; prerelease directories (for
+    # example names containing "rc") are ignored for "latest" and for major-series
+    # selection. To install a prerelease build, pass the exact directory name
+    # shown at RepoUrl (for example "3008.0rc1"). Alternatively, specify a major
+    # version for the latest GA in that series (for example "3006"). Versions
+    # older than 3006 are not supported.
     [String]$Version = "latest",
 
     [Parameter(Mandatory=$false, ValueFromPipeline=$True)]
@@ -153,6 +157,40 @@ function Get-MajorVersion {
     return ( $Version -split "\." )[0]
 }
 
+function Test-SaltOnedirVersionIsGA {
+    # True if the onedir directory name is a GA CalVer (digits and dots only).
+    # Prerelease dirs (e.g. 3008.0rc1) are not GA; install those only via exact
+    # -Version matching the directory name.
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory=$true)]
+        [String] $Version
+    )
+    return [bool]( $Version -match '^\d+\.\d+(\.\d+)*$' )
+}
+
+function Compare-SaltCalVer {
+    # Compare two GA numeric CalVer strings (e.g. 3006.24 vs 3007.0). Returns 1
+    # if Left is greater than Right, -1 if less, 0 if equal.
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory=$true)]
+        [String] $Left,
+        [Parameter(Mandatory=$true)]
+        [String] $Right
+    )
+    $left_parts = @( ($Left -split '\.') | ForEach-Object { [int]$_ } )
+    $right_parts = @( ($Right -split '\.') | ForEach-Object { [int]$_ } )
+    $max_len = [Math]::Max($left_parts.Count, $right_parts.Count)
+    for ( $i = 0; $i -lt $max_len; $i++ ) {
+        $a = if ( $i -lt $left_parts.Count ) { $left_parts[$i] } else { 0 }
+        $b = if ( $i -lt $right_parts.Count ) { $right_parts[$i] } else { 0 }
+        if ( $a -gt $b ) { return 1 }
+        if ( $a -lt $b ) { return -1 }
+    }
+    return 0
+}
+
 function Get-AvailableVersions {
     # Get available versions from a remote location specified in the Source
     # Parameter
@@ -163,7 +201,6 @@ function Get-AvailableVersions {
 
     if ( $base_url.StartsWith("http") -or $base_url.StartsWith("ftp") ) {
         # We're dealing with HTTP, HTTPS, or FTP
-        $response = Invoke-WebRequest "$base_url" -UseBasicParsing
         try {
             $response = Invoke-WebRequest "$base_url" -UseBasicParsing
         } catch {
@@ -177,19 +214,15 @@ function Get-AvailableVersions {
             exit 1
         }
 
-        $response.links | ForEach-Object {
-            if ( $_.href.Length -gt 8) {
-                Write-Host "The content at this location is unexpected" -ForegroundColor Red
-                Write-Host "Should be a list of directories where the name is a version of Salt" -ForegroundColor Red
-                exit 1
-            }
-        }
-
-        # Getting available versions from response
+        # Getting available versions from response (Salt dirs: 3006.24, 3008.0,
+        # 3008.0rc1, etc.). Skip non-version links from the index page.
         Write-Verbose "Getting available versions from response"
         $filtered = $response.Links | Where-Object -Property href -NE "../"
-        $filtered | Select-Object -Property href | ForEach-Object {
-            $available_versions.Add($_.href.Trim("/")) | Out-Null
+        $filtered | ForEach-Object {
+            $name = $_.href.Trim("/")
+            if ( $name -match '^\d+\.\d+' ) {
+                $available_versions.Add($name) | Out-Null
+            }
         }
     } elseif ( $base_url.StartsWith("\\") -or $base_url -match "^[A-Za-z]:\\" ) {
         # We're dealing with a local directory or SMB source
@@ -202,34 +235,42 @@ function Get-AvailableVersions {
         exit 1
     }
 
+    if ( $available_versions.Count -eq 0 ) {
+        Write-Host "No version directories found at RepoUrl" -ForegroundColor Red
+        Write-Host "base_url: $base_url" -ForegroundColor Red
+        exit 1
+    }
+
     Write-Verbose "Available versions:"
     $available_versions | ForEach-Object {
         Write-Verbose "- $_"
     }
 
     # Create a versions table
-    # This will have the latest version available, the latest version available
-    # for each major version, and every version available. This makes the
-    # version lookup logic easier. The contents of the versions table can be
-    # found by running -Verbose
+    # "latest" and each major-series key (3006, 3007, ...) use the newest GA
+    # build only; prerelease dirs still appear under their exact names. Every
+    # discovered directory name is also stored lowercased for lookup. The
+    # contents of the versions table can be found by running -Verbose
     Write-Verbose "Populating the versions table"
     $versions_table = [ordered]@{}
     $available_versions | ForEach-Object {
         $major_version = $(Get-MajorVersion $_)
-        if ( $versions_table.Keys -contains $major_version ) {
-            if ( [System.Version]$_ -gt [System.Version]$versions_table[$major_version] ) {
+        if ( Test-SaltOnedirVersionIsGA $_ ) {
+            if ( $versions_table.Keys -contains $major_version ) {
+                if ( (Compare-SaltCalVer $_ $versions_table[$major_version]) -gt 0 ) {
+                    $versions_table[$major_version] = $_
+                }
+            } else {
                 $versions_table[$major_version] = $_
             }
-        } else {
-            $versions_table[$major_version] = $_
-        }
 
-        if ( $versions_table -contains "latest" ) {
-            if ( [System.Version]$_ -gt [System.Version]$versions_table["latest"] ) {
+            if ( $versions_table.Keys -contains "latest" ) {
+                if ( (Compare-SaltCalVer $_ $versions_table["latest"]) -gt 0 ) {
+                    $versions_table["latest"] = $_
+                }
+            } else {
                 $versions_table["latest"] = $_
             }
-        } else {
-            $versions_table["latest"] = $_
         }
 
         $versions_table[$_.ToLower()] = $_.ToLower()

@@ -6389,6 +6389,15 @@ EOF
 #
 
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  __salt_onedir_filter_ga_version_dirs
+#   DESCRIPTION:  From stdin: keep only GA CalVer-style directory names (digits and dots;
+#                 prerelease dirs like 3008.0rc1 are excluded).
+#----------------------------------------------------------------------------------------------------------------------
+__salt_onedir_filter_ga_version_dirs() {
+    grep -E '^[0-9]+\.[0-9]+(\.[0-9]+)*$'
+}
+
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #          NAME:  __rpm_get_packagesite_onedir_latest
 #   DESCRIPTION:  Set _GENERIC_PKG_VERSION to the latest for RPM or latest for major version input
 #----------------------------------------------------------------------------------------------------------------------
@@ -6396,26 +6405,35 @@ __get_packagesite_onedir_latest() {
 
     echodebug "Find latest rpm release from repository"
 
-    # get dir listing from url, sort and pick highest
     generic_versions_tmpdir=$(mktemp -d)
     curr_pwd=$(pwd)
-    cd  ${generic_versions_tmpdir} || return 1
+    cd "${generic_versions_tmpdir}" || return 1
 
     # leverage the windows directories since release Windows and Linux
     wget -q -r -np -nH --exclude-directories=onedir,relenv,macos -x -l 1 "https://${_REPO_URL}/saltproject-generic/windows/"
     if [ "$#" -gt 0 ] && [ -n "$1" ]; then
         MAJOR_VER="$1"
         # shellcheck disable=SC2010
-        _GENERIC_PKG_VERSION=$(ls artifactory/saltproject-generic/windows/ | grep -v 'index.html' | sort -V -u | grep -E "$MAJOR_VER" | tail -n 1)
+        _GENERIC_PKG_VERSION=$(ls artifactory/saltproject-generic/windows/ | grep -v 'index.html' | __salt_onedir_filter_ga_version_dirs | grep -E "^${MAJOR_VER}\\." | sort -V -u | tail -n 1)
     else
         # shellcheck disable=SC2010
-        _GENERIC_PKG_VERSION=$(ls artifactory/saltproject-generic/windows/ | grep -v 'index.html' | sort -V -u | tail -n 1)
+        _GENERIC_PKG_VERSION=$(ls artifactory/saltproject-generic/windows/ | grep -v 'index.html' | __salt_onedir_filter_ga_version_dirs | sort -V -u | tail -n 1)
     fi
-    cd ${curr_pwd} || return "${_GENERIC_PKG_VERSION}"
-    rm -fR ${generic_versions_tmpdir}
+    cd "${curr_pwd}" || return 1
+    rm -fR "${generic_versions_tmpdir}"
+
+    if [ -z "${_GENERIC_PKG_VERSION}" ]; then
+        if [ "$#" -gt 0 ] && [ -n "$1" ]; then
+            echoerror "No GA Salt onedir version found for major series $1 (prerelease dirs are ignored for this selection)."
+        else
+            echoerror "No GA Salt onedir version found for latest (prerelease dirs are ignored for this selection)."
+        fi
+        return 1
+    fi
 
     echodebug "latest rpm release from repository found ${_GENERIC_PKG_VERSION}"
 
+    return 0
 }
 
 
@@ -6759,7 +6777,7 @@ install_vmware_photon_os_onedir() {
 
     if [ "$(echo "$STABLE_REV" | grep -E '^(3006|3007)$')" != "" ]; then
         # Major version Salt, config and repo already setup
-        __get_packagesite_onedir_latest "$STABLE_REV"
+        __get_packagesite_onedir_latest "$STABLE_REV" || return 1
         MINOR_VER_STRG="-$_GENERIC_PKG_VERSION"
     elif [ "$(echo "$STABLE_REV" | grep -E '^([3-9][0-5]{2}[6-9](\.[0-9]*)?)')" != "" ]; then
         # Minor version Salt, need to add specific minor version
@@ -6767,7 +6785,7 @@ install_vmware_photon_os_onedir() {
         MINOR_VER_STRG="-$STABLE_REV_DOT"
     else
         # default to latest version Salt, config and repo already setup
-        __get_packagesite_onedir_latest
+        __get_packagesite_onedir_latest || return 1
         MINOR_VER_STRG="-$_GENERIC_PKG_VERSION"
     fi
 
@@ -7841,24 +7859,33 @@ __macosx_get_packagesite_onedir_latest() {
 
     echodebug "Find latest MacOS release from repository"
 
-    # get dir listing from url, sort and pick highest
     macos_versions_tmpdir=$(mktemp -d)
     curr_pwd=$(pwd)
-    cd  ${macos_versions_tmpdir} || return 1
+    cd "${macos_versions_tmpdir}" || return 1
     wget -q -r -np -nH --exclude-directories=onedir,relenv,windows -x -l 1 "$SALT_MACOS_PKGDIR_URL/"
     if [ "$#" -gt 0 ] && [ -n "$1" ]; then
         MAJOR_VER="$1"
         # shellcheck disable=SC2010
-        _PKG_VERSION=$(ls artifactory/saltproject-generic/macos/ | grep -v 'index.html' | sort -V -u | grep -E "$MAJOR_VER" | tail -n 1)
+        _PKG_VERSION=$(ls artifactory/saltproject-generic/macos/ | grep -v 'index.html' | __salt_onedir_filter_ga_version_dirs | grep -E "^${MAJOR_VER}\\." | sort -V -u | tail -n 1)
     else
         # shellcheck disable=SC2010
-        _PKG_VERSION=$(ls artifactory/saltproject-generic/macos/ | grep -v 'index.html' | sort -V -u | tail -n 1)
+        _PKG_VERSION=$(ls artifactory/saltproject-generic/macos/ | grep -v 'index.html' | __salt_onedir_filter_ga_version_dirs | sort -V -u | tail -n 1)
     fi
-    cd ${curr_pwd} || return "${_PKG_VERSION}"
-    rm -fR ${macos_versions_tmpdir}
+    cd "${curr_pwd}" || return 1
+    rm -fR "${macos_versions_tmpdir}"
+
+    if [ -z "${_PKG_VERSION}" ]; then
+        if [ "$#" -gt 0 ] && [ -n "$1" ]; then
+            echoerror "No GA Salt macOS onedir version found for major series $1 (prerelease dirs are ignored for this selection)."
+        else
+            echoerror "No GA Salt macOS onedir version found for latest (prerelease dirs are ignored for this selection)."
+        fi
+        return 1
+    fi
 
     echodebug "latest MacOS release from repository found ${_PKG_VERSION}"
 
+    return 0
 }
 
 
@@ -7877,15 +7904,15 @@ __macosx_get_packagesite_onedir() {
     _ONEDIR_TYPE="saltproject-generic"
     SALT_MACOS_PKGDIR_URL="https://${_REPO_URL}/${_ONEDIR_TYPE}/macos"
     if [ "$(echo "$_ONEDIR_REV" | grep -E '^(latest)$')" != "" ]; then
-        __macosx_get_packagesite_onedir_latest
+        __macosx_get_packagesite_onedir_latest || return 1
     elif [ "$(echo "$_ONEDIR_REV" | grep -E '^(3006|3007)$')" != "" ]; then
         # need to get latest for major version
-        __macosx_get_packagesite_onedir_latest "$_ONEDIR_REV"
+        __macosx_get_packagesite_onedir_latest "$_ONEDIR_REV" || return 1
     elif [ "$(echo "$_ONEDIR_REV" | grep -E '^([3-9][0-9]{3}(\.[0-9]*)?)')" != "" ]; then
         _PKG_VERSION=$_ONEDIR_REV
     else
         # default to getting latest
-        __macosx_get_packagesite_onedir_latest
+        __macosx_get_packagesite_onedir_latest || return 1
     fi
 
     PKG="salt-${_PKG_VERSION}-py3-${DARWIN_ARCH}.pkg"

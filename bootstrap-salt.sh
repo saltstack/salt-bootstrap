@@ -515,6 +515,7 @@ fi
 
 # What ever is written to the logpipe gets written to the logfile
 tee < "$LOGPIPE" "$LOGFILE" &
+TEE_PID=$!
 
 # Close STDOUT, reopen it directing it to the logpipe
 exec 1>&-
@@ -571,10 +572,10 @@ __exit_cleanup() {
     fi
 
     # Kill tee when exiting, CentOS, at least requires this
-    # shellcheck disable=SC2009
-    TEE_PID=$(ps ax | grep tee | grep "$LOGFILE" | awk '{print $1}')
-
-    [ "$TEE_PID" = "" ] && exit $EXIT_CODE
+    if [ "$TEE_PID" = "" ]; then
+        exec >/dev/null 2>&1
+        exit "$EXIT_CODE"
+    fi
 
     echodebug "Killing logging pipe tee's with pid(s): $TEE_PID"
 
@@ -587,11 +588,13 @@ __exit_cleanup() {
     }
     trap "__trap_errors" INT ABRT QUIT TERM
 
-    # Now we're "good" to kill tee
+    # Detach stdout/stderr from LOGPIPE before killing tee so shell teardown does
+    # not write to a pipe with no reader (SIGPIPE / exit 141 under docker exec -e).
+    exec >/dev/null 2>&1
     kill -s TERM "$TEE_PID"
 
     # In case the 127 errno is not triggered, exit with the "original" exit code
-    exit $EXIT_CODE
+    exit "$EXIT_CODE"
 }
 trap "__exit_cleanup" EXIT INT
 

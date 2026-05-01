@@ -35,7 +35,7 @@ jobs:
       - name: Set Job Output
         id: set-output
         run: |
-          echo "::set-output name=run-tests::${{ steps.changed-files.outputs.any_modified }}"
+          echo "run-tests=${{ steps.changed-files.outputs.any_modified }}" >> $GITHUB_OUTPUT
 
       - name: Set Exit Status
         if: always()
@@ -319,7 +319,7 @@ jobs:
         if: always()
         uses: geekyeggo/delete-artifact@v5
         with:
-          pattern: exitstatus-*
+          name: exitstatus-*
           failOnError: false
 
       - name: Set Pipeline Exit Status

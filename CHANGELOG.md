@@ -1,3 +1,15 @@
+# v2026.05.01
+
+## What's Changed
+
+- Update filelock to 3.20.3 by @twangboy in https://github.com/saltstack/salt-bootstrap/pull/2103
+- Fix ci by @twangboy in https://github.com/saltstack/salt-bootstrap/pull/2104
+- Update requests to >2.33.0 by @twangboy in https://github.com/saltstack/salt-bootstrap/pull/2106
+- Update pygments to >= 2.20.0 by @twangboy in https://github.com/saltstack/salt-bootstrap/pull/2108
+- fix(windows): handle prerelease Salt dirs in bootstrap-salt.ps1 by @twangboy in https://github.com/saltstack/salt-bootstrap/pull/2109
+
+**Full Changelog**: https://github.com/saltstack/salt-bootstrap/compare/v2026.01.22...v2026.05.01
+
 # v2026.01.22
 
 ## What's Changed

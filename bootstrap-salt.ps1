@@ -112,7 +112,7 @@ if ($help) {
     exit 0
 }
 
-$__ScriptVersion = "2026.01.22"
+$__ScriptVersion = "2026.05.01"
 $ScriptName = $myInvocation.MyCommand.Name
 
 # We'll check for the Version next, because it also has no requirements

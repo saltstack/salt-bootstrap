@@ -76,7 +76,7 @@ typing-extensions==4.15.0
     #   python-tools-scripts
     #   rich
     #   virtualenv
-urllib3==2.6.3
+urllib3==2.7.0
     # via
     #   -r requirements/release.in
     #   botocore

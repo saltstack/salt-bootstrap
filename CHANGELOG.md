@@ -1,3 +1,13 @@
+# v2026.05.20
+
+## What's Changed
+
+- Update urllib3 to 2.7.0 by @twangboy in https://github.com/saltstack/salt-bootstrap/pull/2110
+- Update idna to >= 3.15 by @twangboy in https://github.com/saltstack/salt-bootstrap/pull/2111
+- fix(bootstrap): install git deps from linux.lock or linux.txt by @twangboy in https://github.com/saltstack/salt-bootstrap/pull/2112
+
+**Full Changelog**: https://github.com/saltstack/salt-bootstrap/compare/v2026.05.01...v2026.05.20
+
 # v2026.05.01
 
 ## What's Changed

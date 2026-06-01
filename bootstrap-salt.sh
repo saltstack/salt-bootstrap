@@ -2157,18 +2157,13 @@ __git_clone_and_checkout() {
             git fetch --tags upstream
         fi
 
+        # Check if GIT_REV_ADJ is a remote branch or just a commit hash
+        if git branch -r | grep -q -F -w "origin/$GIT_REV_ADJ"; then
+            GIT_REV_ADJ="origin/$GIT_REV_ADJ"
+        fi
+
         echodebug "Hard reseting the cloned repository to ${GIT_REV_ADJ}"
         git reset --hard "$GIT_REV_ADJ" || return 1
-
-        # Just calling `git reset --hard $GIT_REV_ADJ` on a branch name that has
-        # already been checked out will not update that branch to the upstream
-        # HEAD; instead it will simply reset to itself.  Check the ref to see
-        # if it is a branch name, check out the branch, and pull in the
-        # changes.
-        if git branch -a | grep -q "${GIT_REV_ADJ}"; then
-            echodebug "Rebasing the cloned repository branch"
-            git pull --rebase || return 1
-        fi
     else
         if [ "$_FORCE_SHALLOW_CLONE" -eq "${BS_TRUE}" ]; then
             echoinfo "Forced shallow cloning of git repository."

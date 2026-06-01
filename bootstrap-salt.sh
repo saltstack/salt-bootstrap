@@ -2739,23 +2739,21 @@ __install_salt_from_repo() {
     echodebug "__install_salt_from_repo py_exe=$_py_exe"
 
     _py_version=$(${_py_exe} -c "import sys; print('{0}.{1}'.format(*sys.version_info))")
-    _pip_cmd="pip${_py_version}"
-    if ! __check_command_exists "${_pip_cmd}"; then
-        echodebug "The pip binary '${_pip_cmd}' was not found in PATH"
-        _pip_cmd="pip$(echo "${_py_version}" | cut -c -1)"
+    _pip_cmd="${_py_exe} -m pip"
+    _pip_version="$(${_pip_cmd} --version)"
+    if [ -z "${_pip_version}" ]; then
+        echodebug "Pip is not installed for Python '${_py_exe}' (version ${_py_version})"
+        _pip_cmd="pip${_py_version}"
         if ! __check_command_exists "${_pip_cmd}"; then
             echodebug "The pip binary '${_pip_cmd}' was not found in PATH"
-            _pip_cmd="pip"
-            if ! __check_command_exists "${_pip_cmd}"; then
-                echoerror "Unable to find a pip binary"
-                return 1
-            fi
+            echoerror "Unable to find a pip binary"
+            return 1
         fi
     fi
 
     __check_pip_allowed
 
-    echodebug "Installed pip version: $(${_pip_cmd} --version)"
+    echodebug "Installed pip version: $_pip_version"
 
     _setuptools_dep="setuptools>=${_MINIMUM_SETUPTOOLS_VERSION},<${_MAXIMUM_SETUPTOOLS_VERSION}"
     if [ "$_PY_MAJOR_VERSION" -ne 3 ]; then

@@ -5531,15 +5531,22 @@ install_alpine_linux_post() {
         [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
 
         if [ -f /sbin/rc-update ]; then
-            script_url="${_SALTSTACK_REPO_URL%.git}/raw/master/pkg/alpine/salt-$fname"
-            [ -f "/etc/init.d/salt-$fname" ] || __fetch_url "/etc/init.d/salt-$fname" "$script_url"
+            local script_path="/etc/init.d/salt-$fname"
+            if ! [ -f "$script_path" ]; then
+                cat <<_eof > "$script_path"
+#!/sbin/openrc-run
+command="/usr/bin/salt-${fname}"
+command_args="--daemon"
+pidfile="/var/run/salt-${fname}.pid"
+name="Salt ${fname} daemon"
 
-            # shellcheck disable=SC2181
-            if [ $? -eq 0 ]; then
-                chmod +x "/etc/init.d/salt-$fname"
-            else
-                echoerror "Failed to get OpenRC init script for $OS_NAME from $script_url."
-                return 1
+depend() {
+        need localmount
+        use net
+        after bootmisc
+}
+_eof
+                chmod +x "$script_path"
             fi
 
             # Skip salt-api since the service should be opt-in and not necessarily started on boot

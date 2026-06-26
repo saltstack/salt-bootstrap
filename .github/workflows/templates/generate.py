@@ -23,6 +23,7 @@ LINUX_DISTROS = [
     "rockylinux-8",
     "rockylinux-9",
     "ubuntu-2204",
+    "ubuntu-2604",
 ]
 
 WINDOWS = [
@@ -49,6 +50,7 @@ STABLE_DISTROS = [
     "rockylinux-8",
     "rockylinux-9",
     "ubuntu-2204",
+    "ubuntu-2604",
 ]
 
 #    "amazonlinux-2",
@@ -65,6 +67,7 @@ ONEDIR_DISTROS = [
     "rockylinux-8",
     "rockylinux-9",
     "ubuntu-2204",
+    "ubuntu-2604",
 ]
 
 #    "amazonlinux-2",
@@ -78,6 +81,7 @@ ONEDIR_RC_DISTROS = [
     "photon-5",
     "rockylinux-9",
     "ubuntu-2204",
+    "ubuntu-2604",
 ]
 
 BLACKLIST_3006 = [
@@ -90,6 +94,8 @@ BLACKLIST_3006 = [
 BLACKLIST_3007 = [
     "photon-4",
 ]
+
+BLACKLIST_3008 = []
 
 #    "ubuntu-2204",
 BLACKLIST_GIT_3006 = [
@@ -137,6 +143,7 @@ SALT_VERSIONS = [
     "3006-8",
     "3007",
     "3007-1",
+    "3008",
     "master",
     "latest",
     "nightly",
@@ -145,6 +152,7 @@ SALT_VERSIONS = [
 ONEDIR_SALT_VERSIONS = [
     "3006",
     "3007",
+    "3008",
     "latest",
 ]
 
@@ -155,6 +163,7 @@ VERSION_DISPLAY_NAMES = {
     "3006-8": "v3006.8",
     "3007": "v3007",
     "3007-1": "v3007.1",
+    "3008": "v3008",
     "master": "Master",
     "latest": "Latest",
     "nightly": "Nightly",
@@ -205,6 +214,7 @@ DISTRO_DISPLAY_NAMES = {
     "ubuntu-2004": "Ubuntu 20.04",
     "ubuntu-2204": "Ubuntu 22.04",
     "ubuntu-2404": "Ubuntu 24.04",
+    "ubuntu-2604": "Ubuntu 26.04",
     "macos-14": "macOS 14",
     "macos-15-intel": "macOS 15 (intel)",
     "windows-2022": "Windows 2022",
@@ -225,6 +235,7 @@ CONTAINER_SLUG_NAMES = {
     "ubuntu-2004": "ubuntu-20.04",
     "ubuntu-2204": "ubuntu-22.04",
     "ubuntu-2404": "ubuntu-24.04",
+    "ubuntu-2604": "ubuntu-26.04",
     "macos-14": "macos-14",
     "macos-15-intel": "macos-15-intel",
     "windows-2022": "windows-2022",
@@ -405,6 +416,7 @@ def generate_test_jobs():
                     "3006-8": BLACKLIST_3006,
                     "3007": BLACKLIST_3007,
                     "3007-1": BLACKLIST_3007,
+                    "3008": BLACKLIST_3008,
                 }
                 if bootstrap_type == "git":
                     BLACKLIST = {
@@ -419,10 +431,7 @@ def generate_test_jobs():
                     if salt_version.endswith("-0"):
                         continue
 
-                if (
-                    salt_version in ("3006", "3006-8", "3007", "3007-1", "master")
-                    and distro in BLACKLIST[salt_version]
-                ):
+                if distro in BLACKLIST.get(salt_version, []):
                     continue
 
                 test_target = f"{bootstrap_type}-{salt_version}"

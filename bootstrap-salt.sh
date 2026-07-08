@@ -6722,11 +6722,7 @@ install_vmware_photon_os_git() {
 
     install_vmware_photon_os_git_deps
 
-    if [ -f "${_SALT_GIT_CHECKOUT_DIR}/salt/syspaths.py" ]; then
-        ${_PYEXE} setup.py --salt-config-dir="$_SALT_ETC_DIR" --salt-cache-dir="${_SALT_CACHE_DIR}" ${SETUP_PY_INSTALL_ARGS} install --prefix=/usr || return 1
-    else
-        ${_PYEXE} setup.py ${SETUP_PY_INSTALL_ARGS} install --prefix=/usr || return 1
-    fi
+    __install_salt_from_repo "${_PYEXE}" || return 1
     return 0
 }
 

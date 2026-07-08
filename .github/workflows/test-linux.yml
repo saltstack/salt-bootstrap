@@ -64,12 +64,12 @@ jobs:
           /usr/bin/docker start ${{ github.run_id }}_salt-test
 
       - name: "Install Python Dependencies with pip breakage in container ${{ inputs.container-slug }}"
-        if: ${{ ( inputs.distro-slug == 'debian-12' ) || ( inputs.distro-slug == 'debian-13' ) || ( inputs.distro-slug == 'ubuntu-2404' ) }}
+        if: ${{ ( inputs.distro-slug == 'debian-12' ) || ( inputs.distro-slug == 'debian-13' ) || ( inputs.distro-slug == 'ubuntu-2404' ) || ( inputs.distro-slug == 'ubuntu-2604' ) }}
         run: |
           docker exec ${{ github.run_id}}_salt-test python3 -m pip install --break-system-packages -r /_w/btstrap/tests/requirements.txt
 
       - name: "Install Python Dependencies without pip breakage in container ${{ inputs.container-slug }}"
-        if: ${{ ( inputs.distro-slug != 'debian-12' ) && ( inputs.distro-slug != 'debian-13' ) && ( inputs.distro-slug != 'ubuntu-2404' ) }}
+        if: ${{ ( inputs.distro-slug != 'debian-12' ) && ( inputs.distro-slug != 'debian-13' ) && ( inputs.distro-slug != 'ubuntu-2404' ) && ( inputs.distro-slug != 'ubuntu-2604' ) }}
         run: |
           docker exec ${{ github.run_id}}_salt-test python3 -m pip install -r /_w/btstrap/tests/requirements.txt
 

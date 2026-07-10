@@ -2,6 +2,7 @@ import json
 import logging
 import os
 import platform
+import shutil
 import subprocess
 
 import pytest
@@ -80,3 +81,42 @@ def test_target_salt_version(path, target_salt_version):
     # Returns: {'saltversion': '3006.9+217.g53cfa53040'}
     adj_saltversion = result["saltversion"].split("+")[0]
     assert adj_saltversion == target_salt_version
+
+
+def test_apt_keyring_is_trusted():
+    """
+    Regression test for https://github.com/saltstack/salt/issues/69740
+    apt only recognizes .gpg (binary) or .asc (armored) keyring files. A
+    keyring referenced by an extension apt doesn't recognize is silently
+    ignored, which apt reports as a NO_PUBKEY / unsigned-repository error.
+    """
+    if platform.system() != "Linux" or shutil.which("apt-get") is None:
+        pytest.skip("Not an apt-based system")
+
+    sources_file = "/etc/apt/sources.list.d/salt.sources"
+    if not os.path.exists(sources_file):
+        pytest.skip("No salt.sources file present")
+
+    signed_by = None
+    with open(sources_file) as fp:
+        for line in fp:
+            if line.strip().startswith("Signed-By:"):
+                signed_by = line.split(":", 1)[1].strip()
+                break
+
+    assert signed_by, "salt.sources has no Signed-By line"
+    assert os.path.exists(signed_by), f"Signed-By keyring {signed_by} does not exist"
+    assert signed_by.endswith(
+        ".gpg"
+    ), f"apt does not recognize {signed_by}'s extension as a valid keyring"
+
+    # Confirm the keyring is actually binary GPG data, not raw ASCII-armored text
+    file_result = subprocess.run(
+        ["file", signed_by], capture_output=True, text=True
+    )
+    assert "PGP public key block" not in file_result.stdout, file_result.stdout
+
+    result = subprocess.run(["apt-get", "update"], capture_output=True, text=True)
+    assert result.returncode == 0, result.stderr
+    assert "NO_PUBKEY" not in result.stderr, result.stderr
+    assert "unsupported filetype" not in result.stderr, result.stderr

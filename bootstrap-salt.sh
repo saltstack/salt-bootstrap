@@ -957,28 +957,6 @@ __fetch_url() {
 }
 
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
-#         NAME:  __fetch_verify
-#  DESCRIPTION:  Retrieves a URL, verifies its content and writes it to standard output
-#----------------------------------------------------------------------------------------------------------------------
-__fetch_verify() {
-
-    fetch_verify_url="$1"
-    fetch_verify_sum="$2"
-    fetch_verify_size="$3"
-
-    fetch_verify_tmpf=$(mktemp) && \
-    __fetch_url "$fetch_verify_tmpf" "$fetch_verify_url" && \
-    test "$(stat --format=%s "$fetch_verify_tmpf")" -eq "$fetch_verify_size" && \
-    test "$(md5sum "$fetch_verify_tmpf" | awk '{ print $1 }')" = "$fetch_verify_sum" && \
-    cat "$fetch_verify_tmpf" && \
-    if rm -f "$fetch_verify_tmpf"; then
-        return 0
-    fi
-    echo "Failed verification of $fetch_verify_url"
-    return 1
-}
-
-#---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #         NAME:  __check_url_exists
 #  DESCRIPTION:  Checks if a URL exists
 #----------------------------------------------------------------------------------------------------------------------
@@ -2033,11 +2011,11 @@ __apt_key_fetch() {
     mkdir -p /etc/apt/keyrings
     if __check_command_exists gpg; then
         # Newer apt requires the keyring in binary (dearmored) format.
-        gpg --dearmor < "$tempfile" > /etc/apt/keyrings/salt-archive-keyring.pgp || return 1
+        gpg --dearmor < "$tempfile" > /etc/apt/keyrings/salt-archive-keyring.gpg || return 1
     else
-        cp -f "$tempfile" /etc/apt/keyrings/salt-archive-keyring.pgp || return 1
+        cp -f "$tempfile" /etc/apt/keyrings/salt-archive-keyring.gpg || return 1
     fi
-    chmod 644 /etc/apt/keyrings/salt-archive-keyring.pgp || return 1
+    chmod 644 /etc/apt/keyrings/salt-archive-keyring.gpg || return 1
     rm -f "$tempfile"
 
     return 0
@@ -3025,6 +3003,7 @@ __install_saltstack_ubuntu_repository() {
 
     # SaltStack's stable Ubuntu repository:
     __fetch_url "/etc/apt/sources.list.d/salt.sources" "https://github.com/saltstack/salt-install-guide/releases/latest/download/salt.sources"
+    [ -f /etc/apt/sources.list.d/salt.sources ] && sed -i "s#salt-archive-keyring\.pgp#salt-archive-keyring.gpg#" /etc/apt/sources.list.d/salt.sources
     __apt_key_fetch "${HTTP_VAL}://${_REPO_URL}/api/security/keypair/SaltProjectKey/public" || return 1
     __wait_for_apt apt-get update || return 1
 
@@ -3077,6 +3056,7 @@ __install_saltstack_ubuntu_onedir_repository() {
 
     # SaltStack's stable Ubuntu repository:
     __fetch_url "/etc/apt/sources.list.d/salt.sources" "https://github.com/saltstack/salt-install-guide/releases/latest/download/salt.sources"
+    [ -f /etc/apt/sources.list.d/salt.sources ] && sed -i "s#salt-archive-keyring\.pgp#salt-archive-keyring.gpg#" /etc/apt/sources.list.d/salt.sources
     __apt_key_fetch "${HTTP_VAL}://${_REPO_URL}/api/security/keypair/SaltProjectKey/public" || return 1
     __wait_for_apt apt-get update || return 1
 
@@ -3528,6 +3508,7 @@ __install_saltstack_debian_repository() {
     __apt_get_install_noinput ${__PACKAGES} || return 1
 
     __fetch_url "/etc/apt/sources.list.d/salt.sources" "https://github.com/saltstack/salt-install-guide/releases/latest/download/salt.sources"
+    [ -f /etc/apt/sources.list.d/salt.sources ] && sed -i "s#salt-archive-keyring\.pgp#salt-archive-keyring.gpg#" /etc/apt/sources.list.d/salt.sources
     __apt_key_fetch "${HTTP_VAL}://${_REPO_URL}/api/security/keypair/SaltProjectKey/public" || return 1
     __wait_for_apt apt-get update || return 1
 
@@ -3573,6 +3554,7 @@ __install_saltstack_debian_onedir_repository() {
     __apt_get_install_noinput ${__PACKAGES} || return 1
 
     __fetch_url "/etc/apt/sources.list.d/salt.sources" "https://github.com/saltstack/salt-install-guide/releases/latest/download/salt.sources"
+    [ -f /etc/apt/sources.list.d/salt.sources ] && sed -i "s#salt-archive-keyring\.pgp#salt-archive-keyring.gpg#" /etc/apt/sources.list.d/salt.sources
     __apt_key_fetch "${HTTP_VAL}://${_REPO_URL}/api/security/keypair/SaltProjectKey/public" || return 1
     __wait_for_apt apt-get update || return 1
 

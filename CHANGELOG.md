@@ -1,3 +1,12 @@
+# v2026.07.10
+
+## What's Changed
+
+- fix(bootstrap): support Salt 3008+ major versions and fix repo/key issues by @twangboy in https://github.com/saltstack/salt-bootstrap/pull/2120
+- fix(bootstrap): rename apt keyring to .gpg, drop SHA1/MD5, remove dead md5sum code by @twangboy in https://github.com/saltstack/salt-bootstrap/pull/2121
+
+**Full Changelog**: https://github.com/saltstack/salt-bootstrap/compare/v2026.05.20...v2026.07.10
+
 # v2026.05.20
 
 ## What's Changed

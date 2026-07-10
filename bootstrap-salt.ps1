@@ -112,7 +112,7 @@ if ($help) {
     exit 0
 }
 
-$__ScriptVersion = "2026.05.20"
+$__ScriptVersion = "2026.07.10"
 $ScriptName = $myInvocation.MyCommand.Name
 
 # We'll check for the Version next, because it also has no requirements
@@ -328,14 +328,12 @@ function Get-FileHash {
 
         [Parameter(Mandatory=$false)]
         [ValidateSet(
-                "SHA1",
                 "SHA256",
                 "SHA384",
                 "SHA512",
                 # https://serverfault.com/questions/820300/
                 # why-isnt-mactripledes-algorithm-output-in-powershell-stable
                 "MACTripleDES", # don't use
-                "MD5",
                 "RIPEMD160",
                 IgnoreCase=$true)]
         [String] $Algorithm = "SHA256"
@@ -354,9 +352,6 @@ function Get-FileHash {
     $Path = Resolve-Path -Path $Path
 
     Switch ($Algorithm) {
-        SHA1 {
-            $hasher = [System.Security.Cryptography.SHA1CryptoServiceProvider]::Create()
-        }
         SHA256 {
             $hasher = [System.Security.Cryptography.SHA256]::Create()
         }
@@ -368,9 +363,6 @@ function Get-FileHash {
         }
         MACTripleDES {
             $hasher = [System.Security.Cryptography.MACTripleDES]::Create()
-        }
-        MD5 {
-            $hasher = [System.Security.Cryptography.MD5]::Create()
         }
         RIPEMD160 {
             $hasher = [System.Security.Cryptography.RIPEMD160]::Create()

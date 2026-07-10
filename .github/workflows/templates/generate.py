@@ -140,7 +140,7 @@ BLACKLIST_GIT_MASTER = [
 
 SALT_VERSIONS = [
     "3006",
-    "3006-8",
+    "3006-24",
     "3007",
     "3007-1",
     "3008",
@@ -160,7 +160,7 @@ ONEDIR_RC_SALT_VERSIONS = []
 
 VERSION_DISPLAY_NAMES = {
     "3006": "v3006",
-    "3006-8": "v3006.8",
+    "3006-24": "v3006.24",
     "3007": "v3007",
     "3007-1": "v3007.1",
     "3008": "v3008",
@@ -180,7 +180,7 @@ MAC_STABLE_VERSION_BLACKLIST = [
 ]
 
 GIT_VERSION_BLACKLIST = [
-    "3006-8",
+    "3006-24",
     "3007-1",
     "nightly",
 ]
@@ -413,7 +413,7 @@ def generate_test_jobs():
 
                 BLACKLIST = {
                     "3006": BLACKLIST_3006,
-                    "3006-8": BLACKLIST_3006,
+                    "3006-24": BLACKLIST_3006,
                     "3007": BLACKLIST_3007,
                     "3007-1": BLACKLIST_3007,
                     "3008": BLACKLIST_3008,

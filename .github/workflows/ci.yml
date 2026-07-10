@@ -127,7 +127,7 @@ jobs:
       container-slug: macos-14
       timeout: 20
       runs-on: macos-14
-      instances: '["stable-3006", "stable-3006-8", "stable-3007", "stable-3007-1", "stable-3008", "latest"]'
+      instances: '["stable-3006", "stable-3006-24", "stable-3007", "stable-3007-1", "stable-3008", "latest"]'
 
 
   macos-15-intel:
@@ -143,7 +143,7 @@ jobs:
       container-slug: macos-15-intel
       timeout: 20
       runs-on: macos-15-intel
-      instances: '["stable-3006", "stable-3006-8", "stable-3007", "stable-3007-1", "stable-3008", "latest"]'
+      instances: '["stable-3006", "stable-3006-24", "stable-3007", "stable-3007-1", "stable-3008", "latest"]'
 
 
 
@@ -160,7 +160,7 @@ jobs:
       container-slug: windows-2022
       timeout: 20
       runs-on: windows-2022
-      instances: '["stable-3006", "stable-3006-8", "stable-3007", "stable-3007-1", "stable-3008", "latest"]'
+      instances: '["stable-3006", "stable-3006-24", "stable-3007", "stable-3007-1", "stable-3008", "latest"]'
 
 
   windows-2025:
@@ -176,7 +176,7 @@ jobs:
       container-slug: windows-2025
       timeout: 20
       runs-on: windows-2025
-      instances: '["stable-3006", "stable-3006-8", "stable-3007", "stable-3007-1", "stable-3008", "latest"]'
+      instances: '["stable-3006", "stable-3006-24", "stable-3007", "stable-3007-1", "stable-3008", "latest"]'
 
 
 
@@ -192,7 +192,7 @@ jobs:
       display-name: Amazon 2023
       container-slug: amazonlinux-2023
       timeout: 20
-      instances: '["stable-3006", "onedir-3006", "stable-3006-8", "stable-3007", "onedir-3007", "stable-3007-1", "stable-3008", "git-3008", "onedir-3008", "latest", "default"]'
+      instances: '["stable-3006", "onedir-3006", "stable-3006-24", "stable-3007", "onedir-3007", "stable-3007-1", "stable-3008", "git-3008", "onedir-3008", "latest", "default"]'
 
 
   debian-11:
@@ -207,7 +207,7 @@ jobs:
       display-name: Debian 11
       container-slug: debian-11
       timeout: 20
-      instances: '["stable-3006", "onedir-3006", "stable-3006-8", "stable-3007", "onedir-3007", "stable-3007-1", "stable-3008", "git-3008", "onedir-3008", "git-master", "latest", "default"]'
+      instances: '["stable-3006", "onedir-3006", "stable-3006-24", "stable-3007", "onedir-3007", "stable-3007-1", "stable-3008", "git-3008", "onedir-3008", "git-master", "latest", "default"]'
 
 
   debian-12:
@@ -237,7 +237,7 @@ jobs:
       display-name: Photon OS 5
       container-slug: photon-5
       timeout: 20
-      instances: '["stable-3006", "onedir-3006", "stable-3006-8", "stable-3007", "onedir-3007", "stable-3007-1", "stable-3008", "git-3008", "onedir-3008", "latest", "default"]'
+      instances: '["stable-3006", "onedir-3006", "stable-3006-24", "stable-3007", "onedir-3007", "stable-3007-1", "stable-3008", "git-3008", "onedir-3008", "latest", "default"]'
 
 
   rockylinux-8:
@@ -252,7 +252,7 @@ jobs:
       display-name: Rocky Linux 8
       container-slug: rockylinux-8
       timeout: 20
-      instances: '["stable-3006", "onedir-3006", "stable-3006-8", "stable-3007", "onedir-3007", "stable-3007-1", "stable-3008", "onedir-3008", "latest", "default"]'
+      instances: '["stable-3006", "onedir-3006", "stable-3006-24", "stable-3007", "onedir-3007", "stable-3007-1", "stable-3008", "onedir-3008", "latest", "default"]'
 
 
   rockylinux-9:
@@ -267,7 +267,7 @@ jobs:
       display-name: Rocky Linux 9
       container-slug: rockylinux-9
       timeout: 20
-      instances: '["stable-3006", "onedir-3006", "stable-3006-8", "stable-3007", "onedir-3007", "stable-3007-1", "stable-3008", "git-3008", "onedir-3008", "latest", "default"]'
+      instances: '["stable-3006", "onedir-3006", "stable-3006-24", "stable-3007", "onedir-3007", "stable-3007-1", "stable-3008", "git-3008", "onedir-3008", "latest", "default"]'
 
 
   ubuntu-2204:
@@ -282,7 +282,7 @@ jobs:
       display-name: Ubuntu 22.04
       container-slug: ubuntu-22.04
       timeout: 20
-      instances: '["stable-3006", "git-3006", "onedir-3006", "stable-3006-8", "stable-3007", "git-3007", "onedir-3007", "stable-3007-1", "stable-3008", "git-3008", "onedir-3008", "git-master", "latest", "default"]'
+      instances: '["stable-3006", "git-3006", "onedir-3006", "stable-3006-24", "stable-3007", "git-3007", "onedir-3007", "stable-3007-1", "stable-3008", "git-3008", "onedir-3008", "git-master", "latest", "default"]'
 
 
   ubuntu-2604:
@@ -297,7 +297,7 @@ jobs:
       display-name: Ubuntu 26.04
       container-slug: ubuntu-26.04
       timeout: 20
-      instances: '["stable-3006", "git-3006", "onedir-3006", "stable-3006-8", "stable-3007", "git-3007", "onedir-3007", "stable-3007-1", "stable-3008", "git-3008", "onedir-3008", "git-master", "latest", "default"]'
+      instances: '["stable-3006", "git-3006", "onedir-3006", "stable-3006-24", "stable-3007", "git-3007", "onedir-3007", "stable-3007-1", "stable-3008", "git-3008", "onedir-3008", "git-master", "latest", "default"]'
 
 
   set-pipeline-exit-status:

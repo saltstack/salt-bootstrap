@@ -1,3 +1,11 @@
+# v2026.07.23
+
+## What's Changed
+
+- fix(bootstrap): support -N package-release suffix in Salt version strings by @twangboy in https://github.com/saltstack/salt-bootstrap/pull/2122
+
+**Full Changelog**: https://github.com/saltstack/salt-bootstrap/compare/v2026.07.10...v2026.07.23
+
 # v2026.07.10
 
 ## What's Changed

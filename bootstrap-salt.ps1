@@ -112,7 +112,7 @@ if ($help) {
     exit 0
 }
 
-$__ScriptVersion = "2026.07.10"
+$__ScriptVersion = "2026.07.23"
 $ScriptName = $myInvocation.MyCommand.Name
 
 # We'll check for the Version next, because it also has no requirements
@@ -158,20 +158,26 @@ function Get-MajorVersion {
 }
 
 function Test-SaltOnedirVersionIsGA {
-    # True if the onedir directory name is a GA CalVer (digits and dots only).
-    # Prerelease dirs (e.g. 3008.0rc1) are not GA; install those only via exact
-    # -Version matching the directory name.
+    # True if the onedir directory name is a GA CalVer, optionally with a -N
+    # package-release suffix (e.g. 3008.1 or 3008.1-1). Prerelease dirs (e.g.
+    # 3008.0rc1) are not GA; install those only via exact -Version matching
+    # the directory name. A -N suffix is a repackage of the same version, not
+    # a prerelease, so it counts as GA and participates in latest/major-series
+    # selection via Compare-SaltCalVer.
     [CmdletBinding()]
     param(
         [Parameter(Mandatory=$true)]
         [String] $Version
     )
-    return [bool]( $Version -match '^\d+\.\d+(\.\d+)*$' )
+    return [bool]( $Version -match '^\d+\.\d+(\.\d+)*(-\d+)?$' )
 }
 
 function Compare-SaltCalVer {
-    # Compare two GA numeric CalVer strings (e.g. 3006.24 vs 3007.0). Returns 1
-    # if Left is greater than Right, -1 if less, 0 if equal.
+    # Compare two GA CalVer strings, each optionally carrying a -N
+    # package-release suffix (e.g. 3006.24, 3008.1-1). Returns 1 if Left is
+    # greater than Right, -1 if less, 0 if equal. The dotted version is
+    # compared first; a missing -N suffix is treated as release 0, so
+    # 3008.1-1 compares greater than 3008.1.
     [CmdletBinding()]
     param(
         [Parameter(Mandatory=$true)]
@@ -179,15 +185,30 @@ function Compare-SaltCalVer {
         [Parameter(Mandatory=$true)]
         [String] $Right
     )
-    $left_parts = @( ($Left -split '\.') | ForEach-Object { [int]$_ } )
-    $right_parts = @( ($Right -split '\.') | ForEach-Object { [int]$_ } )
-    $max_len = [Math]::Max($left_parts.Count, $right_parts.Count)
+    function Get-CalVerParts {
+        param([String] $Version)
+        $release = 0
+        $dotted = $Version
+        if ( $Version -match '^(.+)-(\d+)$' ) {
+            $dotted = $Matches[1]
+            $release = [int]$Matches[2]
+        }
+        return @{
+            Dotted  = @( ($dotted -split '\.') | ForEach-Object { [int]$_ } )
+            Release = $release
+        }
+    }
+    $left_parts = Get-CalVerParts $Left
+    $right_parts = Get-CalVerParts $Right
+    $max_len = [Math]::Max($left_parts.Dotted.Count, $right_parts.Dotted.Count)
     for ( $i = 0; $i -lt $max_len; $i++ ) {
-        $a = if ( $i -lt $left_parts.Count ) { $left_parts[$i] } else { 0 }
-        $b = if ( $i -lt $right_parts.Count ) { $right_parts[$i] } else { 0 }
+        $a = if ( $i -lt $left_parts.Dotted.Count ) { $left_parts.Dotted[$i] } else { 0 }
+        $b = if ( $i -lt $right_parts.Dotted.Count ) { $right_parts.Dotted[$i] } else { 0 }
         if ( $a -gt $b ) { return 1 }
         if ( $a -lt $b ) { return -1 }
     }
+    if ( $left_parts.Release -gt $right_parts.Release ) { return 1 }
+    if ( $left_parts.Release -lt $right_parts.Release ) { return -1 }
     return 0
 }
 

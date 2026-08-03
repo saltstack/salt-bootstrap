@@ -63,6 +63,26 @@ jobs:
         run: |
           /usr/bin/docker start ${{ github.run_id }}_salt-test
 
+      - name: "Wait for container ${{ inputs.container-slug }} to finish booting"
+        run: |
+          # systemd's default tmpfiles.d rules wipe /tmp during early boot
+          # (systemd-tmpfiles-setup.service). Running pip/bootstrap before
+          # that finishes races the wipe and fails with spurious
+          # "No such file or directory" errors on /tmp/pip-*-tracker-*.
+          for i in $(seq 1 90); do
+            state=$(docker exec ${{ github.run_id }}_salt-test systemctl is-system-running 2>/dev/null || true)
+            echo "boot state at ${i}s: '$state'"
+            case "$state" in
+              running|degraded) exit 0 ;;
+            esac
+            sleep 1
+          done
+          echo "::error::Container did not finish booting within 90 seconds (last state: '$state')"
+          docker exec ${{ github.run_id }}_salt-test systemctl list-jobs || true
+          docker exec ${{ github.run_id }}_salt-test systemctl --failed || true
+          docker exec ${{ github.run_id }}_salt-test journalctl -b --no-pager || true
+          exit 1
+
       - name: "Install Python Dependencies with pip breakage in container ${{ inputs.container-slug }}"
         if: ${{ ( inputs.distro-slug == 'debian-12' ) || ( inputs.distro-slug == 'debian-13' ) || ( inputs.distro-slug == 'ubuntu-2404' ) || ( inputs.distro-slug == 'ubuntu-2604' ) }}
         run: |

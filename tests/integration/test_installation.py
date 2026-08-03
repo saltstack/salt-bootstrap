@@ -2,6 +2,7 @@ import json
 import logging
 import os
 import platform
+import re
 import shutil
 import subprocess
 
@@ -120,3 +121,69 @@ def test_apt_keyring_is_trusted():
     assert result.returncode == 0, result.stderr
     assert "NO_PUBKEY" not in result.stderr, result.stderr
     assert "unsupported filetype" not in result.stderr, result.stderr
+
+
+DEBIAN_REPO_FUNCTIONS = [
+    "__install_saltstack_ubuntu_repository",
+    "__install_saltstack_ubuntu_onedir_repository",
+    "__install_saltstack_debian_repository",
+    "__install_saltstack_debian_onedir_repository",
+]
+
+SAMPLE_SALT_SOURCES = """\
+X-Repolib-Name: Salt Project
+Types: deb
+URIs: https://packages.broadcom.com/artifactory/saltproject-deb
+Signed-By: /etc/apt/keyrings/salt-archive-keyring.pgp
+Suites: stable
+Components: main
+"""
+
+
+def test_debian_repo_functions_rewrite_custom_repo_url(tmp_path):
+    """
+    Regression test for https://github.com/saltstack/salt-bootstrap/issues/2123
+    The -R/_CUSTOM_REPO_URL option must rewrite the "URIs:" line in
+    salt.sources for Debian/Ubuntu, not just the GPG key fetch URL.
+    """
+    if shutil.which("bash") is None or shutil.which("sed") is None:
+        pytest.skip("bash/sed not available")
+
+    bootstrap_script = os.path.join(
+        os.path.dirname(__file__), "..", "..", "bootstrap-salt.sh"
+    )
+    if not os.path.exists(bootstrap_script):
+        pytest.skip("bootstrap-salt.sh not found (not running from a repo checkout)")
+
+    with open(bootstrap_script) as fp:
+        script = fp.read()
+
+    for func_name in DEBIAN_REPO_FUNCTIONS:
+        match = re.search(
+            rf"^{re.escape(func_name)}\(\) {{(.*?)^}}", script, re.M | re.S
+        )
+        assert match, f"could not find {func_name}() in bootstrap-salt.sh"
+
+        sed_exprs = re.findall(
+            r'sed -i "([^"]+)" /etc/apt/sources\.list\.d/salt\.sources',
+            match.group(1),
+        )
+        assert sed_exprs, f"{func_name} has no salt.sources sed post-processing"
+
+        sources_file = tmp_path / f"{func_name}.sources"
+        sources_file.write_text(SAMPLE_SALT_SOURCES)
+
+        env = dict(os.environ, _REPO_URL="repo.example.com/myrepo", HTTP_VAL="https")
+        for expr in sed_exprs:
+            subprocess.run(
+                ["bash", "-c", f'sed -i "{expr}" "$1"', "--", str(sources_file)],
+                env=env,
+                check=True,
+            )
+
+        result = sources_file.read_text()
+        assert "packages.broadcom.com" not in result, (
+            f"{func_name}: salt.sources still references packages.broadcom.com "
+            f"after applying its sed commands:\n{result}"
+        )
+        assert "repo.example.com/myrepo" in result

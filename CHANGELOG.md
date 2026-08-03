@@ -1,3 +1,11 @@
+# v2026.08.03
+
+## What's Changed
+
+- fix(bootstrap): rewrite salt.sources URIs to honor -R custom repo URL on Debian/Ubuntu by @twangboy in https://github.com/saltstack/salt-bootstrap/pull/2124
+
+**Full Changelog**: https://github.com/saltstack/salt-bootstrap/compare/v2026.07.23...v2026.08.03
+
 # v2026.07.23
 
 ## What's Changed

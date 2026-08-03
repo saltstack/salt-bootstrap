@@ -147,7 +147,10 @@ def _bash_has_gnu_sed():
     # stub instead - a different, often broken, resolution path.
     try:
         result = subprocess.run(
-            ["bash", "-c", "sed --version"], capture_output=True, text=True
+            ["bash", "-c", "sed --version"],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            universal_newlines=True,
         )
     except FileNotFoundError:
         return False

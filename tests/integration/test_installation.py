@@ -140,14 +140,32 @@ Components: main
 """
 
 
+def _bash_has_gnu_sed():
+    # Check through "bash -c", the exact invocation the test below uses, since
+    # e.g. on GitHub's Windows runners plain "sed" on the host PATH is Git
+    # Bash's GNU sed, but "bash" on the host PATH resolves to the WSL launcher
+    # stub instead - a different, often broken, resolution path.
+    try:
+        result = subprocess.run(
+            ["bash", "-c", "sed --version"], capture_output=True, text=True
+        )
+    except FileNotFoundError:
+        return False
+    return "GNU sed" in result.stdout
+
+
 def test_debian_repo_functions_rewrite_custom_repo_url(tmp_path):
     """
     Regression test for https://github.com/saltstack/salt-bootstrap/issues/2123
     The -R/_CUSTOM_REPO_URL option must rewrite the "URIs:" line in
     salt.sources for Debian/Ubuntu, not just the GPG key fetch URL.
     """
-    if shutil.which("bash") is None or shutil.which("sed") is None:
-        pytest.skip("bash/sed not available")
+    if not _bash_has_gnu_sed():
+        # bootstrap-salt.sh's Debian/Ubuntu sed -i syntax targets GNU sed,
+        # which is what those distros actually ship. BSD sed (e.g. on macOS)
+        # parses "-i" differently, and isn't representative of the real
+        # target either way.
+        pytest.skip("bash with GNU sed not available")
 
     bootstrap_script = os.path.join(
         os.path.dirname(__file__), "..", "..", "bootstrap-salt.sh"

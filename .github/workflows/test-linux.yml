@@ -57,11 +57,36 @@ jobs:
 
       - name: "Create container ${{ inputs.container-slug }}"
         run: |
-          /usr/bin/docker create --name ${{ github.run_id }}_salt-test --workdir /_w/ --privileged -e "HOME=/github/home" -e GITHUB_ACTIONS=true -e CI=true -e $GITHUB_ENV -v "/var/run/docker.sock":"/var/run/docker.sock" -v "/home/runner/work":"/__w" -v "/home/runner/work/_temp":"/__w/_temp" -v "/home/runner/work/_actions":"/__w/_actions" -v "/opt/hostedtoolcache":"/__t" -v "/home/runner/work/_temp/_github_home":"/github/home" -v "/home/runner/work/_temp/_github_workflow":"/github/workflow" -v "/home/runner/work/salt-bootstrap/salt-bootstrap":"/_w/btstrap"  --entrypoint "/usr/lib/systemd/systemd" ghcr.io/saltstack/salt-ci-containers/testing:${{ inputs.container-slug }} --systemd --unit rescue.target
+          /usr/bin/docker create --name ${{ github.run_id }}_salt-test --workdir /_w/ --privileged -e "HOME=/github/home" -e GITHUB_ACTIONS=true -e CI=true -e $GITHUB_ENV -v "/var/run/docker.sock":"/var/run/docker.sock" -v "/home/runner/work":"/__w" -v "/home/runner/work/_temp":"/__w/_temp" -v "/home/runner/work/_actions":"/__w/_actions" -v "/opt/hostedtoolcache":"/__t" -v "/home/runner/work/_temp/_github_home":"/github/home" -v "/home/runner/work/_temp/_github_workflow":"/github/workflow" -v "/home/runner/work/salt-bootstrap/salt-bootstrap":"/_w/btstrap"  --entrypoint "/usr/lib/systemd/systemd" ghcr.io/saltstack/salt-ci-containers/testing:${{ inputs.container-slug }} --unit=rescue.target
 
       - name: "Start container ${{ inputs.container-slug }}"
         run: |
           /usr/bin/docker start ${{ github.run_id }}_salt-test
+
+      - name: "Wait for container ${{ inputs.container-slug }} to finish booting"
+        run: |
+          # systemd's default tmpfiles.d rules wipe /tmp during early boot
+          # (systemd-tmpfiles-setup.service). Running pip/bootstrap before
+          # that finishes races the wipe and fails with spurious
+          # "No such file or directory" errors on /tmp/pip-*-tracker-*.
+          #
+          # The container boots into rescue.target (--unit=rescue.target
+          # above), so "is-system-running" settles on "maintenance", not
+          # "running"/"degraded" - those are kept as a fallback in case a
+          # given image's rescue.target ever pulls in extra units.
+          for i in $(seq 1 30); do
+            state=$(docker exec ${{ github.run_id }}_salt-test systemctl is-system-running 2>/dev/null || true)
+            echo "boot state at ${i}s: '$state'"
+            case "$state" in
+              maintenance|running|degraded) exit 0 ;;
+            esac
+            sleep 1
+          done
+          echo "::error::Container did not finish booting within 30 seconds (last state: '$state')"
+          docker exec ${{ github.run_id }}_salt-test systemctl list-jobs || true
+          docker exec ${{ github.run_id }}_salt-test systemctl --failed || true
+          docker exec ${{ github.run_id }}_salt-test journalctl -b --no-pager || true
+          exit 1
 
       - name: "Install Python Dependencies with pip breakage in container ${{ inputs.container-slug }}"
         if: ${{ ( inputs.distro-slug == 'debian-12' ) || ( inputs.distro-slug == 'debian-13' ) || ( inputs.distro-slug == 'ubuntu-2404' ) || ( inputs.distro-slug == 'ubuntu-2604' ) }}

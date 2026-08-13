@@ -180,6 +180,36 @@ jobs:
 
 
 
+  altlinux-10:
+    name: ALT Linux 10
+    if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
+    uses: ./.github/workflows/test-linux.yml
+    needs:
+      - lint
+      - generate-actions-workflow
+    with:
+      distro-slug: altlinux-10
+      display-name: ALT Linux 10
+      container-slug: altlinux-10
+      timeout: 20
+      instances: '["stable-3006", "git-3006", "onedir-3006", "stable-3006-24", "stable-3007", "git-3007", "onedir-3007", "stable-3007-1", "git-master", "latest", "default"]'
+
+
+  altlinux-11:
+    name: ALT Linux 11
+    if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
+    uses: ./.github/workflows/test-linux.yml
+    needs:
+      - lint
+      - generate-actions-workflow
+    with:
+      distro-slug: altlinux-11
+      display-name: ALT Linux 11
+      container-slug: altlinux-11
+      timeout: 20
+      instances: '["stable-3007", "git-3007", "onedir-3007", "stable-3007-1", "stable-3008", "git-3008", "onedir-3008", "git-master", "latest", "default"]'
+
+
   amazonlinux-2023:
     name: Amazon 2023
     if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
@@ -312,6 +342,8 @@ jobs:
       - macos-15-intel
       - windows-2022
       - windows-2025
+      - altlinux-10
+      - altlinux-11
       - amazonlinux-2023
       - debian-11
       - debian-12

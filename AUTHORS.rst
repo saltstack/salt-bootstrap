@@ -52,6 +52,7 @@ Dan Mick                    dmick                  dan.mick@inktank.com
 Daniel Poelzleithner        poelzi
 Daniel Wallace              gtmanfred              danielwallace@gtmanfred.com
 Darko Cerdic                darkocerdic
+Daniil Chistyakov           KegsZooL               danil.chistyakov.2015@inbox.ru
 Daryl Turner                darylturner            d.turner@arkadin.com
 David J. Felix              DavidJFelix
 David Murphy                daithi                david-dm.murphy@broadcom.com

@@ -2024,15 +2024,17 @@ __apt_key_fetch() {
     url=$1
 
     tempfile="$(__temp_gpg_pub)"
-    if __check_command_exists /usr/lib/apt/apt-helper; then
-        # apt-helper reuses apt's own acquire machinery, so it transparently
-        # honors credentials configured in /etc/apt/auth.conf(.d) for
-        # authenticated custom repos (see issue #2126), as well as any
-        # proxy/apt.conf settings - things curl/wget can't do without
-        # reimplementing apt's own auth-file parsing.
+    if ! __fetch_url "$tempfile" "$url"; then
+        # curl/wget have no access to credentials stored in apt's own
+        # /etc/apt/auth.conf(.d), so they fail against authenticated custom
+        # repos (see issue #2126). Fall back to apt-helper in that case,
+        # since it reuses apt's own acquire machinery and transparently
+        # honors those credentials, as well as any proxy/apt.conf settings.
+        # It isn't tried first because some WAFs/CDNs (e.g. in front of the
+        # default packages.broadcom.com repo) reject its request headers
+        # with a 406 that curl/wget don't trigger.
+        __check_command_exists /usr/lib/apt/apt-helper || return 1
         /usr/lib/apt/apt-helper download-file "$url" "$tempfile" || return 1
-    else
-        __fetch_url "$tempfile" "$url" || return 1
     fi
     mkdir -p /etc/apt/keyrings
     if __check_command_exists gpg; then

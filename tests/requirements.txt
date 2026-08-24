@@ -1,3 +1,7 @@
 pytest
 requests
 packaging
+# charset-normalizer>=3.5.0 rewrote its compiled extension from mypyc to
+# Cython, which is ABI-broken on Python 3.14 (AttributeError:
+# module 'charset_normalizer.md' has no attribute 'CharInfo').
+charset-normalizer<3.5.0

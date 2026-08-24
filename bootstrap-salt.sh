@@ -2024,7 +2024,16 @@ __apt_key_fetch() {
     url=$1
 
     tempfile="$(__temp_gpg_pub)"
-    __fetch_url "$tempfile" "$url" || return 1
+    if __check_command_exists /usr/lib/apt/apt-helper; then
+        # apt-helper reuses apt's own acquire machinery, so it transparently
+        # honors credentials configured in /etc/apt/auth.conf(.d) for
+        # authenticated custom repos (see issue #2126), as well as any
+        # proxy/apt.conf settings - things curl/wget can't do without
+        # reimplementing apt's own auth-file parsing.
+        /usr/lib/apt/apt-helper download-file "$url" "$tempfile" || return 1
+    else
+        __fetch_url "$tempfile" "$url" || return 1
+    fi
     mkdir -p /etc/apt/keyrings
     if __check_command_exists gpg; then
         # Newer apt requires the keyring in binary (dearmored) format.

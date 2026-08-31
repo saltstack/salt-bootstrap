@@ -2740,8 +2740,9 @@ __install_salt_from_repo() {
 
     _py_version=$(${_py_exe} -c "import sys; print('{0}.{1}'.format(*sys.version_info))")
     _pip_cmd="${_py_exe} -m pip"
-    _pip_version="$(${_pip_cmd} --version)"
-    if [ -z "${_pip_version}" ]; then
+    if ${_pip_cmd} --version > /dev/null 2>&1; then
+        _pip_version="$(${_pip_cmd} --version 2>/dev/null)"
+    else
         echodebug "Pip is not installed for Python '${_py_exe}' (version ${_py_version})"
         _pip_cmd="pip${_py_version}"
         if ! __check_command_exists "${_pip_cmd}"; then
@@ -2749,6 +2750,7 @@ __install_salt_from_repo() {
             echoerror "Unable to find a pip binary"
             return 1
         fi
+        _pip_version="$(${_pip_cmd} --version 2>/dev/null)"
     fi
 
     __check_pip_allowed

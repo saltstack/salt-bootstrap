@@ -5531,7 +5531,7 @@ install_alpine_linux_post() {
         [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
 
         if [ -f /sbin/rc-update ]; then
-            local script_path="/etc/init.d/salt-$fname"
+            script_path="/etc/init.d/salt-$fname"
             if ! [ -f "$script_path" ]; then
                 cat <<_eof > "$script_path"
 #!/sbin/openrc-run

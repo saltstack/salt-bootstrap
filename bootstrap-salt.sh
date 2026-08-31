@@ -3396,6 +3396,11 @@ install_ubuntu_stable_post() {
     return 0
 }
 
+install_ubuntu_onedir_post() {
+    install_ubuntu_stable_post || return 1
+    return 0
+}
+
 install_ubuntu_git_post() {
 
     for fname in api master minion syndic; do

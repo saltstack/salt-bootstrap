@@ -2158,12 +2158,13 @@ __git_clone_and_checkout() {
         fi
 
         # Check if GIT_REV_ADJ is a remote branch or just a commit hash
+        __GIT_CHECKOUT_REV="$GIT_REV_ADJ"
         if git branch -r | grep -q -F -w "origin/$GIT_REV_ADJ"; then
-            GIT_REV_ADJ="origin/$GIT_REV_ADJ"
+            __GIT_CHECKOUT_REV="origin/$GIT_REV_ADJ"
         fi
 
-        echodebug "Hard reseting the cloned repository to ${GIT_REV_ADJ}"
-        git reset --hard "$GIT_REV_ADJ" || return 1
+        echodebug "Hard reseting the cloned repository to ${__GIT_CHECKOUT_REV}"
+        git reset --hard "$__GIT_CHECKOUT_REV" || return 1
     else
         if [ "$_FORCE_SHALLOW_CLONE" -eq "${BS_TRUE}" ]; then
             echoinfo "Forced shallow cloning of git repository."

@@ -8265,6 +8265,7 @@ install_alt_linux_deps() {
 }
 
 install_alt_linux_onedir_deps() {
+    __wait_for_apt apt-get update || return 1
     __apt_get_install_noinput wget tar gzip gnupg ca-certificates || return 1
     return 0
 }

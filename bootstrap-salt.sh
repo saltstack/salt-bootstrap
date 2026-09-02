@@ -1268,6 +1268,10 @@ __gather_linux_system_info() {
                         n="Alpine Linux"
                         v="${rv}"
                         ;;
+                    altlinux    )
+                        n="ALT Linux"
+                        v="${rv}"
+                        ;;
                     amzn        )
                         # Amazon AMI's after 2014.09 match here
                         n="Amazon Linux AMI"

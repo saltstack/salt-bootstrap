@@ -8355,13 +8355,19 @@ install_alt_linux_onedir() {
     arch="x86_64"
     [ "$(uname -m)" = "aarch64" ] && arch="aarch64"
 
-    # Resolve "latest" to actual version
+    # Resolve "latest", or a bare major version (e.g. "3006"), to the actual
+    # latest GA release for that series via the artifactory directory listing
+    # (same mechanism used for macOS/Windows/Photon onedir installs). A full
+    # version string (e.g. "3006.26") is used as-is.
     if [ "$version" = "latest" ]; then
-        version=$(wget -qO- https://api.github.com/repos/saltstack/salt/releases/latest \
-                  | sed -n 's/.*"tag_name": *"v\([0-9.]*\(-[0-9]*\)\?\)".*/\1/p') || return 1
+        __get_packagesite_onedir_latest || return 1
+        version="$_GENERIC_PKG_VERSION"
+    elif [ "$(echo "$version" | grep -E '^[0-9]{4}$')" != "" ]; then
+        __get_packagesite_onedir_latest "$version" || return 1
+        version="$_GENERIC_PKG_VERSION"
+    else
+        version=$(__salt_version_string "$version")
     fi
-
-    version=$(__salt_version_string "$version")
 
     tarball="salt-${version}-onedir-linux-${arch}.tar.xz"
     url="https://github.com/saltstack/salt/releases/download/v${version}/${tarball}"

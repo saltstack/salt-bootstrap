@@ -8394,12 +8394,19 @@ install_alt_linux_onedir() {
 
 install_alt_linux_onedir_post() {
 
-    # Add onedir paths system-wide
+    # Add onedir paths system-wide. This only takes effect for login/interactive
+    # shells that source /etc/profile.d - it does not help something like
+    # `docker exec <container> salt-call ...`, which runs without one, so also
+    # symlink the onedir binaries into /usr/bin, already on PATH everywhere.
     cat >/etc/profile.d/saltstack.sh <<'EOF'
 export PATH=/opt/saltstack/salt:/opt/saltstack/salt/bin:$PATH
 EOF
 
     chmod 644 /etc/profile.d/saltstack.sh
+
+    for bin in /opt/saltstack/salt/salt*; do
+        [ -f "$bin" ] && [ -x "$bin" ] && ln -sf "$bin" "/usr/bin/$(basename "$bin")"
+    done
 
     for fname in api master minion syndic; do
         # Skip salt-api since the service should be opt-in and not necessarily started on boot

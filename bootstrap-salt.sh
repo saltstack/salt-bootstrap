@@ -8353,7 +8353,8 @@ install_alt_linux_git_post() {
 install_alt_linux_onedir() {
     version="${ONEDIR_REV:-latest}"
     arch="x86_64"
-    [ "$(uname -m)" = "aarch64" ] && arch="aarch64"
+    # Onedir tarball filenames use "arm64", not the "aarch64" uname reports.
+    [ "$(uname -m)" = "aarch64" ] && arch="arm64"
 
     # Resolve "latest", or a bare major version (e.g. "3006"), to the actual
     # latest GA release for that series via the artifactory directory listing
@@ -8370,7 +8371,12 @@ install_alt_linux_onedir() {
     fi
 
     tarball="salt-${version}-onedir-linux-${arch}.tar.xz"
-    url="https://github.com/saltstack/salt/releases/download/v${version}/${tarball}"
+    # GitHub Releases doesn't carry an onedir tarball asset for every
+    # historical point release (only newer ones do), while the artifactory
+    # generic repo has the complete history - it's the same source already
+    # used by the macOS/Windows/Photon onedir installers, and by the CI
+    # images' own provisioning.
+    url="https://${_REPO_URL}/saltproject-generic/onedir/${version}/${tarball}"
     extractdir="/opt/saltstack/salt"
 
     echoinfo "Downloading Salt onedir: $url"

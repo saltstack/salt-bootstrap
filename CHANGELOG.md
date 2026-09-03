@@ -1,3 +1,22 @@
+# v2026.09.03
+
+## What's Changed
+
+- fix(bootstrap): use apt-helper to fetch GPG key for authenticated custom repos by @twangboy in https://github.com/saltstack/salt-bootstrap/pull/2127
+- fix(bootstrap): add missing install_ubuntu_onedir_post function by @twangboy in https://github.com/saltstack/salt-bootstrap/pull/2129
+- Fix checking out a branch on in existing repo by @heewa in https://github.com/saltstack/salt-bootstrap/pull/2114
+- Use pip from specified python cmd by @heewa in https://github.com/saltstack/salt-bootstrap/pull/2115
+- Add openssl pkg to alpine to provide libcrypto by @heewa in https://github.com/saltstack/salt-bootstrap/pull/2116
+- Write alpine service scripts directly by @heewa in https://github.com/saltstack/salt-bootstrap/pull/2117
+- feat(altlinux): add ALT Linux 10/11 support by @KegsZooL in https://github.com/saltstack/salt-bootstrap/pull/2125
+
+## New Contributors
+
+- @heewa made their first contribution in https://github.com/saltstack/salt-bootstrap/pull/2114
+- @KegsZooL made their first contribution in https://github.com/saltstack/salt-bootstrap/pull/2125
+
+**Full Changelog**: https://github.com/saltstack/salt-bootstrap/compare/v2026.08.03...v2026.09.03
+
 # v2026.08.03
 
 ## What's Changed

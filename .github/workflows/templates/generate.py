@@ -16,6 +16,8 @@ os.chdir(os.path.abspath(os.path.dirname(__file__)))
 #    "ubuntu-2004",
 #    "ubuntu-2404",
 LINUX_DISTROS = [
+    "altlinux-10",
+    "altlinux-11",
     "amazonlinux-2023",
     "debian-11",
     "debian-12",
@@ -43,6 +45,8 @@ OSX = [
 #    "ubuntu-2004",
 #    "ubuntu-2404",
 STABLE_DISTROS = [
+    "altlinux-10",
+    "altlinux-11",
     "amazonlinux-2023",
     "debian-11",
     "debian-12",
@@ -60,6 +64,8 @@ STABLE_DISTROS = [
 #    "ubuntu-2004",
 #    "ubuntu-2404",
 ONEDIR_DISTROS = [
+    "altlinux-10",
+    "altlinux-11",
     "amazonlinux-2023",
     "debian-11",
     "debian-12",
@@ -77,6 +83,8 @@ ONEDIR_DISTROS = [
 #    "rockylinux-8",
 #    "ubuntu-2404",
 ONEDIR_RC_DISTROS = [
+    "altlinux-10",
+    "altlinux-11",
     "debian-12",
     "photon-5",
     "rockylinux-9",
@@ -85,6 +93,7 @@ ONEDIR_RC_DISTROS = [
 ]
 
 BLACKLIST_3006 = [
+    "altlinux-11",
     "debian-12",
     "fedora-40",
     "ubuntu-2404",
@@ -95,10 +104,13 @@ BLACKLIST_3007 = [
     "photon-4",
 ]
 
-BLACKLIST_3008 = []
+BLACKLIST_3008 = [
+    "altlinux-10",
+]
 
 #    "ubuntu-2204",
 BLACKLIST_GIT_3006 = [
+    "altlinux-11",
     "amazonlinux-2",
     "amazonlinux-2023",
     "debian-11",
@@ -125,6 +137,10 @@ BLACKLIST_GIT_3007 = [
     "rockylinux-9",
     "ubuntu-2004",
     "ubuntu-2404",
+]
+
+BLACKLIST_GIT_3008 = [
+    "altlinux-10",
 ]
 
 #    "debian-12",
@@ -201,6 +217,8 @@ GIT_DISTRO_BLACKLIST = [
 LATEST_PKG_BLACKLIST = []
 
 DISTRO_DISPLAY_NAMES = {
+    "altlinux-10": "ALT Linux 10",
+    "altlinux-11": "ALT Linux 11",
     "amazonlinux-2": "Amazon 2",
     "amazonlinux-2023": "Amazon 2023",
     "debian-11": "Debian 11",
@@ -222,6 +240,8 @@ DISTRO_DISPLAY_NAMES = {
 }
 
 CONTAINER_SLUG_NAMES = {
+    "altlinux-10": "altlinux-10",
+    "altlinux-11": "altlinux-11",
     "amazonlinux-2": "amazonlinux-2",
     "amazonlinux-2023": "amazonlinux-2023",
     "debian-11": "debian-11",
@@ -422,6 +442,7 @@ def generate_test_jobs():
                     BLACKLIST = {
                         "3006": BLACKLIST_GIT_3006,
                         "3007": BLACKLIST_GIT_3007,
+                        "3008": BLACKLIST_GIT_3008,
                         "master": BLACKLIST_GIT_MASTER,
                     }
 

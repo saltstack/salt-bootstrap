@@ -1618,8 +1618,9 @@ __debian_codename_translation() {
 __check_end_of_life_versions() {
     case "${DISTRO_NAME_L}" in
         debian)
-            # Debian versions below 11 are not supported
-            if [ "$DISTRO_MAJOR_VERSION" -lt 11 ]; then
+            # Debian 11 (bullseye) reached end of LTS support on 2026-08-31.
+            # See: https://www.debian.org/releases/bullseye/
+            if [ "$DISTRO_MAJOR_VERSION" -lt 12 ]; then
                 echoerror "End of life distributions are not supported."
                 echoerror "Please consider upgrading to the next stable. See:"
                 echoerror "    https://wiki.debian.org/DebianReleases"

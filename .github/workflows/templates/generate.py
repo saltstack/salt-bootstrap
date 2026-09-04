@@ -10,7 +10,6 @@ import pathlib
 os.chdir(os.path.abspath(os.path.dirname(__file__)))
 
 #    "amazonlinux-2",
-#    "debian-13",
 #    "fedora-40",
 #    "photon-4",
 #    "ubuntu-2004",
@@ -19,8 +18,8 @@ LINUX_DISTROS = [
     "altlinux-10",
     "altlinux-11",
     "amazonlinux-2023",
-    "debian-11",
     "debian-12",
+    "debian-13",
     "photon-5",
     "rockylinux-8",
     "rockylinux-9",
@@ -39,7 +38,6 @@ OSX = [
 ]
 
 #    "amazonlinux-2",
-#    "debian-13",
 #    "fedora-40",
 #    "photon-4",
 #    "ubuntu-2004",
@@ -48,8 +46,8 @@ STABLE_DISTROS = [
     "altlinux-10",
     "altlinux-11",
     "amazonlinux-2023",
-    "debian-11",
     "debian-12",
+    "debian-13",
     "photon-5",
     "rockylinux-8",
     "rockylinux-9",
@@ -58,7 +56,6 @@ STABLE_DISTROS = [
 ]
 
 #    "amazonlinux-2",
-#    "debian-13",
 #    "fedora-40",
 #    "photon-4",
 #    "ubuntu-2004",
@@ -67,8 +64,8 @@ ONEDIR_DISTROS = [
     "altlinux-10",
     "altlinux-11",
     "amazonlinux-2023",
-    "debian-11",
     "debian-12",
+    "debian-13",
     "photon-5",
     "rockylinux-8",
     "rockylinux-9",
@@ -113,7 +110,6 @@ BLACKLIST_GIT_3006 = [
     "altlinux-11",
     "amazonlinux-2",
     "amazonlinux-2023",
-    "debian-11",
     "debian-12",
     "debian-13",
     "fedora-40",
@@ -129,7 +125,6 @@ BLACKLIST_GIT_3006 = [
 BLACKLIST_GIT_3007 = [
     "amazonlinux-2",
     "amazonlinux-2023",
-    "debian-11",
     "debian-13",
     "fedora-40",
     "photon-4",
@@ -221,7 +216,6 @@ DISTRO_DISPLAY_NAMES = {
     "altlinux-11": "ALT Linux 11",
     "amazonlinux-2": "Amazon 2",
     "amazonlinux-2023": "Amazon 2023",
-    "debian-11": "Debian 11",
     "debian-12": "Debian 12",
     "debian-13": "Debian 13",
     "fedora-40": "Fedora 40",
@@ -244,7 +238,6 @@ CONTAINER_SLUG_NAMES = {
     "altlinux-11": "altlinux-11",
     "amazonlinux-2": "amazonlinux-2",
     "amazonlinux-2023": "amazonlinux-2023",
-    "debian-11": "debian-11",
     "debian-12": "debian-12",
     "debian-13": "debian-13",
     "fedora-40": "fedora-40",

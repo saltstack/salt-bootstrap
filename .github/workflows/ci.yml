@@ -225,21 +225,6 @@ jobs:
       instances: '["stable-3006", "onedir-3006", "stable-3006-24", "stable-3007", "onedir-3007", "stable-3007-1", "stable-3008", "git-3008", "onedir-3008", "latest", "default"]'
 
 
-  debian-11:
-    name: Debian 11
-    if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
-    uses: ./.github/workflows/test-linux.yml
-    needs:
-      - lint
-      - generate-actions-workflow
-    with:
-      distro-slug: debian-11
-      display-name: Debian 11
-      container-slug: debian-11
-      timeout: 20
-      instances: '["stable-3006", "onedir-3006", "stable-3006-24", "stable-3007", "onedir-3007", "stable-3007-1", "stable-3008", "git-3008", "onedir-3008", "git-master", "latest", "default"]'
-
-
   debian-12:
     name: Debian 12
     if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
@@ -253,6 +238,21 @@ jobs:
       container-slug: debian-12
       timeout: 20
       instances: '["stable-3007", "git-3007", "onedir-3007", "stable-3007-1", "stable-3008", "git-3008", "onedir-3008", "git-master", "latest", "default"]'
+
+
+  debian-13:
+    name: Debian 13
+    if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
+    uses: ./.github/workflows/test-linux.yml
+    needs:
+      - lint
+      - generate-actions-workflow
+    with:
+      distro-slug: debian-13
+      display-name: Debian 13
+      container-slug: debian-13
+      timeout: 20
+      instances: '["stable-3006", "onedir-3006", "stable-3006-24", "stable-3007", "onedir-3007", "stable-3007-1", "stable-3008", "git-3008", "onedir-3008", "latest", "default"]'
 
 
   photon-5:
@@ -345,8 +345,8 @@ jobs:
       - altlinux-10
       - altlinux-11
       - amazonlinux-2023
-      - debian-11
       - debian-12
+      - debian-13
       - photon-5
       - rockylinux-8
       - rockylinux-9

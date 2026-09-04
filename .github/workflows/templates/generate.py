@@ -10,7 +10,6 @@ import pathlib
 os.chdir(os.path.abspath(os.path.dirname(__file__)))
 
 #    "amazonlinux-2",
-#    "debian-13",
 #    "fedora-40",
 #    "photon-4",
 #    "ubuntu-2004",
@@ -19,8 +18,8 @@ LINUX_DISTROS = [
     "altlinux-10",
     "altlinux-11",
     "amazonlinux-2023",
-    "debian-11",
     "debian-12",
+    "debian-13",
     "photon-5",
     "rockylinux-8",
     "rockylinux-9",
@@ -39,7 +38,6 @@ OSX = [
 ]
 
 #    "amazonlinux-2",
-#    "debian-13",
 #    "fedora-40",
 #    "photon-4",
 #    "ubuntu-2004",
@@ -48,8 +46,8 @@ STABLE_DISTROS = [
     "altlinux-10",
     "altlinux-11",
     "amazonlinux-2023",
-    "debian-11",
     "debian-12",
+    "debian-13",
     "photon-5",
     "rockylinux-8",
     "rockylinux-9",
@@ -58,7 +56,6 @@ STABLE_DISTROS = [
 ]
 
 #    "amazonlinux-2",
-#    "debian-13",
 #    "fedora-40",
 #    "photon-4",
 #    "ubuntu-2004",
@@ -67,8 +64,8 @@ ONEDIR_DISTROS = [
     "altlinux-10",
     "altlinux-11",
     "amazonlinux-2023",
-    "debian-11",
     "debian-12",
+    "debian-13",
     "photon-5",
     "rockylinux-8",
     "rockylinux-9",

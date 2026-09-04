@@ -6274,19 +6274,30 @@ install_arch_linux_onedir() {
 
     version="${ONEDIR_REV:-latest}"
     arch="x86_64"
-    [ "$(uname -m)" = "aarch64" ] && arch="aarch64"
+    # Onedir tarball filenames use "arm64", not the "aarch64" uname reports.
+    [ "$(uname -m)" = "aarch64" ] && arch="arm64"
 
-    # Resolve "latest" to actual version
+    # Resolve "latest", or a bare major version (e.g. "3006"), to the actual
+    # latest GA release for that series via the artifactory directory listing
+    # (same mechanism used for macOS/Windows/Photon onedir installs). A full
+    # version string (e.g. "3006.26") is used as-is.
     if [ "$version" = "latest" ]; then
-        version=$(wget -qO- https://api.github.com/repos/saltstack/salt/releases/latest \
-                  | grep -Eo '"tag_name": *"v[0-9.]+(-[0-9]+)?"' \
-                  | sed 's/"tag_name": *"v//;s/"//') || return 1
+        __get_packagesite_onedir_latest || return 1
+        version="$_GENERIC_PKG_VERSION"
+    elif [ "$(echo "$version" | grep -E '^[0-9]{4}$')" != "" ]; then
+        __get_packagesite_onedir_latest "$version" || return 1
+        version="$_GENERIC_PKG_VERSION"
+    else
+        version=$(__salt_version_string "$version")
     fi
 
-    version=$(__salt_version_string "$version")
-
     tarball="salt-${version}-onedir-linux-${arch}.tar.xz"
-    url="https://github.com/saltstack/salt/releases/download/v${version}/${tarball}"
+    # GitHub Releases doesn't carry an onedir tarball asset for every
+    # historical point release (only newer ones do), while the artifactory
+    # generic repo has the complete history - it's the same source already
+    # used by the macOS/Windows/Photon onedir installers, and by the CI
+    # images' own provisioning.
+    url="https://${_REPO_URL}/saltproject-generic/onedir/${version}/${tarball}"
     extractdir="/tmp/salt-${version}-onedir-linux-${arch}"
 
     echoinfo "Downloading Salt onedir: $url"
@@ -6477,12 +6488,19 @@ EOF
 
     systemctl daemon-reload
 
-    # Add onedir paths system-wide
+    # Add onedir paths system-wide. This only takes effect for login/interactive
+    # shells that source /etc/profile.d - it does not help something like
+    # `docker exec <container> salt-call ...`, which runs without one, so also
+    # symlink the onedir binaries into /usr/bin, already on PATH everywhere.
     cat >/etc/profile.d/saltstack.sh <<'EOF'
 export PATH=/opt/saltstack/salt:/opt/saltstack/salt/bin:$PATH
 EOF
 
     chmod 644 /etc/profile.d/saltstack.sh
+
+    for bin in /opt/saltstack/salt/salt*; do
+        [ -f "$bin" ] && [ -x "$bin" ] && ln -sf "$bin" "/usr/bin/$(basename "$bin")"
+    done
 
     if [ "$_START_DAEMONS" -eq $BS_TRUE ]; then
         systemctl enable --now salt-minion.service

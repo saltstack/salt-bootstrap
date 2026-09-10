@@ -225,6 +225,21 @@ jobs:
       instances: '["stable-3006", "onedir-3006", "stable-3006-24", "stable-3007", "onedir-3007", "stable-3007-1", "stable-3008", "git-3008", "onedir-3008", "latest", "default"]'
 
 
+  archlinux:
+    name: Arch Linux
+    if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
+    uses: ./.github/workflows/test-linux.yml
+    needs:
+      - lint
+      - generate-actions-workflow
+    with:
+      distro-slug: archlinux
+      display-name: Arch Linux
+      container-slug: archlinux
+      timeout: 20
+      instances: '["stable-3006", "git-3006", "onedir-3006", "stable-3006-24", "stable-3007", "git-3007", "onedir-3007", "stable-3007-1", "stable-3008", "git-3008", "onedir-3008", "git-master", "latest", "default"]'
+
+
   debian-11:
     name: Debian 11
     if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
@@ -345,6 +360,7 @@ jobs:
       - altlinux-10
       - altlinux-11
       - amazonlinux-2023
+      - archlinux
       - debian-11
       - debian-12
       - photon-5

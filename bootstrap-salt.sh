@@ -6465,29 +6465,6 @@ install_arch_check_services() {
 install_arch_linux_onedir_post() {
     echodebug "install_arch_linux_onedir_post() entry"
 
-    # Disable any distro/AUR salt units
-    systemctl disable --now salt-minion.service 2>/dev/null || true
-    systemctl disable --now salt-master.service 2>/dev/null || true
-
-    # Drop a clean unit, same pattern as Debian/Ubuntu onedir
-    cat >/etc/systemd/system/salt-minion.service <<'EOF'
-[Unit]
-Description=Salt Minion (onedir)
-After=network-online.target
-Wants=network-online.target
-
-[Service]
-Type=simple
-ExecStart=/opt/saltstack/salt/salt-minion -c /etc/salt
-Restart=always
-LimitNOFILE=100000
-
-[Install]
-WantedBy=multi-user.target
-EOF
-
-    systemctl daemon-reload
-
     # Add onedir paths system-wide. This only takes effect for login/interactive
     # shells that source /etc/profile.d - it does not help something like
     # `docker exec <container> salt-call ...`, which runs without one, so also
@@ -6502,9 +6479,40 @@ EOF
         [ -f "$bin" ] && [ -x "$bin" ] && ln -sf "$bin" "/usr/bin/$(basename "$bin")"
     done
 
-    if [ "$_START_DAEMONS" -eq $BS_TRUE ]; then
-        systemctl enable --now salt-minion.service
-    fi
+    for fname in api master minion syndic; do
+        # Skip salt-api since the service should be opt-in and not necessarily started on boot
+        [ $fname = "api" ] && continue
+
+        # Skip if not meant to be installed
+        [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
+        [ $fname = "minion" ] && [ "$_INSTALL_MINION" -eq $BS_FALSE ] && continue
+        [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
+
+        # Disable any distro/AUR salt unit before dropping our own
+        systemctl disable --now "salt-${fname}.service" 2>/dev/null || true
+
+        cat >"/etc/systemd/system/salt-${fname}.service" <<EOF
+[Unit]
+Description=Salt ${fname} (onedir)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+ExecStart=/opt/saltstack/salt/salt-${fname} -c /etc/salt
+Restart=always
+LimitNOFILE=100000
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+        if [ "$_START_DAEMONS" -eq $BS_TRUE ]; then
+            systemctl enable --now "salt-${fname}.service"
+        fi
+    done
+
+    systemctl daemon-reload
 
     return 0
 }

@@ -262,9 +262,9 @@ def test_os_release_id_resolves_to_install_functions(
 
     fake_etc = tmp_path / "etc"
     fake_etc.mkdir()
-    (fake_etc / "os-release").write_text(
-        f'NAME="{os_name}"\nID={os_id}\nVERSION_ID={version_id}\n', newline="\n"
-    )
+    # open() rather than write_text(newline=), which needs Python 3.10+
+    with open(str(fake_etc / "os-release"), "w", newline="\n") as fp:
+        fp.write(f'NAME="{os_name}"\nID={os_id}\nVERSION_ID={version_id}\n')
 
     # Keep the host's lsb_release from short-circuiting os-release detection
     shell = "\n".join(
@@ -277,7 +277,8 @@ def test_os_release_id_resolves_to_install_functions(
         ]
     )
     # Run from a file; passing this through "bash -c" mangles quoting on Windows
-    (tmp_path / "detect.sh").write_text(shell + "\n", newline="\n")
+    with open(str(tmp_path / "detect.sh"), "w", newline="\n") as fp:
+        fp.write(shell + "\n")
 
     result = subprocess.run(
         ["bash", "detect.sh"],

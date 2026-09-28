@@ -1,3 +1,15 @@
+# v2026.09.28
+
+## What's Changed
+
+- fix(bootstrap): port ALT Linux onedir fixes to Arch Linux by @twangboy in https://github.com/saltstack/salt-bootstrap/pull/2130
+- Add Arch Linux to the CI test matrix by @twangboy in https://github.com/saltstack/salt-bootstrap/pull/2132
+- ci: drop debian-11, add debian-13 testing by @twangboy in https://github.com/saltstack/salt-bootstrap/pull/2131
+- fix(bootstrap): map Photon OS os-release ID to distro name by @twangboy in https://github.com/saltstack/salt-bootstrap/pull/2133
+- feature(bootstrap): add -y/-Y flags to install salt-ssh and salt-proxy by @twangboy in https://github.com/saltstack/salt-bootstrap/pull/2134
+
+**Full Changelog**: https://github.com/saltstack/salt-bootstrap/compare/v2026.09.03...v2026.09.28
+
 # v2026.09.03
 
 ## What's Changed

@@ -37,6 +37,7 @@ sum** of the downloaded ``bootstrap-salt.sh`` file.
 
 The SHA256 sum of the ``bootstrap-salt.sh`` file, per release, is:
 
+- 2026.09.03: ``cca427e7da4131ad4bf9d3d8941a69cd99f45bc880e17e73cc539f459d7bcd66``
 - 2026.08.03: ``b2c4435faaf327719b3976cede80d46ebd3bd723908600515d55e4d1b4269eb6``
 - 2026.07.23: ``145a4a31cb3e3a8e6f67851a6bfb3c73432b8e888c534e148716184a31e21397``
 - 2026.07.10: ``e70543075fbf7240313066e48ce145d128fb26acf262116306bbd38b98ea47c1``
@@ -219,6 +220,8 @@ To view the latest options and descriptions for ``salt-bootstrap``, use ``-h`` a
     -x  Changes the Python version used to install Salt (default: Python 3).
         Python 2.7 is no longer supported.
     -X  Do not start daemons after installation
+    -y  Also install salt-ssh
+    -Y  Also install salt-proxy
 
 The Salt Bootstrap script has a wide variety of options that can be passed as
 well as several ways of obtaining the bootstrap script itself. Note that the use of ``sudo``

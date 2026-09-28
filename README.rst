@@ -220,6 +220,8 @@ To view the latest options and descriptions for ``salt-bootstrap``, use ``-h`` a
     -x  Changes the Python version used to install Salt (default: Python 3).
         Python 2.7 is no longer supported.
     -X  Do not start daemons after installation
+    -y  Also install salt-ssh
+    -Y  Also install salt-proxy
 
 The Salt Bootstrap script has a wide variety of options that can be passed as
 well as several ways of obtaining the bootstrap script itself. Note that the use of ``sudo``

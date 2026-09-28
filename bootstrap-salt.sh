@@ -257,6 +257,8 @@ _INSTALL_SYNDIC=$BS_FALSE
 _INSTALL_SALT_API=$BS_FALSE
 _INSTALL_MINION=$BS_TRUE
 _INSTALL_CLOUD=$BS_FALSE
+_INSTALL_SSH=$BS_FALSE
+_INSTALL_PROXY=$BS_FALSE
 _VIRTUALENV_DIR=${BS_VIRTUALENV_DIR:-"null"}
 _START_DAEMONS=$BS_TRUE
 _DISABLE_SALT_CHECKS=$BS_FALSE
@@ -438,11 +440,13 @@ __usage() {
     -x  Changes the Python version used to install Salt (default: Python 3).
         Python 2.7 is no longer supported.
     -X  Do not start daemons after installation
+    -y  Also install salt-ssh
+    -Y  Also install salt-proxy
 
 EOT
 }   # ----------  end of function __usage  ----------
 
-while getopts ':hvnDc:g:Gx:k:s:MSWNXCPFUKIA:i:Lp:dH:bflV:J:j:rR:T:aqQ' opt
+while getopts ':hvnDc:g:Gx:k:s:MSWNXCPFUKIA:i:Lp:dH:bflV:J:j:rR:T:aqQyY' opt
 do
   case "${opt}" in
 
@@ -490,6 +494,8 @@ do
     q )  _QUIET_GIT_INSTALLATION=$BS_TRUE               ;;
     Q )  _QUICK_START=$BS_TRUE                          ;;
     x )  _PY_EXE="$OPTARG"                              ;;
+    y )  _INSTALL_SSH=$BS_TRUE                          ;;
+    Y )  _INSTALL_PROXY=$BS_TRUE                        ;;
 
     \?)  echo
          echoerror "Option does not exist : $OPTARG"
@@ -3327,6 +3333,14 @@ install_ubuntu_stable() {
         __PACKAGES="${__PACKAGES} salt-api"
     fi
 
+    if [ "$_INSTALL_SSH" -eq $BS_TRUE ]; then
+        __PACKAGES="${__PACKAGES} salt-ssh"
+    fi
+
+    if [ "$_INSTALL_PROXY" -eq $BS_TRUE ]; then
+        __PACKAGES="${__PACKAGES} salt-proxy"
+    fi
+
     # shellcheck disable=SC2086
     __apt_get_install_noinput ${__PACKAGES} || return 1
 
@@ -3384,6 +3398,14 @@ install_ubuntu_onedir() {
 
     if [ "$_INSTALL_SALT_API" -eq $BS_TRUE ]; then
         __PACKAGES="${__PACKAGES} salt-api"
+    fi
+
+    if [ "$_INSTALL_SSH" -eq $BS_TRUE ]; then
+        __PACKAGES="${__PACKAGES} salt-ssh"
+    fi
+
+    if [ "$_INSTALL_PROXY" -eq $BS_TRUE ]; then
+        __PACKAGES="${__PACKAGES} salt-proxy"
     fi
 
     # shellcheck disable=SC2086
@@ -3751,6 +3773,14 @@ install_debian_stable() {
         __PACKAGES="${__PACKAGES} salt-api"
     fi
 
+    if [ "$_INSTALL_SSH" -eq $BS_TRUE ]; then
+        __PACKAGES="${__PACKAGES} salt-ssh"
+    fi
+
+    if [ "$_INSTALL_PROXY" -eq $BS_TRUE ]; then
+        __PACKAGES="${__PACKAGES} salt-proxy"
+    fi
+
     # shellcheck disable=SC2086
     __apt_get_install_noinput ${__PACKAGES} || return 1
 
@@ -3830,6 +3860,14 @@ install_debian_onedir() {
 
     if [ "$_INSTALL_SALT_API" -eq $BS_TRUE ]; then
         __PACKAGES="${__PACKAGES} salt-api"
+    fi
+
+    if [ "$_INSTALL_SSH" -eq $BS_TRUE ]; then
+        __PACKAGES="${__PACKAGES} salt-ssh"
+    fi
+
+    if [ "$_INSTALL_PROXY" -eq $BS_TRUE ]; then
+        __PACKAGES="${__PACKAGES} salt-proxy"
     fi
 
     # shellcheck disable=SC2086
@@ -4237,6 +4275,14 @@ install_fedora_onedir() {
         __PACKAGES="${__PACKAGES} salt-api$MINOR_VER_STRG"
     fi
 
+    if [ "$_INSTALL_SSH" -eq $BS_TRUE ]; then
+        __PACKAGES="${__PACKAGES} salt-ssh$MINOR_VER_STRG"
+    fi
+
+    if [ "$_INSTALL_PROXY" -eq $BS_TRUE ]; then
+        __PACKAGES="${__PACKAGES} salt-proxy$MINOR_VER_STRG"
+    fi
+
     # shellcheck disable=SC2086
     dnf makecache || return 1
     __yum_install_noinput ${__PACKAGES} || return 1
@@ -4400,6 +4446,14 @@ install_centos_stable() {
 
     if [ "$_INSTALL_SALT_API" -eq $BS_TRUE ]; then
         __PACKAGES="${__PACKAGES} salt-api$MINOR_VER_STRG"
+    fi
+
+    if [ "$_INSTALL_SSH" -eq $BS_TRUE ]; then
+        __PACKAGES="${__PACKAGES} salt-ssh$MINOR_VER_STRG"
+    fi
+
+    if [ "$_INSTALL_PROXY" -eq $BS_TRUE ]; then
+        __PACKAGES="${__PACKAGES} salt-proxy$MINOR_VER_STRG"
     fi
 
     # shellcheck disable=SC2086
@@ -4620,6 +4674,14 @@ install_centos_onedir() {
 
     if [ "$_INSTALL_SALT_API" -eq $BS_TRUE ]; then
         __PACKAGES="${__PACKAGES} salt-api$MINOR_VER_STRG"
+    fi
+
+    if [ "$_INSTALL_SSH" -eq $BS_TRUE ]; then
+        __PACKAGES="${__PACKAGES} salt-ssh$MINOR_VER_STRG"
+    fi
+
+    if [ "$_INSTALL_PROXY" -eq $BS_TRUE ]; then
+        __PACKAGES="${__PACKAGES} salt-proxy$MINOR_VER_STRG"
     fi
 
     # shellcheck disable=SC2086
@@ -5534,6 +5596,14 @@ install_alpine_linux_stable() {
 
     if [ "$_INSTALL_SALT_API" -eq $BS_TRUE ]; then
         __PACKAGES="${__PACKAGES} salt-api"
+    fi
+
+    if [ "$_INSTALL_SSH" -eq $BS_TRUE ]; then
+        __PACKAGES="${__PACKAGES} salt-ssh"
+    fi
+
+    if [ "$_INSTALL_PROXY" -eq $BS_TRUE ]; then
+        __PACKAGES="${__PACKAGES} salt-proxy"
     fi
 
     # shellcheck disable=SC2086
@@ -6963,6 +7033,14 @@ install_vmware_photon_os_onedir() {
         __PACKAGES="${__PACKAGES} salt-api$MINOR_VER_STRG"
     fi
 
+    if [ "$_INSTALL_SSH" -eq $BS_TRUE ]; then
+        __PACKAGES="${__PACKAGES} salt-ssh$MINOR_VER_STRG"
+    fi
+
+    if [ "$_INSTALL_PROXY" -eq $BS_TRUE ]; then
+        __PACKAGES="${__PACKAGES} salt-proxy$MINOR_VER_STRG"
+    fi
+
     # shellcheck disable=SC2086
     __tdnf_install_noinput ${__PACKAGES} || return 1
 
@@ -7231,6 +7309,14 @@ install_opensuse_stable() {
 
     if [ "$_INSTALL_SALT_API" -eq $BS_TRUE ]; then
         __PACKAGES="${__PACKAGES} salt-api$MINOR_VER_STRG"
+    fi
+
+    if [ "$_INSTALL_SSH" -eq $BS_TRUE ]; then
+        __PACKAGES="${__PACKAGES} salt-ssh$MINOR_VER_STRG"
+    fi
+
+    if [ "$_INSTALL_PROXY" -eq $BS_TRUE ]; then
+        __PACKAGES="${__PACKAGES} salt-proxy$MINOR_VER_STRG"
     fi
 
     # shellcheck disable=SC2086

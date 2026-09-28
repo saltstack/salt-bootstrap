@@ -208,3 +208,88 @@ def test_debian_repo_functions_rewrite_custom_repo_url(tmp_path):
             f"after applying its sed commands:\n{result}"
         )
         assert "repo.example.com/myrepo" in result
+
+
+DETECTION_FUNCTIONS = [
+    "__gather_linux_system_info",
+    "__sort_release_files",
+    "__parse_version_string",
+    "__unquote_string",
+    "__derive_debian_numeric_version",
+    "__camelcase_split",
+]
+
+
+@pytest.mark.parametrize(
+    "os_id,version_id,os_name,expected",
+    [
+        ("photon", "5.0", "VMware Photon OS", "vmware_photon_os"),
+        ("photon", "4.0", "VMware Photon OS", "vmware_photon_os"),
+        ("altlinux", "11", "ALT Server", "alt_linux"),
+        ("alpine", "3.20.3", "Alpine Linux", "alpine_linux"),
+    ],
+)
+def test_os_release_id_resolves_to_install_functions(
+    tmp_path, os_id, version_id, os_name, expected
+):
+    """
+    Regression test for UBMVCFOPS-14333
+    When /etc/lsb-release is absent, distro detection falls back to the ID= in
+    /etc/os-release. The resulting DISTRO_NAME_L must match the name used by
+    the distro's install_* functions, or bootstrap exits with "No dependencies
+    installation function found."
+    """
+    if not _bash_has_gnu_sed():
+        pytest.skip("bash with GNU sed not available")
+
+    bootstrap_script = os.path.join(
+        os.path.dirname(__file__), "..", "..", "bootstrap-salt.sh"
+    )
+    if not os.path.exists(bootstrap_script):
+        pytest.skip("bootstrap-salt.sh not found (not running from a repo checkout)")
+
+    with open(bootstrap_script) as fp:
+        script = fp.read()
+
+    funcs = []
+    for func_name in DETECTION_FUNCTIONS:
+        match = re.search(rf"^{re.escape(func_name)}\(\) {{.*?^}}", script, re.M | re.S)
+        assert match, f"could not find {func_name}() in bootstrap-salt.sh"
+        funcs.append(match.group(0))
+
+    name_l_match = re.search(r"^DISTRO_NAME_L=.*$", script, re.M)
+    assert name_l_match, "could not find DISTRO_NAME_L assignment in bootstrap-salt.sh"
+
+    fake_etc = tmp_path / "etc"
+    fake_etc.mkdir()
+    (fake_etc / "os-release").write_text(
+        f'NAME="{os_name}"\nID={os_id}\nVERSION_ID={version_id}\n', newline="\n"
+    )
+
+    # Keep the host's lsb_release from short-circuiting os-release detection
+    shell = "\n".join(
+        ["FAKE_ETC=etc", "lsb_release() { return 1; }"]
+        + [func.replace("/etc", "${FAKE_ETC}") for func in funcs]
+        + [
+            "__gather_linux_system_info",
+            name_l_match.group(0),
+            'echo "$DISTRO_NAME_L"',
+        ]
+    )
+    # Run from a file; passing this through "bash -c" mangles quoting on Windows
+    (tmp_path / "detect.sh").write_text(shell + "\n", newline="\n")
+
+    result = subprocess.run(
+        ["bash", "detect.sh"],
+        cwd=str(tmp_path),
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        universal_newlines=True,
+    )
+    assert result.returncode == 0, result.stderr
+    distro_name_l = result.stdout.strip()
+    assert distro_name_l == expected
+
+    assert re.search(
+        rf"^install_{re.escape(distro_name_l)}_\w*deps\(\)", script, re.M
+    ), f"no install_{distro_name_l}_*deps() in bootstrap-salt.sh"

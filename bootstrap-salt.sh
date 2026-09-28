@@ -1295,6 +1295,9 @@ __gather_linux_system_info() {
                         n="opensuse"
                         v="${rv}"
                         ;;
+                    photon      )
+                        n="VMware Photon OS"
+                        ;;
                     *           )
                         n=${nn}
                         ;;

@@ -76,6 +76,91 @@ jobs:
         run: |
           pytest --cache-clear -v -s -ra --log-cli-level=debug tests/integration/
 
+      - name: Test -ConfigureOnly
+        # Regression test for #2138. Runs after "Test Bootstrap" since it
+        # overwrites the minion config.
+        run: |
+          $ErrorActionPreference = "Stop"
+          $rootDir = "$env:ProgramData\Salt Project\Salt"
+          $regKey = "HKLM:\SOFTWARE\Salt Project\Salt"
+          if ( Test-Path $regKey ) {
+            $reg = (Get-ItemProperty $regKey).root_dir
+            if ( $reg ) { $rootDir = $reg }
+          }
+          $confDir = "$rootDir\conf"
+
+          # Nothing to copy: must warn and exit 0 rather than throw
+          Remove-Item C:\tmp -Recurse -Force -ErrorAction SilentlyContinue
+          & .\bootstrap-salt.ps1 -ConfigureOnly
+          if ( $LASTEXITCODE -ne 0 ) { throw "-ConfigureOnly with nothing to copy exited $LASTEXITCODE" }
+
+          # Files in C:\tmp must land under the Salt root dir
+          New-Item C:\tmp -ItemType Directory -Force | Out-Null
+          Set-Content -Path C:\tmp\minion -Value "id: configure-only-test"
+          Set-Content -Path C:\tmp\grains -Value "role: configure-only-test"
+          Set-Content -Path C:\tmp\minion.pem -Value "fake-private-key"
+          Set-Content -Path C:\tmp\minion.pub -Value "fake-public-key"
+          & .\bootstrap-salt.ps1 -ConfigureOnly
+          if ( $LASTEXITCODE -ne 0 ) { throw "-ConfigureOnly exited $LASTEXITCODE" }
+
+          $expected = @{
+            "$confDir\minion"               = "id: configure-only-test"
+            "$confDir\grains"               = "role: configure-only-test"
+            "$confDir\pki\minion\minion.pem" = "fake-private-key"
+            "$confDir\pki\minion\minion.pub" = "fake-public-key"
+          }
+          foreach ( $path in $expected.Keys ) {
+            if ( !(Test-Path $path) ) { throw "Missing $path" }
+            $content = (Get-Content $path -Raw).Trim()
+            if ( $content -ne $expected[$path] ) { throw "Unexpected content in ${path}: $content" }
+          }
+          # And not on the drive root, where the broken paths used to send them
+          if ( Test-Path C:\conf ) { throw "Files were copied to C:\conf" }
+
+      - name: Test -RepoUrl
+        # Uses a fake repo, served over HTTP.
+        run: |
+          $ErrorActionPreference = "Stop"
+          $repo = Join-Path $env:RUNNER_TEMP "repo"
+          # whoami.exe stands in for the installer: it exits immediately, and
+          # the salt-minion service already exists from the earlier bootstrap
+          foreach ( $v in "3007.5", "3008.1", "3008.2", "3009.0rc1" ) {
+            New-Item "$repo\$v" -ItemType Directory -Force | Out-Null
+            Copy-Item "$env:SystemRoot\System32\whoami.exe" "$repo\$v\Salt-Minion-$v-Py3-AMD64-Setup.exe"
+          }
+          $server = Start-Process python -ArgumentList "-m", "http.server", "8765", "--directory", $repo `
+            -PassThru -WindowStyle Hidden
+          try {
+            Start-Sleep -Seconds 3
+            $url = "http://localhost:8765/"
+
+            function Invoke-Bootstrap($version) {
+              # Write-Host goes to the information stream
+              $out = & .\bootstrap-salt.ps1 -RepoUrl $url -Version $version -RunService $false 6>&1 | Out-String
+              Write-Host $out
+              return @{ Code = $LASTEXITCODE; Output = $out }
+            }
+
+            # "latest" is the newest GA release; the rc must be ignored
+            $r = Invoke-Bootstrap "latest"
+            if ( $r.Code -ne 0 -or $r.Output -notmatch "version: 3008\.2\b" ) { throw "latest did not resolve to 3008.2" }
+            if ( $r.Output -notmatch [regex]::Escape("file url : ${url}3008.2/Salt-Minion-3008.2-Py3-AMD64-Setup.exe") ) { throw "Installer was not downloaded from RepoUrl" }
+
+            # A major version selects the newest GA in that series
+            $r = Invoke-Bootstrap "3007"
+            if ( $r.Code -ne 0 -or $r.Output -notmatch "version: 3007\.5\b" ) { throw "3007 did not resolve to 3007.5" }
+
+            # A prerelease can be installed by its exact name
+            $r = Invoke-Bootstrap "3009.0rc1"
+            if ( $r.Code -ne 0 -or $r.Output -notmatch "version: 3009\.0rc1" ) { throw "3009.0rc1 was not installable by exact name" }
+
+            # A version that is not in the repo must fail
+            $r = Invoke-Bootstrap "3010"
+            if ( $r.Code -eq 0 ) { throw "3010 should not be available" }
+          } finally {
+            Stop-Process -Id $server.Id -Force -ErrorAction SilentlyContinue
+          }
+
       - name: Set Exit Status
         if: always()
         run: |

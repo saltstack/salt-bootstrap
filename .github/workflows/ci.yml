@@ -221,23 +221,6 @@ jobs:
 
 
 
-  macos-14:
-    name: macOS 14
-    if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
-    uses: ./.github/workflows/test-macos.yml
-    needs:
-      - lint
-      - lint-powershell
-      - generate-actions-workflow
-    with:
-      distro-slug: macos-14
-      display-name: macOS 14
-      container-slug: macos-14
-      timeout: 20
-      runs-on: macos-14
-      instances: '["stable-3006", "stable-3006-24", "stable-3007", "stable-3007-1", "stable-3008", "latest"]'
-
-
   macos-15-intel:
     name: macOS 15 (intel)
     if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
@@ -252,6 +235,40 @@ jobs:
       container-slug: macos-15-intel
       timeout: 20
       runs-on: macos-15-intel
+      instances: '["stable-3006", "stable-3006-24", "stable-3007", "stable-3007-1", "stable-3008", "latest"]'
+
+
+  macos-26:
+    name: macOS 26 (m-series)
+    if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
+    uses: ./.github/workflows/test-macos.yml
+    needs:
+      - lint
+      - lint-powershell
+      - generate-actions-workflow
+    with:
+      distro-slug: macos-26
+      display-name: macOS 26 (m-series)
+      container-slug: macos-26
+      timeout: 20
+      runs-on: macos-26
+      instances: '["stable-3006", "stable-3006-24", "stable-3007", "stable-3007-1", "stable-3008", "latest"]'
+
+
+  macos-26-intel:
+    name: macOS 26 (intel)
+    if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
+    uses: ./.github/workflows/test-macos.yml
+    needs:
+      - lint
+      - lint-powershell
+      - generate-actions-workflow
+    with:
+      distro-slug: macos-26-intel
+      display-name: macOS 26 (intel)
+      container-slug: macos-26-intel
+      timeout: 20
+      runs-on: macos-26-intel
       instances: '["stable-3006", "stable-3006-24", "stable-3007", "stable-3007-1", "stable-3008", "latest"]'
 
 
@@ -478,8 +495,9 @@ jobs:
       - test-shell
       - test-powershell
       - generate-actions-workflow
-      - macos-14
       - macos-15-intel
+      - macos-26
+      - macos-26-intel
       - windows-2022
       - windows-2025
       - altlinux-10

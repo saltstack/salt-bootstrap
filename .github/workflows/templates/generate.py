@@ -283,7 +283,13 @@ TEMPLATE = """
 
 def generate_test_jobs():
     test_jobs = ""
-    needs = ["lint", "lint-powershell", "test-powershell", "generate-actions-workflow"]
+    needs = [
+        "lint",
+        "lint-powershell",
+        "test-shell",
+        "test-powershell",
+        "generate-actions-workflow",
+    ]
 
     test_jobs += "\n"
     for distro in OSX:

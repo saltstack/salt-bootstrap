@@ -34,7 +34,6 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: ${{ inputs.timeout }}
     strategy:
-      max-parallel: 2
       fail-fast: false
       matrix:
         instance: ${{ fromJSON(inputs.instances) }}

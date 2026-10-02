@@ -37,7 +37,6 @@ jobs:
   Test:
     name: ${{ matrix.instance }}
     runs-on: ${{ inputs.runs-on }}
-    ## runs-on: macos-13
     timeout-minutes: ${{ inputs.timeout }}
     strategy:
       fail-fast: false
@@ -47,15 +46,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install Python Dependencies with pip breakage
-        if: ${{ inputs.distro-slug != 'macos-13' }}
+      - name: Install Python Dependencies
         run: |
           python3 -m pip install --break-system-packages -r tests/requirements.txt
-
-      - name: Install Python Dependencies without pip breakage
-        if: ${{ inputs.distro-slug == 'macos-13' }}
-        run: |
-          python3 -m pip install -r tests/requirements.txt
 
       - name: Get Version
         run: |

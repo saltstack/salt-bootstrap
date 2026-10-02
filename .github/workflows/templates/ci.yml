@@ -152,6 +152,40 @@ jobs:
           name: exitstatus-${{ github.job }}
           path: exitstatus/
 
+  test-shell:
+    name: Test Shell
+    runs-on: ubuntu-latest
+    needs: collect-changed-files
+    if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install ShellSpec
+        run: |
+          git clone --depth 1 --branch 0.28.1 https://github.com/shellspec/shellspec.git "$RUNNER_TEMP/shellspec"
+
+      # bootstrap-salt.sh is POSIX sh and Debian/Ubuntu run it under dash, so
+      # run the specs under dash as well as bash
+      - name: ShellSpec (dash)
+        run: |
+          "$RUNNER_TEMP/shellspec/shellspec" --shell dash
+
+      - name: ShellSpec (bash)
+        run: |
+          "$RUNNER_TEMP/shellspec/shellspec" --shell bash
+
+      - name: Set Exit Status
+        if: always()
+        run: |
+          mkdir exitstatus
+          echo "${{ job.status }}" > exitstatus/${{ github.job }}
+
+      - name: Upload Exit Status
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: exitstatus-${{ github.job }}
+          path: exitstatus/
+
   test-powershell:
     name: Test PowerShell
     # Windows PowerShell 5.1 is what bootstrap-salt.ps1 mostly runs on

@@ -399,6 +399,23 @@ Display information about the install script parameters:
 
   Get-Help $env:TEMP\bootstrap-salt.ps1 -Detailed
 
+Using a custom source for the installer with ``-RepoUrl``. It can be an HTTP,
+HTTPS or FTP URL, an SMB share, or a local directory, and must contain one folder
+per Salt version holding the installer for that version:
+
+.. code:: powershell
+
+  & "$env:TEMP\bootstrap-salt.ps1" -RepoUrl https://mirror.example.com/salt/windows/
+  & "$env:TEMP\bootstrap-salt.ps1" -RepoUrl \\fileserver\salt\windows
+  & "$env:TEMP\bootstrap-salt.ps1" -RepoUrl C:\salt\windows
+
+.. note::
+
+  The installer's SHA256 hash is only verified when ``-RepoUrl`` is an
+  Artifactory URL (it contains ``/artifactory/``), because the hash is read from
+  the Artifactory API. For any other source, including FTP, SMB shares and local
+  directories, the hash is **not** checked. Make sure you trust the source.
+
 Using ``cygwin`` to install latest stable version:
 
 .. code:: console

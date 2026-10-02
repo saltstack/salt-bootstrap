@@ -212,6 +212,32 @@ function Compare-SaltCalVer {
     return 0
 }
 
+function Get-FtpDirectoryNames {
+    # Returns the names of the entries in an FTP directory. Credentials can be
+    # given in the URL (ftp://user:password@host/path/); otherwise the login is
+    # anonymous.
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory=$true, Position=0)]
+        [String] $Url
+    )
+    if ( !$Url.EndsWith("/") ) { $Url = "$Url/" }
+    $request = [System.Net.FtpWebRequest]::Create($Url)
+    $request.Method = [System.Net.WebRequestMethods+Ftp]::ListDirectory
+    $response = $request.GetResponse()
+    try {
+        $reader = New-Object System.IO.StreamReader($response.GetResponseStream())
+        while ( $null -ne ($line = $reader.ReadLine()) ) {
+            # Some servers return the full path of each entry, keep the name
+            $name = ( $line.Trim() -split "/" )[-1]
+            if ( $name ) { $name }
+        }
+    } finally {
+        if ( $null -ne $reader ) { $reader.Close() }
+        $response.Close()
+    }
+}
+
 function Get-AvailableVersions {
     # Get available versions from a remote location specified in the Source
     # Parameter
@@ -220,8 +246,23 @@ function Get-AvailableVersions {
 
     $available_versions = [System.Collections.ArrayList]@()
 
-    if ( $base_url.StartsWith("http") -or $base_url.StartsWith("ftp") ) {
-        # We're dealing with HTTP, HTTPS, or FTP
+    if ( $base_url -match "^ftp://" ) {
+        # We're dealing with FTP. Invoke-WebRequest does not support FTP, so
+        # list the directory names directly.
+        try {
+            Get-FtpDirectoryNames $base_url | ForEach-Object {
+                # Salt dirs: 3006.24, 3008.0, 3008.0rc1, etc. Skip anything else.
+                if ( $_ -match '^\d+\.\d+' ) {
+                    $available_versions.Add($_) | Out-Null
+                }
+            }
+        } catch {
+            Write-Host "Failed to get version information" -ForegroundColor Red
+            Write-Host "Error: $_" -ForegroundColor Red
+            exit 1
+        }
+    } elseif ( $base_url.StartsWith("http") ) {
+        # We're dealing with HTTP or HTTPS
         try {
             $response = Invoke-WebRequest "$base_url" -UseBasicParsing
         } catch {
@@ -576,7 +617,14 @@ if ( $versions.Contains($Version.ToLower()) ) {
 # Get file url and sha256
 #===============================================================================
 $saltFileName = "Salt-Minion-$Version-Py3-$arch-Setup.exe"
-$saltFileUrl = "$base_url/$Version/$saltFileName"
+# A local directory or SMB share is copied, not downloaded; Invoke-WebRequest
+# only handles http(s). Matches the source types in Get-AvailableVersions.
+$isLocalSource = $base_url.StartsWith("\\") -or $base_url -match "^[A-Za-z]:\\"
+if ( $isLocalSource ) {
+    $saltFileUrl = Join-Path (Join-Path $base_url $Version) $saltFileName
+} else {
+    $saltFileUrl = "$base_url/$Version/$saltFileName"
+}
 $saltSha256 = Get-HashFromArtifactory -SaltVersion $Version -SaltFileName $saltFileName
 
 #===============================================================================
@@ -603,8 +651,22 @@ Write-Verbose "Local File: $localFile"
 # Remove existing local file
 if ( Test-Path -Path $localFile ) { Remove-Item -Path $localFile -Force }
 
-# Download the file
-Invoke-WebRequest -Uri $saltFileUrl -OutFile $localFile
+# Download (or copy, for a local/SMB source) the file
+if ( $isLocalSource ) {
+    if ( !(Test-Path -Path $saltFileUrl) ) {
+        Write-Host "Failed" -ForegroundColor Red
+        Write-Host "Installer not found: $saltFileUrl" -ForegroundColor Red
+        exit 1
+    }
+    Copy-Item -Path $saltFileUrl -Destination $localFile -Force
+} else {
+    if ( $saltFileUrl -match "^ftp://" ) {
+        # Invoke-WebRequest does not support FTP, WebClient does
+        (New-Object System.Net.WebClient).DownloadFile($saltFileUrl, $localFile)
+    } else {
+        Invoke-WebRequest -Uri $saltFileUrl -OutFile $localFile
+    }
+}
 if ( Test-Path -Path $localFile ) {
     Write-Host "Success" -ForegroundColor Green
 } else {

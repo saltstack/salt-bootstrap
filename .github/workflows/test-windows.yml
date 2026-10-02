@@ -118,7 +118,7 @@ jobs:
           if ( Test-Path C:\conf ) { throw "Files were copied to C:\conf" }
 
       - name: Test -RepoUrl
-        # Uses a fake repo, served over HTTP.
+        # Uses a fake repo, served over HTTP and also as a local directory.
         run: |
           $ErrorActionPreference = "Stop"
           $repo = Join-Path $env:RUNNER_TEMP "repo"
@@ -130,13 +130,17 @@ jobs:
           }
           $server = Start-Process python -ArgumentList "-m", "http.server", "8765", "--directory", $repo `
             -PassThru -WindowStyle Hidden
+          # Anonymous, read-only FTP server for the same repo
+          python -m pip install pyftpdlib
+          $ftpServer = Start-Process python -ArgumentList "-m", "pyftpdlib", "-p", "2121", "-d", $repo `
+            -PassThru -WindowStyle Hidden
           try {
             Start-Sleep -Seconds 3
             $url = "http://localhost:8765/"
 
-            function Invoke-Bootstrap($version) {
+            function Invoke-Bootstrap($version, $source = $url) {
               # Write-Host goes to the information stream
-              $out = & .\bootstrap-salt.ps1 -RepoUrl $url -Version $version -RunService $false 6>&1 | Out-String
+              $out = & .\bootstrap-salt.ps1 -RepoUrl $source -Version $version -RunService $false 6>&1 | Out-String
               Write-Host $out
               return @{ Code = $LASTEXITCODE; Output = $out }
             }
@@ -157,8 +161,20 @@ jobs:
             # A version that is not in the repo must fail
             $r = Invoke-Bootstrap "3010"
             if ( $r.Code -eq 0 ) { throw "3010 should not be available" }
+
+            # The same repo as a local directory: the installer is copied
+            $r = Invoke-Bootstrap "latest" $repo
+            if ( $r.Code -ne 0 -or $r.Output -notmatch "version: 3008\.2\b" ) { throw "local directory: latest did not resolve to 3008.2" }
+            if ( $r.Output -notmatch [regex]::Escape("$repo\3008.2\Salt-Minion-3008.2-Py3-AMD64-Setup.exe") ) { throw "local directory: installer path is wrong" }
+
+            # The same repo over FTP: Invoke-WebRequest can't do this
+            $ftpUrl = "ftp://localhost:2121/"
+            $r = Invoke-Bootstrap "latest" $ftpUrl
+            if ( $r.Code -ne 0 -or $r.Output -notmatch "version: 3008\.2\b" ) { throw "FTP: latest did not resolve to 3008.2" }
+            if ( $r.Output -notmatch [regex]::Escape("file url : ${ftpUrl}3008.2/Salt-Minion-3008.2-Py3-AMD64-Setup.exe") ) { throw "FTP: installer was not downloaded from RepoUrl" }
           } finally {
             Stop-Process -Id $server.Id -Force -ErrorAction SilentlyContinue
+            Stop-Process -Id $ftpServer.Id -Force -ErrorAction SilentlyContinue
           }
 
       - name: Set Exit Status

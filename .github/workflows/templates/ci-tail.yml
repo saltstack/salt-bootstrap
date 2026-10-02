@@ -24,6 +24,12 @@
           name: exitstatus-*
           failOnError: false
 
+      - name: Check Needs Results
+        if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')
+        run: |
+          echo "One or more required jobs failed or were cancelled"
+          exit 1
+
       - name: Set Pipeline Exit Status
         run: |
           grep -RE 'failure|cancelled' exitstatus/ && exit 1 || exit 0

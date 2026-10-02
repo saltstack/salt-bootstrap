@@ -37,19 +37,6 @@ jobs:
         run: |
           echo "run-tests=${{ steps.changed-files.outputs.any_modified }}" >> $GITHUB_OUTPUT
 
-      - name: Set Exit Status
-        if: always()
-        run: |
-          mkdir exitstatus
-          echo "${{ job.status }}" > exitstatus/${{ github.job }}
-
-      - name: Upload Exit Status
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: exitstatus-${{ github.job }}
-          path: exitstatus/
-
   generate-actions-workflow:
     name: Generate The Actions Workflow
     runs-on: ubuntu-latest
@@ -74,19 +61,6 @@ jobs:
         run: |
           pre-commit run -av generate-actions-workflow
 
-      - name: Set Exit Status
-        if: always()
-        run: |
-          mkdir exitstatus
-          echo "${{ job.status }}" > exitstatus/${{ github.job }}
-
-      - name: Upload Exit Status
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: exitstatus-${{ github.job }}
-          path: exitstatus/
-
   lint:
     name: Lint
     runs-on: ubuntu-latest
@@ -99,35 +73,74 @@ jobs:
         run: |
           shellcheck -s sh -f tty bootstrap-salt.sh
 
-      - name: Set Exit Status
-        if: always()
-        run: |
-          mkdir exitstatus
-          echo "${{ job.status }}" > exitstatus/${{ github.job }}
-
-      - name: Upload Exit Status
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: exitstatus-${{ github.job }}
-          path: exitstatus/
-
-
-
-  macos-14:
-    name: macOS 14
+  lint-powershell:
+    name: Lint PowerShell
+    runs-on: ubuntu-latest
+    needs: collect-changed-files
     if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
-    uses: ./.github/workflows/test-macos.yml
-    needs:
-      - lint
-      - generate-actions-workflow
-    with:
-      distro-slug: macos-14
-      display-name: macOS 14
-      container-slug: macos-14
-      timeout: 20
-      runs-on: macos-14
-      instances: '["stable-3006", "stable-3006-24", "stable-3007", "stable-3007-1", "stable-3008", "latest"]'
+    steps:
+      - uses: actions/checkout@v4
+      - name: PSScriptAnalyzer
+        shell: pwsh
+        run: |
+          # The runner image normally ships it; only install if it is missing
+          if (-not (Get-Module PSScriptAnalyzer -ListAvailable)) {
+            Install-Module PSScriptAnalyzer -Scope CurrentUser -Force
+          }
+          # Write-Host is intentional (interactive installer output), and
+          # Get-FileHash is overridden on purpose to support PowerShell 3. The
+          # script parameters all take pipeline input, and singular function
+          # names are only a style preference, so those rules are skipped too.
+          $results = Invoke-ScriptAnalyzer -Path ./bootstrap-salt.ps1 `
+            -Severity Error,Warning `
+            -ExcludeRule PSAvoidUsingWriteHost,PSAvoidOverwritingBuiltInCmdlets,PSUseProcessBlockForPipelineCommand,PSUseSingularNouns
+          $results | Format-List RuleName, Severity, Line, Message
+          # A clean run prints nothing above, so say what was checked
+          $version = (Get-Module PSScriptAnalyzer -ListAvailable | Select-Object -First 1).Version
+          Write-Host "PSScriptAnalyzer $version checked bootstrap-salt.ps1: $(@($results).Count) findings"
+          if ($results) { exit 1 }
+
+  test-shell:
+    name: Test Shell
+    runs-on: ubuntu-latest
+    needs: collect-changed-files
+    if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install ShellSpec
+        run: |
+          git clone --depth 1 --branch 0.28.1 https://github.com/shellspec/shellspec.git "$RUNNER_TEMP/shellspec"
+
+      # bootstrap-salt.sh is POSIX sh and Debian/Ubuntu run it under dash, so
+      # run the specs under dash as well as bash
+      - name: ShellSpec (dash)
+        run: |
+          "$RUNNER_TEMP/shellspec/shellspec" --shell dash
+
+      - name: ShellSpec (bash)
+        run: |
+          "$RUNNER_TEMP/shellspec/shellspec" --shell bash
+
+  test-powershell:
+    name: Test PowerShell
+    # Windows PowerShell 5.1 is what bootstrap-salt.ps1 mostly runs on
+    runs-on: windows-latest
+    needs: collect-changed-files
+    if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Pester
+        shell: powershell
+        run: |
+          # The image ships Pester 3; the tests need 5
+          Install-Module Pester -MinimumVersion 5.0.0 -Scope CurrentUser -Force -SkipPublisherCheck
+          Import-Module Pester -MinimumVersion 5.0.0
+          $config = New-PesterConfiguration
+          $config.Run.Path = "tests/powershell"
+          $config.Run.Exit = $true
+          $config.Output.Verbosity = "Detailed"
+          Invoke-Pester -Configuration $config
+
 
 
   macos-15-intel:
@@ -136,6 +149,7 @@ jobs:
     uses: ./.github/workflows/test-macos.yml
     needs:
       - lint
+      - lint-powershell
       - generate-actions-workflow
     with:
       distro-slug: macos-15-intel
@@ -146,6 +160,40 @@ jobs:
       instances: '["stable-3006", "stable-3006-24", "stable-3007", "stable-3007-1", "stable-3008", "latest"]'
 
 
+  macos-26:
+    name: macOS 26 (m-series)
+    if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
+    uses: ./.github/workflows/test-macos.yml
+    needs:
+      - lint
+      - lint-powershell
+      - generate-actions-workflow
+    with:
+      distro-slug: macos-26
+      display-name: macOS 26 (m-series)
+      container-slug: macos-26
+      timeout: 20
+      runs-on: macos-26
+      instances: '["stable-3006", "stable-3006-24", "stable-3007", "stable-3007-1", "stable-3008", "latest"]'
+
+
+  macos-26-intel:
+    name: macOS 26 (intel)
+    if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
+    uses: ./.github/workflows/test-macos.yml
+    needs:
+      - lint
+      - lint-powershell
+      - generate-actions-workflow
+    with:
+      distro-slug: macos-26-intel
+      display-name: macOS 26 (intel)
+      container-slug: macos-26-intel
+      timeout: 20
+      runs-on: macos-26-intel
+      instances: '["stable-3006", "stable-3006-24", "stable-3007", "stable-3007-1", "stable-3008", "latest"]'
+
+
 
   windows-2022:
     name: Windows 2022
@@ -153,6 +201,7 @@ jobs:
     uses: ./.github/workflows/test-windows.yml
     needs:
       - lint
+      - lint-powershell
       - generate-actions-workflow
     with:
       distro-slug: windows-2022
@@ -169,6 +218,7 @@ jobs:
     uses: ./.github/workflows/test-windows.yml
     needs:
       - lint
+      - lint-powershell
       - generate-actions-workflow
     with:
       distro-slug: windows-2025
@@ -186,6 +236,7 @@ jobs:
     uses: ./.github/workflows/test-linux.yml
     needs:
       - lint
+      - lint-powershell
       - generate-actions-workflow
     with:
       distro-slug: altlinux-10
@@ -201,6 +252,7 @@ jobs:
     uses: ./.github/workflows/test-linux.yml
     needs:
       - lint
+      - lint-powershell
       - generate-actions-workflow
     with:
       distro-slug: altlinux-11
@@ -216,6 +268,7 @@ jobs:
     uses: ./.github/workflows/test-linux.yml
     needs:
       - lint
+      - lint-powershell
       - generate-actions-workflow
     with:
       distro-slug: amazonlinux-2023
@@ -231,6 +284,7 @@ jobs:
     uses: ./.github/workflows/test-linux.yml
     needs:
       - lint
+      - lint-powershell
       - generate-actions-workflow
     with:
       distro-slug: archlinux
@@ -246,6 +300,7 @@ jobs:
     uses: ./.github/workflows/test-linux.yml
     needs:
       - lint
+      - lint-powershell
       - generate-actions-workflow
     with:
       distro-slug: debian-12
@@ -261,6 +316,7 @@ jobs:
     uses: ./.github/workflows/test-linux.yml
     needs:
       - lint
+      - lint-powershell
       - generate-actions-workflow
     with:
       distro-slug: debian-13
@@ -276,6 +332,7 @@ jobs:
     uses: ./.github/workflows/test-linux.yml
     needs:
       - lint
+      - lint-powershell
       - generate-actions-workflow
     with:
       distro-slug: photon-5
@@ -291,6 +348,7 @@ jobs:
     uses: ./.github/workflows/test-linux.yml
     needs:
       - lint
+      - lint-powershell
       - generate-actions-workflow
     with:
       distro-slug: rockylinux-8
@@ -306,6 +364,7 @@ jobs:
     uses: ./.github/workflows/test-linux.yml
     needs:
       - lint
+      - lint-powershell
       - generate-actions-workflow
     with:
       distro-slug: rockylinux-9
@@ -321,6 +380,7 @@ jobs:
     uses: ./.github/workflows/test-linux.yml
     needs:
       - lint
+      - lint-powershell
       - generate-actions-workflow
     with:
       distro-slug: ubuntu-2204
@@ -336,6 +396,7 @@ jobs:
     uses: ./.github/workflows/test-linux.yml
     needs:
       - lint
+      - lint-powershell
       - generate-actions-workflow
     with:
       distro-slug: ubuntu-2604
@@ -352,9 +413,13 @@ jobs:
     runs-on: ubuntu-latest
     needs:
       - lint
+      - lint-powershell
+      - test-shell
+      - test-powershell
       - generate-actions-workflow
-      - macos-14
       - macos-15-intel
+      - macos-26
+      - macos-26-intel
       - windows-2022
       - windows-2025
       - altlinux-10
@@ -371,24 +436,11 @@ jobs:
     if: always()
     steps:
 
-      - name: Download Exit Status Files
-        if: always()
-        uses: actions/download-artifact@v4
-        with:
-          path: exitstatus/
-          pattern: exitstatus-*
-          merge-multiple: true
-
-      - name: Delete Exit Status Artifacts
-        if: always()
-        uses: geekyeggo/delete-artifact@v5
-        with:
-          name: exitstatus-*
-          failOnError: false
-
-      - name: Set Pipeline Exit Status
+      - name: Check Needs Results
+        if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')
         run: |
-          grep -RE 'failure|cancelled' exitstatus/ && exit 1 || exit 0
+          echo "One or more required jobs failed or were cancelled"
+          exit 1
 
       - name: Done
         if: always()

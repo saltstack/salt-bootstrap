@@ -37,6 +37,7 @@ sum** of the downloaded ``bootstrap-salt.sh`` file.
 
 The SHA256 sum of the ``bootstrap-salt.sh`` file, per release, is:
 
+- 2026.09.28: ``a320303167987719d89a97399f50526e572a319ae51336b0aea679b74710375c``
 - 2026.09.03: ``cca427e7da4131ad4bf9d3d8941a69cd99f45bc880e17e73cc539f459d7bcd66``
 - 2026.08.03: ``b2c4435faaf327719b3976cede80d46ebd3bd723908600515d55e4d1b4269eb6``
 - 2026.07.23: ``145a4a31cb3e3a8e6f67851a6bfb3c73432b8e888c534e148716184a31e21397``
@@ -397,6 +398,23 @@ Display information about the install script parameters:
 .. code:: powershell
 
   Get-Help $env:TEMP\bootstrap-salt.ps1 -Detailed
+
+Using a custom source for the installer with ``-RepoUrl``. It can be an HTTP,
+HTTPS or FTP URL, an SMB share, or a local directory, and must contain one folder
+per Salt version holding the installer for that version:
+
+.. code:: powershell
+
+  & "$env:TEMP\bootstrap-salt.ps1" -RepoUrl https://mirror.example.com/salt/windows/
+  & "$env:TEMP\bootstrap-salt.ps1" -RepoUrl \\fileserver\salt\windows
+  & "$env:TEMP\bootstrap-salt.ps1" -RepoUrl C:\salt\windows
+
+.. note::
+
+  The installer's SHA256 hash is only verified when ``-RepoUrl`` is an
+  Artifactory URL (it contains ``/artifactory/``), because the hash is read from
+  the Artifactory API. For any other source, including FTP, SMB shares and local
+  directories, the hash is **not** checked. Make sure you trust the source.
 
 Using ``cygwin`` to install latest stable version:
 

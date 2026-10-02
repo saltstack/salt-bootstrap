@@ -34,8 +34,9 @@ WINDOWS = [
 ]
 
 OSX = [
-    "macos-14",
     "macos-15-intel",
+    "macos-26",
+    "macos-26-intel",
 ]
 
 #    "amazonlinux-2",
@@ -231,8 +232,9 @@ DISTRO_DISPLAY_NAMES = {
     "ubuntu-2204": "Ubuntu 22.04",
     "ubuntu-2404": "Ubuntu 24.04",
     "ubuntu-2604": "Ubuntu 26.04",
-    "macos-14": "macOS 14",
     "macos-15-intel": "macOS 15 (intel)",
+    "macos-26": "macOS 26 (m-series)",
+    "macos-26-intel": "macOS 26 (intel)",
     "windows-2022": "Windows 2022",
     "windows-2025": "Windows 2025",
 }
@@ -254,8 +256,9 @@ CONTAINER_SLUG_NAMES = {
     "ubuntu-2204": "ubuntu-22.04",
     "ubuntu-2404": "ubuntu-24.04",
     "ubuntu-2604": "ubuntu-26.04",
-    "macos-14": "macos-14",
     "macos-15-intel": "macos-15-intel",
+    "macos-26": "macos-26",
+    "macos-26-intel": "macos-26-intel",
     "windows-2022": "windows-2022",
     "windows-2025": "windows-2025",
 }
@@ -270,6 +273,7 @@ TEMPLATE = """
     uses: {uses}
     needs:
       - lint
+      - lint-powershell
       - generate-actions-workflow
     with:
       distro-slug: {distro}
@@ -282,7 +286,13 @@ TEMPLATE = """
 
 def generate_test_jobs():
     test_jobs = ""
-    needs = ["lint", "generate-actions-workflow"]
+    needs = [
+        "lint",
+        "lint-powershell",
+        "test-shell",
+        "test-powershell",
+        "generate-actions-workflow",
+    ]
 
     test_jobs += "\n"
     for distro in OSX:

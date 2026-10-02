@@ -9,24 +9,11 @@
     if: always()
     steps:
 
-      - name: Download Exit Status Files
-        if: always()
-        uses: actions/download-artifact@v4
-        with:
-          path: exitstatus/
-          pattern: exitstatus-*
-          merge-multiple: true
-
-      - name: Delete Exit Status Artifacts
-        if: always()
-        uses: geekyeggo/delete-artifact@v5
-        with:
-          name: exitstatus-*
-          failOnError: false
-
-      - name: Set Pipeline Exit Status
+      - name: Check Needs Results
+        if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')
         run: |
-          grep -RE 'failure|cancelled' exitstatus/ && exit 1 || exit 0
+          echo "One or more required jobs failed or were cancelled"
+          exit 1
 
       - name: Done
         if: always()

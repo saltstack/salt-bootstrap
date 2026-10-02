@@ -1,0 +1,4 @@
+--default-path tests/shell
+--helperdir tests/shell
+--require spec_helper
+--shell sh

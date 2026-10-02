@@ -35,6 +35,16 @@
     All of the parameters are optional. The default should be the latest
     version. The architecture is dynamically determined by the script.
 
+    -RepoUrl accepts an HTTP, HTTPS or FTP URL, an SMB share (\\server\share),
+    or a local directory (C:\path). Each Salt version needs its own folder
+    containing the installer. FTP logins are anonymous unless credentials are
+    in the URL (ftp://user:password@host/path/).
+
+    The installer's SHA256 hash is only verified when RepoUrl is an Artifactory
+    URL (it contains "/artifactory/"), because the hash comes from the
+    Artifactory API. For any other source, including FTP, SMB shares and local
+    directories, the hash is NOT checked. Make sure you trust the source.
+
 .LINK
     Salt Bootstrap GitHub Project (script home) - https://github.com/saltstack/salt-bootstrap
     Original Vagrant Provisioner Project - https://github.com/saltstack/salty-vagrant
@@ -83,6 +93,9 @@ param(
     # the URL/Version. Place a folder for each version of Salt in this directory
     # and place the installer binary for each version in its folder.
     # Default is "https://packages.broadcom.com/artifactory/saltproject-generic/windows/"
+    # Can be an HTTP, HTTPS or FTP URL, an SMB share, or a local directory.
+    # The installer's hash is only verified for Artifactory URLs. For any other
+    # source it is not checked.
     [String]$RepoUrl = "https://packages.broadcom.com/artifactory/saltproject-generic/windows/",
 
     [Parameter(Mandatory=$false, ValueFromPipeline=$True)]
@@ -112,7 +125,7 @@ if ($help) {
     exit 0
 }
 
-$__ScriptVersion = "2026.09.28"
+$__ScriptVersion = "2026.10.02"
 $ScriptName = $myInvocation.MyCommand.Name
 
 # We'll check for the Version next, because it also has no requirements
@@ -212,6 +225,32 @@ function Compare-SaltCalVer {
     return 0
 }
 
+function Get-FtpDirectoryNames {
+    # Returns the names of the entries in an FTP directory. Credentials can be
+    # given in the URL (ftp://user:password@host/path/); otherwise the login is
+    # anonymous.
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory=$true, Position=0)]
+        [String] $Url
+    )
+    if ( !$Url.EndsWith("/") ) { $Url = "$Url/" }
+    $request = [System.Net.FtpWebRequest]::Create($Url)
+    $request.Method = [System.Net.WebRequestMethods+Ftp]::ListDirectory
+    $response = $request.GetResponse()
+    try {
+        $reader = New-Object System.IO.StreamReader($response.GetResponseStream())
+        while ( $null -ne ($line = $reader.ReadLine()) ) {
+            # Some servers return the full path of each entry, keep the name
+            $name = ( $line.Trim() -split "/" )[-1]
+            if ( $name ) { $name }
+        }
+    } finally {
+        if ( $null -ne $reader ) { $reader.Close() }
+        $response.Close()
+    }
+}
+
 function Get-AvailableVersions {
     # Get available versions from a remote location specified in the Source
     # Parameter
@@ -220,8 +259,23 @@ function Get-AvailableVersions {
 
     $available_versions = [System.Collections.ArrayList]@()
 
-    if ( $base_url.StartsWith("http") -or $base_url.StartsWith("ftp") ) {
-        # We're dealing with HTTP, HTTPS, or FTP
+    if ( $base_url -match "^ftp://" ) {
+        # We're dealing with FTP. Invoke-WebRequest does not support FTP, so
+        # list the directory names directly.
+        try {
+            Get-FtpDirectoryNames $base_url | ForEach-Object {
+                # Salt dirs: 3006.24, 3008.0, 3008.0rc1, etc. Skip anything else.
+                if ( $_ -match '^\d+\.\d+' ) {
+                    $available_versions.Add($_) | Out-Null
+                }
+            }
+        } catch {
+            Write-Host "Failed to get version information" -ForegroundColor Red
+            Write-Host "Error: $_" -ForegroundColor Red
+            exit 1
+        }
+    } elseif ( $base_url.StartsWith("http") ) {
+        # We're dealing with HTTP or HTTPS
         try {
             $response = Invoke-WebRequest "$base_url" -UseBasicParsing
         } catch {
@@ -458,9 +512,6 @@ if ($majorVersion -lt "3006") {
 #===============================================================================
 # Declare variables
 #===============================================================================
-$ConfDir = "$RootDir\conf"
-$PkiDir  = "$ConfDir\pki\minion"
-
 $RootDir = "$env:ProgramData\Salt Project\Salt"
 # Check for existing installation where RootDir is stored in the registry
 $SaltRegKey = "HKLM:\SOFTWARE\Salt Project\Salt"
@@ -469,6 +520,10 @@ if (Test-Path -Path $SaltRegKey) {
         $RootDir = (Get-ItemProperty $SaltRegKey).root_dir
     }
 }
+
+# These depend on RootDir, so they must be set after it is final
+$ConfDir = "$RootDir\conf"
+$PkiDir  = "$ConfDir\pki\minion"
 
 # Get repo and api URLs. An artifactory URL will have "artifactory" in it
 $domain, $target = $RepoUrl -split "/artifactory/"
@@ -538,7 +593,7 @@ if (Test-Path C:\tmp\grains) {
 
 if ( $ConfigureOnly ) {
     if ( !$ConfiguredAnything ) {
-        Write-Host "No configuration or keys were copied over." -ForegroundColor yes
+        Write-Host "No configuration or keys were copied over." -ForegroundColor Yellow
         Write-Host "No configuration was done!" -ForegroundColor Yellow
     } else {
         Write-Host "Salt minion successfully configured" -ForegroundColor Green
@@ -575,7 +630,15 @@ if ( $versions.Contains($Version.ToLower()) ) {
 # Get file url and sha256
 #===============================================================================
 $saltFileName = "Salt-Minion-$Version-Py3-$arch-Setup.exe"
-$saltFileUrl = "$base_url/$Version/$saltFileName"
+# A local directory or SMB share is copied, not downloaded; Invoke-WebRequest
+# only handles http(s). Matches the source types in Get-AvailableVersions.
+$isLocalSource = $base_url.StartsWith("\\") -or $base_url -match "^[A-Za-z]:\\"
+if ( $isLocalSource ) {
+    $saltFileUrl = Join-Path (Join-Path $base_url $Version) $saltFileName
+} else {
+    # RepoUrl usually ends in "/", avoid a double slash in the file URL
+    $saltFileUrl = "$($base_url.TrimEnd('/'))/$Version/$saltFileName"
+}
 $saltSha256 = Get-HashFromArtifactory -SaltVersion $Version -SaltFileName $saltFileName
 
 #===============================================================================
@@ -602,8 +665,22 @@ Write-Verbose "Local File: $localFile"
 # Remove existing local file
 if ( Test-Path -Path $localFile ) { Remove-Item -Path $localFile -Force }
 
-# Download the file
-Invoke-WebRequest -Uri $saltFileUrl -OutFile $localFile
+# Download (or copy, for a local/SMB source) the file
+if ( $isLocalSource ) {
+    if ( !(Test-Path -Path $saltFileUrl) ) {
+        Write-Host "Failed" -ForegroundColor Red
+        Write-Host "Installer not found: $saltFileUrl" -ForegroundColor Red
+        exit 1
+    }
+    Copy-Item -Path $saltFileUrl -Destination $localFile -Force
+} else {
+    if ( $saltFileUrl -match "^ftp://" ) {
+        # Invoke-WebRequest does not support FTP, WebClient does
+        (New-Object System.Net.WebClient).DownloadFile($saltFileUrl, $localFile)
+    } else {
+        Invoke-WebRequest -Uri $saltFileUrl -OutFile $localFile
+    }
+}
 if ( Test-Path -Path $localFile ) {
     Write-Host "Success" -ForegroundColor Green
 } else {

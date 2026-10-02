@@ -76,15 +76,136 @@ jobs:
         run: |
           pytest --cache-clear -v -s -ra --log-cli-level=debug tests/integration/
 
-      - name: Set Exit Status
-        if: always()
+      - name: Test -ConfigureOnly
+        # Regression test for #2138. Runs after "Test Bootstrap" since it
+        # overwrites the minion config.
         run: |
-          mkdir exitstatus
-          echo "${{ job.status }}" > exitstatus/${{ github.job }}-${{ matrix.instance }}-${{ inputs.distro-slug }}
+          $ErrorActionPreference = "Stop"
+          $rootDir = "$env:ProgramData\Salt Project\Salt"
+          $regKey = "HKLM:\SOFTWARE\Salt Project\Salt"
+          if ( Test-Path $regKey ) {
+            $reg = (Get-ItemProperty $regKey).root_dir
+            if ( $reg ) { $rootDir = $reg }
+          }
+          $confDir = "$rootDir\conf"
 
-      - name: Upload Exit Status
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: exitstatus-${{ github.job }}-${{ matrix.instance }}-${{ inputs.distro-slug }}
-          path: exitstatus/
+          # Nothing to copy: must warn and exit 0 rather than throw
+          Remove-Item C:\tmp -Recurse -Force -ErrorAction SilentlyContinue
+          & .\bootstrap-salt.ps1 -ConfigureOnly
+          if ( $LASTEXITCODE -ne 0 ) { throw "-ConfigureOnly with nothing to copy exited $LASTEXITCODE" }
+
+          # Files in C:\tmp must land under the Salt root dir
+          New-Item C:\tmp -ItemType Directory -Force | Out-Null
+          Set-Content -Path C:\tmp\minion -Value "id: configure-only-test"
+          Set-Content -Path C:\tmp\grains -Value "role: configure-only-test"
+          Set-Content -Path C:\tmp\minion.pem -Value "fake-private-key"
+          Set-Content -Path C:\tmp\minion.pub -Value "fake-public-key"
+          & .\bootstrap-salt.ps1 -ConfigureOnly
+          if ( $LASTEXITCODE -ne 0 ) { throw "-ConfigureOnly exited $LASTEXITCODE" }
+
+          $expected = @{
+            "$confDir\minion"               = "id: configure-only-test"
+            "$confDir\grains"               = "role: configure-only-test"
+            "$confDir\pki\minion\minion.pem" = "fake-private-key"
+            "$confDir\pki\minion\minion.pub" = "fake-public-key"
+          }
+          foreach ( $path in $expected.Keys ) {
+            if ( !(Test-Path $path) ) { throw "Missing $path" }
+            $content = (Get-Content $path -Raw).Trim()
+            if ( $content -ne $expected[$path] ) { throw "Unexpected content in ${path}: $content" }
+          }
+          # And not on the drive root, where the broken paths used to send them
+          if ( Test-Path C:\conf ) { throw "Files were copied to C:\conf" }
+
+      - name: Test -RepoUrl
+        # Uses a fake repo, served over HTTP and also as a local directory.
+        run: |
+          $ErrorActionPreference = "Stop"
+          $repo = Join-Path $env:RUNNER_TEMP "repo"
+          # whoami.exe stands in for the installer: it exits immediately, and
+          # the salt-minion service already exists from the earlier bootstrap
+          foreach ( $v in "3007.5", "3008.1", "3008.2", "3009.0rc1" ) {
+            New-Item "$repo\$v" -ItemType Directory -Force | Out-Null
+            Copy-Item "$env:SystemRoot\System32\whoami.exe" "$repo\$v\Salt-Minion-$v-Py3-AMD64-Setup.exe"
+          }
+          $server = Start-Process python -ArgumentList "-m", "http.server", "8765", "--directory", $repo `
+            -PassThru -WindowStyle Hidden
+          # Anonymous, read-only FTP server for the same repo
+          python -m pip install pyftpdlib
+          $ftpServer = Start-Process python -ArgumentList "-m", "pyftpdlib", "-p", "2121", "-d", $repo `
+            -PassThru -WindowStyle Hidden
+          try {
+            Start-Sleep -Seconds 3
+            $url = "http://localhost:8765/"
+
+            function Invoke-Bootstrap($version, $source = $url) {
+              # Write-Host goes to the information stream
+              $out = & .\bootstrap-salt.ps1 -RepoUrl $source -Version $version -RunService $false 6>&1 | Out-String
+              Write-Host $out
+              return @{ Code = $LASTEXITCODE; Output = $out }
+            }
+
+            # "latest" is the newest GA release; the rc must be ignored
+            $r = Invoke-Bootstrap "latest"
+            if ( $r.Code -ne 0 -or $r.Output -notmatch "version: 3008\.2\b" ) { throw "latest did not resolve to 3008.2" }
+            if ( $r.Output -notmatch [regex]::Escape("file url : ${url}3008.2/Salt-Minion-3008.2-Py3-AMD64-Setup.exe") ) { throw "Installer was not downloaded from RepoUrl" }
+
+            # A major version selects the newest GA in that series
+            $r = Invoke-Bootstrap "3007"
+            if ( $r.Code -ne 0 -or $r.Output -notmatch "version: 3007\.5\b" ) { throw "3007 did not resolve to 3007.5" }
+
+            # A prerelease can be installed by its exact name
+            $r = Invoke-Bootstrap "3009.0rc1"
+            if ( $r.Code -ne 0 -or $r.Output -notmatch "version: 3009\.0rc1" ) { throw "3009.0rc1 was not installable by exact name" }
+
+            # A version that is not in the repo must fail
+            $r = Invoke-Bootstrap "3010"
+            if ( $r.Code -eq 0 ) { throw "3010 should not be available" }
+
+            # The same repo as a local directory: the installer is copied
+            $r = Invoke-Bootstrap "latest" $repo
+            if ( $r.Code -ne 0 -or $r.Output -notmatch "version: 3008\.2\b" ) { throw "local directory: latest did not resolve to 3008.2" }
+            if ( $r.Output -notmatch [regex]::Escape("$repo\3008.2\Salt-Minion-3008.2-Py3-AMD64-Setup.exe") ) { throw "local directory: installer path is wrong" }
+
+            # The same repo over FTP: Invoke-WebRequest can't do this
+            $ftpUrl = "ftp://localhost:2121/"
+            $r = Invoke-Bootstrap "latest" $ftpUrl
+            if ( $r.Code -ne 0 -or $r.Output -notmatch "version: 3008\.2\b" ) { throw "FTP: latest did not resolve to 3008.2" }
+            if ( $r.Output -notmatch [regex]::Escape("file url : ${ftpUrl}3008.2/Salt-Minion-3008.2-Py3-AMD64-Setup.exe") ) { throw "FTP: installer was not downloaded from RepoUrl" }
+          } finally {
+            Stop-Process -Id $server.Id -Force -ErrorAction SilentlyContinue
+            Stop-Process -Id $ftpServer.Id -Force -ErrorAction SilentlyContinue
+          }
+
+      - name: Test -Minion and -Master
+        # Windows PowerShell 5.1 is needed for Add-Type -OutputAssembly
+        shell: powershell
+        run: |
+          $ErrorActionPreference = "Stop"
+          # A stub installer that records the arguments it was started with
+          $repo = Join-Path $env:RUNNER_TEMP "args-repo"
+          $dir = Join-Path $repo "3008.2"
+          New-Item $dir -ItemType Directory -Force | Out-Null
+          $source = 'using System; using System.IO; public static class Stub { public static int Main(string[] args) { File.WriteAllText(Environment.GetEnvironmentVariable("STUB_ARGS_FILE"), string.Join(" ", args)); return 0; } }'
+          Add-Type -TypeDefinition $source -OutputAssembly (Join-Path $dir "Salt-Minion-3008.2-Py3-AMD64-Setup.exe") -OutputType ConsoleApplication
+          $env:STUB_ARGS_FILE = Join-Path $env:RUNNER_TEMP "stub-args.txt"
+
+          function Get-InstallerArgs($extra) {
+            Remove-Item $env:STUB_ARGS_FILE -ErrorAction SilentlyContinue
+            & .\bootstrap-salt.ps1 -RepoUrl $repo -Version 3008.2 -RunService $false @extra 6>&1 | Out-Null
+            if ( $LASTEXITCODE -ne 0 ) { throw "bootstrap-salt.ps1 exited $LASTEXITCODE" }
+            if ( !(Test-Path $env:STUB_ARGS_FILE) ) { throw "The installer was not started" }
+            return (Get-Content $env:STUB_ARGS_FILE -Raw).Trim()
+          }
+
+          $cases = @(
+            @{ Name = "defaults";      Extra = @{};                                   Expected = "/S /start-service=0" }
+            @{ Name = "-Minion";       Extra = @{ Minion = "min-1" };                 Expected = "/S /start-service=0 /minion-name=min-1" }
+            @{ Name = "-Master";       Extra = @{ Master = "master-1" };              Expected = "/S /start-service=0 /master=master-1" }
+            @{ Name = "both";          Extra = @{ Minion = "min-1"; Master = "master-1" }; Expected = "/S /start-service=0 /minion-name=min-1 /master=master-1" }
+          )
+          foreach ( $case in $cases ) {
+            $actual = Get-InstallerArgs $case.Extra
+            Write-Host "$($case.Name): '$actual'"
+            if ( $actual -ne $case.Expected ) { throw "$($case.Name): expected '$($case.Expected)' but the installer got '$actual'" }
+          }

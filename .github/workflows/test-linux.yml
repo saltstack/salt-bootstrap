@@ -34,7 +34,6 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: ${{ inputs.timeout }}
     strategy:
-      max-parallel: 2
       fail-fast: false
       matrix:
         instance: ${{ fromJSON(inputs.instances) }}
@@ -110,15 +109,36 @@ jobs:
         run: |
           docker exec ${{ github.run_id}}_salt-test pytest --cache-clear -v -s -ra --log-cli-level=debug /_w/btstrap/tests/integration/
 
-      - name: Set Exit Status
-        if: always()
+      - name: Test custom repository URL (-R)
+        # One instance per distro is enough; the repo definition does not depend
+        # on the Salt version. Arch and ALT Linux have no salt.sources/salt.repo.
+        # This must run after "Test Bootstrap": it leaves the repo definition
+        # pointing at an unreachable host.
+        if: ${{ matrix.instance == 'stable-3007' && !startsWith(inputs.distro-slug, 'archlinux') && !startsWith(inputs.distro-slug, 'altlinux') }}
         run: |
-          mkdir exitstatus
-          echo "${{ job.status }}" > exitstatus/${{ github.job }}-${{ matrix.instance }}-${{ inputs.distro-slug }}
-
-      - name: Upload Exit Status
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: exitstatus-${{ github.job }}-${{ matrix.instance }}-${{ inputs.distro-slug }}
-          path: exitstatus/
+          # Regression test for #2123 and #2135: -R must be written into the
+          # repo definition, not just used for the GPG key fetch. The mirror host
+          # is unreachable on purpose, so bootstrap is expected to fail once it
+          # tries to use the repo; only the resulting file is checked.
+          mirror="mirror.example.invalid/artifactory"
+          # Simulate a fresh host. Some distros (e.g. Amazon Linux) only write
+          # the repo file when it is missing and ignore -F, so the one left by
+          # the first bootstrap run would otherwise be kept as is.
+          docker exec ${{ github.run_id}}_salt-test rm -f /etc/apt/sources.list.d/salt.sources /etc/yum.repos.d/salt.repo
+          docker exec ${{ github.run_id}}_salt-test timeout 300 sh -x /_w/btstrap/bootstrap-salt.sh -F -R "$mirror" stable 3007 || echo "bootstrap exited $? (expected)"
+          found=0
+          for f in /etc/apt/sources.list.d/salt.sources /etc/yum.repos.d/salt.repo; do
+            docker exec ${{ github.run_id}}_salt-test test -f "$f" || continue
+            found=1
+            echo "=== $f ==="
+            docker exec ${{ github.run_id}}_salt-test cat "$f"
+            if docker exec ${{ github.run_id}}_salt-test grep -q "packages.broadcom.com" "$f"; then
+              echo "::error::$f still references packages.broadcom.com"
+              exit 1
+            fi
+            docker exec ${{ github.run_id}}_salt-test grep -q "$mirror" "$f" || { echo "::error::$f does not reference $mirror"; exit 1; }
+          done
+          if [ "$found" -eq 0 ]; then
+            echo "::error::No salt repo definition found to check"
+            exit 1
+          fi

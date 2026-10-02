@@ -5,6 +5,7 @@ import platform
 import re
 import shutil
 import subprocess
+import sys
 
 import pytest
 
@@ -140,14 +141,25 @@ Components: main
 """
 
 
-def _bash_has_gnu_sed():
-    # Check through "bash -c", the exact invocation the test below uses, since
+# bootstrap-salt.sh is POSIX sh, and Debian/Ubuntu run it under dash. Run the
+# functions extracted from it with "sh" rather than "bash" so that a bashism
+# fails here too. Set BOOTSTRAP_TEST_SHELL to pick another shell, e.g. "dash".
+TEST_SHELL = os.environ.get("BOOTSTRAP_TEST_SHELL", "sh")
+
+
+def _shell_has_gnu_sed():
+    if sys.platform == "win32" and "BOOTSTRAP_TEST_SHELL" not in os.environ:
+        # Git's "sh" (Cygwin) has no default PATH for "env -i", which the
+        # script relies on, so the extracted functions misbehave there. These
+        # tests are meant for Linux; opt in with BOOTSTRAP_TEST_SHELL.
+        return False
+    # Check through "<shell> -c", the exact invocation the tests use, since
     # e.g. on GitHub's Windows runners plain "sed" on the host PATH is Git
     # Bash's GNU sed, but "bash" on the host PATH resolves to the WSL launcher
     # stub instead - a different, often broken, resolution path.
     try:
         result = subprocess.run(
-            ["bash", "-c", "sed --version"],
+            [TEST_SHELL, "-c", "sed --version"],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             universal_newlines=True,
@@ -157,57 +169,152 @@ def _bash_has_gnu_sed():
     return "GNU sed" in result.stdout
 
 
-def test_debian_repo_functions_rewrite_custom_repo_url(tmp_path):
-    """
-    Regression test for https://github.com/saltstack/salt-bootstrap/issues/2123
-    The -R/_CUSTOM_REPO_URL option must rewrite the "URIs:" line in
-    salt.sources for Debian/Ubuntu, not just the GPG key fetch URL.
-    """
-    if not _bash_has_gnu_sed():
-        # bootstrap-salt.sh's Debian/Ubuntu sed -i syntax targets GNU sed,
-        # which is what those distros actually ship. BSD sed (e.g. on macOS)
-        # parses "-i" differently, and isn't representative of the real
-        # target either way.
-        pytest.skip("bash with GNU sed not available")
+REPO_FILE_FUNCTIONS = DEBIAN_REPO_FUNCTIONS + [
+    "__install_saltstack_rhel_onedir_repository",
+    "__install_saltstack_fedora_onedir_repository",
+]
 
+SAMPLE_SALT_REPO = """[salt-repo-3006-lts]
+name=Salt Repo for Salt v3006 LTS
+baseurl=https://packages.broadcom.com/artifactory/saltproject-rpm/
+skip_if_unavailable=True
+priority=10
+enabled=1
+enabled_metadata=1
+gpgcheck=1
+exclude=*3007* *3008* *3009* *3010*
+gpgkey=https://packages.broadcom.com/artifactory/api/security/keypair/SaltProjectKey/public
+
+[salt-repo-latest]
+name=Salt Repo for Salt LATEST release
+baseurl=https://packages.broadcom.com/artifactory/saltproject-rpm/
+skip_if_unavailable=True
+priority=10
+enabled=0
+enabled_metadata=1
+gpgcheck=1
+gpgkey=https://packages.broadcom.com/artifactory/api/security/keypair/SaltProjectKey/public
+"""
+
+
+def _read_bootstrap_script():
     bootstrap_script = os.path.join(
         os.path.dirname(__file__), "..", "..", "bootstrap-salt.sh"
     )
     if not os.path.exists(bootstrap_script):
         pytest.skip("bootstrap-salt.sh not found (not running from a repo checkout)")
-
     with open(bootstrap_script) as fp:
-        script = fp.read()
+        return fp.read()
 
-    for func_name in DEBIAN_REPO_FUNCTIONS:
-        match = re.search(
-            rf"^{re.escape(func_name)}\(\) {{(.*?)^}}", script, re.M | re.S
+
+def _extract_function(script, func_name):
+    match = re.search(rf"^{re.escape(func_name)}\(\) {{.*?^}}", script, re.M | re.S)
+    assert match, f"could not find {func_name}() in bootstrap-salt.sh"
+    return match.group(0)
+
+
+def _run_rewrite_repo_url(tmp_path, script, repo_file, repo_url):
+    # Run from a file; passing this through "sh -c" mangles quoting on Windows
+    shell = "\n".join(
+        [
+            f'_REPO_URL="{repo_url}"',
+            _extract_function(script, "__rewrite_repo_url"),
+            '__rewrite_repo_url "$1"',
+        ]
+    )
+    with open(str(tmp_path / "rewrite.sh"), "w", newline="\n") as fp:
+        fp.write(shell + "\n")
+    # Relative paths, since backslashes in Windows paths get mangled by the shell
+    subprocess.run(
+        [TEST_SHELL, "rewrite.sh", repo_file.name],
+        cwd=str(tmp_path),
+        check=True,
+    )
+
+
+def test_repo_functions_call_rewrite_repo_url():
+    """
+    Every function that downloads a repo definition from salt-install-guide must
+    rewrite it for -R/_CUSTOM_REPO_URL, otherwise the system keeps pointing at
+    packages.broadcom.com (issues #2123, #2135).
+    """
+    script = _read_bootstrap_script()
+
+    # Discover rather than rely on a hand-kept list, so new distro functions that
+    # download a repo definition are covered automatically. Commented-out fetches
+    # (e.g. Photon) are ignored.
+    discovered = set()
+    for match in re.finditer(r"^(\w+)\(\) {.*?^}", script, re.M | re.S):
+        code = "\n".join(
+            line
+            for line in match.group(0).splitlines()
+            if not line.lstrip().startswith("#")
         )
-        assert match, f"could not find {func_name}() in bootstrap-salt.sh"
+        if "salt-install-guide/releases" in code:
+            discovered.add(match.group(1))
 
-        sed_exprs = re.findall(
-            r'sed -i "([^"]+)" /etc/apt/sources\.list\.d/salt\.sources',
-            match.group(1),
+    # Guard against the discovery silently matching nothing
+    missing = set(REPO_FILE_FUNCTIONS) - discovered
+    assert not missing, f"repo discovery missed known functions: {sorted(missing)}"
+
+    for func_name in sorted(discovered):
+        body = _extract_function(script, func_name)
+        assert (
+            "__rewrite_repo_url" in body
+        ), f"{func_name} downloads a repo file but does not call __rewrite_repo_url"
+
+
+def test_debian_repo_files_rewrite_custom_repo_url(tmp_path):
+    """
+    Regression test for https://github.com/saltstack/salt-bootstrap/issues/2123
+    The -R/_CUSTOM_REPO_URL option must rewrite the "URIs:" line in
+    salt.sources for Debian/Ubuntu, not just the GPG key fetch URL.
+    """
+    if not _shell_has_gnu_sed():
+        # bootstrap-salt.sh's sed -i syntax targets GNU sed, which is what these
+        # distros actually ship. BSD sed (e.g. on macOS) parses "-i" differently,
+        # and isn't representative of the real target either way.
+        pytest.skip(f"{TEST_SHELL} with GNU sed not available")
+    script = _read_bootstrap_script()
+
+    sources_file = tmp_path / "salt.sources"
+    with open(str(sources_file), "w", newline="\n") as fp:
+        fp.write(SAMPLE_SALT_SOURCES)
+    _run_rewrite_repo_url(tmp_path, script, sources_file, "repo.example.com/myrepo")
+
+    result = sources_file.read_text()
+    assert "packages.broadcom.com" not in result, result
+    assert "URIs: https://repo.example.com/myrepo/saltproject-deb" in result
+
+
+def test_rpm_repo_file_rewrite_custom_repo_url(tmp_path):
+    """
+    Regression test for https://github.com/saltstack/salt-bootstrap/issues/2135
+    The -R/_CUSTOM_REPO_URL option must rewrite every baseurl= and gpgkey= in
+    the downloaded salt.repo for RHEL/CentOS/Fedora.
+    """
+    if not _shell_has_gnu_sed():
+        pytest.skip(f"{TEST_SHELL} with GNU sed not available")
+    script = _read_bootstrap_script()
+
+    repo_file = tmp_path / "salt.repo"
+    with open(str(repo_file), "w", newline="\n") as fp:
+        fp.write(SAMPLE_SALT_REPO)
+    # "&" and "#" are special in the sed replacement/delimiter
+    _run_rewrite_repo_url(tmp_path, script, repo_file, "repo.example.com/my&repo#1")
+
+    result = repo_file.read_text()
+    assert "packages.broadcom.com" not in result, result
+    assert result.count("baseurl=https://repo.example.com/my&repo#1/saltproject-rpm/") == 2
+    assert (
+        result.count(
+            "gpgkey=https://repo.example.com/my&repo#1/api/security/keypair/SaltProjectKey/public"
         )
-        assert sed_exprs, f"{func_name} has no salt.sources sed post-processing"
-
-        sources_file = tmp_path / f"{func_name}.sources"
-        sources_file.write_text(SAMPLE_SALT_SOURCES)
-
-        env = dict(os.environ, _REPO_URL="repo.example.com/myrepo", HTTP_VAL="https")
-        for expr in sed_exprs:
-            subprocess.run(
-                ["bash", "-c", f'sed -i "{expr}" "$1"', "--", str(sources_file)],
-                env=env,
-                check=True,
-            )
-
-        result = sources_file.read_text()
-        assert "packages.broadcom.com" not in result, (
-            f"{func_name}: salt.sources still references packages.broadcom.com "
-            f"after applying its sed commands:\n{result}"
-        )
-        assert "repo.example.com/myrepo" in result
+        == 2
+    )
+    # Only the URLs change; sections and their enabled state are preserved
+    assert "[salt-repo-3006-lts]" in result and "[salt-repo-latest]" in result
+    assert result.count("enabled=1") == 1 and result.count("enabled=0") == 1
 
 
 DETECTION_FUNCTIONS = [
@@ -239,8 +346,8 @@ def test_os_release_id_resolves_to_install_functions(
     the distro's install_* functions, or bootstrap exits with "No dependencies
     installation function found."
     """
-    if not _bash_has_gnu_sed():
-        pytest.skip("bash with GNU sed not available")
+    if not _shell_has_gnu_sed():
+        pytest.skip(f"{TEST_SHELL} with GNU sed not available")
 
     bootstrap_script = os.path.join(
         os.path.dirname(__file__), "..", "..", "bootstrap-salt.sh"
@@ -276,12 +383,12 @@ def test_os_release_id_resolves_to_install_functions(
             'echo "$DISTRO_NAME_L"',
         ]
     )
-    # Run from a file; passing this through "bash -c" mangles quoting on Windows
+    # Run from a file; passing this through "sh -c" mangles quoting on Windows
     with open(str(tmp_path / "detect.sh"), "w", newline="\n") as fp:
         fp.write(shell + "\n")
 
     result = subprocess.run(
-        ["bash", "detect.sh"],
+        [TEST_SHELL, "detect.sh"],
         cwd=str(tmp_path),
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
@@ -294,3 +401,62 @@ def test_os_release_id_resolves_to_install_functions(
     assert re.search(
         rf"^install_{re.escape(distro_name_l)}_\w*deps\(\)", script, re.M
     ), f"no install_{distro_name_l}_*deps() in bootstrap-salt.sh"
+
+
+CONSOLE_COLORS = {
+    "Black",
+    "DarkBlue",
+    "DarkGreen",
+    "DarkCyan",
+    "DarkRed",
+    "DarkMagenta",
+    "DarkYellow",
+    "Gray",
+    "DarkGray",
+    "Blue",
+    "Green",
+    "Cyan",
+    "Red",
+    "Magenta",
+    "Yellow",
+    "White",
+}
+
+
+def _read_powershell_script():
+    ps_script = os.path.join(os.path.dirname(__file__), "..", "..", "bootstrap-salt.ps1")
+    if not os.path.exists(ps_script):
+        pytest.skip("bootstrap-salt.ps1 not found (not running from a repo checkout)")
+    with open(ps_script) as fp:
+        return fp.read()
+
+
+def test_powershell_conf_dirs_are_set_after_root_dir():
+    """
+    Regression test for https://github.com/saltstack/salt-bootstrap/issues/2138
+    $ConfDir and $PkiDir are derived from $RootDir, so they must be assigned
+    after $RootDir is final (including the registry override). Otherwise they
+    resolve to "\conf" and Vagrant files are copied to the wrong place.
+    """
+    script = _read_powershell_script()
+    root_dir_assignments = [
+        m.start() for m in re.finditer(r"^\s*\$RootDir\s*=", script, re.M)
+    ]
+    conf_dir = re.search(r"^\$ConfDir\s*=", script, re.M)
+    pki_dir = re.search(r"^\$PkiDir\s*=", script, re.M)
+    assert root_dir_assignments and conf_dir and pki_dir
+    assert conf_dir.start() > max(root_dir_assignments)
+    assert pki_dir.start() > conf_dir.start()
+
+
+def test_powershell_foreground_colors_are_valid():
+    """
+    Regression test for https://github.com/saltstack/salt-bootstrap/issues/2138
+    An invalid -ForegroundColor throws under $ErrorActionPreference = "Stop".
+    """
+    script = _read_powershell_script()
+    for color in re.findall(r"-ForegroundColor\s+(\w+)", script, re.I):
+        # PowerShell parameter values are case-insensitive
+        assert color.lower() in {
+            c.lower() for c in CONSOLE_COLORS
+        }, f"invalid -ForegroundColor {color}"

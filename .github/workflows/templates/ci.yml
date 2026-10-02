@@ -151,3 +151,36 @@ jobs:
         with:
           name: exitstatus-${{ github.job }}
           path: exitstatus/
+
+  test-powershell:
+    name: Test PowerShell
+    # Windows PowerShell 5.1 is what bootstrap-salt.ps1 mostly runs on
+    runs-on: windows-latest
+    needs: collect-changed-files
+    if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Pester
+        shell: powershell
+        run: |
+          # The image ships Pester 3; the tests need 5
+          Install-Module Pester -MinimumVersion 5.0.0 -Scope CurrentUser -Force -SkipPublisherCheck
+          Import-Module Pester -MinimumVersion 5.0.0
+          $config = New-PesterConfiguration
+          $config.Run.Path = "tests/powershell"
+          $config.Run.Exit = $true
+          $config.Output.Verbosity = "Detailed"
+          Invoke-Pester -Configuration $config
+
+      - name: Set Exit Status
+        if: always()
+        run: |
+          mkdir exitstatus
+          echo "${{ job.status }}" > exitstatus/${{ github.job }}
+
+      - name: Upload Exit Status
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: exitstatus-${{ github.job }}
+          path: exitstatus/

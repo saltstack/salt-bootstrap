@@ -1,3 +1,18 @@
+# v2026.10.02
+
+## What's Changed
+
+- fix(bootstrap): honor -R custom repo URL for RHEL/CentOS/Fedora salt.repo by @twangboy in https://github.com/saltstack/salt-bootstrap/pull/2136
+- ci: verify -R custom repo URL ends up in the repo definition by @twangboy in https://github.com/saltstack/salt-bootstrap/pull/2137
+- fix(bootstrap.ps1): fix config dir paths and invalid color in -ConfigureOnly by @twangboy in https://github.com/saltstack/salt-bootstrap/pull/2140
+- Add CI coverage for bootstrap-salt.ps1 and fix local, SMB and FTP -RepoUrl sources by @twangboy in https://github.com/saltstack/salt-bootstrap/pull/2141
+- Add Pester unit tests and an installer-arguments check for bootstrap-salt.ps1 by @twangboy in https://github.com/saltstack/salt-bootstrap/pull/2142
+- Run bash script tests under sh and add ShellSpec specs for bootstrap-salt.sh by @twangboy in https://github.com/saltstack/salt-bootstrap/pull/2143
+- ci: replace macos-14 runner with macos-26-intel by @twangboy in https://github.com/saltstack/salt-bootstrap/pull/2144
+- deps: bump urllib3 to 2.8.0 and virtualenv to 21.13.0 by @twangboy in https://github.com/saltstack/salt-bootstrap/pull/2145
+
+**Full Changelog**: https://github.com/saltstack/salt-bootstrap/compare/v2026.09.28...v2026.10.02
+
 # v2026.09.28
 
 ## What's Changed

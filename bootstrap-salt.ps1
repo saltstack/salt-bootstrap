@@ -458,9 +458,6 @@ if ($majorVersion -lt "3006") {
 #===============================================================================
 # Declare variables
 #===============================================================================
-$ConfDir = "$RootDir\conf"
-$PkiDir  = "$ConfDir\pki\minion"
-
 $RootDir = "$env:ProgramData\Salt Project\Salt"
 # Check for existing installation where RootDir is stored in the registry
 $SaltRegKey = "HKLM:\SOFTWARE\Salt Project\Salt"
@@ -469,6 +466,10 @@ if (Test-Path -Path $SaltRegKey) {
         $RootDir = (Get-ItemProperty $SaltRegKey).root_dir
     }
 }
+
+# These depend on RootDir, so they must be set after it is final
+$ConfDir = "$RootDir\conf"
+$PkiDir  = "$ConfDir\pki\minion"
 
 # Get repo and api URLs. An artifactory URL will have "artifactory" in it
 $domain, $target = $RepoUrl -split "/artifactory/"
@@ -538,7 +539,7 @@ if (Test-Path C:\tmp\grains) {
 
 if ( $ConfigureOnly ) {
     if ( !$ConfiguredAnything ) {
-        Write-Host "No configuration or keys were copied over." -ForegroundColor yes
+        Write-Host "No configuration or keys were copied over." -ForegroundColor Yellow
         Write-Host "No configuration was done!" -ForegroundColor Yellow
     } else {
         Write-Host "Salt minion successfully configured" -ForegroundColor Green

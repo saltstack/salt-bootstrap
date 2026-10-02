@@ -122,7 +122,10 @@ jobs:
       - name: PSScriptAnalyzer
         shell: pwsh
         run: |
-          Install-Module PSScriptAnalyzer -Scope CurrentUser -Force
+          # The runner image normally ships it; only install if it is missing
+          if (-not (Get-Module PSScriptAnalyzer -ListAvailable)) {
+            Install-Module PSScriptAnalyzer -Scope CurrentUser -Force
+          }
           # Write-Host is intentional (interactive installer output), and
           # Get-FileHash is overridden on purpose to support PowerShell 3. The
           # script parameters all take pipeline input, and singular function
@@ -131,6 +134,9 @@ jobs:
             -Severity Error,Warning `
             -ExcludeRule PSAvoidUsingWriteHost,PSAvoidOverwritingBuiltInCmdlets,PSUseProcessBlockForPipelineCommand,PSUseSingularNouns
           $results | Format-List RuleName, Severity, Line, Message
+          # A clean run prints nothing above, so say what was checked
+          $version = (Get-Module PSScriptAnalyzer -ListAvailable | Select-Object -First 1).Version
+          Write-Host "PSScriptAnalyzer $version checked bootstrap-salt.ps1: $(@($results).Count) findings"
           if ($results) { exit 1 }
 
       - name: Set Exit Status

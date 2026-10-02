@@ -112,6 +112,38 @@ jobs:
           name: exitstatus-${{ github.job }}
           path: exitstatus/
 
+  lint-powershell:
+    name: Lint PowerShell
+    runs-on: ubuntu-latest
+    needs: collect-changed-files
+    if: github.event_name == 'push' || needs.collect-changed-files.outputs.run-tests == 'true'
+    steps:
+      - uses: actions/checkout@v4
+      - name: PSScriptAnalyzer
+        shell: pwsh
+        run: |
+          Install-Module PSScriptAnalyzer -Scope CurrentUser -Force
+          # Write-Host is intentional (interactive installer output), and
+          # Get-FileHash is overridden on purpose to support PowerShell 3.
+          $results = Invoke-ScriptAnalyzer -Path ./bootstrap-salt.ps1 `
+            -Severity Error,Warning `
+            -ExcludeRule PSAvoidUsingWriteHost,PSAvoidOverwritingBuiltInCmdlets
+          $results | Format-List RuleName, Severity, Line, Message
+          if ($results) { exit 1 }
+
+      - name: Set Exit Status
+        if: always()
+        run: |
+          mkdir exitstatus
+          echo "${{ job.status }}" > exitstatus/${{ github.job }}
+
+      - name: Upload Exit Status
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: exitstatus-${{ github.job }}
+          path: exitstatus/
+
 
 
   macos-14:
@@ -120,6 +152,7 @@ jobs:
     uses: ./.github/workflows/test-macos.yml
     needs:
       - lint
+      - lint-powershell
       - generate-actions-workflow
     with:
       distro-slug: macos-14
@@ -136,6 +169,7 @@ jobs:
     uses: ./.github/workflows/test-macos.yml
     needs:
       - lint
+      - lint-powershell
       - generate-actions-workflow
     with:
       distro-slug: macos-15-intel
@@ -153,6 +187,7 @@ jobs:
     uses: ./.github/workflows/test-windows.yml
     needs:
       - lint
+      - lint-powershell
       - generate-actions-workflow
     with:
       distro-slug: windows-2022
@@ -169,6 +204,7 @@ jobs:
     uses: ./.github/workflows/test-windows.yml
     needs:
       - lint
+      - lint-powershell
       - generate-actions-workflow
     with:
       distro-slug: windows-2025
@@ -186,6 +222,7 @@ jobs:
     uses: ./.github/workflows/test-linux.yml
     needs:
       - lint
+      - lint-powershell
       - generate-actions-workflow
     with:
       distro-slug: altlinux-10
@@ -201,6 +238,7 @@ jobs:
     uses: ./.github/workflows/test-linux.yml
     needs:
       - lint
+      - lint-powershell
       - generate-actions-workflow
     with:
       distro-slug: altlinux-11
@@ -216,6 +254,7 @@ jobs:
     uses: ./.github/workflows/test-linux.yml
     needs:
       - lint
+      - lint-powershell
       - generate-actions-workflow
     with:
       distro-slug: amazonlinux-2023
@@ -231,6 +270,7 @@ jobs:
     uses: ./.github/workflows/test-linux.yml
     needs:
       - lint
+      - lint-powershell
       - generate-actions-workflow
     with:
       distro-slug: archlinux
@@ -246,6 +286,7 @@ jobs:
     uses: ./.github/workflows/test-linux.yml
     needs:
       - lint
+      - lint-powershell
       - generate-actions-workflow
     with:
       distro-slug: debian-12
@@ -261,6 +302,7 @@ jobs:
     uses: ./.github/workflows/test-linux.yml
     needs:
       - lint
+      - lint-powershell
       - generate-actions-workflow
     with:
       distro-slug: debian-13
@@ -276,6 +318,7 @@ jobs:
     uses: ./.github/workflows/test-linux.yml
     needs:
       - lint
+      - lint-powershell
       - generate-actions-workflow
     with:
       distro-slug: photon-5
@@ -291,6 +334,7 @@ jobs:
     uses: ./.github/workflows/test-linux.yml
     needs:
       - lint
+      - lint-powershell
       - generate-actions-workflow
     with:
       distro-slug: rockylinux-8
@@ -306,6 +350,7 @@ jobs:
     uses: ./.github/workflows/test-linux.yml
     needs:
       - lint
+      - lint-powershell
       - generate-actions-workflow
     with:
       distro-slug: rockylinux-9
@@ -321,6 +366,7 @@ jobs:
     uses: ./.github/workflows/test-linux.yml
     needs:
       - lint
+      - lint-powershell
       - generate-actions-workflow
     with:
       distro-slug: ubuntu-2204
@@ -336,6 +382,7 @@ jobs:
     uses: ./.github/workflows/test-linux.yml
     needs:
       - lint
+      - lint-powershell
       - generate-actions-workflow
     with:
       distro-slug: ubuntu-2604
@@ -352,6 +399,7 @@ jobs:
     runs-on: ubuntu-latest
     needs:
       - lint
+      - lint-powershell
       - generate-actions-workflow
       - macos-14
       - macos-15-intel

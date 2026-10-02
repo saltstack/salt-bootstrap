@@ -124,10 +124,12 @@ jobs:
         run: |
           Install-Module PSScriptAnalyzer -Scope CurrentUser -Force
           # Write-Host is intentional (interactive installer output), and
-          # Get-FileHash is overridden on purpose to support PowerShell 3.
+          # Get-FileHash is overridden on purpose to support PowerShell 3. The
+          # script parameters all take pipeline input, and singular function
+          # names are only a style preference, so those rules are skipped too.
           $results = Invoke-ScriptAnalyzer -Path ./bootstrap-salt.ps1 `
             -Severity Error,Warning `
-            -ExcludeRule PSAvoidUsingWriteHost,PSAvoidOverwritingBuiltInCmdlets
+            -ExcludeRule PSAvoidUsingWriteHost,PSAvoidOverwritingBuiltInCmdlets,PSUseProcessBlockForPipelineCommand,PSUseSingularNouns
           $results | Format-List RuleName, Severity, Line, Message
           if ($results) { exit 1 }
 

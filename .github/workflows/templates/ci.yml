@@ -37,19 +37,6 @@ jobs:
         run: |
           echo "run-tests=${{ steps.changed-files.outputs.any_modified }}" >> $GITHUB_OUTPUT
 
-      - name: Set Exit Status
-        if: always()
-        run: |
-          mkdir exitstatus
-          echo "${{ job.status }}" > exitstatus/${{ github.job }}
-
-      - name: Upload Exit Status
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: exitstatus-${{ github.job }}
-          path: exitstatus/
-
   generate-actions-workflow:
     name: Generate The Actions Workflow
     runs-on: ubuntu-latest
@@ -74,19 +61,6 @@ jobs:
         run: |
           pre-commit run -av generate-actions-workflow
 
-      - name: Set Exit Status
-        if: always()
-        run: |
-          mkdir exitstatus
-          echo "${{ job.status }}" > exitstatus/${{ github.job }}
-
-      - name: Upload Exit Status
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: exitstatus-${{ github.job }}
-          path: exitstatus/
-
   lint:
     name: Lint
     runs-on: ubuntu-latest
@@ -98,19 +72,6 @@ jobs:
       - name: ShellCheck
         run: |
           shellcheck -s sh -f tty bootstrap-salt.sh
-
-      - name: Set Exit Status
-        if: always()
-        run: |
-          mkdir exitstatus
-          echo "${{ job.status }}" > exitstatus/${{ github.job }}
-
-      - name: Upload Exit Status
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: exitstatus-${{ github.job }}
-          path: exitstatus/
 
   lint-powershell:
     name: Lint PowerShell
@@ -139,19 +100,6 @@ jobs:
           Write-Host "PSScriptAnalyzer $version checked bootstrap-salt.ps1: $(@($results).Count) findings"
           if ($results) { exit 1 }
 
-      - name: Set Exit Status
-        if: always()
-        run: |
-          mkdir exitstatus
-          echo "${{ job.status }}" > exitstatus/${{ github.job }}
-
-      - name: Upload Exit Status
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: exitstatus-${{ github.job }}
-          path: exitstatus/
-
   test-shell:
     name: Test Shell
     runs-on: ubuntu-latest
@@ -173,19 +121,6 @@ jobs:
         run: |
           "$RUNNER_TEMP/shellspec/shellspec" --shell bash
 
-      - name: Set Exit Status
-        if: always()
-        run: |
-          mkdir exitstatus
-          echo "${{ job.status }}" > exitstatus/${{ github.job }}
-
-      - name: Upload Exit Status
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: exitstatus-${{ github.job }}
-          path: exitstatus/
-
   test-powershell:
     name: Test PowerShell
     # Windows PowerShell 5.1 is what bootstrap-salt.ps1 mostly runs on
@@ -205,16 +140,3 @@ jobs:
           $config.Run.Exit = $true
           $config.Output.Verbosity = "Detailed"
           Invoke-Pester -Configuration $config
-
-      - name: Set Exit Status
-        if: always()
-        run: |
-          mkdir exitstatus
-          echo "${{ job.status }}" > exitstatus/${{ github.job }}
-
-      - name: Upload Exit Status
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: exitstatus-${{ github.job }}
-          path: exitstatus/

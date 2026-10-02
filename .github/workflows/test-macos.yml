@@ -71,16 +71,3 @@ jobs:
       - name: Test Bootstrap
         run: |
           pytest --cache-clear -v -s -ra --log-cli-level=debug tests/integration/
-
-      - name: Set Exit Status
-        if: always()
-        run: |
-          mkdir exitstatus
-          echo "${{ job.status }}" > exitstatus/${{ github.job }}-${{ matrix.instance }}-${{ inputs.distro-slug }}
-
-      - name: Upload Exit Status
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: exitstatus-${{ github.job }}-${{ matrix.instance }}-${{ inputs.distro-slug }}
-          path: exitstatus/

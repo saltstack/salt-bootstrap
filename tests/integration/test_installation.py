@@ -157,57 +157,152 @@ def _bash_has_gnu_sed():
     return "GNU sed" in result.stdout
 
 
-def test_debian_repo_functions_rewrite_custom_repo_url(tmp_path):
+REPO_FILE_FUNCTIONS = DEBIAN_REPO_FUNCTIONS + [
+    "__install_saltstack_rhel_onedir_repository",
+    "__install_saltstack_fedora_onedir_repository",
+]
+
+SAMPLE_SALT_REPO = """[salt-repo-3006-lts]
+name=Salt Repo for Salt v3006 LTS
+baseurl=https://packages.broadcom.com/artifactory/saltproject-rpm/
+skip_if_unavailable=True
+priority=10
+enabled=1
+enabled_metadata=1
+gpgcheck=1
+exclude=*3007* *3008* *3009* *3010*
+gpgkey=https://packages.broadcom.com/artifactory/api/security/keypair/SaltProjectKey/public
+
+[salt-repo-latest]
+name=Salt Repo for Salt LATEST release
+baseurl=https://packages.broadcom.com/artifactory/saltproject-rpm/
+skip_if_unavailable=True
+priority=10
+enabled=0
+enabled_metadata=1
+gpgcheck=1
+gpgkey=https://packages.broadcom.com/artifactory/api/security/keypair/SaltProjectKey/public
+"""
+
+
+def _read_bootstrap_script():
+    bootstrap_script = os.path.join(
+        os.path.dirname(__file__), "..", "..", "bootstrap-salt.sh"
+    )
+    if not os.path.exists(bootstrap_script):
+        pytest.skip("bootstrap-salt.sh not found (not running from a repo checkout)")
+    with open(bootstrap_script) as fp:
+        return fp.read()
+
+
+def _extract_function(script, func_name):
+    match = re.search(rf"^{re.escape(func_name)}\(\) {{.*?^}}", script, re.M | re.S)
+    assert match, f"could not find {func_name}() in bootstrap-salt.sh"
+    return match.group(0)
+
+
+def _run_rewrite_repo_url(tmp_path, script, repo_file, repo_url):
+    # Run from a file; passing this through "bash -c" mangles quoting on Windows
+    shell = "\n".join(
+        [
+            f'_REPO_URL="{repo_url}"',
+            _extract_function(script, "__rewrite_repo_url"),
+            '__rewrite_repo_url "$1"',
+        ]
+    )
+    with open(str(tmp_path / "rewrite.sh"), "w", newline="\n") as fp:
+        fp.write(shell + "\n")
+    # Relative paths, since backslashes in Windows paths get mangled by bash
+    subprocess.run(
+        ["bash", "rewrite.sh", repo_file.name],
+        cwd=str(tmp_path),
+        check=True,
+    )
+
+
+def test_repo_functions_call_rewrite_repo_url():
+    """
+    Every function that downloads a repo definition from salt-install-guide must
+    rewrite it for -R/_CUSTOM_REPO_URL, otherwise the system keeps pointing at
+    packages.broadcom.com (issues #2123, #2135).
+    """
+    script = _read_bootstrap_script()
+
+    # Discover rather than rely on a hand-kept list, so new distro functions that
+    # download a repo definition are covered automatically. Commented-out fetches
+    # (e.g. Photon) are ignored.
+    discovered = set()
+    for match in re.finditer(r"^(\w+)\(\) {.*?^}", script, re.M | re.S):
+        code = "\n".join(
+            line
+            for line in match.group(0).splitlines()
+            if not line.lstrip().startswith("#")
+        )
+        if "salt-install-guide/releases" in code:
+            discovered.add(match.group(1))
+
+    # Guard against the discovery silently matching nothing
+    missing = set(REPO_FILE_FUNCTIONS) - discovered
+    assert not missing, f"repo discovery missed known functions: {sorted(missing)}"
+
+    for func_name in sorted(discovered):
+        body = _extract_function(script, func_name)
+        assert (
+            "__rewrite_repo_url" in body
+        ), f"{func_name} downloads a repo file but does not call __rewrite_repo_url"
+
+
+def test_debian_repo_files_rewrite_custom_repo_url(tmp_path):
     """
     Regression test for https://github.com/saltstack/salt-bootstrap/issues/2123
     The -R/_CUSTOM_REPO_URL option must rewrite the "URIs:" line in
     salt.sources for Debian/Ubuntu, not just the GPG key fetch URL.
     """
     if not _bash_has_gnu_sed():
-        # bootstrap-salt.sh's Debian/Ubuntu sed -i syntax targets GNU sed,
-        # which is what those distros actually ship. BSD sed (e.g. on macOS)
-        # parses "-i" differently, and isn't representative of the real
-        # target either way.
+        # bootstrap-salt.sh's sed -i syntax targets GNU sed, which is what these
+        # distros actually ship. BSD sed (e.g. on macOS) parses "-i" differently,
+        # and isn't representative of the real target either way.
         pytest.skip("bash with GNU sed not available")
+    script = _read_bootstrap_script()
 
-    bootstrap_script = os.path.join(
-        os.path.dirname(__file__), "..", "..", "bootstrap-salt.sh"
+    sources_file = tmp_path / "salt.sources"
+    with open(str(sources_file), "w", newline="\n") as fp:
+        fp.write(SAMPLE_SALT_SOURCES)
+    _run_rewrite_repo_url(tmp_path, script, sources_file, "repo.example.com/myrepo")
+
+    result = sources_file.read_text()
+    assert "packages.broadcom.com" not in result, result
+    assert "URIs: https://repo.example.com/myrepo/saltproject-deb" in result
+
+
+def test_rpm_repo_file_rewrite_custom_repo_url(tmp_path):
+    """
+    Regression test for https://github.com/saltstack/salt-bootstrap/issues/2135
+    The -R/_CUSTOM_REPO_URL option must rewrite every baseurl= and gpgkey= in
+    the downloaded salt.repo for RHEL/CentOS/Fedora.
+    """
+    if not _bash_has_gnu_sed():
+        pytest.skip("bash with GNU sed not available")
+    script = _read_bootstrap_script()
+
+    repo_file = tmp_path / "salt.repo"
+    with open(str(repo_file), "w", newline="\n") as fp:
+        fp.write(SAMPLE_SALT_REPO)
+    # "&" and "#" are special in the sed replacement/delimiter
+    _run_rewrite_repo_url(tmp_path, script, repo_file, "repo.example.com/my&repo#1")
+
+    result = repo_file.read_text()
+    assert "packages.broadcom.com" not in result, result
+    assert result.count("baseurl=https://repo.example.com/my&repo#1/saltproject-rpm/") == 2
+    assert (
+        result.count(
+            "gpgkey=https://repo.example.com/my&repo#1/api/security/keypair/SaltProjectKey/public"
+        )
+        == 2
     )
-    if not os.path.exists(bootstrap_script):
-        pytest.skip("bootstrap-salt.sh not found (not running from a repo checkout)")
-
-    with open(bootstrap_script) as fp:
-        script = fp.read()
-
-    for func_name in DEBIAN_REPO_FUNCTIONS:
-        match = re.search(
-            rf"^{re.escape(func_name)}\(\) {{(.*?)^}}", script, re.M | re.S
-        )
-        assert match, f"could not find {func_name}() in bootstrap-salt.sh"
-
-        sed_exprs = re.findall(
-            r'sed -i "([^"]+)" /etc/apt/sources\.list\.d/salt\.sources',
-            match.group(1),
-        )
-        assert sed_exprs, f"{func_name} has no salt.sources sed post-processing"
-
-        sources_file = tmp_path / f"{func_name}.sources"
-        sources_file.write_text(SAMPLE_SALT_SOURCES)
-
-        env = dict(os.environ, _REPO_URL="repo.example.com/myrepo", HTTP_VAL="https")
-        for expr in sed_exprs:
-            subprocess.run(
-                ["bash", "-c", f'sed -i "{expr}" "$1"', "--", str(sources_file)],
-                env=env,
-                check=True,
-            )
-
-        result = sources_file.read_text()
-        assert "packages.broadcom.com" not in result, (
-            f"{func_name}: salt.sources still references packages.broadcom.com "
-            f"after applying its sed commands:\n{result}"
-        )
-        assert "repo.example.com/myrepo" in result
+    # Only the URLs change; sections and their enabled state are preserved
+    assert "[salt-repo-3006-lts]" in result and "[salt-repo-latest]" in result
+    assert result.count("enabled=1") == 1 and result.count("enabled=0") == 1
 
 
 DETECTION_FUNCTIONS = [

@@ -389,3 +389,62 @@ def test_os_release_id_resolves_to_install_functions(
     assert re.search(
         rf"^install_{re.escape(distro_name_l)}_\w*deps\(\)", script, re.M
     ), f"no install_{distro_name_l}_*deps() in bootstrap-salt.sh"
+
+
+CONSOLE_COLORS = {
+    "Black",
+    "DarkBlue",
+    "DarkGreen",
+    "DarkCyan",
+    "DarkRed",
+    "DarkMagenta",
+    "DarkYellow",
+    "Gray",
+    "DarkGray",
+    "Blue",
+    "Green",
+    "Cyan",
+    "Red",
+    "Magenta",
+    "Yellow",
+    "White",
+}
+
+
+def _read_powershell_script():
+    ps_script = os.path.join(os.path.dirname(__file__), "..", "..", "bootstrap-salt.ps1")
+    if not os.path.exists(ps_script):
+        pytest.skip("bootstrap-salt.ps1 not found (not running from a repo checkout)")
+    with open(ps_script) as fp:
+        return fp.read()
+
+
+def test_powershell_conf_dirs_are_set_after_root_dir():
+    """
+    Regression test for https://github.com/saltstack/salt-bootstrap/issues/2138
+    $ConfDir and $PkiDir are derived from $RootDir, so they must be assigned
+    after $RootDir is final (including the registry override). Otherwise they
+    resolve to "\conf" and Vagrant files are copied to the wrong place.
+    """
+    script = _read_powershell_script()
+    root_dir_assignments = [
+        m.start() for m in re.finditer(r"^\s*\$RootDir\s*=", script, re.M)
+    ]
+    conf_dir = re.search(r"^\$ConfDir\s*=", script, re.M)
+    pki_dir = re.search(r"^\$PkiDir\s*=", script, re.M)
+    assert root_dir_assignments and conf_dir and pki_dir
+    assert conf_dir.start() > max(root_dir_assignments)
+    assert pki_dir.start() > conf_dir.start()
+
+
+def test_powershell_foreground_colors_are_valid():
+    """
+    Regression test for https://github.com/saltstack/salt-bootstrap/issues/2138
+    An invalid -ForegroundColor throws under $ErrorActionPreference = "Stop".
+    """
+    script = _read_powershell_script()
+    for color in re.findall(r"-ForegroundColor\s+(\w+)", script, re.I):
+        # PowerShell parameter values are case-insensitive
+        assert color.lower() in {
+            c.lower() for c in CONSOLE_COLORS
+        }, f"invalid -ForegroundColor {color}"

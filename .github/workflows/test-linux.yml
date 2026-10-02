@@ -142,16 +142,3 @@ jobs:
             echo "::error::No salt repo definition found to check"
             exit 1
           fi
-
-      - name: Set Exit Status
-        if: always()
-        run: |
-          mkdir exitstatus
-          echo "${{ job.status }}" > exitstatus/${{ github.job }}-${{ matrix.instance }}-${{ inputs.distro-slug }}
-
-      - name: Upload Exit Status
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: exitstatus-${{ github.job }}-${{ matrix.instance }}-${{ inputs.distro-slug }}
-          path: exitstatus/

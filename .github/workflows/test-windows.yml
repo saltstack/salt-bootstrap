@@ -209,16 +209,3 @@ jobs:
             Write-Host "$($case.Name): '$actual'"
             if ( $actual -ne $case.Expected ) { throw "$($case.Name): expected '$($case.Expected)' but the installer got '$actual'" }
           }
-
-      - name: Set Exit Status
-        if: always()
-        run: |
-          mkdir exitstatus
-          echo "${{ job.status }}" > exitstatus/${{ github.job }}-${{ matrix.instance }}-${{ inputs.distro-slug }}
-
-      - name: Upload Exit Status
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: exitstatus-${{ github.job }}-${{ matrix.instance }}-${{ inputs.distro-slug }}
-          path: exitstatus/

@@ -5,6 +5,7 @@ import platform
 import re
 import shutil
 import subprocess
+import sys
 
 import pytest
 
@@ -140,14 +141,25 @@ Components: main
 """
 
 
-def _bash_has_gnu_sed():
-    # Check through "bash -c", the exact invocation the test below uses, since
+# bootstrap-salt.sh is POSIX sh, and Debian/Ubuntu run it under dash. Run the
+# functions extracted from it with "sh" rather than "bash" so that a bashism
+# fails here too. Set BOOTSTRAP_TEST_SHELL to pick another shell, e.g. "dash".
+TEST_SHELL = os.environ.get("BOOTSTRAP_TEST_SHELL", "sh")
+
+
+def _shell_has_gnu_sed():
+    if sys.platform == "win32" and "BOOTSTRAP_TEST_SHELL" not in os.environ:
+        # Git's "sh" (Cygwin) has no default PATH for "env -i", which the
+        # script relies on, so the extracted functions misbehave there. These
+        # tests are meant for Linux; opt in with BOOTSTRAP_TEST_SHELL.
+        return False
+    # Check through "<shell> -c", the exact invocation the tests use, since
     # e.g. on GitHub's Windows runners plain "sed" on the host PATH is Git
     # Bash's GNU sed, but "bash" on the host PATH resolves to the WSL launcher
     # stub instead - a different, often broken, resolution path.
     try:
         result = subprocess.run(
-            ["bash", "-c", "sed --version"],
+            [TEST_SHELL, "-c", "sed --version"],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             universal_newlines=True,
@@ -202,7 +214,7 @@ def _extract_function(script, func_name):
 
 
 def _run_rewrite_repo_url(tmp_path, script, repo_file, repo_url):
-    # Run from a file; passing this through "bash -c" mangles quoting on Windows
+    # Run from a file; passing this through "sh -c" mangles quoting on Windows
     shell = "\n".join(
         [
             f'_REPO_URL="{repo_url}"',
@@ -212,9 +224,9 @@ def _run_rewrite_repo_url(tmp_path, script, repo_file, repo_url):
     )
     with open(str(tmp_path / "rewrite.sh"), "w", newline="\n") as fp:
         fp.write(shell + "\n")
-    # Relative paths, since backslashes in Windows paths get mangled by bash
+    # Relative paths, since backslashes in Windows paths get mangled by the shell
     subprocess.run(
-        ["bash", "rewrite.sh", repo_file.name],
+        [TEST_SHELL, "rewrite.sh", repo_file.name],
         cwd=str(tmp_path),
         check=True,
     )
@@ -258,11 +270,11 @@ def test_debian_repo_files_rewrite_custom_repo_url(tmp_path):
     The -R/_CUSTOM_REPO_URL option must rewrite the "URIs:" line in
     salt.sources for Debian/Ubuntu, not just the GPG key fetch URL.
     """
-    if not _bash_has_gnu_sed():
+    if not _shell_has_gnu_sed():
         # bootstrap-salt.sh's sed -i syntax targets GNU sed, which is what these
         # distros actually ship. BSD sed (e.g. on macOS) parses "-i" differently,
         # and isn't representative of the real target either way.
-        pytest.skip("bash with GNU sed not available")
+        pytest.skip(f"{TEST_SHELL} with GNU sed not available")
     script = _read_bootstrap_script()
 
     sources_file = tmp_path / "salt.sources"
@@ -281,8 +293,8 @@ def test_rpm_repo_file_rewrite_custom_repo_url(tmp_path):
     The -R/_CUSTOM_REPO_URL option must rewrite every baseurl= and gpgkey= in
     the downloaded salt.repo for RHEL/CentOS/Fedora.
     """
-    if not _bash_has_gnu_sed():
-        pytest.skip("bash with GNU sed not available")
+    if not _shell_has_gnu_sed():
+        pytest.skip(f"{TEST_SHELL} with GNU sed not available")
     script = _read_bootstrap_script()
 
     repo_file = tmp_path / "salt.repo"
@@ -334,8 +346,8 @@ def test_os_release_id_resolves_to_install_functions(
     the distro's install_* functions, or bootstrap exits with "No dependencies
     installation function found."
     """
-    if not _bash_has_gnu_sed():
-        pytest.skip("bash with GNU sed not available")
+    if not _shell_has_gnu_sed():
+        pytest.skip(f"{TEST_SHELL} with GNU sed not available")
 
     bootstrap_script = os.path.join(
         os.path.dirname(__file__), "..", "..", "bootstrap-salt.sh"
@@ -371,12 +383,12 @@ def test_os_release_id_resolves_to_install_functions(
             'echo "$DISTRO_NAME_L"',
         ]
     )
-    # Run from a file; passing this through "bash -c" mangles quoting on Windows
+    # Run from a file; passing this through "sh -c" mangles quoting on Windows
     with open(str(tmp_path / "detect.sh"), "w", newline="\n") as fp:
         fp.write(shell + "\n")
 
     result = subprocess.run(
-        ["bash", "detect.sh"],
+        [TEST_SHELL, "detect.sh"],
         cwd=str(tmp_path),
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,

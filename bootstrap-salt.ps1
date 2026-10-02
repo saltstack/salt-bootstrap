@@ -35,6 +35,16 @@
     All of the parameters are optional. The default should be the latest
     version. The architecture is dynamically determined by the script.
 
+    -RepoUrl accepts an HTTP, HTTPS or FTP URL, an SMB share (\\server\share),
+    or a local directory (C:\path). Each Salt version needs its own folder
+    containing the installer. FTP logins are anonymous unless credentials are
+    in the URL (ftp://user:password@host/path/).
+
+    The installer's SHA256 hash is only verified when RepoUrl is an Artifactory
+    URL (it contains "/artifactory/"), because the hash comes from the
+    Artifactory API. For any other source, including FTP, SMB shares and local
+    directories, the hash is NOT checked. Make sure you trust the source.
+
 .LINK
     Salt Bootstrap GitHub Project (script home) - https://github.com/saltstack/salt-bootstrap
     Original Vagrant Provisioner Project - https://github.com/saltstack/salty-vagrant
@@ -83,6 +93,9 @@ param(
     # the URL/Version. Place a folder for each version of Salt in this directory
     # and place the installer binary for each version in its folder.
     # Default is "https://packages.broadcom.com/artifactory/saltproject-generic/windows/"
+    # Can be an HTTP, HTTPS or FTP URL, an SMB share, or a local directory.
+    # The installer's hash is only verified for Artifactory URLs. For any other
+    # source it is not checked.
     [String]$RepoUrl = "https://packages.broadcom.com/artifactory/saltproject-generic/windows/",
 
     [Parameter(Mandatory=$false, ValueFromPipeline=$True)]

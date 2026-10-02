@@ -636,7 +636,8 @@ $isLocalSource = $base_url.StartsWith("\\") -or $base_url -match "^[A-Za-z]:\\"
 if ( $isLocalSource ) {
     $saltFileUrl = Join-Path (Join-Path $base_url $Version) $saltFileName
 } else {
-    $saltFileUrl = "$base_url/$Version/$saltFileName"
+    # RepoUrl usually ends in "/", avoid a double slash in the file URL
+    $saltFileUrl = "$($base_url.TrimEnd('/'))/$Version/$saltFileName"
 }
 $saltSha256 = Get-HashFromArtifactory -SaltVersion $Version -SaltFileName $saltFileName
 

@@ -177,6 +177,39 @@ jobs:
             Stop-Process -Id $ftpServer.Id -Force -ErrorAction SilentlyContinue
           }
 
+      - name: Test -Minion and -Master
+        # Windows PowerShell 5.1 is needed for Add-Type -OutputAssembly
+        shell: powershell
+        run: |
+          $ErrorActionPreference = "Stop"
+          # A stub installer that records the arguments it was started with
+          $repo = Join-Path $env:RUNNER_TEMP "args-repo"
+          $dir = Join-Path $repo "3008.2"
+          New-Item $dir -ItemType Directory -Force | Out-Null
+          $source = 'using System; using System.IO; public static class Stub { public static int Main(string[] args) { File.WriteAllText(Environment.GetEnvironmentVariable("STUB_ARGS_FILE"), string.Join(" ", args)); return 0; } }'
+          Add-Type -TypeDefinition $source -OutputAssembly (Join-Path $dir "Salt-Minion-3008.2-Py3-AMD64-Setup.exe") -OutputType ConsoleApplication
+          $env:STUB_ARGS_FILE = Join-Path $env:RUNNER_TEMP "stub-args.txt"
+
+          function Get-InstallerArgs($extra) {
+            Remove-Item $env:STUB_ARGS_FILE -ErrorAction SilentlyContinue
+            & .\bootstrap-salt.ps1 -RepoUrl $repo -Version 3008.2 -RunService $false @extra 6>&1 | Out-Null
+            if ( $LASTEXITCODE -ne 0 ) { throw "bootstrap-salt.ps1 exited $LASTEXITCODE" }
+            if ( !(Test-Path $env:STUB_ARGS_FILE) ) { throw "The installer was not started" }
+            return (Get-Content $env:STUB_ARGS_FILE -Raw).Trim()
+          }
+
+          $cases = @(
+            @{ Name = "defaults";      Extra = @{};                                   Expected = "/S /start-service=0" }
+            @{ Name = "-Minion";       Extra = @{ Minion = "min-1" };                 Expected = "/S /start-service=0 /minion-name=min-1" }
+            @{ Name = "-Master";       Extra = @{ Master = "master-1" };              Expected = "/S /start-service=0 /master=master-1" }
+            @{ Name = "both";          Extra = @{ Minion = "min-1"; Master = "master-1" }; Expected = "/S /start-service=0 /minion-name=min-1 /master=master-1" }
+          )
+          foreach ( $case in $cases ) {
+            $actual = Get-InstallerArgs $case.Extra
+            Write-Host "$($case.Name): '$actual'"
+            if ( $actual -ne $case.Expected ) { throw "$($case.Name): expected '$($case.Expected)' but the installer got '$actual'" }
+          }
+
       - name: Set Exit Status
         if: always()
         run: |

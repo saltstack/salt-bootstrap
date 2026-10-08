@@ -147,3 +147,119 @@ Describe "Get-HashFromArtifactory" {
         Should -Invoke Invoke-RestMethod -Times 0
     }
 }
+
+Describe "Resolve-PipRequirementsFile" {
+    BeforeAll {
+        $requirements = Join-Path $TestDrive "requirements.txt"
+        Set-Content -Path $requirements -Value "# Salt Extensions", "saltext-foo==1.2.3"
+    }
+
+    It "returns the full path of a requirements file" {
+        Resolve-PipRequirementsFile -Path $requirements |
+            Should -Be (Resolve-Path $requirements).ProviderPath
+    }
+
+    It "resolves a relative path" {
+        Push-Location $TestDrive
+        try {
+            Resolve-PipRequirementsFile -Path "./requirements.txt" |
+                Should -Be (Resolve-Path $requirements).ProviderPath
+        } finally {
+            Pop-Location
+        }
+    }
+
+    It "accepts a file with an index option and a package" {
+        $file = Join-Path $TestDrive "index.txt"
+        Set-Content -Path $file -Value "--index-url https://pypi.example.com/simple", "saltext-foo"
+        { Resolve-PipRequirementsFile -Path $file } | Should -Not -Throw
+    }
+
+    It "throws when the file does not exist" {
+        { Resolve-PipRequirementsFile -Path (Join-Path $TestDrive "missing.txt") } |
+            Should -Throw "*does not exist*"
+    }
+
+    It "throws for a directory" {
+        { Resolve-PipRequirementsFile -Path $TestDrive } | Should -Throw "*does not exist*"
+    }
+
+    It "throws when the file only has comments and blank lines" {
+        $file = Join-Path $TestDrive "empty.txt"
+        Set-Content -Path $file -Value "# nothing here", "", "   ", "  # still nothing"
+        { Resolve-PipRequirementsFile -Path $file } | Should -Throw "*does not list any packages*"
+    }
+}
+
+Describe "Get-SaltPipPath" {
+    BeforeEach {
+        $savedW6432 = $env:ProgramW6432
+        $savedProgramFiles = $env:ProgramFiles
+    }
+
+    AfterEach {
+        $env:ProgramW6432 = $savedW6432
+        $env:ProgramFiles = $savedProgramFiles
+    }
+
+    It "uses the 64-bit Program Files when it is set" {
+        $env:ProgramW6432 = Join-Path $TestDrive "Program Files"
+        $env:ProgramFiles = Join-Path $TestDrive "Program Files (x86)"
+        Get-SaltPipPath | Should -Be (Join-Path $env:ProgramW6432 "Salt Project\Salt\salt-pip.exe")
+    }
+
+    It "falls back to Program Files" {
+        $env:ProgramW6432 = ""
+        $env:ProgramFiles = Join-Path $TestDrive "Program Files"
+        Get-SaltPipPath | Should -Be (Join-Path $env:ProgramFiles "Salt Project\Salt\salt-pip.exe")
+    }
+}
+
+Describe "Install-PipRequirements" {
+    BeforeAll {
+        $requirements = Join-Path $TestDrive "requirements.txt"
+        Set-Content -Path $requirements -Value "saltext-foo==1.2.3"
+        $saltPip = Join-Path $TestDrive "salt-pip.exe"
+        Set-Content -Path $saltPip -Value ""
+        # Always set on Windows. Only needed so the tests also run elsewhere.
+        $setSystemRoot = !$env:SystemRoot
+        if ( $setSystemRoot ) { $env:SystemRoot = Join-Path $TestDrive "Windows" }
+    }
+
+    AfterAll {
+        if ( $setSystemRoot ) { $env:SystemRoot = $null }
+    }
+
+    It "runs salt-pip install -r" {
+        Mock Start-Process { [pscustomobject]@{ ExitCode = 0 } }
+        Install-PipRequirements -Path $requirements -SaltPip $saltPip | Should -Be 0
+        Should -Invoke Start-Process -Times 1 -ParameterFilter {
+            $FilePath -eq $saltPip -and
+            $ArgumentList -eq "install -r `"$requirements`""
+        }
+    }
+
+    # "python -m pip" puts the working directory first on sys.path, so running
+    # it from the directory of the file would let anyone who can write there
+    # run code as administrator
+    It "does not run salt-pip from the directory of the requirements file" {
+        Mock Start-Process { [pscustomobject]@{ ExitCode = 0 } }
+        Install-PipRequirements -Path $requirements -SaltPip $saltPip | Out-Null
+        Should -Invoke Start-Process -Times 1 -ParameterFilter {
+            $WorkingDirectory -eq $env:SystemRoot -and
+            $WorkingDirectory -ne (Split-Path $requirements -Parent)
+        }
+    }
+
+    It "returns the exit code of salt-pip" {
+        Mock Start-Process { [pscustomobject]@{ ExitCode = 1 } }
+        Install-PipRequirements -Path $requirements -SaltPip $saltPip | Should -Be 1
+    }
+
+    It "throws when salt-pip is missing" {
+        Mock Start-Process { [pscustomobject]@{ ExitCode = 0 } }
+        { Install-PipRequirements -Path $requirements -SaltPip (Join-Path $TestDrive "missing.exe") } |
+            Should -Throw "*salt-pip was not found*"
+        Should -Invoke Start-Process -Times 0
+    }
+}

@@ -76,6 +76,31 @@ jobs:
         run: |
           pytest --cache-clear -v -s -ra --log-cli-level=debug tests/integration/
 
+      - name: Test -PipRequirements
+        # Runs after "Test Bootstrap": it needs Salt to be installed already,
+        # and it re-runs the installer, which keeps the service stopped.
+        run: |
+          $ErrorActionPreference = "Stop"
+
+          # A requirements file that can not be used must be rejected up front
+          & .\bootstrap-salt.ps1 -RunService $false -Version $env:SaltVersion -PipRequirements "$env:RUNNER_TEMP\does-not-exist.txt"
+          if ( $LASTEXITCODE -eq 0 ) { throw "-PipRequirements with a missing file did not fail" }
+
+          # cowsay is small, pure Python and not a dependency of Salt
+          $requirements = Join-Path $env:RUNNER_TEMP "pip-requirements.txt"
+          Set-Content -Path $requirements -Value "# Salt Extensions", "cowsay==6.1"
+          & .\bootstrap-salt.ps1 -RunService $false -Version $env:SaltVersion -PipRequirements $requirements
+          if ( $LASTEXITCODE -ne 0 ) { throw "-PipRequirements exited $LASTEXITCODE" }
+
+          # The package must be installed into Salt
+          $saltPip = "$env:ProgramFiles\Salt Project\Salt\salt-pip.exe"
+          $out = & $saltPip show cowsay
+          $out
+          if ( ($out -join "`n") -notmatch "(?m)^Version: 6\.1\s*$" ) { throw "cowsay 6.1 was not installed" }
+
+          # and the service must not have been started along the way
+          if ( (Get-Service salt-minion).Status -ne "Stopped" ) { throw "salt-minion is not stopped" }
+
       - name: Test -ConfigureOnly
         # Regression test for #2138. Runs after "Test Bootstrap" since it
         # overwrites the minion config.

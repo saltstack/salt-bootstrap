@@ -71,3 +71,14 @@ jobs:
       - name: Test Bootstrap
         run: |
           pytest --cache-clear -v -s -ra --log-cli-level=debug tests/integration/
+
+      - name: Test pip requirements file (-e) is rejected
+        # The macOS package starts the minion itself while it is installed, so
+        # there is no chance to install packages first. -e must fail up front
+        # instead of installing them after Salt has already started.
+        run: |
+          printf '# Salt Extensions\ncowsay==6.1\n' > "$RUNNER_TEMP/pip-requirements.txt"
+          if sudo sh ./bootstrap-salt.sh -e "$RUNNER_TEMP/pip-requirements.txt" onedir; then
+            echo "::error::-e was accepted on macOS"
+            exit 1
+          fi

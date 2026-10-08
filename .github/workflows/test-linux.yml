@@ -109,6 +109,36 @@ jobs:
         run: |
           docker exec ${{ github.run_id}}_salt-test pytest --cache-clear -v -s -ra --log-cli-level=debug /_w/btstrap/tests/integration/
 
+      - name: Test pip requirements file (-e)
+        # One instance per distro is enough; the feature does not depend on the
+        # Salt version. This must run after "Test Bootstrap" and before the -R
+        # test below, which leaves the repo definition pointing at an
+        # unreachable host.
+        if: ${{ matrix.instance == 'stable-3007' }}
+        run: |
+          # A requirements file that can not be used must be rejected up front,
+          # before anything is installed
+          if docker exec ${{ github.run_id}}_salt-test sh /_w/btstrap/bootstrap-salt.sh -e /tmp/does-not-exist.txt stable 3007; then
+            echo "::error::-e with a missing requirements file did not fail"
+            exit 1
+          fi
+
+          # cowsay is small, pure Python and not a dependency of Salt
+          docker exec ${{ github.run_id}}_salt-test sh -c 'printf "# Salt Extensions\ncowsay==6.1\n" > /tmp/pip-requirements.txt'
+          docker exec ${{ github.run_id}}_salt-test sh -x /_w/btstrap/bootstrap-salt.sh -e /tmp/pip-requirements.txt stable 3007
+
+          # The package must be installed into the Salt onedir
+          out=$(docker exec ${{ github.run_id}}_salt-test salt-pip show cowsay)
+          echo "$out"
+          echo "$out" | grep -q '^Version: 6.1$' || { echo "::error::cowsay 6.1 was not installed by -e"; exit 1; }
+
+          # and the policy-rc.d used to hold back service starts on Debian and
+          # Ubuntu must not be left behind
+          if docker exec ${{ github.run_id}}_salt-test test -f /usr/sbin/policy-rc.d.salt-bootstrap-backup; then
+            echo "::error::the policy-rc.d backup was left behind"
+            exit 1
+          fi
+
       - name: Test custom repository URL (-R)
         # One instance per distro is enough; the repo definition does not depend
         # on the Salt version. Arch and ALT Linux have no salt.sources/salt.repo.

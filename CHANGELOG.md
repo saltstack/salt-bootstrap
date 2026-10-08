@@ -1,3 +1,11 @@
+# v2026.10.08
+
+## What's Changed
+
+- feature(bootstrap): add -e/-PipRequirements to install PyPI packagesbefore Salt starts by @twangboy in https://github.com/saltstack/salt-bootstrap/pull/2146
+
+**Full Changelog**: https://github.com/saltstack/salt-bootstrap/compare/v2026.10.02...v2026.10.08
+
 # v2026.10.02
 
 ## What's Changed

@@ -31,6 +31,12 @@
     ./bootstrap-salt.ps1 -Minion minion-box -Master master-box -Version 3006.7 -RunService $false
     Specifies all the optional parameters in no particular order.
 
+.EXAMPLE
+    ./bootstrap-salt.ps1 -PipRequirements C:\salt\extensions.txt
+    Installs the PyPI packages (for example Salt Extensions) listed in the
+    requirements file into Salt using salt-pip. They are installed after Salt
+    and before the salt-minion service is first started.
+
 .NOTES
     All of the parameters are optional. The default should be the latest
     version. The architecture is dynamically determined by the script.
@@ -44,6 +50,16 @@
     URL (it contains "/artifactory/"), because the hash comes from the
     Artifactory API. For any other source, including FTP, SMB shares and local
     directories, the hash is NOT checked. Make sure you trust the source.
+
+    -PipRequirements takes the path to a pip requirements file. Pin versions in
+    the file (for example "saltext-foo==1.2.3"). A custom or private package
+    index can be set with "--index-url" or "--extra-index-url" lines in the
+    file, or with the PIP_INDEX_URL and PIP_EXTRA_INDEX_URL environment
+    variables. Prefer those over putting credentials on the command line. The
+    contents of the file are never printed by this script. Use absolute paths
+    for local packages in the file, and do not leave the file in a location
+    others can write to, it is installed as administrator. If a package has to
+    be compiled, the build tools it needs must already be installed.
 
 .LINK
     Salt Bootstrap GitHub Project (script home) - https://github.com/saltstack/salt-bootstrap
@@ -105,6 +121,18 @@ param(
     # Vagrant (C:\tmp) to Salt config locations and exits. Does not run the
     # installer
     [Switch]$ConfigureOnly,
+
+    [Parameter(Mandatory=$false, ValueFromPipeline=$True)]
+    [Alias("p")]
+    # Path to a pip requirements file listing PyPI packages (for example Salt
+    # Extensions) to install into Salt with salt-pip. They are installed after
+    # Salt is installed and before the salt-minion service is first started, so
+    # they are available the first time Salt runs. Pin versions in the file
+    # (for example "saltext-foo==1.2.3"). A custom or private index can be set
+    # with "--index-url" or "--extra-index-url" lines in the file, or with the
+    # PIP_INDEX_URL and PIP_EXTRA_INDEX_URL environment variables. The file's
+    # contents are never printed. Cannot be combined with -ConfigureOnly.
+    [String]$PipRequirements = "",
 
     [Parameter(Mandatory=$false)]
     [Alias("h")]
@@ -465,6 +493,93 @@ function Get-FileHash {
     }
 }
 
+function Resolve-PipRequirementsFile {
+    # Checks the file passed with -PipRequirements and returns its full path.
+    # Throws if it is not a file, or lists no packages (pip refuses to run
+    # with nothing to install).
+    param(
+        [Parameter(Mandatory=$true)]
+        [String] $Path
+    )
+
+    if ( !(Test-Path -LiteralPath $Path -PathType Leaf) ) {
+        throw "The requirements file does not exist: $Path"
+    }
+
+    $fullPath = (Resolve-Path -LiteralPath $Path).ProviderPath
+    $package = Get-Content -LiteralPath $fullPath |
+        Where-Object { $_ -notmatch '^\s*(#|$)' } |
+        Select-Object -First 1
+    if ( !$package ) {
+        throw "The requirements file does not list any packages: $fullPath"
+    }
+
+    return $fullPath
+}
+
+function Get-SaltPipPath {
+    # Returns the default location of salt-pip.exe. ProgramW6432 is the 64-bit
+    # Program Files even when this runs in a 32-bit PowerShell.
+    if ( $env:ProgramW6432 ) {
+        $programFiles = $env:ProgramW6432
+    } else {
+        $programFiles = $env:ProgramFiles
+    }
+    return Join-Path $programFiles "Salt Project\Salt\salt-pip.exe"
+}
+
+function Install-PipRequirements {
+    # Installs the packages in a requirements file with salt-pip and returns its
+    # exit code. Throws if salt-pip is missing.
+    #
+    # It runs from the Windows directory, not the file's directory:
+    # "python -m pip" puts the working directory at the front of sys.path, so a
+    # directory others can write to would let them run code as administrator by
+    # planting a module there. Nested -r files still resolve against the
+    # requirements file, but local package paths in it need to be absolute.
+    param(
+        [Parameter(Mandatory=$true)]
+        [String] $Path,
+
+        [Parameter(Mandatory=$false)]
+        [String] $SaltPip = ""
+    )
+
+    if ( !$SaltPip ) { $SaltPip = Get-SaltPipPath }
+    if ( !(Test-Path -LiteralPath $SaltPip) ) {
+        throw "salt-pip was not found at: $SaltPip"
+    }
+
+    Write-Verbose "salt-pip: $SaltPip"
+    Write-Verbose "Requirements file: $Path"
+    $process = Start-Process $SaltPip `
+        -WorkingDirectory $env:SystemRoot `
+        -ArgumentList "install -r `"$Path`"" `
+        -NoNewWindow -Wait -PassThru
+    return $process.ExitCode
+}
+
+#===============================================================================
+# Validate the pip requirements file
+#===============================================================================
+# This is done before the elevation check below so a relative path is resolved
+# from where the script was started. The elevated copy of the script starts in
+# a different directory.
+if ( $PipRequirements ) {
+    if ( $ConfigureOnly ) {
+        Write-Host "-PipRequirements cannot be used with -ConfigureOnly, no Salt is installed" -ForegroundColor Red
+        exit 1
+    }
+    try {
+        $PipRequirements = Resolve-PipRequirementsFile -Path $PipRequirements
+    } catch {
+        Write-Host $_.Exception.Message -ForegroundColor Red
+        exit 1
+    }
+    # Hand the resolved path to the elevated copy of the script
+    $PSBoundParameters["PipRequirements"] = $PipRequirements
+}
+
 #===============================================================================
 # Check for Elevated Privileges
 #===============================================================================
@@ -551,6 +666,7 @@ Write-Verbose "repourl: $base_url"
 Write-Verbose "apiurl: $api_url"
 Write-Verbose "ConfDir: $ConfDir"
 Write-Verbose "RootDir: $RootDir"
+Write-Verbose "PipRequirements: $PipRequirements"
 
 if ($RunService) {
     Write-Verbose "Windows service will be set to run"
@@ -769,6 +885,29 @@ while ( ! $service ) {
 }
 # If we get this far, the service was installed, we have a service object
 Write-Host "Success" -ForegroundColor Green
+
+#===============================================================================
+# Install PyPI packages (for example Salt Extensions)
+#===============================================================================
+# The installer ran with /start-service=0, so the service has not started yet.
+# Installing here means the packages are in place the first time Salt runs.
+if ( $PipRequirements ) {
+    Write-Host "Installing Python packages from the requirements file:"
+    try {
+        $pipExitCode = Install-PipRequirements -Path $PipRequirements
+    } catch {
+        Write-Host "Failed" -ForegroundColor Red
+        Write-Host $_.Exception.Message
+        exit 1
+    }
+    if ( $pipExitCode -ne 0 ) {
+        Write-Host "Failed" -ForegroundColor Red
+        Write-Host "salt-pip exited with code $pipExitCode"
+        Write-Host "If a package has to be compiled, its build tools must already be installed"
+        exit 1
+    }
+    Write-Host "Success" -ForegroundColor Green
+}
 
 #===============================================================================
 # Configure the minion service

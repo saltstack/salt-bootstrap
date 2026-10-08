@@ -157,6 +157,20 @@ To view the latest options and descriptions for ``salt-bootstrap``, use ``-h`` a
         You can also do this by touching /tmp/disable_salt_checks on the target
         host. Default: \${BS_FALSE}
     -D  Show debug output
+    -e  Path to a pip requirements file listing PyPI packages (for example Salt
+        Extensions) to install into the Salt onedir with salt-pip. The packages
+        are installed after Salt is installed and before its services are
+        started, so they are available the first time Salt starts. Pin versions
+        in the file, for example "saltext-foo==1.2.3". Custom or private
+        package indexes can be set with "--index-url" or "--extra-index-url"
+        lines in the file, or with the PIP_INDEX_URL and PIP_EXTRA_INDEX_URL
+        environment variables. Prefer these over putting credentials on the
+        command line. Use absolute paths for local packages in the file, and
+        do not leave the file writable by others, it is installed as root. If
+        the minion "user" is not root, the file must be readable by that user.
+        Only supported for onedir installs on Linux.
+        Packages that need compiling or system libraries can be satisfied
+        with -p, for example: -p build-essential -p libmariadb-dev
     -f  Force shallow cloning for git installations.
         This may result in an "n/a" in the version number.
     -F  Allow copied files to overwrite existing (config, init.d, etc)
@@ -416,6 +430,20 @@ per Salt version holding the installer for that version:
   Artifactory URL (it contains ``/artifactory/``), because the hash is read from
   the Artifactory API. For any other source, including FTP, SMB shares and local
   directories, the hash is **not** checked. Make sure you trust the source.
+
+Installing PyPI packages, such as Salt Extensions, with ``-PipRequirements``. It
+takes the path to a pip requirements file. The packages are installed with
+``salt-pip`` after Salt is installed and before the ``salt-minion`` service is
+first started, so they are available the first time Salt runs:
+
+.. code:: powershell
+
+  & "$env:TEMP\bootstrap-salt.ps1" -PipRequirements C:\salt\extensions.txt
+
+Pin versions in the file (for example ``saltext-foo==1.2.3``). A custom or
+private package index can be set with ``--index-url`` or ``--extra-index-url``
+lines in the file, or with the ``PIP_INDEX_URL`` and ``PIP_EXTRA_INDEX_URL``
+environment variables. Prefer those over putting credentials on the command line.
 
 Using ``cygwin`` to install latest stable version:
 

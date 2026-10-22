@@ -1,7 +1,7 @@
 # shellcheck shell=sh
 
 Describe 'version and string helpers'
-  Include "$(bootstrap_functions __parse_version_string __unquote_string __camelcase_split __derive_debian_numeric_version)"
+  Include "$(bootstrap_functions __parse_version_string __unquote_string __camelcase_split __derive_debian_numeric_version __salt_repo_exclude_majors)"
 
   Describe '__parse_version_string'
     Parameters
@@ -55,6 +55,23 @@ Describe 'version and string helpers'
       When call __derive_debian_numeric_version "mystery/sid"
       The stderr should include "Unable to parse the Debian Version"
       The output should eq ""
+    End
+  End
+
+  Describe '__salt_repo_exclude_majors'
+    # 3006 to 3008 match the exclude= lines in the official salt.repo
+    Parameters
+      "3006"      "*3007* *3008* *3009* *3010*"
+      "3006.26"   "*3007* *3008* *3009* *3010*"
+      "3007.15"   "*3006* *3008* *3009* *3010*"
+      "3008.1-1"  "*3006* *3007* *3009* *3010*"
+      "3009.2"    "*3006* *3007* *3008* *3010* *3011*"
+      "3012.1"    "*3006* *3007* *3008* *3009* *3010* *3011* *3013* *3014*"
+    End
+
+    It "excludes every major but the one in $1"
+      When call __salt_repo_exclude_majors "$1"
+      The output should eq "$2"
     End
   End
 End

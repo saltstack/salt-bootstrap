@@ -1,3 +1,4 @@
+import configparser
 import json
 import logging
 import os
@@ -315,6 +316,40 @@ def test_rpm_repo_file_rewrite_custom_repo_url(tmp_path):
     # Only the URLs change; sections and their enabled state are preserved
     assert "[salt-repo-3006-lts]" in result and "[salt-repo-latest]" in result
     assert result.count("enabled=1") == 1 and result.count("enabled=0") == 1
+
+
+def test_rpm_point_release_repo_excludes_other_majors():
+    """
+    Regression test for https://github.com/saltstack/salt-bootstrap/issues/2147
+    For a point release (e.g. "stable 3006.24") bootstrap writes its own
+    salt.repo section. Its baseurl serves every major, so the section must
+    exclude the other majors or the next "dnf update" moves Salt to the newest
+    one in the repo.
+    """
+    repo_file = "/etc/yum.repos.d/salt.repo"
+    if platform.system() != "Linux" or not os.path.exists(repo_file):
+        pytest.skip("No salt.repo file present")
+    if os.path.exists("/etc/photon-release"):
+        pytest.skip("tdnf doesn't read exclude= from a .repo file")
+
+    repo = configparser.ConfigParser(interpolation=None)
+    repo.read(repo_file)
+    # Only the point release path names the section after the full version,
+    # e.g. [salt-repo-3006.24-lts]
+    sections = []
+    for section in repo.sections():
+        match = re.match(r"salt-repo-(\d{4})\.\S+-lts$", section)
+        if match:
+            sections.append((section, int(match.group(1))))
+    if not sections:
+        pytest.skip("salt.repo was not written for a point release")
+
+    for section, major in sections:
+        exclude = repo[section].get("exclude", "").split()
+        assert f"*{major}*" not in exclude, f"[{section}] excludes its own major"
+        for other in range(3006, 3011):
+            if other != major:
+                assert f"*{other}*" in exclude, f"[{section}] does not exclude {other}"
 
 
 DETECTION_FUNCTIONS = [

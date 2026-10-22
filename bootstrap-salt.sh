@@ -676,6 +676,33 @@ __salt_version_string() {
     echo "$1"
 }
 
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  __salt_repo_exclude_majors
+#   DESCRIPTION:  Print the exclude= value for a salt.repo section that must
+#                 stay on the major version of the Salt version in $1 (e.g.
+#                 3006.26 or 3008.1-1). The baseurl serves every major, so
+#                 without it the first yum/dnf update moves to the newest
+#                 Salt. Same list as the official salt.repo: 3006 through 3010
+#                 minus the given major. For majors past 3008 the list runs to
+#                 the major + 2, so the next two majors are still excluded.
+#----------------------------------------------------------------------------------------------------------------------
+__salt_repo_exclude_majors() {
+    _EXCLUDE_MAJOR=$(echo "$1" | cut -d '.' -f 1)
+    _EXCLUDE_LAST=3010
+    if [ "$_EXCLUDE_MAJOR" -gt 3008 ]; then
+        _EXCLUDE_LAST=$((_EXCLUDE_MAJOR + 2))
+    fi
+    _EXCLUDE_LIST=""
+    _EXCLUDE_REV=3006
+    while [ "$_EXCLUDE_REV" -le "$_EXCLUDE_LAST" ]; do
+        if [ "$_EXCLUDE_REV" -ne "$_EXCLUDE_MAJOR" ]; then
+            _EXCLUDE_LIST="${_EXCLUDE_LIST} *${_EXCLUDE_REV}*"
+        fi
+        _EXCLUDE_REV=$((_EXCLUDE_REV + 1))
+    done
+    echo "${_EXCLUDE_LIST# }"
+}
+
 # check if systemd is functional
 __check_services_systemd_functional
 
@@ -4220,6 +4247,7 @@ __install_saltstack_fedora_onedir_repository() {
                 echo "enabled=1" >> "${YUM_REPO_FILE}"
                 echo "enabled_metadata=1" >> "${YUM_REPO_FILE}"
                 echo "gpgcheck=1" >> "${YUM_REPO_FILE}"
+                echo "exclude=$(__salt_repo_exclude_majors "$ONEDIR_REV_DOT")" >> "${YUM_REPO_FILE}"
                 echo "gpgkey=https://${_REPO_URL}/api/security/keypair/SaltProjectKey/public" >> "${YUM_REPO_FILE}"
             fi
         else
@@ -4559,6 +4587,7 @@ __install_saltstack_rhel_onedir_repository() {
                 echo "enabled=1" >> "${YUM_REPO_FILE}"
                 echo "enabled_metadata=1" >> "${YUM_REPO_FILE}"
                 echo "gpgcheck=1" >> "${YUM_REPO_FILE}"
+                echo "exclude=$(__salt_repo_exclude_majors "$ONEDIR_REV_DOT")" >> "${YUM_REPO_FILE}"
                 echo "gpgkey=https://${_REPO_URL}/api/security/keypair/SaltProjectKey/public" >> "${YUM_REPO_FILE}"
             fi
         else
@@ -6041,6 +6070,7 @@ install_amazon_linux_ami_2_deps() {
                     echo "enabled=1" >> "${YUM_REPO_FILE}"
                     echo "enabled_metadata=1" >> "${YUM_REPO_FILE}"
                     echo "gpgcheck=1" >> "${YUM_REPO_FILE}"
+                    echo "exclude=$(__salt_repo_exclude_majors "$STABLE_REV_DOT")" >> "${YUM_REPO_FILE}"
                     echo "gpgkey=https://${_REPO_URL}/api/security/keypair/SaltProjectKey/public" >> "${YUM_REPO_FILE}"
                 fi
             else
@@ -6142,6 +6172,7 @@ install_amazon_linux_ami_2_onedir_deps() {
                     echo "enabled=1" >> "${YUM_REPO_FILE}"
                     echo "enabled_metadata=1" >> "${YUM_REPO_FILE}"
                     echo "gpgcheck=1" >> "${YUM_REPO_FILE}"
+                    echo "exclude=$(__salt_repo_exclude_majors "$ONEDIR_REV_DOT")" >> "${YUM_REPO_FILE}"
                     echo "gpgkey=https://${_REPO_URL}/api/security/keypair/SaltProjectKey/public" >> "${YUM_REPO_FILE}"
                 fi
             else
@@ -6335,6 +6366,7 @@ install_amazon_linux_ami_2023_onedir_deps() {
                     echo "enabled=1" >> "${YUM_REPO_FILE}"
                     echo "enabled_metadata=1" >> "${YUM_REPO_FILE}"
                     echo "gpgcheck=1" >> "${YUM_REPO_FILE}"
+                    echo "exclude=$(__salt_repo_exclude_majors "$ONEDIR_REV_DOT")" >> "${YUM_REPO_FILE}"
                     echo "gpgkey=https://${_REPO_URL}/api/security/keypair/SaltProjectKey/public" >> "${YUM_REPO_FILE}"
                 fi
             else

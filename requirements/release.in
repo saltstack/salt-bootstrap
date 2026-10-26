@@ -1,6 +1,7 @@
-boto3
+certifi >= 2026.10.19
 filelock >= 3.20.3
 idna >= 3.15
+pip >= 26.2.2
 pre-commit
 pygments >= 2.20.0
 python-tools-scripts >= 0.18.6
